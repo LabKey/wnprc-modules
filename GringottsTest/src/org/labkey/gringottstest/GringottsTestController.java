@@ -26,7 +26,6 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.gringotts.api.GringottsService;
 import org.labkey.gringottstest.model.PersonVault;
-import org.labkey.webutils.WebUtilsController;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -51,10 +50,12 @@ public class GringottsTestController extends SpringActionController {
         }
     }
 
+    public static class NullForm {}
+
     @RequiresNoPermission
-    public class TestAction extends ApiAction<WebUtilsController.NullForm> {
+    public class TestAction extends ApiAction<NullForm> {
         @Override
-        public Object execute(WebUtilsController.NullForm nullForm, BindException errors) throws Exception {
+        public Object execute(NullForm nullForm, BindException errors) throws Exception {
 
             GringottsService service = GringottsService.get();
 

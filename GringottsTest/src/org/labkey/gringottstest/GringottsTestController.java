@@ -25,8 +25,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.gringotts.api.GringottsService;
-import org.labkey.gringotts.api.model.Vault;
-import org.labkey.gringottstest.model.Person;
+import org.labkey.gringottstest.model.PersonVault;
 import org.labkey.webutils.WebUtilsController;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -59,7 +58,11 @@ public class GringottsTestController extends SpringActionController {
 
             GringottsService service = GringottsService.get();
 
-            Vault<Person> persons = service.getVault(getUser(), Person.class);
+            PersonVault vault = new PersonVault(getContainer());
+
+            PersonVault.Person jon = vault.new Person();
+
+            jon.save();
 
             return null;
         }

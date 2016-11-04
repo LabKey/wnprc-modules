@@ -1,9 +1,12 @@
 package org.labkey.gringotts.api.model;
 
 import com.google.common.reflect.TypeToken;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.gringotts.api.GringottsService;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,34 +83,96 @@ public abstract class Vault<RecordType extends Vault.Record> {
     }
 
     /**
+     * Upgrades a record to the current version.  The system tries it's best to bind the rawRecordValues
+     * to the current object, but it's clearly not able to be perfect, so this method is called to finish
+     * the upgrade.
+     *
+     * If this method throws an exception, the upgrade will fail, and the vault will be inaccessible. If
+     * you want to rely on the default method of upcasting, just override this and return null.  Note that
+     * that can cause data loss (in the case that you remove a persisted field), so you should be careful.
+     *
+     * @param recordType
+     * @param rawRecordValues
+     * @throws NotImplementedException if the
+     */
+    public void upgrade(RecordType recordType, RawRecordValues rawRecordValues) throws NotImplementedException {
+        throw new NotImplementedException();
+    }
+
+    /**
      * Return a pretty display name.  Often, this is very similar to the class name.
      *
      * @return A string to display as the name of the Vault in UIs, debugs, etc.
      */
     public abstract String getDisplayName();
 
+    public int getCurrentRecordVersion() {
+        return 0;
+    }
+
     public TypeToken<RecordType> getTypeToken() {
         return _typeToken;
     }
 
     public abstract class Record {
-        private Map<TypeToken<? extends Record>, String> idMap = new HashMap<>();
+        // We can take advantage of the extends functionality in Java to allow a record to inherit fields
+        // nicely, but we can't really inherit the id, so we store the id has a hash of all ids for each
+        // class.
+        private final Map<TypeToken, String> idMap = new HashMap<>();
 
-        protected Record(Map<TypeToken<? extends Record>, String> ids) {
+        // A reference to the original values currently in the DB
+        private RawRecordValues oldValues = null;
+
+        protected int version = Vault.this.getCurrentRecordVersion();
+
+        // This is a private constructor shared by the two "public" constructors.
+        private Record(@NotNull String id, @Nullable Object dummyObjectToMakeSignatureUnique) {
+            idMap.put(getVault().getTypeToken(), id);
         }
 
+        /**
+         * Opens an existing record from the Vault.
+         *
+         * @param id the id of the record in the vault to retrieve
+         * @throws NotFoundException if the id doesn't exist in the database.
+         */
+        protected Record(@NotNull String id) throws NotFoundException {
+            this(id, null);
+
+        }
+
+        /**
+         * Constructs a brand new record.
+         */
         protected Record() {
-            this(null);
+            this(GringottsService.getNewId(), null);
         }
 
+        private final void bind() {
+            GringottsService.get().bindRecord(this);
+        }
+
+        /**
+         * Utility function to access the containing Vault.
+         *
+         * @return the Record's containing vault
+         */
         public final Vault getVault() {
             return Vault.this;
         }
 
+        /**
+         * Persists the record to the database, and updates this.oldValues
+         */
         public final void save() {
             GringottsService.get().saveRecord(this);
         }
 
+        /**
+         * Marks a record as deleted in the database.  This prevents it from existing from this point on, but
+         * it will still technically be stored in the database to allow historical queries and maintain the
+         * ledger.
+         */
         public final void delete() {
             GringottsService.get().deleteRecord(this);
         }
@@ -115,6 +180,12 @@ public abstract class Vault<RecordType extends Vault.Record> {
 
     public class InvalidVaultException extends Exception {
         public InvalidVaultException(String message) {
+            super(message);
+        }
+    }
+
+    public class NotFoundException extends Exception {
+        public NotFoundException(String message) {
             super(message);
         }
     }

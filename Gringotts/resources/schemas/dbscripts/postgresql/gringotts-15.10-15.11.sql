@@ -88,6 +88,30 @@ CREATE TABLE gringotts.vault_text_values (
   CONSTRAINT FK_vault_text_values_transactions FOREIGN KEY (transactionId) REFERENCES gringotts.transactions (transactionId)
 );
 
+CREATE TABLE gringotts.vault_datetime_values (
+  vaultId       TEXT     NOT NULL,
+  recordId      TEXT     NOT NULL,
+  columnId      TEXT     NOT NULL,
+  transactionId TEXT     NOT NULL,
+
+  value         TIMESTAMP,
+
+  CONSTRAINT PK_vault_datetime_values PRIMARY KEY (vaultId, recordId, columnId, transactionId),
+  CONSTRAINT FK_vault_datetime_values_transactions FOREIGN KEY (transactionId) REFERENCES gringotts.transactions (transactionId)
+);
+
+CREATE TABLE gringotts.vault_int_values (
+  vaultId       TEXT     NOT NULL,
+  recordId      TEXT     NOT NULL,
+  columnId      TEXT     NOT NULL,
+  transactionId TEXT     NOT NULL,
+
+  value         INTEGER,
+
+  CONSTRAINT PK_vault_int_values PRIMARY KEY (vaultId, recordId, columnId, transactionId),
+  CONSTRAINT FK_vault_int_values_transactions FOREIGN KEY (transactionId) REFERENCES gringotts.transactions (transactionId)
+);
+
 CREATE TABLE gringotts.vault_links (
   -- "Primary" primary keys
   vaultId1 TEXT NOT NULL, -- source

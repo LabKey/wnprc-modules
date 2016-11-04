@@ -41,4 +41,5 @@ public abstract class GringottsService {
 
     abstract public void saveRecord(Vault.Record record);
     abstract public void deleteRecord(Vault.Record record);
+    abstract public void bindRecord(Vault.Record record);
 }

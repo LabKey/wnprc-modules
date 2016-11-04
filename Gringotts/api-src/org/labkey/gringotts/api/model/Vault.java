@@ -24,13 +24,15 @@ import java.util.Map;
  *     <li>
  *         A full audit log/ledger of all changes to the record, tracking both
  *         changes over time and QC edits made by administrators.  This also
- *         allows
+ *         allows a point-in-time lookback, where you can view the state of a
+ *         record at any time in the past.
  *     </li>
  * </ul>
  *
  * Vaults are not great at write performance, so don't use them for something that
- * needs to store a new record (or edit) every 10 seconds.  They are meant for things
- * that only get updated several times a day.
+ * needs to store a new record (or edit) every 10 seconds.  The vault ecosystem is
+ * limited to one transaction per microsecond across all Vaults, since it uses the
+ * timestamp as the primary key.
  *
  * @param <RecordType> The class that represents the data record.
  *

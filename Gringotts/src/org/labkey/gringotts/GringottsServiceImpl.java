@@ -8,10 +8,8 @@ import org.labkey.gringotts.api.GringottsService;
 import org.labkey.gringotts.api.annotation.SerializeField;
 import org.labkey.gringotts.api.model.Vault;
 import org.labkey.gringotts.model.ValueType;
-import org.labkey.gringotts.model.exception.NotAVaultException;
 import org.labkey.gringotts.model.raw.tables.VaultColumns;
 import org.labkey.gringotts.model.raw.tables.Vaults;
-import org.labkey.gringotts.model.raw.tables.records.VaultsRecord;
 
 import java.lang.reflect.Field;
 

@@ -38,7 +38,4 @@ public abstract class GringottsService {
         // Encode the bytes...
         return Base64.encode(bytes);
     }
-
-    public abstract Vault createVault(User user, Class clazz);
-    public abstract Vault getVault(User user, Class clazz);
 }

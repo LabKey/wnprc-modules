@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.gringotts.api.GringottsService;
+import org.labkey.gringotts.api.exception.InvalidVaultException;
+import org.labkey.gringotts.api.exception.RecordNotFoundException;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
@@ -134,9 +136,9 @@ public abstract class Vault<RecordType extends Vault.Record> {
          * Opens an existing record from the Vault.
          *
          * @param id the id of the record in the vault to retrieve
-         * @throws NotFoundException if the id doesn't exist in the database.
+         * @throws RecordNotFoundException if the id doesn't exist in the database.
          */
-        protected Record(@NotNull String id) throws NotFoundException {
+        protected Record(@NotNull String id) throws RecordNotFoundException {
             this(id, null);
 
         }
@@ -175,18 +177,6 @@ public abstract class Vault<RecordType extends Vault.Record> {
          */
         public final void delete() {
             GringottsService.get().deleteRecord(this);
-        }
-    }
-
-    public class InvalidVaultException extends Exception {
-        public InvalidVaultException(String message) {
-            super(message);
-        }
-    }
-
-    public class NotFoundException extends Exception {
-        public NotFoundException(String message) {
-            super(message);
         }
     }
 }

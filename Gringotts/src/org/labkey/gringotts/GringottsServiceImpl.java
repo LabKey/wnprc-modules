@@ -82,4 +82,9 @@ public class GringottsServiceImpl extends GringottsService {
     public void deleteRecord(Vault.Record record) {
 
     }
+
+    @Override
+    public void bindRecord(Vault.Record record) {
+
+    }
 }

@@ -3,6 +3,7 @@ package org.labkey.gringotts.api.model;
 import com.google.common.reflect.TypeToken;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.gringotts.api.GringottsService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,14 +28,22 @@ import java.util.Map;
  *     </li>
  * </ul>
  *
+ * Vaults are not great at write performance, so don't use them for something that
+ * needs to store a new record (or edit) every 10 seconds.  They are meant for things
+ * that only get updated several times a day.
  *
  * @param <RecordType> The class that represents the data record.
  *
  * Created by Jon Richardson on 10/19/16.
  */
 public abstract class Vault<RecordType extends Vault.Record> {
+    // Container is used for scoping.
     protected Container _container;
+
+    // User is used for auditing.
     protected User _user;
+
+    private TypeToken<RecordType> _typeToken;
 
     /**
      * Vaults are not scoped to containers (unlike the Study module), but
@@ -46,6 +55,9 @@ public abstract class Vault<RecordType extends Vault.Record> {
      */
     public Vault(Container container) throws InvalidVaultException {
         _container = container;
+
+        // Save off the type token for later.
+        _typeToken = new TypeToken<RecordType>(getClass()) {};
     }
 
     /**
@@ -72,19 +84,14 @@ public abstract class Vault<RecordType extends Vault.Record> {
      */
     public abstract String getDisplayName();
 
-    private void saveRecord(Record record) {
-
-    }
-
-    private void deleteRecord(Record record) {
-
+    public TypeToken<RecordType> getTypeToken() {
+        return _typeToken;
     }
 
     public abstract class Record {
         private Map<TypeToken<? extends Record>, String> idMap = new HashMap<>();
 
         protected Record(Map<TypeToken<? extends Record>, String> ids) {
-
         }
 
         protected Record() {
@@ -96,11 +103,11 @@ public abstract class Vault<RecordType extends Vault.Record> {
         }
 
         public final void save() {
-            saveRecord(this);
+            GringottsService.get().saveRecord(this);
         }
 
         public final void delete() {
-            deleteRecord(this);
+            GringottsService.get().deleteRecord(this);
         }
     }
 

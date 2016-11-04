@@ -38,4 +38,7 @@ public abstract class GringottsService {
         // Encode the bytes...
         return Base64.encode(bytes);
     }
+
+    abstract public void saveRecord(Vault.Record record);
+    abstract public void deleteRecord(Vault.Record record);
 }

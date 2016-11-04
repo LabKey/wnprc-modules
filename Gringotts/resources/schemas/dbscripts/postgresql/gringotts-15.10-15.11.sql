@@ -19,17 +19,14 @@
 CREATE SCHEMA gringotts;
 
 CREATE TABLE gringotts.vaults (
-  vaultId       TEXT NOT NULL,
-  vaultName     TEXT NOT NULL,
+  vaultId        TEXT NOT NULL,
+  vaultClassName TEXT NOT NULL,
 
-  -- Default fields for LabKey.
-  --container  entityid NOT NULL, -- Vaults shouldn't be container scoped.
+  -- Purposely not including modified[By], as vaults are only ever created, not modified
   createdby  userid,
   created    TIMESTAMP,
-  modifiedby userid,
-  modified   TIMESTAMP,
 
-  CONSTRAINT PK_vaults PRIMARY KEY (vaultId)
+  CONSTRAINT PK_vaults PRIMARY KEY (vaultId, created)
 );
 
 CREATE TABLE gringotts.transactions (
@@ -67,14 +64,13 @@ CREATE TABLE gringotts.records (
 CREATE TABLE gringotts.vault_text_values (
   vaultId       TEXT     NOT NULL,
   recordId      TEXT     NOT NULL,
-  container     ENTITYID NOT NULL,
   columnId      TEXT     NOT NULL,
   transactionId TEXT     NOT NULL,
 
   value         TEXT,
   effectiveDate TIMESTAMP,
 
-  CONSTRAINT PK_vault_text_values PRIMARY KEY (vaultId, recordId, container, columnId, transactionId)
+  CONSTRAINT PK_vault_text_values PRIMARY KEY (vaultId, recordId, columnId, transactionId)
 );
 
 CREATE TABLE gringotts.vault_links (

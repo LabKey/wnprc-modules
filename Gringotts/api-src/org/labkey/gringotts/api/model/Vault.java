@@ -65,6 +65,28 @@ public abstract class Vault<RecordType extends Vault.Record> {
 
         // Save off the type token for later.
         _typeToken = new TypeToken<RecordType>(getClass()) {};
+
+        initialize();
+    }
+
+    // Cache of the vault info
+    private static VaultInfo vaultInfo = null;
+
+    /**
+     * Sets the VaultInfo for the vault to use.
+     *
+     * This is synchronized, because only the first call should only run once.
+     *
+     * @throws InvalidVaultException
+     */
+    private synchronized void initialize() throws InvalidVaultException {
+        if (vaultInfo == null) {
+            vaultInfo = GringottsService.get().validateVault(this);
+        }
+    }
+
+    public User getUser() {
+        return _user;
     }
 
     /**

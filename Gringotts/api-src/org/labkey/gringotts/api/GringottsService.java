@@ -3,7 +3,9 @@ package org.labkey.gringotts.api;
 import org.apache.xerces.impl.dv.util.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.security.User;
+import org.labkey.gringotts.api.exception.InvalidVaultException;
 import org.labkey.gringotts.api.model.Vault;
+import org.labkey.gringotts.api.model.VaultInfo;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -42,4 +44,6 @@ public abstract class GringottsService {
     abstract public void saveRecord(Vault.Record record);
     abstract public void deleteRecord(Vault.Record record);
     abstract public void bindRecord(Vault.Record record);
+
+    abstract public VaultInfo validateVault(Vault vault) throws InvalidVaultException;
 }

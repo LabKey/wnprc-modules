@@ -16,6 +16,9 @@
 
 package org.labkey.gringotts;
 
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
@@ -47,4 +50,9 @@ public class GringottsSchema {
     public SqlDialect getSqlDialect() {
         return getSchema().getSqlDialect();
     }
+
+    static public DSLContext getSQLConnection() {
+        return DSL.using(SQLDialect.POSTGRES);
+    }
+
 }

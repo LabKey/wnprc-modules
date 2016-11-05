@@ -1,17 +1,24 @@
 package org.labkey.gringotts;
 
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.collections15.map.CaseInsensitiveMap;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.labkey.gringotts.api.GringottsService;
 import org.labkey.gringotts.api.annotation.SerializeField;
+import org.labkey.gringotts.api.exception.InvalidVaultException;
 import org.labkey.gringotts.api.model.Vault;
-import org.labkey.gringotts.model.ValueType;
+import org.labkey.gringotts.api.model.VaultInfo;
+import org.labkey.gringotts.api.model.ValueType;
+import org.labkey.gringotts.model.VaultUtils;
 import org.labkey.gringotts.model.jooq.tables.VaultColumns;
 import org.labkey.gringotts.model.jooq.tables.Vaults;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by jon on 10/19/16.
@@ -86,5 +93,38 @@ public class GringottsServiceImpl extends GringottsService {
     @Override
     public void bindRecord(Vault.Record record) {
 
+    }
+
+    private Map<TypeToken, CountDownLatch> _validationLatches = new HashMap<>();
+    private Map<TypeToken, VaultInfo> _vaultInfoMap = new HashMap<>();
+
+    @Override
+    public synchronized VaultInfo validateVault(Vault vault) throws InvalidVaultException {
+        TypeToken recordType = vault.getTypeToken();
+
+        // If there's already a validation under way for this record type, await it's completion
+        if (_validationLatches.containsKey(recordType)) {
+            CountDownLatch latch = _validationLatches.get(vault.getTypeToken());
+            try {
+                latch.await();
+            }
+            catch (InterruptedException e) {
+                throw new InvalidVaultException("Vault timed out during validation");
+            }
+        // Otherwise, set a latch and start working on validating the Vault.
+        }
+        else {
+            // Set the latch
+            CountDownLatch latch = new CountDownLatch(1);
+            _validationLatches.put(recordType, latch);
+
+            // Generate the vault info
+            _vaultInfoMap.put(recordType, VaultUtils.generateVaultInfo(vault));
+
+            // Release the latch
+            latch.countDown();
+        }
+
+        return _vaultInfoMap.get(recordType);
     }
 }

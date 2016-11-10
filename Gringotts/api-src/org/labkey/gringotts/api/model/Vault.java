@@ -149,6 +149,10 @@ public abstract class Vault<RecordType extends Vault.Record> {
             idMap.put(getVault().getTypeToken(), id);
         }
 
+        public String  getId(TypeToken typeToken) {
+            return idMap.get(typeToken);
+        }
+
         /**
          * Opens an existing record from the Vault.
          *

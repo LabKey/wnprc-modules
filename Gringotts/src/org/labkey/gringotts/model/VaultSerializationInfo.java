@@ -2,6 +2,7 @@ package org.labkey.gringotts.model;
 
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.collections15.map.CaseInsensitiveMap;
+import org.joda.time.DateTime;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
@@ -10,11 +11,13 @@ import org.labkey.gringotts.api.GringottsService;
 import org.labkey.gringotts.api.annotation.SerializeField;
 import org.labkey.gringotts.api.exception.InvalidVaultException;
 import org.labkey.gringotts.api.model.ColumnInfo;
+import org.labkey.gringotts.api.model.RawRecordValues;
 import org.labkey.gringotts.api.model.ValueType;
 import org.labkey.gringotts.api.model.Vault;
 import org.labkey.gringotts.model.jooq.tables.records.VaultColumnsRecord;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,25 +34,36 @@ import static org.labkey.gringotts.model.jooq.tables.VaultColumns.VAULT_COLUMNS;
  * Created by jon on 11/4/16.
  */
 public class VaultSerializationInfo {
-    private final Vault vault;
+    private final TypeToken token;
     private VaultSerializationInfo parentInfo;
     private final String internalId;
 
     // A list of the versions
     private final List<CaseInsensitiveMap<ColumnInfo>> versions;
 
+    // Current Version FieldMaps
+    private Map<Field, String> currentDateFields = new HashMap<>();
+    private Map<Field, String> currentIntFields  = new HashMap<>();
+    private Map<Field, String> currentTextFields = new HashMap<>();
+
     // A collection of all internal names that have been used.
     public Set<String> usedColumnNames = new HashSet<>();
 
     public boolean needsToFlushMostRecentColumnMap = false;
 
-    public VaultSerializationInfo(Vault vault) throws InvalidVaultException {
-        this.vault = vault;
+    /**
+     * This method is private to force usage of the #getInfo() factory.
+     *
+     * @param token
+     * @throws InvalidVaultException
+     */
+    private VaultSerializationInfo(TypeToken token) throws InvalidVaultException {
+        this.token = token;
         this.internalId = getInternalId();
 
         this.versions = getVersions();
 
-        Class superClass = this.vault.getTypeToken().getRawType().getSuperclass();
+        Class superClass = token.getRawType().getSuperclass();
         if (superClass == Vault.Record.class) {
             parentInfo = null;
         }
@@ -67,7 +81,7 @@ public class VaultSerializationInfo {
             return internalId;
         }
 
-        return VaultUtils.getInternalId(vault);
+        return VaultUtils.getInternalId(token);
     }
 
     public List<CaseInsensitiveMap<ColumnInfo>> getVersions() throws InvalidVaultException {
@@ -103,7 +117,7 @@ public class VaultSerializationInfo {
         }
 
         // Possibly add the current map to the pool.
-        CaseInsensitiveMap<ColumnInfo> currentMap = getColumnMapForClass(vault.getClass());
+        CaseInsensitiveMap<ColumnInfo> currentMap = getColumnMapForClass(token.getRawType());
         if (versions.size() == 0 || !columnMapsAreEqual(currentMap, versions.get(versions.size() - 1))) {
             versions.add(currentMap);
             needsToFlushMostRecentColumnMap = true;
@@ -232,13 +246,132 @@ public class VaultSerializationInfo {
         }
     }
 
-    public static Map<TypeToken, ClassColumnInfo> cache = new HashMap<>();
+    public Map<String, DateTime> getTimestampValues(Object o) {
+        Map<String, DateTime> map = new HashMap<>();
 
-    public static ClassColumnInfo getClassColumnInfo(TypeToken typeToken) {
-        ClassColumnInfo info = cache.get(typeToken);
+        if (token.getRawType().isAssignableFrom(o.getClass())) {
+            for(Field field : currentDateFields.keySet()) {
+                String columnName = currentDateFields.get(field);
+
+                try(FieldAccessorHelper helper = new FieldAccessorHelper(field)) {
+                    DateTime value = (DateTime) field.get(o);
+                    map.put(columnName, value);
+                }
+                catch (IllegalAccessException e) {
+                    // Field Accessor helper should prevent us from getting here...
+                    assert false;
+                }
+            }
+        }
+
+        return map;
+    }
+
+    public Map<String, String> getTextValues(Object o) {
+        Map<String, String> map = new HashMap<>();
+
+        if (token.getRawType().isAssignableFrom(o.getClass())) {
+            for(Field field : currentTextFields.keySet()) {
+                String columnName = currentTextFields.get(field);
+
+                try(FieldAccessorHelper helper = new FieldAccessorHelper(field)) {
+                    String value = (String) field.get(o);
+                    map.put(columnName, value);
+                }
+                catch (IllegalAccessException e) {
+                    // Field Accessor helper should prevent us from getting here...
+                    assert false;
+                }
+            }
+        }
+
+        return map;
+    }
+
+    public Map<String, Integer> getIntValues(Object o) {
+        Map<String, Integer> map = new HashMap<>();
+
+        if (token.getRawType().isAssignableFrom(o.getClass())) {
+            for(Field field : currentTextFields.keySet()) {
+                String columnName = currentTextFields.get(field);
+
+                try(FieldAccessorHelper helper = new FieldAccessorHelper(field)) {
+                    Integer value = (Integer) field.get(o);
+                    map.put(columnName, value);
+                }
+                catch (IllegalAccessException e) {
+                    // Field Accessor helper should prevent us from getting here...
+                    assert false;
+                }
+            }
+        }
+
+        return map;
+    }
+
+    public void bind(Vault.Record record) {
+        RawRecordValues curValues = getCurrentValues();
+
+        for (Field field : currentTextFields.keySet()) {
+            try(FieldAccessorHelper helper = new FieldAccessorHelper(field)) {
+                field.set(record, curValues.textValues.get(currentTextFields.get(field)));
+            }
+            catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        for (Field field : currentIntFields.keySet()) {
+            try(FieldAccessorHelper helper = new FieldAccessorHelper(field)) {
+                field.set(record, curValues.intValues.get(currentIntFields.get(field)));
+            }
+            catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        for (Field field : currentDateFields.keySet()) {
+            try(FieldAccessorHelper helper = new FieldAccessorHelper(field)) {
+                field.set(record, curValues.dateValues.get(currentDateFields.get(field)));
+            }
+            catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public RawRecordValues getCurrentValues() {
+        return null;
+    }
+
+    public static class FieldAccessorHelper implements AutoCloseable {
+        private boolean originalAccessible;
+        private Field f;
+
+        public FieldAccessorHelper(Field f) {
+            this.f = f;
+            this.originalAccessible = f.isAccessible();
+
+            if (!f.isAccessible()) {
+                f.setAccessible(true);
+            }
+        }
+
+        @Override
+        public void close() {
+            if (originalAccessible != f.isAccessible()) {
+                f.setAccessible(originalAccessible);
+            }
+        }
+    }
+
+    public static Map<TypeToken, VaultSerializationInfo> cache = new HashMap<>();
+
+    public static VaultSerializationInfo getInfo(TypeToken typeToken) throws InvalidVaultException {
+        VaultSerializationInfo info = cache.get(typeToken);
 
         if (info == null) {
-            info = new ClassColumnInfo(typeToken);
+            info = new VaultSerializationInfo(typeToken);
 
             cache.put(typeToken, info);
         }
@@ -246,9 +379,7 @@ public class VaultSerializationInfo {
         return info;
     }
 
-    public static class ClassColumnInfo {
-        public ClassColumnInfo(TypeToken typeToken) {
-
-        }
+    public static VaultSerializationInfo getInfo(Vault vault) throws InvalidVaultException {
+        return getInfo(vault.getTypeToken());
     }
 }

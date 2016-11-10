@@ -1,11 +1,15 @@
 package org.labkey.gringotts.model;
 
+import com.google.common.reflect.TypeToken;
+import org.apache.commons.collections15.map.CaseInsensitiveMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.labkey.gringotts.GringottsSchema;
+import org.labkey.gringotts.api.exception.InvalidVaultException;
+import org.labkey.gringotts.api.model.Vault;
 import org.labkey.gringotts.model.jooq.tables.records.VaultDatetimeValuesRecord;
 import org.labkey.gringotts.model.jooq.tables.records.VaultIntValuesRecord;
 import org.labkey.gringotts.model.jooq.tables.records.VaultTextValuesRecord;
@@ -14,6 +18,7 @@ import org.labkey.gringotts.model.jooq.tables.records.VaultsRecord;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.labkey.gringotts.model.jooq.tables.VaultTextValues.VAULT_TEXT_VALUES;
 import static org.labkey.gringotts.model.jooq.tables.VaultDatetimeValues.VAULT_DATETIME_VALUES;
@@ -118,6 +123,71 @@ public class Transaction implements AutoCloseable {
         }
 
         return new Timestamp(dateTime.getMillis());
+    }
+
+    public void saveRecord(Vault.Record record) throws InvalidVaultException {
+        TypeToken typeToken = record.getVault().getTypeToken();
+
+        TypeToken currentTypeToken = typeToken;
+
+        while(!currentTypeToken.equals(TypeToken.of(Vault.Record.class))) {
+            saveClass(record, currentTypeToken);
+            currentTypeToken = TypeToken.of(currentTypeToken.getRawType().getSuperclass());
+        }
+    }
+
+    /**
+     * This guy saves all of the records associated with this class in the
+     * class inheritance tree.
+     *
+     * @param record
+     * @param typeToken
+     * @throws InvalidVaultException
+     */
+    private void saveClass(Vault.Record record, TypeToken typeToken) throws InvalidVaultException {
+        VaultSerializationInfo info = VaultSerializationInfo.getInfo(record.getVault());
+
+        // Start by saving the date values
+        Map<String, DateTime> curDateValues = info.getTimestampValues(record);
+        CaseInsensitiveMap<DateTime> oldDateValues = record.getOldValues().dateValues;
+
+        for(String key : curDateValues.keySet()) {
+            if (!curDateValues.get(key).isEqual(oldDateValues.get(key))) {
+                addDateTimeValueRecord(
+                        record.getId(typeToken),
+                        key,
+                        curDateValues.get(key)
+                );
+            }
+        }
+
+        // Now, do the text values.
+        Map<String, String> curTextValues = info.getTextValues(record);
+        CaseInsensitiveMap<String> oldTextValues = record.getOldValues().textValues;
+
+        for(String key : curTextValues.keySet()) {
+            if (!curTextValues.get(key).equals(oldTextValues.get(key))) {
+                addTextValueRecord(
+                        record.getId(typeToken),
+                        key,
+                        curTextValues.get(key)
+                );
+            }
+        }
+
+        // Finally, do the ints
+        Map<String, Integer> curIntValues = info.getIntValues(record);
+        CaseInsensitiveMap<Integer> oldIntValues = record.getOldValues().intValues;
+
+        for(String key : curIntValues.keySet()) {
+            if (!curIntValues.get(key).equals(oldIntValues.get(key))) {
+                addIntValueRecord(
+                        record.getId(typeToken),
+                        key,
+                        curIntValues.get(key)
+                );
+            }
+        }
     }
 
     @Override

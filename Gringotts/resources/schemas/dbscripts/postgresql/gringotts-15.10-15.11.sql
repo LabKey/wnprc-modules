@@ -95,6 +95,7 @@ CREATE TABLE gringotts.vault_datetime_values (
   transactionId TEXT     NOT NULL,
 
   value         TIMESTAMP,
+  effectiveDate TIMESTAMP,
 
   CONSTRAINT PK_vault_datetime_values PRIMARY KEY (vaultId, recordId, columnId, transactionId),
   CONSTRAINT FK_vault_datetime_values_transactions FOREIGN KEY (transactionId) REFERENCES gringotts.transactions (transactionId)
@@ -107,6 +108,7 @@ CREATE TABLE gringotts.vault_int_values (
   transactionId TEXT     NOT NULL,
 
   value         INTEGER,
+  effectiveDate TIMESTAMP,
 
   CONSTRAINT PK_vault_int_values PRIMARY KEY (vaultId, recordId, columnId, transactionId),
   CONSTRAINT FK_vault_int_values_transactions FOREIGN KEY (transactionId) REFERENCES gringotts.transactions (transactionId)

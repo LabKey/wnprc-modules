@@ -9,9 +9,9 @@ import org.labkey.gringotts.api.GringottsService;
 import org.labkey.gringotts.api.annotation.SerializeField;
 import org.labkey.gringotts.api.exception.InvalidVaultException;
 import org.labkey.gringotts.api.model.Vault;
-import org.labkey.gringotts.api.model.VaultInfo;
 import org.labkey.gringotts.api.model.ValueType;
-import org.labkey.gringotts.model.VaultUtils;
+import org.labkey.gringotts.model.Transaction;
+import org.labkey.gringotts.model.VaultSerializationInfo;
 import org.labkey.gringotts.model.jooq.tables.VaultColumns;
 import org.labkey.gringotts.model.jooq.tables.Vaults;
 
@@ -66,6 +66,17 @@ public class GringottsServiceImpl extends GringottsService {
         Vaults vaults = new Vaults();
         VaultColumns columns = new VaultColumns();
 
+        try(Transaction transaction = new Transaction(new VaultSerializationInfo(record.getVault()))) {
+
+
+        }
+        catch (InvalidVaultException e) {
+            e.printStackTrace();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         /*  Just some exampley code to show how to interact with the record.
         VaultsRecord tempVaultRecord = create.fetchOne(vaults, vaults.VAULTNAME.eq(vaultInfo.name()));
@@ -96,10 +107,9 @@ public class GringottsServiceImpl extends GringottsService {
     }
 
     private Map<TypeToken, CountDownLatch> _validationLatches = new HashMap<>();
-    private Map<TypeToken, VaultInfo> _vaultInfoMap = new HashMap<>();
+    private Map<TypeToken, VaultSerializationInfo> _vaultInfoMap = new HashMap<>();
 
-    @Override
-    public synchronized VaultInfo validateVault(Vault vault) throws InvalidVaultException {
+    public synchronized VaultSerializationInfo validateVault(Vault vault) throws InvalidVaultException {
         TypeToken recordType = vault.getTypeToken();
 
         // If there's already a validation under way for this record type, await it's completion
@@ -119,7 +129,7 @@ public class GringottsServiceImpl extends GringottsService {
             _validationLatches.put(recordType, latch);
 
             // Generate the vault info
-            _vaultInfoMap.put(recordType, VaultUtils.generateVaultInfo(vault));
+            //_vaultInfoMap.put(recordType, VaultUtils.generateVaultInfo(vault));
 
             // Release the latch
             latch.countDown();

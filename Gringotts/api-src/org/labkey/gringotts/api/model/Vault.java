@@ -69,9 +69,6 @@ public abstract class Vault<RecordType extends Vault.Record> {
         initialize();
     }
 
-    // Cache of the vault info
-    private static VaultInfo vaultInfo = null;
-
     /**
      * Sets the VaultInfo for the vault to use.
      *
@@ -80,9 +77,7 @@ public abstract class Vault<RecordType extends Vault.Record> {
      * @throws InvalidVaultException
      */
     private synchronized void initialize() throws InvalidVaultException {
-        if (vaultInfo == null) {
-            vaultInfo = GringottsService.get().validateVault(this);
-        }
+
     }
 
     public User getUser() {
@@ -163,6 +158,10 @@ public abstract class Vault<RecordType extends Vault.Record> {
         protected Record(@NotNull String id) throws RecordNotFoundException {
             this(id, null);
 
+        }
+
+        public RawRecordValues getOldValues() {
+            return oldValues;
         }
 
         /**

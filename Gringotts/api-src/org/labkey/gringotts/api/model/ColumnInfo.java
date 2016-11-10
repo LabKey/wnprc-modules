@@ -22,7 +22,9 @@ public class ColumnInfo {
     public boolean equals(Object o) {
         if (o instanceof ColumnInfo) {
             ColumnInfo that = (ColumnInfo) o;
-            if (this.type == that.type && this.columnName == that.columnName && this.internalName == that.internalName) {
+            if (this.type.equals(that.type)
+                    && this.columnName.equals(that.columnName)
+                    && this.internalName.equals(that.internalName)) {
                 return true;
             }
             else {

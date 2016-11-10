@@ -24,6 +24,8 @@ import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 
+import java.sql.Timestamp;
+
 public class GringottsSchema {
     private static final GringottsSchema _instance = new GringottsSchema();
     public static final String NAME = "gringotts";
@@ -55,4 +57,7 @@ public class GringottsSchema {
         return DSL.using(SQLDialect.POSTGRES);
     }
 
+    public static Timestamp now() {
+        return new Timestamp(System.currentTimeMillis());
+    }
 }

@@ -365,7 +365,11 @@ public class VaultSerializationInfo {
         }
     }
 
-    public static Map<TypeToken, VaultSerializationInfo> cache = new HashMap<>();
+    /*
+     * Each DBRecord class only needs to be instantiated once, so we use a cache to hold all of the already
+     * instantiated ones.
+     */
+    private final static Map<TypeToken, VaultSerializationInfo> cache = new HashMap<>();
 
     public static VaultSerializationInfo getInfo(TypeToken typeToken) throws InvalidVaultException {
         VaultSerializationInfo info = cache.get(typeToken);

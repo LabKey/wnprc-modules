@@ -66,7 +66,7 @@ public class GringottsServiceImpl extends GringottsService {
         Vaults vaults = new Vaults();
         VaultColumns columns = new VaultColumns();
 
-        try(Transaction transaction = new Transaction(new VaultSerializationInfo(record.getVault()))) {
+        try(Transaction transaction = new Transaction(VaultSerializationInfo.getInfo(record.getVault().getTypeToken()))) {
 
 
         }

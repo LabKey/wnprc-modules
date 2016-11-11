@@ -114,6 +114,19 @@ CREATE TABLE gringotts.vault_int_values (
   CONSTRAINT FK_vault_int_values_transactions FOREIGN KEY (transactionId) REFERENCES gringotts.transactions (transactionId)
 );
 
+/*
+ * This holds the mappings for records that extend other records.  The child vault class must extend the
+ * parent vault class.
+ */
+CREATE TABLE gringotts.vault_parent_records (
+  childVaultId   TEXT NOT NULL,
+  childRecordId  TEXT NOT NULL,
+  parentVaultId  TEXT NOT NULL,
+  parentRecordId TEXT NOT NULL,
+
+  CONSTRAINT PK_vault_parent_records PRIMARY KEY (childRecordId, childVaultId, parentVaultId, parentRecordId)
+);
+
 CREATE TABLE gringotts.vault_links (
   -- "Primary" primary keys
   vaultId1 TEXT NOT NULL, -- source

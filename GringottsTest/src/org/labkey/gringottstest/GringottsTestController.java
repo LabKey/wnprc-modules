@@ -16,6 +16,7 @@
 
 package org.labkey.gringottstest;
 
+import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -25,6 +26,8 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.gringotts.api.GringottsService;
+import org.labkey.gringottstest.model.EmployeeTypes;
+import org.labkey.gringottstest.model.EmployeeVault;
 import org.labkey.gringottstest.model.PersonVault;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
@@ -96,7 +99,27 @@ public class GringottsTestController extends SpringActionController {
 
             assert jon3.lastName.equals("Kringle");
 
-            return jon3.toJSON();
+            EmployeeVault employeeVault = new EmployeeVault(getContainer(), getUser());
+
+            EmployeeVault.Employee jGordon = employeeVault.new Employee();
+
+            jGordon.firstName = "James";
+            jGordon.middleName = "Worthington";
+            jGordon.lastName = "Gordon";
+
+            jGordon.age = 40;
+            jGordon.birthdate = LocalDateTime.of(1985, Month.JULY, 6, 0, 0);
+            jGordon.employeeType = EmployeeTypes.STUDENT;
+
+            jGordon.save();
+
+            EmployeeVault.Employee jG2 = employeeVault.new Employee(jGordon.getId(vault.getTypeToken()));
+
+            assert jG2.employeeType.equals(EmployeeTypes.STUDENT);
+
+            JSONObject success = new JSONObject();
+            success.put("status", "All tests passed!");
+            return success;
         }
     }
 }

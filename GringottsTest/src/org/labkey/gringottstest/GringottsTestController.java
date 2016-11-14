@@ -17,6 +17,7 @@
 package org.labkey.gringottstest;
 
 import com.google.common.reflect.TypeToken;
+import junit.framework.TestSuite;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -30,6 +31,8 @@ import org.labkey.gringotts.api.GringottsService;
 import org.labkey.gringottstest.model.EmployeeTypes;
 import org.labkey.gringottstest.model.EmployeeVault;
 import org.labkey.gringottstest.model.PersonVault;
+import org.labkey.gringottstest.test.AbstractTestSuite;
+import org.labkey.gringottstest.test.BasicFunctionality;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -48,7 +51,8 @@ public class GringottsTestController extends SpringActionController {
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction {
         public ModelAndView getView(Object o, BindException errors) throws Exception {
-            return new JspView("/org/labkey/gringottstest/view/hello.jsp");
+            ModelAndView view = new JspView("/org/labkey/gringottstest/view/hello.jsp");
+            return view;
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -63,64 +67,9 @@ public class GringottsTestController extends SpringActionController {
     public class TestAction extends ApiAction<NullForm> {
         @Override
         public Object execute(NullForm nullForm, BindException errors) throws Exception {
-            String firstName = "Edward";
-            String middleName = "Percival";
-            String lastName  = "Nygma";
-            Integer age = 3;
-            LocalDateTime birthdate = LocalDateTime.of(1985, Month.APRIL, 1, 0, 0, 0);
+            AbstractTestSuite suite = new BasicFunctionality(getUser(), getContainer());
 
-            PersonVault<PersonVault.Person> vault = new PersonVault(getContainer(), getUser());
-
-            PersonVault.Person jon = vault.new Person();
-
-            jon.firstName = firstName;
-            jon.middleName = middleName;
-            jon.lastName = lastName;
-            jon.birthdate = birthdate;
-            jon.age = age;
-
-            jon.save();
-
-            String jonsId = jon.getId(TypeToken.of(jon.getClass()));
-
-            PersonVault.Person jon2 = vault.new Person(jonsId);
-
-            assert jon2.age.equals(age);
-            assert jon2.birthdate.isEqual(birthdate);
-            assert jon2.firstName.equals(firstName);
-            assert jon2.lastName.equals(lastName);
-            assert jon2.middleName.equals(middleName);
-
-            // Sometimes the guy can take the girl's name...
-            jon2.lastName = "Kringle";
-
-            jon2.save();
-
-            PersonVault.Person jon3 = vault.new Person(jonsId);
-
-            assert jon3.lastName.equals("Kringle");
-
-            EmployeeVault employeeVault = new EmployeeVault(getContainer(), getUser());
-
-            EmployeeVault.Employee jGordon = employeeVault.new Employee();
-
-            jGordon.firstName = "James";
-            jGordon.middleName = "Worthington";
-            jGordon.lastName = "Gordon";
-
-            jGordon.age = 40;
-            jGordon.birthdate = LocalDateTime.of(1985, Month.JULY, 6, 0, 0);
-            jGordon.employeeType = EmployeeTypes.STUDENT;
-
-            jGordon.save();
-
-            EmployeeVault.Employee jG2 = employeeVault.new Employee(jGordon.getId(TypeToken.of(jGordon.getClass())));
-
-            assert jG2.employeeType.equals(EmployeeTypes.STUDENT);
-
-            JSONObject success = new JSONObject();
-            success.put("status", "All tests passed!");
-            return success;
+            return suite.runTests();
         }
     }
 }

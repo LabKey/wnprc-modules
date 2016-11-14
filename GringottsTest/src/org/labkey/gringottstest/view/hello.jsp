@@ -17,9 +17,46 @@
 %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.api.module.ModuleLoader" %>
+<%@ page import="org.labkey.gringottstest.test.BasicFunctionality" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     Container c = getContainer();
     User user = getUser();
+
+    BasicFunctionality test = new BasicFunctionality(getUser(), getContainer());
+
+    JSONObject results = test.runTests();
 %>
 Hello, and welcome to the GringottsTest module.
+
+
+<ul>
+<%
+    for (String key: results.getJSONObject("summary").keySet()) {
+        boolean result = results.getJSONObject("summary").getBoolean(key);
+
+        String reason = "";
+        if (!result) {
+            reason = results.getJSONObject("details").getJSONObject(key).getString("error");
+        }
+
+        String color = (result) ? "green" : "red";
+%>
+    <li style="color: <%= color %>">
+        <%= key %>
+        <%
+            if (!result) {
+        %>
+        <ul>
+            <li><%= reason %></li>
+        </ul>
+        <%
+            }
+        %>
+    </li>
+<%
+    }
+%>
+</ul>

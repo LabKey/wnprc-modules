@@ -10,7 +10,7 @@ import org.labkey.gringotts.api.model.Vault;
 /**
  * Created by jon on 11/13/16.
  */
-public class EmployeeVault extends PersonVault {
+public class EmployeeVault extends PersonVault<EmployeeVault.Employee> {
     public EmployeeVault(Container c, User user) throws InvalidVaultException {
         super(c, user);
     }

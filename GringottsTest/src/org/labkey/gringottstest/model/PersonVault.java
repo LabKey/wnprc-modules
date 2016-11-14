@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * Created by jon on 11/3/16.
  */
-public class PersonVault extends Vault<PersonVault.Person> {
+public class PersonVault<RecordType extends PersonVault.Person> extends Vault<RecordType> {
     public PersonVault(Container c, User user) throws InvalidVaultException {
         super(c, user);
     }

@@ -16,6 +16,7 @@
 
 package org.labkey.gringottstest;
 
+import com.google.common.reflect.TypeToken;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -68,7 +69,7 @@ public class GringottsTestController extends SpringActionController {
             Integer age = 3;
             LocalDateTime birthdate = LocalDateTime.of(1985, Month.APRIL, 1, 0, 0, 0);
 
-            PersonVault vault = new PersonVault(getContainer(), getUser());
+            PersonVault<PersonVault.Person> vault = new PersonVault(getContainer(), getUser());
 
             PersonVault.Person jon = vault.new Person();
 
@@ -80,7 +81,7 @@ public class GringottsTestController extends SpringActionController {
 
             jon.save();
 
-            String jonsId = jon.getId(vault.getTypeToken());
+            String jonsId = jon.getId(TypeToken.of(jon.getClass()));
 
             PersonVault.Person jon2 = vault.new Person(jonsId);
 
@@ -113,7 +114,7 @@ public class GringottsTestController extends SpringActionController {
 
             jGordon.save();
 
-            EmployeeVault.Employee jG2 = employeeVault.new Employee(jGordon.getId(vault.getTypeToken()));
+            EmployeeVault.Employee jG2 = employeeVault.new Employee(jGordon.getId(TypeToken.of(jGordon.getClass())));
 
             assert jG2.employeeType.equals(EmployeeTypes.STUDENT);
 

@@ -29,6 +29,9 @@ import org.labkey.gringottstest.model.PersonVault;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+
 public class GringottsTestController extends SpringActionController {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(GringottsTestController.class);
     public static final String NAME = "gringottstest";
@@ -56,16 +59,44 @@ public class GringottsTestController extends SpringActionController {
     public class TestAction extends ApiAction<NullForm> {
         @Override
         public Object execute(NullForm nullForm, BindException errors) throws Exception {
+            String firstName = "Edward";
+            String middleName = "Percival";
+            String lastName  = "Nygma";
+            Integer age = 3;
+            LocalDateTime birthdate = LocalDateTime.of(1985, Month.APRIL, 1, 0, 0, 0);
 
-            GringottsService service = GringottsService.get();
-
-            PersonVault vault = new PersonVault(getContainer());
+            PersonVault vault = new PersonVault(getContainer(), getUser());
 
             PersonVault.Person jon = vault.new Person();
 
+            jon.firstName = firstName;
+            jon.middleName = middleName;
+            jon.lastName = lastName;
+            jon.birthdate = birthdate;
+            jon.age = age;
+
             jon.save();
 
-            return null;
+            String jonsId = jon.getId(vault.getTypeToken());
+
+            PersonVault.Person jon2 = vault.new Person(jonsId);
+
+            assert jon2.age.equals(age);
+            assert jon2.birthdate.isEqual(birthdate);
+            assert jon2.firstName.equals(firstName);
+            assert jon2.lastName.equals(lastName);
+            assert jon2.middleName.equals(middleName);
+
+            // Sometimes the guy can take the girl's name...
+            jon2.lastName = "Kringle";
+
+            jon2.save();
+
+            PersonVault.Person jon3 = vault.new Person(jonsId);
+
+            assert jon3.lastName.equals("Kringle");
+
+            return jon3.toJSON();
         }
     }
 }

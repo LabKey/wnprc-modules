@@ -4,9 +4,10 @@ import com.google.common.reflect.TypeToken;
 import org.json.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.gringotts.api.model.Vault;
+import org.labkey.gringottstest.model.Employee;
 import org.labkey.gringottstest.model.EmployeeTypes;
-import org.labkey.gringottstest.model.EmployeeVault;
-import org.labkey.gringottstest.model.PersonVault;
+import org.labkey.gringottstest.model.Person;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -33,9 +34,9 @@ public class BasicFunctionality extends AbstractTestSuite {
             Integer age = 3;
             LocalDateTime birthdate = LocalDateTime.of(1985, Month.APRIL, 1, 0, 0, 0);
 
-            PersonVault<PersonVault.Person> vault = new PersonVault(getContainer(), getUser());
 
-            PersonVault.Person jon = vault.new Person();
+            Vault<Person> vault = new Vault<Person>(getContainer(), getUser()) {};
+            Person jon = vault.create();
 
             jon.firstName = firstName;
             jon.middleName = middleName;
@@ -47,7 +48,7 @@ public class BasicFunctionality extends AbstractTestSuite {
 
             String jonsId = jon.getId(TypeToken.of(jon.getClass()));
 
-            PersonVault.Person jon2 = vault.new Person(jonsId);
+            Person jon2 = vault.load(jonsId);
 
             assert jon2.age.equals(age);
             assert jon2.birthdate.isEqual(birthdate);
@@ -60,7 +61,7 @@ public class BasicFunctionality extends AbstractTestSuite {
 
             jon2.save();
 
-            PersonVault.Person jon3 = vault.new Person(jonsId);
+            Person jon3 = vault.load(jonsId);
 
             assert jon3.lastName.equals("Kringle");
         }
@@ -69,9 +70,9 @@ public class BasicFunctionality extends AbstractTestSuite {
     public class SimpleInheritanceAndEnumValues extends Test {
         @Override
         void runTest() throws Exception {
-            EmployeeVault employeeVault = new EmployeeVault(getContainer(), getUser());
+            Vault<Employee> employeeVault = new Vault<Employee>(getContainer(), getUser()) {};
 
-            EmployeeVault.Employee jGordon = employeeVault.new Employee();
+            Employee jGordon = employeeVault.create();
 
             jGordon.firstName = "James";
             jGordon.middleName = "Worthington";
@@ -83,7 +84,7 @@ public class BasicFunctionality extends AbstractTestSuite {
 
             jGordon.save();
 
-            EmployeeVault.Employee jG2 = employeeVault.new Employee(jGordon.getId(TypeToken.of(jGordon.getClass())));
+            Employee jG2 = employeeVault.load(jGordon.getId(TypeToken.of(jGordon.getClass())));
 
             assert jG2.employeeType.equals(EmployeeTypes.STUDENT);
         }

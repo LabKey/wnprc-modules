@@ -29,7 +29,12 @@ public class EmployeeVault extends PersonVault<EmployeeVault.Employee> {
             super(id);
         }
 
+        /*
+         * Note here that we can't just assign here. The class body gets executed after the call to
+         * super() but before the rest of the constructor body, so not checking for null overrides
+         * any value that might have been bound from the database.
+         */
         @SerializeField
-        public EmployeeTypes employeeType = EmployeeTypes.FULL_TIME;
+        public EmployeeTypes employeeType = (this.employeeType == null) ? EmployeeTypes.FULL_TIME : this.employeeType;
     }
 }

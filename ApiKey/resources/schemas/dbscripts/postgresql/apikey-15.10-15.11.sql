@@ -17,3 +17,36 @@
 -- Create schema, tables, indexes, and constraints used for ApiKey module here
 -- All SQL VIEW definitions should be created in apikey-create.sql and dropped in apikey-drop.sql
 CREATE SCHEMA apikey;
+
+CREATE TABLE apikey.apikeys (
+  apikey     TEXT NOT NULL,
+
+  note       TEXT,
+  isSuperKey BOOLEAN NOT NULL DEFAULT FALSE,
+  owner      USERID NOT NULL,
+  starts     TIMESTAMP,
+  expires    TIMESTAMP,
+
+  CONSTRAINT PK_apikeys PRIMARY KEY (apikey)
+);
+
+CREATE TABLE apikey.key_revocations (
+  apikey TEXT NOT NULL,
+
+  revokedOn TIMESTAMP NOT NULL,
+  revokedBy USERID    NOT NULL,
+  reason    TEXT,
+
+  CONSTRAINT PK_key_revocations PRIMARY KEY (apikey),
+  CONSTRAINT FK_key_revocations_apikeys FOREIGN KEY (apikey) REFERENCES apikeys (apikey)
+);
+
+CREATE TABLE apikey.allowed_services (
+  apikey     TEXT NOT NULL,
+
+  moduleName  TEXT NOT NULL,
+  serviceName TEXT NOT NULL,
+
+  CONSTRAINT PK_services PRIMARY KEY (apikey, moduleName, serviceName),
+  CONSTRAINT FK_key_revocations_apikeys FOREIGN KEY (apikey) REFERENCES apikeys (apikey)
+);

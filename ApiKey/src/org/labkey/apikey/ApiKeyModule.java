@@ -19,15 +19,19 @@ package org.labkey.apikey;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.apikey.api.JsonService;
+import org.labkey.apikey.api.JsonServiceManager;
+import org.labkey.apikey.service.JsonServiceManagerImpl;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-public class ApiKeyModule extends DefaultModule
+public class ApiKeyModule extends ExtendedSimpleModule
 {
     public static final String NAME = "ApiKey";
 
@@ -57,13 +61,14 @@ public class ApiKeyModule extends DefaultModule
     }
 
     @Override
-    protected void init()
-    {
+    protected void init() {
         addController(ApiKeyController.NAME, ApiKeyController.class);
+
+        JsonServiceManager.set(new JsonServiceManagerImpl());
     }
 
     @Override
-    public void doStartup(ModuleContext moduleContext)
+    public void doStartupAfterSpringConfig(ModuleContext moduleContext)
     {
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new ApiKeyContainerListener());

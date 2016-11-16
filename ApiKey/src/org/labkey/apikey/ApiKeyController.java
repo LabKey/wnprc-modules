@@ -1,32 +1,28 @@
-/*
- * Copyright (c) 2015 LabKey Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.labkey.apikey;
 
+import org.json.JSONObject;
+import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.apikey.api.ApiKey;
+import org.labkey.apikey.api.ApiKeyService;
+import org.labkey.apikey.api.JsonService;
+import org.labkey.apikey.api.JsonServiceManager;
+import org.labkey.apikey.api.exception.InvalidApiKey;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-public class ApiKeyController extends SpringActionController
-{
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+
+public class ApiKeyController extends SpringActionController {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ApiKeyController.class);
     public static final String NAME = "apikey";
 
@@ -36,16 +32,84 @@ public class ApiKeyController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
-        {
+    public class BeginAction extends SimpleViewAction {
+        public ModelAndView getView(Object o, BindException errors) throws Exception {
             return new JspView("/org/labkey/apikey/view/hello.jsp");
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             return root;
+        }
+    }
+
+    public static class NullForm {}
+
+    @RequiresNoPermission
+    public class ExecuteServiceAction extends ApiAction<NullForm> {
+        @Override
+        public Object execute(NullForm nullForm, BindException errors) throws Exception {
+            HttpServletRequest req = getViewContext().getRequest();
+
+            String moduleName   = req.getHeader("ModuleName");
+            String serviceName  = req.getHeader("ServiceName");
+            String apiKeyString = req.getHeader("API-Key");
+
+            Module module = ModuleLoader.getInstance().getModule(moduleName);
+
+            if (module == null) {
+                throw new Exception(moduleName + " is not a valid module name");
+            }
+
+            StringBuffer jb = new StringBuffer();
+            String line = null;
+            try {
+                BufferedReader reader = req.getReader();
+                while ((line = reader.readLine()) != null)
+                    jb.append(line);
+            } catch (Exception e) { /*report an error*/ }
+
+            JSONObject jsonObject = new JSONObject(jb.toString());
+
+            return JsonServiceManager.get().executeService(module, getContainer(), serviceName, apiKeyString, jsonObject);
+        }
+    }
+
+    @RequiresNoPermission
+    public class GetKeyInfo extends ApiAction<NullForm> {
+        @Override
+        public Object execute(NullForm nullForm, BindException errors) throws Exception {
+            HttpServletRequest req = getViewContext().getRequest();
+
+            String apiKeyString = req.getHeader("API-Key");
+            ApiKey key = ApiKeyService.get().loadKey(apiKeyString);
+
+            if (key == null) {
+                throw new InvalidApiKey("Invalid Api Key");
+            }
+
+            JSONObject keyInfo = new JSONObject();
+
+            JSONObject userInfo = new JSONObject();
+            userInfo.put("userid", key.getUser().getUserId());
+            userInfo.put("displayName", key.getUser().getDisplayName(null));
+            keyInfo.put("user", userInfo);
+
+            keyInfo.put("valid", key.isValid());
+            keyInfo.put("superkey", key.isSuperKey());
+
+            JSONObject allowedModules = new JSONObject();
+            for(Module module : key.getAllowedServices().keySet()) {
+                JSONObject allowedServices = new JSONObject();
+
+                for(JsonService service : key.getAllowedServices().get(module)) {
+                    allowedServices.put(service.getName(), true);
+                }
+
+                allowedModules.put(module.getName(), allowedServices);
+            }
+
+            return keyInfo;
         }
     }
 }

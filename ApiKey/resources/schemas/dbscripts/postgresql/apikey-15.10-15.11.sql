@@ -38,7 +38,7 @@ CREATE TABLE apikey.key_revocations (
   reason    TEXT,
 
   CONSTRAINT PK_key_revocations PRIMARY KEY (apikey),
-  CONSTRAINT FK_key_revocations_apikeys FOREIGN KEY (apikey) REFERENCES apikeys (apikey)
+  CONSTRAINT FK_key_revocations_apikeys FOREIGN KEY (apikey) REFERENCES apikey.apikeys (apikey)
 );
 
 CREATE TABLE apikey.allowed_services (
@@ -48,5 +48,5 @@ CREATE TABLE apikey.allowed_services (
   serviceName TEXT NOT NULL,
 
   CONSTRAINT PK_services PRIMARY KEY (apikey, moduleName, serviceName),
-  CONSTRAINT FK_key_revocations_apikeys FOREIGN KEY (apikey) REFERENCES apikeys (apikey)
+  CONSTRAINT FK_key_revocations_apikeys FOREIGN KEY (apikey) REFERENCES apikey.apikeys (apikey)
 );

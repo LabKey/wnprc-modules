@@ -63,6 +63,13 @@ public class ApiKeyController extends SpringActionController {
 
             JSONObject jsonObject = new JSONObject(req.getParameter("jsonText"));
 
+            // Set the user, so anything assuming a ViewContext will be fine,
+            // *cough* EHR trigger scripts *cough*
+            ApiKey key = ApiKeyService.get().loadKey(apiKeyString);
+            if (key != null) {
+                getViewContext().setUser(key.getUser());
+            }
+
             return JsonServiceManager.get().executeService(module, getContainer(), serviceName, apiKeyString, jsonObject);
         }
     }

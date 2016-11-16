@@ -43,3 +43,13 @@ CREATE TABLE deviceproxy.allowed_service (
   CONSTRAINT PK_allowed_service PRIMARY KEY (public_key, start_time, module_name, service_name),
   CONSTRAINT FK_allowed_service_lease FOREIGN KEY (public_key, start_time) REFERENCES deviceproxy.lease (public_key, start_time)
 );
+
+CREATE TABLE deviceproxy.users (
+  userid      USERID NOT NULL,
+
+  card_number TEXT   NOT NULL,
+  pin_hash    TEXT   NOT NULL,
+
+  CONSTRAINT PK_users PRIMARY KEY (userid),
+  CONSTRAINT users_cardnumber_unique UNIQUE (card_number)
+);

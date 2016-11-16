@@ -17,6 +17,7 @@ import org.labkey.deviceproxy.model.jooq.tables.AllowedService;
 import org.labkey.deviceproxy.model.jooq.tables.AuthMethod;
 import org.labkey.deviceproxy.model.jooq.tables.Device;
 import org.labkey.deviceproxy.model.jooq.tables.Lease;
+import org.labkey.deviceproxy.model.jooq.tables.Users;
 
 
 /**
@@ -32,7 +33,7 @@ import org.labkey.deviceproxy.model.jooq.tables.Lease;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Deviceproxy extends SchemaImpl {
 
-    private static final long serialVersionUID = 1865117202;
+    private static final long serialVersionUID = -2002638633;
 
     /**
      * The reference instance of <code>deviceproxy</code>
@@ -58,6 +59,11 @@ public class Deviceproxy extends SchemaImpl {
      * The table <code>deviceproxy.lease</code>.
      */
     public final Lease LEASE = org.labkey.deviceproxy.model.jooq.tables.Lease.LEASE;
+
+    /**
+     * The table <code>deviceproxy.users</code>.
+     */
+    public final Users USERS = org.labkey.deviceproxy.model.jooq.tables.Users.USERS;
 
     /**
      * No further instances allowed
@@ -87,6 +93,7 @@ public class Deviceproxy extends SchemaImpl {
             AllowedService.ALLOWED_SERVICE,
             AuthMethod.AUTH_METHOD,
             Device.DEVICE,
-            Lease.LEASE);
+            Lease.LEASE,
+            Users.USERS);
     }
 }

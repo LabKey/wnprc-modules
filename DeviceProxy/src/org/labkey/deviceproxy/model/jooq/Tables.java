@@ -10,6 +10,7 @@ import org.labkey.deviceproxy.model.jooq.tables.AllowedService;
 import org.labkey.deviceproxy.model.jooq.tables.AuthMethod;
 import org.labkey.deviceproxy.model.jooq.tables.Device;
 import org.labkey.deviceproxy.model.jooq.tables.Lease;
+import org.labkey.deviceproxy.model.jooq.tables.Users;
 
 
 /**
@@ -44,4 +45,9 @@ public class Tables {
      * The table <code>deviceproxy.lease</code>.
      */
     public static final Lease LEASE = org.labkey.deviceproxy.model.jooq.tables.Lease.LEASE;
+
+    /**
+     * The table <code>deviceproxy.users</code>.
+     */
+    public static final Users USERS = org.labkey.deviceproxy.model.jooq.tables.Users.USERS;
 }

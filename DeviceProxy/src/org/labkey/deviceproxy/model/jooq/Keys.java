@@ -13,10 +13,12 @@ import org.labkey.deviceproxy.model.jooq.tables.AllowedService;
 import org.labkey.deviceproxy.model.jooq.tables.AuthMethod;
 import org.labkey.deviceproxy.model.jooq.tables.Device;
 import org.labkey.deviceproxy.model.jooq.tables.Lease;
+import org.labkey.deviceproxy.model.jooq.tables.Users;
 import org.labkey.deviceproxy.model.jooq.tables.records.AllowedServiceRecord;
 import org.labkey.deviceproxy.model.jooq.tables.records.AuthMethodRecord;
 import org.labkey.deviceproxy.model.jooq.tables.records.DeviceRecord;
 import org.labkey.deviceproxy.model.jooq.tables.records.LeaseRecord;
+import org.labkey.deviceproxy.model.jooq.tables.records.UsersRecord;
 
 
 /**
@@ -46,6 +48,8 @@ public class Keys {
     public static final UniqueKey<AuthMethodRecord> PK_AUTH_METHOD = UniqueKeys0.PK_AUTH_METHOD;
     public static final UniqueKey<DeviceRecord> PK_DEVICE_REQUEST = UniqueKeys0.PK_DEVICE_REQUEST;
     public static final UniqueKey<LeaseRecord> PK_LEASE = UniqueKeys0.PK_LEASE;
+    public static final UniqueKey<UsersRecord> PK_USERS = UniqueKeys0.PK_USERS;
+    public static final UniqueKey<UsersRecord> USERS_CARDNUMBER_UNIQUE = UniqueKeys0.USERS_CARDNUMBER_UNIQUE;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -64,6 +68,8 @@ public class Keys {
         public static final UniqueKey<AuthMethodRecord> PK_AUTH_METHOD = createUniqueKey(AuthMethod.AUTH_METHOD, "pk_auth_method", AuthMethod.AUTH_METHOD.PUBLIC_KEY, AuthMethod.AUTH_METHOD.START_TIME, AuthMethod.AUTH_METHOD.AUTH_METHOD_);
         public static final UniqueKey<DeviceRecord> PK_DEVICE_REQUEST = createUniqueKey(Device.DEVICE, "pk_device_request", Device.DEVICE.PUBLIC_KEY);
         public static final UniqueKey<LeaseRecord> PK_LEASE = createUniqueKey(Lease.LEASE, "pk_lease", Lease.LEASE.PUBLIC_KEY, Lease.LEASE.START_TIME);
+        public static final UniqueKey<UsersRecord> PK_USERS = createUniqueKey(Users.USERS, "pk_users", Users.USERS.USERID);
+        public static final UniqueKey<UsersRecord> USERS_CARDNUMBER_UNIQUE = createUniqueKey(Users.USERS, "users_cardnumber_unique", Users.USERS.CARD_NUMBER);
     }
 
     private static class ForeignKeys0 extends AbstractKeys {

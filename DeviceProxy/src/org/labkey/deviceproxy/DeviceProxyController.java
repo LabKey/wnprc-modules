@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
@@ -154,7 +155,7 @@ public class DeviceProxyController extends SpringActionController {
     }
 
     @RequiresNoPermission
-    public class RequestApiKey extends ApiAction<RequestApiKeyForm> {
+    public class RequestApiKeyAction extends ApiAction<RequestApiKeyForm> {
         @Override
         public Object execute(RequestApiKeyForm form, BindException errors) throws Exception {
             ApiKey key = DeviceProxyService.get().requestApiKey(form.getPublicKey(), form.getCardnumber(), form.getPin());
@@ -163,6 +164,15 @@ public class DeviceProxyController extends SpringActionController {
             response.put("key", key != null ? key.getKey() : null);
 
             return response;
+        }
+    }
+
+    @RequiresLogin
+    public class EnrollUserAction extends ApiAction<RequestApiKeyForm> {
+        @Override
+        public Object execute(RequestApiKeyForm form, BindException errors) throws Exception {
+            DeviceProxyService.get().enroll(getUser(), form.getCardnumber(), form.getPin());
+            return new JSONObject();
         }
     }
 }

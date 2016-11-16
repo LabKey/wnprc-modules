@@ -17,8 +17,8 @@ CREATE TABLE deviceproxy.lease (
 
   createdBy  USERID NOT NULL,
   end_time   TIMESTAMP,
-  endedBy    USERID NOT NULL,
-  endedOn    TIMESTAMP NOT NULL,
+  endedBy    USERID,
+  endedOn    TIMESTAMP,
 
   CONSTRAINT PK_lease PRIMARY KEY (public_key, start_time),
   CONSTRAINT FK_lease_device FOREIGN KEY (public_key) REFERENCES deviceproxy.device (public_key)

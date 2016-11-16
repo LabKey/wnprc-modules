@@ -113,6 +113,23 @@ public class DeviceProxyService {
         }
     }
 
+    public void enroll(User user, String cardNumber, String pin) {
+        try (jOOQConnection conn = new jOOQConnection()) {
+            UsersRecord usersRecord = conn.create().fetchOne(DEVICEPROXY.USERS, DEVICEPROXY.USERS.USERID.eq(user.getUserId()));
+
+            if (usersRecord == null) {
+                usersRecord = conn.create().newRecord(DEVICEPROXY.USERS);
+
+                usersRecord.setUserid(user.getUserId());
+            }
+
+            usersRecord.setCardNumber(cardNumber);
+            usersRecord.setPinHash(hashPin(pin));
+
+            usersRecord.store();
+        }
+    }
+
     public ApiKey requestApiKey(String publicKey, String cardNumber, String pin) {
         LocalDateTime now = LocalDateTime.now();
 

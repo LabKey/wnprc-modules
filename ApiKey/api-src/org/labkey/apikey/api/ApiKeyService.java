@@ -1,9 +1,11 @@
 package org.labkey.apikey.api;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -23,6 +25,6 @@ public abstract class ApiKeyService {
     @Nullable
     abstract public ApiKey loadKey(String key);
 
-    abstract public ApiKey generateKey(User user, @Nullable Set<String> serviceNames, @Nullable Duration expirationTime);
+    abstract public ApiKey generateKey(User user, @Nullable Map<Module, Set<String>> serviceNames, @Nullable Duration expirationTime, @Nullable String note);
     abstract public void revokeApiKey(ApiKey key, User revokingUser, String comment);
 }

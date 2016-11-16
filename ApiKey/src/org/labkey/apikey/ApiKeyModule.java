@@ -23,8 +23,10 @@ import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.apikey.api.ApiKeyService;
 import org.labkey.apikey.api.JsonService;
 import org.labkey.apikey.api.JsonServiceManager;
+import org.labkey.apikey.service.ApiKeyServiceImpl;
 import org.labkey.apikey.service.JsonServiceManagerImpl;
 
 import java.util.Collection;
@@ -65,6 +67,7 @@ public class ApiKeyModule extends ExtendedSimpleModule
         addController(ApiKeyController.NAME, ApiKeyController.class);
 
         JsonServiceManager.set(new JsonServiceManagerImpl());
+        ApiKeyService.set(new ApiKeyServiceImpl());
     }
 
     @Override

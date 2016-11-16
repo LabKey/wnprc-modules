@@ -61,22 +61,14 @@ public class ApiKeyController extends SpringActionController {
                 throw new Exception(moduleName + " is not a valid module name");
             }
 
-            StringBuffer jb = new StringBuffer();
-            String line = null;
-            try {
-                BufferedReader reader = req.getReader();
-                while ((line = reader.readLine()) != null)
-                    jb.append(line);
-            } catch (Exception e) { /*report an error*/ }
-
-            JSONObject jsonObject = new JSONObject(jb.toString());
+            JSONObject jsonObject = new JSONObject(req.getParameter("jsonText"));
 
             return JsonServiceManager.get().executeService(module, getContainer(), serviceName, apiKeyString, jsonObject);
         }
     }
 
     @RequiresNoPermission
-    public class GetKeyInfo extends ApiAction<NullForm> {
+    public class GetKeyInfoAction extends ApiAction<NullForm> {
         @Override
         public Object execute(NullForm nullForm, BindException errors) throws Exception {
             HttpServletRequest req = getViewContext().getRequest();

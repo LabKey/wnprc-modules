@@ -1,0 +1,18 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <!--<columns>-->
+       <!--<column name="Id"/>-->
+       <!--<column name="NumActiveAssignments"/>-->
+       <!--<column name="NumPendingAssignments"/>-->
+       <!--<column name="NumActiveResearchAssignments"/>-->
+       <!--<column name="NumActiveVetAssignments"/>-->
+       <!--<column name="NumActiveTrainingAssignments"/>-->
+       <!--<column name="NumActiveBreedingAssignments"/>-->
+       <!--<column name="ActiveSPF_StockAssignment"/>-->
+       <!--<column name="ActiveConventionalStockAssignment"/>-->
+       <!--<column name="ActiveMarmStockAssignment"/>-->
+       <!--<column name="NumActiveStockAssignments"/>-->
+   <!--</columns>-->
+   <sorts>
+       <sort column="Id" descending="false"/>
+   </sorts>
+</customView>

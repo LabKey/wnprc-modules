@@ -1,0 +1,21 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="sampleType"/>
+        <column name="sampleAppearance"/>
+        <column name="stainType"/>
+        <column name="slidesMade"/>
+        <column name="results"/>
+        <column name="remark"/>
+        <column name="qcstate" />
+        <column name="taskid" />
+    </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+       <sort column="id" descending="false"/>
+       <sort column="sampleType" descending="false"/>
+       <sort column="stainType" descending="false"/>
+   </sorts>
+    
+</customView>

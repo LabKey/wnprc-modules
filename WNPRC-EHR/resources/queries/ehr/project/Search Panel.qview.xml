@@ -1,0 +1,27 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
+   <columns>
+       <column name="project"/>
+       <column name="protocol"/>
+       <column name="activeAssignments/activeAssignments">
+           <properties>
+               <property name="columnTitle" value="Animals Assigned"/>
+           </properties>
+       </column>
+       <column name="lastAssignment/lastAssignmentDate">
+           <properties>
+               <property name="columnTitle" value="Last Assignment Date"/>
+           </properties>
+       </column>
+       <column name="account"/>
+       <column name="inves"/>
+       <column name="title"/>
+       <column name="avail"/>
+       <column name="research"/>
+   </columns>
+   <!--<filters>-->
+       <!--<filter column="totalAssigned/ActiveAssignments" operator="gt" value="0"/>-->
+   <!--</filters>-->
+   <sorts>
+       <sort column="project" descending="true"/>
+   </sorts>
+</customView>

@@ -1,0 +1,23 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="testId"/>
+        <column name="result"/>
+        <column name="testId/units"/>
+        <column name="status"/>
+        <column name="range"/>
+        <column name="remark"/>
+        <column name="AgeAtTime"/>
+        <column name="ageClass"/>
+        <column name="qcstate"/>
+        <column name="taskid"/>
+    </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+       <sort column="testId/sort_order" descending="false"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

@@ -1,0 +1,32 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsSurgery" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="AnySurgery">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Clinical Encounters&amp;
+                            query.type~contains=surgery&amp;
+                            query.Id~eq=${Id}
+                        </url>
+                        <columnTitle>Had Any Surgery?</columnTitle>
+                    </column>
+                    <column columnName="MajorSurgery">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Clinical Encounters&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.type~contains=surgery&amp;
+                            query.Major~eq=Yes
+                        </url>
+                        <columnTitle>Had A Major Surgery?</columnTitle>
+                    </column>
+                </columns>
+                <titleColumn>MajorSurgery</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,13 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="virus" />
+        <column name="ViralLoad"/>
+        <column name="LogVL"/>
+    </columns>
+   <sorts>
+       <sort column="Id" />
+       <sort column="date" descending="true"/>
+   </sorts>
+</customView>

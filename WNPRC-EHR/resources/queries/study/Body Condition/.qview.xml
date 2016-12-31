@@ -1,0 +1,22 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+       <column name="date" />
+       <column name="project" />
+       <column name="score" />
+       <column name="weightStatus" />
+       <column name="microchip" />
+       <column name="tag" />
+       <column name="tattoo_chest" />
+       <column name="tattoo_thigh" />
+       <column name="tattoo_remark" />
+       <column name="remark" />
+       <column name="performedby" />
+       <column name="qcstate" />
+       <column name="taskid" />
+       <column name="requestid" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+</customView>

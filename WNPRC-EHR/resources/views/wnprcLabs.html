@@ -1,0 +1,64 @@
+<html>
+<head>
+<script type="text/javascript">
+LABKEY.requiresScript("/ehr/ext3/navMenu.js");
+</script>
+
+<script type="text/javascript">
+
+Ext.onReady(createNavMenu);
+
+function createNavMenu()
+{
+    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
+    {
+        createNavMenu.defer(10);
+        return;
+    }
+
+    new EHR.ext.NavMenu({
+        renderTo: 'wnprcLabs',
+        width: 300,
+        sections: [
+            {header: 'Information to Laboratories',
+            items: [
+                {name: 'Pricing for WNPRC Services', url: '<%=contextPath%>/WNPRC_EHR/WNPRC/EHR/unitPricing.view?'}
+            ]},        
+            {header: 'WNPRC Lab Sites',
+            items: [
+                {name: 'Tom Friedrich Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/friedrich/begin.view'},
+                {name: 'David O\'Connor Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/oconnor/begin.view'},
+                {name: 'Shelby O\'Connor Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/soconnor/begin.view'},
+                {name: 'David Watkins Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/watkins/begin.view'},
+                {name: 'Slukvin Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/Slukvin/begin.view'},
+                {name: 'Basso Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/basso/begin.view'},
+                {name: 'Colman Lab**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Laboratories/Colman/begin.view'}
+            ]},
+            {header: 'Affiliated Groups',
+            items: [
+                {name: 'MHC SSP Core**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/MHC_SSP/begin.view?'}
+            ]},
+
+        ]
+    });
+
+}
+
+</script>
+</head>
+<body>
+
+<p />
+<div style="max-width:900px">
+    Laboratories associated with WNPRC can create pages for internal or external consumption.  These could include areas to store data, post information or securately share information with collaborators.
+<p/>
+    If you are interested in creating a page for your group, please submit a request <a href="<%=contextPath%>/issues/WNPRC/EHR/Issue_Tracker/list.view?" target="new">here</a>
+</div>
+<p />
+
+<div id="wnprcLabs"></div>
+
+<p/>
+<b>**Denotes restricted area</b>
+</body>
+</html>

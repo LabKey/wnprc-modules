@@ -1,0 +1,38 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+       <column name="date" />
+       <column name="status" />
+       <column name="quantity" />
+       <!--<column name="minDate" />-->
+       <!--<column name="maxDate" />-->
+       <column name="BloodLast30">
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Drawn in Previous 30 Days"/>-->
+            <!--</properties>-->
+       </column>
+       <column name="BloodNext30">
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Scheduled in Next 30 Days"/>-->
+            <!--</properties>-->
+       </column>
+       <column name="AvailBlood">
+           <!--<properties>-->
+           <!--<property name="columnTitle" value="Volume Remaining After Draw (mL)"/>-->
+           <!--</properties>-->
+       </column>
+       <column name="MaxBlood">
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Max Allowable Blood At Time"/>-->
+            <!--</properties>-->
+       </column>
+       <column name="weight" />
+   </columns>
+   <sorts>
+       <sort column="Id" />
+       <sort column="date" />
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

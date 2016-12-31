@@ -1,0 +1,6 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <sorts>
+       <sort column="species" descending="false"/>
+       <sort column="v_status" descending="false"/>
+   </sorts>
+</customView>

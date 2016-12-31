@@ -1,0 +1,12 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="ShortName" />
+        <column name="Allele" />
+        <column name="Status" />
+    </columns>
+   <sorts>
+       <sort column="Id" descending="false"/>
+       <sort column="Allele" descending="false"/>
+   </sorts>
+</customView>

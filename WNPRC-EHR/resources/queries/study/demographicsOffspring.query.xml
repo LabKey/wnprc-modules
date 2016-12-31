@@ -1,0 +1,28 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsOffspring" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <!--<isHidden>true</isHidden>-->
+                    </column>
+                    <column columnName="Relationship">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsOffspring&amp;
+                            query.Id~eq=${Id}
+                        </url>
+                    </column>
+                    <column columnName="Offspring">
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>animal</fkTable>
+                          <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+                <titleColumn>Relationship</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

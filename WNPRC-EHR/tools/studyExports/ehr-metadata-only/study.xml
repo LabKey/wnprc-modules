@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<study label="Primate Electronic Health Record" xmlns="http://labkey.org/study/xml">
+  <datasets dir="datasets" file="datasets_manifest.xml">
+    <definition file="EHRStudy.dataset"/>
+  </datasets>
+</study>
+
+
+
+

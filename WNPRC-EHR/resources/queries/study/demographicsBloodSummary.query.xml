@@ -1,0 +1,63 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsBloodSummary" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="lsid">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="BloodLast30">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Blood Draws&amp;
+                            query.viewName=Blood Summary&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.Date~lte=${Date}&amp;
+                            query.sort=-Date&amp;
+                        </url>
+                        <columnTitle>Blood Drawn In Previous 30 Days</columnTitle>
+                    </column>
+                    <column columnName="BloodNext30">
+                        <columnTitle>Scheduled in Next 30 Days</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Blood Draws&amp;
+                            query.viewName=Blood Summary&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.Date~gt=${Date}&amp;
+                            query.sort=-Date&amp;
+                        </url>
+                    </column>
+                    <column columnName="MaxBlood">
+                        <columnTitle>Max Blood Per 30 Days (mL)</columnTitle>
+                    </column>
+                    <column columnName="AvailBlood">
+                        <columnTitle>Available Blood (mL)</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="lte" value="0"/>
+                                </filters>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="CurrentBlood">
+                        <columnTitle>Current Blood (mL)</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="lte" value="0"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                </columns>
+                <titleColumn>AvailBlood</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,16 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="rooms_quick" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="room">
+                        <isKeyField>true</isKeyField>
+                        <displayWidth>40</displayWidth>
+                    </column>
+                </columns>
+                <titleColumn>room</titleColumn>
+                <pkColumnName>room</pkColumnName>
+            </table>
+        </tables>
+    </metadata>
+</query>

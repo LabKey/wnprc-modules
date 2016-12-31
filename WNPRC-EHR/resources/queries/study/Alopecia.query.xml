@@ -1,0 +1,127 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Alopecia" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="score">
+                        <columnTitle>Alopecia Score</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>alopecia_score</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>value</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cause">
+                        <columnTitle>Cause</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>alopecia_cause</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="head">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Head</columnTitle>
+                    </column>
+                    <column columnName="dorsum">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Dorsum</columnTitle>
+                    </column>
+                    <column columnName="rump">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Rump</columnTitle>
+                    </column>
+                    <column columnName="shoulders">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Shoulders</columnTitle>
+                    </column>
+                    <column columnName="upperArms">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Upper Arms</columnTitle>
+                    </column>
+                    <column columnName="lowerArms">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Lower Arms</columnTitle>
+                    </column>
+                    <column columnName="lowerArms">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Lower Arms</columnTitle>
+                    </column>
+                    <column columnName="hips">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Hips</columnTitle>
+                    </column>
+                    <column columnName="upperLegs">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Upper Legs</columnTitle>
+                    </column>
+                    <column columnName="lowerLegs">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Lower Legs</columnTitle>
+                    </column>
+                    <column columnName="other">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                        <columnTitle>Other</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

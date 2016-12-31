@@ -1,0 +1,238 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Demographics" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>false</isKeyField>
+                    </column>
+                    <column columnName="gender">
+                        <columnTitle>Gender</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>gender_codes</fkTable>
+                            <fkColumnName>Code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="QCState">
+                        <columnTitle>Record Status</columnTitle>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="date">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="status">
+                        <shownInInsertView>false</shownInInsertView>
+                        <isHidden>true</isHidden>
+                        <columnTitle>Status</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>status_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="calculated_status">
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Status</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>calculated_status_codes</fkTable>
+                            <fkColumnName>Code</fkColumnName>
+                        </fk>
+                    </column>
+                    <!--NOTE: being depreciated-->
+                    <column columnName="avail">
+                        <isHidden>true</isHidden>
+                        <columnTitle>Availability</columnTitle>
+                        <!--<fk>-->
+                        <!--<fkDbSchema>ehr_lookups</fkDbSchema>-->
+                        <!--<fkTable>avail_codes</fkTable>-->
+                        <!--<fkColumnName>Code</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="hold">
+                        <columnTitle>Hold</columnTitle>
+                        <!--<fk>-->
+                        <!--<fkDbSchema>ehr_lookups</fkDbSchema>-->
+                        <!--<fkTable>hold_codes</fkTable>-->
+                        <!--<fkColumnName>Code</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="species">
+                        <columnTitle>Species</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>species</fkTable>
+                            <fkColumnName>common</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="dam">
+                        <columnTitle>Dam</columnTitle>
+                        <!--<fk>-->
+                            <!--<fkDbSchema>study</fkDbSchema>-->
+                            <!--<fkTable>animal</fkTable>-->
+                            <!--<fkColumnName>id</fkColumnName>-->
+                        <!--</fk>-->
+                        <url>/ehr/participantView.view?participantId=${dam}</url>
+                    </column>
+                    <column columnName="sire">
+                        <columnTitle>Sire</columnTitle>
+                        <!--<fk>-->
+                            <!--<fkDbSchema>study</fkDbSchema>-->
+                            <!--<fkTable>animal</fkTable>-->
+                            <!--<fkColumnName>id</fkColumnName>-->
+                        <!--</fk>-->
+                        <url>/ehr/participantView.view?participantId=${sire}</url>
+                    </column>
+                    <column columnName="origin">
+                        <columnTitle>Origin</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>source</fkTable>
+                            <fkColumnName>Code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="birth">
+                        <formatString>yyyy-MM-dd</formatString>
+                        <!--<shownInInsertView>false</shownInInsertView>-->
+                        <columnTitle>Birth</columnTitle>
+                         <url>/query/executeQuery.view?
+                            schemaName=study&amp;
+                            query.queryName=Birth&amp;
+                            query.Id~eq=${Id}
+                        </url>
+                    </column>
+                    <column columnName="death">
+                        <formatString>yyyy-MM-dd</formatString>
+                        <!--<shownInInsertView>false</shownInInsertView>-->
+                        <columnTitle>Death</columnTitle>
+                         <url>/query/executeQuery.view?
+                            schemaName=study&amp;
+                            query.queryName=Deaths&amp;
+                            query.Id~eq=${Id}
+                        </url>
+                    </column>
+                    <!--NOTE: being deprecated-->
+                    <column columnName="arrivedate">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Arrival Date</columnTitle>
+                    </column>
+                    <column columnName="departdate">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Departure Date</columnTitle>
+                    </column>
+                    <column columnName="room">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Room</columnTitle>
+                        <url>/ehr/cageDetails.view?
+                            room=${room}&amp;
+                        </url>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cage">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Cage</columnTitle>
+                        <url>/ehr/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cage}&amp;
+                        </url>
+                    </column>
+                    <column columnName="cond">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <displayWidth>30</displayWidth>
+                        <columnTitle>Condition</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>housing_condition_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="weight">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Current Weight (kg)</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Weight&amp;
+                            query.id~eq=${id}
+                        </url>
+                    </column>
+                    <!--NOTE: being depreciated-->
+                    <column columnName="wdate">
+                        <shownInInsertView>false</shownInInsertView>
+                        <isHidden>true</isHidden>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Weight Date</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Weight&amp;
+                            query.id~eq=${id}&amp;
+                            query.date~eq=${wdate}
+                        </url>
+                    </column>
+                    <column columnName="tbdate">
+                        <shownInInsertView>false</shownInInsertView>
+                        <isHidden>true</isHidden>
+                        <formatString>yyyy-MM-dd</formatString>
+                        <columnTitle>Last TB Date</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=TB Tests&amp;
+                            query.id~eq=${id}&amp;
+                            query.sort=-Date
+                        </url>
+                    </column>
+                    <column columnName="medical">
+                        <columnTitle>Medical</columnTitle>
+                    </column>
+                    <column columnName="prepaid">
+                        <columnTitle>Replacement Prepaid By</columnTitle>
+                    </column>
+                    <column columnName="v_status">
+                        <columnTitle>Viral Status</columnTitle>
+                        <isHidden>true</isHidden>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>viral_status</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="geographic_origin">
+                        <columnTitle>Geographic Origin</columnTitle>
+                    </column>
+                    <!--<column columnName="behavior">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Behavior</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=BehaviorAbstract&amp;
+                            query.id~eq=${id}
+                        </url>
+                        &lt;!&ndash;<formatString>#.##</formatString>&ndash;&gt;
+                    </column>-->
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

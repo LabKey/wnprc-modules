@@ -1,0 +1,37 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="GLUC::results"/>
+        <column name="BUN::results"/>
+        <column name="CREAT::results"/>
+        <column name="CPK::results"/>
+        <column name="CHOL::results"/>
+        <column name="TRIG::results"/>
+        <column name="SGOT::results"/>
+        <column name="LDH::results"/>
+        <column name="TB::results"/>
+        <column name="GGT::results"/>
+        <column name="SGPT::results"/>
+        <column name="TP::results"/>
+        <column name="ALB::results"/>
+        <column name="ALKP::results"/>
+        <column name="CA::results"/>
+        <column name="PHOS::results"/>
+        <column name="FE::results"/>
+        <column name="NA::results"/>
+        <column name="K::results"/>
+        <column name="CL::results"/>
+        <!--<column name="LDL::results"/>-->
+        <!--<column name="iCA::results"/>-->
+        <!--<column name="HCT"/>-->
+        <!--<column name="BE"/>-->
+        <!--<column name="LACT"/>-->
+        <!--<column name="CEACT"/>-->
+        <!--<column name="CTPNI"/>-->
+
+
+
+
+    </columns>
+</customView>

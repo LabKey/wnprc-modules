@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasets metaDataFile="datasets_metadata.xml" xmlns="http://labkey.org/study/xml">
+  <categories>
+    <category>Clinical</category>
+    <category>ColonyManagement</category>
+    <category>ClinPath</category>
+    <category>Pathology</category>
+  </categories>
+  <datasets>
+    <dataset name="alopecia" id="1061" category="Clinical"/>
+    <dataset name="ActiveHousing" id="5010" showByDefault="false" category="ColonyManagement" demographicData="true"/>
+    <dataset name="birth" id="1007" category="Clinical" demographicData="true"/>
+    <dataset name="blood" id="1008" category="Clinical"/>
+    <dataset name="bcs" id="1065" showByDefault="false" category="Clinical"/>
+    <dataset name="cageObs" id="5003" showByDefault="false" category="Clinical"/>
+    <dataset name="encounters" id="1067" category="Clinical"/>
+    <dataset name="clinical_observations" id="5006" category="Clinical"/>
+    <dataset name="clinremarks" id="1047" category="Clinical"/>
+    <dataset name="dentalStatus" id="1064" showByDefault="false" category="Clinical"/>
+    <dataset name="drug" id="1014" category="Clinical"/>
+    <dataset name="final_reports" id="5009" category="Clinical"/>
+    <dataset name="obs" id="1023" category="Clinical"/>
+    <dataset name="procedures" id="1033" category="Clinical"/>
+    <dataset name="problem" id="1030" category="Clinical"/>
+    <dataset name="surgery" id="1031" showByDefault="false" category="Clinical"/>
+    <dataset name="treatments" id="1075" showByDefault="false" category="Clinical"/>
+    <dataset name="tb" id="1035" category="Clinical"/>
+    <dataset name="teeth" id="1062" showByDefault="false" category="Clinical"/>
+    <dataset name="treatment_order" id="1037" category="Clinical"/>
+    <dataset name="weight" id="1045" category="Clinical"/>
+    <dataset name="vitals" id="1063" showByDefault="false" category="Clinical"/>
+    <dataset name="bacteriologyResults" id="1049" category="ClinPath"/>
+    <dataset name="chemistryResults" id="1056" category="ClinPath"/>
+    <dataset name="clinpathRuns" id="1073" category="ClinPath"/>
+    <dataset name="hematologyMorphology" id="1058" category="ClinPath"/>
+    <dataset name="hematologyResults" id="1059" category="ClinPath"/>
+    <dataset name="immunologyResults" id="1083" category="ClinPath"/>
+    <dataset name="parasitologyResults" id="1052" category="ClinPath"/>
+    <dataset name="urinalysisResults" id="1081" category="ClinPath"/>
+    <dataset name="virologyResults" id="1054" category="ClinPath"/>
+    <dataset name="arrival" id="1001" category="ColonyManagement"/>
+    <dataset name="assignment" id="1002" category="ColonyManagement"/>
+    <dataset name="behavetrem" id="1004" category="ColonyManagement"/>
+    <dataset name="charges" id="5005" category="ColonyManagement"/>
+    <dataset name="deaths" id="1048" category="Pathology" demographicData="true"/>
+    <dataset name="demographics" id="1012" category="ColonyManagement" demographicData="true"/>
+    <dataset name="departure" id="1013" category="ColonyManagement"/>
+    <dataset name="feeding" id="1078" category="Clinical" demographicData="true"/>
+    <dataset name="housing" id="1018" category="ColonyManagement"/>
+    <dataset name="inbreeding" id="5001" category="ColonyManagement"/>
+    <dataset name="menses" id="1060" showByDefault="false" category="ColonyManagement"/>
+    <dataset name="notes" id="1068" showByDefault="false" category="ColonyManagement"/>
+    <dataset name="pairtest" id="1079" showByDefault="false" category="ColonyManagement"/>
+    <dataset name="Pregnancies" id="5007" showByDefault="false" category="ColonyManagement"/>
+    <dataset name="prenatal" id="1029" category="Pathology" demographicData="true"/>
+    <dataset name="biopsy" id="1006" category="Pathology"/>
+    <dataset name="morphologicDiagnosis" id="1005" category="Pathology"/>
+    <dataset name="histology" id="1070" category="Pathology"/>
+    <dataset name="necropsy" id="1022" category="Pathology"/>
+    <dataset name="necropsydiag" id="1021" category="Pathology"/>
+    <dataset name="organ_weights" id="1072" showByDefault="false" category="Pathology"/>
+    <dataset name="tissue_requests" id="1036" showByDefault="false" category="Pathology"/>
+    <dataset name="tissue_samples" id="1071" showByDefault="false" category="Pathology"/>
+  </datasets>
+</datasets>

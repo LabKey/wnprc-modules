@@ -1,0 +1,32 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+  <columns>
+      <column name="Id"/>
+      <column name="date"/>
+      <column name="caseno/caseno">
+          <properties>
+              <property name="columnTitle" value="Case No"/>
+          </properties>
+      </column>
+      <column name="remark"/>
+      <column name="tissue"/>
+      <column name="tissue_qualifier"/>
+      <column name="severity"/>
+      <column name="duration"/>
+      <column name="distribution"/>
+      <!--<column name="distribution2"/>-->
+      <column name="inflammation"/>
+      <column name="inflammation2"/>
+      <column name="etiology"/>
+      <column name="process"/>
+      <column name="process2"/>
+      <column name="qcstate"/>
+      <column name="taskid" />
+   </columns>
+   <sorts>
+       <sort column="Id" />
+       <sort column="date" />
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

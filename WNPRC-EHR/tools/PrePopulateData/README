@@ -1,0 +1,7 @@
+This excel file is used to manage the default values for various EHR tables.  The excel
+file contains a formula to generate strings that can be cut/pasted into _init.html in the EHR
+module.  that file contains a simple web UI to manage import of default values.
+
+In general, this excel file manages values that have a container associated with them, and can therefore
+only be imported to a specific instance of the EHR.  Values without a container are generally put into
+the module's SQL scripts directly.

@@ -1,0 +1,97 @@
+<!--
+    This is a template for the Prenatal Death Additional Information form.  It is called by the
+    FINALIZE_DEATH button defined in DataEntryButtons.js
+-->
+
+<form class="form-horizontal">
+    <!-- ko if: errorMessage() != "" -->
+    <div class="col-xs-12">
+        <div class="form-group" style="text-align: center">
+            <strong style="color: red">{{errorMessage}}</strong>
+        </div>
+    </div>
+    <!-- /ko -->
+    <div class="col-xs-12">
+        <div class="form-group">
+            <label class="control-label col-sm-2">Gender</label>
+            <div class="col-sm-10">
+                <select class="form-control gender-field" data-bind="options: availableGenders,
+                                                             optionsText: 'meaning',
+                                                             optionsValue: 'code',
+                                                             value: form.gender,
+                                                             valueAllowUnset: true">
+                </select>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-xs-6">
+        <form class="form-horizontal">
+            <!-- Dam -->
+            <div class="form-group">
+                <label class="control-label col-sm-4">Dam</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control typeahead dam-field" data-bind="textInput: form.dam">
+                </div>
+            </div>
+
+            <!-- Conception Date -->
+            <div class="form-group">
+                <label class="control-label col-sm-4">Conception</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" data-bind="dateTimePicker: form.conception,
+                                                                       dateTimePickerOptions: {
+                                                                           format: 'YYYY-MM-DD'
+                                                                       }">
+                </div>
+            </div>
+
+            <!-- Room -->
+            <div class="form-group">
+                <label class="control-label col-sm-4">Room</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control typeahead" data-bind="textInput: form.room">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-xs-6">
+        <form class="form-horizontal">
+            <!-- Sire -->
+            <div class="form-group">
+                <label class="control-label col-sm-4">Sire</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control typeahead sire-field" data-bind="textInput: form.sire">
+                </div>
+            </div>
+
+            <!-- Species -->
+            <div class="form-group">
+                <label class="control-label col-sm-4">Species</label>
+                <div class="col-sm-8">
+                    <select class="form-control gender-field" data-bind="options:         availableSpecies,
+                                                                         optionsText:     'common',
+                                                                         optionsValue:    'common',
+                                                                         value:           form.species,
+                                                                         valueAllowUnset: true">
+                    </select>
+                </div>
+            </div>
+
+            <!-- Cage -->
+            <div class="form-group">
+                <label class="control-label col-sm-4">Cage</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control typeahead" data-bind="textInput: form.cage">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-group">
+        <label>Remark</label>
+        <textarea rows="3" class="form-control" data-bind="textInput: form.remark"></textarea>
+    </div>
+</form>

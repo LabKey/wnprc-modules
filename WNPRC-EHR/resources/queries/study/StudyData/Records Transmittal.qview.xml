@@ -1,0 +1,25 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id"/>
+       <column name="date"/>
+       <column name="project"/>
+       <column name="DataSet/Label">
+            <properties>
+                <property name="columnTitle" value="Dataset"/>
+            </properties>
+       </column>
+       <column name="remark"/>
+       <column name="description"/>
+       <!--<column name="performedby"/>-->
+       <!--<column name="qcstate"/>-->
+       <column name="requestid" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+       <sort column="dataset/name" descending="false" />
+   </sorts>
+   <filters>
+       <filter column="dataset/name" operator="in" value="behavetrem;biopsy;clinremarks;encounters;drug;necropsy;problem;tb;weight;bacteriologyResults;clinpathRuns;chemistryResults;hematologyResults;immunologyResults;parasitologyResults;urinalysisResults;virologyResults;alopecia;bcs;clinical_observations"/>
+       <filter column="qcstate/publicdata" operator="eq" value="true"/>
+   </filters>
+</customView>

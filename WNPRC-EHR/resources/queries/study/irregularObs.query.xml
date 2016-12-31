@@ -1,0 +1,71 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="irregularObs" tableDbType="TABLE">
+                <tableUrl>/study/datasetDetailRedirect.view?datasetId=${dataset}&amp;lsid=${lsid}</tableUrl>
+                <columns>
+                    <column columnName="lsid">
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>studydata</fkTable>
+                          <fkColumnName>lsid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="Id">
+                        <displayWidth>40</displayWidth>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>Animal</fkTable>
+                          <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Room">
+                        <displayWidth>40</displayWidth>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>rooms</fkTable>
+                          <fkColumnName>Room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cage">
+                        <displayWidth>40</displayWidth>
+                    </column>
+                    <column columnName="remark">
+                        <displayWidth>250</displayWidth>
+                    </column>
+                    <column columnName="description">
+                        <displayWidth>250</displayWidth>
+                    </column>
+                    <column columnName="dataset">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Notes" wrappedColumnName="date">
+                        <columnTitle>Notes</columnTitle>
+                        <formatString>'&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;'</formatString>
+                        <isHidden>false</isHidden>
+                        <displayWidth>200</displayWidth>
+                    </column>
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>tasks</fkTable>
+                          <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="QCState">
+                        <columnTitle>Status</columnTitle>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>qcstate</fkTable>
+                          <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

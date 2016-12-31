@@ -1,0 +1,66 @@
+# default group can be used to avoid repeating definitions for each dataset
+#
+# action=[REPLACE,APPEND,DELETE] (default:REPLACE)
+# deleteAfterImport=[TRUE|FALSE] (default:FALSE)
+
+default.action=REPLACE
+default.deleteAfterImport=FALSE
+default.replaceNewerThanDate=${DATE_CUTOFF}
+
+# map a source tsv column (right side) to a property name or full propertyURI (left)
+# predefined properties: ParticipantId, SiteId, VisitId, Created
+default.property.ParticipantId=id
+default.property.VisitDate=date
+
+# use to map from filename->datasetid
+# NOTE: if there are NO explicit import definitions, we will try to import all files matching pattern
+# NOTE: if there are ANY explicit mapping, we will only import listed datasets
+
+#default.filePattern=dataset(\\d*).tsv
+#default.importAllMatches=TRUE
+
+alerts.file=alerts.tsv
+arrival.file=arrival.tsv
+assignment.file=assignment.tsv
+bacteriologyResults.file=bacteriologyResults.tsv
+bacteriologyRuns.file=bacteriologyRuns.tsv
+behavetrem.file=behavetrem.tsv
+biopsy.file=biopsy.tsv
+biopsydiag.file=biopsydiag.tsv
+birth.file=birth.tsv
+blood.file=blood.tsv
+chemistryRuns.file=chemistryRuns.tsv
+chemistryResults.file=chemistryResults.tsv
+clinremarks.file=clinremarks.tsv
+demographics.file=demographics.tsv
+# always replace the demographics table completely.
+demographics.replaceNewerThanDate=FALSE
+departure.file=departure.tsv
+drug.file=drug.tsv
+encounters.file=encounters.tsv
+hematologyMorphology.file=hematologyMorphology.tsv
+hematologyRuns.file=hematologyRuns.tsv
+hematologyResults.file=hematologyResults.tsv
+housing.file=housing.tsv
+immunologyRuns.file=immunologyRuns.tsv
+immunologyResults.file=immunologyResults.tsv
+necropsydiag.file=necropsydiag.tsv
+necropsy.file=necropsy.tsv
+obs.file=obs.tsv
+parasitologyResults.file=parasitologyResults.tsv
+parasitologyRuns.file=parasitologyRuns.tsv
+prenatal.file=prenatal.tsv
+problem.file=problem.tsv
+surgery.file=surgery.tsv
+#surgfluid.file=surgfluid.tsv
+procedures.file=procedures.tsv
+surgsum.file=surgsum.tsv
+tb.file=tb.tsv
+tissue_requests.file=tissue_requests.tsv
+treatment_order.file=treatment_order.tsv
+urinalysisResults.file=urinalysisResults.tsv
+urinalysisRuns.file=urinalysisRuns.tsv
+virologyResults.file=virologyResults.tsv
+virologyRuns.file=virologyRuns.tsv
+weight.file=weight.tsv
+

@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2010-2011 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
+/* no time column */
+SELECT lower(id) as Id, FixDate(date) AS Date, caseno, account,
+max(ts) as ts, uuid AS objectid
+FROM biopsyhead
+WHERE length(id) > 1
+
+GROUP BY id, date, caseno, account
+HAVING max(ts) > ?
+
+

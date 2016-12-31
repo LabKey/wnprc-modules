@@ -1,0 +1,36 @@
+1. Import data into mysql:
+
+    mysql -uroot -psasa
+    > \. WNPRC_records.sql
+
+2. Dump to ehr-study/datasets/tsv files:
+
+    cd tools
+    ./batchtsv.sh
+
+3. In labkey, create a new study or use an existing study.
+
+4. Point pipeline root at the ehr-study directory in this directory.
+
+5. Import the study!
+
+---------------
+Old steps no longer used, but kept for reference:
+
+2. Dump mysql tables. Must be writable by mysql user.
+
+    mkdir /tmp/primate-dump
+    chmod 777 /tmp/primate-dump
+    mysqldump -uroot -psasa --tab=/tmp/primate-dump --no-create-info colony --ignore-table=colony.tmp_table
+
+3. Compile FixTabs.java tool:
+
+    javac FixTabs.java
+
+4. Fixup and import data:
+
+    vi importdata.sh, edit paths
+    chmod 777 a target and source directories
+    sudo su postgres (authentication may not work otherwise)
+    ./importdata.sh
+

@@ -1,0 +1,13 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="full_snomed" tableDbType="TABLE">
+                <titleColumn>meaning</titleColumn>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+            </table>
+        </tables>
+    </metadata>
+</query>

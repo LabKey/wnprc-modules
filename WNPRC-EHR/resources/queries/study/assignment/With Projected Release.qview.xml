@@ -1,0 +1,42 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Id/Dataset/Demographics/gender">
+            <properties>
+                <property name="columnTitle" value="Gender"/>
+            </properties>
+        </column>
+        <column name="project"/>
+        <column name="project/protocol">
+            <properties>
+                <property name="columnTitle" value="Protocol"/>
+            </properties>
+        </column>
+        <column name="project/title">
+            <properties>
+                <property name="columnTitle" value="Title"/>
+            </properties>
+        </column>
+        <column name="project/avail">
+            <properties>
+                <property name="columnTitle" value="Project Avail"/>
+            </properties>
+        </column>
+        <column name="project/inves">
+            <properties>
+                <property name="columnTitle" value="Investigator"/>
+            </properties>
+        </column>
+        <column name="date"/>
+        <column name="enddate"/>
+        <column name="projectedRelease"/>
+        <column name="qcstate" />
+        <column name="taskid" />
+    </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

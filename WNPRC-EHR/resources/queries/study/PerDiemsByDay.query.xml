@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="PerDiems" tableDbType="NOT_IN_DB">
+
+            </table>
+        </tables>
+    </metadata>
+</query>

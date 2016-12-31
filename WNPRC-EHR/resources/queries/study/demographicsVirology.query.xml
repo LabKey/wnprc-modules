@@ -1,0 +1,29 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsVirology" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="numPosResults">
+                        <columnTitle>Number of Positive Results</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Virology Results&amp;
+                            query.Id~eq=${Id}
+                        </url>
+                    </column>
+                    <column columnName="PositivePathogens">
+                        <columnTitle>Pathogens Tested Positive</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Virology Results&amp;
+                            query.Id~eq=${Id}
+                        </url>
+                    </column>
+                </columns>
+            <titleColumn>numResults</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

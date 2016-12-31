@@ -1,0 +1,39 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Feeding" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=Feeding&amp;lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="type">
+                        <columnTitle>Type of Chow</columnTitle>
+                    </column>
+                    <column columnName="amount">
+                    </column>
+                    <column columnName="modified">
+                        <columnTitle>Date Record Last Changed</columnTitle>
+                    </column>
+                    <column columnName="modifiedby">
+                        <columnTitle>Last Changed By</columnTitle>
+                    </column>
+                    <column columnName="date">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="project">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="account">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="performedby">
+                        <columnTitle>Entered By</columnTitle>
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

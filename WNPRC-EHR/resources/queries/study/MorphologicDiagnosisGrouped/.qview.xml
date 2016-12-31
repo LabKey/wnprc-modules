@@ -1,0 +1,31 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+  <columns>
+      <column name="Id"/>
+      <column name="date"/>
+      <column name="caseno" />
+      <column name="seq1"/>
+      <column name="diagnosis"/>
+      <column name="tissue"/>
+      <column name="tissue_qualifier"/>
+      <column name="severity"/>
+      <column name="duration"/>
+      <column name="distribution"/>
+      <column name="distribution2"/>
+      <column name="inflammation"/>
+      <column name="inflammation2"/>
+      <column name="etiology"/>
+      <column name="process"/>
+      <column name="process2"/>
+      <column name="qcstate"/>
+      <!--<column name="code/code">-->
+          <!--<properties>-->
+              <!--<property name="columnTitle" value="SNOMED Code"/>-->
+          <!--</properties>-->
+      <!--</column>-->
+  </columns>
+   <sorts>
+       <sort column="id" />
+       <sort column="date" />
+       <sort column="seq1" />
+   </sorts>
+</customView>

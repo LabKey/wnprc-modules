@@ -1,0 +1,7 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart" title="WNPRC MHC Navigation">
+   <view name="mhc_main"/>
+   <locations>
+		<location name="right"/>
+		<!--<location name="menu"/>-->
+   </locations>
+</webpart>

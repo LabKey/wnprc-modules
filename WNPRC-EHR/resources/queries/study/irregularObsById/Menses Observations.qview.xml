@@ -1,0 +1,27 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+  <columns>
+      <column name="room"/>
+      <column name="cage"/>
+      <column name="Id"/>
+      <column name="date"/>
+      <column name="userid"/>
+      <!--<column name="feces"/>-->
+      <column name="menses"/>
+      <column name="behavior"/>
+      <column name="breeding"/>
+      <!--<column name="other"/>-->
+      <!--<column name="tlocation"/>-->
+      <!--<column name="remark"/>-->
+      <column name="otherbehavior"/>
+      <column name="qcstate" />
+      <column name="taskid" />
+  </columns>
+   <sorts>
+       <sort column="room"/>
+       <sort column="cage"/>
+   </sorts>
+   <filters>
+        <filter column="menses" operator="isnonblank" />
+       <filter column="isIrregular" operator="eq" value="true"/>
+   </filters>
+</customView>

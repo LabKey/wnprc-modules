@@ -1,0 +1,119 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="histology" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="participantid">
+                        <columnTitle>Participant ID</columnTitle>
+                        <description>Participant identifier</description>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Date</columnTitle>
+                        <nullable>false</nullable>
+                        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                    </column>
+                    <column columnName="project">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="slideNum">
+                      <columnTitle>Slide Number</columnTitle>
+                    </column>
+                    <column columnName="tissue">
+                      <columnTitle>Organ/Tissue</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="diagnosis">
+                      <columnTitle>Diagnosis</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="stain">
+                      <columnTitle>Stain</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>histology_stain</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="remark">
+                        <columnTitle>Histology Description</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+                        <inputType>textarea</inputType>
+                    </column>
+                    <column columnName="description">
+                        <columnTitle>Description</columnTitle>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <shownInDetailsView>false</shownInDetailsView>
+                        <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+                        <isHidden>true</isHidden>
+                        <inputType>textarea</inputType>
+                    </column>
+                    <column columnName="objectid">
+                        <columnTitle>Key</columnTitle>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <shownInDetailsView>false</shownInDetailsView>
+                        <isHidden>true</isHidden>
+                        <!--<isAutoInc>true</isAutoInc>-->
+                        <!--<isKeyField>true</isKeyField>-->
+                    </column>
+                    <column columnName="parentid">
+                      <columnTitle>Parent Id</columnTitle>
+                      <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="trimdate">
+                        <columnTitle>Trim Date</columnTitle>
+                    </column>
+                    <column columnName="trim_remarks">
+                        <columnTitle>Trim Remarks</columnTitle>
+                    </column>
+                    <column columnName="trimmed_by">
+                        <columnTitle>Trimmed By</columnTitle>
+                    </column>
+                    <column columnName="pathologist">
+                        <columnTitle>Pathologist</columnTitle>
+                    </column>
+                    <column columnName="qualifier">
+                      <columnTitle>Qualifier</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed_qualifiers</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="container_type">
+                      <columnTitle>Container Type</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>container_types</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                </columns>
+                <tableTitle>Histology</tableTitle>
+                <description>Histology</description>
+            </table>
+        </tables>
+    </metadata>
+</query>

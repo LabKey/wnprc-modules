@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+_ = require('underscore');
+XPages = require('./lib/Pages');
+XTestSuites = require('./lib/TestSuites');
+
+require('nightwatch/bin/runner.js');
+
+BASE_URL = 'http://localhost:8080/labkey/';

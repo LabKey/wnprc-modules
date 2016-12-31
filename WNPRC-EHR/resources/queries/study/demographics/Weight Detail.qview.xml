@@ -1,0 +1,82 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Id/curLocation/area">
+            <properties>
+                <property name="columnTitle" value="Area"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/room">
+            <properties>
+                <property name="columnTitle" value="Room"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/cage">
+            <properties>
+                <property name="columnTitle" value="Cage"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/cond">
+            <properties>
+                <property name="columnTitle" value="Condition"/>
+            </properties>
+        </column>
+        <column name="gender"/>
+        <!--<column name="Dataset/Demographics/Status">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Status"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="calculated_status"/>
+        <column name="Id/activeAssignments/availability">
+            <properties>
+                <property name="columnTitle" value="Avail"/>
+            </properties>
+        </column>
+        <column name="hold"/>
+        <!--<column name="Dataset/Demographics/Origin">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Origin"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <!--<column name="Dataset/Demographics/Birth">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Birth"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <!--<column name="Dataset/Demographics/Death">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Death"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="Id/MostRecentWeight/MostRecentWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentWeight/MostRecentWeightDate">
+            <properties>
+                <property name="columnTitle" value="Weight Date"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentWeight/DaysSinceWeight">
+            <properties>
+                <property name="columnTitle" value="Days Since Weight"/>
+            </properties>
+        </column>
+        <column name="medical"/>
+        <!--<column name="Dataset/Demographics/v_status">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Viral Status"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+    </columns>
+    <filters>
+        <filter column="calculated_status" operator="eq" value="Alive"/>
+    </filters>
+    <sorts>
+        <sort column="Id/curLocation/room" descending="false"/>
+        <sort column="Id/curLocation/cage" descending="false"/>
+        <sort column="Id" descending="false"/>
+    </sorts>
+</customView>

@@ -1,0 +1,75 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Id/curLocation/room">
+            <properties>
+                <property name="columnTitle" value="Room"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/cage">
+            <properties>
+                <property name="columnTitle" value="Cage"/>
+            </properties>
+        </column>
+        <!--<column name="Id/curLocation/cond">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Condition"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="gender"/>
+        <!--<column name="Dataset/Demographics/Status">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Status"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="calculated_status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <!--<column name="Id/activeAssignments/availability">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Avail"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="Id/MostRecentTB/MostRecentTBDate">
+            <properties>
+                <property name="columnTitle" value="Last TB Date"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentTB/MonthsSinceLastTB">
+            <properties>
+                <property name="columnTitle" value="Months Since TB Test"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentTB/eyeTested">
+            <properties>
+                <property name="columnTitle" value="Eye Last Tested"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentTB/24H">
+            <properties>
+                <property name="columnTitle" value="24H"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentTB/48H">
+            <properties>
+                <property name="columnTitle" value="48H"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentTB/72H">
+            <properties>
+                <property name="columnTitle" value="72H"/>
+            </properties>
+        </column>
+    </columns>
+    <filters>
+        <filter column="calculated_status" operator="eq" value="Alive"/>
+        <filter column="Id/MostRecentTB/MonthsSinceLastTB" operator="gt" value="4"/>
+    </filters>
+    <sorts>
+        <sort column="Id/curLocation/room" descending="false"/>
+        <sort column="Id/curLocation/cage" descending="false"/>
+        <sort column="Id" descending="false"/>
+    </sorts>
+</customView>

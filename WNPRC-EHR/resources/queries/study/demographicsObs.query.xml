@@ -1,0 +1,28 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsObs" tableDbType="NOT_IN_DB">
+                <pkColumnName>Id</pkColumnName>
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="previousObs">
+                        <columnTitle>Recent Obs</columnTitle>
+                        <inputType>textarea</inputType>
+                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                            <!--query.queryName=irregularObsById&amp;-->
+                            <!--query.Id~eq=${Id}-->
+                            <!--&lt;!&ndash;query.date~dateeq=${yesterday}&ndash;&gt;-->
+                        <!--</url>-->
+                    </column>
+                    <column columnName="yesterday">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            <titleColumn>previousObs</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

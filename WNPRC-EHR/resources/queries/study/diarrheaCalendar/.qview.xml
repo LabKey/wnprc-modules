@@ -1,0 +1,7 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <sorts>
+       <sort column="Id"/>
+       <sort column="Year" descending="true"/>
+       <sort column="monthNum" descending="true"/>
+   </sorts>
+</customView>

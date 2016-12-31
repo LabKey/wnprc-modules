@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasets metaDataFile="datasets_metadata.xml" xmlns="http://labkey.org/study/xml">
+  <datasets>
+    <dataset name='cageObs' id='5003' category="Clinical" showByDefault="false"/>
+
+
+
+  </datasets>
+</datasets>
+

@@ -1,0 +1,13 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="housingRoommates" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="numRoommates">
+                        <columnTitle># Cagemates</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

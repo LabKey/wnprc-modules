@@ -1,0 +1,28 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="id" />
+        <column name="date" />
+        <column name="enddate" />
+        <column name="project" />
+        <column name="restraint" />
+        <column name="restraintCode" />
+        <column name="restraintDuration"/>
+        <column name="taskid" />
+        <column name="taskid/title">
+            <properties>
+                <property name="columnTitle" value="Title"/>
+            </properties>
+        </column>
+        <column name="taskid/qcstate">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+    </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+  <!--<filters>-->
+      <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+  <!--</filters>-->
+</customView>

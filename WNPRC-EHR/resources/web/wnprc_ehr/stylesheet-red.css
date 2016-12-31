@@ -1,0 +1,1293 @@
+
+/*10.3 red theme:*/
+
+/*alternate red: B70101*/
+
+/*Changes:*/
+
+/*gold:*/
+
+/*#89A1B4 -> CC9900*/
+
+/*light red*/
+
+/*dae1e6 -> FBF4EA*/
+
+/* EBF4FF ->FBF4EA*/
+
+/*light red:*/
+
+ /*e0e6ea -> FBF4EA*/
+
+/*dark red*/
+
+ /*126495 -> 900*/
+
+ /*5894B8 -> 900*/
+
+ /*#8DB2E3 -> CC9900*/
+
+ /*E7EFF4 -> FBF4EA*/
+
+
+
+ /*menu bar*/
+
+ /*DAE1E6 -> FBF4EA*/
+
+   /*possible change: on wp background: E7C995*/
+
+
+
+
+
+a, a:visited, .labkey-link, .labkey-link:visited
+
+{
+
+    color: #900;
+
+}
+
+ a:hover, a:visited:hover, .labkey-link:hover, .labkey-link:visited:hover
+
+{
+
+    color: #c90;
+
+}
+
+
+
+table#header
+
+{
+
+    border-bottom: 10px solid #900;
+
+}
+
+
+
+.labkey-header
+
+{
+
+    color: #900;
+
+}
+
+
+
+
+
+th.labkey-header a:hover {
+
+    color: #900;
+
+}
+
+
+
+.labkey-announcement-title a {
+
+	color:#900;
+
+}
+
+
+
+  /*Used across the site whenever there is a label with a colored background*/
+
+.labkey-form-label, tr td.labkey-form-label
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+.labkey-form-label-nowrap, tr td.labkey-form-label-nowrap {
+
+	background-color: #FBF4EA;
+
+}
+
+
+
+ /*Used for the new css menu buttons, which consist of a link (<a>)*/
+
+    /*or a span wrapped around an input for submit buttons*/
+
+.labkey-button-bar .labkey-button,
+
+.labkey-button-bar .labkey-menu-button,
+
+.labkey-button-bar .labkey-button:visited,
+
+.labkey-button-bar .labkey-menu-button:visited {
+
+    color: #900;
+
+    background-color: #FBF4EA;
+
+    border-color: #FBF4EA;
+
+}
+
+
+
+
+
+ /*this keeps the enabled button text blue*/
+
+a.labkey-menu-button
+
+{
+
+    color: #900;
+
+}
+
+
+
+a.labkey-button,
+
+a.labkey-button:visited {
+
+    color: #900;
+
+}
+
+
+
+a.labkey-button span,
+
+a.labkey-button:visited span {
+
+    color: #900;
+
+}
+
+
+
+a.labkey-button span
+
+{
+
+    color: #900;
+
+}
+
+
+
+td.labkey-app-button-bar-button a
+
+{
+
+    color:#900;
+
+}
+
+
+/* text link buttons with arrows */
+
+a.labkey-text-link, a.labkey-text-link:visited {
+    color: #900;
+    background: url(../../../../ehr/resources/web/ehr/images/arrow_link_button-red.jpg) top right no-repeat;
+    /*background: url(../_images/arrow_link_button-red.jpg)*/
+}
+
+a.labkey-text-link:hover {
+	color: #c90;
+    /*background: url(../_images/arrow_link_button_over-red.jpg) top right no-repeat;*/
+    background: url(../../../../ehr/resources/web/ehr/images/arrow_link_button_over-red.jpg) top right no-repeat;
+}
+
+
+
+ /*Used for full screen pages such as for login or upgrade*/
+
+.labkey-full-screen-background
+
+{
+
+    background-color: #FFFFFF;
+
+}
+
+
+
+.labkey-full-screen-table
+
+{
+
+    border: 5px solid #FBF4EA;
+
+}
+
+
+
+ /*This is used for the headers on data regions that highlight on mouseover and give a drop down*/
+
+/*of filter options when clicked*/
+
+th.labkey-col-header-filter, td.labkey-col-header-filter, tr.labkey-col-header-filter th
+
+{
+
+    color: #900;
+
+}
+
+
+
+.labkey-customview-item.x-view-over {
+
+    border-top: 1px solid #900;
+
+    border-bottom: 1px solid #900;
+
+}
+
+
+
+table.labkey-main
+
+{
+
+    background-color: #fffcf8;
+
+}
+
+
+
+ /*The side panel with the navigation and admin expandable menus*/
+
+td.labkey-site-nav-panel {
+
+    background-color: #fffcf8;
+
+    border-top: 3px solid #C90;
+
+    border-right: 1px solid #f1da94;
+
+}
+
+
+
+td.labkey-proj
+
+{
+
+    border-top: 3px solid #C90;
+
+}
+
+
+
+td.labkey-main-menu
+
+{
+
+    border-top:1px solid #CC9900;
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+table.labkey-expandable-nav
+
+{
+
+    background-color: #fffcf8;
+
+}
+
+.labkey-nav-page-header
+{
+    /*color: #900*/
+    color:#000000;
+}
+
+tr.labkey-nav-tree-row
+
+{
+
+    color: #900;
+
+}
+
+
+
+tr.labkey-nav-tree-row:hover
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+table#navBar
+
+{
+
+    background-color:#fffbf5;
+
+}
+
+
+
+table.labkey-wp
+
+{
+
+    width: 100%;
+
+    border-spacing: 0; border-collapse: collapse;
+
+    border: 5px solid #faf1e3;
+    /*border: 5px solid #E7C995;    */
+
+
+    /*border: 5px solid #900;*/
+
+}
+
+
+
+td.labkey-wp-body
+
+{
+
+    background: #FFFFFF;
+
+}
+
+
+
+tr.labkey-wp-header
+
+{
+
+    background-color: #faf1e3;
+    color:#900;
+    /*background-color: #E7C995;*/
+
+}
+
+
+
+.labkey-wp-header a:link, .labkey-wp-header a:visited
+
+{
+
+    color:#900;
+
+}
+
+.labkey-wp-header th
+{
+    /*color:#000000;*/
+    color:#900;
+}
+
+th.labkey-wp-title-left {
+
+    /*color: #900;*/
+    color:#000000;
+}
+
+th.labkey-wp-title-left a:hover {
+
+    color: #900;
+    /*color:#000000;*/
+}
+
+
+
+a.labkey-text-link, a.labkey-text-link:visited {
+
+    color: #900;
+
+}
+
+
+
+td.labkey-ms1-filter
+
+{
+
+    background: #FBF4EA;
+
+}
+
+
+
+.gwt-DialogBox .Caption {
+
+  background-color: #FBF4EA;
+
+}
+
+
+
+.gwt-MenuBar {
+
+  background-color: #FBF4EA;
+
+}
+
+
+
+.gwt-StackPanel .gwt-StackPanelItem {
+
+  background-color: #FBF4EA;
+
+}
+
+
+
+.x-panel-header {
+
+    background: #FBF4EA;
+
+}
+
+
+
+.x-grid3-hd-inner {
+
+    color: #900;
+
+}
+
+
+
+li.x-menu-item-active {
+
+	background:#FBF4EA none repeat scroll 0 0;
+
+}
+
+
+
+ /*Buttons*/
+
+.x-btn button {
+
+    color: #900;
+
+}
+
+
+
+.x-panel-tl {
+
+    border-top: 1px solid #FBF4EA;
+
+    border-bottom: 1px solid #FBF4EA;
+
+}
+
+
+
+.x-tree-node .x-tree-selected {
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+/*********** X-window ******/
+
+.x-window-tc {
+
+	background: #900;
+
+}
+
+.x-window-tl {
+
+	background: #900;
+
+}
+
+.x-window-tr {
+
+	background: #900;
+
+}
+
+.x-window-bl {
+
+	background: #900;
+
+}
+
+.x-window-br {
+
+	background: #900;
+
+}
+
+
+
+.x-window-footer {
+
+	border-bottom-color: #900;
+
+}
+
+.x-window-ml {
+
+	background: #900;
+
+}
+
+.x-window-mr {
+
+	background: #900;
+
+}
+
+
+
+.x-window-maximized .x-window-tc {
+
+	background: #900;
+
+}
+
+.x-panel-nofooter .x-panel-bc, .x-panel-nofooter .x-window-bc {
+
+	background: #900;
+
+}
+
+
+
+body .x-grid3 .x-grid3-row-selected {
+
+    border: 1px solid #900;
+
+    background: #FBF4EA !important;
+
+}
+
+
+
+ /*This tab has a bottom border so it looks like it is back*/
+
+td.labkey-tab, .labkey-tab {
+
+    background-color: #FBF4EA;
+
+    color: #900;
+
+}
+
+
+
+.labkey-tab a {
+
+    background-color: #FBF4EA;
+
+    color: #900;
+
+}
+
+
+
+.labkey-tab a:hover {
+
+    background-color: #FBF4EA;
+
+    color: #000;
+
+}
+
+
+
+li.labkey-tab-inactive a
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+ul.x-tab-strip-top li {
+
+	background-color: #FBF4EA;
+
+}
+
+
+
+.x-tab-strip span.x-tab-strip-text {
+
+	color: #900;
+
+}
+
+
+
+.x-grid3-hd-inner
+
+{
+
+    color: #900;
+
+}
+
+
+
+.x-toolbar
+
+{
+
+    background: #FBF4EA;
+
+}
+
+
+
+fieldset
+
+{
+
+    border: 1px solid #CC9900;
+
+}
+
+
+
+.labkey-app-bar
+
+{
+
+    border-top: 1px solid #CC9900;
+
+}
+
+
+
+/*.labkey-nav-bordered*/
+
+/*{*/
+
+    /*border: solid 1px #CC9900;*/
+
+/*}*/
+
+
+
+.labkey-data-region-header-container
+
+{
+
+    background-color: #E7EFF4;
+
+    border: 1px solid #CC9900;
+
+}
+
+.x-labkey-wp
+{
+    /*width: 100%;*/
+    border-spacing: 0; border-collapse: collapse;
+    border: 5px solid #faf1e3;
+}
+
+.labkey-customview-item.x-view-selected {
+
+    border-top: 1px solid #CC9900;
+
+    border-bottom: 1px solid #CC9900;
+
+}
+
+
+
+td.labkey-main-menu
+
+{
+
+    margin:4px;
+
+    padding:4px;
+
+    border-top:1px solid #CC9900;
+
+    background-color: #E7EFF4;
+
+    font-weight: normal;
+
+}
+
+
+
+.labkey-search-navresults
+
+{
+
+    padding-left:8px;
+
+    border-left:1px solid #CC9900;
+
+}
+
+
+
+#menuBarFolder_menu .labkey-expandable-nav
+
+{
+
+    border-left: 1px solid #CC9900;
+
+}
+
+
+
+.labkey-callout-tip {
+
+    border-left:1px dotted #CC9900;
+
+}
+
+
+
+.labkey-callout-tip-over {
+
+    background-color: #CC9900;
+
+}
+
+
+
+.gwt-DialogBox {
+
+  border: 8px solid #CC9900;
+
+  background-color: #FFFFFF;
+
+}
+
+
+
+.gwt-DialogBox .Caption {
+
+  background-color: #E7EFF4;
+
+  border: 1px solid #CC9900;
+
+}
+
+
+
+.gwt-HorizontalSplitter .Bar {
+
+  background-color: #CC9900;
+
+}
+
+
+
+.gwt-VerticalSplitter .Bar {
+
+  background-color: #CC9900;
+
+}
+
+
+
+.gwt-MenuBar {
+
+  background-color: #E7EFF4;
+
+  border: 1px solid #CC9900;
+
+}
+
+
+
+.gwt-MenuBar .gwt-MenuItem-selected {
+
+  background-color: #CC9900;
+
+}
+
+
+
+
+.x-panel-header {
+
+	border: 1px solid #CC9900;
+
+}
+
+
+
+.x-grid-group-hd {
+
+    border-color: #CC9900;
+
+}
+
+
+
+.x-menu {
+
+    border-color: #CC9900;
+
+}
+
+
+
+.extContainer .x-menu-item-active {
+
+    border:1px solid #CC9900;
+
+}
+
+
+
+td.labkey-tab-selected, .labkey-tab-selected {
+
+    border-top: solid 1px #CC9900;
+
+    border-left: solid 1px #CC9900;
+
+    border-right: solid 1px #CC9900;
+
+    border-bottom: solid 1px #ffffff;
+
+}
+
+
+
+.labkey-tab-selected a {
+
+    border-top: solid 1px #CC9900;
+
+    border-bottom: solid 1px #ffffff;
+
+}
+
+
+
+td.labkey-tab, .labkey-tab {
+
+    border: solid 1px #CC9900;
+
+    background-color: #e7eff4;
+
+}
+
+
+
+ /*This tab has a bottom border and its text is shaded so it looks like it is back and unselectable*/
+
+td.labkey-tab-inactive {
+
+    border:solid 1px #CC9900;
+
+}
+
+
+
+td.labkey-tab-content, .labkey-tab-content {
+
+    border-left: solid 1px #CC9900;
+
+    border-right: solid 1px #CC9900;
+
+    border-bottom: solid 1px #CC9900;
+
+}
+
+
+
+td.labkey-tab-space, .labkey-tab-space
+
+{
+
+    border-bottom: 1px solid #CC9900;
+
+}
+
+
+
+ /*styles used for TabStripView tabs*/
+
+ul.labkey-tab-strip
+
+{
+
+    /*border-bottom : 1px solid #CC9900;*/
+
+}
+
+
+
+ul.labkey-tab-strip a
+
+{
+
+    border-top : 1px solid #CC9900;
+
+    border-right : 1px solid #CC9900;
+
+    border-left : 1px solid #CC9900;
+
+}
+
+
+
+.labkey-tab-strip-spacer
+
+{
+
+	border-left : 1px solid #CC9900;
+
+	border-right : 1px solid #CC9900;
+
+}
+
+
+
+.labkey-tab-strip-content
+
+{
+
+	border: 1px solid #CC9900;
+
+}
+
+
+
+.gwt-TabPanelBottom {
+
+	border: 1px solid #CC9900;
+
+}
+
+
+
+.gwt-TabBar .gwt-TabBarItem {
+
+  border-top: 1px solid #CC9900;
+
+  border-left: 1px solid #CC9900;
+
+  border-right: 1px solid #CC9900;
+
+}
+
+
+
+.x-tab-panel-body {
+
+    border-color: #CC9900;
+
+}
+
+
+
+ul.x-tab-strip-top li {
+
+    border-top:1px solid #CC9900;
+
+    border-right:1px solid #CC9900;
+
+    border-left:1px solid #CC9900;
+
+}
+
+
+
+.x-tab-panel-header-plain .x-tab-strip-spacer,
+
+.x-tab-panel-footer-plain .x-tab-strip-spacer,
+
+.x-tab-panel-header .x-tab-strip-spacer
+
+{
+
+    border-left:1px solid #CC9900;
+
+	border-right:1px solid #CC9900;
+
+}
+
+
+
+
+
+a.labkey-button,
+
+a.labkey-button:visited {
+
+    border: 1px solid #900;
+
+}
+
+
+
+ul.x-tab-strip-top {
+
+    border-bottom-color: #CC9900;
+
+}
+
+
+
+ e7eff4 changes
+
+.labkey-frame
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+.labkey-completion-highlight
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+th.labkey-col-header-filter:hover, td.labkey-col-header-filter:hover, tr.labkey-col-header-filter th:hover
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+.labkey-data-region-header-container
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+td.labkey-main-menu
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+tr.labkey-nav-tree-row:hover
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+td.labkey-ms1-filter
+
+{
+
+    background: #FBF4EA;
+
+}
+
+
+
+.gwt-DialogBox .Caption {
+
+  background-color: #FBF4EA;
+
+}
+
+
+
+.gwt-MenuBar {
+
+  background-color: #FBF4EA;
+
+}
+
+
+
+.gwt-StackPanel .gwt-StackPanelItem {
+
+  background-color: #FBF4EA;
+
+}
+
+
+
+.x-panel-header {
+
+    background: #FBF4EA;
+
+}
+
+
+
+li.x-menu-item-active {
+
+	background:#FBF4EA none repeat scroll 0 0;
+
+}
+
+
+
+.x-tree-node .x-tree-selected {
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+body .x-grid3 .x-grid3-row-selected {
+
+    background: #FBF4EA !important;
+
+}
+
+
+
+td.labkey-tab, .labkey-tab {
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+.labkey-tab a {
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+.labkey-tab a:hover {
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+li.labkey-tab-inactive a
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+
+
+ul.x-tab-strip-top li {
+
+	background-color: #FBF4EA;
+
+}
+
+
+
+.x-toolbar
+
+{
+
+    background: #FBF4EA;
+
+}
+
+
+
+div.labkey-button-bar,
+
+table.labkey-button-bar
+
+{
+
+    background-color: #FBF4EA;
+
+}
+
+.x-btn-tl, .x-btn-tr, .x-btn-tc, .x-btn-ml, .x-btn-mr, .x-btn-mc, .x-btn-bl, .x-btn-br, .x-btn-bc{
+	/*background-image:url(../gtheme/img/lkbtn-red.gif);*/
+    background-image:url(../../../../ehr/resources/web/ehr/images/lkbtn-red.gif);
+}
+
+.x-btn-with-menu .x-btn-center em {
+    /*background:transparent url(../gtheme/img/btn-arrow-red.gif) no-repeat scroll right 0;*/
+    /*TODO*/
+    background:transparent url(/images/btn-arrow-red.gif) no-repeat scroll right 0;
+}
+
+.labkey-button-bar .labkey-disabled-button,
+.labkey-button-bar .labkey-disabled-button:visited,
+.labkey-button-bar .labkey-disabled-button:hover
+.labkey-menu-button .labkey-disabled-button,
+.labkey-menu-button .labkey-disabled-button:visited,
+.labkey-menu-button .labkey-disabled-button:hover
+.labkey-disabled-menu-button,
+.labkey-disabled-menu-button:visited,
+.labkey-disabled-menu-button:hover {
+    background-color: #FBF4EA;
+    border: 1px solid #FBF4EA;
+}
+
+.ehr-nav-header.x-panel-header-noborder
+{
+    background: none;
+    border-bottom-width: 2px !important;
+    border-bottom-color: #CC9900 !important;
+    font-weight: bold
+}
+
+
+fieldset
+{
+    border: #CC9900;
+}
+
+legend
+{
+    border: #CC9900;
+    background-color: #FBF4EA;
+}
+
+.x-fieldset legend {
+    /*color: #990000;*/
+    color: #000000;
+    
+}

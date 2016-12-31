@@ -1,0 +1,7 @@
+<view xmlns="http://labkey.org/data/xml/view" title="What's New" frame="none">
+    <dependencies>
+        <dependency path="/wnprc_ehr/lib/markdownjs/markdown.js"></dependency>
+        <dependency path="/wnprc_ehr/lib/knockout"></dependency>
+        <dependency path="/wnprc_ehr/lib/jquery-ui"></dependency>
+    </dependencies>
+</view>

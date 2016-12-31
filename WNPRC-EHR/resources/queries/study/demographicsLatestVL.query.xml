@@ -1,0 +1,15 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsLatestVL" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+                <titleColumn>LatestViralLoad</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

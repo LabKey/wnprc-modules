@@ -1,0 +1,66 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="hematologyRefRange" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Lsid">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="resultOORIndicator">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="alertOnAbnormal">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="alertOnAny">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="alertStatus">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="status">
+                        <url>/query/executeQuery.view?schemaName=ehr_lookups&amp;
+                            query.queryName=lab_test_range&amp;
+                            query.type~eq=Immunology&amp;
+                            query.test~eq=${testid}&amp;
+                            query.species~eq=${species}&amp;
+                            query.age_class~eq=${ageClass}&amp;
+                            query.gender~eq=${gender}&amp;
+                        </url>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Low"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="High"/>
+                                </filters>
+                                <backgroundColor>E3170D</backgroundColor>
+                            </conditionalFormat>
+                            <!--<conditionalFormat>-->
+                                <!--<filters>-->
+                                    <!--<filter operator="eq" value="Normal"/>-->
+                                <!--</filters>-->
+                                <!--<backgroundColor>FBEC5D</backgroundColor>-->
+                            <!--</conditionalFormat>-->
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="species">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="ageClass">
+                        <isHidden>false</isHidden>
+                    </column>
+                    <column columnName="gender">
+                        <isHidden>true</isHidden>
+                    </column>                          
+                </columns>
+                <titleColumn>Status</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

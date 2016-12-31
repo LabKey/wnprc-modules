@@ -1,0 +1,14 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Dam"/>
+        <column name="Sire"/>
+        <column name="MaternalGranddam"/>
+        <column name="MaternalGrandsire"/>
+        <column name="PaternalGranddam"/>
+        <column name="PaternalGrandsire"/>        
+   </columns>
+   <sorts>
+       <sort column="Id" />
+   </sorts>
+</customView>

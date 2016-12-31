@@ -1,0 +1,20 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="gender"/>
+        <column name="Relationship"/>
+        <column name="Offspring"/>
+        <column name="Offspring/demographics/gender"/>
+        <column name="Offspring/demographics/calculated_status"/>
+        <column name="Offspring/demographics/birth"/>
+        <column name="Offspring/dataset/birth/type"/>
+        <column name="Offspring/dataset/birth/cond"/>
+        <column name="Offspring/parents/sire"/>
+        <column name="Offspring/parents/sireType"/>
+        <column name="Offspring/parents/dam"/>
+        <column name="Offspring/parents/damType"/>
+    </columns>
+   <sorts>
+       <sort column="Id" />
+   </sorts>
+</customView>

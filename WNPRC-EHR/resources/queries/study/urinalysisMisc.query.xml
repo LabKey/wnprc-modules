@@ -1,0 +1,14 @@
+    <query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="urinalysisMisc" tableDbType="TABLE">
+                <tableTitle>Urinalysis Misc Results</tableTitle>
+                <columns>
+                    <column columnName="resultOORIndicator">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

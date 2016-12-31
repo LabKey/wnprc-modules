@@ -1,0 +1,41 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+  <columns>
+      <!--<column name="Id/curLocation/room">-->
+        <!--<properties>-->
+            <!--<property name="columnTitle" value="Current Room"/>-->
+        <!--</properties>-->
+      <!--</column>-->
+      <!--<column name="Id/curLocation/cage">-->
+          <!--<properties>-->
+            <!--<property name="columnTitle" value="Current Cage"/>-->
+          <!--</properties>-->
+      <!--</column>-->
+      <column name="room"/>
+      <column name="cage"/>
+      <column name="Id"/>
+      <column name="date"/>
+      <column name="type"/>
+      <column name="userid"/>
+      <!--<column name="feces"/>-->
+      <!--<column name="menses"/>-->
+      <!--<column name="behavior"/>-->
+      <!--<column name="breeding"/>-->
+      <!--<column name="other"/>-->
+      <!--<column name="tlocation"/>-->
+      <column name="description"/>
+      <column name="remark"/>
+      <column name="qcstate" />
+  </columns>
+   <sorts>
+       <sort column="DateOnly" descending="true"/>
+       <sort column="room"/>
+       <sort column="cage"/>
+       <sort column="Id"/>
+   </sorts>
+  <filters>
+      <filter column="date" operator="dateeq" value="+0d" />
+      <!--<filter column="hasObs/hasObs" operator="eq" value="true"/>-->
+      <!--<filter column="date" operator="dategt" value="-1" />-->
+  </filters>
+
+</customView>

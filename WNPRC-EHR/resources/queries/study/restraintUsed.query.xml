@@ -1,0 +1,53 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="restraintUsed" tableDbType="TABLE">
+                <columns>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Begin Date</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="restraintCode">
+                        <columnTitle>Code</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="enddate">
+                        <columnTitle>End Date</columnTitle>
+                        <formatString>yyyy-MM-dd H:mm</formatString>
+                        <isHidden>false</isHidden>
+                    </column>
+                    <column columnName="restraint">
+                        <columnTitle>Restraint</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="restraintDuration">
+                        <columnTitle>Time Restrained</columnTitle>
+                    </column>
+                  <column columnName="taskid">
+                    <columnTitle>Task Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                  </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

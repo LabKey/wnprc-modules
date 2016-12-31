@@ -1,0 +1,3 @@
+This directory contains SQL scripts used to extract & transform data from the legacy mySQL system and import into LabKey.
+
+these are no longer necessary, as the mySQL system has been turned off.

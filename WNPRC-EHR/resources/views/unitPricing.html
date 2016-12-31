@@ -1,0 +1,249 @@
+<html>
+<head>
+
+<script type="text/javascript">
+
+    new LABKEY.QueryWebPart({
+        title: 'Assay Services Pricing',
+        schemaName: 'lists',
+        queryName: 'Hormones',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Assay_Services/Public',
+        allowChooseQuery: false,
+        allowChooseView: false,
+        showInsertNewButton: true,
+        showDeleteButton: true,
+        showDetailsColumn: true,
+        showUpdateColumn: true,
+        showRecordSelectors: true,
+        maxRows: 20,
+        frame: 'none',
+        buttonBarPosition: 'top'
+     }).render('assayPricing');
+
+    new LABKEY.WebPart({
+        partName: 'Wiki',
+        renderTo: 'assayWiki',
+        frame: 'none',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Assay_Services/Public',
+        partConfig: {name: 'Assay Services Description'}
+        }).render();
+
+//    new LABKEY.QueryWebPart({
+//        title: 'Scientific Protocol Implementation Pricing',
+//        schemaName: 'lists',
+//        queryName: 'cpi_pricing',
+//        containerPath: '/WNPRC/WNPRC_Units/Animal_Services/SPI/Public',
+//        allowChooseQuery: false,
+//        allowChooseView: false,
+//        showInsertNewButton: true,
+//        showDeleteButton: true,
+//        showDetailsColumn: true,
+//        showUpdateColumn: true,
+//        showRecordSelectors: true,
+//        frame: 'none',
+//        buttonBarPosition: 'top'
+//     }).render('cpiPricing');
+
+//    new LABKEY.WebPart({
+//        partName: 'Wiki',
+//        renderTo: 'cpiWiki',
+//        frame: 'none',
+//        containerPath: '/WNPRC/WNPRC_Units/Animal_Services/SPI/Public',
+//        partConfig: {name: 'Scientific Protocol Implementation Description'}
+//        }).render();
+
+    new LABKEY.QueryWebPart({
+        title: 'Immunology Services Pricing',
+        schemaName: 'lists',
+        queryName: 'immunology_pricing',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Immunology_Services/Public',
+        allowChooseQuery: false,
+        allowChooseView: false,
+        showInsertNewButton: true,
+        showDeleteButton: true,
+        showDetailsColumn: true,
+        showUpdateColumn: true,
+        showRecordSelectors: true,
+        frame: 'none',
+        buttonBarPosition: 'top'
+     }).render('immunologyPricing');
+
+    new LABKEY.WebPart({
+        partName: 'Wiki',
+        renderTo: 'immunologyWiki',
+        frame: 'none',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Immunology_Services/Public',
+        partConfig: {name: 'Immunology Services Description'}
+        }).render();
+
+    new LABKEY.QueryWebPart({
+        title: 'Genetics Services Pricing',
+        schemaName: 'lists',
+        queryName: 'genetics_pricing',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Genetics_Services/Public',
+        allowChooseQuery: false,
+        allowChooseView: false,
+        showInsertNewButton: true,
+        showDeleteButton: true,
+        showDetailsColumn: true,
+        showUpdateColumn: true,
+        showRecordSelectors: true,
+        frame: 'none',
+        buttonBarPosition: 'top'
+     }).render('geneticsPricing');
+
+    new LABKEY.WebPart({
+        partName: 'Wiki',
+        renderTo: 'geneticsWiki',
+        frame: 'none',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Genetics_Services/Public',
+        partConfig: {name: 'Genetics Services Description'}
+        }).render();
+
+    new LABKEY.QueryWebPart({
+        title: 'Virology Services Pricing',
+        schemaName: 'lists',
+        queryName: 'virology_pricing',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Virology_Services/Public',
+        allowChooseQuery: false,
+        allowChooseView: false,
+        showInsertNewButton: true,
+        showDeleteButton: true,
+        showDetailsColumn: true,
+        showUpdateColumn: true,
+        showRecordSelectors: true,
+        frame: 'none',
+        buttonBarPosition: 'top'
+     }).render('virologyPricing');
+
+    new LABKEY.WebPart({
+        partName: 'Wiki',
+        renderTo: 'virologyWiki',
+        frame: 'none',
+        containerPath: '/WNPRC/WNPRC_Units/Research_Services/Virology_Services/Public',
+        partConfig: {name: 'Virology Services Description'}
+        }).render();
+
+</script>
+</head>
+<body>
+Below is a summary of the services and pricing offered by each of the WNPRC Research Services Units, along with contact information for each.
+
+<p/>
+<ul>
+<li>
+<a href="#assay">
+    Assay Services
+</a>
+</li>
+<li>
+<a href="#genetics">
+    Genetics Services
+</a>
+</li>
+<li>
+<a href="#immunology">
+    Immunology Services
+</a>
+</li>
+<li>
+<a href="#virology">
+    Virology Services
+</a>
+</li>
+</ul>
+
+<p/>
+<a id="assay"></a>
+<table class="labkey-wp">
+<tbody>
+    <tr class="labkey-wp-header">
+        <th class="labkey-wp-title-left" title="Assay Services">Assay Services</th>
+        <th class="labkey-wp-title-right"></th>
+    </tr>
+    <tr>
+        <td>
+            <div id="assayWiki"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h3>Pricing For Services:</h3>
+            <div id="assayPricing" style="padding-left:10px"></div>
+        </td>
+    </tr>
+</tbody>
+</table>
+
+<p/>
+
+<p/>
+<a id="genetics"></a>
+<table class="labkey-wp">
+<tbody>
+    <tr class="labkey-wp-header">
+        <th class="labkey-wp-title-left" title="Genetics Services">Genetics Services</th>
+        <th class="labkey-wp-title-right"></th>
+    </tr>
+    <tr>
+        <td>
+            <div id="geneticsWiki"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h3>Pricing For Services:</h3>
+            <div id="geneticsPricing" style="padding-left:10px"></div>
+        </td>
+    </tr>
+</tbody>
+</table>
+<p/>
+
+<p/>
+<a id="immunology"></a>
+<table class="labkey-wp">
+<tbody>
+    <tr class="labkey-wp-header">
+        <th class="labkey-wp-title-left" title="Immunology Services">Immunology Services</th>
+        <th class="labkey-wp-title-right"></th>
+    </tr>
+    <tr>
+        <td>
+            <div id="immunologyWiki"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h3>Pricing For Services:</h3>
+            <div id="immunologyPricing" style="padding-left:10px"></div>
+        </td>
+    </tr>
+</tbody>
+</table>
+<p/>
+
+<p/>
+<a id="virology"></a>
+<table class="labkey-wp">
+<tbody>
+    <tr class="labkey-wp-header">
+        <th class="labkey-wp-title-left" title="Virology Services">Virology Services</th>
+        <th class="labkey-wp-title-right"></th>
+    </tr>
+    <tr>
+        <td>
+            <div id="virologyWiki"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h3>Pricing For Services:</h3>
+            <div id="virologyPricing" style="padding-left:10px"></div>
+        </td>
+    </tr>
+</tbody>
+</table>
+</body>
+
+</html>

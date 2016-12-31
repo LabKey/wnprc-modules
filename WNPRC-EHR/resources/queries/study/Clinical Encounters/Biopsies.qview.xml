@@ -1,0 +1,26 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="enddate"/>
+        <column name="caseno"/>
+        <column name="project"/>
+        <column name="account"/>
+        <!--<column name="type"/>-->
+        <!--<column name="title"/>-->
+        <!--<column name="major"/>-->
+        <column name="performedby"/>
+
+        <column name="remark"/>
+        <column name="history" />
+        <column name="qcstate" />
+        <column name="taskid" />
+        <column name="requestid" />
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="type" operator="eq" value="Biopsy"/>
+    </filters>
+</customView>

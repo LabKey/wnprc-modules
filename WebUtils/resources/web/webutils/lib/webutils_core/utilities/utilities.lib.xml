@@ -1,0 +1,32 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library>
+        <!-- classify requires underscore -->
+        <script path="/webutils/lib/webutils_core/utilities/classify.js"/>
+
+        <!-- fetch requires rsvp.js for promises in older browsers -->
+        <script path="/webutils/lib/webutils_core/utilities/fetch.js"/>
+
+        <!-- jquery-customization and jQuery-BlockUI require jquery to be there, of course -->
+        <script path="/webutils/lib/webutils_core/utilities/jquery-customization.js"/>
+        <script path="/webutils/lib/webutils_core/utilities/jquery-blockui.js"/>
+
+        <!-- toastr and typeahead require jQuery as well -->
+        <script path="/webutils/lib/webutils_core/utilities/toastr.js"/>
+        <script path="/webutils/lib/webutils_core/utilities/toastr.css"/>
+        <script path="/webutils/lib/webutils_core/utilities/typeahead.bundle.js"/>
+        <script path="/webutils/lib/webutils_core/utilities/typeahead.css"/>
+
+
+        <!-- The following have no dependencies -->
+        <script path="/webutils/lib/webutils_core/utilities/webutils-init.js"/>
+        <script path="/webutils/lib/webutils_core/utilities/markdown.js"/>
+        <script path="/webutils/lib/webutils_core/utilities/moment.js"/>
+        <script path="/webutils/lib/webutils_core/utilities/URI.js"/>
+    </library>
+    <dependencies>
+        <dependency path="/webutils/lib/webutils_core/utilities/qunit/qunit"/>
+        <dependency path="/webutils/lib/webutils_core/utilities/rsvp/rsvp"/>
+        <dependency path="/webutils/lib/webutils_core/utilities/underscore/underscore"/>
+        <dependency path="/internal/jQuery"/>
+    </dependencies>
+</libraries>

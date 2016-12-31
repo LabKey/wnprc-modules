@@ -1,0 +1,12 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <properties>
+        <propertyDescriptor name="PerformUnitTestingPerPage">
+            <defaultValue>false</defaultValue>
+            <canSetPerContainer>false</canSetPerContainer>
+            <description>If set to the case insensitive string 'true', QUnit tests will be run and displayed on all JSP pages.  This shouldn't be set in production.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+    </properties>
+</module>

@@ -1,0 +1,9 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <sorts>
+        <sort column="category" />
+        <sort column="code" />
+    </sorts>
+    <filters>
+        <filter column="datedisabled" operator="isblank" value=""/>
+    </filters>
+</customView>

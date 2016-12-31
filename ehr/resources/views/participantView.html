@@ -1,0 +1,18 @@
+<script src="<%= contextPath %>/ehr/lib/underscore.js"></script>
+<script src="<%= contextPath %>/ehr/lib/underscore-string.js"></script>
+<script src="<%= contextPath %>/ehr/lib/knockout.js"></script>
+<script src="<%= contextPath %>/ehr/lib/knockout-mapping.js"></script>
+<script type="application/javascript">
+    var require = {
+        paths: {
+            "text":              "<%= contextPath %>/ehr/lib/require-text", // Make Text Plugin work
+            "classify":          "<%= contextPath %>/ehr/lib/classify",
+            "supersqlstore":     "<%= contextPath %>/ehr/lib/supersqlstore",
+            "pageapp":           "<%= contextPath %>/ehr/HousingAndAssignmentHistory"
+        },
+        waitSeconds: 0
+    };
+
+    webpartContext = <%=webpartContext%>;
+</script>
+<script src="<%= contextPath %>/ehr/lib/require.js" data-main="<%= contextPath %>/ehr/requirements-participantView"></script>

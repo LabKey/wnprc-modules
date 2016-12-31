@@ -1,0 +1,51 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="protocolProcedures" tableDbType="TABLE">
+              <insertUrl />
+              <importUrl />
+              <updateUrl />
+              <deleteUrl />
+              <tableTitle>IACUC Protocol Allowable Procedures</tableTitle>
+              <columns>
+                <column columnName="rowid">
+                  <columnTitle>Key</columnTitle>
+                  <nullable>false</nullable>
+                  <isKeyField>true</isKeyField>
+                  <isAutoInc>true</isAutoInc>
+                  <shownInInsertView>false</shownInInsertView>
+                  <shownInUpdateView>false</shownInUpdateView>
+                  <shownInDetailsView>false</shownInDetailsView>
+                </column>
+                <column columnName="protocol">
+                  <columnTitle>IACUC Protocol</columnTitle>
+                  <nullable>false</nullable>
+                    <fk>
+                      <fkDbSchema>ehr</fkDbSchema>
+                      <fkTable>protocol</fkTable>
+                      <fkColumnName>protocol</fkColumnName>
+                    </fk>
+                </column>
+                <column columnName="code">
+                  <columnTitle>SNOMED Code</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>snomed</fkTable>
+                      <fkColumnName>code</fkColumnName>
+                    </fk>
+                </column>
+                <column columnName="procedureName">
+                  <columnTitle>Procedure Name</columnTitle>
+                </column>
+                <column columnName="allowed">
+                  <columnTitle>Number Allowed</columnTitle>
+                </column>
+                <column columnName="frequency">
+                  <columnTitle>Frequency</columnTitle>
+                </column>
+              </columns>
+              <pkColumnName>rowid</pkColumnName>
+            </table>
+        </tables>
+    </metadata>
+</query>

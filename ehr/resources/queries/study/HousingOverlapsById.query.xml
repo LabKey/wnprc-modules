@@ -1,0 +1,62 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="HousingOverlapsById" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <tableTitle>Housing Overlaps</tableTitle>
+                <description>This query identifies distinct animal IDs that overlapped with given housing records, accounting for date and time</description>
+                <tableUrl />
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Start Date</columnTitle>
+                    </column>
+                </columns>
+                <buttonBarOptions position="both" includeStandardButtons="false">
+                    <includeScript>ehr.context</includeScript>
+                    <includeScript>/ehr/studyButtons.js</includeScript>
+                    <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
+
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
+                    </item>
+                    <item text="Reports">
+                        <originalText>Reports</originalText>
+                    </item>
+                    <!--<item text="Insert New">-->
+                        <!--<originalText>Insert New</originalText>-->
+                    <!--</item>-->
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                    <item text="Insert">
+                        <originalText>Insert</originalText>
+                    </item>
+                    <item text="Import Bulk Data">
+                        <originalText>Import Bulk Data</originalText>
+                    </item>
+                    <item text="Paging">
+                        <originalText>Paging</originalText>
+                    </item>
+                    <item text="More Actions" insertPosition="end" requiresSelection="true">
+                        <item text="Jump To History">
+                            <onClick>
+                                EHR.DatasetButtons.historyHandler(dataRegion, dataRegionName, 'Housing');
+                            </onClick>
+                        </item>
+                        <item text="Return Distinct Values">
+                            <onClick>
+                                EHR.window.GetDistinctWindow.getDistinctHandler(dataRegionName, 'Housing');
+                            </onClick>
+                        </item>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

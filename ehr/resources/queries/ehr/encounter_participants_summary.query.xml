@@ -1,0 +1,27 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="encounter_participants_summary" tableDbType="TABLE">
+                <titleColumn>participants</titleColumn>
+                <tableTitle>Encounter Participants</tableTitle>
+                <columns>
+                    <column columnName="parentid">
+                        <nullable>false</nullable>
+                        <columnTitle>Encounter Id</columnTitle>
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>Clinical Encounters</fkTable>
+                          <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="participants">
+                        <columnTitle>Participants</columnTitle>
+                        <displayWidth>300</displayWidth>
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

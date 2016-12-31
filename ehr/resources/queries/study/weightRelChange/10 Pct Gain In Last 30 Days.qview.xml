@@ -1,0 +1,25 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="LatestWeightDate" />
+        <column name="LatestWeight" />
+        <column name="date" />
+        <column name="weight">
+          <properties>
+            <property name="columnTitle" value="Old Weight (kg)"/>
+          </properties>
+        </column>
+
+        <column name="PctChange" />
+        <column name="IntervalInDays" />
+   </columns>
+   <sorts>
+       <sort column="Id" />
+       <sort column="date" descending="true"/>
+   </sorts>
+    <filters>
+        <filter column="PctChange" operator="gte" value="10"/>
+        <filter column="date" operator="dategte" value="-30d" />
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    </filters>
+</customView>

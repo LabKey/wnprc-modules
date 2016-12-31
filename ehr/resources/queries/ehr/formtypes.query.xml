@@ -1,0 +1,20 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="formtypes" tableDbType="TABLE">
+                <columns>
+                    <!--<column columnName="formsections" wrappedColumnName="formtype">-->
+                        <!--<columnTitle>Form Sections</columnTitle>-->
+                        <!--<fk>-->
+                            <!--<fkDbSchema>ehr</fkDbSchema>-->
+                            <!--<fkTable>formpanelsections</fkTable>-->
+                            <!--<fkColumnName>formtype</fkColumnName>-->
+                            <!--<fkMultiValued>junction</fkMultiValued>-->
+                            <!--<fkJunctionLookup>rowid</fkJunctionLookup>-->
+                        <!--</fk>-->
+                    <!--</column>-->
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

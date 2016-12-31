@@ -1,0 +1,86 @@
+<script type="text/javascript">
+
+Ext4.onReady(function (){
+    if (!LABKEY.ActionURL.getParameter('room')){
+        alert('Must Provide Location');
+        return;
+    }
+
+    var webpart = <%=webpartContext%>;
+
+    var domSpec = [{
+        tag: 'div',
+        id :'cageDetails_' + webpart.wrapperDivId,
+        style: 'padding-bottom: 20px;'
+    },{
+        tag: 'div',
+        id :'activeAnimals_' + webpart.wrapperDivId,
+        style: 'padding-bottom: 20px;'
+    },{
+        tag: 'div',
+        id :'cageNotes_' + webpart.wrapperDivId,
+        style: 'padding-bottom: 20px;'
+    },{
+        tag: 'div',
+        id :'allAnimals_' + webpart.wrapperDivId
+    }];
+
+    var el = Ext4.get(webpart.wrapperDivId);
+    Ext4.DomHelper.append(el, domSpec);
+
+    var filterArray = [LABKEY.Filter.create('room', LABKEY.ActionURL.getParameter('room'), LABKEY.Filter.Types.EQUAL)];
+
+    if (LABKEY.ActionURL.getParameter('cage')){
+        filterArray.push(LABKEY.Filter.create('cage', LABKEY.ActionURL.getParameter('cage'), LABKEY.Filter.Types.EQUAL));
+    }
+
+    if (LABKEY.ActionURL.getParameter('cage')){
+        Ext4.create('LDK.panel.DetailsPanel', {
+            store: {
+                schemaName: 'ehr_lookups',
+                queryName: 'cage',
+                filterArray: filterArray
+            },
+            title: 'Cage Details',
+            renderTo: 'cageDetails_' + webpart.wrapperDivId,
+            showBackBtn: false
+        });
+    }
+    else {
+        LDK.Utils.getReadOnlyQWP({
+            title: 'Cage Details:',
+            schemaName: 'ehr_lookups',
+            queryName: 'cage',
+            filterArray: filterArray
+         }).render('cageDetails_' + webpart.wrapperDivId);
+    }
+
+    LDK.Utils.getReadOnlyQWP({
+        title: 'All Animals Ever Housed',
+        schemaName: 'study',
+        queryName: 'Housing',
+        filterArray: filterArray,
+        sort: '-Date'
+     }).render('allAnimals_' + webpart.wrapperDivId);
+
+
+    LDK.Utils.getReadOnlyQWP({
+        title: 'Cage Observations For This Location',
+        schemaName: 'ehr',
+        queryName: 'cage_observations',
+        filterArray: filterArray,
+        sort: '-Date'
+     }).render('cageNotes_' + webpart.wrapperDivId);
+
+    var filterArray2 = [].concat(filterArray);
+    filterArray2.push(LABKEY.Filter.create('enddate', null, LABKEY.Filter.Types.ISBLANK));
+    LDK.Utils.getReadOnlyQWP({
+        title: 'Animals Currently Housed',
+        schemaName: 'study',
+        queryName: 'Housing',
+        filterArray: filterArray2,
+        sort: '-Date'
+     }).render('activeAnimals_' + webpart.wrapperDivId);
+});
+
+</script>

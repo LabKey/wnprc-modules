@@ -1,0 +1,80 @@
+<script type="text/javascript">
+
+function unique(){
+    var input = document.getElementById('unique').value;
+    input = cleanSplit(input);
+
+    var output = Ext4.unique(input);
+    output.sort();
+
+    document.getElementById('uniqueTarget').value = output.join('\n');
+    document.getElementById('uniqueTargetTotal').innerHTML = ' '+output.length+' total';
+    document.getElementById('uniqueInputTotal').innerHTML = ' '+input.length+' total';
+}
+
+function compare(){
+    var input1 = document.getElementById('subtract1').value;
+    input1 = cleanSplit(input1);
+
+    var input2 = document.getElementById('subtract2').value;
+    input2 = cleanSplit(input2);
+    input1.sort();
+
+    var intersect = Ext4.Array.intersect(input1, input2);
+    var output = Ext4.Array.difference(input1, input2);
+    var output2 = Ext4.Array.difference(input2, input1);
+
+    document.getElementById('subtractTarget').value = output.join('\n');
+    document.getElementById('subtractTargetTotal').innerHTML = ' '+output.length+' total';
+
+    document.getElementById('subtractTarget2').value = output2.join('\n');
+    document.getElementById('subtractTargetTotal2').innerHTML = ' '+output2.length+' total';
+
+    document.getElementById('intersectTarget').value = intersect.join('\n');
+    document.getElementById('intersectTargetTotal').innerHTML = ' '+intersect.length+' total';
+
+    document.getElementById('subtractList1Total').innerHTML = ' '+input1.length+' total';
+    document.getElementById('subtractList2Total').innerHTML = ' '+input2.length+' total';
+
+}
+
+function cleanSplit(input){
+    input = input.replace(/[\s,;]+/g, ';');
+    input = input.replace(/(^;|;$)/g, '');
+    input = input.split(';');
+    input.sort();
+    return input;
+}
+
+</script>
+
+This page contains an several basic utilities to process lists of animal names (can actually be used on anything).
+<p/>
+To use, simply cut/paste or type a list of IDs into the box(es) on the left.  Hit the arrow to process.  Results will appear on the right.
+<p/>
+<h2>Return Unique Values</h2>
+
+<table>
+<tr>
+    <td>List 1:<span id="uniqueInputTotal"></span><br><textarea rows="10" cols="30" id="unique"></textarea></td>
+    <td><button id="uniqueButton" onclick=unique()>--></button></td>
+    <td>Unique Values:<span id="uniqueTargetTotal"></span><br><textarea rows="10" cols="30" id="uniqueTarget"></textarea></td>
+</tr>
+</table>
+
+<p/>
+<hr>
+<p/>
+
+<h2>Compare Lists</h2>
+
+<table>
+<tr>
+    <td>List 1:<span id="subtractList1Total"></span><br><textarea rows="10" cols="30" id="subtract1"></textarea></td>
+    <td>List 2:<span id="subtractList2Total"></span><br><textarea rows="10" cols="30" id="subtract2"></textarea></td>
+    <td><button id="compareButton" onclick=compare()>--></button></td>
+    <td>Shared IDs:<span id="intersectTargetTotal"></span><br><textarea rows="10" cols="30" id="intersectTarget"></textarea></td>
+    <td>Present In List 1, but not List 2:<span id="subtractTargetTotal"></span><br><textarea rows="10" cols="30" id="subtractTarget"></textarea></td>
+    <td>Present In List 2, but not List 1:<span id="subtractTargetTotal2"></span><br><textarea rows="10" cols="30" id="subtractTarget2"></textarea></td>
+</tr>
+</table>

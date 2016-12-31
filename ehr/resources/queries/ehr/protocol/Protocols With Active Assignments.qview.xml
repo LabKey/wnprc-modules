@@ -1,0 +1,8 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <filters>
+       <filter column="activeAnimals/TotalActiveAnimals" operator="gt" value="0"/>
+   </filters>
+   <sorts>
+       <sort column="protocol" />
+   </sorts>
+</customView>

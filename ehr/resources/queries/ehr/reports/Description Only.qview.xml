@@ -1,0 +1,14 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
+   <columns>
+       <column name="category"/>
+       <column name="reporttitle" />
+        <column name="description"/>
+   </columns>
+   <filters>
+       <filter column="visible" operator="eq" value="true" />
+   </filters>
+   <sorts>
+       <sort column="category" />
+       <sort column="reporttitle"/>
+   </sorts>
+</customView>

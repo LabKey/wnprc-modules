@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Id/dataset/demographics/species">
+            <properties>
+                <property name="columnTitle" value="species"/>
+            </properties>
+        </column>
+        <column name="Category"/>
+        <column name="date"/>
+        <column name="Year"/>
+    </columns>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

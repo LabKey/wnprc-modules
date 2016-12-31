@@ -1,0 +1,83 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="chemistryResults" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="project">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="testid">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Test Id</columnTitle>
+                        <displayWidth>120</displayWidth>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>chemistry_tests</fkTable>
+                            <fkColumnName>testid</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="resultOORIndicator">
+
+                    </column>
+                    <column columnName="result">
+                        <columnTitle>Result</columnTitle>
+                    </column>
+                    <column columnName="units">
+                        <columnTitle>Units</columnTitle>
+                        <displayWidth>60</displayWidth>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>lab_test_units</fkTable>
+                            <fkColumnName>units</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="qualresult">
+                        <columnTitle>Qualitative Result</columnTitle>
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="method">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Method</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>chemistry_method</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="refRange" wrappedColumnName="lsid">
+                        <columnTitle>Ref Range</columnTitle>
+                        <isUnselectable>true</isUnselectable>
+                        <isHidden>false</isHidden>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>chemistryRefRange</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>chemistryRuns</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="runid">
+                        <isHidden>false</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

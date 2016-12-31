@@ -1,0 +1,18 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="All Housing Types">
+    <columns>
+        <column name="Id"/>
+        <column name="RoommateId"/>
+        <column name="room"/>
+        <column name="cage"/>
+        <column name="RoommateStart"/>
+        <column name="RoommateEnd"/>
+        <column name="DaysCoHoused"/>
+        <column name="startDate"/>
+        <column name="removalDate"/>
+        <column name="duration"/>
+    </columns>
+   <sorts>
+       <sort column="Id" descending="true"/>
+       <sort column="RoommateStart" descending="true"/>
+   </sorts>
+</customView>

@@ -1,0 +1,50 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="weightPctChange" tableDbType="NOT_IN_DB">
+                <tableTitle>Weight Change, Relative to Previous Weight</tableTitle>
+                <description>This query shows the percent change of each weight, relative to the weight immediately prior to it</description>
+                <columns>
+                    <column columnName="lsid">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="CurWeight">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=weight&amp;
+                            query.id~eq=${id}&amp;
+                            query.sort=-date
+                        </url>
+                    </column>
+                    <column columnName="PrevWeight">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=weight&amp;
+                            query.date~eq=${PrevDate}&amp;
+                            query.sort=-date
+                        </url>
+                    </column>
+                    <column columnName="PctChange">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=weight&amp;
+                            query.lsid~eq=${lsid}&amp;
+                        </url>
+                        <columnTitle>Percent Change</columnTitle>
+                    </column>
+                    <column columnName="Interval">
+                        <columnTitle>Interval (Days)</columnTitle>
+                    </column>
+                    <column columnName="LatestWeight">
+                        <columnTitle>Current Weight (kg)</columnTitle>
+                    </column>
+                    <column columnName="LatestWeightDate">
+                        <columnTitle>Weight Date</columnTitle>
+                    </column>
+                    <!--<column columnName="qcstate">-->
+                        <!--<isHidden>true</isHidden>-->
+                    <!--</column>-->
+                </columns>
+                <titleColumn>PctChange</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,40 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="CreatedBy"/>
+        <column name="Date"/>
+        <!--<column name="project"/>-->
+        <!--<column name="container"/>-->
+        <column name="IntKey1"/>
+        <column name="lsid_pointer/Id">
+            <properties>
+                <property name="columnTitle" value="Id"/>
+            </properties>
+        </column>
+        <column name="lsid_pointer/date">
+            <properties>
+                <property name="columnTitle" value="Record Date"/>
+            </properties>
+        </column>
+        <column name="lsid_pointer/description">
+            <properties>
+                <property name="columnTitle" value="Description"/>
+            </properties>
+        </column>
+        <column name="Comment" />
+        <column name="oldValues">
+            <properties>
+                <property name="columnTitle" value="Old Values"/>
+            </properties>
+        </column>
+
+        <column name="newValues">
+            <properties>
+                <property name="columnTitle" value="New Values"/>
+            </properties>
+        </column>
+        <column name="DataChanges"/>
+    </columns>
+   <sorts>
+       <sort column="Date" descending="true"/>
+   </sorts>
+</customView>

@@ -1,0 +1,21 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="protocol" tableDbType="TABLE">
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="protocol">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>protocol</fkTable>
+                            <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,12 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="area"/>
+       <column name="description"/>
+   </columns>
+   <sorts>
+       <sort column="area" descending="false"/>
+   </sorts>
+   <!--<filters>-->
+       <!--<filter column="disabled" operator="isblank"/>-->
+   <!--</filters>-->
+</customView>

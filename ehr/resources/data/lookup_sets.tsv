@@ -1,0 +1,73 @@
+setname	label	keyfield	titleColumn
+alopecia_cause	Alopecia Cause	value	
+alopecia_score	Alopecia Score	value	
+avail_codes	Availability Code Field Values	value	
+bacteriology_method	Bacteriology Method Field Values	value	
+bacteriology_sensitivity	Bacteriology Sensitivity Field Values	value	
+bcs_score	BCS Store Field Values	value	title
+behavior_category	Behavior Category Field Values	value	
+biopsy_type	Biopsy Type Field Values	value	
+birth_condition	Birth Condition Field Values	value	value
+birth_type	Birth Type Field Values	value	title
+blood_billed_by	Blood Billed By Field Values	value	title
+blood_code_prefixes	Blood Code Prefix Field Values	value	
+chemistry_method	Chemistry Method Field Values	value	
+chow_types	Chow Types Field Values	value	
+clinpath_collection_method	Clinpath Collection Method Field Values	value	
+clinpath_sampletype	Clinpath Sample Type Field Values	value	
+clinpath_types	Clinpath Type Field Values	value	
+clinremarks_category	Clinremarks Category Field Values	value	
+container_types	Container Types Field Values	value	
+death_cause	Death Cause Field Values	value	
+death_codes	Death Codes Field Values	value	title
+death_manner	Manner of Death Field Values	value	
+dental_gingivitis	Dental Gingivitis Field Values	value	
+dental_jaw	Dental Jaw Field Values	value	
+dental_priority	Dental Priority Field Values	value	
+dental_side	Dental Side Field Values	value	
+dental_status	Dental Status Field Values	value	
+dental_tartar	Dental Tartar Field Values	value	
+dental_teeth	Dental Teeth Field Values	value	
+drug_categories	Drug Category Field Values	value	
+encounter_types	Encounter Types Field Values	value	
+hematology_method	Hematology Method Field Values	value	
+hematology_morphology	Hematology Morphology Field Values	value	
+hematology_score	Hematology Score	value	
+histology_stain	Histology Stain Field Values	value	
+hold_codes	Hold Codes Field Values	value	title
+housing_condition_codes	Housing Condition Code Field Values	value	title
+housing_reason	Housing Reason Field Values	value	
+immunology_method	Immunology Method Field Values	value	
+microchip_comments	Microchip Comments Field Values	value	
+necropsy_condition	Necropsy Condition Field Values	value	
+necropsy_perfusion	Necropsy Perfusion Field Values	value	
+necropsy_perfusion_area	Necropsy Perfusion Area Field Values	value	
+obs_behavior	Obs Behavior Field Values	value	title
+obs_breeding	Obs Breeding Field Values	value	title
+obs_feces	Obs Feces Field Values	value	title
+obs_mens	Obs Mens Field Values	value	title
+obs_other	Obs Other Field Values	value	title
+obs_remarks	Obs Remarks Field Values	value	
+obs_tlocation	Obs Trauma Location Field Values	value	
+observations_anesthesia_recovery	Observations Anesthesia Recovery Field Values	value	
+pairtest_bhav	Pairtest Behavior Field Values	value	
+pairtest_conclusion	Pairtest Conclusion Field Values	value	
+parasitology_method	Parasitology Method Field Values	value	
+pe_region	PE Region Field Values	value	
+pe_remarks	PE Remarks Field Values	value	
+preservation_solutions	Preservation Solution Field Values	value	
+problem_list_category	Problem List Category Field Values	value	
+restraint_duration	Restraint Duration Field Values	value	
+sample_types	Sample Type Field Values	value	
+snomed_qualifiers	SNOMED Qualifiers Field Values	value	
+stain_types	Stain Type Field Values	value	
+status_codes	Status Code Field Values	value	title
+tattoo_status	Tattoo Status Field Values	value	
+tb_result	TB Result Field Values	value	
+tissue_distribution	Tissue Distribution Field Values	value	
+tissue_recipients	Tissue Recipients Field Values	value	
+urinalysis_method	Urinalysis Method Field Values	value	
+urinalysis_qualitative_results	Urinalysis Qualitative Result Field Values	value	
+viral_status	Viral Status Field Values	value	
+virology_method	Virology Method Field Values	value	
+virology_source	Virology Source Field Values	value	

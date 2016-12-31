@@ -1,0 +1,6 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <sorts>
+       <sort column="Id"/>
+       <sort column="coefficient" descending="true"/>
+   </sorts>
+</customView>

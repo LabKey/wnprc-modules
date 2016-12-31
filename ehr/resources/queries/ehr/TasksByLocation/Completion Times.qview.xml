@@ -1,0 +1,54 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+        <column name="taskid/rowid">
+            <properties>
+                <property name="columnTitle" value="Task Id"/>
+            </properties>
+        </column>
+        <column name="room/area">
+            <properties>
+                <property name="columnTitle" value="Area"/>
+            </properties>
+        </column>
+        <column name="room">
+            <properties>
+                <property name="columnTitle" value="Room"/>
+            </properties>
+        </column>
+        <!--<column name="taskid/formtype">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Task Type"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="taskid/title">
+            <properties>
+                <property name="columnTitle" value="Title"/>
+            </properties>
+        </column>
+        <column name="taskid/createdby">
+            <properties>
+                <property name="columnTitle" value="created By"/>
+            </properties>
+        </column>
+        <column name="taskid/created">
+            <properties>
+                <property name="columnTitle" value="created"/>
+            </properties>
+        </column>
+        <column name="taskid/datecompleted">
+            <properties>
+                <property name="columnTitle" value="Completed"/>
+            </properties>
+        </column>
+        <column name="taskid/qcstate">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+   </columns>
+   <sorts>
+       <!--<sort column="taskid/created" descending="true"/>-->
+       <sort column="room/area" />
+       <sort column="room" />
+   </sorts>
+</customView>

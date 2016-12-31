@@ -1,0 +1,13 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="code"/>
+       <column name="primaryCategory"/>
+       <column name="primaryCategory/description"/>
+       <!--<column name="secondaryCategory"/>-->
+   </columns>
+    <sorts>
+       <sort column="primaryCategory" descending="false"/>
+        <sort column="secondaryCategory" descending="false"/>
+        <sort column="code/meaning" descending="false"/>
+   </sorts>
+</customView>

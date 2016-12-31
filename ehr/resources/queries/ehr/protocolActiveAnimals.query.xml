@@ -1,0 +1,29 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="protocolActiveAnimals" tableDbType="NOT_IN_DB">
+                <tableTitle>Animals Actively Assigned to Each Protocol</tableTitle>
+                <columns>
+                    <column columnName="protocol">
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>protocol</fkTable>
+                          <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="TotalActiveAnimals">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.viewName=Active Assignments&amp;
+                            query.project/protocol~eq=${protocol}&amp;
+                        </url>
+                    </column>
+                    <column columnName="ActiveAnimals">
+                    </column>
+                </columns>
+                <titleColumn>TotalActiveAnimals</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

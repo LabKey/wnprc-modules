@@ -1,0 +1,30 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="kinshipSummary" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <tableTitle>Kinship Coefficients</tableTitle>
+                <columns>
+                    <column columnName="Id">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>animal</fkTable>
+                            <fkColumnName>id</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                        <url>/ehr/participantView.view?participantId=${Id}</url>
+                    </column>
+                    <column columnName="Id2">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>Pedigree</fkTable>
+                            <fkColumnName>Id</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                        <url>/ehr/participantView.view?participantId=${Id2}</url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

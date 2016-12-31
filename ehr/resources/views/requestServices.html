@@ -1,0 +1,100 @@
+<script type="text/javascript">
+
+Ext.onReady(function(){
+    var webpart = <%=webpartContext%>;
+    var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+    if(!ctx)
+        return;
+
+    var domSpec = [{
+        tag: 'h3',
+        html: 'Overview'
+    },{
+        tag: 'div',
+        id: 'ehrRequests_' + webpart.wrapperDivId
+    },{
+        tag: 'h3',
+        html: 'Requests:'
+    },{
+        tag: 'ul',
+        children: [{
+//            tag: 'li',
+//            html: '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Project%20Request">Request New Project</a>'
+//        },{
+//            tag: 'li',
+//            html: '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Assignment%20Request">Request/Approve Assignment</a>'
+//        },{
+            tag: 'li',
+            html: '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Blood%20Draw%20Request">Request Blood Draws</a>'
+//        },{
+//            tag: 'li',
+//            html: '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Housing%20Request">Request Housing Change</a>'
+//        },{
+//            tag: 'li',
+//            html: '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Procedure%20Request">Request Procedure</a>'
+        },{
+            tag: 'li',
+            html: '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Clinpath%20Request">Request Clinpath Services</a>'
+        }]
+    }]
+
+    var el = Ext.get(webpart.wrapperDivId);
+    Ext.DomHelper.append(el, domSpec);
+
+    var taskpanel = new Ext.Panel({
+        border: false,
+        layout: 'anchor',
+        autoHeight: true,
+        width: '100%',
+        boxMinWidth: 1000,
+        items: [{
+            border: false,
+            items: [{
+                xtype: 'tabpanel',
+                autoHeight: true,
+                activeTab: 0,
+                items: [{
+                    title: 'My Requests',
+                    xtype: 'ehr-qwppanel',
+                    queryConfig:  {
+                        schemaName: 'ehr',
+                        queryName: 'my_requests'
+                        //viewName: 'Pending Requests'
+                    }
+                },{
+                    title: 'Blood Draw Queue',
+                    xtype: 'ehr-qwppanel',
+                    queryConfig:  {
+                        schemaName: 'study',
+                        queryName: 'Blood Draws',
+//                        filterArray: [
+//                            LABKEY.Filter.create('QCState/Label', 'Completed', LABKEY.Filter.Types.NOT_EQUAL)
+//                        ]
+                        viewName: 'Blood Requests'
+                    }
+                },{
+                    title: 'Clinpath Queue',
+                    xtype: 'ehr-qwppanel',
+                    queryConfig:  {
+                        schemaName: 'study',
+                        queryName: 'Clinpath Runs',
+                        filters: [
+                            LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                        ]
+                    }
+                },{
+                    title: 'Procedure Queue',
+                    xtype: 'ehr-qwppanel',
+                    queryConfig:  {
+                        schemaName: 'study',
+                        queryName: 'Clinical Encounters',
+                        filters: [
+                            LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                        ]
+                    }
+                }]
+            }]
+        }]
+    }).render('ehrRequests_' + webpart.wrapperDivId);
+});
+</script>

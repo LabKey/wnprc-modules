@@ -1,0 +1,70 @@
+<script type="text/javascript">
+
+Ext4.onReady(function (){
+    if (!LABKEY.ActionURL.getParameter('objectid')){
+        alert('Must Provide LSID');
+        return;
+    }
+
+    var webpart = <%=webpartContext%>;
+    var domSpec = [{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'encounterDetails_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        html: 'Clinical History For This Date:<br>'
+    },{
+        tag: 'div',
+        style: 'width: 100%',
+        html: 'Loading...',
+        id: 'childTables_' + webpart.wrapperDivId
+    }]
+
+    var el = Ext4.get(webpart.wrapperDivId);
+    Ext4.DomHelper.append(el, domSpec);
+
+    Ext4.create('LABKEY.ext.DetailsPanel', {
+        border: false,
+        showTitle: false,
+        store: {
+            schemaName: 'study',
+            queryName: 'encounters',
+            filterArray: [LABKEY.Filter.create('objectid', LABKEY.ActionURL.getParameter('objectid'), LABKEY.Filter.Types.EQUAL)],
+            listeners: {
+                load: function(store){
+                    if (store.getCount()){
+                        var id = store.getAt(0).get('Id');
+                        var date = store.getAt(0).get('date');
+
+                        if (id && date){
+                            Ext4.get('childTables_' + webpart.wrapperDivId).update(null);
+
+                            Ext4.create('Ext.panel.Panel', {
+                                border: false,
+                                items: [{
+                                    xtype: 'ehr-clinicalhistorypanel',
+                                    //width: 1200,
+                                    subjectId: id,
+                                    minDate: date,
+                                    maxDate: date,
+                                    showMaxDate: true,
+                                    autoLoadRecords: true
+                                }]
+                            }).render('childTables_' + webpart.wrapperDivId);
+                        }
+                        else {
+                            Ext4.get('childTables_' + webpart.wrapperDivId).update('Unable to display the clinical history for this date');
+                        }
+                    }
+                },
+                scope: this
+            }
+        },
+        showBackBtn: false,
+        renderTo: 'encounterDetails_' + webpart.wrapperDivId
+    });
+});
+
+</script>

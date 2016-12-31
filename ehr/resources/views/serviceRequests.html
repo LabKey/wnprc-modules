@@ -1,0 +1,14 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var webpart = <%=webpartContext%>;
+    var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+    if(!ctx)
+        return;
+
+    Ext4.create('EHR.panel.ServiceRequestsPanel', {
+
+    }).render(webpart.wrapperDivId);
+
+});
+</script>

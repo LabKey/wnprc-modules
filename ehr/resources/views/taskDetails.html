@@ -1,0 +1,56 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var formType = LABKEY.ActionURL.getParameter('formtype');
+    var formUUID = LABKEY.ActionURL.getParameter('taskid');
+    var queryName = LABKEY.ActionURL.getParameter('queryName');
+
+    if(!formUUID){
+        alert('Must provide form Id');
+        return;
+    }
+
+    if (!formType){
+        if(formUUID){
+            LABKEY.Query.selectRows({
+                schemaName: 'ehr',
+                queryName: 'tasks',
+                filterArray: [LABKEY.Filter.create('taskid', formUUID, LABKEY.Filter.Types.EQUAL)],
+                scope: this,
+                success: function(data){
+                    if(!data.rows.length){
+                        alert('Must provide form type');
+                        return;
+                    }
+
+                    var row = data.rows[0];
+                    formType = row.formtype;
+                    renderTaskForm(formType);
+                }
+            });
+        }
+        else {
+            alert('Must provide form type');
+        }
+    }
+    else {
+        renderTaskForm(formType);
+    }
+
+    function renderTaskForm(formType){
+        var webpart = <%=webpartContext%>;
+        EHR.Ext3Utils.createImportPanel({
+            panelType: 'TaskDetailsPanel',
+            formUUID: formUUID,
+            formType: formType,
+            renderTo: webpart.wrapperDivId,
+            noTabs: true,
+            readOnly: true,
+            allowableButtons: 'EDIT'
+        });
+
+        LABKEY.NavTrail.setTrail('Task: '+(LABKEY.ActionURL.getParameter('title') || formType));
+    }
+});
+
+</script>

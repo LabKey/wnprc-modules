@@ -1,0 +1,49 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsAge" tableDbType="NOT_IN_DB">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <tableTitle>Age</tableTitle>
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="ageInYears">
+                        <columnTitle>Age (Years)</columnTitle>
+                    </column>
+                    <column columnName="ageInYearsRounded">
+                        <columnTitle>Age (Years, Rounded)</columnTitle>
+                    </column>
+                    <column columnName="ageInMonths">
+                        <columnTitle>Age (Months)</columnTitle>
+                    </column>
+                    <column columnName="ageInDays">
+                        <columnTitle>Age (Days)</columnTitle>
+                    </column>
+                    <column columnName="ageFriendly">
+                        <columnTitle>Age</columnTitle>
+                        <sortColumn>AgeInYears</sortColumn>
+                    </column>
+                    <column columnName="yearAndDays">
+                        <columnTitle>Age (Year and Days)</columnTitle>
+                        <displayWidth>120</displayWidth>
+                        <sortColumn>AgeInYears</sortColumn>
+                    </column>
+                    <column columnName="monthsAndDays">
+                        <columnTitle>Age (Months and Days)</columnTitle>
+                        <displayWidth>120</displayWidth>
+                        <sortColumn>AgeInMonths</sortColumn>
+                    </column>
+                    <column columnName="species">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="death">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+                <titleColumn>AgeInYears</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

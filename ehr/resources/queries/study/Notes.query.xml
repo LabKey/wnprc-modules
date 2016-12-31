@@ -1,0 +1,55 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="notes" tableDbType="TABLE" useColumnOrder="true">
+                <tableTitle>DCM Notes</tableTitle>
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="actiondate">
+                        <columnTitle>Action Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="enddate">
+                        <isHidden>false</isHidden>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="category">
+                        <columnTitle>Category</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>notes_category</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="value">
+                        <columnTitle>Note</columnTitle>
+                    </column>
+                    <column columnName="performedby">
+                        <columnTitle>Entered By</columnTitle>
+                    </column>
+                    <column columnName="project">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

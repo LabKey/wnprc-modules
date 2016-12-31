@@ -1,0 +1,88 @@
+<script type="text/javascript">
+
+Ext.onReady(function(){
+    var formType = LABKEY.ActionURL.getParameter('formtype');
+    var formUUID = LABKEY.ActionURL.getParameter('requestid');
+    var queryName = LABKEY.ActionURL.getParameter('queryName');
+    var webpart = <%=webpartContext%>;
+
+    if(!formType && !queryName){
+        makeFormSelectorPanel().render(webpart.wrapperDivId);
+    }
+    else if (!formType && queryName){
+        renderSimpleForm(queryName);
+    }
+    else {
+        renderTaskForm(formType);
+    }
+
+    function renderTaskForm(formType){
+        EHR.Ext3Utils.createImportPanel({
+            panelType: 'RequestPanel',
+            formUUID: formUUID,
+            formType: formType,
+            renderTo: webpart.wrapperDivId
+        });
+
+        LABKEY.NavTrail.setTrail(LABKEY.ActionURL.getParameter('title') || formType);
+    }
+
+    function renderSimpleForm(queryName){
+        EHR.Ext3Utils.createSimpleTaskPanel({
+            panelType: 'RequestPanel',
+            formType: LABKEY.ActionURL.getParameter('queryName'),
+            formUUID: formUUID,
+            queryName: LABKEY.ActionURL.getParameter('queryName'),
+            schemaName: LABKEY.ActionURL.getParameter('schemaName'),
+            renderTo: webpart.wrapperDivId
+        });
+
+        LABKEY.NavTrail.setTrail(LABKEY.ActionURL.getParameter('title') || queryName);
+    }
+
+    function makeFormSelectorPanel(){
+        return new Ext.FormPanel({
+            border: false
+            ,width: 320
+            ,labelWidth: 140
+            ,items: [{
+                xtype: 'combo'
+                ,fieldLabel: 'Choose Request Type'
+                ,ref: 'type'
+                ,allowBlank: false
+                ,width: 165
+                ,displayField:'formtype'
+                ,valueField: 'formtype'
+                ,forceSelection: true
+                ,typeAhead: false
+                ,triggerAction: 'all'
+                ,mode: 'local'
+                ,store: new LABKEY.ext.Store({
+                    schemaName: 'ehr',
+                    queryName: 'formtypes',
+                    sort: 'formtype',
+                    filterArray: [LABKEY.Filter.create('category', 'Request', LABKEY.Filter.Types.EQUAL)],
+                    autoLoad: true
+                  })
+            }]
+            ,buttons: [{
+                text: 'Submit'
+                ,scope: this
+                ,ref: 'submit'
+                ,handler: function(s){
+                    var val = s.refOwner.ownerCt.type.getValue();
+                    if(val)
+                        //s.refOwner.ownerCt.destroy();
+                        window.location = LABKEY.ActionURL.buildURL(
+                            'ehr',
+                            LABKEY.ActionURL.getAction(),
+                            null,
+                            {formtype: val, requestid: LABKEY.Utils.generateUUID()}
+                        )
+                }
+            }]
+        });
+    }
+});
+
+</script>

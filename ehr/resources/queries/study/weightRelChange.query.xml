@@ -1,0 +1,71 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="weightRelChange" tableDbType="NOT_IN_DB">
+                <tableTitle>Weight Change, Relative to Current Weight</tableTitle>
+                <description>This query shows the percent change of each weight, relative to the current weight</description>
+                <columns>
+                    <column columnName="lsid">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Id">
+                        <isHidden>true</isHidden>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>animal</fkTable>
+                            <fkColumnName>id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="date">
+                        <isHidden>true</isHidden>
+                        <columnTitle>Date of Last Weight</columnTitle>
+                    </column>
+                    <column columnName="weight">
+                        <columnTitle>Old Weight (kg)</columnTitle>
+                    </column>
+                    <column columnName="PctChange">
+                        <columnTitle>% Change Relative To Current</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="lte" value="-10"/>
+                                </filters>
+                                <bold>true</bold>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="gte" value="10"/>
+                                </filters>
+                                <bold>true</bold>
+                                <backgroundColor>458B00</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="IntervalInDays">
+                        <columnTitle>Days Since Weight</columnTitle>
+                    </column>
+                    <column columnName="IntervalInMonths">
+                        <columnTitle>Months Since Weight</columnTitle>
+                    </column>
+                    <column columnName="LatestWeight">
+                        <columnTitle>Latest Weight (kg)</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=weight&amp;
+                            query.date~eq=${LastestWeightDate}&amp;
+                            query.sort=-date
+                        </url>
+                    </column>
+                    <column columnName="LatestWeightDate">
+                        <columnTitle>Latest Weight Date</columnTitle>
+                    </column>
+                    <!--<column columnName="qcstate">-->
+                        <!--<isHidden>true</isHidden>-->
+                    <!--</column>-->
+                </columns>
+                <titleColumn>PctChange</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

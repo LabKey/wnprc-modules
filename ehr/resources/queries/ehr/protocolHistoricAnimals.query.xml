@@ -1,0 +1,43 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="protocolHistoricAnimals" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="protocol">
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>protocol</fkTable>
+                          <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Id">
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>animal</fkTable>
+                          <fkColumnName>id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Species">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>species</fkTable>
+                          <fkColumnName>common</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Allowed">
+                    </column>
+                    <column columnName="TotalAssignments">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.project/protocol~eq=${protocol}&amp;
+                            query.id~eq=${id}&amp;
+                            query.sort=-Date&amp;
+                        </url>
+                    </column>
+                </columns>
+                <tableTitle>Protocols Animal Assignments</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

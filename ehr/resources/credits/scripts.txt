@@ -1,0 +1,9 @@
+{table}
+Library|Version|Source|License|LabKey Dev|Purpose
+Knockout|3.3.0|{link:Knockout.js|http://knockoutjs.com}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Lightweight, Responsive Components and Observables
+Knockout-Mapping|2.4.1|{link:Knockout.js/Mapping Plugin|http://knockoutjs.com/documentation/plugins-mapping.html}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Mapping Plugin for Mapping Objects to Observables
+Underscore|1.8.3|{link:Underscore.js|http://underscorejs.org/}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Lightweight Object/Array Utilities
+Underscore-String|3.2.2|{link:Underscore.String.js|https://github.com/epeli/underscore.string}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Lightweight String Utilities
+Classify|0.0.1|{link:ClassifyJS|https://github.com/JonathonRichardson/ClassifyJS}|{link:Apache 2.0|https://github.com/JonathonRichardson/ClassifyJS/blob/master/LICENSE}|jrichardson|Class Structures
+SuperSQLStore|0.0.1|{link:SuperSQLStore|https://github.com/JonathonRichardson/SuperSQLStoreJS}|{link:Apache 2.0|https://github.com/JonathonRichardson/SuperSQLStoreJS/blob/master/LICENSE}|jrichardson|Observable Tables to Bind to Knockout
+{table}

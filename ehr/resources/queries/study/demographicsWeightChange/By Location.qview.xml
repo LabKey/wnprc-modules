@@ -1,0 +1,23 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="Id/curLocation/room" />
+        <column name="Id/curLocation/cage" />
+        <column name="Id/age/yearAndDays" />
+        <column name="Id/demographics/gender" />
+        <column name="MostRecentWeightDate" />
+        <column name="MostRecentWeight" />
+        <column name="avgLast45" />
+        <column name="avgLast90" />
+        <column name="avgLast365" />
+        <column name="Id/demographics/history" />
+    </columns>
+    <sorts>
+        <sort column="Id/curLocation/room" />
+        <sort column="Id/curLocation/cage" />
+        <sort column="Id" />
+    </sorts>
+    <filters>
+        <filter column="Id/demographics/calculated_status" operator="eq" value="Alive"/>
+    </filters>
+</customView>

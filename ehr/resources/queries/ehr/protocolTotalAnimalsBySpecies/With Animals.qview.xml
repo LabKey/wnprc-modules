@@ -1,0 +1,15 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="protocol"/>
+       <column name="approve"/>
+       <column name="Species"/>
+       <column name="allowed"/>
+       <column name="TotalAnimals"/>
+       <column name="TotalRemaining"/>
+       <column name="PercentUsed"/>
+       <column name="Animals"/>
+   </columns>
+   <sorts>
+       <sort column="protocol"/>
+   </sorts>
+</customView>

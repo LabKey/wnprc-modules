@@ -1,0 +1,513 @@
+<script type="text/javascript">
+
+Ext.onReady(function(){
+    EHR.Security.init({
+        success: onSuccess,
+        scope: this
+    });
+
+    var webpart = <%=webpartContext%>;
+    var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+    if(!ctx)
+        return;
+
+    var domSpec = [{
+        tag: 'div',
+        id: 'ehrTasks_'+webpart.wrapperDivId,
+        style: 'padding-bottom: 10px;'
+    },{
+        tag: 'div',
+        id: 'dataEntryMenuDiv_'+webpart.wrapperDivId,
+        style: 'padding-bottom: 10px;'
+    }]
+
+    var el = Ext.get(webpart.wrapperDivId);
+    Ext.DomHelper.append(el, domSpec);
+
+    function onSuccess(){
+        var menuCfg = {
+            renderTo: 'dataEntryMenuDiv_'+webpart.wrapperDivId,
+            sections: [],
+            width: 400,
+            bodyStyle: 'background-color: transparent;',
+            defaults: {
+                bodyStyle: 'background-color: transparent;',
+                style: 'background-color: transparent;'
+            },
+            renderer: function(item){
+                return {
+                    html: '<a href="'+item.url+'">'+item.title+'</a>',
+                    style: 'padding-left:5px;background-color: transparent;'
+                }
+            }
+        };
+
+        var sec1 = {
+            header: 'Clinical / SPI',
+            items: []
+        };
+
+        Ext.each([
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Blood%20Draws", title: 'Enter Blood Draws', queries: ['Blood Draws']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Charges&keyField=lsid", title: 'Enter Charges', queries: ['Charges']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Clinical%20Remarks&keyField=lsid", title: 'Enter Clinical Remark', queries: ['Clinical Remarks']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Feeding&keyField=lsid", title: 'Enter/Manage Feeding Orders', queries: ['Feeding']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Irregular%20Observations", title: 'Enter Irregular Observations', queries: ['Irregular Observations']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=MPR", title: 'Enter MPR', queries: ['Drug Administration']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=MPR&useSnomedCodes=1", title: 'Enter MPR (using SNOMED codes)', queries: ['Drug Administration']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRecord.view?schemaName=study&queryName=Notes&keyField=lsid", title: 'Enter Note', queries: ['Notes']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Physical%20Exam", title: 'Enter Physical Exam (OWM)', queries: ['Alopecia','Clinical Remarks']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Physical%20Exam - NWM", title: 'Enter Physical Exam (NWM)', queries: ['Alopecia','Clinical Remarks']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Problem%20List", title: 'Enter Problem', queries: ['Problem List']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Surgery", title: 'Enter Surgery', queries: ['Clinical Encounters','Clinical Remarks']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Surgery&useSnomedCodes=1", title: 'Enter Surgery (using SNOMED codes)', queries: ['Clinical Encounters','Clinical Remarks']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=TB%20Tests", title: 'Enter TB Tests', queries: ['TB Tests']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Treatments", title: 'Enter Treatments', queries: ['Drug Administration']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Treatment%20Orders", title: 'Enter Treatment Order', queries: ['Treatment Orders']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Weight", title: 'Enter Weights', queries: ['Weight']}
+        ], function(i){
+            var q = [];
+            Ext.each(i.queries, function(qn){
+                q.push({schemaName: 'study', queryName: qn})
+            }, this);
+
+            i.qcstate = i.qcstate || 'In Progress';
+            i.permission = i.permission || 'insert';
+
+            if(EHR.Security.hasPermission(i.qcstate, i.permission, q)){
+                sec1.items.push(i)
+            }
+        }, this);
+
+        if(sec1.items.length)
+            menuCfg.sections.push(sec1);
+
+
+        var sec2 = {
+            header: 'Colony Records',
+            items: []
+        };
+
+        Ext.each([
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Arrival", title: 'Enter Arrivals', qcstate: 'Completed', permission: 'admin', queries: ['Arrival']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Assignment&keyField=lsid", title: 'Enter/Manage Assignments', qcstate: 'Completed', permission: 'admin', queries: ['Assignment']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Birth", title: 'Enter Births', queries: ['Birth']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Demographics&keyField=lsid", title: 'Enter/Manage Demographics', qcstate: 'Completed', permission: 'admin', queries: ['Demographics']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Departure&keyField=lsid", title: 'Enter Departures', qcstate: 'Completed', permission: 'admin', queries: ['Departure']},
+            {permission: 'admin', url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR", title: 'Enter Multi-Animal MPR', queries: ['Drug Administration']},
+            {permission: 'admin', url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR&useSnomedCodes=1", title: 'Enter Multi-Animal MPR (using SNOMED codes)', queries: ['Drug Administration']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Project&keyField=project", title: 'Enter/Manage Projects', qcstate: 'Completed', permission: 'admin', queries: ['Assignment']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Protocol&keyField=protocol", title: 'Enter/Manage Protocols', qcstate: 'Completed', permission: 'admin', queries: ['Assignment']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=SimpleRemark&title=Remark", title: 'Enter Simple Remark', queries: ['Clinical Remarks']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=supplemental_pedigree&keyField=rowid", title: 'Enter/Manage Supplemental Pedigree', qcstate: 'Completed', permission: 'admin', queries: ['Demographics']}
+
+            //{url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRecord.view?schemaName=ehr&queryName=Project&keyField=project", title: 'Enter Project', queries: ['Assignment']}
+        ], function(i){
+            var q = [];
+            Ext.each(i.queries, function(qn){
+                q.push({schemaName: 'study', queryName: qn})
+            }, this);
+
+            i.qcstate = i.qcstate || 'In Progress';
+            i.permission = i.permission || 'insert';
+
+            if(EHR.Security.hasPermission(i.qcstate, i.permission, q)){
+                sec2.items.push(i)
+            }
+        }, this);
+
+        if(sec2.items.length)
+            menuCfg.sections.push(sec2);
+
+
+        var sec3 = {
+            header: 'Behavior / Colony Management',
+            items: []
+        };
+
+        Ext.each([
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Behavior Remarks&keyField=lsid", title: 'Enter Behavior Remark', queries: ['Behavior Remarks']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Housing", title: 'Enter Housing Change', qcstate: 'Completed', permission: 'admin', queries: ['Housing']}
+            //{url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Pregnancies&keyField=lsid", title: 'Enter Pregnancies', queries: ['Pregnancies']}
+        ], function(i){
+            var q = [];
+            Ext.each(i.queries, function(qn){
+                q.push({schemaName: 'study', queryName: qn})
+            }, this);
+
+            i.qcstate = i.qcstate || 'In Progress';
+            i.permission = i.permission || 'insert';
+
+            if(EHR.Security.hasPermission(i.qcstate, i.permission, q)){
+                sec3.items.push(i)
+            }
+        }, this);
+
+        if(sec3.items.length)
+            menuCfg.sections.push(sec3);
+
+
+        var sec4 = {
+            header: 'Pathology / Clinpath',
+            items: []
+        };
+
+        Ext.each([
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Biopsy", title: 'Enter Biopsy', queries: ['Biopsies']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Clinpath", title: 'Enter Clinpath Results', queries: ['Clinpath Runs'], qcstate: 'Completed'},
+            //{url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRecord.view?schemaName=study&queryName=Deaths&keyField=lsid&metaSources=Task", title: 'Enter Death Record', queries: ['Deaths']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Death", title: 'Enter Death Record', queries: ['Deaths']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Necropsy", title: 'Enter Necropsy', queries: ['Necropsies']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRecord.view?schemaName=study&queryName=Prenatal Deaths&keyField=lsid", title: 'Enter Prenatal Death', queries: ['Prenatal Deaths']}
+        ], function(i){
+            var q = [];
+            Ext.each(i.queries, function(qn){
+                q.push({schemaName: 'study', queryName: qn})
+            }, this);
+
+            i.qcstate = i.qcstate || 'In Progress';
+            i.permission = i.permission || 'insert';
+            if(EHR.Security.hasPermission(i.qcstate, i.permission, q)){
+                sec4.items.push(i)
+            }
+        }, this);
+
+        if(sec4.items.length)
+            menuCfg.sections.push(sec4);
+
+
+        var sec5 = {
+            header: 'Requests',
+            items: []
+        };
+
+        Ext.each([
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRequest.view?formtype=Blood%20Draw%20Request", title: 'Request Blood Draws', queries: ['Blood Draws']},
+            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRequest.view?formtype=Clinpath%20Request", title: 'Request Clinpath Services', queries: ['Clinpath Runs']}
+            //{url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRequest.view?formtype=Housing%20Request", title: 'Request Housing Change', queries: ['Housing']},
+//            {url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageRequest.view?formtype=Procedure%20Request", title: 'Request Procedure', queries: ['Clinical Encounters']}
+        ], function(i){
+            var q = [];
+            Ext.each(i.queries, function(qn){
+                q.push({schemaName: 'study', queryName: qn})
+            }, this);
+
+            i.qcstate = i.qcstate || 'Request: Pending';
+            i.permission = i.permission || 'insert';
+            if(EHR.Security.hasPermission(i.qcstate, i.permission, q)){
+                sec5.items.push(i)
+            }
+        }, this);
+
+        if(sec5.items.length)
+            menuCfg.sections.push(sec5);
+
+        new EHR.ext.NavMenu(menuCfg).render();
+
+        //only give a task manager if they have access to at least 1 form
+        if(menuCfg.sections.length){
+            function onActivate(t){
+                this.ownerCt.ownerCt.ownerCt.ownerCt.loadTab(t);
+            }
+
+            var clinpathUpdateURL = '';
+            var clinpathInsertURL = '';
+            var clinpathDeleteURL = '';
+
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Clinpath Runs', schemaName: 'study'})){
+                clinpathUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&key=${lsid}&update=1';
+                clinpathInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&update=1';
+                clinpathDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Clinpath Runs';
+            }
+
+            var bloodUpdateURL = '';
+            var bloodInsertURL = '';
+            var bloodDeleteURL = '';
+
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
+                bloodUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&key=${lsid}&update=1';
+                bloodInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&update=1';
+                bloodDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Blood Draws';
+            }
+
+            function onSuccess(dr){
+                var width1 = Ext.get(dr.domId).getSize().width + 50;
+                var width2 = Ext.get(taskpanel.id).getSize().width;
+
+                if(width1 > width2){
+                    console.log(width1+'/'+width2)
+                    taskpanel.setWidth(width1+80);
+                    console.log('resizing')
+                }
+                else {
+                    taskpanel.setWidth('100%');
+                }
+            }
+
+            var taskpanel = new Ext.Panel({
+                border: false,
+                autoHeight: true,
+                layout: 'anchor',
+                width: '100%',
+                boxMinWidth: 1000,
+                loadTab: function(t){
+                    if(this.parentTabPanel){
+                        var topTab = this.parentTabPanel.getActiveTab();
+                        if(topTab){
+                            var bottomTab = topTab.getActiveTab();
+                            if(bottomTab)
+                                Ext.History.add('topTab:'+topTab.itemId+'&activeReport:'+bottomTab.itemId);
+                        }
+                    }
+                },
+                restoreFromUrl: function(){
+                    if(document.location.hash){
+                        var token = document.location.hash.split('#');
+                        token = token[1].split('&');
+                        var topTab;
+                        var activeReport;
+                        for (var i=0;i<token.length;i++){
+                            var t = token[i].split(':');
+                            switch(t[0]){
+                                case 'activeReport':
+                                    activeReport = t[1];
+                                    break;
+                                case 'topTab':
+                                    topTab = t[1];
+                                    break;
+                            }
+                        }
+                    }
+
+                    if(topTab){
+                        this.parentTabPanel.setActiveTab(topTab);
+                        if(activeReport && this.parentTabPanel[topTab])
+                            this.parentTabPanel[topTab].setActiveTab(activeReport);
+                    }
+                    else {
+                        this.parentTabPanel.setActiveTab(0);
+                        this.parentTabPanel.items.get(0).setActiveTab(0)
+                    }
+
+                },
+                listeners: {
+                    render: function(r){
+                        this.restoreFromUrl();
+                    }
+                },
+                items: [{
+        //                layout: 'anchor',
+                        border: false,
+                        items: [{
+                            xtype: 'tabpanel',
+                            autoHeight: true,
+                            ref: '../parentTabPanel',
+                            //activeTab: 0,
+                            items: [{
+                                xtype: 'tabpanel',
+                                //activeTab: 0,
+                                title: 'Manage Tasks',
+                                ref: 'Tasks',
+                                itemId: 'Tasks',
+                                autoWidth: true,
+                                autoHeight: true,
+                                defaults: {
+                                    listeners: {
+                                        activate: onActivate,
+                                        click: onActivate
+                                    }
+                                },
+                                items: [{
+                                    title: 'My Tasks',
+                                    ref: 'MyTasks',
+                                    itemId: 'MyTasks',
+                                    xtype: 'ehr-qwppanel',
+                                    cls: 'my-tasks-marker',
+                                    queryConfig:  {
+                                        schemaName: 'ehr',
+                                        queryName: 'my_tasks',
+                                        viewName: 'Active Tasks',
+                                        scope: this,
+                                        success: onSuccess
+                                        //showUpdateColumn: true
+                                        //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                                    }
+                                },{
+                                    title: 'All Tasks',
+                                    ref: 'AllTasks',
+                                    itemId: 'AllTasks',
+                                    xtype: 'ehr-qwppanel',
+                                    cls: 'all-tasks-marker',
+                                    queryConfig:  {
+                                        schemaName: 'ehr',
+                                        queryName: 'Tasks_DataEntry',
+                                        viewName: 'Active Tasks',
+                                        scope: this,
+                                        success: onSuccess
+                                        //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                                    }
+                                },{
+                                    title: 'Tasks By Room',
+                                    ref: 'TasksByRoom',
+                                    itemId: 'TasksByRoom',
+                                    xtype: 'ehr-qwppanel',
+                                    cls: 'room-tasks-marker',
+                                    queryConfig:  {
+                                        schemaName: 'ehr',
+                                        queryName: 'TasksByLocation_DataEntry',
+                                        viewName: 'Active Tasks',
+                                        scope: this,
+                                        success: onSuccess
+                                        //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                                    }
+                                },{
+                                    title: 'Tasks By Id',
+                                    ref: 'TasksById',
+                                    itemId: 'TasksById',
+                                    xtype: 'ehr-qwppanel',
+                                    cls: 'id-tasks-marker',
+                                    queryConfig:  {
+                                        schemaName: 'ehr',
+                                        queryName: 'TasksById_DataEntry',
+                                        viewName: 'Active Tasks',
+                                        scope: this,
+                                        success: onSuccess
+                                        //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                                    }
+                                },{
+                                    title: 'Review Required',
+                                    ref: 'ReviewRequired',
+                                    itemId: 'ReviewRequired',
+                                    xtype: 'ehr-qwppanel',
+                                    cls: 'review-requested-marker',
+                                    queryConfig:  {
+                                        schemaName: 'ehr',
+                                        queryName: 'Tasks_DataEntry',
+                                        viewName: 'Review Required',
+                                        scope: this,
+                                        success: onSuccess
+                                        //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                                    }
+                                }]
+                            },{
+                                xtype: 'tabpanel',
+                                //activeTab: 0,
+                                title: 'Manage Requests',
+                                ref: 'Requests',
+                                itemId: 'Requests',
+                                autoWidth: true,
+                                autoHeight: true,
+                                defaults: {
+                                    listeners: {
+                                        activate: onActivate,
+                                        click: onActivate
+                                    }
+                                },
+                                items: [{
+                                    /*
+                                    title: 'Pending Requests',
+                                    ref: 'PendingRequests',
+                                    itemId: 'PendingRequests',
+                                    xtype: 'ehr-qwppanel',
+                                    queryConfig:  {
+                                        schemaName: 'study',
+                                        queryName: 'StudyData',
+                                        //viewName: 'Pending Requests',
+                                        filters: [
+                                            LABKEY.Filter.create('QCState/Label', 'Request: Pending', LABKEY.Filter.Types.EQUAL),
+                                            LABKEY.Filter.create('dataset/label', 'Blood Draws;Clinical Encounters;Clinpath Runs', LABKEY.Filter.Types.EQUALS_ONE_OF)
+                                        ]
+                                    }
+                                },{
+                                    title: 'Approved Requests',
+                                    ref: 'ApprovedRequests',
+                                    itemId: 'ApprovedRequests',
+                                    xtype: 'ehr-qwppanel',
+                                    queryConfig:  {
+                                        schemaName: 'study',
+                                        queryName: 'StudyData',
+                                        //viewName: 'Approved Requests',
+                                        filters: [
+                                            LABKEY.Filter.create('QCState/Label', 'Request: Approved', LABKEY.Filter.Types.EQUAL),
+                                            LABKEY.Filter.create('dataset/label', 'Blood Draws;Clinical Encounters;Clinpath Runs', LABKEY.Filter.Types.EQUALS_ONE_OF)
+                                        ]
+                                    }
+                                },{
+                                    title: 'All Requests',
+                                    ref: 'AllRequests',
+                                    itemId: 'AllRequests',
+                                    xtype: 'ehr-qwppanel',
+                                    queryConfig:  {
+                                        schemaName: 'study',
+                                        queryName: 'StudyData',
+                                        filters: [
+                                            LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH),
+                                            LABKEY.Filter.create('dataset/name', 'Blood Draws;Clinical Encounters;Clinpath Runs', LABKEY.Filter.Types.EQUALS_ONE_OF)
+                                        ]
+                                    }
+                                },{
+                                */
+                                    title: 'Blood Draw Requests',
+                                    xtype: 'ehr-qwppanel',
+                                    ref: 'BloodDrawRequests',
+                                    itemId: 'BloodDrawRequests',
+                                    queryConfig:  {
+                                        schemaName: 'study',
+                                        queryName: 'Blood Draws',
+                                        viewName: 'Blood Requests',
+                                        scope: this,
+                                        success: onSuccess,
+                                        updateURL: bloodUpdateURL,
+                                        deleteURL: bloodDeleteURL,
+                                        filters: [
+                                            LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                                        ],
+                                        removeableFilters: [
+                                            LABKEY.Filter.create('billedby', null, LABKEY.Filter.Types.ISBLANK)
+                                        ]
+                                    }
+                                },{
+                                    title: 'Clinpath Requests',
+                                    ref: 'ClinpathRequests',
+                                    itemId: 'ClinpathRequests',
+                                    xtype: 'ehr-qwppanel',
+                                    queryConfig:  {
+                                        schemaName: 'study',
+                                        queryName: 'Clinpath Runs',
+                                        viewName: 'Clinpath Requests',
+                                        updateURL: clinpathUpdateURL,
+                                        deleteURL: clinpathDeleteURL,
+                                        scope: this,
+                                        success: onSuccess,
+                                        filters: [
+                                            LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                                        ]
+                                        //viewName: 'Blood Summary'
+                                    }
+                                /*
+                                },{
+                                    title: 'Procedure Requests',
+                                    ref: 'ProcedureRequests',
+                                    itemId: 'ProcedureRequests',
+                                    xtype: 'ehr-qwppanel',
+                                    queryConfig:  {
+                                        schemaName: 'study',
+                                        queryName: 'Clinical Encounters',
+                                        filters: [
+                                            LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                                        ]
+                                    }
+                                */
+                                }]
+                            }]
+                        }]
+                    }]
+            }).render('ehrTasks_'+webpart.wrapperDivId);
+        }
+        else {
+            alert('You do not have access to this page');
+            window.location = LABKEY.ActionURL.buildURL("project", "home");
+        }
+    }
+});
+</script>

@@ -1,0 +1,5 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <filters>
+        <filter column="Name" operator="neqornull" value="Administrators"/>
+    </filters>
+</customView>

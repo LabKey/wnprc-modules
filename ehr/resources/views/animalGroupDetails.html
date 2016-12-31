@@ -1,0 +1,21 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function (){
+        var webpart = <%=webpartContext%>;
+        var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+        if(!ctx)
+            return;
+
+        var groupId = LABKEY.ActionURL.getParameter('groupId');
+        if (!groupId){
+            alert('Must provide the ID of the group to display');
+            return;
+        }
+
+        Ext4.create('EHR.panel.AnimalGroupDetailsPanel', {
+            groupId: groupId,
+            renderTo: webpart.wrapperDivId
+        });
+    });
+
+</script>

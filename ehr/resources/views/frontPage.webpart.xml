@@ -1,0 +1,7 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart"
+    title="EHR Front Page">
+   <view name="frontPage"/>
+   <locations>
+		<location name="body"/>
+   </locations>
+</webpart>

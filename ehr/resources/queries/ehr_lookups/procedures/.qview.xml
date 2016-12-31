@@ -1,0 +1,18 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="name"/>
+        <column name="genericName"/>
+        <column name="category"/>
+        <column name="major"/>
+        <column name="incision"/>
+        <column name="recoveryDays"/>
+        <column name="followupDays"/>
+        <column name="analgesiaRx"/>
+        <column name="antibioticRx"/>
+        <column name="remark"/>
+        <column name="active"/>
+    </columns>
+    <sorts>
+        <sort column="name" descending="false"/>
+    </sorts>
+</customView>

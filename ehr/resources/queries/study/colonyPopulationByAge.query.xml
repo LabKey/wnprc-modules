@@ -1,0 +1,21 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="colonyPopulationByAge" tableDbType="NOT_IN_DB">
+                <tableTitle>Population Summary, By Age and Species</tableTitle>
+                <columns>
+                    <column columnName="animalCount">
+                        <columnTitle>Animal Count</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographics&amp;
+                            query.species~eq=${species}&amp;
+                            query.gender~eq=${gender}&amp;
+                            query.Id/Age/AgeInYearsRounded~eq=${ageInYears}&amp;
+                            query.viewName=Alive%2C at Center&amp;
+                        </url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

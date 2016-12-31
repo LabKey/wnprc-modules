@@ -1,0 +1,72 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function (){
+        if (!LABKEY.ActionURL.getParameter('procedureId')){
+            alert('Must Provide A Procedure Id');
+            return;
+        }
+
+        var procedureId = LABKEY.ActionURL.getParameter('procedureId');
+
+        var webpart = <%=webpartContext%>;
+        var domSpec = [{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'procedureDetails_' + webpart.wrapperDivId
+        },{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'procedureSummary_' + webpart.wrapperDivId
+        },{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'procedureTreatments_' + webpart.wrapperDivId
+        },{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'procedureCodes_' + webpart.wrapperDivId
+        },{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'procedureCharges_' + webpart.wrapperDivId
+        }]
+
+        var el = Ext4.get(webpart.wrapperDivId);
+        Ext4.DomHelper.append(el, domSpec);
+
+        Ext4.create('LDK.panel.DetailsPanel', {
+            showBackBtn: false,
+            store: {
+                schemaName: 'ehr_lookups',
+                queryName: 'procedures',
+                filterArray: [
+                    LABKEY.Filter.create('rowid', procedureId, LABKEY.Filter.Types.EQUAL)
+                ]
+            },
+            title: 'Procedure Details',
+            renderTo: 'procedureDetails_' + webpart.wrapperDivId
+        });
+
+        LDK.Utils.getReadOnlyQWP({
+            title: 'Default Summary',
+            schemaName: 'ehr_lookups',
+            queryName: 'procedure_default_comments',
+            filters: [LABKEY.Filter.create('procedureId', procedureId, LABKEY.Filter.Types.EQUAL)]
+        }).render('procedureSummary_' + webpart.wrapperDivId);
+
+        LDK.Utils.getReadOnlyQWP({
+            title: 'Default Treatments',
+            schemaName: 'ehr_lookups',
+            queryName: 'procedure_default_treatments',
+            filters: [LABKEY.Filter.create('procedureId', procedureId, LABKEY.Filter.Types.EQUAL)]
+        }).render('procedureTreatments_' + webpart.wrapperDivId);
+
+        LDK.Utils.getReadOnlyQWP({
+            title: 'Default Codes',
+            schemaName: 'ehr_lookups',
+            queryName: 'procedure_default_codes',
+            filters: [LABKEY.Filter.create('procedureId', procedureId, LABKEY.Filter.Types.EQUAL)]
+        }).render('procedureCodes_' + webpart.wrapperDivId);
+    });
+
+</script>

@@ -1,0 +1,115 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var webpart = <%=webpartContext%>;
+    var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+    if(!ctx)
+        return;
+
+    EHR.Utils.getReportLinks({
+        linkTypes: ['project', 'protocol', 'assignment'],
+        success: function(results){
+            var domSpec = [{
+                tag: 'div',
+                style: 'padding-bottom: 10px;',
+                html: 'This page contains a series of queries to search IACUC Protocols, Projects and Assignment data.  If there are additional one-button reports you would like added to the top section, please submit a request using the \'user feedback\' item on the menu bar above.'
+            }];
+
+            domSpec.push({
+                tag: 'h2',
+                html: 'Center Projects:'
+            });
+
+            if (results.project && results.project.domSpec){
+                domSpec = domSpec.concat(results.project.domSpec);
+            }
+
+            domSpec = domSpec.concat([{
+                tag: 'div',
+                id: 'projectPanel_' + webpart.wrapperDivId
+            },{
+                tag: 'hr'
+            },{
+                tag: 'h2',
+                html: 'IACUC Protocols:'
+            }]);
+
+            if (results.protocol && results.protocol.domSpec){
+                domSpec = domSpec.concat(results.protocol.domSpec);
+            }
+
+            domSpec = domSpec.concat([{
+                tag: 'h3',
+                html: 'Search All Protocols:'
+            },{
+                tag: 'div',
+                id: 'protocolPanel_' + webpart.wrapperDivId
+            },{
+                tag: 'hr'
+            },{
+                tag: 'h2',
+                html: 'Assignments:'
+            }]);
+
+            if (results.assignment && results.assignment.domSpec){
+                domSpec = domSpec.concat(results.assignment.domSpec);
+            }
+
+            domSpec = domSpec.concat([{
+                tag: 'h3',
+                html: 'Search All Assignment Records:'
+            },{
+                tag: 'div',
+                id: 'assignmentPanel_' + webpart.wrapperDivId
+            }]);
+
+            var el = Ext4.get(webpart.wrapperDivId);
+            Ext4.DomHelper.append(el, domSpec);
+
+            Ext4.create('LABKEY.ext4.SearchPanel', {
+                schemaName: 'ehr',
+                queryName: 'Project',
+                title: 'Search Projects',
+                metadata: {
+                    protocol: {lookups: false}
+                }
+            }).render('projectPanel_' + webpart.wrapperDivId);
+
+            Ext4.create('LABKEY.ext4.SearchPanel', {
+                schemaName: 'ehr',
+                queryName: 'protocol',
+                title: 'Search Protocols',
+                metadata: {}
+            }).render('protocolPanel_' + webpart.wrapperDivId);
+
+            Ext4.create('LABKEY.ext4.SearchPanel', {
+                schemaName: 'study',
+                queryName: 'assignment',
+                title: 'Search Assignments',
+                metadata: {
+                    project: {lookups: false},
+                    'project/Protocol': {lookups: false},
+                    Id: {lookups: false},
+                    Created: {hidden: true},
+                    CreatedBy: {hidden: true},
+                    Modified: {hidden: true},
+                    ModifiedBy: {hidden: true},
+                    objectid: {hidden: true},
+                    ts: {hidden: true},
+                    Dataset: {hidden: true},
+                    AgeAtTime: {hidden: true},
+                    QCState: {hidden: true},
+                    created: {hidden: true},
+                    modified: {hidden: true},
+                    SequenceNum: {hidden: true},
+                    AnimalVisit: {hidden: true},
+                    EntityId: {hidden: true},
+                    Notes: {hidden: true}
+                },
+                defaultView: 'Active Assignments'
+            }).render('assignmentPanel_' + webpart.wrapperDivId);
+        }
+    });
+});
+
+</script>

@@ -1,0 +1,210 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var webpart = <%=webpartContext%>;
+
+    var qwpDiv = Ext4.DomHelper.insertAfter(webpart.wrapperDivId, {
+        tag: 'div',
+        id: 'qwp_' + Ext4.id()
+    });
+
+    Ext4.QuickTips.init();
+    Ext4.create('Ext.form.Panel', {
+        border: false,
+        width: 550,
+        qwpDiv: qwpDiv,
+        style: 'margin-bottom: 20px;',
+        defaults: {
+            border: false,
+            labelWidth: 180,
+            width: 550
+        },
+        items: [{
+            html: 'This page allows you to find housing records that overlap, based on the criteria below.  For more detail, hover the mouse over the question mark next to the field label.',
+            style: 'padding-bottom: 10px'
+        },{
+            xtype: 'radiogroup',
+            itemId: 'searchType',
+            fieldLabel: 'Search Type',
+            helpPopup: 'If you select \'date and time\', then records will count as overlaps only if their date and time overlap.  If you pick \'date only\', then records will be count as overlaps if the animal was present on that day, not including time of day.  In the latter case, the animals might not technically have resided in the same cage at the time moment in time.',
+            columns: 1,
+            items: [{
+                boxLabel: 'Consider Date And Time',
+                checked: true,
+                name: 'searchType',
+                inputValue: 'dateTime'
+            },{
+                boxLabel: 'Consider Date Only',
+                name: 'searchType',
+                inputValue: 'date'
+            }],
+            listeners: {
+                change: function(btn){
+                    var panel = btn.up('panel');
+                    panel.onSearchTypeChange();
+                }
+            }
+        },{
+            xtype: 'radiogroup',
+            itemId: 'groupingType',
+            fieldLabel: 'Grouping',
+            helpPopup: 'If you select \'individual records\', then the result will include one row per housing record, which could include multiple records per animal.  If you select \'grouped by Id\', then the result will include one row per animal Id, where each row could represent many different housing records.',
+            columns: 1,
+            items: [{
+                boxLabel: 'Show Individual Housing Records',
+                checked: !LABKEY.ActionURL.getParameter('groupById') ? true : false,
+                name: 'groupingType',
+                inputValue: 'individual'
+            },{
+                boxLabel: 'Group Records By Id',
+                checked: LABKEY.ActionURL.getParameter('groupById') ? true : false,
+                name: 'groupingType',
+                inputValue: 'grouped'
+            }],
+            listeners: {
+                change: function(btn){
+                    var panel = btn.up('panel');
+                    panel.onGroupingChange();
+                }
+            }
+        },{
+            xtype: 'xdatetime',
+            helpPopup: 'This will be used at the start of the interval.  It can be left blank to include all records.',
+            fieldLabel: 'Start (optional)',
+            itemId: 'startField'
+        },{
+            xtype: 'xdatetime',
+            helpPopup: 'This will be used at the end of the interval.  It can be left blank the current time will be used.',
+            fieldLabel: 'End (optional)',
+            itemId: 'endField'
+        },{
+            xtype: 'ehr-roomfield',
+            helpPopup: 'If included, only records from this room will be used.  It can be left blank.',
+            fieldLabel: 'Room (optional)',
+            multiSelect: false,
+            value: LABKEY.ActionURL.getParameter('room'),
+            itemId: 'roomField'
+            //hidden: LABKEY.ActionURL.getParameter('groupById') ? true : false
+        },{
+            xtype: 'textfield',
+            helpPopup: 'If included, only records from this cage will be used.  It can be left blank.',
+            fieldLabel: 'Cage (optional)',
+            itemId: 'cageField'
+            //hidden: LABKEY.ActionURL.getParameter('groupById') ? true : false
+        }],
+        dockedItems: {
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: [{
+                xtype: 'tbfill'
+            },{
+                xtype: 'button',
+                text: 'Submit',
+                handler: function(btn){
+                    btn.up('panel').onSubmit();
+                }
+            }]
+        },
+        onGroupingChange: function(){
+            var type = this.down('#groupingType').getValue().groupingType;
+//            var room = this.down('#roomField');
+//            var cage = this.down('#cageField');
+//
+//            if (type == 'grouped'){
+//                room.setVisible(false);
+//                room.setValue(null);
+//                cage.setVisible(false);
+//                cage.setValue(null);
+//            }
+//            else {
+//                room.setVisible(true);
+//                cage.setVisible(true);
+//            }
+
+        },
+        onSearchTypeChange: function(){
+            var type = this.down('#searchType').getValue().searchType;
+            var start = this.down('#startField');
+            var end = this.down('#endField');
+
+            var xtype = 'datefield';
+            if(type == 'date'){
+                if (start.xtype == 'datefield')
+                    return;
+
+                xtype = 'datefield';
+            }
+            else {
+                if (start.xtype == 'xdatetime')
+                    return;
+
+                xtype = 'xdatetime'
+            }
+
+            this.remove(start);
+            this.remove(end);
+
+            this.insert(3, {
+                xtype: xtype,
+                helpPopup: 'This will be used at the start of the interval.  It can be left blank to include all records.',
+                fieldLabel: 'Start (optional - leave blank for all)',
+                itemId: 'startField'
+            });
+
+            this.insert(4, {
+                xtype: xtype,
+                helpPopup: 'This will be used at the end of the interval.  It can be left blank the current time will be used.',
+                fieldLabel: 'End (optional - leave blank for all)',
+                itemId: 'endField'
+            });
+
+            this.doLayout();
+        },
+        onSubmit: function(){
+            var type = this.down('#searchType').getValue().searchType;
+            var grouping = this.down('#groupingType').getValue().groupingType;
+            var start = this.down('#startField').getValue();
+            var end = this.down('#endField').getValue();
+            var room = this.down('#roomField').getValue();
+            var cage = this.down('#cageField').getValue();
+
+            var title = 'Overlapping Housing Records';
+            var queryName = 'HousingOverlaps';
+            if (grouping == 'grouped'){
+                queryName += 'ById';
+                title = 'Overlapping Ids';
+            }
+
+            if (type == 'date')
+                queryName += 'DateOnly';
+
+            var config = {
+                frame: 'portal',
+                renderTo: this.qwpDiv.id,
+                schemaName: 'study',
+                queryName: queryName,
+                title: title
+            };
+
+            var params = {
+                StartDate: start,
+                EndDate: end
+            };
+
+            if (room)
+                params.Room = room;
+            if (cage)
+                params.Cage = cage;
+
+            if (!LABKEY.Utils.isEmptyObj(params))
+                config.parameters = params;
+
+            LDK.Utils.getReadOnlyQWP(config).render(this.qwpDiv.id);
+        }
+
+    }).render(webpart.wrapperDivId);
+
+});
+
+</script>

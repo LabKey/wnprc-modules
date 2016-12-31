@@ -1,0 +1,6 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Genetic Calculations Task Settings">
+    <dependencies>
+        <dependency path="ehr.context" />
+        <dependency path="ehr/panel/GeneticCalculationSettingsPanel.js" />
+    </dependencies>
+</view>

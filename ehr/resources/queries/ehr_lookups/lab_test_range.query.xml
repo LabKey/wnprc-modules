@@ -1,0 +1,41 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="lab_test_range" tableDbType="TABLE">
+                <columns>
+                    <column columnName="test">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Test Id</columnTitle>
+                    </column>
+                    <column columnName="species">
+                        <columnTitle>Species</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>species</fkTable>
+                            <fkColumnName>common</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="gender">
+                        <columnTitle>Gender</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>gender_codes</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="type">
+                        <columnTitle>Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>clinpath_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="age_class">
+                        <columnTitle>Age Class</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

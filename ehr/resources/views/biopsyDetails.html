@@ -1,0 +1,54 @@
+<script type="text/javascript">
+
+Ext4.onReady(function (){
+    if (!LABKEY.ActionURL.getParameter('key')){
+        alert('Must Provide Biopsy Number');
+        return;
+    }
+
+    var key = LABKEY.ActionURL.getParameter('key');
+
+    var webpart = <%=webpartContext%>;
+    var domSpec = [{
+        tag: 'div',
+        id :'biopsyDetails_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        id :'biopsyDiagnosis_' + webpart.wrapperDivId,
+        style: 'padding-bottom: 20px;'
+    },{
+        tag: 'div',
+        id :'histologyDiv_' + webpart.wrapperDivId
+    }];
+
+    var el = Ext4.get(webpart.wrapperDivId);
+    Ext4.DomHelper.append(el, domSpec);
+
+    Ext4.create('LDK.panel.DetailsPanel', {
+        store: {
+            schemaName: 'study',
+            queryName: 'Biopsies',
+            filterArray: [LABKEY.Filter.create('objectId', key, LABKEY.Filter.Types.EQUAL)]
+        },
+        title: 'Biopsy Details',
+        renderTo: 'biopsyDetails_'+webpart.wrapperDivId,
+        showBackBtn: false
+    });
+
+    LDK.Utils.getReadOnlyQWP({
+        title: 'Morphologic Diagnoses',
+        schemaName: 'study',
+        queryName: 'Morphologic Diagnosis',
+        filters: [LABKEY.Filter.create('parentid', key, LABKEY.Filter.Types.EQUAL)]
+     }).render('biopsyDiagnosis_'+webpart.wrapperDivId);
+
+
+    LDK.Utils.getReadOnlyQWP({
+        title: 'Histology',
+        schemaName: 'study',
+        queryName: 'Histology',
+        filters: [LABKEY.Filter.create('parentid', key, LABKEY.Filter.Types.EQUAL)]
+     }).render('histologyDiv_'+webpart.wrapperDivId);
+});
+
+</script>

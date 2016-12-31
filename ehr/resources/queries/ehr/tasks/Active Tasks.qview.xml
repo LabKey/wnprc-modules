@@ -1,0 +1,9 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <filters>
+       <filter column="qcstate/PublicData" operator="eq" value="false"/>
+   </filters>
+   <sorts>
+       <sort column="duedate" descending="true"/>
+       <sort column="created" descending="true"/>
+   </sorts>
+</customView>

@@ -1,0 +1,32 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <!--<columns>-->
+        <!--<column name="Id"/>-->
+        <!--<column name="date"/>-->
+        <!--<column name="enddate"/>-->
+        <!--<column name="qcstate"/>-->
+        <!--<column name="Room"/>-->
+        <!--<column name="Cage"/>-->
+        <!--<column name="Cond"/>-->
+        <!--<column name="reason"/>-->
+        <!--<column name="isTemp"/>-->
+        <!--<column name="restraintType"/>-->
+       <!--<column name="remark"/>-->
+        <!--&lt;!&ndash;<column name="Id/Dataset/Demographics/Status">&ndash;&gt;-->
+            <!--&lt;!&ndash;<properties>&ndash;&gt;-->
+                <!--&lt;!&ndash;<property name="columnTitle" value="Status"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;</properties>&ndash;&gt;-->
+        <!--&lt;!&ndash;</column>&ndash;&gt;-->
+        <!--&lt;!&ndash;<column name="Id/activeAssignments/Availability">&ndash;&gt;-->
+            <!--&lt;!&ndash;<properties>&ndash;&gt;-->
+                <!--&lt;!&ndash;<property name="columnTitle" value="Avail"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;</properties>&ndash;&gt;-->
+        <!--&lt;!&ndash;</column>&ndash;&gt;-->
+   <!--</columns>-->
+   <sorts>
+       <sort column="room"/>
+       <sort column="cage"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

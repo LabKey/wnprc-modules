@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="housingProblems" tableDbType="NOT_IN_DB">
+                <tableTitle>Animals with Duplicate Housing Entries</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

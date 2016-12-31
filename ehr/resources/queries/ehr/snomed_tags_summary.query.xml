@@ -1,0 +1,23 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="snomed_tags_summary" tableDbType="TABLE">
+                <titleColumn>codes</titleColumn>
+                <tableTitle>SNOMED Tags</tableTitle>
+                <columns>
+                    <column columnName="recordid">
+                        <nullable>false</nullable>
+                        <columnTitle>Record Id</columnTitle>
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="codes">
+                        <columnTitle>Codes</columnTitle>
+                        <displayWidth>800</displayWidth>
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

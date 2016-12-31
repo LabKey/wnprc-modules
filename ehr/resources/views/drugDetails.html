@@ -1,0 +1,61 @@
+<script type="text/javascript">
+
+Ext4.onReady(function (){
+    if (!LABKEY.ActionURL.getParameter('lsid')){
+        alert('Must Provide LSID');
+        return;
+    }
+
+    var webpart = <%=webpartContext%>;
+    var domSpec = [{
+        tag: 'div',
+        id: 'drugDetails_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        id: 'childTables_' + webpart.wrapperDivId
+    }]
+
+    var el = Ext4.get(webpart.wrapperDivId);
+    Ext4.DomHelper.append(el, domSpec);
+
+    var filterArray = [LABKEY.Filter.create('lsid', LABKEY.ActionURL.getParameter('lsid'), LABKEY.Filter.Types.EQUAL)];
+
+    Ext4.create('LDK.panel.DetailsPanel', {
+        store: {
+            schemaName: 'study',
+            queryName: 'Drug Administration',
+            filterArray: filterArray
+        },
+        showBackBtn: false,
+        title: 'Drug Details',
+        renderTo: 'drugDetails_' + webpart.wrapperDivId
+    });
+
+    LABKEY.Query.selectRows({
+        schemaName: 'study',
+        queryName: 'Drug Administration',
+        filterArray: filterArray,
+        successCallback: onSuccess
+    });
+
+    function onSuccess(data){
+        if(!data.rows.length){
+            alert('Unable to find record');
+            return;
+        }
+
+        var row = data.rows[0];
+        LDK.Utils.getReadOnlyQWP({
+            title: 'Clinical Remarks From '+(new Date(row.date).format('Y-m-d')),
+            schemaName: 'study',
+            queryName: 'Clinical Remarks',
+            filterArray: [
+                LABKEY.Filter.create('date', row.date, LABKEY.Filter.Types.DATE_EQUAL),
+                LABKEY.Filter.create('id', row.Id, LABKEY.Filter.Types.EQUAL)
+            ],
+            sort: '-Date'
+        }).render('childTables_' + webpart.wrapperDivId);
+    }
+});
+
+</script>

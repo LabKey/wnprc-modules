@@ -1,0 +1,34 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function(){
+        var webpart = <%=webpartContext%>;
+        var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+        if(!ctx)
+            return;
+
+        Ext4.get(webpart.wrapperDivId).update(
+            '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view">' +
+                '<div class="ehr-tool-icon-wrapper-lg tool-icon">' +
+                    '<div class="ehr-tool-icon-lg">' +
+                       '<img src="<%=contextPath%>/ehr/icons/icon_browse_lg.png">Browse Data' +
+                    '</div>' +
+                '</div>' +
+            '</a>' +
+            '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/enterData.view">' +
+                '<div class="ehr-tool-icon-wrapper-lg tool-icon">' +
+                    '<div class="ehr-tool-icon-lg">' +
+                        '<img src="<%=contextPath%>/ehr/icons/icon_data_lg.png">Enter Data' +
+                    '</div>' +
+                '</div>' +
+            '</a>' +
+            '<a href="<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/colonyOverview.view">' +
+                '<div class="ehr-tool-icon-wrapper-lg tool-icon">' +
+                    '<div class="ehr-tool-icon-lg">' +
+                        '<img src="<%=contextPath%>/ehr/icons/icon_center_lg.png">Colony Overview' +
+                    '</div>' +
+                '</div>' +
+            '</a>'
+        );
+
+    });
+</script>

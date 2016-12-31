@@ -1,0 +1,19 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="encounter_participants" tableDbType="TABLE">
+                <tableTitle>Encounter Participants</tableTitle>
+                <columns>
+                    <column columnName="username">
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>usernames</fkTable>
+                            <fkColumnName>DisplayName</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>                        
+                    </column>    
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

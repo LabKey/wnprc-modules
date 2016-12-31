@@ -1,0 +1,8 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <filters>
+       <filter column="enddateCoalesced" operator="dategte" value="-0d"/>
+   </filters>
+   <sorts>
+       <sort column="protocol"/>
+   </sorts>
+</customView>

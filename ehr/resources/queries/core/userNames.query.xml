@@ -1,0 +1,14 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="userNames" tableDbType="NOT_IN_DB">
+                <titleColumn>DisplayName</titleColumn>
+                <columns>
+                    <column columnName="DisplayName">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

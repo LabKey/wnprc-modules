@@ -1,0 +1,67 @@
+<!--NOTE: even though this view is not used by ONPRC, the test expects it to be present and it should remain here-->
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
+    <columns>
+        <column name="Id"/>
+        <column name="calculated_status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <!--<column name="Status">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Status"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="gender" />
+        <column name="species" />
+        <column name="dam" />
+        <column name="Id/activeAssignments/projects">
+            <properties>
+                <property name="columnTitle" value="Active Assignments"/>
+            </properties>
+        </column>
+        <column name="Id/activeAssignments/availability">
+            <properties>
+                <property name="columnTitle" value="Avail"/>
+            </properties>
+        </column>
+        <column name="birth"/>
+        <column name="Id/age/AgeFriendly">
+            <properties>
+                <property name="columnTitle" value="Age"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/room">
+            <properties>
+                <property name="columnTitle" value="Room"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/cage">
+            <properties>
+                <property name="columnTitle" value="Cage"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/cond">
+            <properties>
+                <property name="columnTitle" value="Condition"/>
+            </properties>
+        </column>
+        <column name="Id/mostRecentWeight/MostRecentWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="medical"/>
+        <column name="Id/IrregularObs/previousObs">
+            <properties>
+                <property name="columnTitle" value="Recent Obs"/>
+            </properties>
+        </column>
+    </columns>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+    <sorts>
+        <sort column="Id" descending="false"/>
+    </sorts>
+</customView>

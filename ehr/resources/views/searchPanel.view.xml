@@ -1,0 +1,6 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Search Panel" frame="portal">
+    <dependencies>
+        <dependency path="ehr.context" />
+        <dependency path="extWidgets/SearchPanel.js"/>
+    </dependencies>
+</view>

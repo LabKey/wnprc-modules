@@ -1,0 +1,75 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var metadata;
+
+    var config = {
+        schemaName: LABKEY.ActionURL.getParameter('schemaName')
+        ,queryName: LABKEY.ActionURL.getParameter('queryName')
+        ,viewName: LABKEY.ActionURL.getParameter('viewName')
+        ,columns: LABKEY.ActionURL.getParameter('columns')
+        ,title: 'Search '+LABKEY.ActionURL.getParameter('queryName')
+        ,useContainerFilter: LABKEY.ActionURL.getParameter('useContainerFilter')
+        ,defaultContainerFilter: LABKEY.ActionURL.getParameter('defaultContainerFilter')
+        ,metadata: {
+            Id: {lookups: false}
+            ,date: {duplicate: true}
+            ,TotalRoommates: {hidden: true}
+            ,'project/protocol': {lookups: false}
+            ,'Project/protocol': {lookups: false}
+            ,protocol: {lookups: false}
+            ,Created: {hidden: true}
+            ,CreatedBy: {hidden: true}
+            ,Modified: {hidden: true}
+            ,ModifiedBy: {hidden: true}
+            ,objectid: {hidden: true}
+            ,ts: {hidden: true}
+            ,Dataset: {hidden: true}
+            ,AgeAtTime: {hidden: true}
+            ,QCState: {hidden: true}
+            ,created: {hidden: true}
+            ,modified: {hidden: true}
+            ,SequenceNum: {hidden: true}
+            ,AnimalVisit: {hidden: true}
+            ,EntityId: {hidden: true}
+            ,Notes: {hidden: true}
+            ,dam: {lookups: false}
+            ,sire: {lookups: false}
+    //                ,code: {lookups: false}
+            ,snomed: {lookups: false}
+            ,taskid: {lookups: false}
+            ,requestid: {lookups: false}
+            ,taskId: {lookups: false}
+            ,requestId: {lookups: false}
+        }
+    };
+
+    metadata = {
+        Housing: {
+            defaultView: 'Active Housing'
+            ,metadata: {
+                isTemp: {hidden: true}
+            }
+        },
+        Alopecia: {
+            metadata: {
+                head: {lookups: false}
+            }
+        },
+        'Clinical Remarks': {
+            metadata: {
+                qualifier: {hidden: true}
+            }
+        }
+    }
+var  au = metadata[LABKEY.ActionURL.getParameter('queryName')];
+
+    if(metadata[LABKEY.ActionURL.getParameter('queryName')]){
+        EHR.Utils.rApply(config, metadata[LABKEY.ActionURL.getParameter('queryName')]);
+    }
+
+    var webpart = <%=webpartContext%>;
+    Ext4.create('LABKEY.ext4.SearchPanel', config).render(webpart.wrapperDivId);
+
+});
+</script>

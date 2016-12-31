@@ -1,0 +1,64 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="id"/>
+        <column name="id/Dataset/Demographics/gender">
+            <properties>
+                <property name="columnTitle" value="Gender"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/calculated_status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <column name="Id/activeAssignments/projects">
+            <properties>
+                <property name="columnTitle" value="Active Assignments"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/dam">
+            <properties>
+                <property name="columnTitle" value="Dam"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/sire">
+            <properties>
+                <property name="columnTitle" value="Sire"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/origin"/>
+        <column name="id/Dataset/Demographics/birth">
+            <properties>
+                <property name="columnTitle" value="Birth"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/death">
+            <properties>
+                <property name="columnTitle" value="Death"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/room">
+            <properties>
+                <property name="columnTitle" value="Current Room"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/cage">
+            <properties>
+                <property name="columnTitle" value="Current Cage"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentWeight/MostRecentWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentWeight/MostRecentWeightDate">
+            <properties>
+                <property name="columnTitle" value="Weight Date"/>
+            </properties>
+        </column>
+    </columns>
+    <sorts>
+        <sort column="id" descending="false"/>
+    </sorts>
+</customView>

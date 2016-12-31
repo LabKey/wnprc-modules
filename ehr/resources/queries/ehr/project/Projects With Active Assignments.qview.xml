@@ -1,0 +1,8 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <filters>
+       <filter column="activeAssignments/activeAssignments" operator="gt" value="0"/>
+   </filters>
+   <sorts>
+       <sort column="project" descending="true"/>
+   </sorts>
+</customView>

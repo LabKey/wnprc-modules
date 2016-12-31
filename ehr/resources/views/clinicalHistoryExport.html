@@ -1,0 +1,80 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function (){
+        var webpart = <%=webpartContext%>;
+
+        var subjects = LABKEY.ActionURL.getParameterArray('subjectId');
+        if (!subjects || !subjects.length){
+            Ext4.Msg.alert('Error', 'No IDs provided');
+            return;
+        }
+
+        subjects = subjects.sort();
+
+        var hideHistory = Ext4.data.Types.BOOLEAN.convert(LABKEY.ActionURL.getParameter('hideHistory'));
+
+        var toAdd = [];
+        Ext4.each(subjects, function(s, idx){
+            toAdd.push({
+                html: '<span style="font-size: large;"><b>Animal: ' + s + '</b></span>',
+                style: 'padding-bottom: 20px;',
+                border: false
+            });
+
+
+            toAdd.push({
+                xtype: 'ehr-narrowsnapshotpanel',
+                redacted: Ext4.data.Types.BOOLEAN.convert(LABKEY.ActionURL.getParameter('redacted')),
+                hrefTarget: '_blank',
+                border: false,
+                subjectId: s
+            });
+
+            if (!hideHistory){
+                toAdd.push({
+                    html: '<b>Chronological History:</b><hr>',
+                    style: 'padding-top: 5px;',
+                    border: false
+                });
+
+                toAdd.push({
+                    xtype: LABKEY.ActionURL.getParameter('caseId') ? 'ehr-casehistorypanel' : 'ehr-clinicalhistorypanel',
+                    printMode: true,
+                    hideExportBtn: true,
+                    border: true,
+                    subjectId: s,
+                    autoLoadRecords: true,
+                    minDate: LABKEY.ActionURL.getParameter('minDate'),
+                    maxDate: LABKEY.ActionURL.getParameter('maxDate'),
+                    caseId: LABKEY.ActionURL.getParameter('caseId'),
+                    hideGridButtons: LABKEY.ActionURL.getParameter('hideGridButtons'),
+                    redacted: Ext4.data.Types.BOOLEAN.convert(LABKEY.ActionURL.getParameter('redacted')),
+                    sortMode: LABKEY.ActionURL.getParameter('sortMode'),
+                    checkedItems: LABKEY.ActionURL.getParameter('checkedItems') ? LABKEY.ActionURL.getParameter('checkedItems').split(';') : null,
+                    hrefTarget: '_blank',
+                    style: 'margin-bottom: 20px;'
+                });
+            }
+            else {
+                toAdd.push({
+                    height: 20,
+                    border: false
+                });
+            }
+
+            if (idx != (subjects.length - 1)){
+                toAdd.push({
+                    tag: 'div',
+                    border: false,
+                    cls: 'page-break'
+                });
+            }
+        }, this);
+
+        Ext4.create('Ext.panel.Panel', {
+            border: false,
+            style: 'width: 8in;',
+            items: toAdd
+        }).render(webpart.wrapperDivId);
+    });
+</script>

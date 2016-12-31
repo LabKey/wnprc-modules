@@ -1,0 +1,142 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="requests" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <tableUrl>/ehr/requestDetails.view?formtype=${formtype}&amp;requestid=${requestid}</tableUrl>
+                <insertUrl />
+                <updateUrl />
+                <importUrl />
+                <deleteUrl />
+                <titleColumn>RowId</titleColumn>
+                <pkColumnName>requestid</pkColumnName>
+                <columns>
+                    <column columnName="rowid">
+                        <columnTitle>Request Id</columnTitle>
+                        <isAutoInc>true</isAutoInc>
+                        <nullable>true</nullable>
+                        <url>/ehr/requestDetails.view?formtype=${formtype}&amp;requestid=${requestid}</url>
+                    </column>
+                    <column columnName="title">
+                        <url>/ehr/requestDetails.view?formtype=${formtype}&amp;requestid=${requestid}</url>
+                    </column>
+                    <column columnName="requestid">
+                        <isHidden>true</isHidden>
+                        <isKeyField>true</isKeyField>
+                        <columnTitle>Request Id</columnTitle>
+                    </column>
+                    <column columnName="formtype">
+                        <columnTitle>Request Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>formtypes</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="createdby">
+                        <columnTitle>Created By</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>users</fkTable>
+                            <fkColumnName>userid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="notify1">
+                        <columnTitle>First Contact</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>PrincipalsWithoutAdmin</fkTable>
+                            <fkColumnName>userid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="notify2">
+                        <columnTitle>Second Contact</columnTitle>
+                        <!--<fk>-->
+                            <!--<fkDbSchema>core</fkDbSchema>-->
+                            <!--<fkTable>Principals</fkTable>-->
+                            <!--<fkColumnName>userid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="notify3">
+                        <columnTitle>Third Contact</columnTitle>
+                        <!--<fk>-->
+                            <!--<fkDbSchema>core</fkDbSchema>-->
+                            <!--<fkTable>Principals</fkTable>-->
+                            <!--<fkColumnName>userid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="pi">
+                        <columnTitle>PI</columnTitle>
+                    </column>
+                    <column columnName="priority">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>request_priority</fkTable>
+                            <fkColumnName>priority</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="created">
+                        <columnTitle>Created</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="modifiedby">
+                        <columnTitle>Modified By</columnTitle>
+                    </column>
+                    <column columnName="modified">
+                        <columnTitle>Modified</columnTitle>
+                    </column>
+                    <column columnName="daterequested">
+                        <columnTitle>Date Requested</columnTitle>
+                    </column>
+                    <column columnName="enddate">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="qcstate">
+                        <isHidden>true</isHidden>
+                        <columnTitle>Status</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>qcstate</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                        <displayWidth>200</displayWidth>
+                    </column>
+                    <column columnName="qcstate/Label">
+                        <displayWidth>200</displayWidth>
+                    </column>
+                    <column columnName="description">
+                        <inputType>textarea</inputType>
+                    </column>
+                </columns>
+                <buttonBarOptions includeStandardButtons="false">
+                    <!--<includeScript>/ehr/studyButtons.js</includeScript>-->
+                    <!--<onRender>EHR.DatasetButtons.moreActionsHandler</onRender>-->
+                    <!--<item text="Create New">-->
+                        <!--<originalText>Insert New</originalText>-->
+                    <!--</item>-->
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
+                    </item>
+                    <item text="Reports">
+                        <originalText>Reports</originalText>
+                    </item>
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                    <!--<item text="Import Data">-->
+                        <!--<originalText>Import Data</originalText>-->
+                    <!--</item>-->
+                    <item text="Paging">
+                        <originalText>Paging</originalText>
+                    </item>
+                    <!--<item text="Delete">-->
+                        <!--<originalText>Delete</originalText>-->
+                    <!--</item>-->
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,8 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="isActive" operator="eq" value="true"/>
+    </filters>
+</customView>

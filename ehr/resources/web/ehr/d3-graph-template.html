@@ -1,0 +1,24 @@
+<svg data-bind="attr: { height: settings.graphHeight, width: settings.graphWidth }">
+    <!-- ko foreach: regionsArray -->
+    <g data-bind="css: classname, attr: { transform: translateText }">
+        <clipPath data-bind="attr: { id: 'region-clipping-mask-' + guid() }">
+            <rect x="0" y="0" data-bind="attr: {height: height, width: width}"></rect>
+        </clipPath>
+        <!-- ko if: graph.debugShowOutline -->
+        <rect x="0" y="0" data-bind="attr: {height: height, width: width}, css: name" stroke="black" stroke-dasharray="2,5" fill-opacity=".2"></rect>
+        <!-- /ko -->
+        <g data-bind="attr: { 'clip-path': 'url(#region-clipping-mask-' + guid() + ')' }">
+            <!-- ko if: isChart -->
+            <!-- ko foreach: plots -->
+            <g data-bind="css: classId, attr: { transform: translateText }">
+                <!-- ko if: graph.debugShowOutline -->
+                <rect x="0" y="0" data-bind="attr: {height: height, width: width}, css: name" stroke="blue" stroke-dasharray="2,5" fill-opacity=".2"></rect>
+                <!-- /ko -->
+                <g class="data-container"></g>
+            </g>
+            <!-- /ko -->
+            <!-- /ko -->
+        </g>
+    </g>
+    <!-- /ko -->
+</svg>

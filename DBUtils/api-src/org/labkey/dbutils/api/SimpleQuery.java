@@ -216,11 +216,11 @@ public class SimpleQuery<RowType> extends QueryHelper {
         }
     }
 
-    public Results select() throws SQLException {
+    public Results select() {
         return super.select(this.getDefaultColumns(), null);
     }
 
-    public Results select(SimpleFilter filter) throws SQLException {
+    public Results select(SimpleFilter filter) {
         return super.select(this.getDefaultColumns(), filter);
     }
 

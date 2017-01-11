@@ -45,7 +45,7 @@ my $log_file = File::Spec->catfile($folder, 'deleteLog.txt');
 #my $lock_file = File::Spec->catfile($folder, '.lock');
 
 my $default_container = '/WNPRC/EHR';
-my $baseUrl = 'https://localhost/';
+my $baseUrl = 'https://ehr.primate.wisc.edu/';
 
 # Find today's date to append to filenames
 my $tm = localtime;
@@ -54,6 +54,8 @@ my $datestr=sprintf("%04d%02d%02d_%02d%02d", $tm->year+1900, ($tm->mon)+1, $tm->
 my $twoDaysAgo = localtime( ( time() - ( 2 * 24 * 60 * 60 ) ) );
 $twoDaysAgo = sprintf("%04d-%02d-%02d", $twoDaysAgo->year+1900, ($twoDaysAgo->mon)+1, $twoDaysAgo->mday);
 
+my $oneDayAgo = localtime( ( time() - ( 1 * 24 * 60 * 60 ) ) );
+$oneDayAgo = sprintf("%04d-%02d-%02d", $oneDayAgo->year+1900, ($oneDayAgo->mon)+1, $oneDayAgo->mday);
 #if(-e $lock_file){
 #    print "$datestr\tLock file present\n";
 #    exit 0;
@@ -88,20 +90,20 @@ sub doDelete {
 		-filterArray => [['QCState/Label', 'eq', 'Delete Requested']],
 		-columns => $columns,
 		-requiredVersion => 8.3,
-		#-debug => 1,
+		-debug => 1,
 	);	
 	handleResults($results, $schema, $query, $pk);	
 
-	#and delete anything with a QCState of "Request: Denied" modified more than 2 days ago.
+	#and delete anything with a QCState of "Request: Denied" modified more than 1 day ago.
 	$results = Labkey::Query::selectRows(
 		-baseUrl => $baseUrl,
 		-containerPath => $default_container,
 		-schemaName => $schema,
 		-queryName => $query,
-		-filterArray => [['QCState/Label', 'eq', 'Request: Denied'], ['modified', 'datelt', $twoDaysAgo]],
+		-filterArray => [['QCState/Label', 'eq', 'Request: Denied'], ['modified', 'datelt', $oneDayAgo]],
 		-columns => $columns,
 		-requiredVersion => 8.3,
-		#-debug => 1,
+		-debug => 1,
 	);	
 	handleResults($results, $schema, $query, $pk);		
 }
@@ -160,7 +162,7 @@ sub findDatasets {
 		-containerPath => $default_container,
 		-schemaName => 'study',
 		-queryName => 'datasets',
-		-filterArray => [['KeyManagementType', 'eq', 'GUID']],
+		#-filterArray => [['KeyManagementType', 'eq', 'GUID']],
 		-requiredVersion => 8.3,
 	);
 	

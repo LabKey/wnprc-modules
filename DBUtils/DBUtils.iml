@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="DBUtils-API" />
     <orderEntry type="module" module-name="EHR-API" />
+    <orderEntry type="module" module-name="LDK-API" />
   </component>
 </module>

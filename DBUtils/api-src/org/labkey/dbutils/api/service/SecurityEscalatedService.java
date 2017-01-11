@@ -6,12 +6,9 @@ import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.study.security.SecurityEscalator;
-import org.labkey.api.study.security.StudySecurityEscalator;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
 import org.labkey.dbutils.api.schema.DecoratedTableInfo;
-import org.labkey.api.ehr.EHRService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
@@ -24,9 +21,12 @@ import org.labkey.api.security.permissions.Permission;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class provides a Table Update Service that bypasses LabKey security, and instead checks the security
@@ -53,9 +53,7 @@ public abstract class SecurityEscalatedService {
         }
     }
 
-    public User getEscalationUser() {
-        return EHRService.get().getEHRUser(container);
-    }
+    public abstract User getEscalationUser();
 
     public SimpleUpdateService getUpdateService(String schemaName, String tableName) {
         return new SimpleUpdateService(schemaName, tableName);
@@ -170,6 +168,8 @@ public abstract class SecurityEscalatedService {
             // Wrap the whole thing in a transaction so that the insert is an all or nothing thing.
             try (DbScope.Transaction transaction = getTableInfo().getSchema().getScope().ensureTransaction()) {
                 try (SecurityEscalatorAggregator escalator = SecurityEscalatorAggregator.beginEscalation(user, container, escalationComment)) {
+                    escalator.registerSecurityEscalators(getEscalators(user, container, escalationComment));
+
                     returnedRows = getUpdateService().updateRows(user, container, this.castToCaseInsensitiveMap(rowMaps), this.castToCaseInsensitiveMap(keyMaps), null, null);
                 }
                 catch (QueryUpdateServiceException|SQLException e) {
@@ -191,23 +191,32 @@ public abstract class SecurityEscalatedService {
         }
     }
 
+    abstract public Set<SecurityEscalator> getEscalators(User user, Container container, String escalationComment);
+
     /*
      * This class just combines the EHR and Study Security escalators, to ensure the code above is clean,
      * and to provide an easy way to add another escalator, should the need arise.
      */
     private static class SecurityEscalatorAggregator implements AutoCloseable {
-        SecurityEscalator _studySecurityEscalator;
-        SecurityEscalator _ehrSecurityEscalator;
+        Set<SecurityEscalator> _securityEscalators = new HashSet<>();
 
-        private SecurityEscalatorAggregator(User user, Container container, String comment) {
-            _studySecurityEscalator = StudySecurityEscalator.beginEscalation(user, container, comment);
-            _ehrSecurityEscalator   = EHRSecurityEscalator.beginEscalation(user, container, comment);
+        private SecurityEscalatorAggregator(User user, Container container, String comment) {}
+
+        public void registerSecurityEscalator(SecurityEscalator securityEscalator) {
+            _securityEscalators.add(securityEscalator);
+        }
+
+        public void registerSecurityEscalators(Collection<SecurityEscalator> securityEscalatorCollection) {
+            for (SecurityEscalator escalator : securityEscalatorCollection) {
+                this.registerSecurityEscalator(escalator);
+            }
         }
 
         @Override
         public void close() {
-            _studySecurityEscalator.close();
-            _ehrSecurityEscalator.close();
+            for (SecurityEscalator escalator : _securityEscalators) {
+                escalator.close();
+            }
         }
 
         public static SecurityEscalatorAggregator beginEscalation(User user, Container container, String comment) {

@@ -75,7 +75,7 @@ tar_excluded_dirs = /labkey/backup*		;optional. a whitespace separated list of p
 rsync_backup_dir = /usr/local/labkey	;optional. a folder to be copied using rsync
 
 [lk_config]                            ;Section Optional.
-baseURL= http://localhost:8080/labkey/ ;url of your server
+baseURL= https://ehr.primate.wisc.edu ;url of your server
 containerPath = shared          	   ;the containerPath where you want to insert the record
 
 
@@ -135,9 +135,9 @@ my $datestr=sprintf("%04d%02d%02d_%02d%02d", $tm->year+1900, ($tm->mon)+1, $tm->
 chdir($config{backup_dest});
 checkFolder($config{backup_dest});
 
-my $log_file = File::Spec->catfile($config{backup_dest}, "lk_backup.log");
+
 my $log = Log::Rolling->new(
-	log_file => $log_file,
+	log_file => File::Spec->catfile($config{backup_dest}, "lk_backup.log"),
 	max_size=>50000
 );
 
@@ -470,7 +470,7 @@ sub _compressFile
 
 	my $archive;
 	if ($^O eq "MacOS" || $^O eq 'linux' || $^O eq "darwin") {
-		my $archive = system("gzip \"$origFile\" 2>&1");
+		my $archive = system("gzip $origFile 2>&1");
 		if( $? ){
 			$log->entry("ERROR: Compression returned an error: $archive");
 			$log->commit;
@@ -658,15 +658,14 @@ sub _make_tar
 	my $tarfile = shift;
 	my $files = shift;
 	my $exclude = shift;
-
-	my $cmd = "tar -cpf \"$tarfile\"";
+	
+	my $cmd = "tar -cpf $tarfile";
 	$cmd .= " --exclude='".join("' --exclude='", @$exclude)."'" if $exclude;
-	$cmd .= " @$files" . " 1>>\"$log_file\" 2>&1";
-
+	$cmd .= " @$files" . " 2>&1";
+	 
+	my $out = system($cmd);
 	$log->entry($cmd);
 	$log->commit;
-	my $out = system($cmd);
-
 	if( $? ){
 	    $log->entry("ERROR: Tar archive of files has returned an error: $out");
 	    $log->commit;

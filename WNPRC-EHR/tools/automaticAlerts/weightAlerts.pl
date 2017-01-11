@@ -21,11 +21,11 @@ Ben Bimber
 =cut
 
 #config options:
-my $baseUrl = 'https://ehr.primate.wisc.edu/';
+my $baseUrl = $ENV{'LK_BASE_URL'};
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Weight Drops';
-my $mail_server = 'smtp.wiscmail.wisc.edu';
+my $mail_server = $ENV{'MAIL_SERVER'};
 
 #emails will be sent from this address
 my $from = 'ehr-no-not-reply@primate.wisc.edu';

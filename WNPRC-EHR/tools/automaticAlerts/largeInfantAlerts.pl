@@ -18,11 +18,11 @@ my $dateString = sprintf("%04d-%02d-%02d at %02d:%02d", $tm->year+1900, ($tm->mo
 # Opening line of alert's message
 my $email_html = "This email lists orphans assigned to cages that do not meet minimum size requirements as of $dateString.<p>";
 my $results;
-my $mail_server = 'smtp.wiscmail.wisc.edu';
+my $mail_server = $ENV{'MAIL_SERVER'};
 my $from = 'ehr-do-not-reply@primate.wisc.edu';
 
 
-my $baseUrl='https://ehr.primate.wisc.edu/';
+my $baseUrl = $ENV{'LK_BASE_URL'};
 my $default_container='/WNPRC/EHR/';
 my $dataExists = 0;
 getHeavyInfants();

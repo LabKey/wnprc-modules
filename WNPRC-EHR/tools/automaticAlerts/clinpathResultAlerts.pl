@@ -20,13 +20,13 @@ Ben Bimber
 =cut
 
 #config options:
-my $baseUrl = 'https://ehr.primate.wisc.edu/';
+my $baseUrl = $ENV{'LK_BASE_URL'};
 #$baseUrl = 'http://localhost:8080/labkey/';
 
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Clinpath Results';
-my $mail_server = 'smtp.wiscmail.wisc.edu';
+my $mail_server = $ENV{'MAIL_SERVER'};
 
 #emails will be sent from this address
 my $from = 'ehr-no-not-reply@primate.wisc.edu';

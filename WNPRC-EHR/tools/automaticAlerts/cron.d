@@ -14,6 +14,8 @@
 # Environment Variables
 #---------------------------------------------------------------------------------------
 ALERT_DIR=/usr/local/labkey/automaticAlerts/
+MAIL_SERVER=mailserver
+LK_BASE_URL=https://labkey/
 #
 #---------------------------------------------------------------------------------------
 #Min   Hour     Day   Month   Weekday   User   Command

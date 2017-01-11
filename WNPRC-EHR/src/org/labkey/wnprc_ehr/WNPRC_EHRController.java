@@ -46,7 +46,6 @@ import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
-import org.labkey.api.security.RequiresPermissionClass;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
@@ -216,10 +215,9 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    @RequiresPermissionClass(ReadPermission.class)
+    @RequiresPermission(ReadPermission.class)
     @CSRF
-    public class GetAnimalDemographicsForRoomAction extends ApiAction<GetAnimalDemographicsForRoomForm>
-    {
+    public class GetAnimalDemographicsForRoomAction extends ApiAction<GetAnimalDemographicsForRoomForm> {
         public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors) throws Exception {
             Map<String, Object> props = new HashMap<>();
 

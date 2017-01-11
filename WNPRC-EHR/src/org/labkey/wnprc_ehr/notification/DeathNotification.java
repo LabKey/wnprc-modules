@@ -1,5 +1,7 @@
 package org.labkey.wnprc_ehr.notification;
 
+import org.labkey.api.data.Container;
+
 /**
  * Created by jon on 7/13/16.
  */
@@ -12,7 +14,7 @@ public class DeathNotification extends AbstractJspEmailNotification {
     }
 
     @Override
-    public String getEmailSubject() {
+    public String getEmailSubject(Container container) {
         String subject = "Death Notification";
 
         if (params.has(idParamName)) {

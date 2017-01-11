@@ -65,7 +65,7 @@ public class BehaviorNotification extends ColonyAlertsNotification
     }
 
     @Override
-    public String getEmailSubject()
+    public String getEmailSubject(Container container)
     {
         return "Behavior Alerts: " + _dateTimeFormat.format(new Date());
     }
@@ -89,7 +89,7 @@ public class BehaviorNotification extends ColonyAlertsNotification
     }
 
     @Override
-    public String getMessage(Container c, User u)
+    public String getMessageBodyHTML(Container c, User u)
     {
         Map<String, String> saved = getSavedValues(c);
         Map<String, String> toSave = new HashMap<String, String>();

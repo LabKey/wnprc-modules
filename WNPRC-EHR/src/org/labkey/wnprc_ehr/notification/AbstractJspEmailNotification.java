@@ -40,7 +40,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
     }
 
     @Override
-    public String getMessage(Container c, User u) {
+    public String getMessageBodyHTML(Container c, User u) {
         JspEmail email = new JspEmail(getPathToJsp());
 
         String emailContents;
@@ -91,8 +91,8 @@ abstract public class AbstractJspEmailNotification implements Notification {
             msg.setRecipients(Message.RecipientType.TO, StringUtils.join(emails, ","));
 
             // Set subject and body
-            msg.setSubject(getEmailSubject());
-            msg.setBodyContent(getMessage(container, user), "text/html");
+            msg.setSubject(getEmailSubject(container));
+            msg.setHtmlContent(getMessageBodyHTML(container, user));
 
             MailHelper.send(msg, user, container);
         }

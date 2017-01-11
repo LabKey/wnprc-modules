@@ -13,7 +13,6 @@ import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
-import org.labkey.dbutils.api.service.SecurityEscalatedService;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
@@ -25,14 +24,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by jon on 10/28/16.
  */
-public class BehaviorDataEntryService extends SecurityEscalatedService {
+public class BehaviorDataEntryService extends DataEntryService {
     public static Set<String> BEHAVIOR_PROJECT_CODES = new HashSet<>(Arrays.asList(
             "a1",
             "a2",

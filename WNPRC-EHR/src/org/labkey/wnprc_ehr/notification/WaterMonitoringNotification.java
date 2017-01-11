@@ -85,7 +85,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
     private static final Logger _log = Logger.getLogger(WaterMonitoringNotification.class);
 
 
-    public String getEmailSubject()
+    public String getEmailSubject(Container container)
     {
         return "Daily Water Monitoring: " + AbstractEHRNotification._dateTimeFormat.format(new Date());
     }
@@ -104,7 +104,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.";
     }
 
-    public String getMessage(final Container c, User u)
+    public String getMessageBodyHTML(final Container c, User u)
     {
         final StringBuilder msg = new StringBuilder();
 

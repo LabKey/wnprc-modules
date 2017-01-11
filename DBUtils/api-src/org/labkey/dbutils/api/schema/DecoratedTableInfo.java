@@ -126,6 +126,18 @@ public class DecoratedTableInfo implements TableInfo {
 
     @NotNull
     @Override
+    public Map<String, Pair<IndexType, List<ColumnInfo>>> getUniqueIndices() {
+        return _tableInfo.getUniqueIndices();
+    }
+
+    @NotNull
+    @Override
+    public Map<String, Pair<IndexType, List<ColumnInfo>>> getAllIndices() {
+        return _tableInfo.getAllIndices();
+    }
+
+    @NotNull
+    @Override
     public List<ColumnInfo> getAlternateKeyColumns() {
         return _tableInfo.getAlternateKeyColumns();
     }
@@ -295,6 +307,11 @@ public class DecoratedTableInfo implements TableInfo {
     @Override
     public String getPublicSchemaName() {
         return _tableInfo.getPublicSchemaName();
+    }
+
+    @Override
+    public boolean hasContainerColumn() {
+        return _tableInfo.hasContainerColumn();
     }
 
     @Override

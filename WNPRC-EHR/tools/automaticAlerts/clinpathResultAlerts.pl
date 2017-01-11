@@ -26,10 +26,10 @@ my $baseUrl = 'https://ehr.primate.wisc.edu/';
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Clinpath Results';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
-my $from = 'ehr-do-not-reply@primate.wisc.edu';
+my $from = 'ehr-no-not-reply@primate.wisc.edu';
 
 
 ############Do not edit below this line
@@ -69,7 +69,7 @@ $results = Labkey::Query::selectRows(
     -containerPath => $studyContainer,
     -schemaName => 'study',
     -queryName => 'Clinpath Runs',
-    -columns => 'Id,date,Id/curLocation/area,Id/curLocation/room,Id/curLocation/cage,servicerequested,requestId,requestid/description,reviewedBy,dateReviewed',
+    -columns => 'Id,date,Id/curLocation/area,Id/curLocation/room,Id/curLocation/cage,serviceRequested,requestId,requestid/description,reviewedBy,dateReviewed',
     -sort => 'Id,date',
     -filterArray => [
 		['qcstate/PublicData', 'eq', 'true'],
@@ -115,7 +115,7 @@ if(@{$results->{rows}}){
 			$email_html .= "$room:<br>\n";
 			$email_html .= "<table border=1><tr><td>Id</td><td>Collect Date</td><td>Service Requested</td><td>Requestor</td><td>Date Reviewed</td><td>Reviewed By</td></tr>";
 			foreach my $rec (@{$$rooms{$room}}){		
-				$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#inputType:singleSubject&showReport:1&subjects:".$$rec{Id}."&activeReport:clinPathRuns'>".$$rec{Id}."</a></td><td>".$$rec{date}."</td><td>".$$rec{'servicerequested'}."</td><td>".($$rec{'requestid/description'} ? $$rec{'requestid/description'} : '')."</td><td>".($$rec{'dateReviewed'} ? $$rec{'dateReviewed'} : '')."</td><td".($$rec{'reviewedBy'} ? '' : ' style=background:red;').">".($$rec{'reviewedBy'} ? $$rec{'reviewedBy'} : '')."</td></tr>";
+				$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:clinPathRuns'>".$$rec{Id}."</a></td><td>".$$rec{date}."</td><td>".$$rec{'serviceRequested'}."</td><td>".($$rec{'requestid/description'} ? $$rec{'requestid/description'} : '')."</td><td>".($$rec{'dateReviewed'} ? $$rec{'dateReviewed'} : '')."</td><td".($$rec{'reviewedBy'} ? '' : ' style=background:red;').">".($$rec{'reviewedBy'} ? $$rec{'reviewedBy'} : '')."</td></tr>";
 			}
 						
 			$email_html .= "</table><p>\n";	    	

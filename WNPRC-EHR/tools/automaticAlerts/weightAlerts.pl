@@ -25,10 +25,10 @@ my $baseUrl = 'https://ehr.primate.wisc.edu/';
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Weight Drops';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
-my $from = 'ehr-do-not-reply@primate.wisc.edu';
+my $from = 'ehr-no-not-reply@primate.wisc.edu';
 
 
 ############Do not edit below this line
@@ -155,7 +155,7 @@ sub processWeights {
 			my $rooms = $$summary{$area};			
 			foreach my $room (sort(keys %$rooms)){
 				foreach my $rec (@{$$rooms{$room}{records}}){			
-					$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#inputType:singleSubject&showReport:1&subjects:".$$rec{Id}."&activeReport:abstract'>".$$rec{Id}."</a></td><td>$area</td><td>$room</td><td>".$$rec{'Id/curLocation/cage'}."</td><td>".$$rec{LatestWeight}."</td><td>".$$rec{LatestWeightDate}."</td><td>".$$rec{weight}."</td><td>".$$rec{date}."</td><td>".$$rec{PctChange}."</td><td>".$$rec{IntervalInDays}."</td></tr>";
+					$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:abstract'>".$$rec{Id}."</a></td><td>$area</td><td>$room</td><td>".$$rec{'Id/curLocation/cage'}."</td><td>".$$rec{LatestWeight}."</td><td>".$$rec{LatestWeightDate}."</td><td>".$$rec{weight}."</td><td>".$$rec{date}."</td><td>".$$rec{PctChange}."</td><td>".$$rec{IntervalInDays}."</td></tr>";
 				}								  	
 			}			
 		}

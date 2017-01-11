@@ -38,6 +38,7 @@ use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
 use Time::localtime;
+#use Time::Piece;
 use File::Touch;
 use File::Spec;
 use File::Basename;
@@ -135,6 +136,7 @@ sub processTreatments {
 
 	$email_html .= "<b>$timeofday Treatments:</b><br>";
 
+	#print "We have rows: ".scalar @{$results->{rows}}."\n";
 	if(!@{$results->{rows}}){
 		$email_html .= "There are no scheduled $timeofday treatments as of $timestr. Treatments could be added after this email was sent, so please check online closer to the time.<hr>";
 		if($timeOfDay >= $minTime && $noSendUnlessTreatments){
@@ -357,6 +359,7 @@ if ($hour > 14 || (($hour == 14) && ($minute >= 30))) {
 }
 
 
+#print "Send email: \"$send_email\"";
 if($send_email){
 #	open(HTML, ">", "C:\\Users\\Admin\\Desktop\\test.html");
 #	print HTML $email_html;
@@ -393,6 +396,7 @@ if($send_email){
 			          Encoding => 'quoted-printable',
 			          Data	 => $email_html
 			);
+			#print $smtp->as_string();
 			$smtp->send() || die;
 		}
 	}

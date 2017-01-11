@@ -25,10 +25,10 @@ my $baseUrl = 'https://ehr.primate.wisc.edu/';
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Colony Management Alerts';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
-my $from = 'ehr-do-not-reply@primate.wisc.edu';
+my $from = 'ehr-no-not-reply@primate.wisc.edu';
 
 
 ############Do not edit below this line
@@ -221,7 +221,7 @@ $results = Labkey::Query::selectRows(
     -containerPath => $studyContainer,
     -schemaName => 'study',
     -queryName => 'Demographics',
-    -viewName => 'No Active Assignments',
+    -viewName => 'No Active Assigns',
     -requiredVersion => 8.3,
     #-debug => 1,
 );
@@ -237,7 +237,7 @@ if(@{$results->{rows}}){
         $email_html .= $row->{'Id'}."<br>";
     };
 
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assignments'>Click here to view these animals</a></p>\n";    
+    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns'>Click here to view these animals</a></p>\n";    
     $email_html .= '<hr>';
 }
 
@@ -309,7 +309,7 @@ $results = Labkey::Query::selectRows(
     -queryName => 'Demographics',    
     -filterArray => [
     	['hold', 'isnonblank', ''],
-		['Id/activeAssignments/NumPendingAssignments', 'eq', 0],    	 	 	
+		['Id/AssignmentSummary/NumPendingAssignments', 'eq', 0],    	 	 	
     ],
     -requiredVersion => 8.3,
     #-debug => 1,

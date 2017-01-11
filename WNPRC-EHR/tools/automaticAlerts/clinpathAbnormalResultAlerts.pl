@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w 
 
 =head1 DESCRIPTION
 
@@ -26,10 +26,10 @@ my $baseUrl = 'https://ehr.primate.wisc.edu/';
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Clinpath Abnormal Results';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
-my $from = 'ehr-do-not-reply@primate.wisc.edu';
+my $from = 'ehr-no-not-reply@primate.wisc.edu';
 
 
 ############Do not edit below this line
@@ -135,7 +135,7 @@ foreach my $area (sort(keys %$summary)){
 				$color = '#E3170D';	
 			}
 			
-			$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#inputType:singleSubject&showReport:1&subjects:".$$rec{Id}."&activeReport:clinPathRuns'>".$$rec{Id}."</a></td>".
+			$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:clinPathRuns'>".$$rec{Id}."</a></td>".
 			"<td>".$$rec{date}."</td>".		
 			"<td>".$$rec{'taskid/datecompleted'}."</td>".						
 			"<td>".$$rec{testId}."</td>".

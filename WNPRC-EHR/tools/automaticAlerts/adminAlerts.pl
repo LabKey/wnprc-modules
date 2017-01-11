@@ -20,10 +20,10 @@ Ben Bimber
 
 #config options:
 my $baseUrl = 'https://ehr.primate.wisc.edu/';
-my $studyContainer = 'WNPRC/EHR/';
+my $studyContainer = 'ehr/WNPRC/';
 
 my $notificationtypes = 'Admin Alerts';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
 my $from = 'ehr-do-not-reply@primate.wisc.edu';
@@ -32,7 +32,7 @@ my $from = 'ehr-do-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -57,7 +57,7 @@ my $results;
 
 
 #summarize site usage in the past 7 days
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'core',
@@ -80,7 +80,7 @@ if(@{$results->{rows}}){
 }
 
 #Client Errors:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => 'shared',
     -schemaName => 'auditlog',
@@ -107,41 +107,41 @@ if(@{$results->{rows}}){
 
 $email_html .= "<b>Data Entry Stats:</b><p>";
 
-$results = Labkey::Query::executeSql(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'ehr',
-    -sql => "SELECT formtype, count(*) as total FROM ehr.tasks WHERE cast(created as date) = '$yesterday' GROUP BY formtype ORDER BY formtype",    
-    #-debug => 1,
-);
+#$results = LabKey::Query::executeSql(
+#    -baseUrl => $baseUrl,
+#    -containerPath => $studyContainer,
+#    -schemaName => 'ehr',
+#    -sql => "SELECT formtype, count(*) as total FROM ehr.tasks WHERE cast(created as date) = '$yesterday' GROUP BY formtype ORDER BY formtype",    
+#    #-debug => 1,
+#);
 
-if(@{$results->{rows}}){	
-	$email_html .= "Number of Forms Created Yesterday: <br>\n";
-    foreach my $row (@{$results->{rows}}){
-        $email_html .= $row->{'formtype'}.": ".$row->{'total'}."<br>\n";
-    };
+#if(@{$results->{rows}}){	
+#	$email_html .= "Number of Forms Created Yesterday: <br>\n";
+#    foreach my $row (@{$results->{rows}}){
+#        $email_html .= $row->{'formtype'}.": ".$row->{'total'}."<br>\n";
+#    };
 	
-	$email_html .= "<p>\n";			
-}
+#	$email_html .= "<p>\n";			
+#}
 
-$results = Labkey::Query::executeSql(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'ehr',
-    -sql => "SELECT Dataset.Label as label, count(*) as total FROM study.studydata WHERE cast(created as date) = '$yesterday' and taskid is not null GROUP BY Dataset.Label ORDER BY Dataset.Label",    
+#$results = LabKey::Query::executeSql(
+#    -baseUrl => $baseUrl,
+#    -containerPath => $studyContainer,
+#    -schemaName => 'ehr',
+#    -sql => "SELECT Dataset.Label as label, count(*) as total FROM study.studydata WHERE cast(created as date) = '$yesterday' and taskid is not null GROUP BY Dataset.Label ORDER BY Dataset.Label",    
     #-debug => 1,
-);
+#);
 
-if(@{$results->{rows}}){	
-	$email_html .= "Number of Records Created Yesterday Through Labkey: <br>\n";
-    foreach my $row (@{$results->{rows}}){
-        $email_html .= $row->{'label'}.": ".$row->{'total'}."<br>\n";
-    };
+#if(@{$results->{rows}}){	
+#	$email_html .= "Number of Records Created Yesterday Through Labkey: <br>\n";
+#    foreach my $row (@{$results->{rows}}){
+#        $email_html .= $row->{'label'}.": ".$row->{'total'}."<br>\n";
+#    };
 	
-	$email_html .= "<p>\n";			
-}
+#	$email_html .= "<p>\n";			
+#}
 
-#$results = Labkey::Query::executeSql(
+#$results = LabKey::Query::executeSql(
 #    -baseUrl => $baseUrl,
 #    -containerPath => $studyContainer,
 #    -schemaName => 'ehr',
@@ -167,7 +167,7 @@ if(@{$results->{rows}}){
 #close HTML;
 #die;
 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -requiredVersion => 8.3,
     -containerPath => $studyContainer,

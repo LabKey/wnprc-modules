@@ -25,10 +25,10 @@ my $baseUrl = 'https://ehr.primate.wisc.edu/';
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Colony Alerts Lite';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
-my $from = 'ehr-do-not-reply@primate.wisc.edu';
+my $from = 'ehr-no-not-reply@primate.wisc.edu';
 
 
 ############Do not edit below this line
@@ -197,7 +197,7 @@ $results = Labkey::Query::selectRows(
     -queryName => 'Demographics',
     -filterArray => [
     	['Id/Dataset/Demographics/calculated_status', 'eq', 'Alive'],
-    	['Id/curLocation/room', 'isblank', ''],
+    	['Id/curLocation/room/room', 'isblank', ''],
     ],
     -requiredVersion => 8.3,
     #-debug => 1,
@@ -211,7 +211,7 @@ if(@{$results->{rows}}){
     };
     	
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." living animals that lack an active housing record.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room~isblank&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.Id/curLocation/room/room~isblank&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";#
 	$email_html .= "<hr>\n";			
 }
 
@@ -243,30 +243,30 @@ if(@{$results->{rows}}){
 }
 
 #then we find all records with problems in the calculated_status field
-$results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'Validate_status_mysql',
-    -requiredVersion => 8.3,
-    #-debug => 1,
-);
+#$results = Labkey::Query::selectRows(
+#    -baseUrl => $baseUrl,
+#    -containerPath => $studyContainer,
+#    -schemaName => 'study',
+#    -queryName => 'Validate_status_mysql',
+#    -requiredVersion => 8.3,
+#    #-debug => 1,
+#);
 
-if(@{$results->{rows}}){
-    $doSend = 1;
-
-	my @ids;
-
-    foreach my $row (@{$results->{rows}}){
-    	push(@ids, $row->{'id'});
-        $email_html .= $row->{'id'}."<br>";
-    };
-
-	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with potential problems in the status field (based on old system).</b><br>";
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Validate_status_mysql'>Click here to view these records</a></p>\n";
-    $email_html .= "<a href='".$baseUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Demographics&query.Id~in=".join(';', @ids)."'>Click here to edit demographics to fix the problems</a><p>";
-    $email_html .= "<hr>";
-}
+#if(@{$results->{rows}}){
+#    $doSend = 1;
+#
+#	my @ids;
+#
+#    foreach my $row (@{$results->{rows}}){
+#    	push(@ids, $row->{'id'});
+#        $email_html .= $row->{'id'}."<br>";
+#    };
+#
+#   $email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with potential problems in the status field (based on old system).</b><br>";
+#    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Validate_status_mysql'>Click here to view these records</a></p>\n";
+#    $email_html .= "<a href='".$baseUrl."ehr/".$studyContainer."updateQuery.view?schemaName=study&query.queryName=Demographics&query.Id~in=".join(';', @ids)."'>Click here to edit demographics to fix the problems</a><p>";
+#    $email_html .= "<hr>";
+#}
 
 
 #we find any active assignment where the animal is not alive

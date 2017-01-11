@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 =head1 DESCRIPTION
 
@@ -22,11 +22,11 @@ Ben Bimber
 
 #config options:
 my $baseUrl = 'https://ehr.primate.wisc.edu/';
-#my $baseUrl= 'http://localhost:8080/labkey/';
+#my $baseUrl = 'http://localhost/'; 
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Colony Alerts';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
 my $from = 'ehr-do-not-reply@primate.wisc.edu';
@@ -277,7 +277,7 @@ $results = Labkey::Query::selectRows(
     -sort => 'Id',
     -filterArray => [
     	['Id/Dataset/Demographics/calculated_status', 'eq', 'Alive'],
-    	['Id/curLocation/room', 'isblank', ''],
+    	['Id/curLocation/room/room', 'isblank', ''],
     ],
     -requiredVersion => 8.3,
     #-debug => 1,
@@ -404,7 +404,7 @@ $results = Labkey::Query::selectRows(
     -filterArray => [
     	['Id/Dataset/Demographics/calculated_status', 'neqornull', 'Alive'],
 		['enddate', 'isblank', ''],
-		['protocol/protocol', 'isblank', ''],    			    	
+		['project/protocol', 'isblank', ''],    			    	
     ],
     -requiredVersion => 8.3,
     #-debug => 1,
@@ -442,7 +442,7 @@ $results = Labkey::Query::selectRows(
     -filterArray => [
     	['calculated_status', 'eq', 'Alive'],
 		['medical', 'contains', 'siv'],
-		['Id/activeAssignments/ActiveAssignments', 'doesnotcontain', '20060202'],
+		['Id/assignmentSummary/ActiveVetAssignments', 'doesnotcontain', '20060202'],    			    	
     ],
     -requiredVersion => 8.3,
     #-debug => 1,
@@ -451,7 +451,7 @@ $results = Labkey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with SIV in the medical field, but not actively assigned to exempt from paired housing (20060202):</b><br>";	
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=siv&query.Id%2FactiveAssignments%2FActiveVetAssignments~doesnotcontain=20060202"."'>Click here to view them</a></p>\n";
+    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=siv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202"."'>Click here to view them</a></p>\n";
     $email_html .= '<hr>';
 }
 
@@ -464,7 +464,7 @@ $results = Labkey::Query::selectRows(
     -filterArray => [
     	['calculated_status', 'eq', 'Alive'],
 		['medical', 'contains', 'shiv'],
-		['Id/activeAssignments/ActiveVetAssignments', 'doesnotcontain', '20060202'],    			    	
+		['Id/assignmentSummary/ActiveVetAssignments', 'doesnotcontain', '20060202'],    			    	
     ],
     -requiredVersion => 8.3,
     #-debug => 1,
@@ -473,7 +473,7 @@ $results = Labkey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with SHIV in the medical field, but not actively assigned to exempt from paired housing (20060202):</b><br>";	
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=shiv&query.Id%2FactiveAssignments%2FActiveVetAssignments~doesnotcontain=20060202"."'>Click here to view them</a></p>\n";
+    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Alive%2C%20at%20WNPRC&query.medical~contains=shiv&query.Id%2FassignmentSummary%2FActiveVetAssignments~doesnotcontain=20060202"."'>Click here to view them</a></p>\n";
     $email_html .= '<hr>';
 }
 
@@ -826,7 +826,7 @@ $results = Labkey::Query::selectRows(
     -sort => 'Id', 
     -filterArray => [
     	['hold', 'isnonblank', ''],
-		['Id/assignmentSummary/NumPendingAssignments', 'eq', 0],
+		['Id/assignmentSummary/NumPendingAssignments', 'eq', 0],    	 	 	
     ],
     -requiredVersion => 8.3,
     #-debug => 1,
@@ -834,7 +834,7 @@ $results = Labkey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." animals with a hold code, but not on the pending project.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.hold~isnonblank&query.Id/activeAssignments/NumPendingAssignments~eq=0"."'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.hold~isnonblank&query.Id/assignmentSummary/NumPendingAssignments~eq=0"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";			
 }
 
@@ -990,7 +990,7 @@ $results = Labkey::Query::selectRows(
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." finalized records with future dates.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=StudyData&query.date~dategt=$datestr&query.qcstate/PublicData~eq=true&query.dataset/label~neq=Treatment Orders&query.dataset/label~neq=Assignment'>Click here to view them</a><br>\n";
+	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=StudyData&query.date~dategt=$datestr&query.qcstate/PublicData~eq=1&query.dataset/label~neq=Treatment Orders&query.dataset/label~neq=Assignment'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";	
 }
 

@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-
 =head1 DESCRIPTION
 
 This script is designed to run as a cron job.  It will query a number of tables and email a report.
@@ -23,13 +22,13 @@ Ben Bimber
 my $baseUrl = 'https://ehr.primate.wisc.edu/';
 #$baseUrl = 'http://localhost:8080/labkey/';
 
-my $studyContainer = 'WNPRC/EHR/';
+my $studyContainer = 'ehr/WNPRC/EHR/';
 
 my $notificationtypes = 'Blood Admin Alerts';
-my $mail_server = 'smtp.primate.wisc.edu';
+my $mail_server = 'smtp.wiscmail.wisc.edu';
 
 #emails will be sent from this address
-my $from = 'ehr-do-not-reply@primate.wisc.edu';
+my $from = 'ehr-no-not-reply@primate.wisc.edu';
 
 
 ############Do not edit below this line
@@ -59,17 +58,17 @@ my $results;
 
 #we find any current or future blood draws where the animal is not alive
 $results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'Blood Draws',
-    -filterArray => [
-    	['Id/DataSet/Demographics/calculated_status', 'neqornull', 'Alive'],
-    	['qcstate/label', 'neq', 'Request: Denied'],
+-baseUrl => $baseUrl,
+-containerPath => $studyContainer,
+-schemaName => 'study',
+-queryName => 'Blood Draws',
+-filterArray => [
+	['Id/DataSet/Demographics/calculated_status', 'neqornull', 'Alive'],
+	['qcstate/label', 'neq', 'Request: Denied'],
 		['date', 'dategte', $datestr],    			    	
-    ],
-    -requiredVersion => 8.3,
-    #-debug => 1,
+],
+-requiredVersion => 8.3,
+#-debug => 1,
 );
 
 if(@{$results->{rows}}){
@@ -81,56 +80,58 @@ if(@{$results->{rows}}){
 
 #we find any blood draws over the allowable limit
 $results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'Blood Draws',
-    -filterArray => [
-    	['Id/Dataset/Demographics/calculated_status', 'eq', 'Alive'],
-    	['qcstate/label', 'neq', 'Request: Denied'],
-		['date', 'dategte', $datestr],    
-		['BloodRemaining/AvailBlood', 'lt', 0],    			    	
-    ],
-    -requiredVersion => 8.3,
-    #-debug => 1,
+	-baseUrl => $baseUrl,
+	-containerPath => $studyContainer,
+	-schemaName => 'study',
+	-queryName => 'FutureOverDraws',
+#	-filterArray => [
+#	['Id/Dataset/Demographics/calculated_status', 'eq', 'Alive'],
+#	['qcstate/label', 'neq', 'Request: Denied'],
+#		['date', 'dategte', $datestr],    
+#		['BloodRemaining/AvailBlood', 'lt', 0],    			    	
+#],
+	-requiredVersion => 8.3,
+	-debug => 1,
 );
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." scheduled blood draws exceeding the allowable volume.</b><br>";
-    foreach my $row (@{$results->{rows}}){
-        $email_html .= $row->{'Id'}."<br>";
-    };
+foreach my $row (@{$results->{rows}}){
+$email_html .= $row->{'Id'}."<br>";
+};
 
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Blood Draws&query.viewName=Blood Summary&query.date~dategte=$datestr&query.Id/Dataset/Demographics/calculated_status~eq=Alive&query.BloodRemaining/AvailBlood~lt=0"."'>Click here to view them</a><br>\n";	
+	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=FutureOverDraws&query.viewName=Blood Summary&query.date~dategte=$datestr&query.Id/Dataset/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a><br>\n";	
 	$email_html .= "<hr>\n";			
 }
 else {
 	$email_html .= "<b>There are no future blood draws exceeding the allowable amount based on current weights.</b><br>";
 	$email_html .= "<hr>\n";		
 }
-
+#$email_html .= "<br>\n";
+#$email_html .= "<p><a href='https://ehr.primate.wisc.edu/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=DailyOverDraws'> Click here to see animals with blood less than 10ml of blood available.</a><br>\n";
+#$email_html .= "<hr>\n";
 
 #we find any blood draws where the animal is not assigned to that project
 $results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'BloodSchedule',
-    -filterArray => [    	
-    	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
-    	['qcstate/label', 'neq', 'Request: Denied'],
+-baseUrl => $baseUrl,
+-containerPath => $studyContainer,
+-schemaName => 'study',
+-queryName => 'BloodSchedule',
+-filterArray => [    	
+	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
+	['qcstate/label', 'neq', 'Request: Denied'],
 		['projectStatus', 'isnonblank', ''],
 		['date', 'dategte', $datestr],		
-    ],
-    -requiredVersion => 8.3,
-    #-debug => 1,
+],
+-requiredVersion => 8.3,
+#-debug => 1,
 );
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." blood draws scheduled today or in the future where the animal is not assigned to the project.</b><br>";
-    foreach my $row (@{$results->{rows}}){
-        $email_html .= $row->{'Id'}."<br>";
-    };	
+foreach my $row (@{$results->{rows}}){
+$email_html .= $row->{'Id'}."<br>";
+};	
 	
 	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.projectStatus~isnonblank&query.Id/DataSet/Demographics/calculated_status~eq=Alive&query.date~dategte=$datestr"."'>Click here to view them</a><br>\n";
 	$email_html .= "<hr>\n";			
@@ -142,17 +143,17 @@ else {
 
 #we find any blood draws not yet approved
 $results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'Blood Draws',
-    -filterArray => [    	
-    	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
+-baseUrl => $baseUrl,
+-containerPath => $studyContainer,
+-schemaName => 'study',
+-queryName => 'Blood Draws',
+-filterArray => [    	
+	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
 		['qcstate/label', 'eq', 'Request: Pending'],
 		['date', 'dategte', $datestr],		
-    ],
-    -requiredVersion => 8.3,
-    #-debug => 1,
+],
+-requiredVersion => 8.3,
+#-debug => 1,
 );
 
 if(@{$results->{rows}}){
@@ -167,18 +168,18 @@ else {
 
 #we find any blood draws not yet assigned to either SPI or animal care
 $results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'Blood Draws',
-    -filterArray => [    	
-    	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
-    	['qcstate/label', 'neq', 'Request: Denied'],
+-baseUrl => $baseUrl,
+-containerPath => $studyContainer,
+-schemaName => 'study',
+-queryName => 'Blood Draws',
+-filterArray => [    	
+	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
+	['qcstate/label', 'neq', 'Request: Denied'],
 		['billedby', 'isblank', ''],
 		['date', 'dategte', $datestr],		
-    ],
-    -requiredVersion => 8.3,
-    #-debug => 1,
+],
+-requiredVersion => 8.3,
+#-debug => 1,
 );
 
 if(@{$results->{rows}}){
@@ -192,42 +193,42 @@ else {
 }
 
 #we find any current blood draws with clinpath, but lacking a request
-$results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'ValidateBloodDrawClinpath',
-    -viewName => 'Lacking Clinpath Request',
-    -filterArray => [
-		['date', 'dateeq', $datestr],    			    	
-    ],
-    -requiredVersion => 8.3,
-    #-debug => 1,
-);
+#$results = Labkey::Query::selectRows(
+#-baseUrl => $baseUrl,
+#-containerPath => $studyContainer,
+#-schemaName => 'study',
+#-queryName => 'ValidateBloodDrawClinpath',
+#-viewName => 'Lacking Clinpath Request',
+#-filterArray => [
+#		['date', 'dateeq', $datestr],    			    	
+#],
+#-requiredVersion => 8.3,
+#-debug => 1,
+#);
 
-if(@{$results->{rows}}){
-	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." blood draws scheduled today that request clinpath, but lack a corresponding clinpath request.</b><br>";
-	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ValidateBloodDrawClinpath&query.viewName=Lacking Clinpath Request&query.date~dateeq=$datestr"."'>Click here to view them</a><br>\n";
-	$email_html .= "<hr>\n";			
-}
+#if(@{$results->{rows}}){
+#	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." blood draws scheduled today that request clinpath, but lack a corresponding clinpath request.</b><br>";
+#	$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ValidateBloodDrawClinpath&query.viewName=Lacking Clinpath Request&query.date~dateeq=$datestr"."'>Click here to view them</a><br>\n";
+#	$email_html .= "<hr>\n";			
+#}
 
 
 
 #we find any incomplete blood draws scheduled today, by area
 $results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -containerPath => $studyContainer,
-    -schemaName => 'study',
-    -queryName => 'BloodSchedule',
-    -columns => 'drawStatus,daterequested,project,date,project/protocol,taskid,projectStatus,tube_vol,tube_type,billedby,billedby/title,num_tubes,Id/curLocation/area,Id/curLocation/room,Id/curLocation/cage,additionalServices,remark,Id,quantity,qcstate,qcstate/Label,requestid',
-    -filterArray => [
-    	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
+-baseUrl => $baseUrl,
+-containerPath => $studyContainer,
+-schemaName => 'study',
+-queryName => 'BloodSchedule',
+-columns => 'drawStatus,daterequested,project,date,project/protocol,taskid,projectStatus,tube_vol,tube_type,billedby,billedby/title,num_tubes,Id/curLocation/area,Id/curLocation/room,Id/curLocation/cage,additionalServices,remark,Id,quantity,qcstate,qcstate/Label,requestid',
+-filterArray => [
+	['Id/DataSet/Demographics/calculated_status', 'eq', 'Alive'],
 		['date', 'dateeq', $datestr],
 		['qcstate', 'ne', 'Completed'],     			    	
-    ],    
-    -sort => 'daterequested',
-    -requiredVersion => 8.3,
-    #-debug => 1,
+],    
+-sort => 'daterequested',
+-requiredVersion => 8.3,
+#-debug => 1,
 );
 
 
@@ -238,7 +239,7 @@ else {
 	my $complete = 0;
 	my $incomplete = 0;
 	my $summary = {};
-    foreach my $row (@{$results->{rows}}){   	    	
+foreach my $row (@{$results->{rows}}){   	    	
 		if($row->{'qcstate/Label'} && $row->{'qcstate/Label'} eq 'Completed'){
 			$complete++;
 		}   
@@ -255,7 +256,7 @@ else {
 			
 			$incomplete++;				
 		}     
-    };
+};
 
 	my $url = "<a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=BloodSchedule&query.date~dateeq=$datestr&query.Id/DataSet/Demographics/calculated_status~eq=Alive"."'>Click here to view them</a></p>\n";
 	$email_html .= "There are ".@{$results->{rows}}." scheduled blood draws for $datestr.  $complete have been completed.  $url<p>\n";		
@@ -298,21 +299,21 @@ else {
 #die;
 
 $results = Labkey::Query::selectRows(
-    -baseUrl => $baseUrl,
-    -requiredVersion => 8.3,
-    -containerPath => $studyContainer,
-    -schemaName => 'ehr',
-    -queryName => 'NotificationRecipientsExpanded',
-    -filterArray => [
+-baseUrl => $baseUrl,
+-requiredVersion => 8.3,
+-containerPath => $studyContainer,
+-schemaName => 'ehr',
+-queryName => 'NotificationRecipientsExpanded',
+-filterArray => [
 		['notificationtype', 'in', $notificationtypes],
-    ],
-    #-debug => 1,
+],
+#-debug => 1,
 );	
 if(@{$results->{rows}}){	
 	my @email_recipients;
 	foreach my $row (@{$results->{rows}}){
-    	push(@email_recipients, $$row{email})		
-    }
+	push(@email_recipients, $$row{email})		
+}
 	
 	if(@email_recipients){
 		@email_recipients = uniq @email_recipients;

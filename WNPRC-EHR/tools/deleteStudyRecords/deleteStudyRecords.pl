@@ -45,7 +45,7 @@ my $log_file = File::Spec->catfile($folder, 'deleteLog.txt');
 #my $lock_file = File::Spec->catfile($folder, '.lock');
 
 my $default_container = '/WNPRC/EHR';
-my $baseUrl = 'https://ehr.primate.wisc.edu/';
+my $baseUrl = $ENV{'LK_BASE_URL'};
 
 # Find today's date to append to filenames
 my $tm = localtime;

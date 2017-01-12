@@ -31,7 +31,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
 
     @Override
     public String getCategory() {
-        return WNPRC_EHRModule.WNPRC_Category_Name;
+        return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class).getName();
     }
 
     @Override

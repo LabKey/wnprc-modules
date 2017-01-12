@@ -89,17 +89,7 @@ import java.util.Set;
  * Time: 1:52 PM
  */
 public class WNPRC_EHRModule extends ExtendedSimpleModule {
-    public static final String NAME = "WNPRC_EHR";
     public static final String CONTROLLER_NAME = "wnprc_ehr";
-    public static final String WNPRC_Category_Name = NAME;
-
-    public String getName() {
-        return NAME;
-    }
-
-    public double getVersion() {
-        return 15.12;
-    }
 
     public boolean hasScripts() {
         return true;

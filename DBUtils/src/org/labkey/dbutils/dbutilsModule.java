@@ -13,19 +13,6 @@ import java.util.Collections;
 import java.util.Set;
 
 public class dbutilsModule extends ExtendedSimpleModule {
-    public static final String NAME = "dbutils";
-    public static final String SCHEMA_NAME = NAME;
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public double getVersion() {
-        return 15.11;
-    }
-
     @Override
     public boolean hasScripts() { return false; }
 

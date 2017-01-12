@@ -137,7 +137,7 @@ public class EHRManager
     {
         try
         {
-            Module ehr = ModuleLoader.getInstance().getModule(EHRModule.NAME);
+            Module ehr = ModuleLoader.getInstance().getModule(EHRModule.class);
             ModuleProperty mp = ehr.getModuleProperties().get(EHRManager.EHRAdminUserPropName);
             String emailAddress = PropertyManager.getCoalecedProperty(PropertyManager.SHARED_USER, c, mp.getCategory(), EHRManager.EHRAdminUserPropName);
             if (emailAddress == null)
@@ -166,7 +166,7 @@ public class EHRManager
 
     public Container getPrimaryEHRContainer(boolean logOnError)
     {
-        Module ehr = ModuleLoader.getInstance().getModule(EHRModule.NAME);
+        Module ehr = ModuleLoader.getInstance().getModule(EHRModule.class);
         ModuleProperty mp = ehr.getModuleProperties().get(EHRManager.EHRStudyContainerPropName);
         String path = PropertyManager.getCoalecedProperty(PropertyManager.SHARED_USER, ContainerManager.getRoot(), mp.getCategory(), EHRManager.EHRAdminUserPropName);
         if (path == null)
@@ -181,7 +181,7 @@ public class EHRManager
 
     public String getEHRDefaultClinicalProjectName(Container c)
     {
-        Module ehr = ModuleLoader.getInstance().getModule(EHRModule.NAME);
+        Module ehr = ModuleLoader.getInstance().getModule(EHRModule.class);
         ModuleProperty mp = ehr.getModuleProperties().get(EHRManager.EHRDefaultClinicalProjectName);
 
         return PropertyManager.getCoalecedProperty(PropertyManager.SHARED_USER, c, mp.getCategory(), EHRManager.EHRDefaultClinicalProjectName);
@@ -195,7 +195,7 @@ public class EHRManager
      */
     public Set<Study> getEhrStudies(User u)
     {
-        Module ehrModule = ModuleLoader.getInstance().getModule(EHRModule.NAME);
+        Module ehrModule = ModuleLoader.getInstance().getModule(EHRModule.class);
         if (u == null)
             u = getEHRUser(ContainerManager.getRoot(), false);
 

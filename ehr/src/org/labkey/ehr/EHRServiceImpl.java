@@ -452,7 +452,7 @@ public class EHRServiceImpl extends EHRService
 
     public Container getEHRStudyContainer(Container c)
     {
-        Module ehr = ModuleLoader.getInstance().getModule(EHRModule.NAME);
+        Module ehr = ModuleLoader.getInstance().getModule(EHRModule.class);
         ModuleProperty mp = ehr.getModuleProperties().get(EHRManager.EHRStudyContainerPropName);
         String path = mp.getEffectiveValue(c);
         if (path == null)

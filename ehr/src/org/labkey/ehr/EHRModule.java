@@ -111,20 +111,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class EHRModule extends ExtendedSimpleModule
-{
-    public static final String NAME = "EHR";
+public class EHRModule extends ExtendedSimpleModule {
     public static final String CONTROLLER_NAME = "ehr";
-
-    public String getName()
-    {
-        return NAME;
-    }
-
-    public double getVersion()
-    {
-        return 16.30;
-    }
 
     public boolean hasScripts()
     {

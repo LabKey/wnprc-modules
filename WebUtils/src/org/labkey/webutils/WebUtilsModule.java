@@ -13,20 +13,6 @@ import java.util.Collections;
 import java.util.Set;
 
 public class WebUtilsModule extends DefaultModule {
-    public static final String NAME = "WebUtils";
-
-    @Override
-    public String getName()
-    {
-        return NAME;
-    }
-
-    @Override
-    public double getVersion()
-    {
-        return 15.2;
-    }
-
     @Override
     public boolean hasScripts()
     {

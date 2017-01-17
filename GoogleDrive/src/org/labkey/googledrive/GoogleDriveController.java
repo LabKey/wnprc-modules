@@ -127,7 +127,7 @@ public class GoogleDriveController extends SpringActionController {
     public class UpdateAccountDisplayName extends ApiAction<UpdateDisplayNameForm> {
         @Override
         public Object execute(UpdateDisplayNameForm form, BindException errors) throws Exception {
-            GoogleDriveService.get().updateDisplayNameForAccount(form.getId(), form.getDisplayName());
+            GoogleDriveService.get().updateDisplayNameForAccount(form.getId(), form.getDisplayName(), getUser());
             return new JSONObject();
         }
     }
@@ -137,7 +137,7 @@ public class GoogleDriveController extends SpringActionController {
     public class DeleteAccount extends ApiAction<AccountForm> {
         @Override
         public Object execute(AccountForm form, BindException errors) throws Exception {
-            GoogleDriveService.get().deleteAccount(form.getId());
+            GoogleDriveService.get().deleteAccount(form.getId(), getUser());
             return new JSONObject();
         }
     }

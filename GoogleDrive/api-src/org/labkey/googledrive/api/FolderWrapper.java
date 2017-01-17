@@ -1,6 +1,6 @@
 package org.labkey.googledrive.api;
 
-import org.labkey.api.view.NotFoundException;
+import org.labkey.googledrive.api.exception.NotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -31,15 +31,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/google-api-services-drive-v2-rev248-1.22.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/google-http-client-1.22.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -77,5 +68,14 @@
     </orderEntry>
     <orderEntry type="module" module-name="GoogleDrive-API" />
     <orderEntry type="module" module-name="externalModules" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/google-api-services-drive-v3-rev54-1.22.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

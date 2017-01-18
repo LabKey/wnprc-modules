@@ -49,20 +49,6 @@ public class GoogleDriveController extends SpringActionController {
     }
 
     @RequiresSiteAdmin()
-    @ActionNames("ManageAccounts")
-    public class manageAccounts extends GoogleDrivePageAction {
-        @Override
-        public String getPathToJsp() {
-            return "view/ManageAccounts.jsp";
-        }
-
-        @Override
-        public String getTitle() {
-            return "Manage Accounts";
-        }
-    }
-
-    @RequiresSiteAdmin()
     @ActionNames("RegisterAccountPage")
     public class AddAcountPage extends GoogleDrivePageAction {
         @Override

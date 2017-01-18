@@ -1,14 +1,13 @@
-<%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.security.User" %>
+
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.googledrive.GoogleDriveController" %>
+<%@ page import="org.labkey.api.data.ContainerManager" %>
+<%@ page import="org.labkey.googledrive.GoogleDriveSchema" %>
+<%@ page import="org.labkey.api.util.HString" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    Container c = getContainer();
-    User user = getUser();
-
-    String addURL = new ActionURL(GoogleDriveController.AddAcountPage.class, getContainer()).toString();
-    String manageURL = new ActionURL(GoogleDriveController.manageAccounts.class, getContainer()).toString();
+    HString addURL = new ActionURL(GoogleDriveController.AddAcountPage.class, getContainer()).toHString();
+    String manageURL = getContextPath() + "/query/" + ContainerManager.getHomeContainer().getEncodedPath() + "/executeQuery.view?schemaName=" + GoogleDriveSchema.NAME + "&query.queryName=service_accounts";
 %>
 <p>
     Hello, and welcome to the GoogleDrive module.

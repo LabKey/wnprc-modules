@@ -2,8 +2,10 @@ package org.labkey.googledrive;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.view.WebPartFactory;
@@ -11,6 +13,7 @@ import org.labkey.googledrive.api.GoogleDriveService;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class GoogleDriveModule extends ExtendedSimpleModule {
@@ -30,6 +33,17 @@ public class GoogleDriveModule extends ExtendedSimpleModule {
         addController(GoogleDriveController.NAME, GoogleDriveController.class);
 
         GoogleDriveService.set(new GoogleDriveServiceImpl());
+
+        Module thisModule = ModuleLoader.getInstance().getModule(GoogleDriveModule.class);
+        Container home = ContainerManager.getHomeContainer();
+
+        // Ensure that we're enabled in the home module, since we'll use that for our queries.
+        Set<Module> homeModules = new HashSet<>();
+        homeModules.addAll(home.getActiveModules());
+        if (!homeModules.contains(thisModule)) {
+            homeModules.add(thisModule);
+            home.setActiveModules(homeModules);
+        }
     }
 
     @Override

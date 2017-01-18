@@ -1,7 +1,9 @@
 package org.labkey.googledrive;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.Module;
@@ -14,7 +16,7 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.googledrive.api.GoogleDriveService;
 import org.labkey.googledrive.api.ServiceAccountForm;
-import org.labkey.webutils.api.action.SimpleJspReportAction;
+import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -39,7 +41,7 @@ public class GoogleDriveController extends SpringActionController {
         }
     }
 
-    public abstract class GoogleDrivePageAction extends SimpleJspReportAction {
+    public abstract class GoogleDrivePageAction extends SimpleJspPageAction {
         @Override
         public Module getModule() {
             return ModuleLoader.getInstance().getModule(GoogleDriveModule.class);
@@ -88,10 +90,16 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("registerAccount")
-    public class AddAcount extends ApiAction<RegisterServiceAccountForm> {
+    public class AddAcount extends ApiAction<SimpleApiJsonForm> {
         @Override
-        public Object execute(RegisterServiceAccountForm form, BindException errors) throws Exception {
-            String id = GoogleDriveService.get().registerServiceAccount(form.getDisplayName(), form, getUser());
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
+            ObjectMapper mapper = new ObjectMapper();
+            JSONObject object = (form.getJsonObject() == null) ? new JSONObject() : form.getJsonObject();
+
+
+            RegisterServiceAccountForm registerForm = mapper.readValue(object.toString(), RegisterServiceAccountForm.class);
+
+            String id = GoogleDriveService.get().registerServiceAccount(registerForm.getDisplayName(), registerForm, getUser());
             JSONObject json = new JSONObject();
             json.put("id", id);
             return json;

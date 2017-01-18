@@ -1,5 +1,7 @@
 package org.labkey.googledrive;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -9,6 +11,7 @@ import com.google.api.services.drive.Drive;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
@@ -95,7 +98,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
     }
 
     private SimpleQueryUpdater getQueryUpdater(User user) {
-        return new SimpleQueryUpdater(user, null, "googledrive", "service_accounts");
+        return new SimpleQueryUpdater(user, ContainerManager.getHomeContainer(), "googledrive", "service_accounts");
     }
 
     /**
@@ -107,23 +110,14 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
 
         String id = UUID.randomUUID().toString();
 
-        JSONObject row = new JSONObject();
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode row = mapper.valueToTree(form);
+
         row.put("id", id);
         row.put("display_name", displayName);
 
-        // Add in credential info
-        row.put("project_id",     form.getProjectId());
-        row.put("private_key_id", form.getPrivateKeyId());
-        row.put("private_key",    form.getPrivateKey());
-        row.put("client_email",   form.getClientEmail());
-        row.put("client_id",      form.getClientId());
-        row.put("auth_uri",       form.getAuthUri());
-        row.put("token_uri",      form.getTokenUri());
-        row.put("client_x509_cert_url",        form.getClientX509CertUrl());
-        row.put("auth_provider_x509_cert_url", form.getAuthProviderX509CertUrl());
-
         // Insert the row
-        queryUpdater.upsert(row);
+        queryUpdater.upsert(new JSONObject(row.toString()));
 
         return id;
     }
@@ -152,7 +146,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
     public Map<String, String> getAccounts(User user) {
         Map<String, String> accountDisplayNameLookup = new HashMap<>();
 
-        JSONObject[] rows = (new SimpleQueryFactory(user, null)).selectRows("googledrive", "service_accounts").toJSONObjectArray();
+        JSONObject[] rows = (new SimpleQueryFactory(user, ContainerManager.getHomeContainer())).selectRows("googledrive", "service_accounts").toJSONObjectArray();
 
         for (JSONObject row : rows) {
             accountDisplayNameLookup.put(row.getString("id"), row.getString("display_name"));

@@ -5,9 +5,9 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import org.labkey.api.view.NotFoundException;
 import org.labkey.googledrive.api.FileWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
+import org.labkey.googledrive.api.exception.NotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;

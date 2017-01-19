@@ -51,7 +51,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
             GoogleCredential credential = getCredential(id, user);
-            return new Drive.Builder(httpTransport, JSON_FACTORY, credential).build();
+            return new Drive.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName("LabKeyGoogleDrive").build();
         }
         catch (IOException e) {
             // Google's example code always exits on this error.  I imagine this should only fail if there's

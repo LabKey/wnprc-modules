@@ -8,6 +8,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -61,7 +63,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
 
     private JSONObject getCredentialJSON(String id, User user) throws NotFoundException {
         SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, id);
-        JSONObject[] rows = (new SimpleQueryFactory(user, null)).selectRows("googledrive", "service_accounts", filter).toJSONObjectArray();
+        JSONObject[] rows = (new SimpleQueryFactory(user, ContainerManager.getHomeContainer())).selectRows("googledrive", "service_accounts", filter).toJSONObjectArray();
 
         if (rows.length == 0) {
             throw new NotFoundException();
@@ -76,13 +78,14 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
     }
 
     private GoogleCredential getCredential(String id, User user) throws NotFoundException {
-        String jsonString = getCredentialJSON(id, user).toString();
+        JSONObject json = getCredentialJSON(id, user);
+        json.put("type", "service_account");
+        String jsonString = json.toString();
         InputStream stream = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
 
         try {
             GoogleCredential credential = GoogleCredential.fromStream(stream);
-
-            return credential;
+            return credential.createScoped(Arrays.asList(DriveScopes.DRIVE));
         }
         catch (IOException e) {
             // This shouldn't ever happen, since we're actually reading the stream from a ByteArrayInputStream

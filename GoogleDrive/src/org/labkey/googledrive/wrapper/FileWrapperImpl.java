@@ -11,14 +11,11 @@ import java.io.InputStream;
 /**
  * Created by jon on 1/17/17.
  */
-public class FileWrapperImpl implements FileWrapper {
-    private Drive _drive;
-    private String _id;
+public class FileWrapperImpl extends ItemWrapperImpl implements FileWrapper {
     private File _file;
 
     public FileWrapperImpl(Drive drive, String id) throws IOException {
-        this._drive = drive;
-        this._id = id;
+        super(drive, id);
 
         _file = _drive.files().get(id).execute();
     }

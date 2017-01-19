@@ -8,7 +8,7 @@ import java.io.InputStream;
 /**
  * Created by jon on 1/17/17.
  */
-public interface FolderWrapper {
+public interface FolderWrapper extends Shareable {
     FileWrapper getFile(String name) throws NotFoundException, IOException;
     FolderWrapper getFolder(String name) throws NotFoundException, IOException;
 

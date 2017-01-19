@@ -1,10 +1,10 @@
 package org.labkey.googledrive.wrapper;
 
-import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.FileWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
 import org.labkey.googledrive.api.exception.NotFoundException;
@@ -17,23 +17,15 @@ import java.util.List;
 /**
  * Created by jon on 1/17/17.
  */
-public class FolderWrapperImpl implements FolderWrapper {
-    private Drive _drive;
-    private String _id;
-
+public class FolderWrapperImpl extends ItemWrapperImpl implements FolderWrapper {
     public static String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
 
     public FolderWrapperImpl(Drive drive, String id) {
-        this._drive = drive;
-        this._id = id;
+        super(drive, id);
     }
 
     private String _getItemId(String name, boolean onlyFolders) throws NotFoundException, IOException {
-        String query = String.format("'%s' in parents", this._id);
-        FileList list = _drive.files().list().setQ(query).execute();
-
-        List<File> files = list.getFiles();
-        for (File file : files) {
+        for (File file : this.getFiles()) {
             if (onlyFolders && !file.getMimeType().equals(FOLDER_MIME_TYPE)) {
                 continue;
             }
@@ -44,6 +36,15 @@ public class FolderWrapperImpl implements FolderWrapper {
         }
 
         throw new NotFoundException();
+    }
+
+    protected List<File> getFiles() throws IOException {
+        String query = String.format("'%s' in parents", this._id);
+        FileList list = _drive.files().list().setQ(query).execute();
+
+        List<File> files = list.getFiles();
+
+        return files;
     }
 
     protected List<String> getParentListForCreatedFiles() {
@@ -78,5 +79,17 @@ public class FolderWrapperImpl implements FolderWrapper {
 
         File file = _drive.files().create(fileMetadata, content).setFields("id").execute();
         return (FileWrapper) new FileWrapperImpl(_drive, file.getId());
+    }
+
+    @Override
+    public void share(String username, DriveSharePermission permission, String type) throws IOException {
+        super.share(username, permission, type);
+
+        /*
+        for (File file : this.getFiles()) {
+            FileWrapperImpl fileWrapper = new FileWrapperImpl(_drive, file.getId());
+            fileWrapper.share(username, permission, type);
+        }
+        */
     }
 }

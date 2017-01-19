@@ -6,6 +6,6 @@ import java.io.InputStream;
 /**
  * Created by jon on 1/17/17.
  */
-public interface FileWrapper {
+public interface FileWrapper extends Shareable {
     void updateContent(InputStream stream) throws IOException;
 }

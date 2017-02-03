@@ -1,0 +1,13 @@
+{
+  "label": "Database Utility Module",
+  "server": {
+    "supportedBranches": {
+      "wnprc16.3": 46998
+    },
+    "moduleDependencies": [
+      "LDK",
+      "Study"
+    ]
+  },
+  "moduleClass": "org.labkey.dbutils.dbutilsModule"
+}

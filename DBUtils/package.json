@@ -1,0 +1,27 @@
+{
+  "name": "dbutils",
+  "version": "15.1.1",
+  "description": "This module provides generic database interaction utilities for the use of WNPRC and other modules.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WNPRC-EHR-Services/DBUtils.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": {
+    "type": "Apache-2.0",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/WNPRC-EHR-Services/DBUtils/issues"
+  },
+  "homepage": "https://github.com/WNPRC-EHR-Services/DBUtils#readme",
+  "dependencies": {
+    "gulp-clean": "^0.3.2",
+    "gulp": "^3.9.1",
+    "gulp-javac": "^2.0.1"
+  }
+}

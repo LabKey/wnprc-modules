@@ -1,6 +1,7 @@
 {
   "label": "Database Utility Module",
   "server": {
+    "requiredVersion": 16.3,
     "supportedBranches": {
       "wnprc16.3": 46998
     },

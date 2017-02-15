@@ -8,6 +8,8 @@ var rename = require("gulp-rename");
 var path = require("path");
 const zip = require('gulp-zip');
 
+const lkpm = require('lkpm');
+
 
 gulp.task("deploy", ["zip"]);
 
@@ -28,49 +30,11 @@ gulp.task("compile-java", ['stage-static'], function() {
         .pipe(gulp.dest('build/explodedModule/lib'));
 });
 
-gulp.task("module-config", ['stage-static'], function() {
-    var stream = gulp.src('module.template.xml');
-
-    var package_json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    var lkpm_json    = JSON.parse(fs.readFileSync('lkpm.json',    'utf8'));
-
-    var itemsToReplace = {
-        ModuleClass: lkpm_json['moduleClass'],
-        Name:        package_json['name'],
-        Version:     "1.0" || package_json['version'],
-        RequiredServerVersion: lkpm_json['server']['requiredVersion'],
-        ModuleDependencies: lkpm_json['server']['moduleDependencies'].join(', '),
-        Label:           lkpm_json['label'],
-        Description:     package_json['description'],
-        URL:             package_json["homepage"],
-        Author:          package_json["author"],
-        Maintainer:      package_json["author"],
-        Organization:    "",
-        OrganizationURL: "",
-        License:         package_json["license"]["type"],
-        LicenseURL:      package_json["license"]["url"] ,
-        VcsRevision:     "",
-        VcsURL:          package_json["repository"]["url"],
-        BuildUser:       "",
-        BuildTime:       "",
-        BuildOS:         "",
-        BuildPath:       "",
-        BuildType:       "",
-        SourcePath:      "/LabKey/sources/build/explodedModule",
-        SupportedDatabases: "pgsql",
-        ResourcePath:    "",
-        BuildNumber:     "",
-        EnlistmentId:    "",
-        ConsolidateScripts: "",
-        ManageVersion:   ""
-    };
-
-    _.each(itemsToReplace, function(value, key) {
-        stream = stream.pipe(replace('@@' + key + '@@', itemsToReplace[key]));
+gulp.task("module-config", ['stage-static'], function(cb) {
+    lkpm.compileModuleFile(__dirname).then(function(outStream) {
+        outStream.pipe(gulp.dest("build/explodedModule/config"));
+        cb();
     });
-
-    stream.pipe(rename("module.xml"))
-        .pipe(gulp.dest("build/explodedModule/config"));
 });
 
 gulp.task("stage-static", function() {

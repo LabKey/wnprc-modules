@@ -32,7 +32,7 @@ gulp.task("compile-java", ['stage-static'], function() {
 
 gulp.task("module-config", ['stage-static'], function(cb) {
     lkpm.compileModuleFile(__dirname).then(function(outStream) {
-        outStream.pipe(gulp.dest("build/explodedModule/config"));
+        outStream.pipe(gulp.dest("build/explodedModule"));
         cb();
     });
 });

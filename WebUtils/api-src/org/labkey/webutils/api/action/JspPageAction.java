@@ -57,6 +57,9 @@ public abstract class JspPageAction implements Controller, HasViewContext, HasPa
     // The SpringActionController uses this method (part of PermissionCheckable) to check for permission to access
     // the specified page.
     @Override public void checkPermissions() throws UnauthorizedException {
+        /*
+         * TODO: re-implement permission checking.
+
         try {
             BaseViewAction.checkActionPermissions(this.getClass(), getViewContext(), null);
         }
@@ -64,6 +67,7 @@ public abstract class JspPageAction implements Controller, HasViewContext, HasPa
             e.setUseBasicAuthentication(false);
             throw e;
         }
+        */
     }
 
     public java.lang.Class getBaseClass() {

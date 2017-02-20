@@ -1,0 +1,25 @@
+{
+  "name": "webutils",
+  "version": "15.2.0",
+  "description": "This module contains libraries such as Knockout, Underscore, and Bootstrap, as well as a JSP renderer and other generic functions for labkey modules to make use of.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WNPRC-EHR-Services/WebUtils.git"
+  },
+  "author": "Jon Richardson",
+  "license": {
+    "type": "Apache-2.0",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/WNPRC-EHR-Services/WebUtils/issues"
+  },
+  "homepage": "https://github.com/WNPRC-EHR-Services/WebUtils#readme",
+  "dependencies": {
+    "gulp": "^3.9.1"
+  }
+}

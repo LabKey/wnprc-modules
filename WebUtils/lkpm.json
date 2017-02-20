@@ -7,5 +7,5 @@
     },
     "moduleDependencies": []
   },
-  "moduleClass": "org.labkey.dbutils.WebUtilsModule"
+  "moduleClass": "org.labkey.webutils.WebUtilsModule"
 }

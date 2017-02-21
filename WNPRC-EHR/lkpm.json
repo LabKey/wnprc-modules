@@ -1,0 +1,13 @@
+{
+  "label": "WNPRC-specific extensions and customizations for EHR",
+  "server": {
+    "requiredVersion": 16.3,
+    "supportedBranches": {
+      "wnprc16.3": 46998
+    },
+    "moduleDependencies": [
+      "LDK"
+    ]
+  },
+  "moduleClass": "org.labkey.wnprc_ehr.WNPRC_EHRModule"
+}

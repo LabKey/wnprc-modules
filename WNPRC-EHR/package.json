@@ -1,0 +1,22 @@
+{
+  "name": "wnprc-ehr",
+  "version": "15.1.20",
+  "description": "WNPRC-specific extensions to the ehr module.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WNPRC-EHR-Services/WNPRC-EHR.git"
+  },
+  "author": "Ben Bimber",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/WNPRC-EHR-Services/WNPRC-EHR/issues"
+  },
+  "homepage": "https://github.com/WNPRC-EHR-Services/WNPRC-EHR#readme",
+  "dependencies": {
+    "gulp": "^3.9.1"
+  }
+}

@@ -1,4 +1,5 @@
 {
+  "name": "WNPRC_EHR",
   "label": "WNPRC-specific extensions and customizations for EHR",
   "server": {
     "requiredVersion": 16.3,

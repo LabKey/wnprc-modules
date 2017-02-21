@@ -9,5 +9,10 @@
       "LDK"
     ]
   },
-  "moduleClass": "org.labkey.wnprc_ehr.WNPRC_EHRModule"
+  "moduleClass": "org.labkey.wnprc_ehr.WNPRC_EHRModule",
+  "lkpmDependencies": {
+    "https://github.com/WNPRC-EHR-Services/ehr.git": "",
+    "https://github.com/WNPRC-EHR-Services/WebUtils.git": "",
+    "https://github.com/WNPRC-EHR-Services/DBUtils.git": ""
+  }
 }

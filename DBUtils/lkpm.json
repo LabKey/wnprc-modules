@@ -3,7 +3,7 @@
   "server": {
     "requiredVersion": 16.3,
     "supportedBranches": {
-      "wnprc16.3": 46998
+      "wnprc16.3": 48996
     },
     "moduleDependencies": [
       "LDK",

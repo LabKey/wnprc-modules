@@ -3,11 +3,16 @@ package org.labkey.webutils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.webutils.api.WebUtilsService;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -32,6 +37,23 @@ public class WebUtilsModule extends DefaultModule {
 
         WebUtilsService.setInstance(new WebUtilsServiceImpl());
 
+        Path path = Paths.get("/LabKey/sources/lkpm/");
+        if (Files.exists(path) && Files.isDirectory(path)) {
+            JspLoader.registerAdditionalLibForJSPCompilation("/usr/local/tomcat/lib");
+            JspLoader.registerAdditionalLibForJSPCompilation("/usr/local/labkey/labkeyWebapp/WEB-INF/lib");
+
+            File modulesDir = new File("/usr/local/labkey/modules");
+            if (modulesDir.exists() && modulesDir.isDirectory()) {
+                for (File file : modulesDir.listFiles()) {
+                    if (file.isDirectory()) {
+                        File libDir = new File(Paths.get(file.getAbsolutePath(), "lib").toString());
+                        if (libDir.exists() && libDir.isDirectory()) {
+                            JspLoader.registerAdditionalLibForJSPCompilation(libDir.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override

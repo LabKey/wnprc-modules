@@ -1,5 +1,0 @@
-<libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library>
-        <script path="/webutils/lib/webutils_core/utilities/rsvp/core/rsvp-3.1.0.js"/>
-    </library>
-</libraries>

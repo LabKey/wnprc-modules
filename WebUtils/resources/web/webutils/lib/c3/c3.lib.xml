@@ -1,9 +1,0 @@
-<libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library compileInProductionMode="false">
-        <script path="/webutils/lib/c3/c3.min.js"/>
-        <script path="/webutils/lib/c3/c3.min.css"/>
-    </library>
-    <dependencies>
-        <dependency path="/webutils/lib/c3/d3/d3"/>
-    </dependencies>
-</libraries>

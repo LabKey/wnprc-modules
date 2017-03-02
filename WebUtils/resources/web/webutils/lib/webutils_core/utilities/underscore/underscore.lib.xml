@@ -1,8 +1,0 @@
-<libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library>
-        <script path="/webutils/lib/webutils_core/utilities/underscore/underscore-customized.js"/>
-    </library>
-    <dependencies>
-        <dependency path="/webutils/lib/webutils_core/utilities/underscore/modules/underscore-modules"/>
-    </dependencies>
-</libraries>

@@ -1,9 +1,0 @@
-<libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library>
-        <script path="/webutils/lib/ko/modules/knockout-punches-0.5.1.js"/>
-        <script path="/webutils/lib/ko/modules/knockout-mapping-2.4.1.js"/>
-    </library>
-    <dependencies>
-        <dependency path="/webutils/lib/ko/core/knockout-core"/>
-    </dependencies>
-</libraries>

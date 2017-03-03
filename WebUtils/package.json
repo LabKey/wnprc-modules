@@ -20,6 +20,18 @@
   },
   "homepage": "https://github.com/WNPRC-EHR-Services/WebUtils#readme",
   "dependencies": {
+    "@types/eonasdan-bootstrap-datetimepicker": "^4.17.22",
+    "@types/es6-promise": "0.0.32",
+    "@types/es6-shim": "^0.31.32",
+    "@types/knockout": "^3.4.39",
+    "@types/knockout.punches": "^0.5.31",
+    "@types/moment": "^2.13.0",
+    "@types/rsvp": "^3.3.0",
+    "@types/toastr": "^2.1.32",
+    "@types/underscore": "^1.7.36",
+    "@types/underscore.string": "0.0.30",
+    "@types/urijs": "^1.15.31",
+    "@types/whatwg-fetch": "0.0.33",
     "bower": "^1.8.0",
     "gulp": "^3.9.1",
     "gulp-bower": "0.0.13",
@@ -30,6 +42,13 @@
     "gulp-flatten": "^0.3.1",
     "gulp-main-bower-files": "^1.6.1",
     "gulp-rename": "^1.2.2",
-    "merge-stream": "^1.0.1"
+    "merge-stream": "^1.0.1",
+    "moment": "^2.17.1",
+    "typescript": "^2.2.1",
+    "uri": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^15.0.14",
+    "@types/react-dom": "^0.14.23"
   }
 }

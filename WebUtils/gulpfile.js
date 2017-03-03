@@ -32,6 +32,9 @@ gulp.task(compileJSLibTask, ['bower'], function() {
                         './dist/fonts/*.*'
                     ]
                 },
+                knockout: {
+                    main: "dist/knockout.debug.js"
+                },
                 markdown: {
                     main: [
                         './lib/markdown.js'

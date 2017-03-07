@@ -5,7 +5,7 @@ import * as _ from "underscore";
 
 import rsvp = require('rsvp');
 import {makeURLForHTTPAction} from "./URL";
-import moment = require("../../bower_components/moment/moment");
+import moment = require("moment");
 const Promise = rsvp.Promise;
 
 let makeRequest = function(url: string, config?: RequestInit): Promise<Response> {

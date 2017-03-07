@@ -1,10 +1,4 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-<%@ taglib prefix="lk" uri="http://ehr.primate.wisc.edu/taglib" %>
-
-<lk:lk-webpart title="Test Page">
-    <h1>Hello!</h1>
-    <h2>Goodbye24</h2>
-</lk:lk-webpart>
 
 <div class="panel panel-primary">
     <div class="panel-heading">Test Form</div>

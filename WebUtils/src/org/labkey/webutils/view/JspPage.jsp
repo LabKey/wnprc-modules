@@ -172,8 +172,6 @@
 
         QUnit.test("(All Pages) Plugins and Extensions Loaded Correctly", function(assert) {
             assert.isDefined("_.isDefined");
-            assert.isDefined("_.makeVarDeep");
-            assert.isDefined("_.ensurePathExists");
 
             // Check for Strings module
             assert.isDefined("_.trim", "Underscore.String module loaded")

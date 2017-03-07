@@ -1,14 +1,12 @@
 {
     "compilerOptions": {
-        "module": "amd",
+        "module": "commonjs",
         "target": "es5",
-        "moduleResolution": "node",
         "noImplicitAny": false,
         "sourceMap": true,
         "strictNullChecks": true,
         "declaration": true,
-        "jsx" : "react",
-        "outFile": "bundle.amd.js"
+        "jsx" : "react"
     },
-    "include": [ "web/__webutils-exporter__.ts" ]
+    "include": [ "web/WebUtils.ts" ]
 }

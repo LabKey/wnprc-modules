@@ -26,6 +26,10 @@
     "@types/knockout": "^3.4.39",
     "@types/knockout.punches": "^0.5.31",
     "@types/moment": "^2.13.0",
+    "@types/node": "^7.0.5",
+    "@types/qunit": "^2.0.31",
+    "@types/react": "^15.0.14",
+    "@types/react-dom": "^0.14.23",
     "@types/rsvp": "^3.3.0",
     "@types/toastr": "^2.1.32",
     "@types/underscore": "^1.7.36",
@@ -42,13 +46,28 @@
     "gulp-flatten": "^0.3.1",
     "gulp-main-bower-files": "^1.6.1",
     "gulp-rename": "^1.2.2",
+    "gulp-webpack": "^1.5.0",
+    "knockout": "^3.4.1",
+    "knockout.punches": "^0.5.1",
     "merge-stream": "^1.0.1",
     "moment": "^2.17.1",
+    "qunitjs": "^2.1.1",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "rsvp": "^3.3.3",
+    "toastr": "^2.1.2",
+    "ts-loader": "^2.0.1",
     "typescript": "^2.2.1",
-    "uri": "^0.1.0"
+    "underscore": "^1.8.3",
+    "underscore.string": "^3.3.4",
+    "uri": "^0.1.0",
+    "webpack": "^2.2.1"
   },
   "devDependencies": {
     "@types/react": "^15.0.14",
-    "@types/react-dom": "^0.14.23"
+    "@types/react-dom": "^0.14.23",
+    "awesome-typescript-loader": "^3.0.8",
+    "source-map-loader": "^0.1.6",
+    "typescript": "^2.2.1"
   }
 }

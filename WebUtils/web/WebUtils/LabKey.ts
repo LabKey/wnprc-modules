@@ -1,6 +1,7 @@
 declare const LABKEY: {
     CSRF: string,
-    ActionURL: any
+    ActionURL: any,
+    getModuleContext(moduleName: string): any;
 };
 
 export function getCSRF(): string {
@@ -27,4 +28,8 @@ declare const __WebUtilsPageLoadData: any;
 
 export function getPageLoadData(): any {
     return __WebUtilsPageLoadData;
+}
+
+export function getModuleContext(moduleName: string): any {
+    return LABKEY.getModuleContext(moduleName) || {};
 }

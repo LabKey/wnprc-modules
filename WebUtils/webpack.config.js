@@ -3,7 +3,7 @@ var webpack = require("webpack");
 
 module.exports = {
     entry: {
-        "legacy": './web/WebUtils.ts'
+        "legacy": './web/legacy.ts'
     },
 
     output: {
@@ -36,15 +36,5 @@ module.exports = {
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
             { test: /\.js$/, loader: "source-map-loader", enforce: "pre" }
         ]
-    },
-
-    externals: {
-        "moment": "moment",
-        "underscore": {
-            commonjs: "underscore",
-            commonjs2: "underscore",
-            amd: "underscore",
-            root: "_"
-        }
     }
 };

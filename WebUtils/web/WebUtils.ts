@@ -8,7 +8,7 @@ import {getModuleContext} from "./WebUtils/LabKey";
 
 export {API, Model, URL, Util};
 
-export * from "./WebUtils/Component/lk-table";
+export * from "./WebUtils/component/lk-table";
 
 declare interface IterableIterator<T> {}
 declare interface Symbol {}

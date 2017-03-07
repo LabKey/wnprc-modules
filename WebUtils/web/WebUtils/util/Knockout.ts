@@ -1,5 +1,5 @@
 import * as _ from "underscore";
-import * as foreach2 from "./Knockout/foreach2";
+import * as foreach2 from "./knockout/foreach2";
 import {getBaseURL} from "../LabKey";
 export {foreach2};
 

@@ -8,5 +8,8 @@
         "declaration": true,
         "jsx" : "react"
     },
-    "include": [ "web/WebUtils.ts" ]
+    "include": [
+        "web/WebUtils.ts",
+        "web/legacy.ts"
+    ]
 }

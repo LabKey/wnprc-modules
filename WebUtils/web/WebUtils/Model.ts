@@ -1,3 +1,3 @@
-export * from "./Model/QueryTable";
-export * from "./Model/Table";
-export * from "./Model/TableRow";
+export * from "./model/QueryTable";
+export * from "./model/Table";
+export * from "./model/TableRow";

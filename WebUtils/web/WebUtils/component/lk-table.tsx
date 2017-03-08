@@ -1,4 +1,4 @@
-import * as React from "React";
+import * as React from "react";
 
 let temp = <div className="panel">
         <div className="panel-heading" data-bind="text: $data">Hello</div>

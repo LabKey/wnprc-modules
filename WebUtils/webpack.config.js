@@ -3,11 +3,11 @@ var webpack = require("webpack");
 
 module.exports = {
     entry: {
-        "legacy": './web/legacy.ts'
+        "legacy": __dirname + '/web/legacy.ts'
     },
 
     output: {
-        path: path.resolve(__dirname, 'build', 'compiledResources', 'web', 'lib'),
+        path: path.resolve(__dirname, 'build', 'compiledResources', 'web', 'webutils', 'lib'),
         filename: '[name].js',
         // Export the module as the SimpleFilter variable
         library: "WebUtils",
@@ -16,7 +16,7 @@ module.exports = {
     },
 
     // Enable sourcemaps for debugging webpack's output.
-    //devtool: "source-map",
+    devtool: "source-map",
 
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
@@ -28,13 +28,28 @@ module.exports = {
     },
 
     module: {
-
         rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
             { test: /\.tsx?$/, loader: "ts-loader" },
 
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-            { test: /\.js$/, loader: "source-map-loader", enforce: "pre" }
+            { test: /\.js$/, loader: "source-map-loader", enforce: "pre" },
+
+            { test: /\.scss$/, loader: 'style!css!sass' }
         ]
+    },
+
+    externals: {
+        "c3":     'c3',
+        "d3":     'd3',
+        "fetch":  'fetch',
+        "jquery": 'jQuery',
+        "moment": 'moment',
+        "qunit":  'QUnit',
+        "react":  'React',
+        "React":  'React',
+
+        "react-dom":        'ReactDom',
+        "react-dom/server": 'ReactDomServer'
     }
 };

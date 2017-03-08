@@ -13,8 +13,8 @@ export * from "./WebUtils/component/lk-table";
 declare interface IterableIterator<T> {}
 declare interface Symbol {}
 
-require("knockout.punches");
-ko.punches.enableAll();
+// Include Knockout plugins
+import * as ko from "./WebUtils/externals/knockout-enhanced";
 
 /*
  * TODO:  Although this is used in lk-table, it no longer needs the beforeRenderAll/afterRenderAll methods, which were

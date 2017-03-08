@@ -7,6 +7,7 @@ import rsvp = require('rsvp');
 import {makeURLForHTTPAction} from "./URL";
 import moment = require("moment");
 const Promise = rsvp.Promise;
+const fetch = require("fetch");
 
 let makeRequest = function(url: string, config?: RequestInit): Promise<Response> {
     if (!config) {

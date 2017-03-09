@@ -358,7 +358,7 @@
             checkMatch(true,  ">2.9;<3.1",        "03.00");
         });
 
-        ko.components.register('lk-table', {
+        ko.components.register('lk-table2', {
             viewModel: {
                 createViewModel: function(params, componentInfo) {
                     var $element = $(componentInfo.element);

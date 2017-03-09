@@ -8,13 +8,15 @@ import {getModuleContext} from "./WebUtils/LabKey";
 
 export {API, Model, URL, Util};
 
-export * from "./WebUtils/component/lk-table";
+import * as lkTable from "./WebUtils/component/lk-table";
 
 declare interface IterableIterator<T> {}
 declare interface Symbol {}
 
 // Include Knockout plugins
 import * as ko from "./WebUtils/externals/knockout-enhanced";
+
+lkTable.registerKoComponent();
 
 /*
  * TODO:  Although this is used in lk-table, it no longer needs the beforeRenderAll/afterRenderAll methods, which were

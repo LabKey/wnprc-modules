@@ -58,11 +58,18 @@ gulp.task(compileJSLibTask, ['bower'], function() {
 
     var css = bowerFiles
         .pipe(filter("**/*.css"))
+        .pipe(concat('webutils.css', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
         .pipe(rename(function(file) {
             file.dirname = 'css'
         }));
 
-    //css.pipe(debug({title: "CSS: "}));
+    css.pipe(debug({title: "CSS: "}));
+
+    var fonts = bowerFiles
+        .pipe(filter("**/*.{eot,svg,ttf,woff,woff2}"))
+        .pipe(rename(function(file) {
+            file.dirname = 'fonts'
+        }));
 
     var js = bowerFiles.pipe(filter('**/*.js'));
     //js.pipe(debug({title: "JS: "}));
@@ -86,7 +93,7 @@ gulp.task(compileJSLibTask, ['bower'], function() {
         .pipe(debug({title: "Min Bundle: "}))
         ;
 
-    var webResources = merge(css, minifiedJs)
+    var webResources = merge(css, minifiedJs, fonts)
         .pipe(debug({title: "WEB: "}))
         .pipe(rename(function(file) {
             file.dirname = path.join("web", "webutils", file.dirname)

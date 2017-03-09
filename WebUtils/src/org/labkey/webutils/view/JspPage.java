@@ -27,7 +27,9 @@ public class JspPage extends JspView<JspPageModel> {
         // Add universal client dependencies.
         List<String> dependencyPaths = Arrays.asList(
                 "/webutils/lib/externals-debug.js",
-                "/webutils/lib/legacy.js"
+                "/webutils/lib/legacy.js",
+                "/webutils/css/webutils.css"
+
         );
         for(String path : dependencyPaths) {
             this.addClientDependency(ClientDependency.fromPath(path));

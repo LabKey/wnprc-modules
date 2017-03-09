@@ -358,7 +358,7 @@
             checkMatch(true,  ">2.9;<3.1",        "03.00");
         });
 
-        ko.components.register('lk-table', {
+        ko.components.register('lk-table2', {
             viewModel: {
                 createViewModel: function(params, componentInfo) {
                     var $element = $(componentInfo.element);
@@ -542,7 +542,7 @@
                     };
 
                     VM.actionButtonsDisabled = ko.computed(function() {
-                        return VM.table.getSelectedRows().length === 0;
+                        return VM.table.selectedRows().length === 0;
                     });
 
                     VM.actionButtons = (params.actionButtons || []).map(function(actionButton){
@@ -550,7 +550,7 @@
                             title: actionButton.title,
                             disabled: VM.actionButtonsDisabled,
                             clickAction: function() {
-                                actionButton.execute(VM.table.getSelectedRows(), VM.table);
+                                actionButton.execute(VM.table.selectedRows(), VM.table);
                             }
                         };
                     });

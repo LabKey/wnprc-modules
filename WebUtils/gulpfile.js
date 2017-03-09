@@ -47,6 +47,16 @@ gulp.task(compileJSLibTask, ['bower'], function() {
                         "build/css/bootstrap-datetimepicker.css",
                         "build/js/bootstrap-datetimepicker.min.js"
                     ]
+                },
+                'knockout': {
+                    main: "dist/knockout.debug.js"
+                },
+                'react': {
+                    main: [
+                        "react.js",
+                        "react-dom.js",
+                        "react-dom-server.js"
+                    ]
                 }
             }
         }))
@@ -55,15 +65,21 @@ gulp.task(compileJSLibTask, ['bower'], function() {
 
     var css = bowerFiles
         .pipe(filter("**/*.css"))
+        .pipe(concat('webutils.css', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
         .pipe(rename(function(file) {
             file.dirname = 'css'
         }));
 
-    //css.pipe(debug({title: "CSS: "}));
+    css.pipe(debug({title: "CSS: "}));
+
+    var fonts = bowerFiles
+        .pipe(filter("**/*.{eot,svg,ttf,woff,woff2}"))
+        .pipe(rename(function(file) {
+            file.dirname = 'fonts'
+        }));
 
     var js = bowerFiles.pipe(filter('**/*.js'));
     //js.pipe(debug({title: "JS: "}));
-
     //
     // When concatenating JS files, we add a ";" to ensure there is no odd behavior in case the individual files failed
     // to include a terminating semicolon.
@@ -84,7 +100,7 @@ gulp.task(compileJSLibTask, ['bower'], function() {
         .pipe(debug({title: "Min Bundle: "}))
         ;
 
-    var webResources = merge(css, minifiedJs)
+    var webResources = merge(css, minifiedJs, fonts)
         .pipe(debug({title: "WEB: "}))
         .pipe(rename(function(file) {
             file.dirname = path.join("web", "webutils", file.dirname)
@@ -96,7 +112,7 @@ gulp.task(compileJSLibTask, ['bower'], function() {
 
 const webpackTaskName = 'webpack';
 gulp.task(webpackTaskName, [compileJSLibTask], function() {
-    gulp.src(path.resolve(__dirname, 'web', 'legacy.ts'))
+    return gulp.src(path.resolve(__dirname, 'web', 'legacy.ts'))
         .pipe(gulpWebpack(require('./webpack.config.js'), webpack))
         .pipe(gulp.dest(path.resolve(__dirname, 'build', 'compiledResources', 'web', 'webutils', 'lib')))
 });
@@ -106,7 +122,7 @@ var taskExporter = new lkpm.TaskExporter({
 }, gulp);
 
 var stageTask = taskExporter.tasks[lkpm.TASK_NAMES.STAGE_STATIC];
-stageTask.dependencies.push(compileJSLibTask, 'bower');
+stageTask.dependencies.push(compileJSLibTask, 'bower', webpackTaskName);
 stageTask.setResourceRoot(compiledResourcesDir);
 
 taskExporter.exportTasks();

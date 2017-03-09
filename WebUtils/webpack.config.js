@@ -19,6 +19,11 @@ module.exports = {
     devtool: "source-map",
 
     resolve: {
+        alias: {
+            classify: path.join(__dirname, "./external_resources/js/classify.js"),
+            supersqlstore: path.join(__dirname, "./external_resources/js/supersqlstore.js")
+        },
+
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js"],
 
@@ -44,12 +49,14 @@ module.exports = {
         "d3":     'd3',
         "fetch":  'fetch',
         "jquery": 'jQuery',
+        "knockout": "ko",
         "moment": 'moment',
         "qunit":  'QUnit',
+        "Qunit":  "Qunit",
         "react":  'React',
         "React":  'React',
 
-        "react-dom":        'ReactDom',
-        "react-dom/server": 'ReactDomServer'
+        "react-dom":        'ReactDOM',
+        "react-dom/server": 'ReactDOMServer'
     }
 };

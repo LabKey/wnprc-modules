@@ -1,5 +1,8 @@
 import * as _ from "underscore";
 import {selectRows} from "../API";
+import * as knockout from "knockout";
+
+let ko = knockout as any;
 
 export interface LookupConfig {
     seedData?:  Object,

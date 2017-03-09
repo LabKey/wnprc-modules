@@ -40,7 +40,7 @@ export class Table {
 
     setRowHeaders(newHeaders: string[]) {
         this.rowHeaders.splice(1, this.rowHeaders().length - 1);
-        this.rowHeaders.push.apply(newHeaders);
+        this.rowHeaders.push.apply(this.rowHeaders, newHeaders);
         this.rowHeaders.shift();
     }
 }

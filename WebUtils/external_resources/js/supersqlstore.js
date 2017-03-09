@@ -1,6 +1,6 @@
-var SuperSQLStore = {};
-(function() {
+define(["require","exports","module","jquery","underscore","knockout","classify"],function(require,exports,module,$,_,ko,Classify){
 
+    var SuperSQLStore = {};
     SuperSQLStore.ObservableRow = Classify.newClass({
         constructor: function(config) {
             var self = this;
@@ -121,5 +121,6 @@ var SuperSQLStore = {};
 
     SuperSQLStore.Version = '0.0.7';
 
+    return SuperSQLStore;
 
-})();
+});

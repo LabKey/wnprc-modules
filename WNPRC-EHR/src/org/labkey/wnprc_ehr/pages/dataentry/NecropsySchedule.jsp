@@ -17,9 +17,6 @@
 <%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.css' />
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.min.js'></script>
-
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
 
@@ -422,7 +419,7 @@
                 assignedTo:  '',
                 priority:    ''
             }),
-            PriorityLookup: new WebUtils.utils.Lookup({
+            PriorityLookup: new WebUtils.Util.Lookup({
                 schemaName: 'ehr',
                 queryName:  'requests',
                 columns:    ['requestid', 'priority'],
@@ -431,7 +428,7 @@
                     return obj.priority;
                 }
             }),
-            RequestIdLookup: new WebUtils.utils.Lookup({
+            RequestIdLookup: new WebUtils.Util.Lookup({
                 schemaName: 'ehr',
                 queryName:  'requests',
                 columns:    ['requestid', 'rowid'],
@@ -440,10 +437,10 @@
                     return obj.rowid;
                 }
             }),
-            pendingRequestTable: new WebUtils.Models.Table({
+            pendingRequestTable: new WebUtils.Model.Table({
                 rowHeaders: ["Request ID", "Priority", "Animal ID", "Requested By", "Requested On", "Requested For"],
                 rows: pendingRequests.map(function(row) {
-                    return new WebUtils.Models.TableRow({
+                    return new WebUtils.Model.TableRow({
                         data: [
                             row.requestid,
                             row.priority,

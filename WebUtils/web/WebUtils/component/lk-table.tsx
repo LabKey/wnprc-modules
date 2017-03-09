@@ -7,6 +7,7 @@ import * as ReactDomServer from "react-dom/server";
 import CSSProperties = React.CSSProperties;
 import {Table} from "../model/Table";
 import {TableRow} from "../model/TableRow";
+import {Filterer} from "simplefilter";
 
 export class FilterableTableColumn extends React.Component<{'cellData': any}, {}> {
         render() {
@@ -37,10 +38,33 @@ export interface FilterableTableViewModel {
         table: Table
 }
 
-export class FilterableTable extends React.Component<FilterableTableViewModel, {}> {
+export interface FilterableTableState {
+        filters: {[name: string]: string}
+}
+
+export class FilterableTable extends React.Component<FilterableTableViewModel, FilterableTableState> {
+        constructor(props) {
+                super(props);
+
+                this.state = {
+                        filters: {}
+                };
+
+                this.handleFilterChange = this.handleFilterChange.bind(this);
+        }
+
+        handleFilterChange(event) {
+                let $target = $(event.target);
+                let filters = this.state.filters;
+                filters[$target.attr('data-column-number')] = $target.val();
+
+                this.setState({filters:  filters});
+        }
+
         render() {
                 let table = this.props.table;
-                let shownRows = 0;//TODO; implement
+
+                let state = this.state as FilterableTableState;
 
                 let headers = table.rowHeaders().map((header, i) => {
                         return <th className="header" key={i}>
@@ -48,9 +72,47 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, {
                         </th>;
                 });
 
-                let rows = table.rows().map((row, i) => {
+                let filters = table.rowHeaders().map((filter, i) => {
+                        return (
+                            <td key={i}>
+                                    <div className="input-group">
+                                            <input className="form-control input-sm" placeholder="No active filter" type="text" onChange={this.handleFilterChange} {...{'data-column-number': i}}/>
+                                            <span className="input-group-addon">
+                                                    <span className="glyphicon glyphicon-info-sign" data-toggle="modal"></span>
+                                            </span>
+                                    </div>
+                            </td>
+                        );
+                });
+
+                let filterers: {[name: string]: Filterer} = {};
+                for (let filteredColumnIndex in this.state.filters) {
+                        let filterString = this.state.filters[filteredColumnIndex];
+
+                        filterers[filteredColumnIndex] = new Filterer(filterString);
+                }
+
+                // Get the filtered rows.
+                let rows = table.rows().filter((row) => {
+                        let data = row.rowData;
+
+                        // For each filter, return a failure if we failed to match.
+                        for (let filteredColumnIndex in filterers) {
+                                let filter = filterers[filteredColumnIndex];
+
+                                if (!filter.matches(row.getValueForColumnIndex(parseInt(filteredColumnIndex)))) {
+                                        row.isHidden(true);
+                                        return false;
+                                }
+                        }
+
+                        row.isHidden(false);
+                        return true;
+                }).map((row, i) => {
                         return <FilterableTableRow row={row} key={i} />;
                 });
+
+                let shownRows = rows.length;
 
                 return <div className="panel panel-default">
                         <div className="panel-heading">
@@ -73,6 +135,11 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, {
                                 </thead>
 
                                 <tbody>
+                                <tr className="noclick">
+                                        {filters}
+                                </tr>
+
+
                                 {rows}
                                 </tbody>
                         </table>

@@ -1,3 +1,5 @@
+import * as _ from "underscore";
+
 export interface TableRowConfig {
     rowData: any[],
     otherData?: any,
@@ -29,6 +31,23 @@ export class TableRow {
 
         if (config.otherData) {
             this.otherData = config.otherData;
+        }
+    }
+
+    getValueForColumnIndex(index: number): string {
+        if (this.rowData && this.rowData[index]) {
+            let data = this.rowData[index];
+            if (_.isString(data)) {
+                return data;
+            }
+            else if (_.isObject(data)) {
+                return data['value'].toString();
+            }
+
+            throw new Error("Unrecognized column type");
+        }
+        else {
+            return "";
         }
     }
 }

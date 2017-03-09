@@ -130,7 +130,7 @@
 
                 return new WebUtils.Models.TableRow({
                     otherData: biopsy,
-                    data: [
+                    rowData: [
                         biopsy.order,
                         biopsy.date,
                         '<a href="' + url + '">' + biopsy.type + '</a>' + errorMessage,

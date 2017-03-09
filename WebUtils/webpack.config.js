@@ -56,7 +56,7 @@ module.exports = {
         "react":  'React',
         "React":  'React',
 
-        "react-dom":        'ReactDom',
-        "react-dom/server": 'ReactDomServer'
+        "react-dom":        'ReactDOM',
+        "react-dom/server": 'ReactDOMServer'
     }
 };

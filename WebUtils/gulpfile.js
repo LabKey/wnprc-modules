@@ -50,6 +50,13 @@ gulp.task(compileJSLibTask, ['bower'], function() {
                 },
                 'knockout': {
                     main: "dist/knockout.debug.js"
+                },
+                'react': {
+                    main: [
+                        "react.js",
+                        "react-dom.js",
+                        "react-dom-server.js"
+                    ]
                 }
             }
         }))

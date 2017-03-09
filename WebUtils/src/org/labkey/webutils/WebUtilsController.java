@@ -13,7 +13,10 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
+import org.labkey.webutils.api.action.annotation.JspPath;
+import org.labkey.webutils.api.action.annotation.PageTitle;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -58,22 +61,14 @@ public class WebUtilsController extends SpringActionController {
         }
     }
 
-    public abstract class WebUtilsJspPageAction extends SimpleJspPageAction {
+    public class WebUtilsJspPageAction extends LegacyJspPageAction {
         @Override
-        public Module getModule() {
-            return ModuleLoader.getInstance().getModule(WebUtilsModule.class);
+        protected Class getBaseClass() {
+            return WebUtilsController.class;
         }
     }
 
-    public class TestPageAction extends WebUtilsJspPageAction {
-        @Override
-        public String getPathToJsp() {
-            return "view/TestPage.jsp";
-        }
-
-        @Override
-        public String getTitle() {
-            return "Test Page";
-        }
-    }
+    @PageTitle("Test Page")
+    @JspPath("view/TestPage.jsp")
+    public class TestPageAction extends WebUtilsJspPageAction {}
 }

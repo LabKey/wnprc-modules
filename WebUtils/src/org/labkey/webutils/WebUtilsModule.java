@@ -35,8 +35,6 @@ public class WebUtilsModule extends DefaultModule {
     protected void init() {
         addController(WebUtilsController.NAME, WebUtilsController.class);
 
-        WebUtilsService.setInstance(new WebUtilsServiceImpl());
-
         Path path = Paths.get("/LabKey/sources/lkpm/");
         if (Files.exists(path) && Files.isDirectory(path)) {
             JspLoader.registerAdditionalLibForJSPCompilation("/usr/local/tomcat/lib");
@@ -58,8 +56,7 @@ public class WebUtilsModule extends DefaultModule {
 
     @Override
     public void doStartup(ModuleContext moduleContext) {
-        // add a container listener so we'll know when our container is deleted:
-        ContainerManager.addContainerListener(new WebUtilsContainerListener());
+
     }
 
     @Override

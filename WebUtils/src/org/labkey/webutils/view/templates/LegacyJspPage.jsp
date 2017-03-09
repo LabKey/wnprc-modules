@@ -8,53 +8,29 @@
 <%@ page import="org.labkey.webutils.WebUtilsModule" %>
 <%@ page import="org.labkey.api.module.ModuleProperty" %>
 <%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.WebPartView" %>
+<%@ page import="org.labkey.api.jsp.JspBase" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspPage view = (JspPage) HttpView.currentView();
+    JspView view = (JspView) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
+
+    view.setFrame(WebPartView.FrameType.NONE);
 %>
 
-<style type="text/css">
-    #bootstrap-box {
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 14px;
-        line-height: 1.42857143;
-        color: #333;
-        /* background-color: #fff; */ /* panels will include this, so it's not necessary to set here, and this way, it matches the outer divs */
-    }
+<!-- Include default resources -->
+<script type="application/javascript" src="<%= getContextPath() %>/webutils/lib/externals-debug.js"></script>
+<script type="application/javascript" src="<%= getContextPath() %>/webutils/lib/legacy.js"></script>
 
-    #bootstrap-box input[type="button"] {
-        -webkit-appearance: button;
-        cursor: pointer;
-    }
+<link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/webutils/css/webutils.css" />
 
-    #bootstrap-box input[disabled] {
-        cursor: default;
-    }
-
-    .glyphicon.spinning {
-        animation: spin 1s infinite linear;
-        -webkit-animation: spin2 1s infinite linear;
-    }
-
-    @keyframes spin {
-        from { transform: scale(1) rotate(0deg); }
-        to { transform: scale(1) rotate(360deg); }
-    }
-
-    @-webkit-keyframes spin2 {
-        from { -webkit-transform: rotate(0deg); }
-        to { -webkit-transform: rotate(360deg); }
-    }
-</style>
+<!-- Include any user supplied resources -->
+<% view.include(new JspView<JspPageModel>("/org/labkey/webutils/view/Resources.jsp", model), out); %>
 
 <script type="application/javascript">
     var WebUtils = WebUtils || {};
     WebUtils.VM = {};
-    var $ = jQuery;
 </script>
 
 <div class="koErrorDiv" style="display: none;">
@@ -133,17 +109,8 @@
 <div class="hiddenDiv" style="display: none;">
     <div id="bootstrap-box">
         <!-- Templates -->
-        <%
-            try {
-                List<ModelAndView> templates = model.getTemplates();
-                for (ModelAndView template: templates) {
-                    view.include(template, out);
-                }
-            }
-            catch (Exception e) {
-
-            }
-        %>
+        <% view.include(new JspView<JspPageModel>("/org/labkey/webutils/view/knockout_components/lk-table.jsp", model), out); %>
+        <% view.include(new JspView<JspPageModel>("/org/labkey/webutils/view/knockout_components/lk-querytable.jsp", model), out); %>
 
         <!-- Inner Page -->
         <%

@@ -5,7 +5,16 @@ import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
 import org.labkey.api.view.JspView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Created by jon on 2/23/16.
@@ -17,7 +26,6 @@ abstract public class WebUtilsService {
 
     /**
      * Resolves a JSP path to the absolute file name.
-     *
      * Examples:
      * <ul>
      *     <li>/org/labkey/webutils/JspPages/views/pages/TestPage.jsp --> /org/labkey/webutils/JspPages/views/pages/TestPage.jsp</li>
@@ -51,7 +59,7 @@ abstract public class WebUtilsService {
      * @param clazz The class to get the package path for.
      * @return A string representing the path to the class's directory, relative to source root.
      */
-    public static String getPackageDirFromClass(Class clazz) {
+    private static String getPackageDirFromClass(Class clazz) {
         return "/" + clazz.getPackage().getName().replace(".", "/") + "/";
     }
 
@@ -60,17 +68,28 @@ abstract public class WebUtilsService {
      *
      * You may want to do this to render a JSP page for an email.
      *
-     * @param fullPathToJsp Fully qualified path (with ".jsp") to the JSP page to render.
+     * @param view Fully qualified path (with ".jsp") to the JSP page to render.
      * @param container
      * @param user
      * @return
      */
-    abstract public String renderView(String fullPathToJsp, Container container, User user) throws Exception;
-    abstract public String renderView(String fullPathToJsp, Container container, User user, Object model) throws Exception;
+    static public String renderView(JspView view, User user, Container container) throws Exception {
+        MockHttpServletRequest req = new MockHttpServletRequest();
 
-    /*
-     * These methods wrap the view passed in with either the JspPage template or the JspReport template.
-     */
-    abstract public ModelAndView getJspPageFromView(JspView view);
-    abstract public ModelAndView getJspReportPageFromView(JspView view);
+        // Build the mock response to capture the JSP rendering output.
+        final CharArrayWriter charArray = new CharArrayWriter();
+        HttpServletResponseWrapper response = new HttpServletResponseWrapper(new MockHttpServletResponse()) {
+            @Override
+            public PrintWriter getWriter() throws IOException {
+                return new PrintWriter(charArray);
+            }
+        };
+
+        try (ViewContext.StackResetter resetter = ViewContext.pushMockViewContext(user, container, null)) {
+            view.setFrame(WebPartView.FrameType.NONE);
+            view.render(req, response);
+
+            return charArray.toString();
+        }
+    }
 }

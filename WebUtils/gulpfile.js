@@ -47,6 +47,9 @@ gulp.task(compileJSLibTask, ['bower'], function() {
                         "build/css/bootstrap-datetimepicker.css",
                         "build/js/bootstrap-datetimepicker.min.js"
                     ]
+                },
+                'knockout': {
+                    main: "dist/knockout.debug.js"
                 }
             }
         }))
@@ -63,7 +66,6 @@ gulp.task(compileJSLibTask, ['bower'], function() {
 
     var js = bowerFiles.pipe(filter('**/*.js'));
     //js.pipe(debug({title: "JS: "}));
-
     //
     // When concatenating JS files, we add a ";" to ensure there is no odd behavior in case the individual files failed
     // to include a terminating semicolon.
@@ -96,7 +98,7 @@ gulp.task(compileJSLibTask, ['bower'], function() {
 
 const webpackTaskName = 'webpack';
 gulp.task(webpackTaskName, [compileJSLibTask], function() {
-    gulp.src(path.resolve(__dirname, 'web', 'legacy.ts'))
+    return gulp.src(path.resolve(__dirname, 'web', 'legacy.ts'))
         .pipe(gulpWebpack(require('./webpack.config.js'), webpack))
         .pipe(gulp.dest(path.resolve(__dirname, 'build', 'compiledResources', 'web', 'webutils', 'lib')))
 });
@@ -106,7 +108,7 @@ var taskExporter = new lkpm.TaskExporter({
 }, gulp);
 
 var stageTask = taskExporter.tasks[lkpm.TASK_NAMES.STAGE_STATIC];
-stageTask.dependencies.push(compileJSLibTask, 'bower');
+stageTask.dependencies.push(compileJSLibTask, 'bower', webpackTaskName);
 stageTask.setResourceRoot(compiledResourcesDir);
 
 taskExporter.exportTasks();

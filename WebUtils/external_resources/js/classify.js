@@ -1,6 +1,6 @@
-var Classify = {};
-(function() {
+define(["require","exports","module","jquery","underscore"],function(require,exports,module,$,_){
 
+    var Classify = {};
     var $ = $ || jQuery;
 
     var noOp = function() {};
@@ -164,5 +164,6 @@ var Classify = {};
 
     Classify.Version = '0.0.42';
 
+    return Classify;
 
-})();
+});

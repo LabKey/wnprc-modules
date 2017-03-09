@@ -29,7 +29,7 @@ registerCustomComponentLoader();
 // Export underscore.string and an "isDefined" method to underscore
 extendUnderscore();
 
-require("qunitjs");
+require("qunit");
 declare const QUnit: QUnit;
 
 // Customize whether or not QUnit should run

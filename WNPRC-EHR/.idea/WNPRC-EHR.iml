@@ -11,5 +11,15 @@
     <orderEntry type="module" module-name="ehr" />
     <orderEntry type="module" module-name="WebUtils" />
     <orderEntry type="module" module-name="DBUtils" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>

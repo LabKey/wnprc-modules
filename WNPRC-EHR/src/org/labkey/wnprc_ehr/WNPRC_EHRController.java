@@ -33,7 +33,6 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
-import org.labkey.api.ehr.security.EHRPathologyEntryPermission;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
@@ -51,6 +50,8 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
+import org.labkey.webutils.api.action.annotation.JspPath;
+import org.labkey.webutils.api.action.annotation.PageTitle;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
@@ -562,19 +563,21 @@ public class WNPRC_EHRController extends SpringActionController
 
     public abstract class WNPRCJspPageAction extends SimpleJspPageAction {
         @Override
-        public Module getModule() {
-            return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        public Class getBaseClass() {
+            return WNPRC_EHRModule.class;
         }
     }
 
     public abstract class WNPRCReportPageAction extends SimpleJspReportAction {
         @Override
-        public Module getModule() {
-            return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        public Class getBaseClass() {
+            return WNPRC_EHRModule.class;
         }
     }
 
     @ActionNames("NecropsySchedule")
+    @PageTitle("Necropsy Schedule")
+    @JspPath("pages/dataentry/NecropsySchedule.jsp")
     @RequiresLogin()
     public class NecropsyScheduleAction extends WNPRCJspPageAction {
         @Override

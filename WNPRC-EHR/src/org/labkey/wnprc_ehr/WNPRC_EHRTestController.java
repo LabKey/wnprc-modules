@@ -23,8 +23,8 @@ public class WNPRC_EHRTestController extends SpringActionController {
 
     public abstract class WNPRCTestJspPageAction extends SimpleJspPageAction {
         @Override
-        public Module getModule() {
-            return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        public Class getBaseClass() {
+            return WNPRC_EHRModule.class;
         }
     }
 

@@ -5,14 +5,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.webutils.api.json.JsonUtils;
-import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsyDeliveryOptionTable;
 import org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination;
 

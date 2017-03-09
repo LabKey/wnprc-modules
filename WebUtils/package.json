@@ -21,8 +21,6 @@
   "homepage": "https://github.com/WNPRC-EHR-Services/WebUtils#readme",
   "dependencies": {
     "@types/eonasdan-bootstrap-datetimepicker": "^4.17.22",
-    "@types/es6-promise": "0.0.32",
-    "@types/es6-shim": "^0.31.32",
     "@types/knockout": "^3.4.39",
     "@types/knockout.punches": "^0.5.31",
     "@types/moment": "^2.13.0",
@@ -35,7 +33,6 @@
     "@types/underscore": "^1.7.36",
     "@types/underscore.string": "0.0.30",
     "@types/urijs": "^1.15.31",
-    "@types/whatwg-fetch": "0.0.33",
     "bootstrap": "^3.3.7",
     "bootstrap-loader": "^2.0.0-beta.22",
     "bootstrap-sass": "^3.3.7",

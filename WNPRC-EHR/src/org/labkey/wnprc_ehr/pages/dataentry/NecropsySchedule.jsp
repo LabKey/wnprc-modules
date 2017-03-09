@@ -441,7 +441,7 @@
                 rowHeaders: ["Request ID", "Priority", "Animal ID", "Requested By", "Requested On", "Requested For"],
                 rows: pendingRequests.map(function(row) {
                     return new WebUtils.Model.TableRow({
-                        data: [
+                        rowData: [
                             row.requestid,
                             row.priority,
                             row.animalid,

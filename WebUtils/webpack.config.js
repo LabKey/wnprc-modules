@@ -16,7 +16,8 @@ module.exports = {
     },
 
     // Enable sourcemaps for debugging webpack's output.
-    devtool: "source-map",
+    // TODO: swtich to 'source-map' for production
+    devtool: "eval-source-map",
 
     resolve: {
         alias: {

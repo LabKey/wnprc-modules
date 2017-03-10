@@ -1,0 +1,25 @@
+#bootstrap-box {
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.42857143;
+	color: #333;
+	/* background-color: #fff; */ /* panels will include this, so it's not necessary to set here, and this way, it matches the outer divs */
+}
+
+#bootstrap-box input[type="button"] {
+	-webkit-appearance: button;
+	cursor: pointer;
+}
+
+#bootstrap-box input[disabled] {
+	cursor: default;
+}
+
+#bootstrap-box {
+	@import (less) "../../bower_components/bootstrap/less/bootstrap.less";
+	@import (less) "../../bower_components/bootstrap/less/theme.less";
+	@import (less) "./bootstrap-xl.less";
+}

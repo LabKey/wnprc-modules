@@ -9,11 +9,13 @@ const lkpm = require('lkpm');
 const mainBowerFiles = require('gulp-main-bower-files');
 const minify = require("gulp-minify");
 const merge = require('gulp-merge');
+const newer = require('gulp-newer');
 const path = require("path");
 const rename = require("gulp-rename");
 const pump = require("pump");
 const uglify = require('gulp-uglify');
 const webpack = require('webpack');
+const _ = require("underscore");
 
 var buildDir = path.join(__dirname, "build");
 var compiledResourcesDir = path.join(buildDir, "compiledResources");
@@ -63,9 +65,14 @@ gulp.task(compileJSLibTask, ['bower'], function() {
         .pipe(flatten());
     //bowerFiles.pipe(debug({title: "Bower Files: "}));
 
+    const bootstrapFilter = filter(['!**/bootstrap*.css'], {restore: true});
+
     var css = bowerFiles
         .pipe(filter("**/*.css"))
+        .pipe(bootstrapFilter)
+        .pipe(newer(path.join(compiledResourcesDir, 'web', 'webutils', 'css', 'webutils.css')))
         .pipe(concat('webutils.css', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
+        .pipe(bootstrapFilter.restore)
         .pipe(rename(function(file) {
             file.dirname = 'css'
         }));
@@ -85,6 +92,7 @@ gulp.task(compileJSLibTask, ['bower'], function() {
     // to include a terminating semicolon.
     //
     var jsBundle = js
+        //.pipe(newer(path.join(compiledResourcesDir, 'web', 'webutils', 'lib', 'externals.css')))
         .pipe(concat('externals.js', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
         .pipe(rename(function(file) { file.dirname = "lib"; }))
         .pipe(debug({title: "Bundle: "}))
@@ -120,6 +128,15 @@ gulp.task(webpackTaskName, [compileJSLibTask], function() {
 var taskExporter = new lkpm.TaskExporter({
     moduleBase: __dirname
 }, gulp);
+
+gulp.task('static-copy', function() {
+    gulp.src(path.resolve(__dirname, 'build', 'compiledResources', 'web', '**', '*'))
+        .pipe(gulp.dest(path.resolve(__dirname, 'build', 'explodedModule', 'web')));
+});
+
+gulp.task('static-watch', function() {
+    gulp.watch(path.resolve(__dirname, 'build', 'compiledResources', 'web', '**', '*'), ['static-copy']);
+});
 
 var stageTask = taskExporter.tasks[lkpm.TASK_NAMES.STAGE_STATIC];
 stageTask.dependencies.push(compileJSLibTask, 'bower', webpackTaskName);

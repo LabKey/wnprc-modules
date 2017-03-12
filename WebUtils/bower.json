@@ -1,6 +1,6 @@
 {
   "name": "webutils",
-  "description": "This module contains libraries such as Knockout, Underscore, and Bootstrap, as well as a JSP renderer and other generic functions for labkey modules to make use of.",
+  "description": "",
   "main": "index.js",
   "authors": [
     "Jon Richardson"

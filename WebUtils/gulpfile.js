@@ -1,4 +1,4 @@
-const bower = require('gulp-bower');
+const child_process = require("child_process");
 const concat = require('gulp-concat');
 const debug = require('gulp-debug');
 const filter = require('gulp-filter');
@@ -18,12 +18,18 @@ const webpack = require('webpack');
 var buildDir = path.join(__dirname, "build");
 var compiledResourcesDir = path.join(buildDir, "compiledResources");
 
-gulp.task('bower', function() {
-    return bower();
+gulp.task('bower', function(done) {
+    const bower = path.join(__dirname, 'node_modules', '.bin', 'bower');
+
+    child_process.execSync(bower + " install", {
+        stdio: [0,1,2]
+    });
+
+    done();
 });
 
 var compileJSLibTask = "external-libraries";
-gulp.task(compileJSLibTask, ['bower'], function() {
+gulp.task(compileJSLibTask, function() {
     var staticResources = gulp.src([path.join("resources", "**", "*"), path.join('!resources', 'web', '**', '*')]);
 
     var bowerFiles = gulp.src(path.join(__dirname, './bower.json'))
@@ -110,19 +116,33 @@ gulp.task(compileJSLibTask, ['bower'], function() {
         .pipe(gulp.dest(path.join(compiledResourcesDir)));
 });
 
-const webpackTaskName = 'webpack';
-gulp.task(webpackTaskName, [compileJSLibTask], function() {
-    return gulp.src(path.resolve(__dirname, 'web', 'legacy.ts'))
-        .pipe(gulpWebpack(require('./webpack.config.js'), webpack))
-        .pipe(gulp.dest(path.resolve(__dirname, 'build', 'compiledResources', 'web', 'webutils', 'lib')))
-});
+gulp.task('preprocess-lib', gulp.series('bower', compileJSLibTask));
 
 var taskExporter = new lkpm.TaskExporter({
-    moduleBase: __dirname
+    moduleBase: __dirname,
+    resourcePreprocessorTask: 'preprocess-lib',
+    javaSrcRoots: [path.join(__dirname, 'src', 'java')],
+    tsRoots: [path.join(__dirname, 'src', 'ts')]
 }, gulp);
 
-var stageTask = taskExporter.tasks[lkpm.TASK_NAMES.STAGE_STATIC];
-stageTask.dependencies.push(compileJSLibTask, 'bower', webpackTaskName);
-stageTask.setResourceRoot(compiledResourcesDir);
+taskExporter.enableWebpack({
+    entry: {
+        "lib/legacy": path.join(__dirname, 'src', 'ts', 'legacy.ts')
+    },
+
+    output: {
+        path: path.resolve(taskExporter.getCompiledResourceDir(), 'web', 'webutils', 'lib'),
+        // Export the module as the WebUtils variable
+        library: "WebUtils",
+        libraryTarget: "umd"
+    },
+
+    resolve: {
+        alias: {
+            classify: path.join(__dirname, "./external_resources/js/classify.js"),
+            supersqlstore: path.join(__dirname, "./external_resources/js/supersqlstore.js")
+        }
+    }
+});
 
 taskExporter.exportTasks();

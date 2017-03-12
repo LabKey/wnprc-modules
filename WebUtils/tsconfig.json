@@ -9,7 +9,7 @@
         "jsx" : "react"
     },
     "include": [
-        "web/WebUtils.ts",
-        "web/legacy.ts"
+      "src/ts/WebUtils.ts",
+      "src/ts/legacy.ts"
     ]
 }

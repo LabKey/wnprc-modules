@@ -1,3 +1,4 @@
+import * as ko from "knockout";
 import * as _ from "underscore";
 import * as foreach2 from "./knockout/foreach2";
 import {getBaseURL} from "../LabKey";

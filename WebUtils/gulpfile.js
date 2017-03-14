@@ -81,7 +81,9 @@ gulp.task('css', function() {
         .pipe(flatten())
         .pipe(bootstrapInABoxFilter);
 
-    var bundle = merge(getBowerFiles(), lessFiles)
+    var quilsCss = gulp.src(path.join(__dirname, 'external_resources', 'quill', 'quill*.css'));
+
+    var bundle = merge(getBowerFiles(), lessFiles, quilsCss)
             .pipe(filter("**/*.css"))
             .pipe(bootstrapFilter)
             .pipe(debug({title: 'non-bootstrap: '}))
@@ -111,7 +113,10 @@ gulp.task('fonts', function() {
 });
 
 gulp.task('js', function() {
-    var js = getBowerFiles().pipe(filter('**/*.js'));
+    var js = merge(
+        getBowerFiles().pipe(filter('**/*.js')),
+        gulp.src(path.join(__dirname, 'external_resources', 'quill', 'quill.js'))
+    );
 
     //
     // When concatenating JS files, we add a ";" to ensure there is no odd behavior in case the individual files failed

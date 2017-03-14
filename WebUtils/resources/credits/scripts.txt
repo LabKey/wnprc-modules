@@ -11,6 +11,7 @@ Knockout-Mapping|2.4.1|{link:Knockout.js/Mapping Plugin|http://knockoutjs.com/do
 Knockout-Punches|0.5.1|{link:Knockout.js/Punches Plugin|https://mbest.github.io/knockout.punches/}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Enhanced Binding Syntaxes for Knockout
 Markdown-JS|0.6.0|{link:Markdown-JS|https://github.com/evilstreak/markdown-js}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Parsing of Markdown syntax.
 Moment.js|2.17.1|{link:Moment.js|https://momentjs.com/}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Date and Time manipulation
+Quill|1.2.2|{link:Quill|https://quilljs.com/}|{link:BSD-3-Clause|https://github.com/quilljs/quill/blob/develop/LICENSE}|jrichardson|Text Editing (C) Jason Chen, 2014 and (C) salesforce.com, 2013
 QUnit|2.1.1|{link:QUnit|https://qunitjs.com/}|{link:JS Foundation|https://github.com/qunitjs/qunit/blob/master/LICENSE.txt}|jrichardson|Client side unit testing
 RSVP|3.1.0|{link:RSVP.js|https://github.com/tildeio/rsvp.js/}|{link:MIT|https://raw.githubusercontent.com/tildeio/rsvp.js/master/LICENSE}|jrichardson|Javascript Promises
 SuperSQLStore|0.0.7|{link:SuperSQLStore|https://github.com/JonathonRichardson/SuperSQLStoreJS}|{link:Apache 2.0|https://github.com/JonathonRichardson/SuperSQLStoreJS/blob/master/LICENSE}|jrichardson|Observable Tables to Bind to Knockout

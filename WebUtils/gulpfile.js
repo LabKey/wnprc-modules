@@ -19,7 +19,7 @@ const _ = require("underscore");
 var buildDir = path.join(__dirname, "build");
 var compiledResourcesDir = path.join(buildDir, "compiledResources");
 
-gulp.task('bower', function(done) {
+gulp.task('bower-install', function(done) {
     const bower = path.join(__dirname, 'node_modules', '.bin', 'bower');
 
     child_process.execSync(bower + " install", {
@@ -29,69 +29,82 @@ gulp.task('bower', function(done) {
     done();
 });
 
-var compileJSLibTask = "external-libraries";
-gulp.task(compileJSLibTask, function() {
-    var staticResources = gulp.src([path.join("resources", "**", "*"), path.join('!resources', 'web', '**', '*')]);
+var bowerOverrides = {
+    overrides: {
+        bootstrap: {
+            main: [
+                './dist/js/bootstrap.js',
+                './dist/css/bootstrap-theme.css',
+                './dist/css/bootstrap.css',
+                './dist/fonts/*.*'
+            ]
+        },
+        'eonasdan-bootstrap-datetimepicker': {
+            dependencies: {
+                "jquery":    ">=1.8.3",
+                "moment":    ">=2.10.5",
+                "bootstrap": ">3.3.7"
+            },
+            "main": [
+                "build/css/bootstrap-datetimepicker.css",
+                "build/js/bootstrap-datetimepicker.min.js"
+            ]
+        },
+        'knockout': {
+            main: "dist/knockout.debug.js"
+        },
+        'react': {
+            main: [
+                "react.js",
+                "react-dom.js",
+                "react-dom-server.js"
+            ]
+        }
+    }
+};
 
-    var bowerFiles = gulp.src(path.join(__dirname, './bower.json'))
-        .pipe(mainBowerFiles({
-            overrides: {
-                bootstrap: {
-                    main: [
-                        './dist/js/bootstrap.js',
-                        './dist/css/bootstrap-theme.css',
-                        './dist/css/bootstrap.css',
-                        './dist/fonts/*.*'
-                    ]
-                },
-                'eonasdan-bootstrap-datetimepicker': {
-                    dependencies: {
-                        "jquery":    ">=1.8.3",
-                        "moment":    ">=2.10.5",
-                        "bootstrap": ">3.3.7"
-                    },
-                    "main": [
-                        "build/css/bootstrap-datetimepicker.css",
-                        "build/js/bootstrap-datetimepicker.min.js"
-                    ]
-                },
-                'knockout': {
-                    main: "dist/knockout.debug.js"
-                },
-                'react': {
-                    main: [
-                        "react.js",
-                        "react-dom.js",
-                        "react-dom-server.js"
-                    ]
-                }
-            }
-        }))
+var outputDirectory = path.join(__dirname, 'build', 'compiledResources', 'web', 'webutils');
+
+var getBowerFiles = function() {
+    return gulp.src(path.join(__dirname, './bower.json'))
+        .pipe(mainBowerFiles(bowerOverrides))
         .pipe(flatten());
-    //bowerFiles.pipe(debug({title: "Bower Files: "}));
+};
 
-    const bootstrapFilter = filter(['!**/bootstrap*.css'], {restore: true});
+gulp.task('css', function() {
+    const bootstrapFilter = filter(['**', '!**/bootstrap*.css', '**/bootstrap-datetimepicker.css'], {restore: true, passthrough: false});
 
-    var css = bowerFiles
+    var bundle = getBowerFiles()
         .pipe(filter("**/*.css"))
         .pipe(bootstrapFilter)
-        .pipe(newer(path.join(compiledResourcesDir, 'web', 'webutils', 'css', 'webutils.css')))
+        .pipe(debug({title: 'non-bootstrap: '}))
         .pipe(concat('webutils.css', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
-        .pipe(bootstrapFilter.restore)
+        ;
+
+    var bootstrap = bootstrapFilter.restore
+        .pipe(concat('bootstrap-bundle.css', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
+        ;
+
+    return merge(bundle, bootstrap)
         .pipe(rename(function(file) {
             file.dirname = 'css'
-        }));
+        }))
+        .pipe(debug({title: 'css: '}))
+        .pipe(gulp.dest(outputDirectory));
+});
 
-    css.pipe(debug({title: "CSS: "}));
-
-    var fonts = bowerFiles
+gulp.task('fonts', function() {
+    return getBowerFiles()
         .pipe(filter("**/*.{eot,svg,ttf,woff,woff2}"))
         .pipe(rename(function(file) {
             file.dirname = 'fonts'
-        }));
+        }))
+        .pipe(gulp.dest(outputDirectory));
+});
 
-    var js = bowerFiles.pipe(filter('**/*.js'));
-    //js.pipe(debug({title: "JS: "}));
+gulp.task('js', function() {
+    var js = getBowerFiles().pipe(filter('**/*.js'));
+
     //
     // When concatenating JS files, we add a ";" to ensure there is no odd behavior in case the individual files failed
     // to include a terminating semicolon.
@@ -99,34 +112,27 @@ gulp.task(compileJSLibTask, function() {
     var jsBundle = js
         .pipe(concat('externals.js', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
         .pipe(rename(function(file) { file.dirname = "lib"; }))
-        .pipe(debug({title: "Bundle: "}))
         ;
 
-    var minifiedJs = jsBundle
+    return jsBundle
             .pipe(minify({
                 ext:{
                     src:'-debug.js',
                     min:'-min.js'
                 }
             }))
-        .pipe(debug({title: "Min Bundle: "}))
-        ;
-
-    var webResources = merge(css, minifiedJs, fonts)
-        .pipe(debug({title: "WEB: "}))
-        .pipe(rename(function(file) {
-            file.dirname = path.join("web", "webutils", file.dirname)
-        }));
-
-    return merge(staticResources, webResources)
-        .pipe(gulp.dest(path.join(compiledResourcesDir)));
+        .pipe(gulp.dest(outputDirectory));
 });
 
-gulp.task('preprocess-lib', gulp.series('bower', compileJSLibTask));
+gulp.task('vendor-lib', gulp.series('bower-install', gulp.parallel(
+    'js',
+    'fonts',
+    'css'
+)));
 
 var taskExporter = new lkpm.TaskExporter({
     moduleBase: __dirname,
-    resourcePreprocessorTask: 'preprocess-lib',
+    resourcePreprocessorTask: 'vendor-lib',
     javaSrcRoots: [path.join(__dirname, 'src', 'java')],
     tsRoots: [path.join(__dirname, 'src', 'ts')]
 }, gulp);

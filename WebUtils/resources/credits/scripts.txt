@@ -5,6 +5,7 @@ C3|0.4.10|{link:C3|http://c3js.org}|{link:MIT|http://opensource.org/licenses/mit
 Classify|0.0.42|{link:ClassifyJS|https://github.com/JonathonRichardson/ClassifyJS}|{link:Apache 2.0|https://github.com/JonathonRichardson/ClassifyJS/blob/master/LICENSE}|jrichardson|Class Structures
 D3|3.5.9|{link:D3|http://d3js.org/}|{link:BSD|http://opensource.org/licenses/BSD-3-Clause}|jrichardson|Graphing/Visualizations
 Fetch|2.0.2|{link:Fetch|https://github.com/github/fetch}|{link:GitHub|https://github.com/github/fetch/blob/master/LICENSE}|jrichardson|Simpler Ajax with Promisess
+Font Awesome|4.7.0|{link:Font Awesome|http://fontawesome.io/}|{link:SIL OFL 1.1/CC/MIT|http://fontawesome.io/license/}|jrichardson|Icons
 jQuery BlockUI|2.7|{link:BlockUI|http://malsup.com/jquery/block/#overview}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|UI
 Knockout|3.3.0|{link:Knockout.js|http://knockoutjs.com}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Lightweight, Responsive Components and Observables
 Knockout-Mapping|2.4.1|{link:Knockout.js/Mapping Plugin|http://knockoutjs.com/documentation/plugins-mapping.html}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Mapping Plugin for Mapping Objects to Observables

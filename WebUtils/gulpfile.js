@@ -81,9 +81,10 @@ gulp.task('css', function() {
         .pipe(flatten())
         .pipe(bootstrapInABoxFilter);
 
-    var quilsCss = gulp.src(path.join(__dirname, 'external_resources', 'quill', 'quill*.css'));
+    var quillCss = gulp.src(path.join(__dirname, 'external_resources', 'quill', 'quill*.css'));
+    var fontAwesome = gulp.src(path.join(__dirname, 'external_resources', 'font-awesome', 'css', '*.css'));
 
-    var bundle = merge(getBowerFiles(), lessFiles, quilsCss)
+    var bundle = merge(getBowerFiles(), lessFiles, quillCss, fontAwesome)
             .pipe(filter("**/*.css"))
             .pipe(bootstrapFilter)
             .pipe(debug({title: 'non-bootstrap: '}))
@@ -104,8 +105,13 @@ gulp.task('css', function() {
 });
 
 gulp.task('fonts', function() {
-    return getBowerFiles()
-        .pipe(filter("**/*.{eot,svg,ttf,woff,woff2}"))
+    var fonts = merge(
+        getBowerFiles(),
+        gulp.src(path.join(__dirname, 'external_resources', 'font-awesome', 'fonts', '**'))
+    );
+
+    return fonts
+        .pipe(filter("**/*.{otf,eot,svg,ttf,woff,woff2}"))
         .pipe(rename(function(file) {
             file.dirname = 'fonts'
         }))

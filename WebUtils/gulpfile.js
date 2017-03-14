@@ -5,6 +5,7 @@ const filter = require('gulp-filter');
 const flatten = require("gulp-flatten");
 const gulp = require("gulp");
 const gulpWebpack = require('gulp-webpack');
+const less = require('gulp-less');
 const lkpm = require('lkpm');
 const mainBowerFiles = require('gulp-main-bower-files');
 const minify = require("gulp-minify");
@@ -73,19 +74,26 @@ var getBowerFiles = function() {
 
 gulp.task('css', function() {
     const bootstrapFilter = filter(['**', '!**/bootstrap*.css', '**/bootstrap-datetimepicker.css'], {restore: true, passthrough: false});
+    const bootstrapInABoxFilter = filter(['**', '!**/bootstrap-in-a-box.css'], {restore: true, passthrough: false});
 
-    var bundle = getBowerFiles()
-        .pipe(filter("**/*.css"))
-        .pipe(bootstrapFilter)
-        .pipe(debug({title: 'non-bootstrap: '}))
-        .pipe(concat('webutils.css', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
+    var lessFiles = gulp.src(path.join(__dirname, 'src', 'less', '*.less'))
+        .pipe(less())
+        .pipe(flatten())
+        .pipe(bootstrapInABoxFilter);
+
+    var bundle = merge(getBowerFiles(), lessFiles)
+            .pipe(filter("**/*.css"))
+            .pipe(bootstrapFilter)
+            .pipe(debug({title: 'non-bootstrap: '}))
+            .pipe(concat('webutils.css', { newLine: "\n\n/* ==== CONCAT ==== */\n\n" }))
         ;
 
     var bootstrap = bootstrapFilter.restore
-        .pipe(concat('bootstrap-bundle.css', { newLine: "\n\n;\n// ==== CONCAT ==== \n;\n\n" }))
+        .pipe(concat('bootstrap-bundle.css', { newLine: "\n\n/* ==== CONCAT ==== */\n\n" }))
         ;
 
-    return merge(bundle, bootstrap)
+    return merge(bundle, bootstrap, bootstrapInABoxFilter.restore)
+        .pipe(flatten())
         .pipe(rename(function(file) {
             file.dirname = 'css'
         }))

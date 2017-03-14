@@ -30,6 +30,7 @@
     "knockout": "^3.4.2",
     "knockout.mapping": "bower-knockout.mapping-shim#^2.4.1",
     "knockout.punches": "bower-knockout.punches-shim#^0.5.1",
-    "fullcalendar": "^3.2.0"
+    "fullcalendar": "^3.2.0",
+    "awesome-bootstrap-checkbox": "^0.3.7"
   }
 }

@@ -1,5 +1,6 @@
 {table}
 Library|Version|Source|License|LabKey Dev|Purpose
+Awesome Bootstrap Checkbox|0.3.7|{link:GitHub|https://github.com/flatlogic/awesome-bootstrap-checkbox}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Enhanced Checkbox Styling
 Bootstrap|3.3.6|{link:Bootstrap|http://getbootstrap.com}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|UI
 C3|0.4.10|{link:C3|http://c3js.org}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Charts/Visualizations
 Classify|0.0.42|{link:ClassifyJS|https://github.com/JonathonRichardson/ClassifyJS}|{link:Apache 2.0|https://github.com/JonathonRichardson/ClassifyJS/blob/master/LICENSE}|jrichardson|Class Structures

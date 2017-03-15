@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "noImplicitAny": false,
+        "strictNullChecks": true,
+        "sourceMap": false,
+        "jsx": "react",
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "lkpm/modules/WebUtils/node_modules/*",
+                "lkpm/modules/WebUtils/bower_components/*",
+                "lkpm/modules/WebUtils/src/ts/*"
+            ]
+        },
+        "typeRoots": [
+            "./node_modules/@types",
+            "./lkpm/modules/WebUtils/node_modules/@types"
+        ],
+        "rootDirs": [
+            "./src/ts",
+            "./lkpm/modules/WebUtils/src/ts"
+        ]
+    },
+    "include": [
+        "src/ts/pages/PathCaseList.ts"
+    ]
+}

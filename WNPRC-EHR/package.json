@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/WNPRC-EHR-Services/WNPRC-EHR#readme",
   "dependencies": {
-    "gulp": "github:gulpjs/gulp#4.0"
+    "gulp": "github:gulpjs/gulp#4.0",
+    "typescript": "^2.2.1"
   },
   "devDependencies": {}
 }

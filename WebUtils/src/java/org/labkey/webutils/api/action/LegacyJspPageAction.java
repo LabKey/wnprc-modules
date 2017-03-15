@@ -16,7 +16,7 @@ public abstract class LegacyJspPageAction extends SimpleJspPageAction {
     public JspView<JspPageModel> getView() {
         JspView<JspPageModel> template = new JspView<JspPageModel>("/org/labkey/webutils/view/templates/LegacyJspPage.jsp", model);
 
-        JspView<JspPageModel> inner = new JspView<JspPageModel>(getPathToJsp(), model);
+        JspView<JspPageModel> inner = new JspView<JspPageModel>(this.getResolvedJspPath(), model);
 
         // Set the inner piece of the template
         template.setBody(inner);

@@ -1,7 +1,4 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.webutils.view.JspPage" %>
-<%@ page import="org.springframework.web.servlet.ModelAndView" %>
-<%@ page import="java.util.List" %>
 <%@ page import="org.labkey.api.module.Module" %>
 <%@ page import="org.labkey.api.data.PropertyManager" %>
 <%@ page import="org.labkey.api.module.ModuleLoader" %>
@@ -10,8 +7,8 @@
 <%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.WebPartView" %>
-<%@ page import="org.labkey.api.jsp.JspBase" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+
 <%
     JspView view = (JspView) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
@@ -24,9 +21,10 @@
 <script type="application/javascript" src="<%= getContextPath() %>/webutils/lib/legacy.js"></script>
 
 <link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/webutils/css/webutils.css" />
+<link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/webutils/css/bootstrap-in-a-box.css" />
 
 <!-- Include any user supplied resources -->
-<% view.include(new JspView<JspPageModel>("/org/labkey/webutils/view/Resources.jsp", model), out); %>
+<% view.include(new JspView<JspPageModel>("/org/labkey/webutils/view/fragments/Resources.jsp", model), out); %>
 
 <script type="application/javascript">
     var WebUtils = WebUtils || {};

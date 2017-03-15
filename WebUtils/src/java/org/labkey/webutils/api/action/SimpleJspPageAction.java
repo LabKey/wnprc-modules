@@ -22,7 +22,7 @@ public abstract class SimpleJspPageAction extends SimpleAction {
         model.setTitle(getTitle());
         getPageConfig().setTitle(model.getTitle());
 
-        JspView<JspPageModel> view = new JspView<JspPageModel>(getResolvedJspPath(), model);
+        JspView<JspPageModel> view = getView();
 
         // Call the before render hook.
         this.beforeRender(request, response, view);
@@ -31,10 +31,10 @@ public abstract class SimpleJspPageAction extends SimpleAction {
     }
 
     public JspView<JspPageModel> getView() {
-        return new JspView<JspPageModel>(getPathToJsp(), model);
+        return new JspView<JspPageModel>(getResolvedJspPath(), model);
     }
 
-    private String getResolvedJspPath() {
+    protected String getResolvedJspPath() {
         return WebUtilsService.resolveJspPath(getPathToJsp(), getBaseClass());
     }
 

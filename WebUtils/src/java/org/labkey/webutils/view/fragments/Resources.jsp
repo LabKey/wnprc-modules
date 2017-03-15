@@ -1,9 +1,7 @@
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.webutils.view.JspPage" %>
 <%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+
 <%
-    JspPage view = (JspPage) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
 %>
 

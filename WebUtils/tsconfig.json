@@ -5,7 +5,8 @@
         "noImplicitAny": false,
         "sourceMap": true,
         "strictNullChecks": true,
-        "jsx" : "react"
+        "jsx" : "react",
+        "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"]
     },
     "include": [
       "src/ts/WebUtils.ts",

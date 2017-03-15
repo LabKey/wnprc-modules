@@ -1,3 +1,3 @@
-import * as webutils from "WebUtils";
+import * as api from "WebUtils/API";
 
-webutils.API.selectRows('core', 'users', {});
+api.selectRows('core', 'users', {});

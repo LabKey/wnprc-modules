@@ -1,3 +1,5 @@
 lkpm
 node_modules
 build
+
+**/jspTempDir

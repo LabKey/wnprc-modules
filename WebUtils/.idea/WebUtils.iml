@@ -12,5 +12,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="LabKey-Server" />
+    <orderEntry type="library" name="tsconfig$roots" level="project" />
   </component>
 </module>

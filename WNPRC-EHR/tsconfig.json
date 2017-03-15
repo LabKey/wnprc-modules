@@ -5,10 +5,12 @@
         "noImplicitAny": false,
         "strictNullChecks": true,
         "sourceMap": false,
-        "jsx": "react",
+        "jsx" : "react",
         "baseUrl": ".",
         "paths": {
             "*": [
+                "node_modules/*",
+                "node_modules/lkpm/node_modules/*",
                 "lkpm/modules/WebUtils/node_modules/*",
                 "lkpm/modules/WebUtils/bower_components/*",
                 "lkpm/modules/WebUtils/src/ts/*"
@@ -24,6 +26,6 @@
         ]
     },
     "include": [
-        "src/ts/pages/PathCaseList.ts"
+        "src/ts/pages/*.tsx"
     ]
 }

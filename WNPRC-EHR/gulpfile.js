@@ -10,7 +10,7 @@ var taskExporter = new lkpm.TaskExporter({
 
 taskExporter.enableWebpack({
     entry: {
-        'pages/path-case-list': path.join(__dirname, 'src', 'ts', 'pages', 'PathCaseList.ts')
+        'pages/path-case-list': path.join(__dirname, 'src', 'ts', 'pages', 'PathCaseList.tsx')
     },
 
     output: {

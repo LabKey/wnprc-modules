@@ -49,6 +49,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.action.annotation.JspPath;
 import org.labkey.webutils.api.action.annotation.PageTitle;
@@ -561,7 +562,7 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public abstract class WNPRCJspPageAction extends SimpleJspPageAction {
+    public abstract class WNPRCJspPageAction extends LegacyJspPageAction {
         @Override
         public Class getBaseClass() {
             return WNPRC_EHRModule.class;
@@ -579,17 +580,7 @@ public class WNPRC_EHRController extends SpringActionController
     @PageTitle("Necropsy Schedule")
     @JspPath("pages/dataentry/NecropsySchedule.jsp")
     @RequiresLogin()
-    public class NecropsyScheduleAction extends WNPRCJspPageAction {
-        @Override
-        public String getPathToJsp() {
-            return "pages/dataentry/NecropsySchedule.jsp";
-        }
-
-        @Override
-        public String getTitle() {
-            return "Necropsy Schedule";
-        }
-    }
+    public class NecropsyScheduleAction extends WNPRCJspPageAction {}
 
     @ActionNames("PathologyCaseList")
     @RequiresLogin()

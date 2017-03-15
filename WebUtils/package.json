@@ -23,7 +23,6 @@
     "@types/eonasdan-bootstrap-datetimepicker": "^4.17.22",
     "@types/knockout": "^3.4.39",
     "@types/knockout.punches": "^0.5.31",
-    "@types/moment": "^2.13.0",
     "@types/node": "^7.0.5",
     "@types/qunit": "^2.0.31",
     "@types/react": "^15.0.14",

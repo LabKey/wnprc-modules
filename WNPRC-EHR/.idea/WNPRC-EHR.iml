@@ -22,5 +22,6 @@
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="tsconfig$roots" level="project" />
   </component>
 </module>

@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="tsconfig$roots" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

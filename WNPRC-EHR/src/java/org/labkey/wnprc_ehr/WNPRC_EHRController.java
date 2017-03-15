@@ -596,6 +596,13 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+
+
+    @ActionNames("PathCaseList")
+    @PageTitle("Pathology Case List")
+    @JspPath("pages/dataentry/PathologyCaseList.jsp")
+    public class PathCaseListPage extends WNPRCJspPageAction {}
+
     @ActionNames("NecropsyReport")
     @RequiresLogin()
     public class NecropsyReportAction extends WNPRCReportPageAction {

@@ -2,10 +2,11 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es5",
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "strictNullChecks": true,
         "sourceMap": false,
         "jsx" : "react",
+        "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"],
         "baseUrl": ".",
         "paths": {
             "*": [

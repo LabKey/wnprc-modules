@@ -31,8 +31,15 @@
     List<JSONObject> necropsies = JsonUtils.getListFromJSONArray(necropsyQuery.getResults(dateFilter).getJSONArray("rows"));
 %>
 
-<h1>Hello</h1>
-
 <div id="react-page"></div>
+
+<script>
+    (function() {
+        window.PageLoadData = {
+            biopsies: <%= biopsies.toString() %>,
+            necropsies: <%= necropsies.toString() %>
+        };
+    })();
+</script>
 
 <script src="<%= getContextPath() %>/wnprc_ehr/pages/path-case-list.js"></script>

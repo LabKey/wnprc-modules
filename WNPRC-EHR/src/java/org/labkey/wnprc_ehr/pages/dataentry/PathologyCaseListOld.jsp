@@ -75,8 +75,10 @@
 
 <script type="application/javascript">
     (function() {
-        var biopsies = <%= biopsies.toString() %>;
-        var necropsies = <%= necropsies.toString() %>;
+        window.PageLoadData = {
+            biopsies: <%= biopsies.toString() %>,
+            necropsies: <%= necropsies.toString() %>
+        }
 
         var makeRowMapFn = function(type) {
 
@@ -125,7 +127,7 @@
                 <% ActionURL collectionListURL = new ActionURL(WNPRC_EHRController.NecropsyCollectionListAction.class, getContainer()); %>
                 var collectionListURL = (biopsy.type != "Necropsy") ? "" : LABKEY.ActionURL.buildURL('<%= collectionListURL.getController() %>', '<%= collectionListURL.getAction() %>', null, {
                     taskid: biopsyRow['taskid'],
-                    reportMode: true
+                    reportMode: trueboo
                 });
 
                 return new WebUtils.Models.TableRow({

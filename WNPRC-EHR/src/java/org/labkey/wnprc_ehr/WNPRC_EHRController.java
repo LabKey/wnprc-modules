@@ -587,7 +587,7 @@ public class WNPRC_EHRController extends SpringActionController
     public class PathologyCaseListAction extends WNPRCJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "pages/dataentry/PathologyCaseList.jsp";
+            return "pages/dataentry/PathologyCaseListOld.jsp";
         }
 
         @Override

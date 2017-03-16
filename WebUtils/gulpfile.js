@@ -12,6 +12,7 @@ const minify = require("gulp-minify");
 const merge = require('gulp-merge');
 const path = require("path");
 const rename = require("gulp-rename");
+const replace = require('gulp-replace');
 const pump = require("pump");
 const uglify = require('gulp-uglify');
 const webpack = require('webpack');
@@ -95,7 +96,13 @@ gulp.task('css', function() {
         .pipe(concat('bootstrap-bundle.css', { newLine: "\n\n/* ==== CONCAT ==== */\n\n" }))
         ;
 
-    return merge(bundle, bootstrap, bootstrapInABoxFilter.restore)
+    // LESS has some weird handling of the addition of a wrapping #bootstrap-box, which causes it to embed some styles
+    // as '#bootstrap-box #bootstrap-box', which, of course, you can't really do.  These should just have one, so we'll
+    // do a hacky but simple replace to fix it.
+    var bootstrapInABox = bootstrapInABoxFilter.restore
+        .pipe(replace('#bootstrap-box #bootstrap-box', '#bootstrap-box'));
+
+    return merge(bundle, bootstrap, bootstrapInABox)
         .pipe(flatten())
         .pipe(rename(function(file) {
             file.dirname = 'css'

@@ -16,16 +16,13 @@
                 "lkpm/modules/WebUtils/src/ts/*"
             ]
         },
-        "typeRoots": [
-            "./node_modules/@types",
-            "./lkpm/modules/WebUtils/node_modules/@types"
-        ],
         "rootDirs": [
             "./src/ts",
             "./lkpm/modules/WebUtils/src/ts"
         ]
     },
     "include": [
-        "src/ts/pages/*.tsx"
+        "src/ts/pages/*.tsx",
+        "lkpm/modules/WebUtils/node_modules/@types"
     ]
 }

@@ -27,5 +27,5 @@ export class Page extends React.Component<any, any> {
 
 ReactDOM.render(
     <Page />,
-    document.getElementById("react-page")
+    $("#react-page").get(0)
 );

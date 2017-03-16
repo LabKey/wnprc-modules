@@ -10,164 +10,164 @@ import {TableRow} from "../model/TableRow";
 import {Filterer} from "simplefilter";
 
 export class FilterableTableColumn extends React.Component<{'cellData': any}, {}> {
-        render() {
-                let data = this.props.cellData;
-                let html = _.isObject(data) ? data.display : data;
+    render() {
+        let data = this.props.cellData;
+        let html = _.isObject(data) ? data.display : data;
 
-                return <td>
-                        <span dangerouslySetInnerHTML={{ __html: html }} />
-                </td>
-        }
+        return <td>
+            <span dangerouslySetInnerHTML={{ __html: html }} />
+        </td>
+    }
 }
 
 export class FilterableTableRow extends React.Component<{'row': TableRow}, {}> {
-        render() {
-                let data = this.props.row.rowData;
+    render() {
+        let data = this.props.row.rowData;
 
-                let columns = data.map((cellData, i) => {
-                        return <FilterableTableColumn cellData={cellData} key={i} />
-                });
+        let columns = data.map((cellData, i) => {
+            return <FilterableTableColumn cellData={cellData} key={i} />
+        });
 
-                return <tr>
-                        {columns}
-                </tr>;
-        }
+        return <tr>
+            {columns}
+        </tr>;
+    }
 }
 
 export interface FilterableTableViewModel {
-        table: Table
+    table: Table
 }
 
 export interface FilterableTableState {
-        filters: {[name: string]: string}
+    filters: {[name: string]: string}
 }
 
 export class FilterableTable extends React.Component<FilterableTableViewModel, FilterableTableState> {
-        constructor(props) {
-                super(props);
+    constructor(props) {
+        super(props);
 
-                this.state = {
-                        filters: {}
-                };
+        this.state = {
+            filters: {}
+        };
 
-                this.handleFilterChange = this.handleFilterChange.bind(this);
+        this.handleFilterChange = this.handleFilterChange.bind(this);
+    }
+
+    handleFilterChange(event) {
+        let $target = $(event.target);
+        let filters = this.state.filters;
+        filters[$target.attr('data-column-number')] = $target.val();
+
+        this.setState({filters:  filters});
+    }
+
+    render() {
+        let table = this.props.table;
+
+        let state = this.state as FilterableTableState;
+
+        let headers = table.rowHeaders().map((header, i) => {
+            return <th className="header" key={i}>
+                {header}
+            </th>;
+        });
+
+        let filters = table.rowHeaders().map((filter, i) => {
+            return (
+                <td key={i}>
+                    <div className="input-group">
+                        <input className="form-control input-sm" placeholder="No active filter" type="text" onChange={this.handleFilterChange} {...{'data-column-number': i}}/>
+                        <span className="input-group-addon">
+                            <span className="glyphicon glyphicon-info-sign" data-toggle="modal"></span>
+                        </span>
+                    </div>
+                </td>
+            );
+        });
+
+        let filterers: {[name: string]: Filterer} = {};
+        for (let filteredColumnIndex in this.state.filters) {
+            let filterString = this.state.filters[filteredColumnIndex];
+
+            filterers[filteredColumnIndex] = new Filterer(filterString);
         }
 
-        handleFilterChange(event) {
-                let $target = $(event.target);
-                let filters = this.state.filters;
-                filters[$target.attr('data-column-number')] = $target.val();
+        // Get the filtered rows.
+        let rows = table.rows().filter((row) => {
+            let data = row.rowData;
 
-                this.setState({filters:  filters});
-        }
+            // For each filter, return a failure if we failed to match.
+            for (let filteredColumnIndex in filterers) {
+                let filter = filterers[filteredColumnIndex];
 
-        render() {
-                let table = this.props.table;
-
-                let state = this.state as FilterableTableState;
-
-                let headers = table.rowHeaders().map((header, i) => {
-                        return <th className="header" key={i}>
-                                {header}
-                        </th>;
-                });
-
-                let filters = table.rowHeaders().map((filter, i) => {
-                        return (
-                            <td key={i}>
-                                    <div className="input-group">
-                                            <input className="form-control input-sm" placeholder="No active filter" type="text" onChange={this.handleFilterChange} {...{'data-column-number': i}}/>
-                                            <span className="input-group-addon">
-                                                    <span className="glyphicon glyphicon-info-sign" data-toggle="modal"></span>
-                                            </span>
-                                    </div>
-                            </td>
-                        );
-                });
-
-                let filterers: {[name: string]: Filterer} = {};
-                for (let filteredColumnIndex in this.state.filters) {
-                        let filterString = this.state.filters[filteredColumnIndex];
-
-                        filterers[filteredColumnIndex] = new Filterer(filterString);
+                if (!filter.matches(row.getValueForColumnIndex(parseInt(filteredColumnIndex)))) {
+                    row.isHidden(true);
+                    return false;
                 }
+            }
 
-                // Get the filtered rows.
-                let rows = table.rows().filter((row) => {
-                        let data = row.rowData;
+            row.isHidden(false);
+            return true;
+        }).map((row, i) => {
+            return <FilterableTableRow row={row} key={i} />;
+        });
 
-                        // For each filter, return a failure if we failed to match.
-                        for (let filteredColumnIndex in filterers) {
-                                let filter = filterers[filteredColumnIndex];
+        let shownRows = rows.length;
 
-                                if (!filter.matches(row.getValueForColumnIndex(parseInt(filteredColumnIndex)))) {
-                                        row.isHidden(true);
-                                        return false;
-                                }
-                        }
+        return <div className="panel panel-default">
+            <div className="panel-heading">
+                <div className="container-fluid panel-container">
+                    <div className="col-xs-8 text-left">
 
-                        row.isHidden(false);
-                        return true;
-                }).map((row, i) => {
-                        return <FilterableTableRow row={row} key={i} />;
-                });
+                    </div>
 
-                let shownRows = rows.length;
+                    <div className="col-xs-4 text-right">
+                        <p><strong>Displaying {shownRows} / {table.rows().length} rows.</strong></p>
+                    </div>
+                </div>
+            </div>
 
-                return <div className="panel panel-default">
-                        <div className="panel-heading">
-                                <div className="container-fluid panel-container">
-                                        <div className="col-xs-8 text-left">
+            <table className="table table-striped table-bordered table-hover">
+                <thead>
+                <tr>
+                    {headers}
+                </tr>
+                </thead>
 
-                                        </div>
-
-                                        <div className="col-xs-4 text-right">
-                                                <p><strong>Displaying {shownRows} / {table.rows().length} rows.</strong></p>
-                                        </div>
-                                </div>
-                        </div>
-
-                        <table className="table table-striped table-bordered table-hover">
-                                <thead>
-                                <tr>
-                                        {headers}
-                                </tr>
-                                </thead>
-
-                                <tbody>
-                                <tr className="noclick">
-                                        {filters}
-                                </tr>
+                <tbody>
+                <tr className="noclick">
+                    {filters}
+                </tr>
 
 
-                                {rows}
-                                </tbody>
-                        </table>
-                </div>;
-        }
+                {rows}
+                </tbody>
+            </table>
+        </div>;
+    }
 }
 
 let koTemplate = ReactDomServer.renderToString((<div className="lk-table-react"> </div>));
 
 export interface FilterableTableParams {
-        table: Table
+    table: Table
 }
 
 export function registerKoComponent(): void {
-        ko.components.register('lk-table', {
-                viewModel: {
-                        createViewModel: function(params: FilterableTableParams, componentinfo) {
-                                if (componentinfo) {
-                                        let $element = $(componentinfo.element).find('.lk-table-react');
+    ko.components.register('lk-table', {
+        viewModel: {
+            createViewModel: function(params: FilterableTableParams, componentinfo) {
+                if (componentinfo) {
+                    let $element = $(componentinfo.element).find('.lk-table-react');
 
-                                        ReactDOM.render(
-                                            <FilterableTable table={params.table} />,
-                                            $element.get(0)
-                                        )
-                                }
+                    ReactDOM.render(
+                        <FilterableTable table={params.table} />,
+                        $element.get(0)
+                    )
+                }
 
-                        }
-                },
-                template: koTemplate
-        });
+            }
+        },
+        template: koTemplate
+    });
 }

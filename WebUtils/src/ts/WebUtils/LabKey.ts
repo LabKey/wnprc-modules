@@ -20,8 +20,12 @@ export function getBaseURL(): string {
     return LABKEY.ActionURL.getBaseURL();
 }
 
-export function buildURL(controller: string, action: string, container?: string): string {
+export function buildURL(controller: string, action: string, container: string): string {
     return LABKEY.ActionURL.buildURL(controller, action, container);
+}
+
+export function buildURLWithParams(controller: string, action: string, container: string, queryParams: {[name: string]: string}): string {
+    return LABKEY.ActionURL.buildURL(controller, action, container, queryParams);
 }
 
 declare const __WebUtilsPageLoadData: any;

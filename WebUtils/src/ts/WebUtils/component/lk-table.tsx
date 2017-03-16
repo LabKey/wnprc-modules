@@ -22,7 +22,11 @@ export class FilterableTableColumn extends React.Component<{'cellData': TableCol
             );
         }
         else {
-            return column.getReactElement();
+            return (
+                <td>
+                    {column.getReactElement()}
+                </td>
+            );
         }
     }
 }
@@ -57,6 +61,11 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
             filters: {}
         };
 
+        // Update the table if the table starts or stops loading.
+        this.props.table.isLoading.subscribe(() => {
+            this.forceUpdate();
+        });
+
         this.handleFilterChange = this.handleFilterChange.bind(this);
     }
 
@@ -70,6 +79,15 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
 
     render() {
         let table = this.props.table;
+
+        if (table.isLoading()) {
+            return (
+                <div>
+                    <i className="fa fa-spinner fa-spin"></i>
+                    <strong>Table is Loading...</strong>
+                </div>
+            )
+        }
 
         let state = this.state as FilterableTableState;
 
@@ -132,6 +150,15 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
 
         let shownRows = rows.length;
 
+        if (rows.length == 0) {
+            rows = [(
+                <tr className="text-center" key={"no-rows"}>
+                    <td><span>No Rows</span></td>
+
+                </tr>
+            )];
+        }
+
         return <div className="panel panel-default">
             <div className="panel-heading">
                 <div className="container-fluid panel-container">
@@ -156,7 +183,6 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
                 <tr className="noclick">
                     {filters}
                 </tr>
-
 
                 {rows}
                 </tbody>

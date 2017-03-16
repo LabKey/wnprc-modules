@@ -1,4 +1,5 @@
 import * as _ from "underscore";
+import * as React from "react";
 
 export interface HTMLTableColumn {
     getHTML(): string;
@@ -6,7 +7,7 @@ export interface HTMLTableColumn {
 }
 
 export function isHTMLTableColumn(variable: TableColumn): variable is HTMLTableColumn {
-    return _.isFunction((<HTMLTableColumn>variable).getHTML);
+    return _.isFunction((variable as HTMLTableColumn).getHTML);
 }
 
 export interface ReactTableColumn {
@@ -14,17 +15,33 @@ export interface ReactTableColumn {
     getValue(): string;
 }
 
-export class SimpleStringColumn implements HTMLTableColumn {
+export class SimpleStringColumn implements ReactTableColumn {
     constructor(public value: string) {
 
     }
 
-    getHTML(): string {
-        return this.value;
+    getReactElement(): JSX.Element {
+        return <span>{this.value}</span>;
     }
 
     getValue(): string {
         return this.value;
+    }
+}
+
+export class SimpleLinkColumn implements ReactTableColumn {
+    constructor(public display: string, public address: string) {}
+
+    getReactElement(): JSX.Element {
+        return (
+            <span>
+                <a href={this.address}>{this.display}</a>
+            </span>
+        )
+    }
+
+    getValue(): string {
+        return this.display;
     }
 }
 

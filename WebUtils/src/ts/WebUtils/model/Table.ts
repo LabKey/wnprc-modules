@@ -1,39 +1,37 @@
-import {TableRow} from "./TableRow";
+import {TableRow, TableColumn} from "./TableRow";
 
 export interface TableConfig {
-    rows: string[] | TableRow[] | KnockoutObservableArray<TableRow>
+    rows: TableRow[] | KnockoutObservableArray<TableRow>
     rowHeaders?: string[]
 }
 
 export class Table {
     isLoading:  KnockoutObservable<boolean>       = ko.observable(false);
     rows:       KnockoutObservableArray<TableRow> = ko.observableArray() as KnockoutObservableArray<TableRow>;
-    rowHeaders: KnockoutObservableArray<string>   = ko.observableArray(['placeholder']);
+    rowHeaders: KnockoutObservableArray<string | TableColumn>   = ko.observableArray(['placeholder']);
 
     selectedRows: KnockoutComputed<TableRow[]>;
     hasRows:      KnockoutComputed<boolean>;
 
-    constructor(config) {
+    constructor(config: TableConfig) {
         if (ko.isObservable(config.rows)) {
             this.rows = config.rows;
         }
         else {
-            this.rows(config.rows.map((row) => {
-                return (row instanceof TableRow) ? row : new TableRow(row);
-            }));
+            this.rows(config.rows);
         }
 
         if (config.rowHeaders) {
             this.setRowHeaders(config.rowHeaders);
         }
 
-        this.selectedRows = ko.computed(() => {
+        this.selectedRows = ko.pureComputed(() => {
             return this.rows().filter((row) => {
                 return row.isSelected();
             });
         });
 
-        this.hasRows = ko.computed(() => {
+        this.hasRows = ko.pureComputed(() => {
             return this.rows().length > 0;
         });
     }

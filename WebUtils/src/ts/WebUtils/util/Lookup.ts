@@ -5,7 +5,7 @@ import * as knockout from "knockout";
 let ko = knockout as any;
 
 export interface LookupConfig {
-    seedData?:  Object,
+    seedData?:  {[name: string]: string},
     schemaName: string,
     queryName:  string,
     columns:    string | string[],
@@ -14,7 +14,7 @@ export interface LookupConfig {
 }
 
 export class Lookup {
-    private _lookupTable: Object = {};
+    private _lookupTable: {[name: string]: string} = {};
     schemaName:    string;
     queryName:     string;
     columns:       string[] = [];
@@ -40,7 +40,7 @@ export class Lookup {
             return this._lookupTable[key];
         }
         else {
-            let config = {
+            let config: any = {
                 columns: this.columns
             };
 
@@ -49,7 +49,9 @@ export class Lookup {
             selectRows(this.schemaName, this.queryName, config).then((raw_data) => {
                 let data = raw_data as any;
                 if (data.rows.length > 0) {
-                    _.each(data.rows, (i: number, row: Object) => {
+                    _.each(data.rows, (data, i: number) => {
+                        let row = data as {[name: string]: string};
+
                         let value = _.isString(this.valueAccessor)   ? row[this.valueAccessor] :
                                     _.isFunction(this.valueAccessor) ? this.valueAccessor(row) :
                                                                        null;

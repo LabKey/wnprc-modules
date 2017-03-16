@@ -15,7 +15,9 @@ export class QueryTable extends Table {
     viewName:   string = '';
 
     constructor(config: QueryTableConfig) {
-        super({});
+        super({
+            rows: []
+        });
 
         this.queryName  = config.queryName;
         this.schemaName = config.queryName;
@@ -31,7 +33,7 @@ export class QueryTable extends Table {
      * Load the data from either the local cache or the database.
      */
     load() {
-        let data;
+        let data: any;
         let queryConfig: SelectRowsConfig = {};
         if (!_.isBlank(this.viewName)) {
             queryConfig.viewName = this.viewName;
@@ -41,8 +43,8 @@ export class QueryTable extends Table {
             data = selectRowsFromCache(this.schemaName, this.queryName, this.viewName);
 
             this._handleData({
-                headers: data.colMetadata.map(    (colObject)    => { return colObject.shortCaption;                 }),
-                columns: data.colDisplayData.map( (columnObject) => { return (columnObject.dataIndex).toLowerCase(); }),
+                headers: data.colMetadata.map(    (colObject: any)    => { return colObject.shortCaption;                 }),
+                columns: data.colDisplayData.map( (columnObject: any) => { return (columnObject.dataIndex).toLowerCase(); }),
                 rows:    data.rows
             });
         }
@@ -51,8 +53,8 @@ export class QueryTable extends Table {
                 let anyData = data as any;
 
                 this._handleData({
-                    headers: anyData.columnModel.map((columnObject) => { return columnObject.header;    }),
-                    columns: anyData.columnModel.map((columnObject) => { return columnObject.dataIndex; }),
+                    headers: anyData.columnModel.map((columnObject: any) => { return columnObject.header;    }),
+                    columns: anyData.columnModel.map((columnObject: any) => { return columnObject.dataIndex; }),
                     rows:    anyData.rows
                 });
             });
@@ -67,9 +69,9 @@ export class QueryTable extends Table {
 
         let columns = data.columns;
         this.rows(
-            data.rows.map((row) => {
+            data.rows.map((row: any) => {
                 return new TableRow({
-                    rowData: columns.map((columnName) => { return row[columnName]; })
+                    columns: columns.map((columnName: string) => { return row[columnName]; })
                 });
             })
         );

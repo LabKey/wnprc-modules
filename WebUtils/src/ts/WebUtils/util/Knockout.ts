@@ -5,11 +5,11 @@ import {getBaseURL} from "../LabKey";
 export {foreach2};
 
 // Register the component loader that allows us to load relative to the contextPath.
-let loader = {
-    loadTemplate: function(name, templateConfig, callback) {
+let loader: any = {
+    loadTemplate: function(name: string, templateConfig: any, callback: Function) {
         // Only handle templates meant for us
         if (_.isObject(templateConfig) && ('ajax' in templateConfig)) {
-            var url = getBaseURL() + templateConfig.ajax;
+            let url = getBaseURL() + templateConfig.ajax;
             $.get(url, function(data) {
                 callback($.parseHTML(data));
             })

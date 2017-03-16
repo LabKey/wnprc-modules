@@ -1,7 +1,37 @@
 import * as _ from "underscore";
 
+export interface HTMLTableColumn {
+    getHTML(): string;
+    getValue(): string;
+}
+
+export function isHTMLTableColumn(variable: TableColumn): variable is HTMLTableColumn {
+    return _.isFunction((<HTMLTableColumn>variable).getHTML);
+}
+
+export interface ReactTableColumn {
+    getReactElement(): JSX.Element;
+    getValue(): string;
+}
+
+export class SimpleStringColumn implements HTMLTableColumn {
+    constructor(public value: string) {
+
+    }
+
+    getHTML(): string {
+        return this.value;
+    }
+
+    getValue(): string {
+        return this.value;
+    }
+}
+
+export type TableColumn = HTMLTableColumn | ReactTableColumn
+
 export interface TableRowConfig {
-    rowData: any[],
+    columns: TableColumn[],
     otherData?: any,
     warn?: KnockoutObservable<boolean>,
     err?:  KnockoutObservable<boolean>
@@ -15,7 +45,7 @@ export class TableRow {
     warn: KnockoutComputed<boolean>;
     err:  KnockoutComputed<boolean>;
 
-    rowData: any[];
+    columns: TableColumn[];
     otherData: any = {};
 
     constructor(config: TableRowConfig) {
@@ -27,27 +57,10 @@ export class TableRow {
             return (ko.isObservable(config.err)) ? config.err() : false;
         });
 
-        this.rowData = config.rowData;
+        this.columns = config.columns;
 
         if (config.otherData) {
             this.otherData = config.otherData;
-        }
-    }
-
-    getValueForColumnIndex(index: number): string {
-        if (this.rowData && this.rowData[index]) {
-            let data = this.rowData[index];
-            if (_.isString(data)) {
-                return data;
-            }
-            else if (_.isObject(data)) {
-                return data['value'].toString();
-            }
-
-            throw new Error("Unrecognized column type");
-        }
-        else {
-            return "";
         }
     }
 }

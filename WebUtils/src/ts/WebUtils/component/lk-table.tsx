@@ -6,25 +6,32 @@ import * as ReactDOM from "react-dom";
 import * as ReactDomServer from "react-dom/server";
 import CSSProperties = React.CSSProperties;
 import {Table} from "../model/Table";
-import {TableRow} from "../model/TableRow";
+import {TableRow, TableColumn, isHTMLTableColumn} from "../model/TableRow";
 import {Filterer} from "simplefilter";
+import ChangeEvent = React.ChangeEvent;
 
-export class FilterableTableColumn extends React.Component<{'cellData': any}, {}> {
+export class FilterableTableColumn extends React.Component<{'cellData': TableColumn}, {}> {
     render() {
-        let data = this.props.cellData;
-        let html = _.isObject(data) ? data.display : data;
+        let column = this.props.cellData;
 
-        return <td>
-            <span dangerouslySetInnerHTML={{ __html: html }} />
-        </td>
+        if (isHTMLTableColumn(column)) {
+            return (
+                <td>
+                    <span dangerouslySetInnerHTML={{ __html: column.getHTML() }} />
+                </td>
+            );
+        }
+        else {
+            return column.getReactElement();
+        }
     }
 }
 
 export class FilterableTableRow extends React.Component<{'row': TableRow}, {}> {
     render() {
-        let data = this.props.row.rowData;
+        let data = this.props.row.columns;
 
-        let columns = data.map((cellData, i) => {
+        let columns = data.map((cellData: TableColumn, i: number) => {
             return <FilterableTableColumn cellData={cellData} key={i} />
         });
 
@@ -43,7 +50,7 @@ export interface FilterableTableState {
 }
 
 export class FilterableTable extends React.Component<FilterableTableViewModel, FilterableTableState> {
-    constructor(props) {
+    constructor(props: FilterableTableViewModel) {
         super(props);
 
         this.state = {
@@ -53,7 +60,7 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
         this.handleFilterChange = this.handleFilterChange.bind(this);
     }
 
-    handleFilterChange(event) {
+    handleFilterChange(event: ChangeEvent<HTMLElement>) {
         let $target = $(event.target);
         let filters = this.state.filters;
         filters[$target.attr('data-column-number')] = $target.val();
@@ -66,19 +73,30 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
 
         let state = this.state as FilterableTableState;
 
-        let headers = table.rowHeaders().map((header, i) => {
-            return <th className="header" key={i}>
-                {header}
-            </th>;
+        let headers = table.rowHeaders().map((header: string | TableColumn, i: number) => {
+            if (_.isString(header)) {
+                return (
+                    <th className="header" key={i}>
+                        {header}
+                    </th>
+                );
+            }
+            else {
+                return (
+                    <th className="header" key={i}>
+                        <FilterableTableColumn cellData={header} />
+                    </th>
+                );
+            }
         });
 
-        let filters = table.rowHeaders().map((filter, i) => {
+        let filters = table.rowHeaders().map((neverUsed: any, i: number) => {
             return (
                 <td key={i}>
                     <div className="input-group">
                         <input className="form-control input-sm" placeholder="No active filter" type="text" onChange={this.handleFilterChange} {...{'data-column-number': i}}/>
                         <span className="input-group-addon">
-                            <span className="glyphicon glyphicon-info-sign" data-toggle="modal"></span>
+                            <span className="glyphicon glyphicon-info-sign"></span>
                         </span>
                     </div>
                 </td>
@@ -93,14 +111,14 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
         }
 
         // Get the filtered rows.
-        let rows = table.rows().filter((row) => {
-            let data = row.rowData;
+        let rows = table.rows().filter((row: TableRow) => {
+            let data: TableColumn[] = row.columns;
 
             // For each filter, return a failure if we failed to match.
             for (let filteredColumnIndex in filterers) {
                 let filter = filterers[filteredColumnIndex];
 
-                if (!filter.matches(row.getValueForColumnIndex(parseInt(filteredColumnIndex)))) {
+                if (!filter.matches(data[parseInt(filteredColumnIndex)].getValue())) {
                     row.isHidden(true);
                     return false;
                 }
@@ -108,7 +126,7 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
 
             row.isHidden(false);
             return true;
-        }).map((row, i) => {
+        }).map((row: TableRow, i: number) => {
             return <FilterableTableRow row={row} key={i} />;
         });
 
@@ -156,7 +174,7 @@ export interface FilterableTableParams {
 export function registerKoComponent(): void {
     ko.components.register('lk-table', {
         viewModel: {
-            createViewModel: function(params: FilterableTableParams, componentinfo) {
+            createViewModel: function(params: FilterableTableParams, componentinfo: any) {
                 if (componentinfo) {
                     let $element = $(componentinfo.element).find('.lk-table-react');
 

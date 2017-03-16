@@ -2,13 +2,14 @@ export * from "./WebUtils";
 
 import * as jQuery from "jquery";
 import * as knockout from "knockout";
-import * as markdown from 'markdown';
 import * as moment from 'moment';
 import * as rsvp from "rsvp";
 import * as toastr from "toastr";
 import * as uri from "urijs";
 import * as _ from "underscore";
 import * as s from "underscore.string";
+
+const markdown: any = require('markdown');
 
 knockout.punches.enableAll();
 

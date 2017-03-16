@@ -51,7 +51,7 @@ interface Assert {
 
 // Defining a deep isDefined custom assertion to be able to test that variables exist (X.Y.Z) without first checking
 // for parent variables (X.Y)
-let isDefined = function(string, message) {
+let isDefined = function(string: string, message: string): void {
     var jsCode = "if (_.isDefined(" + string + ")) { varIsDefined = true }";
     var varIsDefined = false;
     try {
@@ -70,4 +70,5 @@ let isDefined = function(string, message) {
 };
 
 
-QUnit.assert['isDefined'] = isDefined;
+let customAssertions = QUnit.assert as any;
+customAssertions['isDefined'] = isDefined;

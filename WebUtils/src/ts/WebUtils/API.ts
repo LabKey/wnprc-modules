@@ -6,6 +6,7 @@ import * as _ from "underscore";
 import rsvp = require('rsvp');
 import {makeURLForHTTPAction} from "./URL";
 import moment = require("moment");
+import Moment = moment.Moment;
 const Promise = rsvp.Promise;
 const fetch = require("fetch");
 
@@ -38,7 +39,7 @@ let makeRequest = function(url: string, config?: RequestInit): Promise<Response>
             return response;
         }
         else {
-            let error = new Error(response.statusText);
+            let error = new Error(response.statusText) as any;
             error['response'] = response;
             throw error;
         }
@@ -204,9 +205,9 @@ export function makeAPIRequest(type: TransactionType, schema: string, query: str
     return makeAPIRequestFromCommands([transaction.getCommandObject()], config);
 }
 
-export function updateRows(schema, query, rows, config) { return makeAPIRequest('update', schema, query, rows, config); }
-export function insertRows(schema, query, rows, config) { return makeAPIRequest('insert', schema, query, rows, config); }
-export function deleteRows(schema, query, rows, config) { return makeAPIRequest('delete', schema, query, rows, config); }
+export function updateRows(schema: string, query: string, rows: Object[], config: CommandRequestConfig) { return makeAPIRequest('update', schema, query, rows, config); }
+export function insertRows(schema: string, query: string, rows: Object[], config: CommandRequestConfig) { return makeAPIRequest('insert', schema, query, rows, config); }
+export function deleteRows(schema: string, query: string, rows: Object[], config: CommandRequestConfig) { return makeAPIRequest('delete', schema, query, rows, config); }
 
 export function executeSql(schema: string, sql: string) {
     return makeRequestJSON(makeURLForHTTPAction('executeSql'), {
@@ -262,11 +263,11 @@ export function postJSON(url: string, data: Object, config: RequestInit) {
 
 let dbFormat = "YYYY/MM/DD HH:mm:ss";
 
-export function formatDateForDB(momentObj) {
+export function formatDateForDB(momentObj: Moment) {
     return momentObj.format(dbFormat)
 }
 
-export function parseDateFromDB(text) {
+export function parseDateFromDB(text: string) {
     return moment(text, dbFormat);
 }
 

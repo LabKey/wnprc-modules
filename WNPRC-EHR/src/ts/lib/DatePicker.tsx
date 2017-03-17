@@ -37,6 +37,7 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
 
         this.selectedDate.subscribe((val) => {
             this.setState({year: val});
+            this.getInputElement().data("DateTimePicker").date(this.state.year);
         });
 
         this.toggle = this.toggle.bind(this);

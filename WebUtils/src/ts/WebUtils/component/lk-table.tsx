@@ -66,6 +66,10 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
             this.forceUpdate();
         });
 
+        this.props.table.rows.subscribe(() => {
+            this.forceUpdate();
+        });
+
         this.handleFilterChange = this.handleFilterChange.bind(this);
     }
 
@@ -137,7 +141,7 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
             row.isHidden(false);
             return true;
         }).map((row: TableRow, i: number) => {
-            return <FilterableTableRow row={row} key={i} />;
+            return <FilterableTableRow row={row} key={row.key} />;
         });
 
         let shownRows = rows.length;

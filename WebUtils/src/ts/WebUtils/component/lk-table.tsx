@@ -79,16 +79,6 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
 
     render() {
         let table = this.props.table;
-
-        if (table.isLoading()) {
-            return (
-                <div>
-                    <i className="fa fa-spinner fa-spin"></i>
-                    <strong>Table is Loading...</strong>
-                </div>
-            )
-        }
-
         let state = this.state as FilterableTableState;
 
         let headers = table.rowHeaders().map((header: string | TableColumn, i: number) => {
@@ -152,15 +142,6 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
 
         let shownRows = rows.length;
 
-        if (rows.length == 0) {
-            rows = [(
-                <tr className="text-center" key={"no-rows"}>
-                    <td><span>No Rows</span></td>
-
-                </tr>
-            )];
-        }
-
         return <div className="panel panel-default">
             <div className="panel-heading">
                 <div className="container-fluid panel-container">
@@ -174,21 +155,40 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
                 </div>
             </div>
 
-            <table className="table table-striped table-bordered table-hover">
-                <thead>
-                <tr>
-                    {headers}
-                </tr>
-                </thead>
+            {table.isLoading() && (
+                <div className="text-center">
+                    <h4>
+                        <i className="fa fa-spinner fa-spin"></i>
+                        Table is Loading...
+                    </h4>
+                </div>
+            )}
 
-                <tbody>
-                <tr className="noclick">
-                    {filters}
-                </tr>
+            {!table.isLoading() && (
+                <div>
+                    <table className="table table-striped table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            {headers}
+                        </tr>
+                        </thead>
 
-                {rows}
-                </tbody>
-            </table>
+                        <tbody>
+                        <tr className="noclick">
+                            {filters}
+                        </tr>
+
+                        {rows}
+                        </tbody>
+                    </table>
+
+                    {(rows.length == 0) && (
+                        <div className="text-center">
+                            <h4>No Rows to Display</h4>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>;
     }
 }

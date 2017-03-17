@@ -210,7 +210,7 @@ let errors = ko.computed(() => {
                     && (moment(entries[1].date).isBefore(y2016))
                     && (_.isEqual(entryTypes, ['Necropsy', 'Biopsy']) || _.isEqual(entryTypes, ['Biopsy', 'Necropsy']))
                 ) {
-                    // There's a special exception before 2016, since we numbered Necropsies and Biopsies seperately.
+                    // There's a special exception before 2016, since we numbered Necropsies and Biopsies separately.
                 }
                 else {
                     errorList.push(`There are ${caseIndex[i].length} cases with the case number of ${i}.`);
@@ -248,21 +248,30 @@ export class PathCaseList extends React.Component<{}, {}> {
                 {(errors().length > 0) ? (
                     <div style={{color: 'red'}}>
                         <p>
-                            <i className="fa fa-remove"></i>
                             The following errors were detected with the case number sequence:
                         </p>
-                        <ul>
+                        <ul className="fa-ul">
                             {
-                                errors().map( (message, i) => { return (<li key={i}>{message}</li>); } )
+                                errors().map( (message, i) => { return (<li key={i}><i className="fa fa-remove"></i>{message}</li>); } )
                             }
                         </ul>
                     </div>
                 ) : (
                     <div style={{color: 'green'}}>
                         <p>
-                            <i className="fa fa-check"></i>
-                            No errors were detected with the case number sequence.
+                            No errors were detected with the case number sequence!  That means:
                         </p>
+                        <ul className="fa-ul">
+                            <li>
+                                <i className="fa-li fa fa-check"></i>Each case number is used only once
+                                <ul>
+                                    <li>Note that cases numbers before 2016 might have both a necropsy and a biopsy associate with them.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <i className="fa-li fa fa-check"></i>No numbers are skipped.
+                            </li>
+                        </ul>
                     </div>
                 )}
 

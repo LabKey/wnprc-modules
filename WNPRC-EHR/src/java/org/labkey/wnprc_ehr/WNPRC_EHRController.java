@@ -582,26 +582,12 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresLogin()
     public class NecropsyScheduleAction extends WNPRCJspPageAction {}
 
+
     @ActionNames("PathologyCaseList")
-    @RequiresLogin()
-    public class PathologyCaseListAction extends WNPRCJspPageAction {
-        @Override
-        public String getPathToJsp() {
-            return "pages/dataentry/PathologyCaseListOld.jsp";
-        }
-
-        @Override
-        public String getTitle() {
-            return "Pathology Case List";
-        }
-    }
-
-
-
-    @ActionNames("PathCaseList")
     @PageTitle("Pathology Case List")
     @JspPath("pages/dataentry/PathologyCaseList.jsp")
-    public class PathCaseListPage extends WNPRCJspPageAction {}
+    public class PathologyCaseListAction extends WNPRCJspPageAction {}
+
 
     @ActionNames("NecropsyReport")
     @RequiresLogin()

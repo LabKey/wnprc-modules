@@ -128,14 +128,16 @@ let makeRow = function(pathCase: PathCase): TableRow {
         }
     };
 
+    let displayOrder: string = (pathCase.order == null) ? '' : pathCase.order.toString();
+
     return new TableRow({
         columns: [
             {
                 getHTML: (): string => {
-                    return (pathCase.order == null) ? '' : pathCase.order.toString();
+                    return displayOrder
                 },
                 getValue: (): string => {
-                    return s.lpad(this.getHTML(), 10, '0');
+                    return s.lpad(displayOrder, 10, '0');
                 }
             },
             new SimpleStringColumn(pathCase.date.format('YYYY/MM/DD HH:mm')),
@@ -166,8 +168,69 @@ let parsePathCase = function(object: any, type: PathCaseType): PathCase {
 let selectedYear = ko.observable(moment().startOf('year')); // Today
 (window as any).SelectedYear = selectedYear;
 
+let errors = ko.computed(() => {
+    let caseIndex: {[num: number]: PathCase[]} = {};
+    let maxIndex = 1;
+
+    /*
+     * First, build an index that we can use to check the indices
+     */
+    values.rows().forEach((row) => {
+        let pathCase = (row.otherData as PathCase);
+        let order = pathCase.order;
+
+        if (order != null) {
+            if (order in caseIndex) {
+                caseIndex[order].push(pathCase)
+            }
+            else {
+                caseIndex[order] = [pathCase];
+            }
+
+            maxIndex = (order > maxIndex) ? order : maxIndex;
+        }
+    });
+
+    let errorList: string[] = [];
+
+    for (let i = 1; i <= maxIndex; i++) {
+        if (i in caseIndex) {
+            let entries = caseIndex[i];
+            let entryTypes = entries.map(function(entry) {
+                return entry.type;
+            });
+
+            // Get a moment for 2016
+            let y2016 = moment().year(2016).startOf('year');
+
+
+            if (entries.length > 1) {
+                if (entries.length == 2
+                    && (moment(entries[0].date).isBefore(y2016))
+                    && (moment(entries[1].date).isBefore(y2016))
+                    && (_.isEqual(entryTypes, ['Necropsy', 'Biopsy']) || _.isEqual(entryTypes, ['Biopsy', 'Necropsy']))
+                ) {
+                    // There's a special exception before 2016, since we numbered Necropsies and Biopsies seperately.
+                }
+                else {
+                    errorList.push(`There are ${caseIndex[i].length} cases with the case number of ${i}.`);
+                }
+            }
+        }
+        else {
+            errorList.push(`${i} is missing from the list.`);
+        }
+    }
+
+    return errorList;
+});
+
 export class PathCaseList extends React.Component<{}, {}> {
     render() {
+        errors.subscribe(() => {
+            this.forceUpdate();
+        });
+
         return (
         <div className="panel panel-primary">
             <div className="panel-heading"><span className="panel-title">List of Biopsy and Necropsy Cases</span></div>
@@ -181,6 +244,27 @@ export class PathCaseList extends React.Component<{}, {}> {
                             </div>
                     </div>
                 </form>
+
+                {(errors().length > 0) ? (
+                    <div style={{color: 'red'}}>
+                        <p>
+                            <i className="fa fa-remove"></i>
+                            The following errors were detected with the case number sequence:
+                        </p>
+                        <ul>
+                            {
+                                errors().map( (message, i) => { return (<li key={i}>{message}</li>); } )
+                            }
+                        </ul>
+                    </div>
+                ) : (
+                    <div style={{color: 'green'}}>
+                        <p>
+                            <i className="fa fa-check"></i>
+                            No errors were detected with the case number sequence.
+                        </p>
+                    </div>
+                )}
 
                 <div className="row">
                     <FilterableTable table={values} />
@@ -248,6 +332,7 @@ export class Page extends React.Component<any, any> {
     }
 }
 
+// Render the page into the react div
 ReactDOM.render(
     <Page />,
     $("#react-page").get(0)

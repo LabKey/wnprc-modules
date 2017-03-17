@@ -15,9 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class SimpleJspReportAction extends SimpleJspPageAction {
     @Override
     public JspView<JspPageModel> getView() {
-        JspView<JspPageModel> template = new JspView<JspPageModel>("/org/labkey/webutils/view/templates/JspReport.jsp", model);
+        JspView<JspPageModel> template = new JspView<JspPageModel>("/org/labkey/webutils/view/templates/LegacyJspPage.jsp", model);
 
-        JspView<JspPageModel> inner = new JspView<JspPageModel>(getPathToJsp(), model);
+        JspView<JspPageModel> inner = new JspView<JspPageModel>(getResolvedJspPath(), model);
 
         // Set the inner piece of the template
         template.setBody(inner);

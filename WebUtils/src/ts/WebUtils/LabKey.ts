@@ -37,3 +37,7 @@ export function getPageLoadData(): any {
 export function getModuleContext(moduleName: string): any {
     return LABKEY.getModuleContext(moduleName) || {};
 }
+
+export function getLinkToAnimal(id: string): string {
+    return LABKEY.ActionURL.buildURL('ehr', 'participantView', null, {participantId: id});
+}

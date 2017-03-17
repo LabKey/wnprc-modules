@@ -13,7 +13,10 @@ import {
 import * as s from "underscore.string";
 import * as _ from "underscore";
 import Moment = moment.Moment;
-import {getLinkToAnimal} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+import {
+    getLinkToAnimal, buildURLWithParams,
+    getCurrentContainer
+} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
 
 
 
@@ -44,6 +47,21 @@ let getOrder = function(caseno: string): number | null{
     return (_.isNull(order) || _.isNaN(order)) ? null : order;
 };
 
+let getCaseURL = function(animalid: string, query: string): string {
+    return buildURLWithParams('query', 'executeQuery', getCurrentContainer(), {
+        schemaName: 'study',
+        'query.queryName': query,
+        'query.Id~in': animalid
+    });
+};
+
+let getTaskURL = function(taskid: string, type: string): string {
+    return buildURLWithParams('ehr', 'taskDetails', getCurrentContainer(), {
+        formtype: type,
+        taskid:   taskid
+    });
+};
+
 let makeRow = function(pathCase: PathCase): TableRow {
     let linksColumn: ReactTableColumn = {
         getReactElement() {
@@ -53,6 +71,32 @@ let makeRow = function(pathCase: PathCase): TableRow {
         },
         getValue(): string {
             return "";
+        }
+    };
+
+    let type = pathCase.type;
+    let typeColumn: ReactTableColumn = {
+        getReactElement(): JSX.Element {
+            if (s.isBlank(pathCase.taskid)) {
+                let query = (type == 'Necropsy') ? "Necropsies" : "Biopsies";
+                return (
+                    <div>
+                        <a href={getCaseURL(pathCase.animalid, query)}>{type}</a>
+                        <p style={{color: 'red'}}>! No Task Assigned to Record</p>
+                    </div>
+                );
+            }
+            else {
+                return (
+                    <div>
+                        <a href={getTaskURL(pathCase.taskid, type)}>{type}</a>
+                    </div>
+                )
+            }
+        },
+
+        getValue(): string {
+            return pathCase.type;
         }
     };
 
@@ -67,7 +111,7 @@ let makeRow = function(pathCase: PathCase): TableRow {
                 }
             },
             new SimpleStringColumn(pathCase.date.format('YYYY/MM/DD HH:mm')),
-            new SimpleStringColumn(pathCase.type),
+            typeColumn,
             new SimpleStringColumn(pathCase.caseno),
             new SimpleLinkColumn(pathCase.animalid, getLinkToAnimal(pathCase.animalid)),
             new SimpleStringColumn(pathCase.status),

@@ -58,7 +58,9 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
                 let date = (e as any).date as any;
 
                 if (date != null && moment.isMoment(date)) {
-                    this.selectedDate(date);
+                    if (!this.selectedDate().isSame(date, 'year')) {
+                        this.selectedDate(date);
+                    }
                 }
             }
         });

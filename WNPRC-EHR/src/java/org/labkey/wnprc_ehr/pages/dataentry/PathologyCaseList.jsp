@@ -7,6 +7,8 @@
 <%@ page import="java.util.Date" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="java.util.Calendar" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -29,6 +31,9 @@
 
     SimpleQuery necropsyQuery = new SimpleQuery("study", "necropsy", getUser(), getContainer());
     List<JSONObject> necropsies = JsonUtils.getListFromJSONArray(necropsyQuery.getResults(dateFilter).getJSONArray("rows"));
+
+    ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer());
+    ActionURL collectionListURL = new ActionURL(WNPRC_EHRController.NecropsyCollectionListAction.class, getContainer());
 %>
 
 <div id="react-page"></div>
@@ -37,7 +42,17 @@
     (function() {
         window.PageLoadData = {
             biopsies: <%= biopsies.toString() %>,
-            necropsies: <%= necropsies.toString() %>
+            necropsies: <%= necropsies.toString() %>,
+            urlData: {
+                necropsyReport: {
+                    controller: "<%= necropsyReportURL.getController() %>",
+                    action:     "<%= necropsyReportURL.getAction()     %>"
+                },
+                collectionList: {
+                    controller: "<%= collectionListURL.getController() %>",
+                    action:     "<%= collectionListURL.getAction()     %>"
+                }
+            }
         };
     })();
 </script>

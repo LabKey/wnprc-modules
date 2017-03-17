@@ -62,13 +62,40 @@ let getTaskURL = function(taskid: string, type: string): string {
     });
 };
 
+interface URLData {
+    controller: string,
+    action: string
+}
+
 let makeRow = function(pathCase: PathCase): TableRow {
     let linksColumn: ReactTableColumn = {
         getReactElement() {
+            if (pathCase.type != "Necropsy") {
+                return (<span></span>);
+            }
+
+            let necropsyReport = pageLoadData.urlData.necropsyReport as URLData;
+            let collectionList = pageLoadData.urlData.collectionList as URLData;
+
+            let reportURL = buildURLWithParams(necropsyReport.controller, necropsyReport.action, getCurrentContainer(), {
+                taskid: pathCase.taskid,
+                reportMode: "true"
+            });
+
+            let collectionListURL = buildURLWithParams(collectionList.controller, collectionList.action, getCurrentContainer(), {
+                taskid: pathCase.taskid,
+                reportMode: "true"
+            });
+
             return (
-                <span>Hello</span>
+                <div>
+                    <a href={reportURL}>View Report</a>
+                    <br/>
+                    <a href={collectionListURL}>View Collection List</a>
+                </div>
             );
         },
+
         getValue(): string {
             return "";
         }

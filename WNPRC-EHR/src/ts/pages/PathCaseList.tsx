@@ -151,7 +151,6 @@ let makeRow = function(pathCase: PathCase): TableRow {
 type PathCaseType = "Biopsy" | "Necropsy";
 
 let parsePathCase = function(object: any, type: PathCaseType): PathCase {
-    console.log(object);
     return {
         status:   object['QCState/label'] || object['QCState/label'.toLowerCase().replace(/\//, "_fs_")],
         date:     api.parseDateFromDB(object['date']),

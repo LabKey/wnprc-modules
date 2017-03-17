@@ -135,8 +135,10 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
             // For each filter, return a failure if we failed to match.
             for (let filteredColumnIndex in filterers) {
                 let filter = filterers[filteredColumnIndex];
+                let column = data[parseInt(filteredColumnIndex)];
+                let cellValue = _.isString(column.getValue()) ? column.getValue() : "";
 
-                if (!filter.matches(data[parseInt(filteredColumnIndex)].getValue())) {
+                if (!filter.matches(cellValue)) {
                     row.isHidden(true);
                     return false;
                 }

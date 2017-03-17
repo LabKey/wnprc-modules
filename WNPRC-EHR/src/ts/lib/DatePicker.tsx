@@ -4,7 +4,7 @@ import moment = require("../../../node_modules/lkpm/node_modules/moment/moment")
 import Moment = moment.Moment;
 
 export interface YearSelectorProps {
-    initialYear?: Moment
+    initialYear?: Moment | KnockoutObservable<Moment>
 }
 
 export interface YearSelectorState {
@@ -12,12 +12,32 @@ export interface YearSelectorState {
 }
 
 export class YearSelector extends React.Component<YearSelectorProps, YearSelectorState> {
-    constructor() {
-        super();
+    selectedDate: KnockoutObservable<Moment>;
+
+    constructor(props: YearSelectorProps) {
+        super(props);
+
+        // Set a default
+        this.selectedDate = ko.observable(moment());
+
+        // If we were passed an observable, use that.  If we were passed a moment, just update our selected date
+        // to reflect that value.
+        if (this.props && this.props.initialYear) {
+            if (ko.isObservable(this.props.initialYear)) {
+                this.selectedDate = this.props.initialYear;
+            }
+            else {
+                this.selectedDate(this.props.initialYear);
+            }
+        }
 
         this.state = {
-            year: (this.props && this.props.initialYear) ? this.props.initialYear : moment()
+            year: this.selectedDate()
         };
+
+        this.selectedDate.subscribe((val) => {
+            this.setState({year: val});
+        });
 
         this.toggle = this.toggle.bind(this);
     }
@@ -30,6 +50,16 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
         // Initialize the DateTimePicker
         this.getInputElement().datetimepicker({
             format: 'YYYY'
+        });
+
+        this.getInputElement().on("dp.change", (e: Event) => {
+            if ('date' in e) {
+                let date = (e as any).date as any;
+
+                if (date != null && moment.isMoment(date)) {
+                    this.selectedDate(date);
+                }
+            }
         });
 
         // Set the current value

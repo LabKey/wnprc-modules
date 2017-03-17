@@ -17,8 +17,9 @@ import {
     getLinkToAnimal, buildURLWithParams,
     getCurrentContainer
 } from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+import * as rsvp from "rsvp";
 
-
+let pageLoadData: any = (window as any)['PageLoadData'];
 
 let values = new Table({rows: []});
 values.rowHeaders(['Order', 'Date', "Type", "Case Number", "Animal Id", "Status", "View Report"]);
@@ -162,15 +163,8 @@ let parsePathCase = function(object: any, type: PathCaseType): PathCase {
     }
 };
 
-let pageLoadData: any = (window as any)['PageLoadData'];
-let cases = [].concat(
-    pageLoadData.biopsies.map((row: any) => {return parsePathCase(row, "Biopsy"); }),
-    pageLoadData.necropsies.map((row: any) => {return parsePathCase(row, "Necropsy"); })
-);
-
-values.rows(_.sortBy(cases, (row: PathCase) => {
-    return (row.order == null) ? -1000 : -row.order;
-}).map(makeRow));
+let selectedYear = ko.observable(moment().startOf('year')); // Today
+(window as any).SelectedYear = selectedYear;
 
 export class PathCaseList extends React.Component<{}, {}> {
     render() {
@@ -183,7 +177,7 @@ export class PathCaseList extends React.Component<{}, {}> {
                     <div className="form-group">
                         <label className="col-xs-3 control-label">Year: </label>
                             <div className="col-xs-9">
-                                <YearSelector/>
+                                <YearSelector initialYear={selectedYear} />
                             </div>
                     </div>
                 </form>
@@ -196,6 +190,57 @@ export class PathCaseList extends React.Component<{}, {}> {
         )
     }
 }
+
+function handleData(biopsies: {[name: string]: string}[], necropsies: {[name: string]: string}[]): Promise<any> {
+    let newCases: PathCase[] = ([] as PathCase[]).concat(
+        biopsies.map((row: any) => {return parsePathCase(row, "Biopsy"); }),
+        necropsies.map((row: any) => {return parsePathCase(row, "Necropsy"); })
+    );
+
+    let newRows = _.sortBy(newCases, (row: PathCase) => {
+        return (row.order == null) ? -1000 : -row.order;
+    }).map(makeRow);
+
+
+    // Update rows
+    values.rows(newRows);
+
+    return Promise.resolve();
+}
+
+selectedYear.subscribe((val: Moment) => {
+    // Don't do anything if the value isn't a moment
+    if (!moment.isMoment(val)) {
+        return;
+    }
+
+    let startOfYear = val.startOf('year').format('YYYY-MM-DD');
+    let endOfYear   = val.endOf('year').format('YYYY-MM-DD');
+
+    values.isLoading(true);
+
+    let config = {
+        columns: ['Id', 'date', 'taskid', 'caseno', 'QCState/label'],
+        filters: {
+            'date~gte': startOfYear,
+            'date~lte': endOfYear
+        }
+    };
+
+    return rsvp.Promise.all([
+        api.selectRows('study', 'biopsy', config),
+        api.selectRows('study', 'necropsy', config)
+    ]).then(function(resultsArray) {
+        let biopsies   = (resultsArray[0] as any).rows as {[name: string]: string}[];
+        let necropsies = (resultsArray[1] as any).rows as {[name: string]: string}[];
+
+        handleData(biopsies, necropsies);
+    }).finally(() => {
+        values.isLoading(false);
+    })
+});
+
+handleData(pageLoadData.biopsies as {[name: string]: string}[], pageLoadData.necropsies as {[name: string]: string}[]);
 
 export class Page extends React.Component<any, any> {
     render() {

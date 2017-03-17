@@ -13,6 +13,7 @@ import {
 import * as s from "underscore.string";
 import * as _ from "underscore";
 import Moment = moment.Moment;
+import {getLinkToAnimal} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
 
 
 
@@ -27,7 +28,6 @@ interface PathCase {
     order:    number | null;
     taskid:   string;
     animalid: string;
-    animalURL: string;
 }
 
 let getOrder = function(caseno: string): number | null{
@@ -69,7 +69,7 @@ let makeRow = function(pathCase: PathCase): TableRow {
             new SimpleStringColumn(pathCase.date.format('YYYY/MM/DD HH:mm')),
             new SimpleStringColumn(pathCase.type),
             new SimpleStringColumn(pathCase.caseno),
-            new SimpleLinkColumn(pathCase.animalid, pathCase.animalURL),
+            new SimpleLinkColumn(pathCase.animalid, getLinkToAnimal(pathCase.animalid)),
             new SimpleStringColumn(pathCase.status),
             linksColumn
         ],
@@ -88,8 +88,7 @@ let parsePathCase = function(object: any, type: PathCaseType): PathCase {
         caseno:   object['caseno'],
         order:    getOrder(object['caseno']),
         taskid:   _.isString(object['taskid']) ? object['taskid'] : '',
-        animalid: object['Id'] || object['id'],
-        animalURL: object['_labkeyurl_Id']
+        animalid: object['Id'] || object['id']
     }
 };
 

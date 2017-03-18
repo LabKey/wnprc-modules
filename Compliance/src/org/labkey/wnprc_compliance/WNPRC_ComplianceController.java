@@ -45,7 +45,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
     }
 
     public abstract class HRJspPageAction extends SimpleJspPageAction {
-        @Override
         public Module getModule() {
             return ModuleLoader.getInstance().getModule(WNPRC_ComplianceModule.class);
         }

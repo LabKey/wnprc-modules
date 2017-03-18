@@ -8,18 +8,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="API" />
-    <orderEntry type="module" module-name="Internal" />
-    <orderEntry type="module" module-name="externalModules" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lib" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/../HRManagement/lib" recursive="false" />
-      </library>
-    </orderEntry>
+    <orderEntry type="module" module-name="LabKey-Server" />
+    <orderEntry type="module" module-name="DBUtils" />
+    <orderEntry type="module" module-name="WebUtils" />
   </component>
 </module>

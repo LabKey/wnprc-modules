@@ -36,12 +36,18 @@ public class SimpleQueryUpdater {
         this.container = container;
     }
 
+    public List<CaseInsensitiveMapWrapper<Object>> upsert(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
+        return this.upsert(rows);
+    }
+
+
     /**
      * Inserts or updates a row to ensure it's in the table.  It intelligently checks to see if each row exists,
      * and determines whether to insert or update them.  It does the entire thing as a transaction, so any failure
      * will result in no data being inserted.
      *
-     * @param rowArray A "list" of {@link Map<String, Object>} objects that represent rows.  Note that these can
+     * @param rows A "list" of {@link Map<String, Object>} objects that represent rows.  Note that these can
      *                 be {@link JSONObject}s, if you so choose.
      * @return A {@link List<CaseInsensitiveMapWrapper>} of the rows that were upserted.  They will have all been
      *         converted to be case-insensitive, and will include any fields that were added/changed automatically
@@ -52,8 +58,8 @@ public class SimpleQueryUpdater {
      * @throws BatchValidationException Thrown if the trigger scripts throw an error on any row.
      * @throws DuplicateKeyException Should not occur, since any row that would throw this will be UPDATEd instead
      */
-    public List<CaseInsensitiveMapWrapper<Object>> upsert(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
-        List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
+    public List<CaseInsensitiveMapWrapper<Object>> upsert(List<Map<String, Object>> rows) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
+        rows = makeRowListCaseInsensitive(rows);
         List<CaseInsensitiveMapWrapper<Object>> rowsToReturn = new ArrayList<>();
 
         // Create buckets for our rows to insert or update
@@ -77,7 +83,7 @@ public class SimpleQueryUpdater {
         }
 
         // Wrap everything in a transaction to make both UPDATE and INSERT operations atomic together.
-        try(DbScope.Transaction transaction = tableInfo.getSchema().getScope().beginTransaction()) {
+        try(DbScope.Transaction transaction = tableInfo.getSchema().getScope().ensureTransaction()) {
             BatchValidationException validationException = new BatchValidationException();
 
             if (rowsToInsert.size() > 0) {
@@ -98,13 +104,39 @@ public class SimpleQueryUpdater {
             }
 
             if (rowsToUpdate.size() > 0) {
-                List<Map<String, Object>> updatedRows = service.updateRows(user, container, rows, rows, null, null);
+                List<Map<String, Object>> updatedRows = service.updateRows(user, container, rowsToUpdate, rowsToUpdate, null, null);
 
                 if (updatedRows.size() != rowsToUpdate.size()) {
                     throw new QueryUpdateServiceException("Not all rows updated properly");
                 }
                 else {
                     rowsToReturn.addAll(getCaseInsensitiveRowList(updatedRows));
+                }
+            }
+
+            // Actually commit the changes.
+            transaction.commit();
+        }
+
+        return rowsToReturn;
+    }
+
+    public List<CaseInsensitiveMapWrapper<Object>> delete(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
+        List<Map<String, Object>> rowsToDelete = makeRowsCaseInsensitive(rowArray);
+        List<CaseInsensitiveMapWrapper<Object>> rowsToReturn = new ArrayList<>();
+
+        // Wrap everything in a transaction to make both UPDATE and INSERT operations atomic together.
+        try(DbScope.Transaction transaction = tableInfo.getSchema().getScope().ensureTransaction()) {
+            if (rowsToDelete.size() > 0) {
+                List<Map<String, Object>> deletedRows = service.deleteRows(user, container, rowsToDelete, null, null);
+
+                // Check to make sure that the QueryUpdateService doesn't try to delete as much as it can, and not throw
+                // an error for the rows that it couldn't.
+                if (deletedRows.size() != deletedRows.size()) {
+                    throw new QueryUpdateServiceException("Not all rows were deleted properly");
+                }
+                else {
+                    rowsToReturn.addAll(getCaseInsensitiveRowList(deletedRows));
                 }
             }
 
@@ -189,7 +221,7 @@ public class SimpleQueryUpdater {
 
             // Now that we know we won't get a NullPointerException on this line, just use the
             // built-in equality checker
-            if (row1.get(columnName).equals(row2.get(columnName))) {
+            if (!row1.get(columnName).equals(row2.get(columnName))) {
                 return false;
             }
         }

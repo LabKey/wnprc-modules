@@ -1,0 +1,19 @@
+{
+  "name": "WNPRC_Compliance",
+  "label": "Personnel, Training, and Compliance Tracking",
+  "server": {
+    "requiredVersion": 16.3,
+    "supportedBranches": {
+      "wnprc16.3": "jsptest"
+    },
+    "moduleDependencies": [
+      "LDK"
+    ]
+  },
+  "moduleClass": "org.labkey.org.labkey.wnprc_compliance.WNPRC_ComplianceModule",
+  "lkpmDependencies": {
+    "https://github.com/WNPRC-EHR-Services/ehr.git": "",
+    "https://github.com/WNPRC-EHR-Services/WebUtils.git": "",
+    "https://github.com/WNPRC-EHR-Services/DBUtils.git": ""
+  }
+}

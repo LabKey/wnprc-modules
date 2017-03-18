@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lkpm/modules/Compliance" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lkpm/modules/DBUtils" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lkpm/modules/WebUtils" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lkpm/modules/ehr" vcs="Git" />

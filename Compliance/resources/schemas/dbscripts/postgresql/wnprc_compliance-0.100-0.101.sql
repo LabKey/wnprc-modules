@@ -137,13 +137,21 @@ CREATE TABLE wnprc_compliance.drug_regimens_to_drugs (
   drug_regimen TEXT,
   drug_id TEXT,
 
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
 
+  CONSTRAINT PK_drug_regimens_to_drugs PRIMARY KEY (drug_id, drug_regimen),
+  CONSTRAINT FK_drug_regimens_to_drugs_regimens FOREIGN KEY (drug_regimen) REFERENCES wnprc_compliance.drug_regimens (id),
+  CONSTRAINT FK_drug_regimens_to_drugs_drugs FOREIGN KEY (drug_id) REFERENCES wnprc_compliance.drugs (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_drug_routes;
-CREATE TABLE wnprc_compliance.allowed_drug_routes (
-  allowed_drug_id TEXT,
-  route TEXT,
+DROP TABLE IF EXISTS wnprc_compliance.drug_routes;
+CREATE TABLE wnprc_compliance.drug_routes (
+  drug_id TEXT,
+  route TEXT NOT NULL,
 
   -- Default fields for LabKey.
   createdby  userid,
@@ -151,17 +159,18 @@ CREATE TABLE wnprc_compliance.allowed_drug_routes (
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT PK_allowed_drug_routes PRIMARY KEY (allowed_drug_id, route),
-  CONSTRAINT FK_allowed_drug_routes_allowed_drugs FOREIGN KEY (allowed_drug_id) REFERENCES wnprc_compliance.allowed_drugs (id)
+  CONSTRAINT PK_drug_routes PRIMARY KEY (drug_id, route),
+  CONSTRAINT FK_drug_routes_to_drugs FOREIGN KEY (drug_id) REFERENCES wnprc_compliance.drugs (id)
 );
 
 -- no more frequently than...
-DROP TABLE IF EXISTS wnprc_compliance.allowed_drugs_frequency_warnings;
-CREATE TABLE wnprc_compliance.allowed_drugs_frequency_warnings (
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimen_frequency_threshold;
+CREATE TABLE wnprc_compliance.drug_regimen_frequency_threshold (
   id TEXT,
 
   timeperiod INTEGER NOT NULL,
   time_unit  TEXT NOT NULL,
+  type TEXT NOT NULL,
 
   -- Default fields for LabKey.
   createdby  userid,
@@ -169,13 +178,13 @@ CREATE TABLE wnprc_compliance.allowed_drugs_frequency_warnings (
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT PK_allowed_drugs_frequency_warnings PRIMARY KEY (id)
+  CONSTRAINT PK_drug_regimen_frequency_threshold PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_drugs_frequency_warnings;
-CREATE TABLE wnprc_compliance.allowed_drugs_to_frequency_warnings (
-  allowed_drug_id TEXT,
-  warning_id TEXT,
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_frequency_threshold;
+CREATE TABLE wnprc_compliance.drug_regimens_to_frequency_threshold (
+  drug_id TEXT,
+  threshold_id TEXT,
 
   -- Default fields for LabKey.
   createdby  userid,
@@ -183,9 +192,9 @@ CREATE TABLE wnprc_compliance.allowed_drugs_to_frequency_warnings (
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT PK_allowed_drugs_to_frequency_warnings PRIMARY KEY (allowed_drug_id, warning_id),
-  CONSTRAINT FK_allowed_drug_frequency_warnings_allowed_drugs FOREIGN KEY (allowed_drug_id) REFERENCES wnprc_compliance.allowed_drugs (id),
-  CONSTRAINT FK_allowed_drug_frequency_warnings_warnings FOREIGN KEY (warning_id) REFERENCES wnprc_compliance.allowed_drugs_frequency_warnings (id)
+  CONSTRAINT PK_drug_regimens_to_frequency_threshold PRIMARY KEY (drug_id, threshold_id),
+  CONSTRAINT FK_drug_regimens_to_frequency_threshold_drugs FOREIGN KEY (drug_id) REFERENCES wnprc_compliance.drugs (id),
+  CONSTRAINT FK_drug_regimens_to_frequency_threshold_thresholds FOREIGN KEY (threshold_id) REFERENCES wnprc_compliance.drug_regimen_frequency_threshold (id)
 );
 
 DROP TABLE IF EXISTS wnprc_compliance.allowed_procedures;

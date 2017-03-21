@@ -4,7 +4,7 @@ const path = require('path');
 
 var taskExporter = new lkpm.TaskExporter({
     moduleBase: __dirname,
-    javaSrcRoots: [path.join(__dirname, 'src', 'java')]
+    javaSrcRoots: [path.join(__dirname, 'src', 'java'), path.join(__dirname, 'gen-src', 'java-jooq')]
 }, gulp);
 
 taskExporter.exportTasks();

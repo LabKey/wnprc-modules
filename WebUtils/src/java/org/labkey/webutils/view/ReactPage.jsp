@@ -19,6 +19,7 @@
         <title><%= model.getTitle() %></title>
 
         <link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/webutils/css/bootstrap-bundle.css">
+        <link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/webutils/css/webutils.css">
 
         <!-- Provide Global Variables -->
         <script type="application/javascript" src="<%= getContextPath() %>/webutils/lib/externals-debug.js"></script>

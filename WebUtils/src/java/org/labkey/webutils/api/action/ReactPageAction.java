@@ -1,6 +1,7 @@
 package org.labkey.webutils.api.action;
 
 import org.labkey.api.view.JspView;
+import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.webutils.api.model.JspPageModel;
 import org.labkey.webutils.api.model.ReactPageModel;
@@ -22,7 +23,8 @@ public abstract class ReactPageAction extends SimpleJspPageAction {
     public JspView<JspPageModel> getView() {
         JspView<JspPageModel> template = new JspView<JspPageModel>("/org/labkey/webutils/view/ReactPage.jsp", model);
 
-        JspView<JspPageModel> inner = new JspView<JspPageModel>(getPathToJsp(), model);
+        JspView<JspPageModel> inner = new JspView<JspPageModel>(getResolvedJspPath(), model);
+        inner.setFrame(WebPartView.FrameType.NONE);
 
         // Set the inner piece of the template
         template.setBody(inner);

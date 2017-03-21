@@ -3,16 +3,26 @@
     <properties>
       <sourceFilesUrls>
         <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/bower_components" />
         <item url="file://$PROJECT_DIR$/node_modules" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules/lkpm/node_modules" />
         <item url="file://$PROJECT_DIR$/node_modules/lkpm/node_modules" />
         <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/bower_components" />
       <root url="file://$PROJECT_DIR$/node_modules" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules/lkpm/node_modules" />
       <root url="file://$PROJECT_DIR$/node_modules/lkpm/node_modules" />
       <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

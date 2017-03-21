@@ -15,5 +15,6 @@
     <orderEntry type="module" module-name="LabKey-Server" />
     <orderEntry type="module" module-name="DBUtils" />
     <orderEntry type="module" module-name="WebUtils" />
+    <orderEntry type="library" name="tsconfig$roots" level="project" />
   </component>
 </module>

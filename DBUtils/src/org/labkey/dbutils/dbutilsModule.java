@@ -41,7 +41,7 @@ public class dbutilsModule extends ExtendedSimpleModule {
     }
 
     public Container getPrivateContainer() {
-
+        throw new NotImplementedException();
     }
 
     public Container getPrivateFilesContainer() {

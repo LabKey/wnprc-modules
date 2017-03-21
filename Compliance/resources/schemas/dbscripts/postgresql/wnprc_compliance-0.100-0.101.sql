@@ -63,12 +63,12 @@ CREATE TABLE wnprc_compliance.protocol_renewals (
   CONSTRAINT PK_protocol_renewals PRIMARY KEY (renewed_protocol)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.max_animals_per_protocol;
-CREATE TABLE wnprc_compliance.max_animals_per_protocol (
+DROP TABLE IF EXISTS wnprc_compliance.allowed_species;
+CREATE TABLE wnprc_compliance.allowed_species (
   protocol_revision_id TEXT,
   species_classifier TEXT,
 
-  number_of_animals INTEGER NOT NULL,
+  max_number_of_animals INTEGER NOT NULL,
 
   -- Default fields for LabKey.
   createdby  userid,
@@ -76,8 +76,8 @@ CREATE TABLE wnprc_compliance.max_animals_per_protocol (
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT PK_max_animals_per_protocol PRIMARY KEY (protocol_revision_id, species),
-  CONSTRAINT FK_max_animals_per_protocol FOREIGN KEY (protocol_revision_id) REFERENCES wnprc_compliance.protocol_revisions (id)
+  CONSTRAINT PK_allowed_species PRIMARY KEY (protocol_revision_id, species_classifier),
+  CONSTRAINT FK_allowed_species FOREIGN KEY (protocol_revision_id) REFERENCES wnprc_compliance.protocol_revisions (id)
 );
 
 DROP TABLE IF EXISTS wnprc_compliance.drug_regimens;
@@ -97,9 +97,10 @@ CREATE TABLE wnprc_compliance.drug_regimens (
   CONSTRAINT PK_allowed_drugs PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_protocols;
-CREATE TABLE wnprc_compliance.drug_regimens_to_protocols (
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_allowed_procedures;
+CREATE TABLE wnprc_compliance.drug_regimens_to_allowed_procedures (
   protocol_revision_id TEXT,
+  species_classifier TEXT,
   drug_regimen_id TEXT,
 
   -- Default fields for LabKey.
@@ -109,7 +110,7 @@ CREATE TABLE wnprc_compliance.drug_regimens_to_protocols (
   modified   TIMESTAMP,
 
   CONSTRAINT PK_drug_regimens_to_protocols PRIMARY KEY (protocol_revision_id, drug_regimen_id),
-  CONSTRAINT FK_drug_regimens_to_protocols_protocol_revisions FOREIGN KEY (protocol_revision_id) REFERENCES wnprc_compliance.protocol_revisions (id),
+  CONSTRAINT FK_drug_regimens_to_protocols_allowed_species FOREIGN KEY (protocol_revision_id, species_classifier) REFERENCES wnprc_compliance.allowed_species (protocol_revision_id, species_classifier),
   CONSTRAINT FK_drug_regimens_to_protocols_drug_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id)
 );
 
@@ -183,7 +184,7 @@ CREATE TABLE wnprc_compliance.drug_regimen_frequency_threshold (
 
 DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_frequency_threshold;
 CREATE TABLE wnprc_compliance.drug_regimens_to_frequency_threshold (
-  drug_id TEXT,
+  drug_regimen_id TEXT,
   threshold_id TEXT,
 
   -- Default fields for LabKey.
@@ -193,7 +194,7 @@ CREATE TABLE wnprc_compliance.drug_regimens_to_frequency_threshold (
   modified   TIMESTAMP,
 
   CONSTRAINT PK_drug_regimens_to_frequency_threshold PRIMARY KEY (drug_id, threshold_id),
-  CONSTRAINT FK_drug_regimens_to_frequency_threshold_drugs FOREIGN KEY (drug_id) REFERENCES wnprc_compliance.drugs (id),
+  CONSTRAINT FK_drug_regimens_to_frequency_threshold_drug_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id),
   CONSTRAINT FK_drug_regimens_to_frequency_threshold_thresholds FOREIGN KEY (threshold_id) REFERENCES wnprc_compliance.drug_regimen_frequency_threshold (id)
 );
 
@@ -207,29 +208,80 @@ CREATE TABLE wnprc_compliance.allowed_procedures (
   max_no_animals INTEGER,
   sop_id TEXT,
 
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
+
   CONSTRAINT PK_allowed_procedures PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.surgery_info;
-CREATE TABLE wnprc_compliance.surgery_info (
-  procedure_id TEXT,
+DROP TABLE IF EXISTS wnprc_compliance.allowed_species_to_allowed_procedures;
+CREATE TABLE wnprc_compliance.allowed_species_to_allowed_procedures (
+  protocol_revision_id TEXT,
+  species_classifier TEXT,
+  allowed_procedure_id TEXT,
 
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
+
+  CONSTRAINT PK_allowed_species_to_allowed_procedures PRIMARY KEY (protocol_revision_id, species_classifier, allowed_procedure_id),
+  CONSTRAINT FK_allowed_species_to_allowed_procedures_allowed_species FOREIGN KEY (protocol_revision_id, species_classifier) REFERENCES wnprc_compliance.allowed_species (protocol_revision_id, species_classifier),
+  CONSTRAINT FK_allowed_species_to_allowed_procedures_allowed_procedures FOREIGN KEY (allowed_procedure_id) REFERENCES wnprc_compliance.allowed_procedures (id)
+);
+
+DROP TABLE IF EXISTS wnprc_compliance.allowed_procedures_to_drug_regimens;
+CREATE TABLE wnprc_compliance.allowed_procedures_to_drug_regimens (
+  allowed_procedure_id TEXT,
+  drug_regimen_id TEXT,
+
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
+
+  CONSTRAINT PK_allowed_procedures_to_drug_regimens PRIMARY KEY (allowed_procedure_id, drug_regimen_id),
+  CONSTRAINT FK_allowed_procedures_to_drug_regimens_allowed_procedures FOREIGN KEY (allowed_procedure_id) REFERENCES wnprc_compliance.allowed_procedures (id),
+  CONSTRAINT FK_allowed_procedures_to_drug_regimens_drug_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id)
+);
+
+DROP TABLE IF EXISTS wnprc_compliance.allowed_surgeries;
+CREATE TABLE wnprc_compliance.allowed_surgeries (
+  surgery_id TEXT,
+
+  title TEXT NOT NULL,
+  description TEXT,
   survival_type TEXT NOT NULL,
   estimated_duration_in_minutes INTEGER NOT NULL,
   min_fast_hours INTEGER,
   max_fast_hours INTEGER,
 
-  CONSTRAINT PK_surgery_info PRIMARY KEY (procedure_id),
-  CONSTRAINT FK_surgery_info_allowed_procedures FOREIGN KEY (procedure_id) REFERENCES wnprc_compliance.allowed_procedures (id)
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
+
+  CONSTRAINT PK_surgery_info PRIMARY KEY (surgery_id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.surgery_info_allowed_drugs;
-CREATE TABLE wnprc_compliance.surgery_info_allowed_drugs (
-  procedure_id TEXT,
-  allowed_drug_id TEXT,
+DROP TABLE wnprc_compliance.allowed_surgeries_to_drug_regimens;
+CREATE TABLE wnprc_compliance.allowed_surgeries_to_drug_regimens (
+  surgery_id TEXT,
+  drug_regimen_id TEXT,
 
-  CONSTRAINT PK_surgery_info_allowed_drugs PRIMARY KEY (procedure_id, allowed_drug_id),
-  CONSTRAINT FK_surgery_info_allowed_drugs_to_allowed_drugs FOREIGN KEY (allowed_drug_id) REFERENCES wnprc_compliance.allowed_drugs (id),
-  CONSTRAINT FK_surgery_info_allowed_drugs_to_procedures FOREIGN KEY (procedure_id) REFERENCES wnprc_compliance.allowed_procedures (id)
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
+
+  CONSTRAINT PK_allowed_surgeries_to_drug_regimens PRIMARY KEY (surgery_id, drug_regimen_id),
+  CONSTRAINT FK_allowed_surgeries_to_drug_regimens_surgeries FOREIGN KEY (surgery_id) REFERENCES wnprc_compliance.allowed_surgeries (surgery_id),
+  CONSTRAINT FK_allowed_surgeries_to_drug_regimens_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id)
 );
-

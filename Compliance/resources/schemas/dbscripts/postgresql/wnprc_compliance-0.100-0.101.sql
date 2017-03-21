@@ -17,6 +17,8 @@ DROP TABLE IF EXISTS wnprc_compliance.protocol_revisions;
 CREATE TABLE wnprc_compliance.protocol_revisions (
   id TEXT,
 
+  protocol_id TEXT,
+
   principal_investigator_id TEXT NOT NULL,
   spi_primary_id            TEXT NOT NULL,
   spi_secondary_id          TEXT NOT NULL,
@@ -94,7 +96,7 @@ CREATE TABLE wnprc_compliance.drug_regimens (
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT PK_allowed_drugs PRIMARY KEY (id)
+  CONSTRAINT PK_drug_regimens PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_allowed_procedures;
@@ -130,10 +132,10 @@ CREATE TABLE wnprc_compliance.drugs (
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT PK_allowed_drugs PRIMARY KEY (id)
+  CONSTRAINT PK_drugs PRIMARY KEY (id)
 );
 
-DROP TABLE wnprc_compliance.drug_regimens_to_drugs;
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_drugs;
 CREATE TABLE wnprc_compliance.drug_regimens_to_drugs (
   drug_regimen TEXT,
   drug_id TEXT,
@@ -193,7 +195,7 @@ CREATE TABLE wnprc_compliance.drug_regimens_to_frequency_threshold (
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT PK_drug_regimens_to_frequency_threshold PRIMARY KEY (drug_id, threshold_id),
+  CONSTRAINT PK_drug_regimens_to_frequency_threshold PRIMARY KEY (drug_regimen_id, threshold_id),
   CONSTRAINT FK_drug_regimens_to_frequency_threshold_drug_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id),
   CONSTRAINT FK_drug_regimens_to_frequency_threshold_thresholds FOREIGN KEY (threshold_id) REFERENCES wnprc_compliance.drug_regimen_frequency_threshold (id)
 );
@@ -270,7 +272,7 @@ CREATE TABLE wnprc_compliance.allowed_surgeries (
   CONSTRAINT PK_surgery_info PRIMARY KEY (surgery_id)
 );
 
-DROP TABLE wnprc_compliance.allowed_surgeries_to_drug_regimens;
+DROP TABLE IF EXISTS wnprc_compliance.allowed_surgeries_to_drug_regimens;
 CREATE TABLE wnprc_compliance.allowed_surgeries_to_drug_regimens (
   surgery_id TEXT,
   drug_regimen_id TEXT,

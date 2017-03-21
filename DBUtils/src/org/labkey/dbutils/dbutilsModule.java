@@ -7,14 +7,16 @@ import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class dbutilsModule extends ExtendedSimpleModule {
     @Override
-    public boolean hasScripts() { return false; }
+    public boolean hasScripts() { return true; }
 
     @Override
     @NotNull
@@ -33,6 +35,16 @@ public class dbutilsModule extends ExtendedSimpleModule {
     @Override
     @NotNull
     public Set<String> getSchemaNames() {
-        return Collections.emptySet();
+        Set<String> schemaNames = new HashSet<>();
+        schemaNames.add("dbutils");
+        return schemaNames;
+    }
+
+    public Container getPrivateContainer() {
+
+    }
+
+    public Container getPrivateFilesContainer() {
+        throw new NotImplementedException();
     }
 }

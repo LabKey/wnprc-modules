@@ -10,52 +10,11 @@ import TabList = ReactTabs.TabList;
 import Tabs = ReactTabs.Tabs;
 import TabPanel = ReactTabs.TabPanel;
 import Tab = ReactTabs.Tab;
-import {ProtocolFlags, ProtocolFlagName, Protocol, SpeciesProtocolInfo, FlagInfo} from "../lib/protocol/protocol";
+import {ProtocolFlags, ProtocolFlagName, Protocol, SpeciesProtocolInfo} from "../lib/protocol/protocol";
+import {CheckBoxSet} from "../lib/checkboxset";
 
-interface CheckBoxProperties {
-    flags: ProtocolFlags
-}
+class ProtocolCheckboxSet extends CheckBoxSet<ProtocolFlagName> {
 
-
-class CheckBoxSet extends React.Component<CheckBoxProperties, {}> {
-    constructor(props: CheckBoxProperties) {
-        super(props);
-
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    handleChange(e: ChangeEvent<HTMLInputElement>) {
-        let name = e.target.name;
-        let val  = !!(e.target.type === 'checkbox' ? e.target.checked : e.target.value);
-
-
-        this.props.flags.setFlag(name as ProtocolFlagName, val);
-    }
-
-    render() {
-        let checkboxes = this.props.flags.getFlagNames().map((name: ProtocolFlagName) => {
-            let info: FlagInfo = this.props.flags.getFlagInfo(name);
-            let id = `checkbox-${name}`;
-
-            return (
-                <div className="checkbox checkbox-primary col-sm-4" key={name}>
-                    <input type="checkbox" id={id} name={name} onChange={this.handleChange}/>
-
-                    <label htmlFor={id}>
-                        {(info.displayName) ? info.displayName : name }
-                    </label>
-                </div>
-            );
-        });
-
-        return (
-            <fieldset>
-                <legend>This Protocol Involves:</legend>
-
-                {checkboxes}
-            </fieldset>
-        );
-    }
 }
 
 interface ProtocolBasicInfoVM {
@@ -125,7 +84,7 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
                 <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
                 <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
 
-                <CheckBoxSet flags={this.state.protocol.flags} />
+                <ProtocolCheckboxSet flags={this.state.protocol.flags} />
             </form>
         )
     }

@@ -1,15 +1,40 @@
 import {SpeciesProtocolInfo} from "../protocol";
 import * as React from "react";
+import ChangeEvent = React.ChangeEvent;
 
 export interface ProtocolSpeciesTabProps {
     info: SpeciesProtocolInfo
 }
 
-export class ProtocolSpeciesTab extends React.Component<ProtocolSpeciesTabProps, {}> {
+export interface ProtocolSpeciesTabState {
+    info: SpeciesProtocolInfo
+}
+
+export class ProtocolSpeciesTab extends React.Component<ProtocolSpeciesTabProps, ProtocolSpeciesTabState> {
+    constructor(props: ProtocolSpeciesTabProps) {
+        super(props);
+
+        this.state = {
+            info: props.info
+        };
+
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(e: ChangeEvent<HTMLInputElement>) {
+        this.props.info.max_number_of_animals = parseInt(e.target.value);
+        this.forceUpdate();
+    }
+
     render() {
         return (
             <div>
-                <h1>This is a species tab for {this.props.info.species_classifier}.</h1>
+                <div className="form-group">
+                    <label className="col-sm-3 control-label">Max Number of Animals</label>
+                    <div className="col-sm-9">
+                        <input value={this.state.info.max_number_of_animals} className="form-control" type="number" min="0" onChange={this.handleChange} />
+                    </div>
+                </div>
             </div>
         )
     }

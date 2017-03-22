@@ -78,6 +78,8 @@ export class ProtocolFlags {
 
 
 export class SpeciesProtocolInfo {
+    max_number_of_animals: number = 0;
+
     constructor(public readonly species_classifier: string) {
 
     }

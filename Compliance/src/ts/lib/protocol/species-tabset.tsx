@@ -84,15 +84,15 @@ class ProtocolSpeciesTab extends React.Component<ProtocolSpeciesTabProps, {}> {
     }
 }
 
-export interface ProtocolSpeciesTabsProps {
+export interface ProtocolSpeciesTabsetProps {
     protocol: Protocol,
     speciesOptions: {[name: string]: string}
 }
 
-export class ProtocolSpeciesTabs extends React.Component<ProtocolSpeciesTabsProps, {}> {
+export class ProtocolSpeciesTabset extends React.Component<ProtocolSpeciesTabsetProps, {}> {
     selectedSpecies: KnockoutObservableArray<string> = ko.observableArray([]);
 
-    constructor(props: ProtocolSpeciesTabsProps) {
+    constructor(props: ProtocolSpeciesTabsetProps) {
         super(props);
 
         this.addProtocolSpecies = this.addProtocolSpecies.bind(this);

@@ -4,7 +4,7 @@ import * as React from "react";
 import ChangeEvent = React.ChangeEvent;
 import Moment = moment.Moment;
 import moment = require("moment");
-import {SpeciesSelector, ProtocolSpeciesTabs} from "../lib/protocol/species-tab";
+import {SpeciesSelector, ProtocolSpeciesTabset} from "../lib/protocol/species-tabset";
 import * as ReactTabs from 'react-tabs';
 import TabList = ReactTabs.TabList;
 import Tabs = ReactTabs.Tabs;
@@ -188,7 +188,7 @@ class Page extends React.Component<{}, PageState> {
                             <div className="panel-body">
                                 <ProtocolBasicInfo protocol={this.state.protocol} onProtocolChange={this.protocolChangeHandler} />
 
-                                <ProtocolSpeciesTabs protocol={this.state.protocol} speciesOptions={(window as any).PageLoadData.lookups.species} />
+                                <ProtocolSpeciesTabset protocol={this.state.protocol} speciesOptions={(window as any).PageLoadData.lookups.species} />
                             </div>
                         </div>
                     </div>

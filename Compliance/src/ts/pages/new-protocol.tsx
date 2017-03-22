@@ -1,74 +1,21 @@
 import {ToolBar} from "../lib/toolbar";
 import * as ReactDOM from "react-dom";
 import * as React from "react";
-import * as _ from "underscore";
 import ChangeEvent = React.ChangeEvent;
 import Moment = moment.Moment;
 import moment = require("moment");
-
-type ProtocolFlagName = "has_biological_hazards" | "has_chemical_hazards" | "has_physical_hazards"
-                      | "has_radiation_hazards"  | "has_wildlife_hazards" | "has_other_hazards"
-                      | "involves_eurthanasia"   | "allows_single_housing";
-
-class ProtocolFlags {
-    private _flags: {[name: string]: FlagInfo} = {};
-
-    constructor() {
-        this._initFlag("has_biological_hazards", "Biological Hazards");
-        this._initFlag("has_chemical_hazards",   "Chemical Hazards");
-        this._initFlag("has_physical_hazards",   "Physical Hazards");
-        this._initFlag("has_radiation_hazards",  "Radiation Hazards");
-        this._initFlag("has_wildlife_hazards",   "Wildlife Hazards");
-        this._initFlag("has_other_hazards",      "Other Hazards");
-    }
-
-    private _initFlag(name: ProtocolFlagName, displayName?: string, description?: string) {
-        let info: FlagInfo = {
-            checked: false
-        };
-
-        if (displayName) {
-            info.displayName = displayName;
-        }
-
-        if (description) {
-            info.description = description;
-        }
-
-        this._flags[name] = info;
-    }
-
-    getFlagNames(): ProtocolFlagName[] {
-        return _.keys(this._flags) as ProtocolFlagName[];
-    }
-
-    getFlag(name: ProtocolFlagName): boolean {
-        return this.getFlagInfo(name).checked;
-    }
-
-    getFlagInfo(name: ProtocolFlagName): FlagInfo {
-        return (name in this._flags) ? this._flags[name]: {checked: false};
-    }
-
-    setFlag(name: ProtocolFlagName, val: boolean): void {
-        if (name in this._flags) {
-            this._flags[name] = {checked: val};
-        }
-        else {
-            this._flags[name].checked = val;
-        }
-    }
-}
+import {SpeciesSelector, ProtocolSpeciesTabs} from "../lib/protocol/species-tab";
+import * as ReactTabs from 'react-tabs';
+import TabList = ReactTabs.TabList;
+import Tabs = ReactTabs.Tabs;
+import TabPanel = ReactTabs.TabPanel;
+import Tab = ReactTabs.Tab;
+import {ProtocolFlags, ProtocolFlagName, Protocol, SpeciesProtocolInfo, FlagInfo} from "../lib/protocol/protocol";
 
 interface CheckBoxProperties {
     flags: ProtocolFlags
 }
 
-interface FlagInfo {
-    checked:      boolean,
-    displayName?: string,
-    description?: string
-}
 
 class CheckBoxSet extends React.Component<CheckBoxProperties, {}> {
     constructor(props: CheckBoxProperties) {
@@ -109,18 +56,6 @@ class CheckBoxSet extends React.Component<CheckBoxProperties, {}> {
             </fieldset>
         );
     }
-}
-
-interface Protocol {
-    title: string;
-    number: string;
-    principal_investigator: string,
-    spi_primary: string,
-    spi_secondary: string,
-    original_approval_date: Moment
-    approval_date: Moment,
-
-    flags: ProtocolFlags;
 }
 
 interface ProtocolBasicInfoVM {
@@ -196,8 +131,12 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
     }
 }
 
-class Page extends React.Component<any, {protocol: Protocol}> {
-    constructor(props: any) {
+interface PageState {
+    protocol: Protocol;
+}
+
+class Page extends React.Component<{}, PageState> {
+    constructor(props: {}) {
         super(props);
 
         let newProtocol: Protocol = {
@@ -208,7 +147,7 @@ class Page extends React.Component<any, {protocol: Protocol}> {
             title: '',
             original_approval_date: moment(),
             approval_date: moment(),
-
+            species: [] as SpeciesProtocolInfo[],
             flags: new ProtocolFlags()
         };
 
@@ -219,10 +158,16 @@ class Page extends React.Component<any, {protocol: Protocol}> {
         };
 
         this.protocolChangeHandler = this.protocolChangeHandler.bind(this);
+        this.addProtocolSpecies = this.addProtocolSpecies.bind(this);
     }
 
     protocolChangeHandler(protocol: Protocol): void {
         this.setState({protocol: protocol});
+    }
+
+    addProtocolSpecies(species_name: string) {
+        this.state.protocol.species.push(new SpeciesProtocolInfo(species_name));
+        this.forceUpdate();
     }
 
     render() {
@@ -248,6 +193,12 @@ class Page extends React.Component<any, {protocol: Protocol}> {
                             <div className="panel-heading">New Protocol {this.state.protocol.number && (<span>({this.state.protocol.number})</span>)}</div>
                             <div className="panel-body">
                                 <ProtocolBasicInfo protocol={this.state.protocol} onProtocolChange={this.protocolChangeHandler} />
+
+                                <div className="text-center">
+                                    <SpeciesSelector options={(window as any).PageLoadData.lookups.species} handleButtonClick={this.addProtocolSpecies} />
+                                </div>
+
+                                <ProtocolSpeciesTabs protocol={this.state.protocol} />
                             </div>
                         </div>
                     </div>

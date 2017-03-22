@@ -10,19 +10,25 @@ import java.util.List;
  * to add a getDisplayName() or similar.
  */
 public enum SpeciesClass {
-    RHESUS_MACAQUE (Species.RHESUS_MACAQUE),
-    CYNOMOLGUS_MACAQUE (Species.CYNOMOLGUS_MACAQUE),
-    COMMON_MARMOSET (Species.COMMON_MARMOSET),
-    MACAQUE (Arrays.asList(Species.RHESUS_MACAQUE, Species.CYNOMOLGUS_MACAQUE))
+    RHESUS_MACAQUE     ("Rhesus Macaque",  Species.RHESUS_MACAQUE),
+    CYNOMOLGUS_MACAQUE ("Cynos Macaque",   Species.CYNOMOLGUS_MACAQUE),
+    COMMON_MARMOSET    ("Common Marmoset", Species.COMMON_MARMOSET),
+    MACAQUE            ("Macaque",         Arrays.asList(Species.RHESUS_MACAQUE, Species.CYNOMOLGUS_MACAQUE))
     ;
 
     List<Species> species = new ArrayList<>();
+    String displayName;
 
-    SpeciesClass(Species species) {
-        this.species.add(species);
+    SpeciesClass(String displayName, Species species) {
+        this(displayName, Arrays.asList(species));
     }
 
-    SpeciesClass(List<Species> speciesList) {
+    SpeciesClass(String displayName, List<Species> speciesList) {
         this.species.addAll(speciesList);
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
     }
 }

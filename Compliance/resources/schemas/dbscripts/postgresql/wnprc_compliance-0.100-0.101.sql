@@ -24,7 +24,6 @@ CREATE TABLE wnprc_compliance.protocol_revisions (
   spi_secondary_id          TEXT NOT NULL,
   approval_date             TIMESTAMP,
   attached_file_id          TEXT,
-  usda_designation          TEXT NOT NULL,
 
   has_biological_hazards  BOOLEAN NOT NULL DEFAULT FALSE,
   has_chemical_hazards    BOOLEAN NOT NULL DEFAULT FALSE,

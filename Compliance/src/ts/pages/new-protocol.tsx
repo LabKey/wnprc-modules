@@ -183,20 +183,15 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
 
     render() {
         return (
-            <div className="panel panel-primary">
-                <div className="panel-heading">Basic Info</div>
-                <div className="panel-body">
-                    <form className="form-horizontal">
-                        <TextInput label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
-                        <TextInput label="Title" property_name="title" handleChange={this.handleTextChange} />
-                        <TextInput label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
-                        <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
-                        <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
+            <form className="form-horizontal">
+                <TextInput label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
+                <TextInput label="Title" property_name="title" handleChange={this.handleTextChange} />
+                <TextInput label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
+                <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
+                <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
 
-                        <CheckBoxSet flags={this.state.protocol.flags} />
-                    </form>
-                </div>
-            </div>
+                <CheckBoxSet flags={this.state.protocol.flags} />
+            </form>
         )
     }
 }
@@ -217,7 +212,7 @@ class Page extends React.Component<any, {protocol: Protocol}> {
             flags: new ProtocolFlags()
         };
 
-        window.p = newProtocol;
+        //window.p = newProtocol;
 
         this.state = {
             protocol: newProtocol

@@ -40,7 +40,7 @@ export class ProtocolSpeciesTabset extends React.Component<ProtocolSpeciesTabset
 
         this.selectedSpecies.remove(name);
 
-        this.props.protocol.species = this.props.protocol.species.filter((info) => {
+        this.props.protocol.species = this.props.protocol.species.filter((info: SpeciesProtocolInfo) => {
             return info.species_classifier !== name;
         });
         this.forceUpdate();

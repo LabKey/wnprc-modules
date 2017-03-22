@@ -34,6 +34,8 @@ export class SpeciesSelector extends React.Component<SpeciesSelectorProps, Speci
             this.props.handleButtonClick(this.state.value);
         }
 
+        this.setState({value: ""});
+
         e.preventDefault();
     }
 

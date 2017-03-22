@@ -4,7 +4,7 @@ import * as React from "react";
 import ChangeEvent = React.ChangeEvent;
 import Moment = moment.Moment;
 import moment = require("moment");
-import {SpeciesSelector, ProtocolSpeciesTabset} from "../lib/protocol/species-tabset";
+import {ProtocolSpeciesTabset} from "../lib/protocol/species-tabset";
 import * as ReactTabs from 'react-tabs';
 import TabList = ReactTabs.TabList;
 import Tabs = ReactTabs.Tabs;

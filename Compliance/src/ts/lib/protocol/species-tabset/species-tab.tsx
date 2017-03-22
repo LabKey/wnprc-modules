@@ -1,6 +1,9 @@
-import {SpeciesProtocolInfo} from "../protocol";
+import {SpeciesProtocolInfo, SpeciesFlagNames} from "../protocol";
 import * as React from "react";
 import ChangeEvent = React.ChangeEvent;
+import {CheckBoxSet} from "../../checkboxset";
+
+class SpeciesCheckboxSet extends CheckBoxSet<SpeciesFlagNames> {}
 
 export interface ProtocolSpeciesTabProps {
     info: SpeciesProtocolInfo
@@ -35,6 +38,12 @@ export class ProtocolSpeciesTab extends React.Component<ProtocolSpeciesTabProps,
                         <input value={this.state.info.max_number_of_animals} className="form-control" type="number" min="0" onChange={this.handleChange} />
                     </div>
                 </div>
+
+                <div className="col-sm-12">
+                    <SpeciesCheckboxSet title="What will be done to this species?" flags={this.state.info.flags} />
+                </div>
+
+
             </div>
         )
     }

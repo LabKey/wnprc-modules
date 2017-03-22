@@ -34,9 +34,19 @@ export class ProtocolFlags extends FlagSet<ProtocolFlagName> {
     }
 }
 
+export type SpeciesFlagNames = "has_drugs";
+
+export class SpeciesFlags extends FlagSet<SpeciesFlagNames> {
+    constructor() {
+        super();
+
+        this._initFlag("has_drugs");
+    }
+}
 
 export class SpeciesProtocolInfo {
     max_number_of_animals: number = 0;
+    flags: SpeciesFlags = new SpeciesFlags();
 
     constructor(public readonly species_classifier: string) {
 

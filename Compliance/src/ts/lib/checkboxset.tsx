@@ -51,7 +51,8 @@ export class FlagSet<T extends string> {
 
 
 export interface CheckBoxProperties<T extends string> {
-    flags: FlagSet<T>
+    title: string;
+    flags: FlagSet<T>;
 }
 
 
@@ -68,6 +69,7 @@ export class CheckBoxSet<T extends string> extends React.Component<CheckBoxPrope
 
 
         this.props.flags.setFlag((name as T), val);
+        this.forceUpdate();
     }
 
     render() {
@@ -77,7 +79,7 @@ export class CheckBoxSet<T extends string> extends React.Component<CheckBoxPrope
 
             return (
                 <div className="checkbox checkbox-primary col-sm-4" key={name}>
-                    <input type="checkbox" id={id} name={name} onChange={this.handleChange}/>
+                    <input type="checkbox" checked={this.props.flags.getFlag(name)} id={id} name={name} onChange={this.handleChange}/>
 
                     <label htmlFor={id}>
                         {(info.displayName) ? info.displayName : name }
@@ -88,7 +90,7 @@ export class CheckBoxSet<T extends string> extends React.Component<CheckBoxPrope
 
         return (
             <fieldset>
-                <legend>This Protocol Involves:</legend>
+                <legend>{this.props.title}</legend>
 
                 {checkboxes}
             </fieldset>

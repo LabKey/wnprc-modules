@@ -84,7 +84,7 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
                 <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
                 <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
 
-                <ProtocolCheckboxSet flags={this.state.protocol.flags} />
+                <ProtocolCheckboxSet title="This Protocol Involves:" flags={this.state.protocol.flags} />
             </form>
         )
     }

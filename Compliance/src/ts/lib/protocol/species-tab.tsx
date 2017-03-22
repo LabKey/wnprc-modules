@@ -70,11 +70,15 @@ export class SpeciesSelector extends React.Component<SpeciesSelectorProps, Speci
     }
 }
 
-class ProtocolSpeciesTab extends React.Component<SpeciesProtocolInfo, {}> {
+interface ProtocolSpeciesTabProps {
+    info: SpeciesProtocolInfo
+}
+
+class ProtocolSpeciesTab extends React.Component<ProtocolSpeciesTabProps, {}> {
     render() {
         return (
             <div>
-                <h1>This is a species tab for {this.props.species_classifier}.</h1>
+                <h1>This is a species tab for {this.props.info.species_classifier}.</h1>
             </div>
         )
     }
@@ -129,9 +133,7 @@ export class ProtocolSpeciesTabs extends React.Component<ProtocolSpeciesTabsProp
         let speciesTabsContent = speciesInfos.map((info: SpeciesProtocolInfo) => {
             return (
                 <TabPanel key={info.species_classifier}>
-                    <h1>
-                        {info.species_classifier}
-                    </h1>
+                    <ProtocolSpeciesTab info={info} />
                 </TabPanel>
             )
         });

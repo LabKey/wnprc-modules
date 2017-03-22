@@ -41,10 +41,10 @@ export class FlagSet<T extends string> {
 
     setFlag(name: T, val: boolean): void {
         if (name.toString() in this._flags) {
-            this._flags[name.toString()] = {checked: val};
+            this._flags[name.toString()].checked = val;
         }
         else {
-            this._flags[name.toString()].checked = val;
+            this._flags[name.toString()] = {checked: val};
         }
     }
 }

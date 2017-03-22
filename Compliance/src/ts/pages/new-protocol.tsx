@@ -158,16 +158,10 @@ class Page extends React.Component<{}, PageState> {
         };
 
         this.protocolChangeHandler = this.protocolChangeHandler.bind(this);
-        this.addProtocolSpecies = this.addProtocolSpecies.bind(this);
     }
 
     protocolChangeHandler(protocol: Protocol): void {
         this.setState({protocol: protocol});
-    }
-
-    addProtocolSpecies(species_name: string) {
-        this.state.protocol.species.push(new SpeciesProtocolInfo(species_name));
-        this.forceUpdate();
     }
 
     render() {
@@ -194,11 +188,7 @@ class Page extends React.Component<{}, PageState> {
                             <div className="panel-body">
                                 <ProtocolBasicInfo protocol={this.state.protocol} onProtocolChange={this.protocolChangeHandler} />
 
-                                <div className="text-center">
-                                    <SpeciesSelector options={(window as any).PageLoadData.lookups.species} handleButtonClick={this.addProtocolSpecies} />
-                                </div>
-
-                                <ProtocolSpeciesTabs protocol={this.state.protocol} />
+                                <ProtocolSpeciesTabs protocol={this.state.protocol} speciesOptions={(window as any).PageLoadData.lookups.species} />
                             </div>
                         </div>
                     </div>

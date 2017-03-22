@@ -76,10 +76,22 @@ class ProtocolSpeciesTab extends React.Component<SpeciesProtocolInfo, {}> {
 }
 
 export interface ProtocolSpeciesTabsProps {
-    protocol: Protocol
+    protocol: Protocol,
+    speciesOptions: {[name: string]: string}
 }
 
 export class ProtocolSpeciesTabs extends React.Component<ProtocolSpeciesTabsProps, {}> {
+    constructor(props: ProtocolSpeciesTabsProps) {
+        super(props);
+
+        this.addProtocolSpecies = this.addProtocolSpecies.bind(this);
+    }
+
+    addProtocolSpecies(species_name: string) {
+        this.props.protocol.species.push(new SpeciesProtocolInfo(species_name));
+        this.forceUpdate();
+    }
+
     render() {
 
         let speciesInfos: SpeciesProtocolInfo[] = this.props.protocol.species;
@@ -103,6 +115,10 @@ export class ProtocolSpeciesTabs extends React.Component<ProtocolSpeciesTabsProp
 
         return (
             <div>
+                <div className="text-center">
+                    <SpeciesSelector options={this.props.speciesOptions} handleButtonClick={this.addProtocolSpecies} />
+                </div>
+
                 {this.props.protocol.species.length > 0 && (
                     <Tabs>
                         <TabList>

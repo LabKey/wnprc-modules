@@ -34,13 +34,20 @@ export class ProtocolFlags extends FlagSet<ProtocolFlagName> {
     }
 }
 
-export type SpeciesFlagNames = "has_drugs";
+export type SpeciesFlagNames = "drug_administration" | "blood_collection" | "food_regulation" | "imaging"
+                             | "non_surgical_procedures" | "surgeries" | "multiple_surgeries";
 
 export class SpeciesFlags extends FlagSet<SpeciesFlagNames> {
     constructor() {
         super();
 
-        this._initFlag("has_drugs");
+        this._initFlag("drug_administration",     "Drug Administration");
+        this._initFlag("blood_collection",        "Blood Collection");
+        this._initFlag("food_regulation",         "Food and/or Fluid Regulation");
+        this._initFlag("imaging",                 "Imaging");
+        this._initFlag("non_surgical_procedures", "Other Non-Surgical Procedures");
+        this._initFlag("surgeries",               "Surgeries");
+        this._initFlag("multiple_surgeries",      "Multiple Concurrent Surgeries");
     }
 }
 

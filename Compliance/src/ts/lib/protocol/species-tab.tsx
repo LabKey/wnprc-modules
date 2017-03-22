@@ -1,5 +1,7 @@
 import * as React from "react";
 import * as _ from "underscore";
+import * as ko from "knockout";
+import * as $ from "jquery";
 import ChangeEvent = React.ChangeEvent;
 import MouseEvent  = React.MouseEvent;
 import {Protocol, SpeciesProtocolInfo} from "./protocol";
@@ -12,6 +14,7 @@ import Tab = ReactTabs.Tab;
 
 export interface SpeciesSelectorProps {
     options: {[name: string]: string};
+    selectedSpecies: KnockoutObservableArray<string>;
     handleButtonClick?(optionValue: string): void;
 }
 
@@ -44,7 +47,9 @@ export class SpeciesSelector extends React.Component<SpeciesSelectorProps, Speci
     }
 
     render() {
-        let options = _.keys(this.props.options).map((keyName: string) => {
+        let options = _.keys(this.props.options).filter((keyName: string) => {
+            return this.props.selectedSpecies.indexOf(keyName) === -1;
+        }).map((keyName: string) => {
             return (
                 <option key={keyName} value={keyName}>{this.props.options[keyName]}</option>
             );
@@ -81,25 +86,43 @@ export interface ProtocolSpeciesTabsProps {
 }
 
 export class ProtocolSpeciesTabs extends React.Component<ProtocolSpeciesTabsProps, {}> {
+    selectedSpecies: KnockoutObservableArray<string> = ko.observableArray([]);
+
     constructor(props: ProtocolSpeciesTabsProps) {
         super(props);
 
         this.addProtocolSpecies = this.addProtocolSpecies.bind(this);
+        this.removeProtocolSpecies = this.removeProtocolSpecies.bind(this);
     }
 
     addProtocolSpecies(species_name: string) {
         this.props.protocol.species.push(new SpeciesProtocolInfo(species_name));
+        this.selectedSpecies.push(species_name);
         this.forceUpdate();
     }
 
+    removeProtocolSpecies(e: MouseEvent<HTMLElement>) {
+        let name = $(e.target).data().name;
+
+        this.selectedSpecies.remove(name);
+
+        this.props.protocol.species = this.props.protocol.species.filter((info) => {
+            return info.species_classifier !== name;
+        });
+        this.forceUpdate();
+
+        e.preventDefault();
+    }
+
     render() {
-
         let speciesInfos: SpeciesProtocolInfo[] = this.props.protocol.species;
-
 
         let speciesTabs = speciesInfos.map((info: SpeciesProtocolInfo) => {
             return (
-                <Tab key={info.species_classifier}>{info.species_classifier}</Tab>
+                <Tab key={info.species_classifier}>
+                    {info.species_classifier}
+                    <i style={{color: 'red'}} className="fa fa-remove" onClick={this.removeProtocolSpecies} {...{'data-name': info.species_classifier}} />
+                </Tab>
             )
         });
 
@@ -116,7 +139,7 @@ export class ProtocolSpeciesTabs extends React.Component<ProtocolSpeciesTabsProp
         return (
             <div>
                 <div className="text-center">
-                    <SpeciesSelector options={this.props.speciesOptions} handleButtonClick={this.addProtocolSpecies} />
+                    <SpeciesSelector options={this.props.speciesOptions} handleButtonClick={this.addProtocolSpecies} selectedSpecies={this.selectedSpecies} />
                 </div>
 
                 {this.props.protocol.species.length > 0 && (

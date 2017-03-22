@@ -3,6 +3,8 @@ import * as ReactDOM from "react-dom";
 import * as React from "react";
 import * as _ from "underscore";
 import ChangeEvent = React.ChangeEvent;
+import Moment = moment.Moment;
+import moment = require("moment");
 
 type ProtocolFlagName = "has_biological_hazards" | "has_chemical_hazards" | "has_physical_hazards"
                       | "has_radiation_hazards"  | "has_wildlife_hazards" | "has_other_hazards"
@@ -110,13 +112,50 @@ class CheckBoxSet extends React.Component<CheckBoxProperties, {}> {
 }
 
 interface Protocol {
+    title: string;
     number: string;
+    principal_investigator: string,
+    spi_primary: string,
+    spi_secondary: string,
+    original_approval_date: Moment
+    approval_date: Moment,
+
     flags: ProtocolFlags;
 }
 
 interface ProtocolBasicInfoVM {
     protocol: Protocol;
     onProtocolChange(protocol: Protocol): void
+}
+
+interface TextInputProps {
+    property_name: string;
+    label?: string;
+    handleChange?(label: string, val: string): void;
+}
+
+class TextInput extends React.Component<TextInputProps, {}> {
+    constructor(props: TextInputProps) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(e: ChangeEvent<HTMLInputElement>) {
+        if (this.props.handleChange) {
+            this.props.handleChange(this.props.property_name, e.target.value);
+        }
+    }
+
+    render() {
+        return (
+            <div className="form-group" key={this.props.property_name}>
+                <label className="col-sm-3 control-label">{this.props.label || this.props.property_name}</label>
+                <div className="col-sm-9">
+                    <input className="form-control" type="text" onChange={this.handleChange} />
+                </div>
+            </div>
+        )
+    }
 }
 
 class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: Protocol}> {
@@ -127,13 +166,15 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
             protocol: this.props.protocol
         };
 
-        this.handleNumberChange = this.handleNumberChange.bind(this);
+        this.handleTextChange = this.handleTextChange.bind(this);
     }
 
-    handleNumberChange(e: ChangeEvent<HTMLInputElement>) {
+    handleTextChange(label: string, value: string) {
         let protocol = this.state.protocol;
 
-        protocol.number = e.target.value;
+        if (label in protocol) {
+            (protocol as any)[label] = value;
+        }
 
         this.setState({protocol: protocol}, () => {
             this.props.onProtocolChange(this.state.protocol);
@@ -146,12 +187,11 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
                 <div className="panel-heading">Basic Info</div>
                 <div className="panel-body">
                     <form className="form-horizontal">
-                        <div className="form-group">
-                            <label className="col-sm-2 control-label">Number</label>
-                            <div className="col-sm-10">
-                                <input className="form-control" type="text" onChange={this.handleNumberChange} />
-                            </div>
-                        </div>
+                        <TextInput label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
+                        <TextInput label="Title" property_name="title" handleChange={this.handleTextChange} />
+                        <TextInput label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
+                        <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
+                        <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
 
                         <CheckBoxSet flags={this.state.protocol.flags} />
                     </form>
@@ -167,10 +207,17 @@ class Page extends React.Component<any, {protocol: Protocol}> {
 
         let newProtocol: Protocol = {
             number: '',
+            principal_investigator: '',
+            spi_primary: '',
+            spi_secondary: '',
+            title: '',
+            original_approval_date: moment(),
+            approval_date: moment(),
+
             flags: new ProtocolFlags()
         };
 
-        //window.p = newProtocol;
+        window.p = newProtocol;
 
         this.state = {
             protocol: newProtocol

@@ -1,14 +1,16 @@
 import * as React from "react";
+import CSSProperties = React.CSSProperties;
 
 export class ToolBar extends React.Component<any, any> {
     render() {
         let id = "bs-example-navbar-collapse-1";
 
-        let betaStyle: CSSStyleRule = {
+        let betaStyle: CSSProperties = {
             color: 'red',
             fontStyle: 'italic',
             fontVariant: 'small-caps'
         };
+
         let betaSpan = (
             <span style={betaStyle}>beta</span>
         );

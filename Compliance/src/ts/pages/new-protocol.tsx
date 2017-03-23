@@ -80,8 +80,8 @@ class UnblockedSection extends React.Component<EditableSectionProps, {}> {
         });
 
         $innerDiv
-            .width($outerDiv.width())
-            .height($outerDiv.height());
+            .width($outerDiv.outerWidth())
+            .height($outerDiv.outerHeight());
 
     }
 
@@ -199,15 +199,33 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
 
     render() {
         return (
-            <fieldset className="form-horizontal" disabled={this.props.disabled}>
-                <TextInput label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
-                <TextInput label="Title" property_name="title" handleChange={this.handleTextChange} />
-                <TextInput label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
-                <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
-                <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
+            <div className="container-fluid">
+                <h3>
+                    Basic Info
+                    {
+                        (this.props.disabled) ? (
+                            <a href="#" className="btn btn-primary btn-xs" style={{marginLeft: '5px'}} onClick={this.props.beginEdit}>
+                                <i className="fa fa-pencil"/>Edit
+                            </a>
+                        ) : (
+                            <a href="#" className="btn btn-primary btn-xs" style={{marginLeft: '5px'}} onClick={this.props.endEdit}>
+                                <i className="fa fa-save"/>Save
+                            </a>
+                        )
+                    }
+                </h3>
+                <hr />
 
-                <ProtocolCheckboxSet title="This Protocol Involves:" flags={this.state.protocol.flags} />
-            </fieldset>
+                <fieldset className="form-horizontal" disabled={this.props.disabled}>
+                    <TextInput label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
+                    <TextInput label="Title" property_name="title" handleChange={this.handleTextChange} />
+                    <TextInput label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
+                    <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
+                    <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
+
+                    <ProtocolCheckboxSet title="This Protocol Involves:" flags={this.state.protocol.flags} />
+                </fieldset>
+            </div>
         )
     }
 }
@@ -279,7 +297,6 @@ class Page extends React.Component<{}, PageState> {
                         <div className="panel panel-primary">
                             <div className="panel-heading">
                                 New Protocol {this.state.protocol.number && (<span>({this.state.protocol.number})</span>)}
-                                {this.state.sectionToEdit === 'info' ? (<a href="#" onClick={this.clearSectionToEdit}>Done</a>) : (<a href="#" onClick={() => {this.setSectionToEdit('info')}}>Edit</a>)}
                                 </div>
 
                             <BlockableDiv disabled={this.state.sectionToEdit !== null} className="panel-body">

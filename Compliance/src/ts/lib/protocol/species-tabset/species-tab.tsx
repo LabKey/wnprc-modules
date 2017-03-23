@@ -54,7 +54,7 @@ export class ProtocolSpeciesTab extends React.Component<ProtocolSpeciesTabProps,
                     </div>
                 </div>
 
-                {this.state.info.flags.getFlag("drug_administration") && (<DrugsSection />)}
+                {this.state.info.flags.getFlag("drug_administration") && (<DrugsSection info={this.state.info} />)}
                 {this.state.info.flags.getFlag("drug_administration") && (<DrugRegimensSection />)}
             </div>
         )

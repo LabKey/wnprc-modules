@@ -12,6 +12,9 @@ import TabPanel = ReactTabs.TabPanel;
 import Tab = ReactTabs.Tab;
 import {ProtocolFlags, ProtocolFlagName, Protocol, SpeciesProtocolInfo} from "../lib/protocol/protocol";
 import {CheckBoxSet} from "../lib/checkboxset";
+import {newUUID} from "../../../../WebUtils/src/ts/WebUtils/Util";
+import CSSProperties = React.CSSProperties;
+import * as $ from "jquery";
 
 class ProtocolCheckboxSet extends CheckBoxSet<ProtocolFlagName> {
 
@@ -19,13 +22,132 @@ class ProtocolCheckboxSet extends CheckBoxSet<ProtocolFlagName> {
 
 interface ProtocolBasicInfoVM {
     protocol: Protocol;
-    onProtocolChange(protocol: Protocol): void
+    onProtocolChange(protocol: Protocol): void,
+    beginEdit: () => void;
+    endEdit: () => void;
+    disabled: boolean;
 }
 
 interface TextInputProps {
     property_name: string;
     label?: string;
     handleChange?(label: string, val: string): void;
+}
+
+interface EditableSectionProps {
+    isUnblocked: boolean;
+}
+
+class UnblockedSection extends React.Component<EditableSectionProps, {}> {
+    private _innerDiv: HTMLDivElement;
+    private _outerDiv: HTMLDivElement;
+
+    constructor(props: EditableSectionProps) {
+        super(props);
+    }
+
+    componentDidMount() {
+        if (this.props.isUnblocked) {
+            this.makeEditable();
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.props.isUnblocked) {
+            this.makeEditable();
+        }
+        else {
+            this.unmakeEditable();
+        }
+    }
+
+    makeEditable(): void {
+        if (!this._innerDiv || !this._outerDiv) {
+            return;
+        }
+
+        let $innerDiv = $(this._innerDiv);
+        let $outerDiv = $(this._outerDiv);
+
+        $outerDiv
+            .width($innerDiv.width())
+            .height($innerDiv.height());
+
+        $innerDiv.css({
+            position: 'absolute',
+            'z-index': 2000, // The Z-index of jQuery.blockUI elements are between 1000 and 1020.
+            'background-color': 'white'
+        });
+
+        $innerDiv
+            .width($outerDiv.width())
+            .height($outerDiv.height());
+
+    }
+
+    unmakeEditable() {
+        if (!this._innerDiv || !this._outerDiv) {
+            return;
+        }
+
+        let $innerDiv = $(this._innerDiv);
+        let $outerDiv = $(this._outerDiv);
+
+        $innerDiv.css('height', '').css('width', '');
+        $outerDiv.css('height', '').css('width', '');
+
+        $innerDiv.css({
+            position: '',
+            'z-index': '',
+            'background-color': ''
+        });
+    }
+
+    render() {
+        return (
+            <div ref={(div) => {this._outerDiv = div;}}>
+                <div ref={(div) => {this._innerDiv = div}}>
+                    {this.props.children}
+                </div>
+            </div>
+        )
+    }
+}
+
+interface BlockableDivProps {
+    disabled: boolean;
+    className: string;
+}
+
+class BlockableDiv extends React.Component<BlockableDivProps, {}> {
+    id: string = newUUID();
+    _div: HTMLDivElement;
+
+    constructor(props: BlockableDivProps) {
+        super(props);
+    }
+
+    componentDidMount() {
+        if (this._div) {
+            let $div = $(this._div) as any;
+            (this.props.disabled) ? $div.block({message: null}) : $div.unblock();
+        }
+    }
+
+    componentDidUpdate() {
+        if (this._div) {
+            let $div = $(this._div) as any;
+            (this.props.disabled) ? $div.block({message: null}) : $div.unblock();
+        }
+    }
+
+    render() {
+        return (
+            <div ref={(div) => {this._div = div} } className={this.props.className}>
+                {this.props.children}
+            </div>
+        )
+    }
 }
 
 class TextInput extends React.Component<TextInputProps, {}> {
@@ -77,7 +199,7 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
 
     render() {
         return (
-            <form className="form-horizontal">
+            <fieldset className="form-horizontal" disabled={this.props.disabled}>
                 <TextInput label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
                 <TextInput label="Title" property_name="title" handleChange={this.handleTextChange} />
                 <TextInput label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
@@ -85,13 +207,14 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
                 <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
 
                 <ProtocolCheckboxSet title="This Protocol Involves:" flags={this.state.protocol.flags} />
-            </form>
+            </fieldset>
         )
     }
 }
 
 interface PageState {
     protocol: Protocol;
+    sectionToEdit: string | null;
 }
 
 class Page extends React.Component<{}, PageState> {
@@ -113,14 +236,25 @@ class Page extends React.Component<{}, PageState> {
         //window.p = newProtocol;
 
         this.state = {
-            protocol: newProtocol
+            protocol: newProtocol,
+            sectionToEdit: null
         };
 
         this.protocolChangeHandler = this.protocolChangeHandler.bind(this);
+        this.setSectionToEdit = this.setSectionToEdit.bind(this);
+        this.clearSectionToEdit = this.clearSectionToEdit.bind(this);
     }
 
     protocolChangeHandler(protocol: Protocol): void {
         this.setState({protocol: protocol});
+    }
+
+    setSectionToEdit(name: string) {
+        this.setState({sectionToEdit: name})
+    }
+
+    clearSectionToEdit() {
+        this.setState({sectionToEdit: null})
     }
 
     render() {
@@ -143,12 +277,24 @@ class Page extends React.Component<{}, PageState> {
 
                     <div className="col-sm-9">
                         <div className="panel panel-primary">
-                            <div className="panel-heading">New Protocol {this.state.protocol.number && (<span>({this.state.protocol.number})</span>)}</div>
-                            <div className="panel-body">
-                                <ProtocolBasicInfo protocol={this.state.protocol} onProtocolChange={this.protocolChangeHandler} />
+                            <div className="panel-heading">
+                                New Protocol {this.state.protocol.number && (<span>({this.state.protocol.number})</span>)}
+                                {this.state.sectionToEdit === 'info' ? (<a href="#" onClick={this.clearSectionToEdit}>Done</a>) : (<a href="#" onClick={() => {this.setSectionToEdit('info')}}>Edit</a>)}
+                                </div>
+
+                            <BlockableDiv disabled={this.state.sectionToEdit !== null} className="panel-body">
+                                <UnblockedSection isUnblocked={this.state.sectionToEdit === 'info'}>
+                                    <ProtocolBasicInfo protocol={this.state.protocol}
+                                                       onProtocolChange={this.protocolChangeHandler}
+                                                       beginEdit={() => {this.setSectionToEdit('info')}}
+                                                       endEdit={this.clearSectionToEdit}
+                                                       disabled={this.state.sectionToEdit !== 'info'}
+                                    />
+                                </UnblockedSection>
+
 
                                 <ProtocolSpeciesTabset protocol={this.state.protocol} speciesOptions={(window as any).PageLoadData.lookups.species} />
-                            </div>
+                            </BlockableDiv>
                         </div>
                     </div>
                 </div>

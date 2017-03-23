@@ -10,6 +10,7 @@ export interface FlagInfo {
 
 export class FlagSet<T extends string> {
     private _flags: {[name: string]: FlagInfo} = {};
+    private _listeners: ((flags: FlagSet<T>) => void)[] = [];
 
     protected _initFlag(name: T, displayName?: string, description?: string) {
         let info: FlagInfo = {
@@ -46,6 +47,18 @@ export class FlagSet<T extends string> {
         else {
             this._flags[name.toString()] = {checked: val};
         }
+
+        this._updateListeners();
+    }
+
+    _updateListeners(): void {
+        this._listeners.forEach((cb: (flags:FlagSet<T>) => void) => {
+            cb(this);
+        })
+    }
+
+    registerListener(callback: (flags: FlagSet<T>) => void): void {
+        this._listeners.push(callback);
     }
 }
 

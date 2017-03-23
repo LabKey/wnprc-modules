@@ -1,6 +1,7 @@
 import moment = require("moment");
 import Moment = moment.Moment;
 import {FlagSet} from "../checkboxset";
+import {Drug} from "./protocol/drug";
 
 
 export interface Protocol {
@@ -54,6 +55,7 @@ export class SpeciesFlags extends FlagSet<SpeciesFlagNames> {
 export class SpeciesProtocolInfo {
     max_number_of_animals: number = 0;
     flags: SpeciesFlags = new SpeciesFlags();
+    drugs: Drug[] = [];
 
     constructor(public readonly species_classifier: string) {
 

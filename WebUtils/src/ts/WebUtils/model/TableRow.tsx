@@ -1,5 +1,6 @@
 import * as _ from "underscore";
 import * as React from "react";
+import {newUUID} from "../Util";
 
 export interface HTMLTableColumn {
     getHTML(): string;
@@ -45,18 +46,6 @@ export class SimpleLinkColumn implements ReactTableColumn {
     }
 }
 
-
-// Thank you: http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-function guid() {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-        s4() + '-' + s4() + s4() + s4();
-}
-
 export type TableColumn = HTMLTableColumn | ReactTableColumn
 
 export interface TableRowConfig {
@@ -71,7 +60,7 @@ export class TableRow {
     isEven:     KnockoutObservable<boolean> = ko.observable(false);
     isHidden:   KnockoutObservable<boolean> = ko.observable(false);
 
-    key: string = guid();
+    key: string = newUUID();
 
     warn: KnockoutComputed<boolean>;
     err:  KnockoutComputed<boolean>;

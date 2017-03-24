@@ -2,5 +2,6 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/lkpm/modules/Compliance/resources/schemas/dbscripts/postgresql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/lkpm/modules/DBUtils/resources/schemas/dbscripts/postgresql" dialect="PostgreSQL" />
   </component>
 </project>

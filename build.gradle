@@ -20,6 +20,8 @@ dependencies {
     // The production code uses Guava
     compile 'com.google.guava:guava:20.0'
 
+    compile group: 'commons-io', name: 'commons-io', version: '2.0.1'
+
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
 }

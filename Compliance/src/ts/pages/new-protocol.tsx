@@ -32,6 +32,8 @@ interface TextInputProps {
     property_name: string;
     label?: string;
     handleChange?(label: string, val: string): void;
+    editable: boolean;
+    value: string;
 }
 
 interface EditableSectionProps {
@@ -178,11 +180,23 @@ class TextInput extends React.Component<TextInputProps, {}> {
     }
 
     render() {
+        let ellipsisStyle: CSSProperties = {
+            whiteSpace: 'pre-line',
+            overflow: 'hidden'
+        };
+
         return (
-            <div className="form-group" key={this.props.property_name}>
+            <div className="form-group" style={{marginBottom: '5px'}} key={this.props.property_name}>
                 <label className="col-sm-3 control-label">{this.props.label || this.props.property_name}</label>
                 <div className="col-sm-9">
-                    <input className="form-control" type="text" onChange={this.handleChange} />
+                    {
+                        (this.props.editable) ? (
+                            <input value={this.props.value} className="form-control" type="text" onChange={this.handleChange} />
+                        ) : (
+                            <p style={ellipsisStyle} className="form-control-static">{this.props.value}</p>
+                        )
+                    }
+
                 </div>
             </div>
         )
@@ -232,11 +246,11 @@ class ProtocolBasicInfo extends React.Component<ProtocolBasicInfoVM, {protocol: 
                 <hr />
 
                 <fieldset className="form-horizontal" disabled={this.props.disabled}>
-                    <TextInput label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
-                    <TextInput label="Title" property_name="title" handleChange={this.handleTextChange} />
-                    <TextInput label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
-                    <TextInput label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
-                    <TextInput label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
+                    <TextInput editable={!this.props.disabled} value={this.state.protocol.number} label="Protocol Number" property_name="number" handleChange={this.handleTextChange} />
+                    <TextInput editable={!this.props.disabled} value={this.state.protocol.title} label="Title" property_name="title" handleChange={this.handleTextChange} />
+                    <TextInput editable={!this.props.disabled} value={this.state.protocol.principal_investigator} label="Principal Investigator" property_name="principal_investigator" handleChange={this.handleTextChange} />
+                    <TextInput editable={!this.props.disabled} value={this.state.protocol.spi_primary} label="SPI Primary" property_name="spi_primary" handleChange={this.handleTextChange} />
+                    <TextInput editable={!this.props.disabled} value={this.state.protocol.spi_secondary} label="SPI Secondary" property_name="spi_secondary" handleChange={this.handleTextChange} />
 
                     <ProtocolCheckboxSet title="This Protocol Involves:" flags={this.state.protocol.flags} />
                 </fieldset>

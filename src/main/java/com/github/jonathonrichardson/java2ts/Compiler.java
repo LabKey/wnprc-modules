@@ -1,5 +1,6 @@
 package com.github.jonathonrichardson.java2ts;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
@@ -14,7 +15,7 @@ public class Compiler {
         this.manifest = manifest;
     }
 
-    public CompilerOutput compile(OutputStream outputStream) throws ClassNotFoundException {
+    public CompilerOutput compile(OutputStream outputStream) throws ClassNotFoundException, IOException {
         CompilerOutput output = new CompilerOutput();
         output.outfiles = new HashMap<>();
 
@@ -22,6 +23,8 @@ public class Compiler {
             Class clazz = this.getClass().getClassLoader().loadClass(className);
             this.namespace.addClass(clazz);
         }
+
+        this.namespace.write(outputStream);
 
         return output;
     }

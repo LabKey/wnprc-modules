@@ -4,6 +4,8 @@ import com.github.jonathonrichardson.java2ts.annotation.SerializeToTS;
 import com.github.jonathonrichardson.java2ts.type.Moment;
 import com.github.jonathonrichardson.java2ts.type.TSString;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -18,6 +20,11 @@ public class Namespace {
         // Add the default types
         this.addType(new Moment());
         this.addType(new TSString());
+    }
+
+    public void write(OutputStream stream) throws IOException {
+        NamespaceWriter writer = new NamespaceWriter(this, stream);
+        writer.write();
     }
 
     public void addClass(Class clazz) {
@@ -39,7 +46,12 @@ public class Namespace {
         public TSClass(Class clazz) {
             this.clazz = clazz;
 
+            System.out.println("Parsing class: " + clazz.getName());
+
             for (Field field : clazz.getFields()) {
+                System.out.println(String.format(
+                        "Class %s has field %s with type %s", clazz.getSimpleName(), field.getName(), field.getType().getName()
+                ));
                 String fieldName = field.getName();
                 Type fieldType;
 

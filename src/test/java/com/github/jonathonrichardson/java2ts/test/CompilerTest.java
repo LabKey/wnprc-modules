@@ -36,6 +36,14 @@ public class CompilerTest {
 
         String generatedContents = new String(outputStream.toByteArray(), Charset.forName("UTF-8"));
 
+
+        System.out.println("Expected: ");
+        System.out.println(fileContents);
+
+
+        System.out.println("Generated: ");
+        System.out.println(generatedContents);
+
         assertEquals("Contents should match for File1", fileContents, generatedContents);
     }
 }

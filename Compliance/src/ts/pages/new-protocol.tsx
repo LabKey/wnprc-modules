@@ -78,7 +78,8 @@ class UnblockedSection extends React.Component<EditableSectionProps, {}> {
         $innerDiv.css({
             position: 'absolute',
             'z-index': 2000, // The Z-index of jQuery.blockUI elements are between 1000 and 1020.
-            'background-color': 'white'
+            'background-color': 'white',
+            'border-radius': '8px'
         });
 
         $innerDiv
@@ -101,7 +102,8 @@ class UnblockedSection extends React.Component<EditableSectionProps, {}> {
         $innerDiv.css({
             position: '',
             'z-index': '',
-            'background-color': ''
+            'background-color': '',
+            'border-radius': ''
         });
     }
 
@@ -133,7 +135,6 @@ class BlockableDiv extends React.Component<BlockableDivProps, {isBlocked: boolea
     }
 
     componentDidMount() {
-        console.log('create');
         if (this._div) {
             let $div = $(this._div) as any;
 
@@ -147,7 +148,6 @@ class BlockableDiv extends React.Component<BlockableDivProps, {isBlocked: boolea
     }
 
     componentDidUpdate() {
-        console.log('update');
         if (this._div) {
             let $div = $(this._div) as any;
 

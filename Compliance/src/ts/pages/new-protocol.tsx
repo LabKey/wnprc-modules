@@ -15,6 +15,7 @@ import {CheckBoxSet} from "../lib/checkboxset";
 import {newUUID} from "../../../../WebUtils/src/ts/WebUtils/Util";
 import CSSProperties = React.CSSProperties;
 import * as $ from "jquery";
+import * as s from "underscore.string";
 
 class ProtocolCheckboxSet extends CheckBoxSet<ProtocolFlagName> {
 
@@ -180,10 +181,15 @@ class TextInput extends React.Component<TextInputProps, {}> {
     }
 
     render() {
-        let ellipsisStyle: CSSProperties = {
+        let pStyle: CSSProperties = {
             whiteSpace: 'pre-line',
             overflow: 'hidden'
         };
+
+        if (s.isBlank(this.props.value)) {
+            pStyle['fontStyle'] = 'italic';
+            pStyle['color'] = 'grey';
+        }
 
         return (
             <div className="form-group" style={{marginBottom: '5px'}} key={this.props.property_name}>
@@ -193,7 +199,9 @@ class TextInput extends React.Component<TextInputProps, {}> {
                         (this.props.editable) ? (
                             <input value={this.props.value} className="form-control" type="text" onChange={this.handleChange} />
                         ) : (
-                            <p style={ellipsisStyle} className="form-control-static">{this.props.value}</p>
+                            <p style={pStyle} className="form-control-static">
+                                {s.isBlank(this.props.value) ? 'None Specified' : this.props.value}
+                            </p>
                         )
                     }
 

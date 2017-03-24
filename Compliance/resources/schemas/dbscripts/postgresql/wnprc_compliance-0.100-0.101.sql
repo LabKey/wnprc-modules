@@ -19,10 +19,10 @@ CREATE TABLE wnprc_compliance.protocol_revisions (
 
   protocol_id TEXT,
 
-  principal_investigator_id TEXT NOT NULL,
-  spi_primary_id            TEXT NOT NULL,
-  spi_secondary_id          TEXT NOT NULL,
-  approval_date             TIMESTAMP,
+  principal_investigator_id TEXT,
+  spi_primary_id            TEXT,
+  spi_secondary_id          TEXT,
+  approval_date             TIMESTAMP NOT NULL,
   attached_file_id          TEXT,
 
   has_biological_hazards  BOOLEAN NOT NULL DEFAULT FALSE,
@@ -32,7 +32,7 @@ CREATE TABLE wnprc_compliance.protocol_revisions (
   has_wildlife_hazards    BOOLEAN NOT NULL DEFAULT FALSE,
   has_other_hazards       BOOLEAN NOT NULL DEFAULT FALSE,
   other_hazards_notes     TEXT,
-  has_recombinant_material_hazards   BOOLEAN,
+  has_recombinant_material_hazards   BOOLEAN NOT NULL DEFAULT FALSE,
 
   involves_euthanasia BOOLEAN NOT NULL DEFAULT FALSE,
   allows_single_housing BOOLEAN NOT NULL DEFAULT FALSE,

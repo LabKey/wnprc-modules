@@ -9,7 +9,8 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.experiment.api.Protocol;
+import org.labkey.wnprc_compliance.protocol.ProtocolAPIController;
+import org.labkey.wnprc_compliance.protocol.ProtocolViewController;
 import org.labkey.wnprc_compliance.security.ComplianceAdminPermission;
 import org.labkey.wnprc_compliance.security.ComplianceAdminRole;
 
@@ -32,7 +33,8 @@ public class WNPRC_ComplianceModule extends ExtendedSimpleModule {
     @Override
     protected void init() {
         addController(WNPRC_ComplianceController.NAME, WNPRC_ComplianceController.class);
-        addController(ProtocolController.NAME, ProtocolController.class);
+        addController(ProtocolViewController.NAME, ProtocolViewController.class);
+        addController(ProtocolAPIController.NAME, ProtocolAPIController.class);
     }
 
     @Override

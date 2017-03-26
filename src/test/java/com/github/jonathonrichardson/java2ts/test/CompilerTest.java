@@ -6,6 +6,7 @@ package com.github.jonathonrichardson.java2ts.test;
 import com.github.jonathonrichardson.java2ts.Compiler;
 import com.github.jonathonrichardson.java2ts.Manifest;
 import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClass;
+import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClassWithDate;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -54,6 +55,9 @@ public class CompilerTest {
         assertOutputMatches("/SimpleClass.ts", SimpleClass.class);
     }
 
-
+    @Test
+    public void compileSimpleClassWithDate() throws IOException, ClassNotFoundException {
+        assertOutputMatches("/SimpleClassWithDate.ts", SimpleClassWithDate.class);
+    }
 }
 

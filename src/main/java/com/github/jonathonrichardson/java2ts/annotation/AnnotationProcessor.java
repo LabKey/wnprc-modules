@@ -34,13 +34,13 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(Message.class)) {
+        for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(SerializeToTS.class)) {
             // Check to make sure it's a class
             if (annotatedElement.getKind() != ElementKind.CLASS) {
                 types.add((TypeElement) annotatedElement);
             }
             else {
-                messager.printMessage(Diagnostic.Kind.ERROR, String.format("%s is not a supported element kind for @%s", annotatedElement.getKind(), Message.class.getSimpleName()));
+                messager.printMessage(Diagnostic.Kind.ERROR, String.format("%s is not a supported element kind for @%s", annotatedElement.getKind(), SerializeToTS.class.getSimpleName()));
                 return true;
             }
         }
@@ -66,7 +66,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> supportedTypes = new HashSet<>();
 
-        supportedTypes.add(Message.class.getCanonicalName());
+        supportedTypes.add(SerializeToTS.class.getCanonicalName());
 
         return supportedTypes;
     }

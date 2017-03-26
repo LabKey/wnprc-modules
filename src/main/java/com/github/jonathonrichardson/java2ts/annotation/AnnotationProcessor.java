@@ -1,5 +1,8 @@
 package com.github.jonathonrichardson.java2ts.annotation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.jonathonrichardson.java2ts.Manifest;
+
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -7,9 +10,13 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import javax.tools.Diagnostic;
+import javax.tools.FileObject;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import static javax.tools.Diagnostic.Kind.ERROR;
+import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 /**
  * Created by jon on 3/24/17.
@@ -36,11 +43,11 @@ public class AnnotationProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(SerializeToTS.class)) {
             // Check to make sure it's a class
-            if (annotatedElement.getKind() != ElementKind.CLASS) {
+            if (annotatedElement.getKind() != ElementKind.CLASS || annotatedElement.getKind() != ElementKind.ENUM) {
                 types.add((TypeElement) annotatedElement);
             }
             else {
-                messager.printMessage(Diagnostic.Kind.ERROR, String.format("%s is not a supported element kind for @%s", annotatedElement.getKind(), SerializeToTS.class.getSimpleName()));
+                messager.printMessage(ERROR, String.format("%s is not a supported element kind for @%s", annotatedElement.getKind(), SerializeToTS.class.getSimpleName()));
                 return true;
             }
         }
@@ -49,7 +56,10 @@ public class AnnotationProcessor extends AbstractProcessor {
             try {
                 generateSource();
             } catch (ClassNotFoundException e) {
-                messager.printMessage(Diagnostic.Kind.ERROR, String.format("Class not found: %s", e.toString()));
+                messager.printMessage(ERROR, String.format("Class not found: %s", e.toString()));
+            } catch (IOException e) {
+                messager.printMessage(ERROR, "Error generating file: " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
@@ -86,7 +96,16 @@ public class AnnotationProcessor extends AbstractProcessor {
         return annotations.size() == 0;
     }
 
-    public void generateSource() throws ClassNotFoundException {
+    public void generateSource() throws ClassNotFoundException, IOException {
+        FileObject manifestFile = filer.createResource(CLASS_OUTPUT, "java2ts", "manifest.json");
 
+        Manifest manifest = new Manifest();
+
+        for(TypeElement type : types) {
+            manifest.fullyQualifiedClassNames.add(type.getQualifiedName().toString());
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(manifestFile.openWriter(), manifest);
     }
 }

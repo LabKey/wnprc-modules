@@ -24,6 +24,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
 
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.7'
+
     compile group: 'commons-io', name: 'commons-io', version: '2.0.1'
 
     // Use JUnit test framework

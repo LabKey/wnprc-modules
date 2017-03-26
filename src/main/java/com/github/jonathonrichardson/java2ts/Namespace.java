@@ -31,12 +31,51 @@ public class Namespace {
         this.addType(new TSClass(clazz));
     }
 
+    public void addEnum(Class<? extends Enum> clazz) {
+        this.addType(new TSEnum(clazz));
+    }
+
     public void addType(Type type) {
         for (Class clazz : type.getJavaClasses()) {
             classes_to_types.put(clazz, type);
         }
 
         types.put(type.getTypescriptTypeName(), type);
+    }
+
+    public class TSEnum implements Type {
+        private Class<? extends Enum> enumClass;
+
+        public TSEnum(Class<? extends Enum> enumClass) {
+            this.enumClass = enumClass;
+        }
+
+        @Override
+        public Set<Class> getJavaClasses() {
+            Set<Class> classes = new HashSet<>();
+            classes.add(this.enumClass);
+            return classes;
+        }
+
+        @Override
+        public String getCastString(String input) {
+            return input + " as " + this.getTypescriptTypeName();
+        }
+
+        @Override
+        public String getTypescriptTypeName() {
+            return enumClass.getSimpleName();
+        }
+
+        public Set<String> getValues() {
+            Set<String> values = new HashSet<>();
+
+            for (Enum curEnum : this.enumClass.getEnumConstants()) {
+                values.add(curEnum.name());
+            }
+
+            return values;
+        }
     }
 
     public class TSClass implements Type {
@@ -59,6 +98,9 @@ public class Namespace {
                 if (!Namespace.this.classes_to_types.containsKey(fieldClass)) {
                     if (!fieldClass.isPrimitive() && hasSerializeToTSAnnotation(fieldClass)) {
                         Namespace.this.addClass(fieldClass);
+                    }
+                    else if (fieldClass.isEnum()) {
+                        Namespace.this.addEnum((Class<? extends Enum>) fieldClass);
                     }
                     else {
                         throw new RuntimeException(String.format("Field type '%s' is not supported", fieldClass.getName()));

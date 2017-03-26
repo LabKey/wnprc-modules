@@ -8,6 +8,7 @@ import com.github.jonathonrichardson.java2ts.Manifest;
 import com.github.jonathonrichardson.java2ts.test.testclasses.EmbeddedClass;
 import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClass;
 import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClassWithDate;
+import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClassWithEnum;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -61,10 +62,14 @@ public class CompilerTest {
         assertOutputMatches("/SimpleClassWithDate.ts", SimpleClassWithDate.class);
     }
 
-
     @Test
     public void compileEmbeddedClass() throws IOException, ClassNotFoundException {
         assertOutputMatches("/EmbeddedClass.ts", EmbeddedClass.class);
+    }
+
+    @Test
+    public void compileEnumClass() throws IOException, ClassNotFoundException {
+        assertOutputMatches("/EnumClass.ts", SimpleClassWithEnum.class);
     }
 }
 

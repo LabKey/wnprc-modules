@@ -1,0 +1,13 @@
+export type {{ typeName }} = {% for val in values -%}
+    "{{ val }}"
+{%- if (loop.last) -%}{%- else %} | {% endif -%}
+{%- endfor %};
+
+export function get{{ typeName }}Values(): {{ typeName }}[] {
+    return [
+{%- for val in values -%}
+    "{{ val }}"
+    {%- if (loop.last) -%}{%- else %}, {% endif -%}
+{%- endfor -%}
+];
+}

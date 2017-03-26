@@ -38,10 +38,24 @@ public class NamespaceWriter {
             if (type instanceof Namespace.TSClass) {
                 writeClass((Namespace.TSClass) type);
             }
+            else if (type instanceof Namespace.TSEnum) {
+                writeEnum((Namespace.TSEnum) type);
+            }
 
         }
     }
 
+    private void writeEnum(Namespace.TSEnum tsEnum) throws IOException {
+        writeLine("");
+
+        JtwigTemplate template = JtwigTemplate.classpathTemplate("templates/enum.twig");
+
+        JtwigModel model = JtwigModel.newModel();
+        model.with("typeName", tsEnum.getTypescriptTypeName());
+        model.with("values", tsEnum.getValues());
+
+        template.render(model, outputStream);
+    }
 
     private void writeClass(Namespace.TSClass tsClass) throws IOException {
         writeLine("");

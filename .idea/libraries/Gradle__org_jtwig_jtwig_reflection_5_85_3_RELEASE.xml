@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.jtwig:jtwig-reflection:5.85.3.RELEASE">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jtwig/jtwig-reflection/5.85.3.RELEASE/8db4270b89c72653f85f71ee3b98ddbe5c1732b1/jtwig-reflection-5.85.3.RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jtwig/jtwig-reflection/5.85.3.RELEASE/a0de8667d200d640a894415128d8c85588eefaec/jtwig-reflection-5.85.3.RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

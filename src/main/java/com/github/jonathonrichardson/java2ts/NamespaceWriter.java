@@ -1,9 +1,15 @@
 package com.github.jonathonrichardson.java2ts;
 
+import org.jtwig.JtwigModel;
+import org.jtwig.JtwigTemplate;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jon on 3/24/17.
@@ -40,19 +46,29 @@ public class NamespaceWriter {
     private void writeClass(Namespace.TSClass tsClass) throws IOException {
         writeLine("");
 
-        writeLine(String.format("export class %s {", tsClass.getTypescriptTypeName()));
+        JtwigTemplate template = JtwigTemplate.classpathTemplate("templates/class.twig");
+        JtwigModel model = JtwigModel.newModel();
+
+        model.with("classType", tsClass.getTypescriptTypeName());
 
 
+        List<Map<String, String>> fields = new ArrayList<>();
         for (String fieldName : tsClass.members.keySet()) {
-            System.out.println("Found field: " + fieldName);
-            writeLine(String.format(
-                    "%s: %s;",
-                    fieldName,
-                    tsClass.members.get(fieldName).getTypescriptTypeName()
-            ), 1);
-        }
+            Type type = tsClass.members.get(fieldName);
+            String accessString = String.format("json['%s']", fieldName);
 
-        writeLine("}");
+            Map<String, String> field = new HashMap<>();
+            field.put("name", fieldName);
+            field.put("castString", type.getCastString(accessString));
+            field.put("type", type.getTypescriptTypeName());
+
+            fields.add(field);
+
+            System.out.println("Found field: " + fieldName);
+        }
+        model.with("fields", fields);
+
+        template.render(model, outputStream);
     }
 
     private void writeLine(String text) throws IOException {

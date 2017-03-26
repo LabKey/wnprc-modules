@@ -19,6 +19,10 @@ repositories {
 dependencies {
     // The production code uses Guava
     compile 'com.google.guava:guava:20.0'
+    compile "org.jtwig:jtwig-core:5.85.3.RELEASE"
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
 
     compile group: 'commons-io', name: 'commons-io', version: '2.0.1'
 

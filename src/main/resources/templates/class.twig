@@ -1,0 +1,15 @@
+export class {{ classType }} {
+{%- for field in fields %}
+    {{ field.name }}: {{ field.type }};
+{%- endfor %}
+
+    static fromJSON(json: {[key: string]: string}): {{ classType }} {
+        let obj: {{ classType }} = new {{ classType }}();
+
+    {%- for field in fields %}
+        obj.{{ field.name }} = {{ field.castString }};
+    {%- endfor %}
+
+        return obj;
+    }
+}

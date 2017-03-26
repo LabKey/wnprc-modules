@@ -5,7 +5,7 @@ package com.github.jonathonrichardson.java2ts.test;
  */
 import com.github.jonathonrichardson.java2ts.Compiler;
 import com.github.jonathonrichardson.java2ts.Manifest;
-import com.github.jonathonrichardson.java2ts.test.testclasses.Test1;
+import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClass;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class CompilerTest {
     @Test
     public void testSomeLibraryMethod() throws IOException, ClassNotFoundException {
         Manifest manifest = new Manifest();
-        manifest.fullyQualifiedClassNames.add(Test1.class.getCanonicalName());
+        manifest.fullyQualifiedClassNames.add(SimpleClass.class.getCanonicalName());
 
         Compiler compiler = new Compiler(manifest);
 
@@ -34,7 +34,7 @@ public class CompilerTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         compiler.compile(outputStream);
 
-        String generatedContents = new String(outputStream.toByteArray(), Charset.forName("UTF-8"));
+        String generatedContents = new String(outputStream.toByteArray(), Charset.forName("UTF-8")).replaceAll("\\r\\n", "\n");
 
 
         System.out.println("Expected: ");
@@ -46,5 +46,7 @@ public class CompilerTest {
 
         assertEquals("Contents should match for File1", fileContents, generatedContents);
     }
+
+
 }
 

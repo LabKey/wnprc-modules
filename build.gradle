@@ -17,8 +17,6 @@ repositories {
 }
 
 dependencies {
-    // The production code uses Guava
-    compile 'com.google.guava:guava:20.0'
     compile "org.jtwig:jtwig-core:5.85.3.RELEASE"
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple

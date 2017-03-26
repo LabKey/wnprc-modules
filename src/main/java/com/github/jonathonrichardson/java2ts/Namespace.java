@@ -2,6 +2,8 @@ package com.github.jonathonrichardson.java2ts;
 
 import com.github.jonathonrichardson.java2ts.annotation.SerializeToTS;
 import com.github.jonathonrichardson.java2ts.type.Moment;
+import com.github.jonathonrichardson.java2ts.type.TSBoolean;
+import com.github.jonathonrichardson.java2ts.type.TSNumber;
 import com.github.jonathonrichardson.java2ts.type.TSString;
 
 import java.io.IOException;
@@ -20,6 +22,8 @@ public class Namespace {
         // Add the default types
         this.addType(new Moment());
         this.addType(new TSString());
+        this.addType(new TSNumber());
+        this.addType(new TSBoolean());
     }
 
     public void write(OutputStream stream) throws IOException {

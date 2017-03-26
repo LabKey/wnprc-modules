@@ -6,26 +6,24 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by jon on 3/24/17.
+ * Created by Jon on 3/26/2017.
  */
-public class TSString implements Type {
+public class TSBoolean implements Type {
     @Override
     public Set<Class> getJavaClasses() {
         Set<Class> classes = new HashSet<>();
-
-        classes.add(String.class);
-        classes.add(char.class);
-
+        classes.add(boolean.class);
+        classes.add(Boolean.class);
         return classes;
     }
 
     @Override
     public String getCastString(String input) {
-        return input;
+        return String.format("(%s.toLowerCase() === 'true') ? true : false", input);
     }
 
     @Override
     public String getTypescriptTypeName() {
-        return "string";
+        return "boolean";
     }
 }

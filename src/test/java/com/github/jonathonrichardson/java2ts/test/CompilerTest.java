@@ -5,10 +5,7 @@ package com.github.jonathonrichardson.java2ts.test;
  */
 import com.github.jonathonrichardson.java2ts.Compiler;
 import com.github.jonathonrichardson.java2ts.Manifest;
-import com.github.jonathonrichardson.java2ts.test.testclasses.EmbeddedClass;
-import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClass;
-import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClassWithDate;
-import com.github.jonathonrichardson.java2ts.test.testclasses.SimpleClassWithEnum;
+import com.github.jonathonrichardson.java2ts.test.testclasses.*;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -70,6 +67,11 @@ public class CompilerTest {
     @Test
     public void compileEnumClass() throws IOException, ClassNotFoundException {
         assertOutputMatches("/EnumClass.ts", SimpleClassWithEnum.class);
+    }
+
+    @Test
+    public void compileBurritoClass() throws IOException, ClassNotFoundException {
+        assertOutputMatches("/BurritoClass.ts", FullyLoadedBurritoClass.class);
     }
 }
 

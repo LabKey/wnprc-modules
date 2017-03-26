@@ -57,7 +57,7 @@ public class Namespace {
 
                 Class fieldClass = field.getType();
                 if (!Namespace.this.classes_to_types.containsKey(fieldClass)) {
-                    if (!fieldClass.isPrimitive() && hasSerializeToTSAnnotation(clazz)) {
+                    if (!fieldClass.isPrimitive() && hasSerializeToTSAnnotation(fieldClass)) {
                         Namespace.this.addClass(fieldClass);
                     }
                     else {

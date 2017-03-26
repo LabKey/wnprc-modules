@@ -1,0 +1,22 @@
+{
+  "name": "java2ts",
+  "version": "0.1.0",
+  "description": "Converts Java POJOs and Enums into TS classes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonathonRichardson/java2ts.git"
+  },
+  "author": "Jonathon Richardson",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/JonathonRichardson/java2ts/issues"
+  },
+  "homepage": "https://github.com/JonathonRichardson/java2ts#readme",
+  "dependencies": {
+    "moment": "^2.18.1"
+  }
+}

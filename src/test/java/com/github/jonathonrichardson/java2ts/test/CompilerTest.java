@@ -18,18 +18,20 @@ import java.nio.charset.Charset;
 import static org.junit.Assert.*;
 
 public class CompilerTest {
-    @Test
-    public void testSomeLibraryMethod() throws IOException, ClassNotFoundException {
+    private void assertOutputMatches(String outputPath, Class... classes) throws IOException, ClassNotFoundException {
         Manifest manifest = new Manifest();
-        manifest.fullyQualifiedClassNames.add(SimpleClass.class.getCanonicalName());
+
+        for (Class clazz : classes) {
+            manifest.fullyQualifiedClassNames.add(clazz.getCanonicalName());
+        }
 
         Compiler compiler = new Compiler(manifest);
 
-        InputStream inputStream = this.getClass().getResourceAsStream("/Test1.ts");
+        InputStream inputStream = this.getClass().getResourceAsStream(outputPath);
 
         StringWriter writer = new StringWriter();
         IOUtils.copy(inputStream, writer);
-        String fileContents = writer.toString();
+        String fileContents = writer.toString().replaceAll("\\r\\n", "\n");
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         compiler.compile(outputStream);
@@ -44,7 +46,12 @@ public class CompilerTest {
         System.out.println("Generated: ");
         System.out.println(generatedContents);
 
-        assertEquals("Contents should match for File1", fileContents, generatedContents);
+        assertEquals("Contents should match " + outputPath, fileContents, generatedContents);
+    }
+
+    @Test
+    public void compileSimpleClass() throws IOException, ClassNotFoundException {
+        assertOutputMatches("/SimpleClass.ts", SimpleClass.class);
     }
 
 

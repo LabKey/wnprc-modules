@@ -10,7 +10,8 @@ var taskExporter = new lkpm.TaskExporter({
 
 taskExporter.enableWebpack({
     entry: {
-        'pages/new-protocol': path.join(__dirname, 'src', 'ts', 'pages', 'new-protocol.tsx')
+        'pages/new-protocol': path.join(__dirname, 'src', 'ts', 'pages', 'new-protocol.tsx'),
+        'pages/protocol-list': path.join(__dirname, 'src', 'ts', 'pages', 'protocol-list.tsx')
     },
 
     output: {

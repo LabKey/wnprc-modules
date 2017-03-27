@@ -84,8 +84,9 @@ gulp.task('css', function() {
 
     var quillCss = gulp.src(path.join(__dirname, 'external_resources', 'quill', 'quill*.css'));
     var fontAwesome = gulp.src(path.join(__dirname, 'external_resources', 'font-awesome', 'css', '*.css'));
+    var toastr = gulp.src(path.join(__dirname, 'node_modules', 'toastr', 'build', '*.css'));
 
-    var bundle = merge(getBowerFiles(), lessFiles, quillCss, fontAwesome)
+    var bundle = merge(getBowerFiles(), lessFiles, quillCss, fontAwesome, toastr)
             .pipe(filter("**/*.css"))
             .pipe(bootstrapFilter)
             .pipe(debug({title: 'non-bootstrap: '}))

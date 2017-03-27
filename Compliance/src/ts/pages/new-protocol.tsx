@@ -328,8 +328,7 @@ class Page extends React.Component<{}, PageState> {
                             <div className="panel-heading">Protocols</div>
                             <div className="panel-body">
                                 <ul>
-                                    <li>New Protocol</li>
-                                    <li>List Protocols</li>
+                                    <li>Protocol List</li>
                                 </ul>
                             </div>
                         </div>
@@ -351,6 +350,7 @@ class Page extends React.Component<{}, PageState> {
                                     />
                                 </UnblockedSection>
 
+                                <hr />
 
                                 <ProtocolSpeciesTabset protocol={this.state.protocol} speciesOptions={(window as any).PageLoadData.lookups.species} />
                             </BlockableDiv>

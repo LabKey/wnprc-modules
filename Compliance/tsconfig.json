@@ -15,7 +15,8 @@
                 "lkpm/modules/WebUtils/node_modules/*",
                 "lkpm/modules/WebUtils/node_modules/@types/*",
                 "lkpm/modules/WebUtils/bower_components/*",
-                "lkpm/modules/WebUtils/src/ts/*"
+                "lkpm/modules/WebUtils/src/ts/*",
+                "build/generated-ts/*"
             ]
         },
         "rootDirs": [

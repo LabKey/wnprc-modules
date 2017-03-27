@@ -14,8 +14,13 @@ import {ProtocolFlags, ProtocolFlagName, Protocol, SpeciesProtocolInfo} from "..
 import {CheckBoxSet} from "../lib/checkboxset";
 import {newUUID} from "../../../../WebUtils/src/ts/WebUtils/Util";
 import CSSProperties = React.CSSProperties;
-import * as $ from "jquery";
 import * as s from "underscore.string";
+import {NewProtocolForm} from "GeneratedFromJava";
+
+function submit(): void {
+    let form = new NewProtocolForm();
+    form.id = newUUID();
+}
 
 class ProtocolCheckboxSet extends CheckBoxSet<ProtocolFlagName> {
 

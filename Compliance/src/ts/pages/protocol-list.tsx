@@ -5,7 +5,7 @@ import ChangeEvent = React.ChangeEvent;
 import * as $ from "jquery";
 import * as moment from "moment";
 import Moment = moment.Moment;
-import {NewProtocolForm, NewProtocolResponse} from "../../../build/generated-ts/GeneratedFromJava";
+import {NewProtocolForm, NewProtocolResponse, ProtocolListItem} from "../../../build/generated-ts/GeneratedFromJava";
 import * as api from "Webutils/API";
 import {buildURL, getCurrentContainer} from "WebUtils/LabKey";
 import * as toastr from "toastr";
@@ -166,7 +166,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
 
         let postURL = buildURL('wnprc_compliance-protocol-api', 'newProtocol', getCurrentContainer());
 
-        api.postJSON(postURL, form, {}).then((jsonData: any) => {
+        (api.postJSON(postURL, form, {}).then((jsonData: any) => {
             let data = jsonData as NewProtocolResponse;
 
             this.hide();
@@ -175,11 +175,11 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
             console.log(e.message, e);
 
             alert("failed");
-        }).finally(() => {
+        }) as any).finally(() => {
             this.setState({
                 isSaving: false
             });
-        })
+        });
     }
 
     render() {
@@ -287,6 +287,9 @@ class Page extends React.Component<{}, PageState> {
         )
     }
 }
+
+let protocols = (window as any).PageLoadData.protocols as ProtocolListItem[];
+console.log(protocols);
 
 ReactDOM.render(
     <Page/>,

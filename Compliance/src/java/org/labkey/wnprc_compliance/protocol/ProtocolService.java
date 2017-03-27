@@ -1,6 +1,9 @@
 package org.labkey.wnprc_compliance.protocol;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Record6;
+import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
@@ -8,11 +11,12 @@ import org.labkey.dbutils.jooq.jOOQConnection;
 import org.labkey.wnprc_compliance.WNPRC_ComplianceSchema;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolRevisionsRecord;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolsRecord;
-import org.labkey.wnprc_compliance.protocol.messages.BasicInfoForm;
-import org.labkey.wnprc_compliance.protocol.messages.NewProtocolForm;
-import org.labkey.wnprc_compliance.protocol.messages.NewProtocolResponse;
+import org.labkey.wnprc_compliance.protocol.messages.*;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.labkey.wnprc_compliance.model.jooq.Tables.PROTOCOLS;
@@ -70,5 +74,40 @@ public class ProtocolService {
 
             record.store();
         }
+    }
+
+    public List<ProtocolListItem> getProtocolList() {
+        List<ProtocolListItem> protocols = new ArrayList<>();
+
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
+            Result<Record6<String, String, Timestamp, Boolean, Boolean, Boolean>> ret = conn.create().select(
+                    PROTOCOL_REVISIONS.ID,
+                    PROTOCOLS.PROTOCOL_NUMBER,
+                    PROTOCOL_REVISIONS.APPROVAL_DATE,
+                    PROTOCOL_REVISIONS.HAS_BIOLOGICAL_HAZARDS,
+                    PROTOCOL_REVISIONS.HAS_CHEMICAL_HAZARDS,
+                    PROTOCOL_REVISIONS.HAS_PHYSICAL_HAZARDS
+            ).from(PROTOCOL_REVISIONS)
+                    .join(PROTOCOLS)
+                    .on(PROTOCOL_REVISIONS.PROTOCOL_ID.eq(PROTOCOLS.ID))
+                    .fetch();
+
+            for (Record6<String, String, Timestamp, Boolean, Boolean, Boolean> rec : ret) {
+                HazardsForm hazardsForm = new HazardsForm();
+                hazardsForm.biological  = rec.getValue(PROTOCOL_REVISIONS.HAS_BIOLOGICAL_HAZARDS);
+                hazardsForm.chemical    = rec.getValue(PROTOCOL_REVISIONS.HAS_CHEMICAL_HAZARDS);
+                hazardsForm.physical    = rec.getValue(PROTOCOL_REVISIONS.HAS_PHYSICAL_HAZARDS);
+
+                ProtocolListItem protocol = new ProtocolListItem();
+                protocol.mostRecentApprovalDate = rec.getValue(PROTOCOL_REVISIONS.APPROVAL_DATE);
+                protocol.mostRecentId = rec.getValue(PROTOCOL_REVISIONS.ID);
+                protocol.protocol_number = rec.getValue(PROTOCOLS.PROTOCOL_NUMBER);
+
+                protocol.hazards = hazardsForm;
+                protocols.add(protocol);
+            }
+        }
+
+        return protocols;
     }
 }

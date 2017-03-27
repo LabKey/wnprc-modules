@@ -37,7 +37,7 @@ public class MostRecentProtocolRevision extends AbstractTableInfo {
                     .from(PROTOCOL_REVISIONS)
                     .getSQL();
 
-            sql.append("(" + query + ")");
+            sql.append(query);
         }
 
         return sql;

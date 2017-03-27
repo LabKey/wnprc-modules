@@ -77,8 +77,6 @@ public class NamespaceWriter {
             field.put("type", type.getTypescriptTypeName());
 
             fields.add(field);
-
-            System.out.println("Found field: " + fieldName);
         }
         model.with("fields", fields);
 

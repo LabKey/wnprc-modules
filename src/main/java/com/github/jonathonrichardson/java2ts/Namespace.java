@@ -92,9 +92,9 @@ public class Namespace {
             System.out.println("Parsing class: " + clazz.getName());
 
             for (Field field : clazz.getFields()) {
-                System.out.println(String.format(
-                        "Class %s has field %s with type %s", clazz.getSimpleName(), field.getName(), field.getType().getName()
-                ));
+                //System.out.println(String.format(
+                //        "Class %s has field %s with type %s", clazz.getSimpleName(), field.getName(), field.getType().getName()
+                //));
                 String fieldName = field.getName();
                 Type fieldType;
 

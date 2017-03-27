@@ -28,14 +28,14 @@ public class ProtocolViewController extends SpringActionController {
     }
 
     @ActionNames("EditProtocol")
-    @JspPath("protocol/view/EditProtocol.jsp")
+    @JspPath("view/EditProtocol.jsp")
     @PageTitle("New Protocol")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class NewProtocolPage extends ProtocolPageAction {}
 
 
     @ActionNames("ProtocolList")
-    @JspPath("protocol/view/ProtocolList.jsp")
+    @JspPath("view/ProtocolList.jsp")
     @PageTitle("Protocols List")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class ListProtocolsPage extends ProtocolPageAction {}

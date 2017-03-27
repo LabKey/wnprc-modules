@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS wnprc_compliance.protocols;
+DROP TABLE IF EXISTS wnprc_compliance.protocols CASCADE;
 CREATE TABLE wnprc_compliance.protocols (
   id TEXT,
   protocol_number TEXT UNIQUE NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE wnprc_compliance.protocols (
   CONSTRAINT PK_protocol PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.protocol_revisions;
+DROP TABLE IF EXISTS wnprc_compliance.protocol_revisions CASCADE ;
 CREATE TABLE wnprc_compliance.protocol_revisions (
   id TEXT,
 
@@ -50,7 +50,7 @@ CREATE TABLE wnprc_compliance.protocol_revisions (
   CONSTRAINT FK_protocol_revisions_protocols    FOREIGN KEY (protocol_id) REFERENCES wnprc_compliance.protocols (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.protocol_renewals;
+DROP TABLE IF EXISTS wnprc_compliance.protocol_renewals CASCADE ;
 CREATE TABLE wnprc_compliance.protocol_renewals (
   expired_protocol TEXT,
   renewed_protocol TEXT,
@@ -64,7 +64,7 @@ CREATE TABLE wnprc_compliance.protocol_renewals (
   CONSTRAINT PK_protocol_renewals PRIMARY KEY (renewed_protocol)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_species;
+DROP TABLE IF EXISTS wnprc_compliance.allowed_species CASCADE ;
 CREATE TABLE wnprc_compliance.allowed_species (
   protocol_revision_id TEXT,
   species_classifier TEXT,
@@ -81,7 +81,7 @@ CREATE TABLE wnprc_compliance.allowed_species (
   CONSTRAINT FK_allowed_species FOREIGN KEY (protocol_revision_id) REFERENCES wnprc_compliance.protocol_revisions (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.drug_regimens;
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimens CASCADE ;
 CREATE TABLE wnprc_compliance.drug_regimens (
   id TEXT,
 
@@ -98,7 +98,7 @@ CREATE TABLE wnprc_compliance.drug_regimens (
   CONSTRAINT PK_drug_regimens PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_allowed_procedures;
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_allowed_procedures CASCADE ;
 CREATE TABLE wnprc_compliance.drug_regimens_to_allowed_procedures (
   protocol_revision_id TEXT,
   species_classifier TEXT,
@@ -115,7 +115,7 @@ CREATE TABLE wnprc_compliance.drug_regimens_to_allowed_procedures (
   CONSTRAINT FK_drug_regimens_to_protocols_drug_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.drugs;
+DROP TABLE IF EXISTS wnprc_compliance.drugs CASCADE ;
 CREATE TABLE wnprc_compliance.drugs (
   id TEXT,
 
@@ -134,7 +134,7 @@ CREATE TABLE wnprc_compliance.drugs (
   CONSTRAINT PK_drugs PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_drugs;
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_drugs CASCADE ;
 CREATE TABLE wnprc_compliance.drug_regimens_to_drugs (
   drug_regimen TEXT,
   drug_id TEXT,
@@ -150,7 +150,7 @@ CREATE TABLE wnprc_compliance.drug_regimens_to_drugs (
   CONSTRAINT FK_drug_regimens_to_drugs_drugs FOREIGN KEY (drug_id) REFERENCES wnprc_compliance.drugs (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.drug_routes;
+DROP TABLE IF EXISTS wnprc_compliance.drug_routes CASCADE ;
 CREATE TABLE wnprc_compliance.drug_routes (
   drug_id TEXT,
   route TEXT NOT NULL,
@@ -166,7 +166,7 @@ CREATE TABLE wnprc_compliance.drug_routes (
 );
 
 -- no more frequently than...
-DROP TABLE IF EXISTS wnprc_compliance.drug_regimen_frequency_threshold;
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimen_frequency_threshold CASCADE ;
 CREATE TABLE wnprc_compliance.drug_regimen_frequency_threshold (
   id TEXT,
 
@@ -183,7 +183,7 @@ CREATE TABLE wnprc_compliance.drug_regimen_frequency_threshold (
   CONSTRAINT PK_drug_regimen_frequency_threshold PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_frequency_threshold;
+DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_frequency_threshold CASCADE ;
 CREATE TABLE wnprc_compliance.drug_regimens_to_frequency_threshold (
   drug_regimen_id TEXT,
   threshold_id TEXT,
@@ -199,7 +199,7 @@ CREATE TABLE wnprc_compliance.drug_regimens_to_frequency_threshold (
   CONSTRAINT FK_drug_regimens_to_frequency_threshold_thresholds FOREIGN KEY (threshold_id) REFERENCES wnprc_compliance.drug_regimen_frequency_threshold (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_procedures;
+DROP TABLE IF EXISTS wnprc_compliance.allowed_procedures CASCADE ;
 CREATE TABLE wnprc_compliance.allowed_procedures (
   id TEXT,
 
@@ -218,7 +218,7 @@ CREATE TABLE wnprc_compliance.allowed_procedures (
   CONSTRAINT PK_allowed_procedures PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_species_to_allowed_procedures;
+DROP TABLE IF EXISTS wnprc_compliance.allowed_species_to_allowed_procedures CASCADE ;
 CREATE TABLE wnprc_compliance.allowed_species_to_allowed_procedures (
   protocol_revision_id TEXT,
   species_classifier TEXT,
@@ -235,7 +235,7 @@ CREATE TABLE wnprc_compliance.allowed_species_to_allowed_procedures (
   CONSTRAINT FK_allowed_species_to_allowed_procedures_allowed_procedures FOREIGN KEY (allowed_procedure_id) REFERENCES wnprc_compliance.allowed_procedures (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_procedures_to_drug_regimens;
+DROP TABLE IF EXISTS wnprc_compliance.allowed_procedures_to_drug_regimens CASCADE ;
 CREATE TABLE wnprc_compliance.allowed_procedures_to_drug_regimens (
   allowed_procedure_id TEXT,
   drug_regimen_id TEXT,
@@ -251,7 +251,7 @@ CREATE TABLE wnprc_compliance.allowed_procedures_to_drug_regimens (
   CONSTRAINT FK_allowed_procedures_to_drug_regimens_drug_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_surgeries;
+DROP TABLE IF EXISTS wnprc_compliance.allowed_surgeries CASCADE ;
 CREATE TABLE wnprc_compliance.allowed_surgeries (
   surgery_id TEXT,
 
@@ -271,7 +271,7 @@ CREATE TABLE wnprc_compliance.allowed_surgeries (
   CONSTRAINT PK_surgery_info PRIMARY KEY (surgery_id)
 );
 
-DROP TABLE IF EXISTS wnprc_compliance.allowed_surgeries_to_drug_regimens;
+DROP TABLE IF EXISTS wnprc_compliance.allowed_surgeries_to_drug_regimens CASCADE ;
 CREATE TABLE wnprc_compliance.allowed_surgeries_to_drug_regimens (
   surgery_id TEXT,
   drug_regimen_id TEXT,

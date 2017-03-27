@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import moment = require("../../../node_modules/lkpm/node_modules/moment/moment");
+import moment = require("moment");
 import Moment = moment.Moment;
 
 export interface YearSelectorProps {
@@ -49,7 +49,7 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
 
     init() {
         // Initialize the DateTimePicker
-        this.getInputElement().datetimepicker({
+        (this.getInputElement() as any).datetimepicker({
             format: 'YYYY'
         });
 

@@ -32,7 +32,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     @Override
     public synchronized void init(ProcessingEnvironment env) {
-        super.init(processingEnv);
+        super.init(env);
         typeUtils = processingEnv.getTypeUtils();
         elementUtils = processingEnv.getElementUtils();
         filer = processingEnv.getFiler();

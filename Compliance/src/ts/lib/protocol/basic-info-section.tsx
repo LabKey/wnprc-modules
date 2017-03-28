@@ -14,9 +14,7 @@ let basicInfoFormProvider: FormProvider<BasicInfoForm> = {
         let url = buildURLWithParams('wnprc_compliance-protocol-api', 'getBasicInfo', getCurrentContainer(), {'revision_id': id});
 
         return getJSON(url, {}).then((rawData: any) => {
-            let data = BasicInfoForm.fromJSON(rawData);
-
-            return data;
+            return BasicInfoForm.fromJSON(rawData);
         });
     },
 

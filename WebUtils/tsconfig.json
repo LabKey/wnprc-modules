@@ -6,6 +6,16 @@
         "sourceMap": true,
         "strictNullChecks": true,
         "jsx" : "react",
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "node_modules/*",
+                "node_modules/lkpm/node_modules/*",
+                "node_modules/@types/*",
+                "bower_components/*",
+                "build/generated-ts/*"
+            ]
+        },
         "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"]
     },
     "include": [

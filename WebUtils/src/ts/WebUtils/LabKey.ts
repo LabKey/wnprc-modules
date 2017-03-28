@@ -1,3 +1,4 @@
+import {URLForAction} from "../../../build/generated-ts/GeneratedFromJava";
 declare const LABKEY: {
     CSRF: string,
     ActionURL: any,
@@ -18,6 +19,15 @@ export function getCurrentContainer(): string {
 
 export function getBaseURL(): string {
     return LABKEY.ActionURL.getBaseURL();
+}
+
+export function urlFromAction(actionURL: URLForAction, params?: {[name: string]: string}): string {
+    if (!params) {
+        return buildURL(actionURL.controller, actionURL.actionName, getCurrentContainer());
+    }
+    else {
+        return buildURLWithParams(actionURL.controller, actionURL.actionName, getCurrentContainer(), params);
+    }
 }
 
 export function buildURL(controller: string, action: string, container: string): string {

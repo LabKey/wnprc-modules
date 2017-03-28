@@ -36,7 +36,7 @@ public abstract class jOOQTableInfo<RecordType extends Record> extends AbstractT
         JdbcType jdbcType = JdbcType.valueOf(fieldType.getSQLType());
         String name = field.getName();
 
-        this.addColumn(new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + "." + name), jdbcType));
+        this.addColumn(new ExprColumn(this, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".\"" + name + "\""), jdbcType));
     }
 
     @Override

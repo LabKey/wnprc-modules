@@ -26,5 +26,6 @@
         <jarDirectory url="file://$MODULE_DIR$/node_modules/lkpm/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="tsconfig$roots" level="project" />
   </component>
 </module>

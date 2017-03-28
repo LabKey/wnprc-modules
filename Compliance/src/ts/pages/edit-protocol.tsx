@@ -19,6 +19,7 @@ import {BlockableDiv} from "../lib/blockable-div";
 import {UnblockedSection} from "../lib/unblocked-section";
 import {EditableSection} from "../lib/editable-section";
 import {ProtocolBasicInfoEditor} from "../lib/protocol/basic-info-section";
+import {URLForAction} from "../../../../WebUtils/build/generated-ts/GeneratedFromJava";
 
 function submit(): void {
     let form = new NewProtocolForm();
@@ -45,6 +46,8 @@ interface Section {
 
 interface PageProps {
     revision_id: string;
+    saveBasicInfoURL: URLForAction;
+    getBasicInfoURL: URLForAction;
 }
 
 interface PageState {
@@ -96,7 +99,12 @@ class Page extends React.Component<PageProps, PageState> {
 
                             <BlockableDiv disabled={this.state.sectionToEdit !== null} className="panel-body">
                                 <UnblockedSection isUnblocked={this.state.sectionToEdit === 'info'}>
-                                    <ProtocolBasicInfoEditor revision_id={this.props.revision_id} startEdit={() => {this.setSectionToEdit('info')}} endEdit={() => {this.clearSectionToEdit()}} />
+                                    <ProtocolBasicInfoEditor revision_id={this.props.revision_id}
+                                                             startEdit={() => {this.setSectionToEdit('info')}}
+                                                             endEdit={() => {this.clearSectionToEdit()}}
+                                                             getURL={this.props.getBasicInfoURL}
+                                                             saveURL={this.props.saveBasicInfoURL}
+                                    />
                                 </UnblockedSection>
                             </BlockableDiv>
                         </div>
@@ -107,7 +115,12 @@ class Page extends React.Component<PageProps, PageState> {
     }
 }
 
+let pageData = (window as any).PageLoadData;
+
 ReactDOM.render(
-    <Page revision_id={(window as any).PageLoadData.revision_id} />,
+    <Page revision_id={pageData.revision_id}
+          saveBasicInfoURL={URLForAction.fromJSON(pageData.urls.saveBasicInfo)}
+          getBasicInfoURL={URLForAction.fromJSON(pageData.urls.getBasicInfo)}
+    />,
     $("#reactDiv").get(0)
 );

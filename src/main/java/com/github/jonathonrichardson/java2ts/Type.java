@@ -15,4 +15,8 @@ public interface Type {
     default public List<String> getImports() {
         return new ArrayList<>();
     }
+
+    default public String getCloneString(String input) {
+        return input;
+    }
 }

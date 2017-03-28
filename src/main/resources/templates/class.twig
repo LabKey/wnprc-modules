@@ -3,6 +3,16 @@ export class {{ classType }} {
     {{ field.name }}: {{ field.type }};
 {%- endfor %}
 
+    public clone(): {{ classType }} {
+        let obj: {{ classType }} = new {{ classType }}();
+
+    {%- for field in fields %}
+        obj.{{ field.name }} = {{ field.cloneString }};
+    {%- endfor %}
+
+        return obj;
+    }
+
     static fromJSON(json: {[key: string]: string}): {{ classType }} {
         let obj: {{ classType }} = new {{ classType }}();
 

@@ -5,6 +5,14 @@ export class EmbeddedClass {
     embeddedClass: SimpleClass;
     id: string;
 
+    public clone(): EmbeddedClass {
+        let obj: EmbeddedClass = new EmbeddedClass();
+        obj.embeddedClass = this.embeddedClass.clone();
+        obj.id = this.id;
+
+        return obj;
+    }
+
     static fromJSON(json: {[key: string]: string}): EmbeddedClass {
         let obj: EmbeddedClass = new EmbeddedClass();
         obj.embeddedClass = SimpleClass.fromJSON((json['embeddedClass'] as any) as {[key: string]: string});
@@ -15,6 +23,13 @@ export class EmbeddedClass {
 }
 export class SimpleClass {
     value: string;
+
+    public clone(): SimpleClass {
+        let obj: SimpleClass = new SimpleClass();
+        obj.value = this.value;
+
+        return obj;
+    }
 
     static fromJSON(json: {[key: string]: string}): SimpleClass {
         let obj: SimpleClass = new SimpleClass();

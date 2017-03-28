@@ -20,15 +20,17 @@ public class Moment implements Type {
 
     @Override
     public String getCastString(String input) {
-        return String.format(
-                "moment(%s)",
-                input
-        );
+        return String.format("moment(%s)", input);
     }
 
     @Override
     public String getTypescriptTypeName() {
         return "Moment";
+    }
+
+    @Override
+    public String getCloneString(String input) {
+        return String.format("%s.clone()", input);
     }
 
     @Override

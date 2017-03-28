@@ -23,6 +23,26 @@ export class FullyLoadedBurritoClass {
     short2: number;
     short1: number;
 
+    public clone(): FullyLoadedBurritoClass {
+        let obj: FullyLoadedBurritoClass = new FullyLoadedBurritoClass();
+        obj.isYes = this.isYes;
+        obj.float1 = this.float1;
+        obj.float2 = this.float2;
+        obj.string = this.string;
+        obj.long2 = this.long2;
+        obj.int2 = this.int2;
+        obj.int1 = this.int1;
+        obj.long1 = this.long1;
+        obj.enumValue = this.enumValue;
+        obj.double2 = this.double2;
+        obj.double1 = this.double1;
+        obj.isNo = this.isNo;
+        obj.short2 = this.short2;
+        obj.short1 = this.short1;
+
+        return obj;
+    }
+
     static fromJSON(json: {[key: string]: string}): FullyLoadedBurritoClass {
         let obj: FullyLoadedBurritoClass = new FullyLoadedBurritoClass();
         obj.isYes = (json['isYes'].toString().toLowerCase() === 'true') ? true : false;

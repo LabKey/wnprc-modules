@@ -70,10 +70,12 @@ public class NamespaceWriter {
         for (String fieldName : tsClass.members.keySet()) {
             Type type = tsClass.members.get(fieldName);
             String accessString = String.format("json['%s']", fieldName);
+            String memberAccessString = String.format("this.%s", fieldName);
 
             Map<String, String> field = new HashMap<>();
             field.put("name", fieldName);
             field.put("castString", type.getCastString(accessString));
+            field.put("cloneString", type.getCloneString(memberAccessString));
             field.put("type", type.getTypescriptTypeName());
 
             fields.add(field);

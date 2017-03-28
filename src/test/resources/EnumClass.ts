@@ -11,6 +11,14 @@ export class SimpleClassWithEnum {
     id: string;
     selectedOption: SimpleEnum;
 
+    public clone(): SimpleClassWithEnum {
+        let obj: SimpleClassWithEnum = new SimpleClassWithEnum();
+        obj.id = this.id;
+        obj.selectedOption = this.selectedOption;
+
+        return obj;
+    }
+
     static fromJSON(json: {[key: string]: string}): SimpleClassWithEnum {
         let obj: SimpleClassWithEnum = new SimpleClassWithEnum();
         obj.id = json['id'];

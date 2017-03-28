@@ -138,6 +138,14 @@ public class Namespace {
         }
 
         @Override
+        public String getCloneString(String input) {
+            return String.format(
+                    "%s.clone()",
+                    input
+            );
+        }
+
+        @Override
         public String getTypescriptTypeName() {
             return clazz.getSimpleName();
         }

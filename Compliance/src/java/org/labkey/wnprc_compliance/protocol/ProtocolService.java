@@ -1,23 +1,19 @@
 package org.labkey.wnprc_compliance.protocol;
 
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record6;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.labkey.api.data.Container;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.jooq.jOOQConnection;
 import org.labkey.wnprc_compliance.WNPRC_ComplianceSchema;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolRevisionsRecord;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolsRecord;
 import org.labkey.wnprc_compliance.protocol.messages.*;
+import org.labkey.wnprc_compliance.schema.tables.MostRecentProtocolRevision;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.labkey.wnprc_compliance.model.jooq.Tables.PROTOCOLS;
 import static org.labkey.wnprc_compliance.model.jooq.Tables.PROTOCOL_REVISIONS;
@@ -32,6 +28,10 @@ public class ProtocolService {
     public ProtocolService(User user, Container container) {
         this.user = user;
         this.container = container;
+    }
+
+    private UserSchema getUserSchema() {
+        return new WNPRC_ComplianceSchema(user, container);
     }
 
     public NewProtocolResponse newProtocol(NewProtocolForm protocol) {
@@ -106,19 +106,24 @@ public class ProtocolService {
         List<ProtocolListItem> protocols = new ArrayList<>();
 
         try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
-            Result<Record6<String, String, Timestamp, Boolean, Boolean, Boolean>> ret = conn.create().select(
-                    PROTOCOL_REVISIONS.ID,
-                    PROTOCOLS.PROTOCOL_NUMBER,
-                    PROTOCOL_REVISIONS.APPROVAL_DATE,
-                    PROTOCOL_REVISIONS.HAS_BIOLOGICAL_HAZARDS,
-                    PROTOCOL_REVISIONS.HAS_CHEMICAL_HAZARDS,
-                    PROTOCOL_REVISIONS.HAS_PHYSICAL_HAZARDS
-            ).from(PROTOCOL_REVISIONS)
-                    .join(PROTOCOLS)
-                    .on(PROTOCOL_REVISIONS.PROTOCOL_ID.eq(PROTOCOLS.ID))
+            MostRecentProtocolRevision mostRecentProtocolRevisions = new MostRecentProtocolRevision(getUserSchema());
+
+            List<Field> fieldList = new ArrayList<>();
+            fieldList.addAll(Arrays.asList(PROTOCOL_REVISIONS.fields()));
+            fieldList.add(PROTOCOLS.PROTOCOL_NUMBER);
+
+            Field[] fields = new Field[fieldList.size()];
+            fieldList.toArray(fields);
+
+            Result<? extends Record> results = conn.create().select(fields)
+                    .from(mostRecentProtocolRevisions.getjOOQTable())
+                    .leftJoin(PROTOCOL_REVISIONS)
+                    .on(PROTOCOL_REVISIONS.ID.eq(mostRecentProtocolRevisions.ID_FIELD))
+                    .leftJoin(PROTOCOLS)
+                    .on(PROTOCOLS.ID.eq(PROTOCOL_REVISIONS.PROTOCOL_ID))
                     .fetch();
 
-            for (Record6<String, String, Timestamp, Boolean, Boolean, Boolean> rec : ret) {
+            for (Record rec : results) {
                 HazardsForm hazardsForm = new HazardsForm();
                 hazardsForm.biological  = rec.getValue(PROTOCOL_REVISIONS.HAS_BIOLOGICAL_HAZARDS);
                 hazardsForm.chemical    = rec.getValue(PROTOCOL_REVISIONS.HAS_CHEMICAL_HAZARDS);

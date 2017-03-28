@@ -6,7 +6,7 @@ import * as $ from "jquery";
 import * as moment from "moment";
 import Moment = moment.Moment;
 import {NewProtocolForm, NewProtocolResponse, ProtocolListItem} from "../../../build/generated-ts/GeneratedFromJava";
-import * as api from "Webutils/API";
+import * as api from "WebUtils/API";
 import {buildURL, getCurrentContainer, buildURLWithParams} from "WebUtils/LabKey";
 import * as toastr from "toastr";
 import {

@@ -22,29 +22,6 @@
 
 <script>
     (function() {
-        window.LABKEY = {
-            CSRF: '<%= CSRFUtil.getExpectedToken(getViewContext()) %>',
-            ActionURL: {
-                getContainer: function() {
-                    return '<%= getViewContext().getContainer().getPath() %>';
-                },
-                getBaseURL: function() {
-                    return '<%= AppProps.getInstance().getBaseServerUrl() %>';
-                },
-                buildURL: function(controller, action, container, queryParams) {
-                    return [
-                        LABKEY.ActionURL.getBaseURL(),
-                        controller,
-                        container || LABKEY.ActionURL.getContainer(),
-                        action
-                    ].join("/") + ".view" + (queryParams ? "?" + $.param(queryParams) : "");
-                }
-            },
-            getModuleContext: function() {
-                return {};
-            }
-        };
-
         window.PageLoadData = {
             lookups: {
                 species: <%= availableSpecies.toString() %>

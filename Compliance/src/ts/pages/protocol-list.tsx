@@ -240,7 +240,7 @@ let rows = protocols.map((protocol) => {
             {
                 getReactElement(): JSX.Element {
                     let href: string = buildURLWithParams('wnprc_compliance-protocol-view', 'EditProtocol', getCurrentContainer(), {
-                        protocol: protocol.mostRecentId
+                        revision_id: protocol.mostRecentId
                     });
 
                     return (
@@ -285,7 +285,7 @@ class Page extends React.Component<{}, PageState> {
     render() {
         return (
             <div>
-                <NewProtocolModal isOpen={this.state.modalOpen} handleClose={() => {this.closeModal()}} />
+                <NewProtocolModal isOpen={this.state.modalOpen} />
 
                 <ToolBar/>
 

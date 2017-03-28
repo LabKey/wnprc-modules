@@ -51,4 +51,19 @@ public class ProtocolAPIController extends SpringActionController {
             return new JSONObject();
         }
     }
+
+    public static class GetBasicInfoForm {
+        public String revision_id;
+    }
+
+    @ActionNames("getBasicInfo")
+    @Marshal(Marshaller.Jackson)
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class GetBasicInfo extends ApiAction<BasicInfoForm> {
+        @Override
+        public Object execute(BasicInfoForm form, BindException e) throws Exception {
+            ProtocolService service = new ProtocolService(getUser(), getContainer());
+            return service.getBasicInfo(getViewContext().getRequest().getParameter("revision_id"));
+        }
+    }
 }

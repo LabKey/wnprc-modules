@@ -67,12 +67,38 @@ public class ProtocolService {
         try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
             ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(form.revision_id));
 
-            record.setPrincipalInvestigatorId(form.principal_investigator);
-            record.setSpiPrimaryId(form.spi_primary);
-            record.setSpiSecondaryId(form.spi_secondary);
-            record.setApprovalDate(new Timestamp(form.approval_date.getTime()));
+            if (form.principal_investigator != null) {
+                record.setPrincipalInvestigatorId(form.principal_investigator);
+            }
+
+            if (form.spi_primary != null) {
+                record.setSpiPrimaryId(form.spi_primary);
+            }
+
+            if (form.spi_secondary != null) {
+                record.setSpiSecondaryId(form.spi_secondary);
+            }
+
+            if (form.approval_date != null) {
+                record.setApprovalDate(new Timestamp(form.approval_date.getTime()));
+            }
 
             record.store();
+        }
+    }
+
+    public BasicInfoForm getBasicInfo(String revision_id) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
+            ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(revision_id));
+
+            BasicInfoForm form = new BasicInfoForm();
+            form.revision_id = record.getId();
+            form.principal_investigator = record.getPrincipalInvestigatorId();
+            form.spi_primary = record.getSpiPrimaryId();
+            form.spi_secondary = record.getSpiSecondaryId();
+            form.approval_date = new Date(record.getApprovalDate().getTime());
+
+            return form;
         }
     }
 

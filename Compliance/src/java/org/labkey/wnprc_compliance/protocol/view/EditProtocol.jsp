@@ -1,5 +1,7 @@
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.wnprc_compliance.lookups.SpeciesClass" %>
+<%@ page import="org.labkey.api.util.CSRFUtil" %>
+<%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -14,8 +16,32 @@
         window.PageLoadData = {
             lookups: {
                 species: <%= availableSpecies.toString() %>
+            },
+            revision_id: "<%= request.getParameter("revision_id") %>"
+        };
+
+        window.LABKEY = {
+            CSRF: '<%= CSRFUtil.getExpectedToken(getViewContext()) %>',
+            ActionURL: {
+                getContainer: function() {
+                    return '<%= getViewContext().getContainer().getPath() %>';
+                },
+                getBaseURL: function() {
+                    return '<%= AppProps.getInstance().getBaseServerUrl() %>';
+                },
+                buildURL: function(controller, action, container, queryParams) {
+                    return [
+                            LABKEY.ActionURL.getBaseURL(),
+                            controller,
+                            container || LABKEY.ActionURL.getContainer(),
+                            action
+                        ].join("/") + ".view" + (queryParams ? "?" + $.param(queryParams) : "");
+                }
+            },
+            getModuleContext: function() {
+                return {};
             }
-        }
+        };
     })();
 </script>
 

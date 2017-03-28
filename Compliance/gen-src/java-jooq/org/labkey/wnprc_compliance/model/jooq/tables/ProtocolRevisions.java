@@ -35,7 +35,7 @@ import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolRevisionsRe
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class ProtocolRevisions extends TableImpl<ProtocolRevisionsRecord> {
 
-    private static final long serialVersionUID = 1917265506;
+    private static final long serialVersionUID = 352860769;
 
     /**
      * The reference instance of <code>wnprc_compliance.protocol_revisions</code>
@@ -63,32 +63,27 @@ public class ProtocolRevisions extends TableImpl<ProtocolRevisionsRecord> {
     /**
      * The column <code>wnprc_compliance.protocol_revisions.principal_investigator_id</code>.
      */
-    public final TableField<ProtocolRevisionsRecord, String> PRINCIPAL_INVESTIGATOR_ID = createField("principal_investigator_id", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<ProtocolRevisionsRecord, String> PRINCIPAL_INVESTIGATOR_ID = createField("principal_investigator_id", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>wnprc_compliance.protocol_revisions.spi_primary_id</code>.
      */
-    public final TableField<ProtocolRevisionsRecord, String> SPI_PRIMARY_ID = createField("spi_primary_id", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<ProtocolRevisionsRecord, String> SPI_PRIMARY_ID = createField("spi_primary_id", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>wnprc_compliance.protocol_revisions.spi_secondary_id</code>.
      */
-    public final TableField<ProtocolRevisionsRecord, String> SPI_SECONDARY_ID = createField("spi_secondary_id", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<ProtocolRevisionsRecord, String> SPI_SECONDARY_ID = createField("spi_secondary_id", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>wnprc_compliance.protocol_revisions.approval_date</code>.
      */
-    public final TableField<ProtocolRevisionsRecord, Timestamp> APPROVAL_DATE = createField("approval_date", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+    public final TableField<ProtocolRevisionsRecord, Timestamp> APPROVAL_DATE = createField("approval_date", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
 
     /**
      * The column <code>wnprc_compliance.protocol_revisions.attached_file_id</code>.
      */
     public final TableField<ProtocolRevisionsRecord, String> ATTACHED_FILE_ID = createField("attached_file_id", org.jooq.impl.SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>wnprc_compliance.protocol_revisions.usda_designation</code>.
-     */
-    public final TableField<ProtocolRevisionsRecord, String> USDA_DESIGNATION = createField("usda_designation", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>wnprc_compliance.protocol_revisions.has_biological_hazards</code>.
@@ -128,7 +123,7 @@ public class ProtocolRevisions extends TableImpl<ProtocolRevisionsRecord> {
     /**
      * The column <code>wnprc_compliance.protocol_revisions.has_recombinant_material_hazards</code>.
      */
-    public final TableField<ProtocolRevisionsRecord, Boolean> HAS_RECOMBINANT_MATERIAL_HAZARDS = createField("has_recombinant_material_hazards", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+    public final TableField<ProtocolRevisionsRecord, Boolean> HAS_RECOMBINANT_MATERIAL_HAZARDS = createField("has_recombinant_material_hazards", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false).defaultValue(org.jooq.impl.DSL.field("false", org.jooq.impl.SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column <code>wnprc_compliance.protocol_revisions.involves_euthanasia</code>.

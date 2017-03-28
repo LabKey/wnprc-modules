@@ -7,8 +7,14 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 import {NewProtocolForm, NewProtocolResponse, ProtocolListItem} from "../../../build/generated-ts/GeneratedFromJava";
 import * as api from "Webutils/API";
-import {buildURL, getCurrentContainer} from "WebUtils/LabKey";
+import {buildURL, getCurrentContainer, buildURLWithParams} from "WebUtils/LabKey";
 import * as toastr from "toastr";
+import {
+    TableRow, SimpleStringColumn,
+    ReactTableColumn
+} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/TableRow";
+import {Table} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/Table";
+import {FilterableTable} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/component/lk-table";
 
 
 export interface DateSelectorProps {
@@ -221,6 +227,37 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
     }
 }
 
+
+
+let protocols: ProtocolListItem[] = (window as any).PageLoadData.protocols.map((p: any) => {return ProtocolListItem.fromJSON(p)});
+console.log(protocols);
+
+let rows = protocols.map((protocol) => {
+    return new TableRow({
+        columns: [
+            new SimpleStringColumn(protocol.protocol_number),
+            new SimpleStringColumn(protocol.mostRecentApprovalDate.format('YYYY/MM/DD')),
+            {
+                getReactElement(): JSX.Element {
+                    let href: string = buildURLWithParams('wnprc_compliance-protocol-view', 'EditProtocol', getCurrentContainer(), {
+                        protocol: protocol.mostRecentId
+                    });
+
+                    return (
+                        <a href={href}>Edit</a>
+                    );
+                }
+            } as ReactTableColumn
+        ],
+        otherData: protocol
+    });
+});
+
+let table = new Table({
+    rowHeaders: ['Protocol Number', "Approval Date", ""],
+    rows: rows
+});
+
 interface PageState {
     modalOpen: boolean;
 }
@@ -277,9 +314,10 @@ class Page extends React.Component<{}, PageState> {
 
                             </div>
 
-                            <div className="panel-body">
-                                <h1>The list of protocols will go here...</h1>
+                            <div style={{marginBottom: '-20px', marginLeft: '-15px', marginRight: '-15px'}}>
+                                <FilterableTable table={table} />
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -287,9 +325,6 @@ class Page extends React.Component<{}, PageState> {
         )
     }
 }
-
-let protocols = (window as any).PageLoadData.protocols as ProtocolListItem[];
-console.log(protocols);
 
 ReactDOM.render(
     <Page/>,

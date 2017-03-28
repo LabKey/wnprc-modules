@@ -131,7 +131,7 @@ public class Namespace {
         @Override
         public String getCastString(String input) {
             return String.format(
-                    "%s.fromJSON(%s as {[key: string]: string})",
+                    "%s.fromJSON((%s as any) as {[key: string]: string})",
                     getTypescriptTypeName(),
                     input
             );

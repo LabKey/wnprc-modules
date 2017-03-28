@@ -25,7 +25,7 @@ export class FullyLoadedBurritoClass {
 
     static fromJSON(json: {[key: string]: string}): FullyLoadedBurritoClass {
         let obj: FullyLoadedBurritoClass = new FullyLoadedBurritoClass();
-        obj.isYes = (json['isYes'].toLowerCase() === 'true') ? true : false;
+        obj.isYes = (json['isYes'].toString().toLowerCase() === 'true') ? true : false;
         obj.float1 = parseFloat(json['float1']);
         obj.float2 = parseFloat(json['float2']);
         obj.string = json['string'];
@@ -36,7 +36,7 @@ export class FullyLoadedBurritoClass {
         obj.enumValue = json['enumValue'] as SimpleEnum;
         obj.double2 = parseFloat(json['double2']);
         obj.double1 = parseFloat(json['double1']);
-        obj.isNo = (json['isNo'].toLowerCase() === 'true') ? true : false;
+        obj.isNo = (json['isNo'].toString().toLowerCase() === 'true') ? true : false;
         obj.short2 = parseFloat(json['short2']);
         obj.short1 = parseFloat(json['short1']);
 

@@ -7,7 +7,7 @@ export class EmbeddedClass {
 
     static fromJSON(json: {[key: string]: string}): EmbeddedClass {
         let obj: EmbeddedClass = new EmbeddedClass();
-        obj.embeddedClass = SimpleClass.fromJSON(json['embeddedClass'] as {[key: string]: string});
+        obj.embeddedClass = SimpleClass.fromJSON((json['embeddedClass'] as any) as {[key: string]: string});
         obj.id = json['id'];
 
         return obj;

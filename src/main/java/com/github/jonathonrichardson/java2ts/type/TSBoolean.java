@@ -19,7 +19,7 @@ public class TSBoolean implements Type {
 
     @Override
     public String getCastString(String input) {
-        return String.format("(%s.toLowerCase() === 'true') ? true : false", input);
+        return String.format("(%s.toString().toLowerCase() === 'true') ? true : false", input);
     }
 
     @Override

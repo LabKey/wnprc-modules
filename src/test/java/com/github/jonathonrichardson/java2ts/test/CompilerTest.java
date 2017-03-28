@@ -38,13 +38,15 @@ public class CompilerTest {
 
         String generatedContents = new String(outputStream.toByteArray(), Charset.forName("UTF-8")).replaceAll("\\r\\n", "\n");
 
+        if (!generatedContents.equals(fileContents)) {
+            System.out.println("Expected: ");
+            System.out.println(fileContents);
 
-        System.out.println("Expected: ");
-        System.out.println(fileContents);
 
+            System.out.println("Generated: ");
+            System.out.println(generatedContents);
+        }
 
-        System.out.println("Generated: ");
-        System.out.println(generatedContents);
 
         assertEquals("Contents should match " + outputPath, fileContents, generatedContents);
     }

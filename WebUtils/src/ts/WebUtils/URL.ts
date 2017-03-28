@@ -1,12 +1,12 @@
-import {getCurrentContainer, buildURL, getCurrentController, getBaseURL} from "./LabKey";
+import {getCurrentContainer, buildURL, getBaseURL} from "./LabKey";
 
 export interface makeURLConfig {
-    controller?: string,
+    controller: string,
     container?: string
 }
 
 export function makeURL(action: string, config: makeURLConfig): string {
-    return buildURL(config.controller || getCurrentController(), action, config.container || getCurrentContainer());
+    return buildURL(config.controller, action, config.container || getCurrentContainer());
 }
 
 

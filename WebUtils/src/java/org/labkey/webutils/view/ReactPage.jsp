@@ -4,6 +4,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.WebPartView" %>
 <%@ page import="org.springframework.web.servlet.ModelAndView" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView view = (JspView) HttpView.currentView();
@@ -31,9 +32,16 @@
             view.include(resourceView, out);
         %>
 
+        <%--
+        <!-- Just leaving this here as a TODO reminder -->
         <!--[if lt IE 9]>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
         <![endif]-->
+        --%>
+
+        <%=
+            PageFlowUtil.getLabkeyJS(getViewContext(), null)
+        %>
     </head>
 
     <body>

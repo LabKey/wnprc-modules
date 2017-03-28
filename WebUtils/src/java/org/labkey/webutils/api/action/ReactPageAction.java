@@ -28,6 +28,7 @@ public abstract class ReactPageAction extends SimpleJspPageAction {
 
         // Set the inner piece of the template
         template.setBody(inner);
+        template.setFrame(WebPartView.FrameType.NONE);
 
         return template;
     }

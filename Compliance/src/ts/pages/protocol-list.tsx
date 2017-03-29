@@ -15,7 +15,7 @@ import {
 } from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/TableRow";
 import {Table} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/Table";
 import {FilterableTable} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/component/lk-table";
-
+import * as rsvp from "rsvp";
 
 export interface DateSelectorProps {
     initialDate?: Moment | KnockoutObservable<Moment>
@@ -113,7 +113,15 @@ interface NewProtocolModalState {
     isSaving: boolean;
 }
 
-
+let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
+    return new rsvp.Promise((resolve, reject) => {
+        promise.then((val) => {
+            resolve(val);
+        }).catch((val) => {
+            reject(val);
+        });
+    });
+};
 
 class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtocolModalState> {
     private $modalDiv: JQuery;
@@ -172,7 +180,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
 
         let postURL = buildURL('wnprc_compliance-protocol-api', 'newProtocol', getCurrentContainer());
 
-        (api.postJSON(postURL, form, {}).then((jsonData: any) => {
+        convertToRSVP(api.postJSON(postURL, form, {}).then((jsonData: any) => {
             let data = jsonData as NewProtocolResponse;
 
             this.hide();
@@ -181,7 +189,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
             console.log(e.message, e);
 
             alert("failed");
-        }) as any).finally(() => {
+        })).finally(() => {
             this.setState({
                 isSaving: false
             });

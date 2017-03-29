@@ -29,7 +29,7 @@ public class MostRecentProtocolRevision extends jOOQTableInfo {
 
     @Override
     public Table<? extends Record> getjOOQTable() {
-        try (jOOQConnection jOOQConnection = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
+        try (jOOQConnection jOOQConnection = new jOOQConnection(WNPRC_ComplianceSchema.NAME, userSchema.getContainer(), userSchema.getUser())) {
 
             Field<String> mostRecentProtocolId = PROTOCOL_REVISIONS.PROTOCOL_ID.as("mostRecentProtocolId");
             Field<Timestamp> mostRecentDate = max(PROTOCOL_REVISIONS.APPROVAL_DATE);

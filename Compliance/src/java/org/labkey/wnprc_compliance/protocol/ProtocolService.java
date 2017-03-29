@@ -38,7 +38,7 @@ public class ProtocolService {
         String protocol_entity_id = UUID.randomUUID().toString().toUpperCase();
         String revision_id = UUID.randomUUID().toString().toUpperCase();
 
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
             conn.create().transaction(configuration -> {
                 DSLContext create = DSL.using(configuration);
 
@@ -64,7 +64,7 @@ public class ProtocolService {
     }
 
     public void saveBasicInfo(BasicInfoForm form) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
             ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(form.revision_id));
 
             if (form.principal_investigator != null) {
@@ -88,7 +88,7 @@ public class ProtocolService {
     }
 
     public BasicInfoForm getBasicInfo(String revision_id) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
             ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(revision_id));
 
             BasicInfoForm form = new BasicInfoForm();
@@ -105,7 +105,7 @@ public class ProtocolService {
     public List<ProtocolListItem> getProtocolList() {
         List<ProtocolListItem> protocols = new ArrayList<>();
 
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME)) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
             MostRecentProtocolRevision mostRecentProtocolRevisions = new MostRecentProtocolRevision(getUserSchema());
 
             List<Field> fieldList = new ArrayList<>();

@@ -9,39 +9,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lkpm/base/labkey-lib" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/lkpm/base/labkey-lib" />
-        </SOURCES>
-        <jarDirectory url="file://$MODULE_DIR$/lkpm/base/labkey-lib" recursive="false" />
-        <jarDirectory url="file://$MODULE_DIR$/lkpm/base/labkey-lib" recursive="false" type="SOURCES" />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lkpm/base/tomcat-lib" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lkpm/base/tomcat-lib" recursive="false" />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lkpm/base/explodedModules/LDK/lib" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lkpm/base/explodedModules/LDK/lib" recursive="false" />
-      </library>
-    </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
@@ -52,5 +19,6 @@
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="LabKey-Server" />
   </component>
 </module>

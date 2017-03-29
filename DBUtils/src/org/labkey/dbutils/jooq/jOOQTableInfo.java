@@ -43,7 +43,7 @@ public abstract class jOOQTableInfo<RecordType extends Record> extends AbstractT
     protected SQLFragment getFromSQL() {
         SQLFragment sql = new SQLFragment();
 
-        try (jOOQConnection jOOQConnection = new jOOQConnection(userSchema.getSchemaName())) {
+        try (jOOQConnection jOOQConnection = new jOOQConnection(userSchema.getSchemaName(), userSchema.getContainer(), userSchema.getUser())) {
             sql.append(jOOQConnection.create().selectFrom(getjOOQTable()).getSQL());
         }
 

@@ -4,15 +4,19 @@ import {EditableSection} from "./editable-section";
 import * as toastr from "toastr";
 import * as rsvp from "rsvp";
 
-export interface FormProvider<FORM> {
+export interface CloneableForm {
+    clone: () => this;
+}
+
+export interface FormProvider<FORM extends CloneableForm> {
     title: string;
     getFormData: (id: string) => Promise<FORM>;
     saveFormData: (id: string, form: FORM | null) => Promise<FORM>;
     cloneForm: (form: FORM) => FORM;
-    renderForm: (form: FORM | null, enabled: boolean) => JSX.Element;
+    renderForm: (form: FORM | null, updateForm: (form: FORM) => void, enabled: boolean) => JSX.Element;
 }
 
-export interface SimpleFormProps<T> {
+export interface SimpleFormProps<T extends CloneableForm> {
     revision_id: string;
     startEdit?: () => void;
     endEdit?: () => void;
@@ -31,7 +35,7 @@ interface BasicForm {
     fromJSON: (data: any) => BasicForm;
 }
 
-export class SimpleFormEditor<FORM> extends Component<SimpleFormProps<FORM>, SimpleFormState<FORM>> {
+export class SimpleFormEditor<FORM extends CloneableForm> extends Component<SimpleFormProps<FORM>, SimpleFormState<FORM>> {
     originalForm: FORM | null;
 
     constructor(props: SimpleFormProps<FORM>) {
@@ -87,27 +91,33 @@ export class SimpleFormEditor<FORM> extends Component<SimpleFormProps<FORM>, Sim
     save() {
         this.setState({
             status: 'saving'
-        });
+        }, () => {
+            this.props.formProvider.saveFormData(this.props.revision_id, this.state.form).then((rawData: FORM) => {
+                this.originalForm = (this.state.form == null) ? null : this.props.formProvider.cloneForm(this.state.form);
 
-        this.props.formProvider.saveFormData(this.props.revision_id, this.state.form).then((rawData: FORM) => {
-            this.originalForm = (this.state.form == null) ? null : this.props.formProvider.cloneForm(this.state.form);
+                this.setState({
+                    status: 'viewing'
+                });
 
-            this.setState({
-                status: 'viewing'
+                toastr.success("Successfully saved!");
+
+                if (this.props.endEdit) {
+                    this.props.endEdit();
+                }
+            }).catch(() => {
+                this.setState({
+                    status: 'editing'
+                }, () => {
+                    toastr.error("Failed to save");
+                })
             });
-
-            toastr.success("Successfully saved!");
         });
-
-        if (this.props.endEdit) {
-            this.props.endEdit();
-        }
     }
 
     cancel() {
         this.setState({
             status: 'viewing',
-            form: this.originalForm
+            form: this.originalForm ? this.originalForm.clone() : null
         });
 
         if (this.props.endEdit) {
@@ -119,10 +129,16 @@ export class SimpleFormEditor<FORM> extends Component<SimpleFormProps<FORM>, Sim
         let status = this.state.status;
         let disabled = (status != 'editing');
 
+        let updateForm = (form: FORM) => {
+            this.setState({
+                form: form
+            });
+        };
+
         return (
             <EditableSection title={this.props.formProvider.title} editMode={(status == 'editing') ? true : (status == 'viewing') ? false : null}
                              handleEdit={this.edit} handleSave={this.save} handleCancel={this.cancel}>
-                {this.props.formProvider.renderForm(this.state.form, !disabled)}
+                {this.props.formProvider.renderForm(this.state.form, updateForm, !disabled)}
             </EditableSection>
         )
     }

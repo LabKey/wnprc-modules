@@ -67,6 +67,10 @@ public class ProtocolService {
         try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
             ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(form.revision_id));
 
+            if (form.principal_investigator.equals("")) {
+                form.principal_investigator = null;
+            }
+
             if (form.principal_investigator != null) {
                 record.setPrincipalInvestigatorId(form.principal_investigator);
             }
@@ -97,6 +101,36 @@ public class ProtocolService {
             form.spi_primary = record.getSpiPrimaryId();
             form.spi_secondary = record.getSpiSecondaryId();
             form.approval_date = new Date(record.getApprovalDate().getTime());
+
+            return form;
+        }
+    }
+
+    public HazardsForm getHazardsInfo(String revision_id) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
+            ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(revision_id));
+
+            HazardsForm form = new HazardsForm();
+            form.biological  = record.getHasBiologicalHazards();
+            form.chemical    = record.getHasChemicalHazards();
+            form.physical    = record.getHasPhysicalHazards();
+            form.other       = record.getHasOtherHazards();
+            form.other_notes = record.getOtherHazardsNotes();
+
+            return form;
+        }
+    }
+
+    public HazardsForm saveHazardsInfo(String revision_id, HazardsForm form) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
+            ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(revision_id));
+
+            record.setHasBiologicalHazards(form.biological);
+            record.setHasChemicalHazards(form.chemical);
+            record.setHasPhysicalHazards(form.physical);
+            record.setHasOtherHazards(form.other);
+            record.setOtherHazardsNotes(form.other_notes);
+            record.store();
 
             return form;
         }

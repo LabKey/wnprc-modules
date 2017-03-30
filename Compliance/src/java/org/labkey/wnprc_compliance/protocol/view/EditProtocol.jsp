@@ -26,7 +26,9 @@
             revision_id: "<%= request.getParameter("revision_id") %>",
             urls: {
                 saveBasicInfo: JSON.parse(<%= PageFlowUtil.jsString(mapper.writeValueAsString(new URLForAction(ProtocolAPIController.SaveBasicInfo.class))) %>),
-                getBasicInfo: JSON.parse(<%= PageFlowUtil.jsString(mapper.writeValueAsString(new URLForAction(ProtocolAPIController.GetBasicInfo.class))) %>)
+                getBasicInfo:  JSON.parse(<%= PageFlowUtil.jsString(mapper.writeValueAsString(new URLForAction(ProtocolAPIController.GetBasicInfo.class))) %>),
+                saveHazards:   JSON.parse(<%= PageFlowUtil.jsString(mapper.writeValueAsString(new URLForAction(ProtocolAPIController.SaveProtocolHazards.class))) %>),
+                getHazards:    JSON.parse(<%= PageFlowUtil.jsString(mapper.writeValueAsString(new URLForAction(ProtocolAPIController.GetProtocolHazards.class))) %>)
             }
         };
     })();

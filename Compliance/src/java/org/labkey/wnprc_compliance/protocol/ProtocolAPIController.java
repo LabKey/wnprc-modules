@@ -1,6 +1,7 @@
 package org.labkey.wnprc_compliance.protocol;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpRequest;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.Marshal;
@@ -9,10 +10,15 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.webutils.WebUtilsController;
 import org.labkey.wnprc_compliance.protocol.messages.BasicInfoForm;
+import org.labkey.wnprc_compliance.protocol.messages.HazardsForm;
 import org.labkey.wnprc_compliance.protocol.messages.NewProtocolForm;
+import org.labkey.wnprc_compliance.protocol.messages.NewProtocolResponse;
 import org.labkey.wnprc_compliance.security.ComplianceAdminPermission;
 import org.springframework.validation.BindException;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by Jon on 3/23/2017.
@@ -25,17 +31,35 @@ public class ProtocolAPIController extends SpringActionController {
         setActionResolver(_actionResolver);
     }
 
+    public abstract class ProtocolAPIAction<FORM> extends ApiAction<FORM> {
+        public ProtocolService getService() {
+            return new ProtocolService(getUser(), getContainer());
+        }
+
+        public String getRevisionId() {
+            return getViewContext().getRequest().getParameter(URLQueryParameters.REVISION_ID.getQueryKey());
+        }
+
+        @Override
+        public Object execute(FORM form, BindException e) throws Exception {
+            ObjectMapper mapper = new ObjectMapper();
+
+            Object obj = this.execute(form);
+
+            return new JSONObject(mapper.writeValueAsString(obj));
+        }
+
+        public abstract Object execute(FORM form);
+    }
+
     @ActionNames("newProtocol")
     @CSRF
     @Marshal(Marshaller.Jackson)
     @RequiresPermission(ComplianceAdminPermission.class)
-    public class NewProtocol extends ApiAction<NewProtocolForm> {
+    public class NewProtocol extends ProtocolAPIAction<NewProtocolForm> {
         @Override
-        public Object execute(NewProtocolForm newProtocolForm, BindException e) throws Exception {
-            ObjectMapper mapper = new ObjectMapper();
-            ProtocolService service = new ProtocolService(getUser(), getContainer());
-
-            return new JSONObject(mapper.writeValueAsString(service.newProtocol(newProtocolForm)));
+        public NewProtocolResponse execute(NewProtocolForm form) {
+            return getService().newProtocol(form);
         }
     }
 
@@ -43,27 +67,42 @@ public class ProtocolAPIController extends SpringActionController {
     @CSRF
     @Marshal(Marshaller.Jackson)
     @RequiresPermission(ComplianceAdminPermission.class)
-    public class SaveBasicInfo extends ApiAction<BasicInfoForm> {
+    public class SaveBasicInfo extends ProtocolAPIAction<BasicInfoForm> {
         @Override
-        public Object execute(BasicInfoForm basicInfoForm, BindException e) throws Exception {
-            ProtocolService service = new ProtocolService(getUser(), getContainer());
-            service.saveBasicInfo(basicInfoForm);
-            return new JSONObject();
+        public Object execute(BasicInfoForm basicInfoForm) {
+            getService().saveBasicInfo(basicInfoForm);
+            return basicInfoForm;
         }
-    }
-
-    public static class GetBasicInfoForm {
-        public String revision_id;
     }
 
     @ActionNames("getBasicInfo")
     @Marshal(Marshaller.Jackson)
     @RequiresPermission(ComplianceAdminPermission.class)
-    public class GetBasicInfo extends ApiAction<BasicInfoForm> {
+    public class GetBasicInfo extends ProtocolAPIAction<BasicInfoForm> {
         @Override
-        public Object execute(BasicInfoForm form, BindException e) throws Exception {
-            ProtocolService service = new ProtocolService(getUser(), getContainer());
-            return service.getBasicInfo(getViewContext().getRequest().getParameter("revision_id"));
+        public Object execute(BasicInfoForm form) {
+            return getService().getBasicInfo(getRevisionId());
+        }
+    }
+
+    @ActionNames("getHazards")
+    @Marshal(Marshaller.Jackson)
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class GetProtocolHazards extends ProtocolAPIAction<WebUtilsController.NullForm> {
+        @Override
+        public Object execute(WebUtilsController.NullForm form) {
+            return getService().getHazardsInfo(getRevisionId());
+        }
+    }
+
+    @ActionNames("saveHazards")
+    @CSRF
+    @Marshal(Marshaller.Jackson)
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class SaveProtocolHazards extends ProtocolAPIAction<HazardsForm> {
+        @Override
+        public Object execute(HazardsForm form) {
+            return getService().saveHazardsInfo(getRevisionId(), form);
         }
     }
 }

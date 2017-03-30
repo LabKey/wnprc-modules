@@ -20,6 +20,7 @@ import {UnblockedSection} from "../lib/unblocked-section";
 import {EditableSection} from "../lib/editable-section";
 import {ProtocolBasicInfoEditor} from "../lib/protocol/basic-info-section";
 import {URLForAction} from "../../../../WebUtils/build/generated-ts/GeneratedFromJava";
+import {HazardsEditor} from "../lib/protocol/hazards-section";
 
 function submit(): void {
     let form = new NewProtocolForm();
@@ -48,6 +49,8 @@ interface PageProps {
     revision_id: string;
     saveBasicInfoURL: URLForAction;
     getBasicInfoURL: URLForAction;
+    saveHazardsURL: URLForAction;
+    getHazardsURL: URLForAction;
 }
 
 interface PageState {
@@ -106,6 +109,15 @@ class Page extends React.Component<PageProps, PageState> {
                                                              saveURL={this.props.saveBasicInfoURL}
                                     />
                                 </UnblockedSection>
+
+                                <UnblockedSection isUnblocked={this.state.sectionToEdit === 'hazards'}>
+                                    <HazardsEditor revision_id={this.props.revision_id}
+                                                   startEdit={() => {this.setSectionToEdit('hazards')}}
+                                                   endEdit={() => {this.clearSectionToEdit()}}
+                                                   getURL={this.props.getHazardsURL}
+                                                   saveURL={this.props.saveHazardsURL}
+                                    />
+                                </UnblockedSection>
                             </BlockableDiv>
                         </div>
                     </div>
@@ -121,6 +133,8 @@ ReactDOM.render(
     <Page revision_id={pageData.revision_id}
           saveBasicInfoURL={URLForAction.fromJSON(pageData.urls.saveBasicInfo)}
           getBasicInfoURL={URLForAction.fromJSON(pageData.urls.getBasicInfo)}
+          getHazardsURL={URLForAction.fromJSON(pageData.urls.getHazards)}
+          saveHazardsURL={URLForAction.fromJSON(pageData.urls.saveHazards)}
     />,
     $("#reactDiv").get(0)
 );

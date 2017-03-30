@@ -49,16 +49,28 @@ export class ProtocolBasicInfoEditor extends React.Component<ProtocolBasicInfoPr
                 return form.clone();
             },
 
-            renderForm: (form: BasicInfoForm, enabled: boolean) => {
+            renderForm: (form: BasicInfoForm, updateForm: (form: BasicInfoForm) => void, enabled: boolean) => {
                 if (form == null) {
                     form = new BasicInfoForm();
                 }
 
+                let handleChange = (propertyName: string, value: string): void => {
+                    if (propertyName in form) {
+                        (form as any)[propertyName] = value;
+                        updateForm(form);
+                    }
+                };
+
                 return (
                     <fieldset className="form-horizontal" disabled={!enabled}>
-                        <TextInput editable={enabled} value={form.principal_investigator || ''} label="Principal Investigator" property_name="principal_investigator"  />
-                        <TextInput editable={enabled} value={form.spi_primary || ''} label="SPI Primary" property_name="spi_primary" />
-                        <TextInput editable={enabled} value={form.spi_secondary || ''} label="SPI Secondary" property_name="spi_secondary" />
+                        <TextInput editable={enabled}
+                                   value={form.principal_investigator || ''}
+                                   label="Principal Investigator"
+                                   property_name="principal_investigator"
+                                   handleChange={handleChange}
+                        />
+                        <TextInput editable={enabled} value={form.spi_primary || ''}   label="SPI Primary"   property_name="spi_primary"   handleChange={handleChange} />
+                        <TextInput editable={enabled} value={form.spi_secondary || ''} label="SPI Secondary" property_name="spi_secondary" handleChange={handleChange} />
                     </fieldset>
                 )
             }

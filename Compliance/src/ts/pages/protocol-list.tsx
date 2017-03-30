@@ -105,6 +105,8 @@ export class DateSelector extends React.Component<DateSelectorProps, DateSelecto
 }
 interface NewProtocolModalProps {
     isOpen: boolean;
+    handleClose: () => void;
+    handleOpen: () => void;
 }
 
 interface NewProtocolModalState {
@@ -142,6 +144,8 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
             });
         });
 
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.show = this.show.bind(this);
         this.hide = this.hide.bind(this);
         this.handleProtocolNumberChange = this.handleProtocolNumberChange.bind(this);
@@ -161,7 +165,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
     }
 
     hide(): void {
-        this.$modalDiv && (this.$modalDiv as any).modal('hide')
+        this.$modalDiv && (this.$modalDiv as any).modal('hide');
     }
 
     handleProtocolNumberChange(e: ChangeEvent<HTMLInputElement>): void {
@@ -169,6 +173,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
     }
 
     submit(): void {
+        let self = this;
         let state: NewProtocolModalState = this.state;
         let form: NewProtocolForm = new NewProtocolForm();
         form.id = state.protocol_number;
@@ -183,14 +188,15 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
         convertToRSVP(api.postJSON(postURL, form, {}).then((jsonData: any) => {
             let data = jsonData as NewProtocolResponse;
 
-            this.hide();
             toastr.success("Successfully saved new protocol.");
         }).catch((e) => {
             console.log(e.message, e);
 
             alert("failed");
         })).finally(() => {
-            this.setState({
+            self.props.handleClose();
+
+            self.setState({
                 isSaving: false
             });
         });
@@ -202,7 +208,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <button type="button" className="close" {...{'data-dismiss': "modal", 'aria-label': "Close"}}><span aria-hidden="true">&times;</span></button>
+                            <button type="button" className="close" onClick={this.props.handleClose} {...{'aria-label': "Close"}}><span aria-hidden="true">&times;</span></button>
                             <h3 className="modal-title">New Protocol</h3>
                         </div>
 
@@ -293,7 +299,7 @@ class Page extends React.Component<{}, PageState> {
     render() {
         return (
             <div>
-                <NewProtocolModal isOpen={this.state.modalOpen} />
+                <NewProtocolModal isOpen={this.state.modalOpen} handleClose={this.closeModal} handleOpen={this.openModal}/>
 
                 <ToolBar/>
 

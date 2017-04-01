@@ -67,7 +67,7 @@ public class ProtocolService {
         try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
             ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(form.revision_id));
 
-            if (form.principal_investigator.equals("")) {
+            if ("".equals(form.principal_investigator)) {
                 form.principal_investigator = null;
             }
 

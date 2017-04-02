@@ -134,6 +134,24 @@ CREATE TABLE wnprc_compliance.drugs (
   CONSTRAINT PK_drugs PRIMARY KEY (id)
 );
 
+DROP TABLE IF EXISTS wnprc_compliance.allowed_species_to_drugs CASCADE;
+CREATE TABLE wnprc_compliance.allowed_species_to_drugs (
+  protocol_revision_id TEXT NOT NULL,
+  species_class TEXT NOT NULL,
+
+  drug_id TEXT NOT NULL,
+
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
+
+  CONSTRAINT PK_allowed_species_to_drugs PRIMARY KEY (protocol_revision_id, species_class, drug_id),
+  CONSTRAINT FK_allowed_species_to_drugs_allowed_species FOREIGN KEY (protocol_revision_id, species_class) REFERENCES wnprc_compliance.allowed_species (protocol_revision_id, species_classifier),
+  CONSTRAINT FK_allowed_species_to_drugs_drugs FOREIGN KEY (drug_id) REFERENCES wnprc_compliance.drugs (id)
+);
+
 DROP TABLE IF EXISTS wnprc_compliance.drug_regimens_to_drugs CASCADE ;
 CREATE TABLE wnprc_compliance.drug_regimens_to_drugs (
   drug_regimen TEXT,
@@ -285,4 +303,20 @@ CREATE TABLE wnprc_compliance.allowed_surgeries_to_drug_regimens (
   CONSTRAINT PK_allowed_surgeries_to_drug_regimens PRIMARY KEY (surgery_id, drug_regimen_id),
   CONSTRAINT FK_allowed_surgeries_to_drug_regimens_surgeries FOREIGN KEY (surgery_id) REFERENCES wnprc_compliance.allowed_surgeries (surgery_id),
   CONSTRAINT FK_allowed_surgeries_to_drug_regimens_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id)
+);
+
+CREATE TABLE wnprc_compliance.allowed_species_to_allowed_surgeries (
+  revision_id TEXT NOT NULL,
+  species_classifier TEXT NOT NULL,
+  surgery_id TEXT NOT NULL,
+
+  -- Default fields for LabKey.
+  createdby  userid,
+  created    TIMESTAMP,
+  modifiedby userid,
+  modified   TIMESTAMP,
+
+  CONSTRAINT PK_allowed_species_to_allowed_surgeries PRIMARY KEY (revision_id, species_classifier, surgery_id),
+  CONSTRAINT FK_allowed_species_to_allowed_surgeries_species FOREIGN KEY (revision_id, species_classifier) REFERENCES wnprc_compliance.allowed_species (protocol_revision_id, species_classifier),
+  CONSTRAINT FK_allowed_species_to_allowed_surgeries_surgeries FOREIGN KEY (surgery_id) REFERENCES wnprc_compliance.allowed_surgeries (surgery_id)
 );

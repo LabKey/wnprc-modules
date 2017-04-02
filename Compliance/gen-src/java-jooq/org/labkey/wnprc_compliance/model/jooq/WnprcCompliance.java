@@ -19,6 +19,8 @@ import org.labkey.wnprc_compliance.model.jooq.tables.AllowedProcedures;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedProceduresToDrugRegimens;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpecies;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedProcedures;
+import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedSurgeries;
+import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToDrugs;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSurgeries;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSurgeriesToDrugRegimens;
 import org.labkey.wnprc_compliance.model.jooq.tables.CardInfo;
@@ -57,7 +59,7 @@ import org.labkey.wnprc_compliance.model.jooq.tables.TbClearances;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class WnprcCompliance extends SchemaImpl {
 
-    private static final long serialVersionUID = 2073865535;
+    private static final long serialVersionUID = -97314103;
 
     /**
      * The reference instance of <code>wnprc_compliance</code>
@@ -93,6 +95,16 @@ public class WnprcCompliance extends SchemaImpl {
      * The table <code>wnprc_compliance.allowed_species_to_allowed_procedures</code>.
      */
     public final AllowedSpeciesToAllowedProcedures ALLOWED_SPECIES_TO_ALLOWED_PROCEDURES = org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedProcedures.ALLOWED_SPECIES_TO_ALLOWED_PROCEDURES;
+
+    /**
+     * The table <code>wnprc_compliance.allowed_species_to_allowed_surgeries</code>.
+     */
+    public final AllowedSpeciesToAllowedSurgeries ALLOWED_SPECIES_TO_ALLOWED_SURGERIES = org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedSurgeries.ALLOWED_SPECIES_TO_ALLOWED_SURGERIES;
+
+    /**
+     * The table <code>wnprc_compliance.allowed_species_to_drugs</code>.
+     */
+    public final AllowedSpeciesToDrugs ALLOWED_SPECIES_TO_DRUGS = org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToDrugs.ALLOWED_SPECIES_TO_DRUGS;
 
     /**
      * The table <code>wnprc_compliance.allowed_surgeries</code>.
@@ -240,6 +252,8 @@ public class WnprcCompliance extends SchemaImpl {
             AllowedProceduresToDrugRegimens.ALLOWED_PROCEDURES_TO_DRUG_REGIMENS,
             AllowedSpecies.ALLOWED_SPECIES,
             AllowedSpeciesToAllowedProcedures.ALLOWED_SPECIES_TO_ALLOWED_PROCEDURES,
+            AllowedSpeciesToAllowedSurgeries.ALLOWED_SPECIES_TO_ALLOWED_SURGERIES,
+            AllowedSpeciesToDrugs.ALLOWED_SPECIES_TO_DRUGS,
             AllowedSurgeries.ALLOWED_SURGERIES,
             AllowedSurgeriesToDrugRegimens.ALLOWED_SURGERIES_TO_DRUG_REGIMENS,
             CardInfo.CARD_INFO,

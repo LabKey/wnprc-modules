@@ -12,6 +12,8 @@ import org.labkey.wnprc_compliance.model.jooq.tables.AllowedProcedures;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedProceduresToDrugRegimens;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpecies;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedProcedures;
+import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedSurgeries;
+import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToDrugs;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSurgeries;
 import org.labkey.wnprc_compliance.model.jooq.tables.AllowedSurgeriesToDrugRegimens;
 import org.labkey.wnprc_compliance.model.jooq.tables.CardInfo;
@@ -79,6 +81,16 @@ public class Tables {
      * The table <code>wnprc_compliance.allowed_species_to_allowed_procedures</code>.
      */
     public static final AllowedSpeciesToAllowedProcedures ALLOWED_SPECIES_TO_ALLOWED_PROCEDURES = org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedProcedures.ALLOWED_SPECIES_TO_ALLOWED_PROCEDURES;
+
+    /**
+     * The table <code>wnprc_compliance.allowed_species_to_allowed_surgeries</code>.
+     */
+    public static final AllowedSpeciesToAllowedSurgeries ALLOWED_SPECIES_TO_ALLOWED_SURGERIES = org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToAllowedSurgeries.ALLOWED_SPECIES_TO_ALLOWED_SURGERIES;
+
+    /**
+     * The table <code>wnprc_compliance.allowed_species_to_drugs</code>.
+     */
+    public static final AllowedSpeciesToDrugs ALLOWED_SPECIES_TO_DRUGS = org.labkey.wnprc_compliance.model.jooq.tables.AllowedSpeciesToDrugs.ALLOWED_SPECIES_TO_DRUGS;
 
     /**
      * The table <code>wnprc_compliance.allowed_surgeries</code>.

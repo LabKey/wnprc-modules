@@ -104,7 +104,7 @@ export class HazardsEditor extends React.Component<HazardsEditorProps, {}> {
                             <div className="row">
                                 <div className="form-group col-sm-12">
                                     <label className="control-label">Explain Other Hazards:</label>
-                                    <textarea value={form.other_notes || ''} onChange={handleOtherNotesChange} className="form-control" style={{resize: 'none'}} />
+                                    <textarea disabled={!form.other} value={form.other_notes || ''} onChange={handleOtherNotesChange} className="form-control" style={{resize: 'none'}} />
                                 </div>
                             </div>
 

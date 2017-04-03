@@ -6,10 +6,7 @@ import org.jtwig.JtwigTemplate;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jon on 3/24/17.
@@ -57,6 +54,29 @@ public class NamespaceWriter {
         template.render(model, outputStream);
     }
 
+    private Type _wrapTypeInArray(final Namespace.TSClass tsClass) {
+        return new Type() {
+            @Override
+            public Set<Class> getJavaClasses() {
+                return tsClass.getJavaClasses();
+            }
+
+            @Override
+            public String getCastString(String input) {
+                return String.format(
+                        "(%s as any[]).map((val: any) => {return %s})",
+                        input,
+                        tsClass.getCastString("val")
+                );
+            }
+
+            @Override
+            public String getTypescriptTypeName() {
+                return tsClass.getTypescriptTypeName() + "[]";
+            }
+        };
+    }
+
     private void writeClass(Namespace.TSClass tsClass) throws IOException {
         writeLine("");
 
@@ -71,6 +91,10 @@ public class NamespaceWriter {
             Type type = tsClass.members.get(fieldName);
             String accessString = String.format("json['%s']", fieldName);
             String memberAccessString = String.format("this.%s", fieldName);
+
+            if (tsClass.memberMetaData.get(fieldName)) {
+                type = _wrapTypeInArray(tsClass);
+            }
 
             Map<String, String> field = new HashMap<>();
             field.put("name", fieldName);

@@ -75,5 +75,11 @@ public class CompilerTest {
     public void compileBurritoClass() throws IOException, ClassNotFoundException {
         assertOutputMatches("/BurritoClass.ts", FullyLoadedBurritoClass.class);
     }
+
+
+    @Test
+    public void compileClassWithArray() throws IOException, ClassNotFoundException {
+        assertOutputMatches("/SimpleClassWithArray.ts", SimpleClassWithArray.class);
+    }
 }
 

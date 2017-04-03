@@ -9,6 +9,7 @@ import com.github.jonathonrichardson.java2ts.type.TSString;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 /**
@@ -85,6 +86,7 @@ public class Namespace {
     public class TSClass implements Type {
         private Class clazz;
         Map<String, Type> members = new HashMap<>();
+        Map<String, Boolean> memberMetaData = new HashMap<>();
 
         public TSClass(Class clazz) {
             this.clazz = clazz;
@@ -99,12 +101,33 @@ public class Namespace {
                 Type fieldType;
 
                 Class fieldClass = field.getType();
-                if (!Namespace.this.classes_to_types.containsKey(fieldClass)) {
-                    if (!fieldClass.isPrimitive() && hasSerializeToTSAnnotation(fieldClass)) {
-                        Namespace.this.addClass(fieldClass);
+
+                boolean isList = false;
+
+                if (field.getGenericType() instanceof ParameterizedType) {
+                    System.out.println("Field is a paramaterized Type");
+                    ParameterizedType pType = (ParameterizedType) field.getGenericType();
+                    java.lang.reflect.Type rawType = pType.getRawType();
+
+                    try {
+                        Class genericClass = TypeUtil.getClassFromType(rawType);
+
+                        if (List.class.isAssignableFrom(genericClass)) {
+                            isList = true;
+                            fieldClass = TypeUtil.getClassFromType(pType.getActualTypeArguments()[0]);
+                        }
+                    } catch (ClassNotFoundException e) {
+                        // We'll just continue and let it fail when it can't support the field type
                     }
-                    else if (fieldClass.isEnum()) {
+                }
+
+
+                if (!Namespace.this.classes_to_types.containsKey(fieldClass)) {
+                    if (fieldClass.isEnum()) {
                         Namespace.this.addEnum((Class<? extends Enum>) fieldClass);
+                    }
+                    else if (!fieldClass.isPrimitive() && hasSerializeToTSAnnotation(fieldClass)) {
+                        Namespace.this.addClass(fieldClass);
                     }
                     else {
                         throw new RuntimeException(String.format("Field type '%s' is not supported", fieldClass.getName()));
@@ -114,6 +137,7 @@ public class Namespace {
                 fieldType = Namespace.this.classes_to_types.get(fieldClass);
 
                 this.members.put(fieldName, fieldType);
+                this.memberMetaData.put(fieldName, isList);
             }
         }
 

@@ -105,7 +105,6 @@ public class Namespace {
                 boolean isList = false;
 
                 if (field.getGenericType() instanceof ParameterizedType) {
-                    System.out.println("Field is a paramaterized Type");
                     ParameterizedType pType = (ParameterizedType) field.getGenericType();
                     java.lang.reflect.Type rawType = pType.getRawType();
 

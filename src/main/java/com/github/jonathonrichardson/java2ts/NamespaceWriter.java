@@ -1,5 +1,6 @@
 package com.github.jonathonrichardson.java2ts;
 
+import org.apache.commons.io.IOUtils;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
@@ -21,6 +22,11 @@ public class NamespaceWriter {
     }
 
     public void write() throws IOException {
+        IOUtils.copy(
+                getClass().getClassLoader().getResourceAsStream("header.ts"),
+                this.outputStream
+        );
+
         for (Type type : namespace.types.values()) {
             List<String> imports = type.getImports();
 

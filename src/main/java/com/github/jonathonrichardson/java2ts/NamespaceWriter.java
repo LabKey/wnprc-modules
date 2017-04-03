@@ -54,11 +54,11 @@ public class NamespaceWriter {
         template.render(model, outputStream);
     }
 
-    private Type _wrapTypeInArray(final Namespace.TSClass tsClass) {
+    private Type _wrapTypeInArray(final Type oldType) {
         return new Type() {
             @Override
             public Set<Class> getJavaClasses() {
-                return tsClass.getJavaClasses();
+                return oldType.getJavaClasses();
             }
 
             @Override
@@ -66,13 +66,22 @@ public class NamespaceWriter {
                 return String.format(
                         "(%s as any[]).map((val: any) => {return %s})",
                         input,
-                        tsClass.getCastString("val")
+                        oldType.getCastString("val")
                 );
             }
 
             @Override
             public String getTypescriptTypeName() {
-                return tsClass.getTypescriptTypeName() + "[]";
+                return oldType.getTypescriptTypeName() + "[]";
+            }
+
+            @Override
+            public String getCloneString(String input) {
+                return String.format(
+                        "(%s).map((val) => { return %s; })",
+                        input,
+                        oldType.getCloneString("val")
+                );
             }
         };
     }
@@ -93,7 +102,7 @@ public class NamespaceWriter {
             String memberAccessString = String.format("this.%s", fieldName);
 
             if (tsClass.memberMetaData.get(fieldName)) {
-                type = _wrapTypeInArray(tsClass);
+                type = _wrapTypeInArray(type);
             }
 
             Map<String, String> field = new HashMap<>();

@@ -13,7 +13,7 @@ export class {{ classType }} {
         return obj;
     }
 
-    static fromJSON(json: {[key: string]: string}): {{ classType }} {
+    static fromJSON(json: {[key: string]: any}): {{ classType }} {
         let obj: {{ classType }} = new {{ classType }}();
 
     {%- for field in fields %}

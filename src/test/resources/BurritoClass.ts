@@ -43,7 +43,7 @@ export class FullyLoadedBurritoClass {
         return obj;
     }
 
-    static fromJSON(json: {[key: string]: string}): FullyLoadedBurritoClass {
+    static fromJSON(json: {[key: string]: any}): FullyLoadedBurritoClass {
         let obj: FullyLoadedBurritoClass = new FullyLoadedBurritoClass();
         obj.isYes = (json['isYes'].toString().toLowerCase() === 'true') ? true : false;
         obj.float1 = parseFloat(json['float1']);

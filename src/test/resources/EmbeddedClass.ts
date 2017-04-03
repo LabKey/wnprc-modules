@@ -13,7 +13,7 @@ export class EmbeddedClass {
         return obj;
     }
 
-    static fromJSON(json: {[key: string]: string}): EmbeddedClass {
+    static fromJSON(json: {[key: string]: any}): EmbeddedClass {
         let obj: EmbeddedClass = new EmbeddedClass();
         obj.embeddedClass = SimpleClass.fromJSON((json['embeddedClass'] as any) as {[key: string]: string});
         obj.id = json['id'];
@@ -31,7 +31,7 @@ export class SimpleClass {
         return obj;
     }
 
-    static fromJSON(json: {[key: string]: string}): SimpleClass {
+    static fromJSON(json: {[key: string]: any}): SimpleClass {
         let obj: SimpleClass = new SimpleClass();
         obj.value = json['value'];
 

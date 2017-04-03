@@ -13,7 +13,7 @@ export class SimpleClassWithDate {
         return obj;
     }
 
-    static fromJSON(json: {[key: string]: string}): SimpleClassWithDate {
+    static fromJSON(json: {[key: string]: any}): SimpleClassWithDate {
         let obj: SimpleClassWithDate = new SimpleClassWithDate();
         obj.value = json['value'];
         obj.startDate = moment(json['startDate']);

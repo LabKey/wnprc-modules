@@ -19,7 +19,7 @@ export class SimpleClassWithEnum {
         return obj;
     }
 
-    static fromJSON(json: {[key: string]: string}): SimpleClassWithEnum {
+    static fromJSON(json: {[key: string]: any}): SimpleClassWithEnum {
         let obj: SimpleClassWithEnum = new SimpleClassWithEnum();
         obj.id = json['id'];
         obj.selectedOption = json['selectedOption'] as SimpleEnum;

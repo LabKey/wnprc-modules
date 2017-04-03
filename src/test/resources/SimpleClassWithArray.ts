@@ -11,7 +11,7 @@ export class SimpleClassWithArray {
         return obj;
     }
 
-    static fromJSON(json: {[key: string]: string}): SimpleClassWithArray {
+    static fromJSON(json: {[key: string]: any}): SimpleClassWithArray {
         let obj: SimpleClassWithArray = new SimpleClassWithArray();
         obj.texts = (json['texts'] as any[]).map((val: any) => {return val});
 

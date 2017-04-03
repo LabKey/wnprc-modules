@@ -105,4 +105,14 @@ public class ProtocolAPIController extends SpringActionController {
             return getService().saveHazardsInfo(getRevisionId(), form);
         }
     }
+
+    @ActionNames("addSpeciesToProtocol")
+    @CSRF
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class AddSpeciesToProtocol extends ProtocolAPIAction<WebUtilsController.NullForm> {
+        @Override
+        public Object execute(WebUtilsController.NullForm form) {
+            return null;
+        }
+    }
 }

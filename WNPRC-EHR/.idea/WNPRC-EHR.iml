@@ -24,5 +24,15 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="tsconfig$roots" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../lkpm/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../lkpm/lib" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>

@@ -69,9 +69,15 @@ import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
+import org.labkey.wnprc_ehr.pathology.necropsy.NecropsyController;
+import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecropsyPermission;
+import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ViewNecropsyPermission;
+import org.labkey.wnprc_ehr.pathology.necropsy.security.role.NecropsyScheduler;
+import org.labkey.wnprc_ehr.pathology.necropsy.security.role.NecropsyViewer;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
+import org.labkey.wnprc_ehr.security.roles.WNPRCAdminRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
@@ -97,6 +103,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     protected void init() {
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
+        addController(NecropsyController.NAME, NecropsyController.class);
     }
 
     @Override
@@ -164,6 +171,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     private void registerPermissions() {
         RoleManager.registerPermission(new BehaviorAssignmentsPermission());
+        RoleManager.registerPermission(new ViewNecropsyPermission());
+        RoleManager.registerPermission(new ScheduleNecropsyPermission());
     }
 
     private void registerServices() {
@@ -266,5 +275,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public void registerRoles() {
         RoleManager.registerRole(new WNPRCFullSubmitterWithReviewerRole());
         RoleManager.registerRole(new BehaviorServiceWorker());
+        RoleManager.registerRole(new WNPRCAdminRole());
+        RoleManager.registerRole(new NecropsyViewer());
+        RoleManager.registerRole(new NecropsyScheduler());
     }
 }

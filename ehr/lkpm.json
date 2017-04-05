@@ -13,5 +13,8 @@
       "LDK"
     ]
   },
-  "moduleClass": "org.labkey.ehr.EHRModule"
+  "moduleClass": "org.labkey.ehr.EHRModule",
+  "lkpmDependencies": {
+    "https://github.com/WNPRC-EHR-Services/DBUtils.git": ""
+  }
 }

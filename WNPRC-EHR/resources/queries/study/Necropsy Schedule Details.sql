@@ -6,13 +6,12 @@ animalid.curLocation.room as cur_room,
 animalid.curLocation.cage as cur_cage,
 animalid.curLocation.cond.title as cur_cond,
 date,
-created,
 caseno,
 project,
 protocol,
 account,
 performedby as pathologist,
-location,
+nsuite.displayname as location,
 delivery_option.title as who_delivers,
 shipping_comment as delivery_comment,
 CASE
@@ -20,7 +19,6 @@ CASE
   ELSE true
 END as has_tissues_for_avrl,
 state
-
 
 FROM (
   SELECT
@@ -63,3 +61,6 @@ LEFT JOIN (
 ON (
   necropsy.lsid = avrl_tissues.taskid
 )
+
+LEFT JOIN wnprc.necropsy_suite nsuite
+ON nsuite.room = necropsy.location

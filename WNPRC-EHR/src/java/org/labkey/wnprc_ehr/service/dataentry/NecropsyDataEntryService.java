@@ -101,7 +101,7 @@ public class NecropsyDataEntryService extends DataEntryService {
             event.animalId = row.getString("animalid");
 
             event.scheduledDate = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(row.getString("date"));
-            //event.color = "";
+            event.color = row.getString("display_color");
 
             returnForm.scheduledNecropsies.add(event);
         }

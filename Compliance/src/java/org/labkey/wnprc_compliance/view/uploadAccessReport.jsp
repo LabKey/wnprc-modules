@@ -39,7 +39,7 @@
     (function() {
 
         var dropZone = jQuery("#access-report-upload").dropzone({
-            url: "<%= new ActionURL(WNPRC_ComplianceController.UploadAccessReportAPI.class, getContainer()).toHString() %>",
+            url: "<%= new ActionURL(WNPRC_ComplianceController.UploadAccessReportAPI.class, getContainer()).toString() %>",
             method: "post",
             maxFiles: 1,
             init: function() {

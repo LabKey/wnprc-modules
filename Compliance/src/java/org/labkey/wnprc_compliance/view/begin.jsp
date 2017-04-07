@@ -15,10 +15,10 @@
                 <li>
                     TB Results
                     <ul>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.NewUserPage.class, getContainer()).toHString()%>">
+                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.NewUserPage.class, getContainer()).toString()%>">
                             Enter TB Results
                         </a></li>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.PendingTBResultsPage.class, getContainer()).toHString()%>">
+                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.PendingTBResultsPage.class, getContainer()).toString()%>">
                             View Pending TB Results
                         </a></li>
                     </ul>
@@ -35,13 +35,13 @@
                 <li>
                     Access Reports
                     <ul>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UploadAccessReportPage.class, getContainer()).toHString()%>">
+                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UploadAccessReportPage.class, getContainer()).toString()%>">
                             Upload New Access Report
                         </a></li>
                         <li><a href="{{mostRecentAccessReportSummary}}">
                             View Most Recent Access Report Summary
                         </a></li>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UnidentifiedCardsPage.class, getContainer()).toHString()%>">
+                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UnidentifiedCardsPage.class, getContainer()).toString()%>">
                             View Unidentified Cards
                         </a></li>
                     </ul>

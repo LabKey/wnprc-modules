@@ -2,7 +2,6 @@
 <%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-<%@ taglib prefix="lk" uri="http://ehr.primate.wisc.edu/taglib" %>
 
 <%
     LocalDate today = (new LocalDate());

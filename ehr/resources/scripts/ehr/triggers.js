@@ -73,8 +73,6 @@ EHR.Server.Triggers.init = function(event, errors){
     this.scriptHelper = new EHR.Server.ScriptHelper(this.extraContext, event, EHR);
     var helper = this.scriptHelper;
 
-    console.log('** evaluating: ' + this['javax.script.filename'] + ' for: ' + (helper.isValidateOnly() ? 'validation/' : '') + event);
-
     EHR.Server.Security.init(helper);
 
     var handlers = [];

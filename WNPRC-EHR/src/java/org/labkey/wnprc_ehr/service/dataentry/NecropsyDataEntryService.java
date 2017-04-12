@@ -138,7 +138,35 @@ public class NecropsyDataEntryService extends DataEntryService {
         throw new NotImplementedException();
     }
 
-    public NecropsyRequestListForm getNecropsyRequests() {
-        throw new NotImplementedException();
+    public NecropsyRequestListForm getNecropsyRequests() throws ParseException {
+        NecropsyRequestListForm necropsyList = new NecropsyRequestListForm();
+
+        int requestPending = EHRService.QCSTATES.RequestPending.getQCState(container).getRowId();
+        SimplerFilter filter = new SimplerFilter("state", CompareType.EQUAL, requestPending);
+
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getEscalationUser(), container);
+        for (JSONObject row : queryFactory.selectRows("study", "Necropsy Requests", filter).toJSONObjectArray()) {
+            NecropsyRequestForm requestForm = new NecropsyRequestForm();
+
+            requestForm.requestLsid = row.getString("lsid");
+            requestForm.requestId = row.getString("requestid");
+            requestForm.priority = row.getString("priority");
+            requestForm.animalId = row.getString("animalid");
+            requestForm.requestedBy = row.getString("requestor");
+            requestForm.requestedOn = _parseDate(row.getString("created"));
+            requestForm.requestedFor = _parseDate(row.getString("date"));
+
+            necropsyList.requests.add(requestForm);
+        }
+
+        return necropsyList;
     }
+
+    private Date _parseDate(String string) throws ParseException {
+        if (string == null) {
+            return null;
+        }
+
+        return (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(string);
+}
 }

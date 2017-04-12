@@ -51,8 +51,8 @@ export type TableColumn = HTMLTableColumn | ReactTableColumn
 export interface TableRowConfig {
     columns: TableColumn[],
     otherData?: any,
-    warn?: KnockoutObservable<boolean>,
-    err?:  KnockoutObservable<boolean>
+    warn?: KnockoutObservable<boolean> | boolean,
+    err?:  KnockoutObservable<boolean> | boolean
 }
 
 export class TableRow {
@@ -70,11 +70,11 @@ export class TableRow {
 
     constructor(config: TableRowConfig) {
         this.warn = ko.computed(() => {
-            return (ko.isObservable(config.warn)) ? config.warn() : false;
+            return (ko.isObservable(config.warn)) ? config.warn() : (_.isBoolean(config.warn)) ? config.warn : false;
         });
 
         this.err = ko.computed(() => {
-            return (ko.isObservable(config.err)) ? config.err() : false;
+            return (ko.isObservable(config.err)) ? config.err() : (_.isBoolean(config.err)) ? config.err : false;
         });
 
         this.columns = config.columns;

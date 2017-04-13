@@ -320,6 +320,15 @@ EHR.Metadata.registerMetadata('Default', {
         }
         ,account: {
             shownInGrid: false
+        },
+        performing_lab: {
+            lookup: {
+                schemaName: 'wnprc',
+                queryName: 'external_labs',
+                displayColumn: 'lab_name',
+                keyColumn: 'code',
+                sort: 'lab_name'
+            }
         }
     },
     byQuery: {

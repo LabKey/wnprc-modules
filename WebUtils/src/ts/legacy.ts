@@ -29,6 +29,7 @@ export function exportGlobals() {
         markdown:      markdown,
         moment:        moment,
         RSVP:          rsvp,
+        s:             s,
         toastr:        toastr,
         URI:           uri
     });

@@ -1,18 +1,27 @@
-<script src="<%= contextPath %>/ehr/lib/underscore.js"></script>
-<script src="<%= contextPath %>/ehr/lib/underscore-string.js"></script>
-<script src="<%= contextPath %>/ehr/lib/knockout.js"></script>
-<script src="<%= contextPath %>/ehr/lib/knockout-mapping.js"></script>
-<script type="application/javascript">
-    var require = {
-        paths: {
-            "text":              "<%= contextPath %>/ehr/lib/require-text", // Make Text Plugin work
-            "classify":          "<%= contextPath %>/ehr/lib/classify",
-            "supersqlstore":     "<%= contextPath %>/ehr/lib/supersqlstore",
-            "pageapp":           "<%= contextPath %>/ehr/HousingAndAssignmentHistory"
-        },
-        waitSeconds: 0
-    };
+<script type="text/javascript">
+    Ext4.onReady(function (){
+        var webpart = <%=webpartContext%>;
+        var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+        if(!ctx)
+            return;
 
-    webpartContext = <%=webpartContext%>;
+        /* get the participant id from the request URL: this parameter is required. */
+        var participantId = LABKEY.ActionURL.getParameter('participantId');
+
+        if (!participantId){
+            alert('Must Provide Id');
+            return;
+        }
+
+        var title = 'Animal Details: ' + participantId;
+        document.title = title;
+        LABKEY.Utils.setWebpartTitle(title, webpart.id);
+
+        Ext4.create('EHR.panel.ParticipantDetailsPanel', {
+            participantId: participantId,
+            defaultReport: ctx.DefaultAnimalHistoryReport,
+            defaultTab: 'General',
+            autoLoadDefaultTab: true
+        }).render(webpart.wrapperDivId);
+    });
 </script>
-<script src="<%= contextPath %>/ehr/lib/require.js" data-main="<%= contextPath %>/ehr/requirements-participantView"></script>

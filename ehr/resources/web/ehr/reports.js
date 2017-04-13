@@ -37,17 +37,6 @@ EHR.reports['abstract'] = function(panel, tab){
         })
     });
 
-    var animalId = panel.activeFilterType.getTitle(tab);
-    var panelId = panel.getId();
-    var housingHTML = "";
-    jQuery.each(animalId.split(","), function(index, id) {
-        housingHTML += '<animal-housing params="animalid: \'' + id.replace(/\s/g, '') + '\'"></animal-housing>';
-    });
-
-
-
-
-
     var config = panel.getQWPConfig({
         title: 'Other Notes' + title,
         frame: true,
@@ -98,44 +87,6 @@ EHR.reports['abstract'] = function(panel, tab){
     });
 
     EHR.reports.weightGraph(panel, tab);
-
-    tab.add({
-        xtype: 'ldk-webpartpanel',
-        title: "Housing and Assignment History - " + animalId,
-        frame: true,
-        html: housingHTML,
-        listeners: {
-            afterrender: {
-                fn: function() {
-                    //console.log("apply bindings");
-
-                    var applyBindings = function() {
-                        var $animalNodes = jQuery('#' + panelId).find('animal-housing');
-
-                        $animalNodes.each(function() {
-                            if (typeof ko !== 'undefined') {
-                                ko.cleanNode(this);
-                                ko.applyBindings({}, this);
-                            }
-                        });
-                    };
-                    applyBindings();
-
-
-                    var firstItem = tab.items.get(0);
-
-                    var oldfn = firstItem.onContentSizeChange;
-                    firstItem.onContentSizeChange = function() {
-                        applyBindings();
-                        if ( typeof oldfn === 'function' ) {
-                            oldfn();
-                        }
-                    };
-                }
-            }
-        },
-        style: 'margin-bottom: 20px'
-    });
 };
 
 EHR.reports.arrivalDeparture = function(panel, tab){

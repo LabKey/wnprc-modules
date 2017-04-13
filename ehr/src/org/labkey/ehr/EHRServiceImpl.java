@@ -92,7 +92,7 @@ public class EHRServiceImpl extends EHRService
     private Map<REPORT_LINK_TYPE, List<ReportLink>> _reportLinks = new HashMap<>();
     private Map<String, List<Pair<Module, String>>> _actionOverrides = new HashMap<>();
     private List<Pair<Module, Resource>> _extraTriggerScripts = new ArrayList<>();
-    private Map<Module, List<ClientDependency>> _clientDependencies = new HashMap<>();
+    private Map<Module, LinkedHashSet<ClientDependency>> _clientDependencies = new HashMap<>();
     private Map<String, Map<String, List<Pair<Module, Class<? extends TableCustomizer>>>>> _tableCustomizers = new CaseInsensitiveHashMap<>();
     private Map<String, Map<String, List<ButtonConfigFactory>>> _moreActionsButtons = new CaseInsensitiveHashMap<>();
     private Map<String, Map<String, List<ButtonConfigFactory>>> _tbarButtons = new CaseInsensitiveHashMap<>();
@@ -252,9 +252,10 @@ public class EHRServiceImpl extends EHRService
 
     public void registerClientDependency(ClientDependency cd, Module owner)
     {
-        List<ClientDependency> list = _clientDependencies.get(owner);
-        if (list == null)
-            list = new ArrayList<>();
+        LinkedHashSet<ClientDependency> list = _clientDependencies.get(owner);
+        if (list == null) {
+            list = new LinkedHashSet<>();
+        }
 
         list.add(cd);
 
@@ -263,7 +264,7 @@ public class EHRServiceImpl extends EHRService
 
     public Set<ClientDependency> getRegisteredClientDependencies(Container c)
     {
-        Set<ClientDependency> set = new LinkedHashSet<>();
+        LinkedHashSet<ClientDependency> set = new LinkedHashSet<>();
         for (Module m : _clientDependencies.keySet())
         {
             if (c.getActiveModules().contains(m))

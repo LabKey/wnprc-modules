@@ -52,7 +52,8 @@ Ext.namespace('EHR.ext');
 &lt;div id='targetDiv'/&gt;
  */
 EHR.ext.NavMenu = Ext.extend(Ext.Panel, {
-    initComponent: function(){
+    initComponent: function() {
+        var self = this;
         //calculate size
         var maxHeight = this.maxHeight || 15;
 
@@ -85,7 +86,7 @@ EHR.ext.NavMenu = Ext.extend(Ext.Panel, {
                 xtype: 'panel',
                 title: tmp.header + ':',
                 width: this.colWidth,
-                style: 'padding-bottom:15px;padding-right:10px;background-color: transparent;',
+                style: 'padding-bottom:15px;padding-right:10px;background-color: transparent;' + self.additionalSectionStyle,
                 bodyStyle: 'background-color: transparent;',
                 headerCfg: {
                     cls: 'ehr-nav-header',
@@ -106,7 +107,7 @@ EHR.ext.NavMenu = Ext.extend(Ext.Panel, {
                 else {
                    //NOTE: this is the default renderer
                    item = {
-                       //Creates links for the navegation panel
+                       //Creates links for the navigation panel
                         html: '<a href="'+tmp.items[j].url+'">'+tmp.items[j].name+'</a>'
                     }
                 }

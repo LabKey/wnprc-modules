@@ -1,3 +1,32 @@
+<script type="application/javascript">
+    (function(){
+        var Ext4RedirectMap = {
+            'Necropsy': {}
+        };
+
+        var formName = LABKEY.ActionURL.getParameter("formtype");
+        var taskid = LABKEY.ActionURL.getParameter('taskid') || LABKEY.ActionURL.getParameter('taskId');
+
+        if (formName in Ext4RedirectMap) {
+            var redirectObject = Ext4RedirectMap[formName];
+
+            var config = {
+                formType: redirectObject.name || formName,
+                returnURL: LABKEY.ActionURL.buildURL("wnprc_ehr", "dataEntry")
+            };
+
+            if (taskid) {
+                config.taskid = taskid;
+            }
+
+            var newURL = LABKEY.ActionURL.buildURL("ehr", "dataEntryForm.view", null, config);
+
+            window.location = newURL;
+        }
+    })();
+</script>
+
+
 <script type="text/javascript">
 
 Ext.onReady(function(){

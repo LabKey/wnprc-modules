@@ -45,29 +45,28 @@ Ext4.define('EHR.panel.AnimalHistoryPanel', {
 
         store.each(function(rec){
             var report = {
-                id: rec.get('reportname'),
-                name: rec.get('reportname'),
-                label: rec.get('reporttitle'),
-                category: rec.get('category'),
-                reportType: rec.get('reporttype'),
+                id:               rec.get('reportname'),
+                name:             rec.get('reportname'),
+                label:            rec.get('reporttitle'),
+                category:         rec.get('category'),
+                reportType:       rec.get('reporttype'),
                 subjectFieldName: rec.get('subjectIdFieldName') || 'Id',
-                containerPath: rec.get('containerpath'),
-                schemaName: rec.get('schemaname'),
-                queryName: rec.get('queryname'),
-                jsHandler: rec.get('queryname'),
-                viewName: rec.get('viewname'),
-                reportId: rec.get("report"),
-                dateFieldName: rec.get("datefieldname"),
-                areaFieldName: rec.get("queryhaslocation") ? 'room/area' : 'Id/curLocation/area',
-                roomFieldName: rec.get("queryhaslocation") ? 'room' : 'Id/curLocation/room',
-                cageFieldName: rec.get("queryhaslocation") ? 'cage' : 'Id/curLocation/cage',
-                todayOnly: rec.get('todayonly')
-            }
+                containerPath:    rec.get('containerpath'),
+                schemaName:       rec.get('schemaname'),
+                queryName:        rec.get('queryname'),
+                jsHandler:        rec.get('queryname'),
+                viewName:         rec.get('viewname'),
+                reportId:         rec.get("report"),
+                dateFieldName:    rec.get("datefieldname"),
+                areaFieldName:    rec.get("queryhaslocation") ? 'room/area' : 'Id/curLocation/area',
+                roomFieldName:    rec.get("queryhaslocation") ? 'room' : 'Id/curLocation/room',
+                cageFieldName:    rec.get("queryhaslocation") ? 'cage' : 'Id/curLocation/cage',
+                todayOnly:        rec.get('todayonly')
+            };
 
-            if (rec.get('jsonconfig')){
-                console.log(rec.get('jsonconfig'));
-                var json = Ext4.decode(rec.get('jsonconfig'));
-                Ext4.apply(report, json);
+            if (rec.get('jsonConfig')){
+                var json = Ext4.decode(rec.get('jsonConfig')) || {};
+                report.queryConfig = json;
             }
 
             this.reports.push(report);

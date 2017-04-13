@@ -928,23 +928,27 @@ EHR.DataEntryUtils = new function(){
                 }
             }
             else {
-                Ext4.Object.each(permMap, function(schemaName, queries) {
-                    // minor improvement.  non-study tables cannot have per-table permissions, so instead we check
-                    // for the container-level DataEntryPermission
+                // Check each query to test in turn
+                Ext4.each(queriesToTest, function(queryObject) {
+                    var schemaPermissions = permMap[queryObject.schemaName];
+                    var queryPermissions = (schemaPermissions || {})[queryObject.queryName];
+
                     var permissionToTest = permissionName;
-                    if (schemaName.toLowerCase() != 'study'){
+                    if (queryObject.schemaName.toLowerCase() != 'study'){
+                        // minor improvement.  non-study tables cannot have per-table permissions, so instead we check
+                        // for the container-level DataEntryPermission
                         permissionToTest = 'org.labkey.api.ehr.security.EHRDataEntryPermission';
                     }
-                    Ext4.Object.each(queries, function(queryName, permissions) {
-                        if (!permissions[permissionToTest]){
-                            hasPermission = false;
-                            return false;
-                        }
-                    }, this);
 
-                    if (!hasPermission)
-                        return false;
-                }, this);
+                    if (Ext4.isDefined(schemaPermissions) && Ext4.isDefined(queryPermissions) && permissionToTest in queryPermissions) {
+                        // Do nothing: we have security
+                    }
+                    else {
+                        // If we don't have any permissions defined for the query, assume we don't have access
+                        hasPermission = false;
+                        return false; // short circuit out of jQuery.each
+                    }
+                });
             }
 
             return hasPermission;

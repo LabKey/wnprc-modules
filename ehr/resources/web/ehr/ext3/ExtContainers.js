@@ -397,7 +397,7 @@ EHR.ext.ChemExcelWin = Ext.extend(Ext.Panel, {
         Ext.Ajax.request({
             url: LABKEY.ActionURL.buildURL("assay", "assayFileUpload"),
             params: {
-                fileName: 'ChemistryUpload_'+(new Date()).format('Y-m-d_H:m:s')+'.csv',
+                fileName: 'ChemistryUpload_'+(new Date()).format('Y-m-d_H:m:s')+'.tsv',
                 fileContent: fileContent
             },
             success: this.onFileUpload,
@@ -468,7 +468,7 @@ EHR.ext.ChemExcelWin = Ext.extend(Ext.Panel, {
         var rec;
 
         Ext.each(data, function(row, idx){
-            id = row[7];
+            id = row[4];
             if(!id){
                 console.log ('animal ID ' + id);
                 alert('Something went wrong reading the file ' + id);
@@ -479,7 +479,7 @@ EHR.ext.ChemExcelWin = Ext.extend(Ext.Panel, {
                 return;
             }
 
-            id = id.replace(/(,)* MONKEY( )*/i, '');
+            id = id.replace(/(,)*MONKEY( )*/i, '');
             id = id.toLowerCase();
 
             if(runsStore.find('Id', id)==-1){
@@ -488,9 +488,18 @@ EHR.ext.ChemExcelWin = Ext.extend(Ext.Panel, {
                 return false;
             }
 
-            date = new Date(row[16]);
-            testId = row[22];
-            result = row[24];
+            date = new Date(row[15]);
+            var tempTime = row[16].match(/(\d+)(:(\d\d))?\s*(p?)/i);
+            var hours = parseInt(tempTime[1],10);
+            if (hours == 12 && !tempTime[4]) {
+                hours =0
+            }
+            else {
+                hours+=(hours<12 && tempTime[4])?12:0;
+            }
+            date.setHours(hours,parseInt(tempTime[3],10 || 0));
+            testId = row[18];
+            result = row[20];
             if(result && (typeof result == 'string') && result.match(/[<>]+/)){
                 resultOORIndicator = result.match(/[<>]+/)[0];
                 result = result.replace(/[<>]+/, '');
@@ -498,8 +507,8 @@ EHR.ext.ChemExcelWin = Ext.extend(Ext.Panel, {
             else
                 resultOORIndicator = null;
 
-            units = row[25];
-            panelType = row[14];
+            units = row[21];
+            panelType = row[17];
 
             if(testId && panelType=='V19SR'){
                 testId = testId.replace(/SR$/, '');

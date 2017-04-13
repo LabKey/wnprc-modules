@@ -59,6 +59,7 @@ EHR.Server.ScriptHelper = function(extraContext, event, EHR){
         removeTimeFromDate: false,
         removeTimeFromEndDate: false,
         allowRequestsInPast: false,
+        allowRequestsInDistantFuture: false,
         allowDeadIds: false,
         allowAnyId: false,
         skipIdFormatCheck: false,
@@ -105,7 +106,7 @@ EHR.Server.ScriptHelper = function(extraContext, event, EHR){
     //we allow the client to pass limited options using extraContext
     //this function is where all processing of client JSON -> server options should reside
     function setScriptOptionsFromExtraContext(){
-        LABKEY.ExtAdapter.each(['skipIdFormatCheck', 'allowAnyId', 'allowDatesInDistantPast'], function(name){
+        LABKEY.ExtAdapter.each(['skipIdFormatCheck', 'allowAnyId', 'allowDatesInDistantPast', 'allowRequestsInDistantFuture'], function(name) {
             if (extraContext[name])
                 scriptOptions[name] = extraContext[name];
         }, this);
@@ -129,6 +130,10 @@ EHR.Server.ScriptHelper = function(extraContext, event, EHR){
 
         shouldRemoveTimeFromDate: function(){
             return scriptOptions.removeTimeFromDate;
+        },
+
+        shouldAllowRequestsInDistantFuture: function() {
+            return scriptOptions.allowRequestsInDistantFuture
         },
 
         shouldAllowRequestsInPast: function(){

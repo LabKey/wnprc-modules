@@ -1,5 +1,5 @@
 <libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library>
+    <library compileInProductionMode="false">
         <script path="/wnprc_ehr/model/sources/Assay.js"/>
         <script path="/wnprc_ehr/model/sources/Biopsy.js"/>
         <script path="/wnprc_ehr/model/sources/BloodDraws.js"/>

@@ -1,7 +1,6 @@
-<module xmlns="http://labkey.org/moduleProperties/xml/">
+<module xmlns="http://labkey.org/moduleProperties/xml/" >
     <clientDependencies>
-        <dependency path="webutils/lib/webutils"/>
-        <dependency path="webutils/models/models"/>
+        <dependency path="wnprc_ehr/webutils"/>
         <dependency path="ehr/ehr_api"/>
         <dependency path="ehr/ehr_ext3_api"/>
     </clientDependencies>

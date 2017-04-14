@@ -1,5 +1,5 @@
 <libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library>
+    <library compileInProductionMode="false">
         <script path="/wnprc_ehr/ext4/components/MultiSelectField.js"/>
         <script path="/wnprc_ehr/ext4/components/Participant.js"/>
         <script path="/wnprc_ehr/ext4/components/ProjectField.js"/>
@@ -14,7 +14,7 @@
         <script path="/wnprc_ehr/ext4/utils/DataEntryButtons.js"/>
     </library>
     <dependencies>
+        <dependency path="/wnprc_ehr/webutils"/>
         <dependency path="/wnprc_ehr/wnprc_ext4_core"/>
-        <dependency path="/webutils/lib/webutils"/>
     </dependencies>
 </libraries>

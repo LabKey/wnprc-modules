@@ -590,7 +590,6 @@ exports.init = function(EHR) {
         //
         //  Enforce that a trauma location must always be supplied when "Trauma" is selected as an "other observation".
         //
-        console.log("TRIGGER", row);
         if ( row.other ) {
             var other = row.other.split(",");
             if ( (other.length > 0) && (other.indexOf("T") >= 0) ) {

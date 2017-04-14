@@ -358,7 +358,6 @@ EHR.Server.Utils = new function(){
          */
         snomedToString: function (code, meaning, helper){
             if (!meaning){
-                console.log('QUERYING SNOMED TERM');
                 meaning = helper.getJavaHelper().getSnomedMeaning(code);
             }
 

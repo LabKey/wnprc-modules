@@ -36,12 +36,14 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
     getMasterClientStore: function() {
         var masterClientStore = null;
 
-        this.storeCollection.clientStores.each(function(store) {
-            if (WNPRC.ExtUtils.isInstanceOf(store, WNPRC.ext.data.SingleAnimal.MasterSectionClientStore)) {
-                masterClientStore = store;
-                return false;
-            }
-        });
+        if (this.storeCollection) {
+            this.storeCollection.clientStores.each(function(store) {
+                if (WNPRC.ExtUtils.isInstanceOf(store, WNPRC.ext.data.SingleAnimal.MasterSectionClientStore)) {
+                    masterClientStore = store;
+                    return false;
+                }
+            });
+        }
 
         return masterClientStore;
     },

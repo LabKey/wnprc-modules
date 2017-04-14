@@ -118,7 +118,7 @@
             %>
             <tr>
                 <td style="font-weight: bold"><%= h(tissueSample.optString("tissue_fs_meaning", "")) %></td>
-                <td><%= h(tissueSample.optString("qualifier_fs_value", "")) %></td>
+                <td><%= h(tissueSample.optString("qualifier_fs_value", tissueSample.optString("qualifier", ""))) %></td>
                 <td><%= h(tissueSample.optString("preservation_fs_value", "")) %> </td>
                 <td><%= h(tissueSample.optString("tissueremarks")) %>             </td>
                 <td><%= h(tissueSample.optString("quantity")) %>                  </td>

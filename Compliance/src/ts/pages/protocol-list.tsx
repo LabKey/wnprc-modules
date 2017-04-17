@@ -246,11 +246,33 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
 let protocols: ProtocolListItem[] = (window as any).PageLoadData.protocols.map((p: any) => {return ProtocolListItem.fromJSON(p)});
 console.log(protocols);
 
+class CheckBoxColumn implements ReactTableColumn {
+    constructor(private value: boolean) {
+
+    }
+
+    getReactElement(): JSX.Element {
+        return (
+            <div>
+                <i style={{color: this.value ? 'green' : 'red'}} className={`fa fa-${this.value ? 'check': 'remove'}`}></i>
+            </div>
+        );    }
+
+    getValue(): string {
+        return this.value ? 'true' : 'false';
+    }
+
+}
+
 let rows = protocols.map((protocol) => {
     return new TableRow({
         columns: [
             new SimpleStringColumn(protocol.protocol_number),
             new SimpleStringColumn(protocol.mostRecentApprovalDate.format('YYYY/MM/DD')),
+            new CheckBoxColumn(protocol.hazards.biological),
+            new CheckBoxColumn(protocol.hazards.chemical),
+            new CheckBoxColumn(protocol.hazards.physical),
+            new CheckBoxColumn(protocol.hazards.other),
             {
                 getReactElement(): JSX.Element {
                     let href: string = buildURLWithParams('wnprc_compliance-protocol-view', 'EditProtocol', getCurrentContainer(), {
@@ -260,15 +282,18 @@ let rows = protocols.map((protocol) => {
                     return (
                         <a href={href}>Edit</a>
                     );
+                },
+                getValue(): string {
+                    return "";
                 }
-            } as ReactTableColumn
+            }
         ],
         otherData: protocol
     });
 });
 
 let table = new Table({
-    rowHeaders: ['Protocol Number', "Approval Date", ""],
+    rowHeaders: ['Protocol Number', "Approval Date", "Biological", "Chemical", "Physical", "Other", ""],
     rows: rows
 });
 
@@ -309,8 +334,9 @@ class Page extends React.Component<{}, PageState> {
                             <div className="panel-heading">Protocols</div>
                             <div className="panel-body">
                                 <ul>
-                                    <li>New Protocol</li>
-                                    <li>List Protocols</li>
+                                    <li>
+                                        <a href={buildURL('wnprc_compliance-protocol-view', 'ProtocolList', getCurrentContainer())}>Protocol List</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>

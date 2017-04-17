@@ -21,6 +21,7 @@ import {EditableSection} from "../lib/editable-section";
 import {ProtocolBasicInfoEditor} from "../lib/protocol/basic-info-section";
 import {URLForAction} from "../../../../WebUtils/build/generated-ts/GeneratedFromJava";
 import {HazardsEditor} from "../lib/protocol/hazards-section";
+import {buildURL, getCurrentContainer} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
 
 function submit(): void {
     let form = new NewProtocolForm();
@@ -88,7 +89,9 @@ class Page extends React.Component<PageProps, PageState> {
                             <div className="panel-heading">Protocols</div>
                             <div className="panel-body">
                                 <ul>
-                                    <li>Protocol List</li>
+                                    <li>
+                                        <a href={buildURL('wnprc_compliance-protocol-view', 'ProtocolList', getCurrentContainer())}>Protocol List</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -118,6 +121,7 @@ class Page extends React.Component<PageProps, PageState> {
                                                    saveURL={this.props.saveHazardsURL}
                                     />
                                 </UnblockedSection>
+
                             </BlockableDiv>
                         </div>
                     </div>

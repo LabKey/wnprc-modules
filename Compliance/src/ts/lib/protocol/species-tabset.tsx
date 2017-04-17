@@ -15,8 +15,13 @@ import {ProtocolSpeciesTab} from "./species-tabset/species-tab";
 
 
 export interface ProtocolSpeciesTabsetProps {
-    protocol: Protocol,
-    speciesOptions: {[name: string]: string}
+    protocol: Protocol
+}
+
+type ComponentState = 'loading' | 'edit' | 'view' | 'saving';
+
+interface ProtocolSpeciesTabsetState {
+    state: ComponentState
 }
 
 export class ProtocolSpeciesTabset extends React.Component<ProtocolSpeciesTabsetProps, {}> {
@@ -24,6 +29,10 @@ export class ProtocolSpeciesTabset extends React.Component<ProtocolSpeciesTabset
 
     constructor(props: ProtocolSpeciesTabsetProps) {
         super(props);
+
+        this.state = {
+            state: 'loading'
+        };
 
         this.addProtocolSpecies = this.addProtocolSpecies.bind(this);
         this.removeProtocolSpecies = this.removeProtocolSpecies.bind(this);
@@ -71,7 +80,7 @@ export class ProtocolSpeciesTabset extends React.Component<ProtocolSpeciesTabset
         return (
             <div>
                 <div className="text-center">
-                    <SpeciesSelector options={this.props.speciesOptions} handleButtonClick={this.addProtocolSpecies} selectedSpecies={this.selectedSpecies} />
+                    {/*<SpeciesSelector options={this.props.speciesOptions} handleButtonClick={this.addProtocolSpecies} selectedSpecies={this.selectedSpecies} />*/}
                 </div>
 
                 {this.props.protocol.species.length > 0 && (

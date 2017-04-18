@@ -84,7 +84,7 @@ class Page extends React.Component<PageProps, PageState> {
                 <ToolBar/>
 
                 <div className="container">
-                    <div className="col-sm-3">
+                    <div className="col-sm-12 col-md-3">
                         <div className="panel panel-primary">
                             <div className="panel-heading">Protocols</div>
                             <div className="panel-body">
@@ -97,7 +97,7 @@ class Page extends React.Component<PageProps, PageState> {
                         </div>
                     </div>
 
-                    <div className="col-sm-9">
+                    <div className="col-sm-12 col-md-9">
                         <div className="panel panel-primary">
                             <div className="panel-heading">
                                 Edit Protocol

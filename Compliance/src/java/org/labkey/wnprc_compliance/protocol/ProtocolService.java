@@ -68,78 +68,10 @@ public class ProtocolService {
         return response;
     }
 
-    public void saveBasicInfo(BasicInfoForm form) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(form.revision_id));
-
-            if ("".equals(form.principal_investigator)) {
-                form.principal_investigator = null;
-            }
-
-            if (form.principal_investigator != null) {
-                record.setPrincipalInvestigatorId(form.principal_investigator);
-            }
-
-            if (form.spi_primary != null) {
-                record.setSpiPrimaryId(form.spi_primary);
-            }
-
-            if (form.spi_secondary != null) {
-                record.setSpiSecondaryId(form.spi_secondary);
-            }
-
-            if (form.approval_date != null) {
-                record.setApprovalDate(new Timestamp(form.approval_date.getTime()));
-            }
-
-            record.store();
-        }
+    public ProtocolRevision getProtocolRevision(String revision) throws ProtocolRevision.ProtocolDoesNotExistException {
+        return new ProtocolRevision(revision, user, container);
     }
 
-    public BasicInfoForm getBasicInfo(String revision_id) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(revision_id));
-
-            BasicInfoForm form = new BasicInfoForm();
-            form.revision_id = record.getId();
-            form.principal_investigator = record.getPrincipalInvestigatorId();
-            form.spi_primary = record.getSpiPrimaryId();
-            form.spi_secondary = record.getSpiSecondaryId();
-            form.approval_date = new Date(record.getApprovalDate().getTime());
-
-            return form;
-        }
-    }
-
-    public HazardsForm getHazardsInfo(String revision_id) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(revision_id));
-
-            HazardsForm form = new HazardsForm();
-            form.biological  = record.getHasBiologicalHazards();
-            form.chemical    = record.getHasChemicalHazards();
-            form.physical    = record.getHasPhysicalHazards();
-            form.other       = record.getHasOtherHazards();
-            form.other_notes = record.getOtherHazardsNotes();
-
-            return form;
-        }
-    }
-
-    public HazardsForm saveHazardsInfo(String revision_id, HazardsForm form) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            ProtocolRevisionsRecord record = conn.create().fetchOne(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.ID.equal(revision_id));
-
-            record.setHasBiologicalHazards(form.biological);
-            record.setHasChemicalHazards(form.chemical);
-            record.setHasPhysicalHazards(form.physical);
-            record.setHasOtherHazards(form.other);
-            record.setOtherHazardsNotes(form.other_notes);
-            record.store();
-
-            return form;
-        }
-    }
 
     public List<ProtocolListItem> getProtocolList() {
         List<ProtocolListItem> protocols = new ArrayList<>();
@@ -202,30 +134,6 @@ public class ProtocolService {
             record.setProtocolRevisionId(protocolRevisionId);
             record.setSpeciesClassifier(speciesClass.name());
             record.setMaxNumberOfAnimals(0);
-
-            record.store();
-        }
-    }
-
-    /**
-     * Sets the max number of animals a protocol can use of a given species (or species classifier).  If the protocol
-     * does not yet allow that species, this will add that species as an allows species for this protocol.
-     *
-     * @param protocolRevisionId The protocol revision id to set the max for.
-     * @param speciesClass The species classifier to set the max for.
-     * @param maxNoAnimals The maximum number of animals for this protocol of the given species.
-     */
-    public void setMaxNumberOfAnimals(@NotNull String protocolRevisionId, @NotNull SpeciesClass speciesClass, int maxNoAnimals) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            AllowedSpeciesRecord record = conn.create().fetchOne(ALLOWED_SPECIES, ALLOWED_SPECIES.PROTOCOL_REVISION_ID.eq(protocolRevisionId).and(ALLOWED_SPECIES.SPECIES_CLASSIFIER.eq(speciesClass.name())));
-
-            // If this protocol already has this species, this does nothing.
-            if (record != null) {
-                addSpeciesToProtocol(protocolRevisionId, speciesClass);
-                record = conn.create().fetchOne(ALLOWED_SPECIES, ALLOWED_SPECIES.PROTOCOL_REVISION_ID.eq(protocolRevisionId).and(ALLOWED_SPECIES.SPECIES_CLASSIFIER.eq(speciesClass.name())));
-            }
-
-            record.setMaxNumberOfAnimals(maxNoAnimals);
 
             record.store();
         }

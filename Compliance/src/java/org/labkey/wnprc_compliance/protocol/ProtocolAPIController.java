@@ -11,6 +11,7 @@ import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.webutils.WebUtilsController;
+import org.labkey.wnprc_compliance.lookups.SpeciesClass;
 import org.labkey.wnprc_compliance.protocol.messages.BasicInfoForm;
 import org.labkey.wnprc_compliance.protocol.messages.HazardsForm;
 import org.labkey.wnprc_compliance.protocol.messages.NewProtocolForm;
@@ -36,8 +37,12 @@ public class ProtocolAPIController extends SpringActionController {
             return new ProtocolService(getUser(), getContainer());
         }
 
+        public String getParameter(String paramName) {
+            return getViewContext().getRequest().getParameter(paramName);
+        }
+
         public String getRevisionId() {
-            return getViewContext().getRequest().getParameter(URLQueryParameters.REVISION_ID.getQueryKey());
+            return getParameter(URLQueryParameters.REVISION_ID.getQueryKey());
         }
 
         @Override
@@ -49,7 +54,7 @@ public class ProtocolAPIController extends SpringActionController {
             return new JSONObject(mapper.writeValueAsString(obj));
         }
 
-        public abstract Object execute(FORM form);
+        public abstract Object execute(FORM form) throws ProtocolRevision.ProtocolDoesNotExistException, ProtocolRevision.ProtocolDoesNotAllowSpecies;
     }
 
     @ActionNames("newProtocol")
@@ -69,8 +74,8 @@ public class ProtocolAPIController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     public class SaveBasicInfo extends ProtocolAPIAction<BasicInfoForm> {
         @Override
-        public Object execute(BasicInfoForm basicInfoForm) {
-            getService().saveBasicInfo(basicInfoForm);
+        public Object execute(BasicInfoForm basicInfoForm) throws ProtocolRevision.ProtocolDoesNotExistException {
+            getService().getProtocolRevision(getRevisionId()).saveBasicInfo(basicInfoForm);
             return basicInfoForm;
         }
     }
@@ -80,8 +85,8 @@ public class ProtocolAPIController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     public class GetBasicInfo extends ProtocolAPIAction<BasicInfoForm> {
         @Override
-        public Object execute(BasicInfoForm form) {
-            return getService().getBasicInfo(getRevisionId());
+        public Object execute(BasicInfoForm form) throws ProtocolRevision.ProtocolDoesNotExistException {
+            return getService().getProtocolRevision(getRevisionId()).getBasicInfo();
         }
     }
 
@@ -90,8 +95,8 @@ public class ProtocolAPIController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     public class GetProtocolHazards extends ProtocolAPIAction<WebUtilsController.NullForm> {
         @Override
-        public Object execute(WebUtilsController.NullForm form) {
-            return getService().getHazardsInfo(getRevisionId());
+        public Object execute(WebUtilsController.NullForm form) throws ProtocolRevision.ProtocolDoesNotExistException {
+            return getService().getProtocolRevision(getRevisionId()).getHazardsInfo();
         }
     }
 
@@ -101,8 +106,8 @@ public class ProtocolAPIController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     public class SaveProtocolHazards extends ProtocolAPIAction<HazardsForm> {
         @Override
-        public Object execute(HazardsForm form) {
-            return getService().saveHazardsInfo(getRevisionId(), form);
+        public Object execute(HazardsForm form) throws ProtocolRevision.ProtocolDoesNotExistException {
+            return getService().getProtocolRevision(getRevisionId()).saveHazardsInfo(form);
         }
     }
 
@@ -112,6 +117,36 @@ public class ProtocolAPIController extends SpringActionController {
     public class AddSpeciesToProtocol extends ProtocolAPIAction<WebUtilsController.NullForm> {
         @Override
         public Object execute(WebUtilsController.NullForm form) {
+            String speciesName = getParameter("species");
+            getService().addSpeciesToProtocol(getRevisionId(), SpeciesClass.valueOf(speciesName));
+
+            return new JSONObject();
+        }
+    }
+
+    @ActionNames("deleteSpeciesFromProtocol")
+    @CSRF
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class DeleteSpeciesFromProtocol extends ProtocolAPIAction<WebUtilsController.NullForm> {
+        @Override
+        public Object execute(WebUtilsController.NullForm form) {
+            return null;
+        }
+    }
+
+
+    @ActionNames("setMaxNoAnimalsForSpecies")
+    @CSRF
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class SetMaxNoAnimalsForSpecies extends ProtocolAPIAction<WebUtilsController.NullForm> {
+        @Override
+        public Object execute(WebUtilsController.NullForm form) throws ProtocolRevision.ProtocolDoesNotExistException, ProtocolRevision.ProtocolDoesNotAllowSpecies {
+            String speciesName = getParameter("species");
+
+            ProtocolRevision revision = getService().getProtocolRevision(getRevisionId());
+            ProtocolRevision.SpeciesInfo info = revision.getSpeciesInfo(SpeciesClass.valueOf(speciesName));
+            info.setMaxNumberOfAnimals(Integer.valueOf(getParameter("max")));
+
             return null;
         }
     }

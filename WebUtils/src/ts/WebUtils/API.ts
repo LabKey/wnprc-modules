@@ -7,10 +7,19 @@ import rsvp = require('rsvp');
 import {makeURLForHTTPAction} from "./URL";
 import moment = require("moment");
 import Moment = moment.Moment;
-const Promise = rsvp.Promise;
 const fetch = require("fetch");
 
-let makeRequest = function(url: string, config?: RequestInit): Promise<Response> {
+let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
+    return new rsvp.Promise((resolve, reject) => {
+        promise.then((val) => {
+            resolve(val);
+        }).catch((val) => {
+            reject(val);
+        });
+    });
+};
+
+let makeRequest = function(url: string, config?: RequestInit): rsvp.Promise<Response> {
     if (!config) {
         config = {};
     }
@@ -46,21 +55,21 @@ let makeRequest = function(url: string, config?: RequestInit): Promise<Response>
     })
 };
 
-let extractJson = function(response: Response): Promise<{[name: string]: any}> {
+let extractJson = function(response: Response): rsvp.Promise<{[name: string]: any}> {
     let contentType = response.headers.get('content-type');
 
     if (contentType && contentType.indexOf('application/json') !== -1) {
-        return response.json()
+        return convertToRSVP(response.json());
     }
     else {
-        return Promise.resolve({});
+        return rsvp.Promise.resolve({});
     }
 };
 
-let makeRequestJSON = function(url: string, config?: RequestInit): Promise<{[name: string]: any}> {
+let makeRequestJSON = function(url: string, config?: RequestInit): rsvp.Promise<{[name: string]: any}> {
     return makeRequest(url, config).catch((e) => {
         return extractJson(e.response).then((data) => {
-            return Promise.reject(data);
+            return rsvp.Promise.reject(data);
         });
     }).then((response) => {
         return extractJson(response);
@@ -84,7 +93,7 @@ export function selectRowsFromCache(schema: string, query: string, view?: string
         view = "";
     }
 
-    if ((schema in cache) && (query in cache[schema])  && (view in cache[schema][query])) {
+    if ((schema in cache) && (query in cache[schema]) && (view in cache[schema][query])) {
         return cache[schema][query][view];
     }
     else {
@@ -92,7 +101,7 @@ export function selectRowsFromCache(schema: string, query: string, view?: string
     }
 }
 
-export function selectRows(schema: string, query: string, config: SelectRowsConfig): Promise<{[name: string]: any}>  {
+export function selectRows(schema: string, query: string, config: SelectRowsConfig): rsvp.Promise<{[name: string]: any}>  {
     // Check for required parameters
     if (!schema) {
         throw "You must specify a schemaName!";

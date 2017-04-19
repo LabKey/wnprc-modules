@@ -122,6 +122,7 @@ class Page extends React.Component<PageProps, PageState> {
                                     />
                                 </UnblockedSection>
 
+                                <ProtocolSpeciesTabset protocol_revision={this.props.revision_id} />
                             </BlockableDiv>
                         </div>
                     </div>

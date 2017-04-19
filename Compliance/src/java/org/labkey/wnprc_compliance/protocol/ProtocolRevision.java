@@ -1,5 +1,7 @@
 package org.labkey.wnprc_compliance.protocol;
 
+import com.drew.lang.annotations.NotNull;
+import org.jooq.impl.DSL;
 import org.labkey.api.data.Container;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
@@ -9,11 +11,14 @@ import org.labkey.wnprc_compliance.WNPRC_ComplianceSchema;
 import org.labkey.wnprc_compliance.lookups.SpeciesClass;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.AllowedSpeciesRecord;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolRevisionsRecord;
+import org.labkey.wnprc_compliance.protocol.messages.AllowedSpeciesForm;
 import org.labkey.wnprc_compliance.protocol.messages.BasicInfoForm;
 import org.labkey.wnprc_compliance.protocol.messages.HazardsForm;
+import org.labkey.wnprc_compliance.protocol.messages.SpeciesForm;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 import static org.labkey.wnprc_compliance.model.jooq.Tables.ALLOWED_SPECIES;
 import static org.labkey.wnprc_compliance.model.jooq.Tables.PROTOCOL_REVISIONS;
@@ -116,6 +121,70 @@ public class ProtocolRevision {
 
             return form;
         }
+    }
+
+    public void addAllowedSpecies(@NotNull SpeciesClass speciesClass) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
+            AllowedSpeciesRecord record = conn.create().fetchOne(ALLOWED_SPECIES, ALLOWED_SPECIES.PROTOCOL_REVISION_ID.eq(revisionId).and(ALLOWED_SPECIES.SPECIES_CLASSIFIER.eq(speciesClass.name())));
+
+            try {
+                SpeciesInfo speciesInfo = new SpeciesInfo(speciesClass);
+            } catch (ProtocolDoesNotAllowSpecies protocolDoesNotAllowSpecies) {
+                // Create a new record
+                record = conn.create().newRecord(ALLOWED_SPECIES);
+
+                // Set primary key
+                record.setProtocolRevisionId(revisionId);
+                record.setSpeciesClassifier(speciesClass.name());
+
+                // Set some defaults
+                record.setMaxNumberOfAnimals(0);
+
+                // Persist
+                record.store();
+            }
+        }
+    }
+
+    public void deleteSpeciesFromProtocol(@NotNull SpeciesClass speciesClass) {
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
+            conn.create().transaction((configuration -> {
+                AllowedSpeciesRecord allowedSpeciesRecord = DSL.using(configuration).fetchOne(ALLOWED_SPECIES, ALLOWED_SPECIES.PROTOCOL_REVISION_ID.eq(revisionId).and(ALLOWED_SPECIES.SPECIES_CLASSIFIER.eq(speciesClass.name())));
+
+                // If it doesn't exist, we have nothing to do.
+                if (allowedSpeciesRecord == null) {
+                    return;
+                }
+
+                allowedSpeciesRecord.delete();
+            }));
+        }
+    }
+
+    public AllowedSpeciesForm getAllowedSpecies() {
+        AllowedSpeciesForm form = new AllowedSpeciesForm();
+
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
+            conn.create().transaction((configuration -> {
+                List<AllowedSpeciesRecord> allowedSpeciesRecords = DSL.using(configuration).fetch(ALLOWED_SPECIES, ALLOWED_SPECIES.PROTOCOL_REVISION_ID.eq(revisionId));
+
+                // If it doesn't exist, we have nothing to do.
+                if (allowedSpeciesRecords == null) {
+                    return;
+                }
+
+                for (AllowedSpeciesRecord record : allowedSpeciesRecords) {
+                    SpeciesForm speciesForm = new SpeciesForm();
+
+                    speciesForm.maxNumberOfAnimals = record.getMaxNumberOfAnimals();
+                    speciesForm.speciesClass = SpeciesClass.valueOf(record.getSpeciesClassifier());
+
+                    form.species.add(speciesForm);
+                }
+            }));
+        }
+
+        return form;
     }
 
     public SpeciesInfo getSpeciesInfo(SpeciesClass speciesClass) throws ProtocolDoesNotAllowSpecies {

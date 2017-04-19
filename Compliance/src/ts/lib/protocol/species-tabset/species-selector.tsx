@@ -2,15 +2,18 @@ import * as React from "react";
 import ChangeEvent = React.ChangeEvent;
 import MouseEvent  = React.MouseEvent;
 import * as _ from "underscore";
+import {getSpeciesClassValues, SpeciesClass} from "../../../../../build/generated-ts/GeneratedFromJava";
+import * as s from "underscore.string";
+
+const all_species: SpeciesClass[] = getSpeciesClassValues();
 
 export interface SpeciesSelectorProps {
-    options: {[name: string]: string};
-    selectedSpecies: KnockoutObservableArray<string>;
+    alreadySelected: SpeciesClass[];
     handleButtonClick?(optionValue: string): void;
 }
 
 interface SpeciesSelectorState {
-    value: string
+    value: SpeciesClass | "";
 }
 
 export class SpeciesSelector extends React.Component<SpeciesSelectorProps, SpeciesSelectorState> {
@@ -25,7 +28,7 @@ export class SpeciesSelector extends React.Component<SpeciesSelectorProps, Speci
 
     handleChange(e: ChangeEvent<HTMLSelectElement>) {
         this.setState({
-            value: e.target.value
+            value: e.target.value as SpeciesClass | ""
         });
     }
 
@@ -40,11 +43,9 @@ export class SpeciesSelector extends React.Component<SpeciesSelectorProps, Speci
     }
 
     render() {
-        let options = _.keys(this.props.options).filter((keyName: string) => {
-            return this.props.selectedSpecies.indexOf(keyName) === -1;
-        }).map((keyName: string) => {
+        let options = _.difference(all_species, this.props.alreadySelected).map((keyName: SpeciesClass | "") => {
             return (
-                <option key={keyName} value={keyName}>{this.props.options[keyName]}</option>
+                <option key={keyName} value={keyName}>{s.titleize(keyName.split('_').join(' '))}</option>
             );
         });
 

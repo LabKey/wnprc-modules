@@ -113,47 +113,6 @@ public class ProtocolService {
         return protocols;
     }
 
-    /**
-     * Adds an allowed species to a protocol revision.  If that protocol revision already allows that species, this
-     * does nothing.
-     *
-     * @param protocolRevisionId The protocol revision id to add the species to.
-     * @param speciesClass The species classifier to add.
-     */
-    public void addSpeciesToProtocol(@NotNull String protocolRevisionId, @NotNull SpeciesClass speciesClass) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            AllowedSpeciesRecord record = conn.create().fetchOne(ALLOWED_SPECIES, ALLOWED_SPECIES.PROTOCOL_REVISION_ID.eq(protocolRevisionId).and(ALLOWED_SPECIES.SPECIES_CLASSIFIER.eq(speciesClass.name())));
-
-            // If this protocol already has this species, this does nothing.
-            if (record != null) {
-                return;
-            }
-
-            record = conn.create().newRecord(ALLOWED_SPECIES);
-
-            record.setProtocolRevisionId(protocolRevisionId);
-            record.setSpeciesClassifier(speciesClass.name());
-            record.setMaxNumberOfAnimals(0);
-
-            record.store();
-        }
-    }
-
-    public void deleteSpeciesFromProtocol(@NotNull String protocolRevisionId, @NotNull SpeciesClass speciesClass) {
-        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            conn.create().transaction((configuration -> {
-                AllowedSpeciesRecord allowedSpeciesRecord = DSL.using(configuration).fetchOne(ALLOWED_SPECIES, ALLOWED_SPECIES.PROTOCOL_REVISION_ID.eq(protocolRevisionId).and(ALLOWED_SPECIES.SPECIES_CLASSIFIER.eq(speciesClass.name())));
-
-                // If it doesn't exist, we have nothing to do.
-                if (allowedSpeciesRecord == null) {
-                    return;
-                }
-
-                allowedSpeciesRecord.delete();
-            }));
-        }
-    }
-
     public AllowedDrugsForm getAllowedDrugs(@NotNull String protocolRevisionId, @NotNull SpeciesClass speciesClass) {
         AllowedDrugsForm form = new AllowedDrugsForm();
         form.protocol_revision_id = protocolRevisionId;

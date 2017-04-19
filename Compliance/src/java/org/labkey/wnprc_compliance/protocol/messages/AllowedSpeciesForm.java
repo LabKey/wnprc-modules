@@ -10,6 +10,5 @@ import java.util.List;
  */
 @SerializeToTS
 public class AllowedSpeciesForm {
-    public String protocolRevisionId;
     public List<SpeciesForm> species = new ArrayList<>();
 }

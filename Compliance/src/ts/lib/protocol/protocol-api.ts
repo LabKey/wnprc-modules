@@ -1,5 +1,8 @@
 import * as api from "WebUtils/API";
-import {SpeciesClass, SpeciesForm, AllowedSpeciesForm} from "../../../../build/generated-ts/GeneratedFromJava";
+import {
+    SpeciesClass, SpeciesForm, AllowedSpeciesForm,
+    ProtocolRevisionsForm
+} from "../../../../build/generated-ts/GeneratedFromJava";
 import {buildURLWithParams, getCurrentContainer} from "../../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
 import * as rsvp from "rsvp";
 type Promise<T> = rsvp.Promise<T>;
@@ -44,4 +47,22 @@ export function getAllowedSpecies(revisionId: string): Promise<AllowedSpeciesFor
     return api.getJSON(url, {}).then((data: any) => {
         return AllowedSpeciesForm.fromJSON(data);
     });
+}
+
+export function getAllRevisions(revisionId: string): Promise<ProtocolRevisionsForm> {
+    let params: {[name: string]: string} = {};
+    params[revision_field_name] = revisionId;
+
+    let url = buildURLWithParams(controller, 'getAllRevisions', getCurrentContainer(), params);
+
+    return api.getJSON(url, {}).then((data: any) => {
+        return ProtocolRevisionsForm.fromJSON(data);
+    });
+}
+
+export function getEditProtocolRevisionLink(revisionId: string): string {
+    let params: {[name: string]: string} = {};
+    params[revision_field_name] = revisionId;
+
+    return buildURLWithParams('wnprc_compliance-protocol-view', 'EditProtocol', getCurrentContainer(), params);
 }

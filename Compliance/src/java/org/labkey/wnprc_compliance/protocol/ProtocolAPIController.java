@@ -77,6 +77,18 @@ public class ProtocolAPIController extends SpringActionController {
         }
     }
 
+
+    @ActionNames("getAllRevisions")
+    @Marshal(Marshaller.Jackson)
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class GetAllRevisions extends ProtocolAPIAction<WebUtilsController.NullForm> {
+        @Override
+        public Object execute(WebUtilsController.NullForm form) throws ProtocolRevision.ProtocolDoesNotExistException {
+            return getService().getProtocolRevision(getRevisionId()).getRevisions();
+        }
+    }
+
+
     @ActionNames("getBasicInfo")
     @Marshal(Marshaller.Jackson)
     @RequiresPermission(ComplianceAdminPermission.class)

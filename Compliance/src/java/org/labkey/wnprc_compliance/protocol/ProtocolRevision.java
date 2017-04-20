@@ -3,7 +3,6 @@ package org.labkey.wnprc_compliance.protocol;
 import com.drew.lang.annotations.NotNull;
 import org.jooq.impl.DSL;
 import org.labkey.api.data.Container;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.SkipMothershipLogging;
 import org.labkey.dbutils.jooq.jOOQConnection;
@@ -11,16 +10,15 @@ import org.labkey.wnprc_compliance.WNPRC_ComplianceSchema;
 import org.labkey.wnprc_compliance.lookups.SpeciesClass;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.AllowedSpeciesRecord;
 import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolRevisionsRecord;
-import org.labkey.wnprc_compliance.protocol.messages.AllowedSpeciesForm;
-import org.labkey.wnprc_compliance.protocol.messages.BasicInfoForm;
-import org.labkey.wnprc_compliance.protocol.messages.HazardsForm;
-import org.labkey.wnprc_compliance.protocol.messages.SpeciesForm;
+import org.labkey.wnprc_compliance.model.jooq.tables.records.ProtocolsRecord;
+import org.labkey.wnprc_compliance.protocol.messages.*;
 
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
 import static org.labkey.wnprc_compliance.model.jooq.Tables.ALLOWED_SPECIES;
+import static org.labkey.wnprc_compliance.model.jooq.Tables.PROTOCOLS;
 import static org.labkey.wnprc_compliance.model.jooq.Tables.PROTOCOL_REVISIONS;
 
 /**
@@ -50,16 +48,42 @@ public class ProtocolRevision {
         return record;
     }
 
+    public ProtocolRevisionsForm getRevisions() {
+        ProtocolRevisionsForm form = new ProtocolRevisionsForm();
+
+        try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
+            ProtocolRevisionsRecord currentRevisionRecord = getRevisionRecord(conn);
+
+            List<ProtocolRevisionsRecord> otherRevisions = conn.create().fetch(PROTOCOL_REVISIONS, PROTOCOL_REVISIONS.PROTOCOL_ID.eq(currentRevisionRecord.getProtocolId()));
+
+            for (ProtocolRevisionsRecord revision : otherRevisions) {
+                ProtocolRevisionForm revisionForm = new ProtocolRevisionForm();
+                revisionForm.revision_id = revision.getId();
+                revisionForm.approval_date = new Date(revision.getApprovalDate().getTime());
+
+                form.revisions.add(revisionForm);
+            }
+
+            ProtocolsRecord protocol = conn.create().fetchOne(PROTOCOLS, PROTOCOLS.ID.eq(currentRevisionRecord.getProtocolId()));
+            form.name = protocol.getProtocolNumber();
+        }
+
+        return form;
+    }
+
     public BasicInfoForm getBasicInfo() {
         try (jOOQConnection conn = new jOOQConnection(WNPRC_ComplianceSchema.NAME, container, user)) {
-            ProtocolRevisionsRecord record = getRevisionRecord(conn);
+            ProtocolRevisionsRecord revisionRecord = getRevisionRecord(conn);
 
             BasicInfoForm form = new BasicInfoForm();
-            form.revision_id = record.getId();
-            form.principal_investigator = record.getPrincipalInvestigatorId();
-            form.spi_primary = record.getSpiPrimaryId();
-            form.spi_secondary = record.getSpiSecondaryId();
-            form.approval_date = new Date(record.getApprovalDate().getTime());
+            form.revision_id = revisionRecord.getId();
+            form.principal_investigator = revisionRecord.getPrincipalInvestigatorId();
+            form.spi_primary   = revisionRecord.getSpiPrimaryId();
+            form.spi_secondary = revisionRecord.getSpiSecondaryId();
+            form.approval_date = new Date(revisionRecord.getApprovalDate().getTime());
+
+            ProtocolsRecord protocolsRecord = conn.create().fetchOne(PROTOCOLS, PROTOCOLS.ID.eq(revisionRecord.getProtocolId()));
+            form.protocol_name = protocolsRecord.getProtocolNumber();
 
             return form;
         }

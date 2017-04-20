@@ -5,15 +5,10 @@ import com.github.jonathonrichardson.java2ts.annotation.SerializeToTS;
 import java.util.Date;
 
 /**
- * Created by Jon on 3/24/2017.
+ * Created by jon on 4/19/17.
  */
 @SerializeToTS
-public class BasicInfoForm {
+public class ProtocolRevisionForm {
     public String revision_id;
-
-    public String protocol_name;
-    public String principal_investigator;
-    public String spi_primary;
-    public String spi_secondary;
     public Date approval_date;
 }

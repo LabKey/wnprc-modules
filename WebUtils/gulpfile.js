@@ -24,7 +24,7 @@ var compiledResourcesDir = path.join(buildDir, "compiledResources");
 gulp.task('bower-install', function(done) {
     const bower = path.join(__dirname, 'node_modules', '.bin', 'bower');
 
-    child_process.execSync(bower + " install", {
+    child_process.execSync(bower + " install --allow-root ", {
         stdio: [0,1,2]
     });
 

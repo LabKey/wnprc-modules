@@ -2,7 +2,7 @@ import * as API from "./WebUtils/API";
 import * as Model from "./WebUtils/Model";
 import * as URL from "./WebUtils/URL";
 import * as Util from "./WebUtils/Util";
-import {foreach2, registerCustomComponentLoader} from "./WebUtils/Util/Knockout";
+import {foreach2, registerCustomComponentLoader} from "./WebUtils/util/Knockout";
 import {extendUnderscore} from "./WebUtils/Util";
 import {getModuleContext} from "./WebUtils/LabKey";
 

@@ -34,24 +34,6 @@ public class WebUtilsModule extends DefaultModule {
     @Override
     protected void init() {
         addController(WebUtilsController.NAME, WebUtilsController.class);
-
-        Path path = Paths.get("/LabKey/sources/lkpm/");
-        if (Files.exists(path) && Files.isDirectory(path)) {
-            JspLoader.registerAdditionalLibForJSPCompilation("/usr/local/tomcat/lib");
-            JspLoader.registerAdditionalLibForJSPCompilation("/usr/local/labkey/labkeyWebapp/WEB-INF/lib");
-
-            File modulesDir = new File("/usr/local/labkey/modules");
-            if (modulesDir.exists() && modulesDir.isDirectory()) {
-                for (File file : modulesDir.listFiles()) {
-                    if (file.isDirectory()) {
-                        File libDir = new File(Paths.get(file.getAbsolutePath(), "lib").toString());
-                        if (libDir.exists() && libDir.isDirectory()) {
-                            JspLoader.registerAdditionalLibForJSPCompilation(libDir.getAbsolutePath());
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @Override

@@ -1,4 +1,5 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
+
 =head1 DESCRIPTION
 
 This script is designed to run as a cron job.  It will query a number of tables and email a report.

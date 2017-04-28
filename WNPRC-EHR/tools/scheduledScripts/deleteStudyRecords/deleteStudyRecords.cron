@@ -21,3 +21,4 @@ LK_BASE_URL=https://labkey/
 #Min   Hour     Day   Month   Weekday   User   Command
 #---------------------------------------------------------------------------------------
 */15   *        *     *       *         root   $DELETE_DIR=/deleteStudyRecords.pl;
+

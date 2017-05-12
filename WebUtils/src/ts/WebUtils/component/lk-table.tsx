@@ -31,7 +31,12 @@ export class FilterableTableColumn extends React.Component<{'cellData': TableCol
     }
 }
 
-export class FilterableTableRow extends React.Component<{'row': TableRow}, {}> {
+export interface FilterableTableRowProps {
+    row: TableRow,
+    handleClick?: (data: any) => void
+}
+
+export class FilterableTableRow extends React.Component<FilterableTableRowProps, {}> {
     render() {
         let data = this.props.row.columns;
 
@@ -39,14 +44,17 @@ export class FilterableTableRow extends React.Component<{'row': TableRow}, {}> {
             return <FilterableTableColumn cellData={cellData} key={i} />
         });
 
-        return <tr>
-            {columns}
-        </tr>;
+        return (
+            <tr onClick={(e) => {_.isFunction(this.props.handleClick) && this.props.handleClick(this.props.row.otherData) ; e.preventDefault();}}>
+                {columns}
+            </tr>
+        );
     }
 }
 
 export interface FilterableTableViewModel {
-    table: Table
+    table: Table,
+    handleRowClick?: (data: any) => void
 }
 
 export interface FilterableTableState {
@@ -141,7 +149,7 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
             row.isHidden(false);
             return true;
         }).map((row: TableRow, i: number) => {
-            return <FilterableTableRow row={row} key={row.key} />;
+            return <FilterableTableRow row={row} key={row.key} handleClick={this.props.handleRowClick} />;
         });
 
         let shownRows = rows.length;

@@ -10,6 +10,10 @@ import {TableRow, SimpleStringColumn} from "WebUtils/model/TableRow";
 import {Table} from "WebUtils/model/Table";
 import {FilterableTable} from "WebUtils/component/lk-table";
 
+interface NxPendingRequestsPanelProps {
+    handleClick: (data: any) => void
+}
+
 interface NxPendingRequestsPanelState {
     requests: NecropsyRequestForm[],
     loading:  boolean
@@ -20,7 +24,7 @@ const requestsListURL: URLForAction = new URLForAction();
 requestsListURL.controller = 'wnprc_ehr-necropsy';
 requestsListURL.actionName = 'getNecropsyRequests';
 
-export class NxPendingRequestsPanel extends Component<{}, NxPendingRequestsPanelState> {
+export class NxPendingRequestsPanel extends Component<NxPendingRequestsPanelProps, NxPendingRequestsPanelState> {
     constructor() {
         super();
 
@@ -124,7 +128,7 @@ export class NxPendingRequestsPanel extends Component<{}, NxPendingRequestsPanel
                 </div>
 
                 {(!this.state.loading && this.state.requests.length > 0) && (
-                    <FilterableTable table={table} />
+                    <FilterableTable table={table} handleRowClick={this.props.handleClick || undefined}/>
                 )}
             </div>
         );

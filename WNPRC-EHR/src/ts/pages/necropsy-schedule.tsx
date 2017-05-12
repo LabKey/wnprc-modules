@@ -23,11 +23,18 @@ class Page extends Component<{}, PageState> {
         };
 
         this.handleEventClick = this.handleEventClick.bind(this);
+        this.handleSelectLsid = this.handleSelectLsid.bind(this);
     }
 
     handleEventClick(nxLsid: string) {
         this.setState({
             selectedNxLsid: nxLsid
+        });
+    }
+
+    handleSelectLsid(rowData: any) {
+        this.setState({
+            selectedNxRequestLsid: rowData.lsid
         });
     }
 
@@ -47,7 +54,7 @@ class Page extends Component<{}, PageState> {
 
                     <div className="col-sm-12 col-xl-8">
                         <div className="col-sm-12 col-md-8">
-                            <NxPendingRequestsPanel />
+                            <NxPendingRequestsPanel handleClick={this.handleSelectLsid} />
                         </div>
 
                         <div className="col-sm-12 col-md-4">

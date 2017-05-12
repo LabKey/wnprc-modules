@@ -64,8 +64,6 @@ export class NxPendingRequestsPanel extends Component<NxPendingRequestsPanelProp
     }
 
     render() {
-        console.log(this.state.requests);
-
         let rows: TableRow[] = this.state.requests.map((request: NecropsyRequestForm) => {
             let displayDate = (m: Moment) => {
                 if (!m) {

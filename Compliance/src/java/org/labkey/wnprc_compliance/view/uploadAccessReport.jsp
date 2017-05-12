@@ -3,7 +3,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
+    String url = (new ActionURL(WNPRC_ComplianceController.TBDashboardPage.class, getContainer())).toString();
 %>
 <div class="text-center" style="margin-bottom: 10px;">
     <a class="btn btn-primary" href="<%= url %>">

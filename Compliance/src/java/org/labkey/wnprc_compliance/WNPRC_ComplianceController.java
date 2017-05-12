@@ -18,6 +18,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.wnprc_compliance.form.NewUserForm;
 import org.labkey.wnprc_compliance.form.RequirementForm;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
@@ -44,14 +45,14 @@ public class WNPRC_ComplianceController extends SpringActionController {
         setActionResolver(_actionResolver);
     }
 
-    public abstract class HRJspPageAction extends SimpleJspPageAction {
+    public abstract class HRJspPageAction extends LegacyJspPageAction {
         public Module getModule() {
             return ModuleLoader.getInstance().getModule(WNPRC_ComplianceModule.class);
         }
     }
 
     @RequiresPermission(ComplianceAdminPermission.class)
-    public class BeginAction extends HRJspPageAction {
+    public class TBDashboardPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
             return "view/begin.jsp";

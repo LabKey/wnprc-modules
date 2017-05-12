@@ -83,6 +83,10 @@ export class NxCalendar extends Component<NxCalendarProps, NxCalendarState> {
                     self.props.handleClick(calEvent.otherData.lsid);
                 }
             }
+        });
+
+        $('.hiddenDiv').on('hiddendiv.show', () => {
+            ($calendar as any).fullCalendar('render');
         })
     }
 

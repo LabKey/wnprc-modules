@@ -10,6 +10,7 @@ import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
+import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.ReactPageAction;
 import org.labkey.webutils.api.action.annotation.JspPath;
 import org.labkey.webutils.api.action.annotation.PageTitle;
@@ -49,7 +50,7 @@ public class NecropsyController extends SpringActionController {
         }
     }
 
-    public abstract class NecropsyPageAction extends ReactPageAction {
+    public abstract class NecropsyPageAction extends LegacyJspPageAction {
         @Override
         public Class getBaseClass() {
             return NecropsyController.class;

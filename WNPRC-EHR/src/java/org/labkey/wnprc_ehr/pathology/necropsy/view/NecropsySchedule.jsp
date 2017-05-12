@@ -4,7 +4,6 @@
 
 %>
 
-
 <script>
     (function() {
         window.PageLoadData = {
@@ -13,5 +12,6 @@
     })();
 </script>
 
+<div id="reactDiv"></div>
 
 <script type="application/javascript" src="<%= getContextPath() %>/wnprc_ehr/pages/necropsy-schedule.js"></script>

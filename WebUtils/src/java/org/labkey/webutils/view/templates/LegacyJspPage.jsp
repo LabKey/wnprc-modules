@@ -172,6 +172,9 @@
 
         $('.hiddenDiv').show();
 
+        // Trigger an event to tell the rest of the page that we've show the hidden div
+        $('.hiddenDiv').trigger('hiddendiv.show');
+
 
         // For some reason, errors get output with a height of zero, and their subelement has a height of 200, so we
         // need to remove them if we actually want to be able to see the error.

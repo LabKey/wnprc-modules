@@ -23,3 +23,8 @@
 	@import (less) "../../bower_components/bootstrap/less/theme.less";
 	@import (less) "./bootstrap-xl.less";
 }
+
+/* LabKey changed it's default font to Roboto, which screws with bolding of text. This changes it back */
+#bootstrap-box div {
+	font-family: Arial, Helvetica, sans-serif;
+}

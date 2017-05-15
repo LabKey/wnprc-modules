@@ -29,8 +29,12 @@
                         <li><strong>DO NOT EDIT THE ID OF ANY USER WHEN EDITING!</strong></li>
                     </ul>
                 </li>
-                <li><a href="{{personListURL}}">
-                    View the List of Persons
+                <li><a href="{{activePersonsURL}}">
+                    View the List of Active Persons
+                </a></li>
+
+                <li><a href="{{archivedPersonsURL}}">
+                    View the List of Archived Persons
                 </a></li>
                 <li>
                     Access Reports
@@ -55,9 +59,13 @@
 <script>
     (function() {
         WebUtils.VM = {
-            personListURL: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {
+            archivedPersonsURL: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {
                 schemaName: "<%= WNPRC_ComplianceSchema.NAME %>",
-                'query.queryName': "personsList"
+                'query.queryName': "ArchivedPersonsList"
+            }),
+            activePersonsURL: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {
+                schemaName: "<%= WNPRC_ComplianceSchema.NAME %>",
+                'query.queryName': "ActivePersonsList"
             }),
             editPersonsURL: LABKEY.ActionURL.buildURL('ehr', 'updateQuery', null, {
                 schemaName: "<%= WNPRC_ComplianceSchema.NAME %>",

@@ -5,7 +5,8 @@ middle_name,
 last_name,
 notes,
 tbResults.lastClearance as lastTbClearance,
-measlesResults.lastClearance as measlesClearance
+measlesResults.lastClearance as measlesClearance,
+archived_for_access_purposes as isArchived
 
 FROM persons
 

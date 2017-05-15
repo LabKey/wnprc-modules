@@ -305,6 +305,7 @@ CREATE TABLE wnprc_compliance.allowed_surgeries_to_drug_regimens (
   CONSTRAINT FK_allowed_surgeries_to_drug_regimens_regimens FOREIGN KEY (drug_regimen_id) REFERENCES wnprc_compliance.drug_regimens (id)
 );
 
+DROP TABLE IF EXISTS wnprc_compliance.allowed_species_to_allowed_surgeries CASCADE ;
 CREATE TABLE wnprc_compliance.allowed_species_to_allowed_surgeries (
   revision_id TEXT NOT NULL,
   species_classifier TEXT NOT NULL,

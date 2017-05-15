@@ -26,6 +26,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-zip": "^4.0.0",
+    "lkpm": "0.0.1",
     "lodash": "^4.17.4"
   }
 }

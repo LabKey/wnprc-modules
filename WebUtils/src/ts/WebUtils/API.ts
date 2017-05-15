@@ -259,8 +259,8 @@ export function post(url: string, data: Object, config: RequestInit) {
     return makeRequest(url, config)
 }
 
-export function postJSON(url: string, data: Object, config: RequestInit) {
-    return makeRequestJSON(url, _.extend(config, {
+export function postJSON(url: string, data: Object, config?: RequestInit) {
+    return makeRequestJSON(url, _.extend(config || {}, {
         method: 'post',
         headers: {
             'Accept':       'application/json',

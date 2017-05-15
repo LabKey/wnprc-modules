@@ -15,7 +15,7 @@
 #---------------------------------------------------------------------------------------
 DELETE_DIR=/usr/local/labkey/deleteStudyRecords/
 MAIL_SERVER=mailserver
-LK_BASE_URL=https://labkey/
+LK_BASE_URL=http://labkey/
 #
 #---------------------------------------------------------------------------------------
 #Min   Hour     Day   Month   Weekday   User   Command

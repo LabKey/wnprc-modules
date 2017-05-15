@@ -77,7 +77,11 @@ export class ProtocolBasicInfoEditor extends React.Component<ProtocolBasicInfoPr
         };
 
         return (
-            <BasicFormEditor formProvider={basicInfoFormProvider} {...this.props} />
+            <BasicFormEditor formProvider={basicInfoFormProvider} {...{
+                revision_id: this.props.revision_id,
+                startEdit:   this.props.startEdit,
+                endEdit:     this.props.endEdit
+            }} />
         )
     }
 }

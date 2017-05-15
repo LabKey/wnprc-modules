@@ -119,7 +119,11 @@ export class HazardsEditor extends React.Component<HazardsEditorProps, {}> {
         };
 
         return (
-            <HazardsFormEditor formProvider={hazardFormProvider} {...this.props} />
+            <HazardsFormEditor formProvider={hazardFormProvider} {...{
+                revision_id: this.props.revision_id,
+                startEdit:   this.props.startEdit,
+                endEdit:     this.props.endEdit
+            }} />
         )
     }
 }

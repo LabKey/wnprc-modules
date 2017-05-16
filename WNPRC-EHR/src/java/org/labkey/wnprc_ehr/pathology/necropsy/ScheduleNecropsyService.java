@@ -1,18 +1,25 @@
-package org.labkey.wnprc_ehr.service.dataentry;
+package org.labkey.wnprc_ehr.pathology.necropsy;
 
 import org.json.JSONObject;
-import org.labkey.api.data.*;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.dataentry.RequestHelper;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
+import org.labkey.api.security.GroupManager;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.Permission;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
+import org.labkey.security.xml.GroupEnumType;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.*;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecropsyPermission;
+import org.labkey.wnprc_ehr.service.dataentry.DataEntryService;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.text.ParseException;
@@ -20,12 +27,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Created by jon on 4/4/17.
+ * Created by jon on 5/16/17.
  */
-public class NecropsyDataEntryService extends DataEntryService {
-    public NecropsyDataEntryService(User user, Container container) throws MissingPermissionsException {
+public class ScheduleNecropsyService extends DataEntryService {
+    public ScheduleNecropsyService(User user, Container container) throws MissingPermissionsException {
         super(user, container, ScheduleNecropsyPermission.class);
     }
+
 
     public void scheduleNecropsy(String requestId, Date scheduledDate, User assignedTo, User pathogist, User assistant) {
         String comment = "Scheduling Necropsy";
@@ -81,14 +89,35 @@ public class NecropsyDataEntryService extends DataEntryService {
             RequestHelper requestHelper = new RequestHelper(requestId, user, container);
             requestHelper.sendEmail("Your Necropsy Request Has Been Scheduled", "");
 
-        } catch (DuplicateKeyException|BatchValidationException|InvalidKeyException e) {
+        } catch (DuplicateKeyException |BatchValidationException |InvalidKeyException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to schedule necropsy", e);
         }
     }
 
-    public NecropsyRequestDetailsForm getNecropsyRequestDetails(String necropsyLsid) {
-        throw new NotImplementedException();
+    public NecropsyRequestDetailsForm getNecropsyRequestDetails(String necropsyLsid) throws ParseException {
+        NecropsyRequestDetailsForm response = new NecropsyRequestDetailsForm();
+
+        SimplerFilter filter = new SimplerFilter("lsid", CompareType.EQUAL, necropsyLsid);
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getEscalationUser(), container);
+        JSONObject row = queryFactory.selectRows("study", "Necropsy Requests", filter).toJSONObjectArray()[0];
+
+        RequestStaticInfo info = new RequestStaticInfo();
+        info.animalid = row.getString("animalid");
+        info.comments = row.getString("comments");
+        info.priority = row.getString("priority");
+        info.requestid = row.getString("requestid");
+        response.staticInfo = info;
+
+        ScheduleNecropsyForm form = new ScheduleNecropsyForm();
+        form.assignedTo    = GroupManager.getGroup(container, "pathology (LDAP)", GroupEnumType.SITE).getUserId();
+        form.assistant     = row.getInt("assistant");
+        form.location      = row.getString("location");
+        form.scheduledDate = _parseDate(row.getString("date"));
+        form.pathologist   = row.getInt("pathologist");
+        response.form = form;
+
+        return response;
     }
 
     public NecropsyRequestListForm getNecropsyRequests() throws ParseException {

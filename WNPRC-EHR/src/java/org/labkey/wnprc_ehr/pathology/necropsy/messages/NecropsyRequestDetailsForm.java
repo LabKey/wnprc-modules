@@ -7,4 +7,6 @@ import com.github.jonathonrichardson.java2ts.annotation.SerializeToTS;
  */
 @SerializeToTS
 public class NecropsyRequestDetailsForm {
+    public RequestStaticInfo staticInfo;
+    public ScheduleNecropsyForm form;
 }

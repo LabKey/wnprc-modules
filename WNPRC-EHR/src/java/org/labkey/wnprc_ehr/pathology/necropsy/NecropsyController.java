@@ -17,7 +17,6 @@ import org.labkey.webutils.api.action.annotation.PageTitle;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.ScheduleNecropsyForm;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecropsyPermission;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ViewNecropsyPermission;
-import org.labkey.wnprc_ehr.service.dataentry.NecropsyDataEntryService;
 import org.springframework.validation.BindException;
 
 import java.text.ParseException;
@@ -44,8 +43,8 @@ public class NecropsyController extends SpringActionController {
     public class ScheduleNecropsy extends ApiAction<ScheduleNecropsyForm> {
         @Override
         public Object execute(ScheduleNecropsyForm form, BindException e) throws Exception {
-            NecropsyDataEntryService necropsyService = new NecropsyDataEntryService(getUser(), getContainer());
-            necropsyService.scheduleNecropsy(form.requestId, form.scheduledDate, form.getAssignedTo(), form.getPathologist(), form.getAssistant());
+            ScheduleNecropsyService necropsyService = new ScheduleNecropsyService(getUser(), getContainer());
+            necropsyService.scheduleNecropsy(getViewContext().getRequest().getParameter("requestid"), form.scheduledDate, form.getAssignedTo(), form.getPathologist(), form.getAssistant());
             return new JSONObject();
         }
     }
@@ -58,8 +57,8 @@ public class NecropsyController extends SpringActionController {
     }
 
     public abstract class NecropsyAPIAction<FORM> extends ApiAction<FORM> {
-        public NecropsyDataEntryService getService() throws MissingPermissionsException {
-            return new NecropsyDataEntryService(getUser(), getContainer());
+        public ScheduleNecropsyService getSchedulerService() throws MissingPermissionsException {
+            return new ScheduleNecropsyService(getUser(), getContainer());
         }
 
         public ViewNecropsyService getViewService() throws MissingPermissionsException {
@@ -117,7 +116,7 @@ public class NecropsyController extends SpringActionController {
     public class GetNecropsyRequests extends NecropsyAPIAction<Object> {
         @Override
         public Object execute(Object form) throws MissingPermissionsException, ParseException {
-            return getService().getNecropsyRequests();
+            return getSchedulerService().getNecropsyRequests();
         }
     }
 
@@ -125,8 +124,8 @@ public class NecropsyController extends SpringActionController {
     @RequiresPermission(ViewNecropsyPermission.class)
     public class GetNecropsyRequestDetails extends NecropsyAPIAction<Object> {
         @Override
-        public Object execute(Object form) throws MissingPermissionsException {
-            return getService().getNecropsyRequestDetails(getNecropsyLsid());
+        public Object execute(Object form) throws MissingPermissionsException, ParseException {
+            return getSchedulerService().getNecropsyRequestDetails(getNecropsyLsid());
         }
     }
 

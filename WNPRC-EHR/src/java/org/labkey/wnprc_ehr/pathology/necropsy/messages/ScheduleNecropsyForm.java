@@ -11,8 +11,8 @@ import java.util.Date;
  */
 @SerializeToTS
 public class ScheduleNecropsyForm {
-    public String requestId;
-    public Date scheduledDate;
+    public Date    scheduledDate;
+    public String  location;
     public Integer assignedTo;
     public Integer pathologist;
     public Integer assistant;

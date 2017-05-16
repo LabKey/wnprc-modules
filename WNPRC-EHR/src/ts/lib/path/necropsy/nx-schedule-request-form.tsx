@@ -9,8 +9,10 @@ export interface NxScheduleRequestFormPanelProps {
 }
 
 interface RequestInfo {
-    animalid: string;
-    comments: string;
+    animalid:  string;
+    comments:  string;
+    requestid: string;
+    priority:  string;
 }
 
 class RequestForm {
@@ -87,7 +89,10 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
                             <p><em>Please select a pending request.</em></p>
                         </div>
                     ) : (
-                        form
+                        /* form */
+                        <p><strong>
+                            Under Construction
+                        </strong></p>
                     )}
                 </div>
             </div>

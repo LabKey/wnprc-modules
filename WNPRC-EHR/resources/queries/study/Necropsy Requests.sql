@@ -16,8 +16,8 @@ performedby as pathologist,
 requestid.qcstate as state,
 comments as comments,
 createdby.displayname as requestor,
-requestid.priority as priority
-
+requestid.priority as priority,
+assistant
 
 FROM study.necropsies
 WHERE requestid IS NOT NULL

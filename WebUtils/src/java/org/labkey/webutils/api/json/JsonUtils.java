@@ -5,22 +5,31 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by jon on 4/15/16.
  */
 public class JsonUtils {
-    public static JSONArray sortJsonArrayByKey(JSONArray jsonArray, String key) {
+    public static JSONArray sortJsonArray(JSONArray jsonArray, Comparator<JSONObject> comparator) {
         List<JSONObject> jsonList = getListFromJSONArray(jsonArray);
 
-        Collections.sort(jsonList, new StringKeyComparator(key));
+        Collections.sort(jsonList, comparator);
 
         return getJSONArrayFromList(jsonList);
     }
 
+    public static JSONArray sortJsonArrayByKey(JSONArray jsonArray, String key) {
+        return sortJsonArray(jsonArray, new StringKeyComparator(key));
+    }
+
+    public static List<JSONObject> getSortedListFromJSONArray(JSONArray jsonArray, Comparator comparator) {
+        return getListFromJSONArray(sortJsonArray(jsonArray, comparator));
+    }
+
     public static List<JSONObject> getSortedListFromJSONArray(JSONArray jsonArray, String key) {
-        return getListFromJSONArray(sortJsonArrayByKey(jsonArray, key));
+        return getSortedListFromJSONArray(jsonArray, new StringKeyComparator(key));
     }
 
     public static JSONArray getJSONArrayFromList(List<JSONObject> jsonObjectList) {

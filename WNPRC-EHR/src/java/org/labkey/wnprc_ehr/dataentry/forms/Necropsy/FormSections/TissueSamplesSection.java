@@ -15,6 +15,7 @@ public class TissueSamplesSection extends SlaveGridSection {
     @Override
     public List<String> getFieldNames() {
         return Arrays.asList(
+                "lab_sample_id",
                 "tissue",
                 "qualifier",
                 "preservation",

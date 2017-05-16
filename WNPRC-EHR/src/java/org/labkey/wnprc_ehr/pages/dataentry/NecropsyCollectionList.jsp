@@ -4,6 +4,8 @@
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.sql.Timestamp" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -64,6 +66,15 @@
         JSONObject necropsy = necropsies.getJSONObject(0);
         JSONObject[] tissueSamples = queryFactory.selectRows("study", "tissue_samples", taskFilter).toJSONObjectArray();
         JSONObject[] organWeights  = queryFactory.selectRows("study", "organ_weights",  taskFilter).toJSONObjectArray();
+
+        Timestamp necropsyDate = (Timestamp) necropsy.get("date");
+        String necropsyDisplayDate;
+        if (necropsyDate != null) {
+            necropsyDisplayDate = new SimpleDateFormat("MMM d, yyyy 'at' hh:mm a").format(necropsyDate);
+        }
+        else {
+            necropsyDisplayDate = "unknown";
+        }
     %>
     <div class="row">
         <%-- A footer --%>
@@ -75,6 +86,25 @@
     </div>
 
     <h2 class="text-center">Collection List for <%= h(necropsy.optString("caseno", "")) %> (<%= h(necropsy.optString("id", "[unknown animal]")) %>)</h2>
+
+    <div class="row">
+        <h4>General</h4>
+        <hr class="sectionBar"/>
+
+        <div class="col-sm-6">
+            <dl class="dl-horizontal">
+                <dt>Necropsy Date</dt>
+                <dd><%= necropsyDisplayDate %></dd>
+            </dl>
+        </div>
+
+        <div class="col-sm-6">
+            <dl class="dl-horizontal">
+                <dt>Perfusion</dt>
+                <dd><%= necropsy.optString("perfusion_area_fs_value", "-- None --") %></dd>
+            </dl>
+        </div>
+    </div>
 
     <div class="row">
         <h4>Pathology Unit Notes</h4>
@@ -96,6 +126,7 @@
                     <th>Preservation</th>
                     <th>Tissue Remarks</th>
                     <th>Quantity</th>
+                    <th>Lab ID</th>
                     <th>Recipient</th>
                     <th>Transfer</th>
                     <th>Shipping Note</th>
@@ -122,6 +153,7 @@
                 <td><%= h(tissueSample.optString("preservation_fs_value", "")) %> </td>
                 <td><%= h(tissueSample.optString("tissueremarks")) %>             </td>
                 <td><%= h(tissueSample.optString("quantity")) %>                  </td>
+                <td><%= h(tissueSample.optString("lab_sample_id")) %>             </td>
                 <td><%= h(tissueSample.optString("recipient")) %>                 </td>
                 <td><%= h(deliveryMethod) %>                                      </td>
                 <td><%= h(tissueSample.optString("ship_to_comment")) %>           </td>

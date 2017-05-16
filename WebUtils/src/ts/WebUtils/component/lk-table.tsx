@@ -205,8 +205,6 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
     }
 }
 
-let koTemplate = ReactDomServer.renderToString((<div className="lk-table-react"> </div>));
-
 export interface FilterableTableParams {
     table: Table
 }
@@ -226,6 +224,6 @@ export function registerKoComponent(): void {
 
             }
         },
-        template: koTemplate
+        template: '<div class="lk-table-react"></div>'
     });
 }

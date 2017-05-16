@@ -21,12 +21,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
-import org.labkey.api.action.ApiResponse;
-import org.labkey.api.action.ApiSimpleResponse;
-import org.labkey.api.action.ApiUsageException;
-import org.labkey.api.action.ExportAction;
-import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.*;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
@@ -49,6 +44,9 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.RedirectException;
 import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.action.annotation.JspPath;
@@ -67,8 +65,10 @@ import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectExcepti
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
+import org.labkey.wnprc_ehr.pathology.necropsy.NecropsyController;
 import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.springframework.validation.BindException;
+import org.springframework.web.servlet.ModelAndView;
 
 
 import javax.servlet.ServletOutputStream;
@@ -578,9 +578,19 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("NecropsySchedule")
     @PageTitle("Necropsy Schedule")
-    @JspPath("pages/dataentry/NecropsySchedule.jsp")
     @RequiresLogin()
-    public class NecropsyScheduleAction extends WNPRCJspPageAction {}
+    public class NecropsyScheduleAction extends SimpleViewAction<NullFORM> {
+        @Override
+        public NavTree appendNavTrail(NavTree navTree) {
+            throw new UnsupportedOperationException("Redirects should not show nav trails");
+        }
+
+        @Override
+        public ModelAndView getView(NullFORM nullFORM, BindException e) throws Exception {
+            ActionURL newNecropsySchedule = new ActionURL(NecropsyController.NecropsySchedulePage.class, getContainer());
+            throw new RedirectException(newNecropsySchedule.toString());
+        }
+    }
 
 
     @ActionNames("PathologyCaseList")

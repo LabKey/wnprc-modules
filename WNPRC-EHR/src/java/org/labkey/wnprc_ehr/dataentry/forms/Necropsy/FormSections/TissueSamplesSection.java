@@ -16,6 +16,8 @@ public class TissueSamplesSection extends SlaveGridSection {
     public List<String> getFieldNames() {
         return Arrays.asList(
                 "lab_sample_id",
+                "collection_order",
+                "collect_before_death",
                 "tissue",
                 "qualifier",
                 "preservation",

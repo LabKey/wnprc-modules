@@ -6,6 +6,10 @@
 <%@ page import="org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.sql.Timestamp" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
+<%@ page import="org.labkey.webutils.api.json.NumberKeyComparator" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -114,7 +118,7 @@
     </div>
 
     <div class="row">
-        <h4>Tissue Samples</h4>
+        <h4>Antemortem Tissue Samples</h4>
         <hr class="sectionBar"/>
 
         <% if (tissueSamples.length > 0) { %>
@@ -136,8 +140,75 @@
                 </tr>
             </thead>
             <%
-                for (JSONObject tissueSample : tissueSamples) {
+                SimplerFilter preDeathFilter = new SimplerFilter("collect_before_death", CompareType.EQUAL, true);
+                preDeathFilter.addAllClauses(taskFilter);
+                List<JSONObject> preDeathTissueSamples = JsonUtils.getSortedListFromJSONArray(queryFactory.selectRows("study", "tissue_samples", preDeathFilter), "collection_order");
 
+                for (JSONObject tissueSample : preDeathTissueSamples) {
+
+                    String deliveryMethod = tissueSample.getString("ship_to");
+                    if (deliveryMethod != null) {
+                        NecropsySampleDeliveryDestination.SampleDeliveryDestination deliveryDestination = NecropsySampleDeliveryDestination.SampleDeliveryDestination.valueOf(deliveryMethod);
+
+                        if (deliveryDestination != null) {
+                            deliveryMethod = deliveryDestination.getTitle();
+                        }
+                    }
+            %>
+            <tr>
+                <td style="font-weight: bold"><%= h(tissueSample.optString("tissue_fs_meaning", "")) %></td>
+                <td><%= h(tissueSample.optString("qualifier_fs_value", tissueSample.optString("qualifier", ""))) %></td>
+                <td><%= h(tissueSample.optString("preservation_fs_value", "")) %> </td>
+                <td><%= h(tissueSample.optString("tissueremarks")) %>             </td>
+                <td><%= h(tissueSample.optString("quantity")) %>                  </td>
+                <td><%= h(tissueSample.optString("lab_sample_id")) %>                 </td>
+                <td><%= h(tissueSample.optString("recipient")) %>                 </td>
+                <td><%= h(deliveryMethod) %>                                      </td>
+                <td><%= h(tissueSample.optString("ship_to_comment")) %>           </td>
+                <td><%= h(tissueSample.optString("container_type_fs_value")) %>   </td>
+                <td><%= h(tissueSample.optString("slidenum")) %>                  </td>
+                <td><%= h(tissueSample.optString("trimremarks")) %>               </td>
+            </tr>
+            <% } %>
+        </table>
+        <% } else { %>
+        <p>
+            There are no requested tissue samples for this necropsy.
+        </p>
+        <% } %>
+    </div>
+
+    <div class="row">
+        <h4>Postmortem Tissue Samples</h4>
+        <hr class="sectionBar"/>
+
+        <% if (tissueSamples.length > 0) { %>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Tissue</th>
+                <th>Tissue Qualifer</th>
+                <th>Preservation</th>
+                <th>Tissue Remarks</th>
+                <th>Quantity</th>
+                <th>Lab ID</th>
+                <th>Recipient</th>
+                <th>Transfer</th>
+                <th>Shipping Note</th>
+                <th>Container Type</th>
+                <th>Slide Number</th>
+                <th>Trim Remarks</th>
+            </tr>
+            </thead>
+            <%
+                SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
+                orClause.addClause(new SimplerFilter("collect_before_death", CompareType.EQUAL, false).getClauses().get(0));
+                orClause.addClause(new SimplerFilter("collect_before_death", CompareType.ISBLANK, null).getClauses().get(0));
+                SimpleFilter preDeathFilter = taskFilter.clone();
+                preDeathFilter.addClause(orClause);
+                List<JSONObject> postmortemTissueSamples = JsonUtils.getSortedListFromJSONArray(queryFactory.selectRows("study", "tissue_samples", preDeathFilter), new NumberKeyComparator("collection_order"));
+
+                for (JSONObject tissueSample : postmortemTissueSamples) {
                     String deliveryMethod = tissueSample.getString("ship_to");
                     if (deliveryMethod != null) {
                         NecropsySampleDeliveryDestination.SampleDeliveryDestination deliveryDestination = NecropsySampleDeliveryDestination.SampleDeliveryDestination.valueOf(deliveryMethod);

@@ -141,6 +141,14 @@ EHR.model.DataModelManager.registerMetadata('NecropsyRequest', {
             slideNum: {
                 hidden: true,
                 shownInGrid: false
+            },
+            collect_before_death: {
+                hidden: true,
+                shownInGrid: false
+            },
+            collection_order: {
+                hidden: true,
+                shownInGrid: false
             }
         }
     }

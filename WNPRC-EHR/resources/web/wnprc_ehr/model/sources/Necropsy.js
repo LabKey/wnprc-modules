@@ -326,6 +326,20 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
             },
             recipient: {
                 shownInGrid: true
+            },
+            collect_before_death: {
+                label: "Antemortem?",
+                columnConfig: {
+                    header: "AM?",
+                    width: 50
+                }
+            },
+            collection_order: {
+                label: "Collection Order",
+                columnConfig: {
+                    header: "#",
+                    width: 40
+                }
             }
         },
         'study.histology': {

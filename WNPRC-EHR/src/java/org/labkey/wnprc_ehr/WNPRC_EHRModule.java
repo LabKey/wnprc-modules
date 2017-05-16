@@ -17,17 +17,21 @@ package org.labkey.wnprc_ehr;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.buttons.MarkCompletedButton;
 import org.labkey.api.ehr.dataentry.DefaultDataEntryFormFactory;
+import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.ldk.notification.Notification;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
+import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
@@ -74,6 +78,7 @@ import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecro
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ViewNecropsyPermission;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.role.NecropsyScheduler;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.role.NecropsyViewer;
+import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
@@ -83,11 +88,7 @@ import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.api.ldk.notification.NotificationService;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: bbimber
@@ -102,6 +103,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     }
 
     protected void init() {
+        TissueSampleTable.registerProperties();
+
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
         addController(NecropsyController.NAME, NecropsyController.class);
     }
@@ -167,6 +170,18 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         this.registerPermissions();
 
         this.registerServices();
+
+        for (Container studyContainer : getWNPRCStudyContainers()) {
+            User user = EHRService.get().getEHRUser(studyContainer);
+            try {
+                WNPRC_Schema.ensureStudyShape(user, studyContainer);
+            }
+            catch (ChangePropertyDescriptorException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 
     private void registerPermissions() {
@@ -278,5 +293,56 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         RoleManager.registerRole(new WNPRCAdminRole());
         RoleManager.registerRole(new NecropsyViewer());
         RoleManager.registerRole(new NecropsyScheduler());
+    }
+
+
+
+    public Set<Container> getWNPRCStudyContainers() {
+        Set<Container> studyContainers = new HashSet<>();
+        WNPRC_EHRModule module = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+
+        for (Container container : getAllContainers()) {
+            if (container.getActiveModules().contains(module)) {
+                Container studyContainer = EHRService.get().getEHRStudyContainer(container);
+                studyContainers.add(studyContainer);
+            }
+        }
+
+        return studyContainers;
+    }
+
+    public static Set<Container> getAllContainers() {
+        Set<Container> containers = new HashSet<>();
+
+        Container root = ContainerManager.getRoot();
+        containers.addAll(getChildContainers(root));
+
+        return containers;
+    }
+
+    public static Set<Container> getChildContainers(Container parentContainer) {
+        Set<Container> containers = new HashSet<>();
+
+        for (Container container : parentContainer.getChildren()) {
+            containers.add(container);
+            containers.addAll(getChildContainers(container));
+        }
+
+        return containers;
+    }
+
+    public static Container getDefaultContainer() {
+        if (ContainerManager.getForPath("/WNPRC") == null) {
+            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC");
+        }
+        Container wnprcContainer = ContainerManager.getForPath("/WNPRC");
+
+        Container ehrContainer = wnprcContainer.getChild("EHR");
+        if (ehrContainer == null) {
+            ContainerManager.createContainer(wnprcContainer, "EHR");
+            ehrContainer = wnprcContainer.getChild("EHR");
+        }
+
+        return ehrContainer;
     }
 }

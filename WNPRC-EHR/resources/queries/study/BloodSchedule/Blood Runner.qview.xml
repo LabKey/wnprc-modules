@@ -52,6 +52,7 @@
        <column name="quantity" />
 
        <column name="additionalServices" />
+       <column name="billedby" />
        <column name="instructions" />
        <!--<column name="remark" />-->
       <column name="requestid/description">

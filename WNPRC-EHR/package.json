@@ -22,7 +22,6 @@
     "@types/underscore": "^1.8.0",
     "@types/underscore.string": "0.0.30",
     "gulp": "github:gulpjs/gulp#4.0",
-    "lkpm": "0.0.1",
     "react": "^15.4.2",
     "typescript": "^2.2.1"
   },

@@ -612,4 +612,31 @@
     EHR.DataEntryUtils.registerGridButton(saveTemplateButtonName, function(config) {
         return Ext4.apply(saveTemplateButton, config);
     });
+
+    EHR.DataEntryUtils.registerGridButton('WNPRC_AUTO_ASSIGN_ORDER', function(config){
+        return Ext4.Object.merge({
+            text: 'Auto Assign Order',
+            xtype: 'button',
+            tooltip: 'This will automatically add order numbers to every row in this grid in the current order they display on screen',
+            handler: function() {
+                var self = this;
+                var grid = this.up('grid');
+
+                if (!grid) {
+                    return;
+                }
+
+                var store = grid.getStore();
+                if (!store) {
+                    return;
+                }
+
+                Ext4.suspendLayouts();
+                _.each(store.getRange(), function(rec, i) {
+                    rec.set("collection_order", i * 10);
+                });
+                Ext4.resumeLayouts(true);
+            }
+        });
+    });
 })();

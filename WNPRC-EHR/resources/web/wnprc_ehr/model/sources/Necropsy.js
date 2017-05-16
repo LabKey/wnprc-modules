@@ -338,7 +338,7 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
                 label: "Collection Order",
                 columnConfig: {
                     header: "#",
-                    width: 40
+                    width: 45
                 }
             }
         },

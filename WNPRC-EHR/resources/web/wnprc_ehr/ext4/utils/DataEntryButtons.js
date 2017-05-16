@@ -590,6 +590,15 @@
         }
     });
 
+
+    /*
+     * This is a wrapper on the Request button to allow .
+     */
+    var SubmitFinalButtonName = 'WNPRC_REQUEST';
+    registerBtn(SubmitFinalButtonName, _.extend(getBtn("REQUEST"), {
+        disableOn: 'ERROR'
+    }));
+
     /*
      * Enable the save template button for all users.
      */

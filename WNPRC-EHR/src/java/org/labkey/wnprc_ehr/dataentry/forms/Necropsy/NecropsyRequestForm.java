@@ -14,7 +14,9 @@ import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleRequestForm;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.AnimalDetailsPanel;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.ShortenedRequestFormSection;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by jon on 3/4/16.
@@ -43,5 +45,17 @@ public class NecropsyRequestForm extends SimpleRequestForm {
 
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/NecropsyRequest.js"));
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Pathology.js"));
+    }
+
+
+    @Override
+    protected List<String> getButtonConfigs() {
+        List<String> buttons = new ArrayList<>();
+        buttons.addAll(super.getButtonConfigs());
+
+        buttons.remove("REQUEST");
+        buttons.add("WNPRC_REQUEST");
+
+        return buttons;
     }
 }

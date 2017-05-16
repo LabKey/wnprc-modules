@@ -19,11 +19,12 @@ exports.registerTriggers = function(EHR, registerGenericHandler, Events) {
         }
 
         if (row.is_prenatal_necropsy && !row.dam) {
-            EHR.Server.Utils.addError(scriptErrors, 'dam', "Dam is required for pre-natal necropsies", "ERROR");
+            EHR.Server.Utils.addError(scriptErrors, 'dam', "Dam is required for pre-natal necropsies.  If dam is not known, you may enter a descriptive placeholder here, such as 'rUNKOWN' for an as of yet unspecified rhesus animal.", "ERROR");
         }
 
         if ('dam' in row && row.dam) {
             validator.checkAnimalInCol("dam", {
+                exists:   WNPRC.Validator.Severity.WARN,
                 isAlive:  WNPRC.Validator.Severity.WARN,
                 isFemale: WNPRC.Validator.Severity.ERROR
             });

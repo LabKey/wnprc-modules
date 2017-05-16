@@ -25,12 +25,12 @@
         display: block;
         content: '\2022'; /* bullet point, for screen readers */
         text-indent: -999999px; /* move the bullet point out of sight */
-        left: -4em;
-        width: 4em; /* desired width of the image */
+        left: -3em;
+        width: 2em; /* desired width of the image */
         height: 2em; /* unrelated to image height; this is so it gets snipped */
         background-repeat: no-repeat;
         background-image: url('<%=AppProps.getInstance().getContextPath()%>/webutils/icons/warning_yellow.svg');
-        background-size: 4em 1.5em;
+        background-size: 2em 1.5em;
         background-position: 0 .3em;
     }
 
@@ -43,10 +43,19 @@
             perform.
         </li>
         <li>
-            Investigators are responsible for providing all solutions for tissue preservation other than
-            10% neutral buffered formalin. <span style="font-weight: normal" >If a member of the investigating lab
-            cannot order or does not provide the solutions needed for a specific necropsy, CPI will mix PFA, PBS
-            and other solutions on a fee-for-service basis.</span>
+            Investigators are responsible for providing all solutions for tissue preservation other than 10% neutral
+            buffered formalin the day before or morning of necropsy. <span style="font-weight: normal">If a member of
+            the investigating lab cannot order or does not provide the solutions needed for a specific necropsy, prior
+            arrangements with SPI to prepare PFA, PBS and other solutions on a fee-for-service basis need to be made.
+            Please indicate in the notes section of the necropsy request form that arrangements have been made for SPI
+            to provide solutions.</span>
+            <ul>
+                <li>
+                    Please indicate in the notes section of the necropsy request form if your laboratory will be
+                    providing pre-labeled containers for samples or if the Pathology Services Unit should plan to
+                    provide containers for samples.
+                </li>
+            </ul>
         </li>
         <li style="margin-bottom: 0px">
             Cultures of microorganisms may be carried out to accurately diagnose the cause of any

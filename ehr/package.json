@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/WNPRC-EHR-Services/ehr#readme",
   "dependencies": {
-    "gulp": "github:gulpjs/gulp#4.0",
-    "lkpm": "0.0.1"
+    "gulp": "github:gulpjs/gulp#4.0"
   }
 }

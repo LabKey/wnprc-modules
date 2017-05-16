@@ -62,6 +62,10 @@ public class NecropsyController extends SpringActionController {
             return new NecropsyDataEntryService(getUser(), getContainer());
         }
 
+        public ViewNecropsyService getViewService() throws MissingPermissionsException {
+            return new ViewNecropsyService(getUser(), getContainer());
+        }
+
         public Object execute(FORM form, BindException e) throws Exception {
             ObjectMapper mapper = new ObjectMapper();
 
@@ -95,7 +99,7 @@ public class NecropsyController extends SpringActionController {
             Date startDate = _parseDate(getParameter("start"));
             Date endDate = _parseDate(getParameter("end"));
 
-            return getService().getScheduledNecropsies(startDate, endDate);
+            return getViewService().getScheduledNecropsies(startDate, endDate);
         }
     }
 
@@ -104,7 +108,7 @@ public class NecropsyController extends SpringActionController {
     public class GetNecropsyInfo extends NecropsyAPIAction<Object> {
         @Override
         public Object execute(Object form) throws MissingPermissionsException, ParseException {
-            return getService().getNecropsyDetails(getNecropsyLsid());
+            return getViewService().getNecropsyDetails(getNecropsyLsid());
         }
     }
 

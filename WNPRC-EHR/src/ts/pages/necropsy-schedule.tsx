@@ -13,6 +13,9 @@ interface PageState {
     selectedNxRequestLsid: string | null;
 }
 
+let global = window as any;
+let isPathologist: boolean = ('isPathologist' in global.PageLoadData) ? global.PageLoadData.isPathologist : false;
+
 class Page extends Component<{}, PageState> {
     constructor(props: {}) {
         super(props);
@@ -44,7 +47,7 @@ class Page extends Component<{}, PageState> {
                 <div className="row">
                     <div className="col-sm-12 col-xl-8">
                         <div className="col-sm-12 col-md-4">
-                            <NxDetailsPanel necropsyLsid={this.state.selectedNxLsid} />
+                            <NxDetailsPanel necropsyLsid={this.state.selectedNxLsid} isPathologist={isPathologist}/>
                         </div>
 
                         <div className="col-sm-12 col-md-8">
@@ -52,15 +55,17 @@ class Page extends Component<{}, PageState> {
                         </div>
                     </div>
 
-                    <div className="col-sm-12 col-xl-8">
-                        <div className="col-sm-12 col-md-8">
-                            <NxPendingRequestsPanel handleClick={this.handleSelectLsid} />
-                        </div>
+                    {isPathologist && (
+                        <div className="col-sm-12 col-xl-8">
+                            <div className="col-sm-12 col-md-8">
+                                <NxPendingRequestsPanel handleClick={this.handleSelectLsid} />
+                            </div>
 
-                        <div className="col-sm-12 col-md-4">
-                            <NxScheduleRequestFormPanel necropsyLsid={this.state.selectedNxRequestLsid} />
+                            <div className="col-sm-12 col-md-4">
+                                <NxScheduleRequestFormPanel necropsyLsid={this.state.selectedNxRequestLsid} />
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         );

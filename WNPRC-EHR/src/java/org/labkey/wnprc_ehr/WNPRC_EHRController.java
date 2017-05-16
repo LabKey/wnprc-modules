@@ -595,6 +595,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("PathologyCaseList")
     @PageTitle("Pathology Case List")
+    @RequiresLogin()
     @JspPath("pages/dataentry/PathologyCaseList.jsp")
     public class PathologyCaseListAction extends WNPRCJspPageAction {}
 

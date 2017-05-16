@@ -4,11 +4,13 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 import {NecropsyDetailsForm, URLForAction} from "../../../../../build/generated-ts/GeneratedFromJava";
 import * as api from "WebUtils/API";
-import {urlFromAction} from "../../../../../lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+import {urlFromAction, buildURLWithParams, getCurrentContainer} from "WebUtils/LabKey";
 import * as s from "underscore.string";
+import * as _ from "underscore";
 
 export interface NxDetailsPanelProps {
     necropsyLsid: string | null;
+    isPathologist: boolean;
 }
 
 export interface NxDetailsPanelState {
@@ -61,6 +63,22 @@ export class NxDetailsPanel extends Component<NxDetailsPanelProps, NxDetailsPane
             sameElse: 'MMM D[,] YYYY'
         });
 
+        let wnprcControllerName = 'wnprc_ehr';
+        let taskIdConfig = {'taskid': this.props.necropsyLsid || ''};
+        let getNecropsyPage = (actionName: string): string => {
+            return buildURLWithParams(wnprcControllerName, actionName, getCurrentContainer(), taskIdConfig);
+        };
+
+        let collectionListURL = getNecropsyPage('NecropsyCollectionList');
+        let reportURL = getNecropsyPage('NecropsyReport');
+
+        let formConfig = _.extend(taskIdConfig, {
+            formType: 'Necropsy'
+        });
+
+        let viewNxURL = buildURLWithParams('ehr', 'dataEntryFormDetails', getCurrentContainer(), formConfig);
+        let editNxURL = buildURLWithParams('ehr', 'dataEntryForm', getCurrentContainer(), formConfig);
+
         let details = form == null ? (
             <div className="text-center">
                 <i className="fa fa-spinner fa-pulse fa-fw"></i>
@@ -99,6 +117,18 @@ export class NxDetailsPanel extends Component<NxDetailsPanelProps, NxDetailsPane
                     }
 
                 </dl>
+
+                <div className="text-center">
+                    <div className="btn-group btn-group-sm" role="group">
+                        <a className="btn btn-default" href={collectionListURL}>Collection List</a>
+                        <a className="btn btn-default" href={reportURL}        >Report</a>
+                        <a className="btn btn-default" href={viewNxURL}        >View Nx</a>
+
+                        {this.props.isPathologist && (
+                            <a className="btn btn-primary" href={editNxURL}    >Edit Nx</a>
+                        )}
+                    </div>
+                </div>
             </div>
         );
 

@@ -87,53 +87,6 @@ public class NecropsyDataEntryService extends DataEntryService {
         }
     }
 
-    public ScheduledNecropsiesForm getScheduledNecropsies(Date startDate, Date endDate) throws ParseException {
-        ScheduledNecropsiesForm returnForm = new ScheduledNecropsiesForm();
-
-        SimplerFilter startFilter = new SimplerFilter("date", CompareType.DATE_GTE, startDate);
-        SimplerFilter endFilter   = new SimplerFilter("date", CompareType.DATE_LTE, endDate);
-        SimpleFilter filter = (new SimpleFilter()).addAllClauses(endFilter).addAllClauses(startFilter);
-
-        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getEscalationUser(), container);
-        for (JSONObject row : queryFactory.selectRows("study", "Necropsy Schedule", filter).toJSONObjectArray()) {
-            NecropsyEventForm event = new NecropsyEventForm();
-            event.lsid = row.getString("lsid");
-            event.animalId = row.getString("animalid");
-
-            event.scheduledDate = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(row.getString("date"));
-            event.color = row.getString("display_color");
-
-            returnForm.scheduledNecropsies.add(event);
-        }
-
-        return returnForm;
-    }
-
-    public NecropsyDetailsForm getNecropsyDetails(String necropsyLsid) throws ParseException {
-        NecropsyDetailsForm detailsForm = new NecropsyDetailsForm();
-
-        SimplerFilter filter = new SimplerFilter("lsid", CompareType.EQUAL, necropsyLsid);
-        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getEscalationUser(), container);
-        JSONObject row = queryFactory.selectRows("study", "Necropsy Schedule Details", filter).toJSONObjectArray()[0];
-
-        detailsForm.taskId = row.getString("taskid");
-        detailsForm.animalId = row.getString("animalid");
-        detailsForm.requestId = "";
-        detailsForm.project   = row.getString("project");
-        detailsForm.account   = row.getString("account");
-        detailsForm.protocol  = row.getString("protocol");
-        detailsForm.scheduledDate = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).parse(row.getString("date"));
-        detailsForm.necropsyLocation = row.getString("location");
-        detailsForm.whoDeliversToNx  = row.getString("who_delivers");
-        detailsForm.deliveryComment  = row.optString("delivery_comment", "");
-        detailsForm.currentRoom = row.getString("cur_room");
-        detailsForm.currentCage = row.getString("cur_cage");
-        detailsForm.housingType = row.getString("cur_cond");
-        detailsForm.hasTissuesForAVRL = row.getBoolean("has_tissues_for_avrl");
-
-        return detailsForm;
-    }
-
     public NecropsyRequestDetailsForm getNecropsyRequestDetails(String necropsyLsid) {
         throw new NotImplementedException();
     }

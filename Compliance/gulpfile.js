@@ -9,10 +9,19 @@ var taskExporter = new lkpm.TaskExporter({
 }, gulp);
 
 taskExporter.enableWebpack({
-    entry: {
-        'pages/edit-protocol': path.join(__dirname, 'src', 'ts', 'pages', 'edit-protocol.tsx'),
-        'pages/protocol-list': path.join(__dirname, 'src', 'ts', 'pages', 'protocol-list.tsx')
-    },
+    entry: (function() {
+        var page_names = [
+            'edit-protocol',
+            'protocol-list',
+            'edit-person',
+            'person-list'
+        ];
+
+        var config = {};
+        page_names.forEach(function(pageName) {
+            config['pages/' + pageName] = path.join(__dirname, 'src', 'ts', 'pages', pageName + '.tsx');
+        })
+    })(),
 
     output: {
         path: path.resolve(taskExporter.getCompiledResourceDir(), 'web', 'wnprc_compliance', 'js')

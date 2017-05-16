@@ -869,4 +869,14 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+
+
+
+
+    @ActionNames("DiarrheaAnalysis")
+    @JspPath("pages/clinical/DiarrheaAnalysis.jsp")
+    @PageTitle("Diarrhea Analysis")
+    @RequiresLogin()
+    public class DiarrheaAnalysisPage extends WNPRCJspPageAction {}
+
 }

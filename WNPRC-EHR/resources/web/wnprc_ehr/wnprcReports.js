@@ -776,6 +776,61 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
 };
 
 (function() {
+    EHR.reports['diarrheaCalendar'] = function(panel, tab) {
+        var animalId = panel.activeFilterType.getTitle(tab);
+
+        var html = "<p>** NOTE: The Diarrhea Trends page linked to from here can take up to 20 seconds to load.</p>";
+
+        // If "Entire Database" is selected, don't add the additional panel
+        if (animalId == "") {
+            return;
+        }
+
+        // If "Current Location" is selected, don't add the additional panel
+        if (animalId.match(/multiple rooms selected/i) || animalId.match(/^Room:/i)) {
+            return;
+        }
+
+        var getDiarrheaLink = function(animalId) {
+            var url = LABKEY.ActionURL.buildURL('wnprc_ehr', 'DiarrheaAnalysis', null, {
+                id: animalId
+            });
+
+            return '<a href="' + url + '">' + animalId + '</a>'
+        };
+
+        var animalList = animalId.split(",");
+        html += '<p>' + animalList.map(getDiarrheaLink).join(", ") + '</p>';
+
+        var config = {
+            xtype: 'ldk-webpartpanel',
+            title: "Links to Diarrhea Trends Over Time",
+            align: 'stretch',
+            frame: true,
+            html:  html,
+            style: 'margin-bottom: 20px'
+        };
+
+        tab.add(config);
+
+        var calendar = panel.getQWPConfig({
+            title: 'Diarrhea Calendar - ' + animalList.join(', '),
+            schemaName: 'study',
+            queryName: 'diarrheaCalendar',
+            filters: [LABKEY.Filter.create('Id', animalList.join(';'), LABKEY.Filter.Types.IN)],
+            frame: true
+        });
+        tab.add( {
+            xtype: 'ldk-querypanel',
+            style: 'margin-bottom:20px;',
+            queryConfig: calendar
+        });
+
+    };
+})();
+
+
+(function() {
     var abstractReport = EHR.reports['abstract'];
 
     EHR.reports['abstract'] = function(panel, tab) {

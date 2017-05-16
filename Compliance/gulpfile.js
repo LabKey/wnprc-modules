@@ -21,6 +21,8 @@ taskExporter.enableWebpack({
         page_names.forEach(function(pageName) {
             config['pages/' + pageName] = path.join(__dirname, 'src', 'ts', 'pages', pageName + '.tsx');
         })
+
+        return config;
     })(),
 
     output: {

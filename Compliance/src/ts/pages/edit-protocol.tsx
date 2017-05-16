@@ -92,7 +92,7 @@ class Page extends React.Component<PageProps, PageState> {
             });
         });
 
-        $(this.dropdownButton).dropdown();
+        ($(this.dropdownButton) as any).dropdown();
     }
 
     setSectionToEdit(name: string) {

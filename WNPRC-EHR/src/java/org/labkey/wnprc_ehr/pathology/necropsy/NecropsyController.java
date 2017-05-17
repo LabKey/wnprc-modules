@@ -15,6 +15,7 @@ import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.ReactPageAction;
 import org.labkey.webutils.api.action.annotation.JspPath;
 import org.labkey.webutils.api.action.annotation.PageTitle;
+import org.labkey.wnprc_ehr.pathology.necropsy.messages.NecropsySuitesList;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.ScheduleNecropsyForm;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecropsyPermission;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ViewNecropsyPermission;
@@ -132,6 +133,26 @@ public class NecropsyController extends SpringActionController {
         @Override
         public Object execute(Object form) throws MissingPermissionsException, ParseException {
             return getSchedulerService().getNecropsyRequestDetails(getNecropsyLsid());
+        }
+    }
+
+    @ActionNames("getNecropsySuites")
+    @RequiresPermission(ViewNecropsyPermission.class)
+    public class GetNecropsySuitesAPI extends NecropsyAPIAction<Object> {
+        @Override
+        public Object execute(Object form) throws MissingPermissionsException {
+            NecropsySuitesList suites = new NecropsySuitesList();
+            suites.suites.addAll(getViewService().getNecropsySuites());
+            return suites;
+        }
+    }
+
+    @ActionNames("getPathologists")
+    @RequiresPermission(ViewNecropsyPermission.class)
+    public class GetPathologistsAPI extends NecropsyAPIAction<Object> {
+        @Override
+        public Object execute(Object form) throws MissingPermissionsException {
+            return getViewService().getPathologists();
         }
     }
 

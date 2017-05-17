@@ -3,18 +3,21 @@ import * as ReactDOM from "react-dom";
 import moment = require("moment");
 import Moment = moment.Moment;
 
-export interface YearSelectorProps {
-    initialYear?: Moment | KnockoutObservable<Moment>
+interface DateSelectorProps {
+    initialDate?: Moment | KnockoutObservable<Moment>;
+    format: string;
+    isEqual: (curDate: Moment, nextDate: Moment) => boolean;
+    handleUpdate?: (newDate: Moment) => void;
 }
 
-export interface YearSelectorState {
-    year: Moment
+interface DateSelectorState {
+    date: Moment
 }
 
-export class YearSelector extends React.Component<YearSelectorProps, YearSelectorState> {
+class DateSelector extends React.Component<DateSelectorProps, DateSelectorState> {
     selectedDate: KnockoutObservable<Moment>;
 
-    constructor(props: YearSelectorProps) {
+    constructor(props: DateSelectorProps) {
         super(props);
 
         // Set a default
@@ -22,22 +25,22 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
 
         // If we were passed an observable, use that.  If we were passed a moment, just update our selected date
         // to reflect that value.
-        if (this.props && this.props.initialYear) {
-            if (ko.isObservable(this.props.initialYear)) {
-                this.selectedDate = this.props.initialYear;
+        if (this.props && this.props.initialDate) {
+            if (ko.isObservable(this.props.initialDate)) {
+                this.selectedDate = this.props.initialDate;
             }
             else {
-                this.selectedDate(this.props.initialYear);
+                this.selectedDate(this.props.initialDate);
             }
         }
 
         this.state = {
-            year: this.selectedDate()
+            date: this.selectedDate()
         };
 
         this.selectedDate.subscribe((val) => {
-            this.setState({year: val});
-            this.getInputElement().data("DateTimePicker").date(this.state.year);
+            this.setState({date: val});
+            this.getInputElement().data("DateTimePicker").date(this.state.date);
         });
 
         this.toggle = this.toggle.bind(this);
@@ -50,7 +53,7 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
     init() {
         // Initialize the DateTimePicker
         (this.getInputElement() as any).datetimepicker({
-            format: 'YYYY'
+            format: this.props.format
         });
 
         this.getInputElement().on("dp.change", (e: Event) => {
@@ -58,15 +61,19 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
                 let date = (e as any).date as any;
 
                 if (date != null && moment.isMoment(date)) {
-                    if (!this.selectedDate().isSame(date, 'year')) {
+                    if (!this.props.isEqual(this.state.date, date)) {
                         this.selectedDate(date);
+
+                        if (this.props.handleUpdate) {
+                            this.props.handleUpdate(date);
+                        }
                     }
                 }
             }
         });
 
         // Set the current value
-        this.getInputElement().data("DateTimePicker").date(this.state.year);
+        this.getInputElement().data("DateTimePicker").date(this.state.date);
     }
 
     toggle() {
@@ -87,5 +94,57 @@ export class YearSelector extends React.Component<YearSelectorProps, YearSelecto
                 </span>
             </div>
         )
+    }
+}
+
+export interface YearSelectorProps {
+    initialYear?: Moment | KnockoutObservable<Moment>;
+}
+
+export class YearSelector extends React.Component<YearSelectorProps, {}> {
+    render() {
+        let isSame = (curDate: moment.Moment, nextDate: moment.Moment): boolean => {
+            return curDate.isSame(nextDate, 'year');
+        };
+
+        return (
+            <DateSelector format="YYYY" initialDate={this.props.initialYear} isEqual={isSame} />
+        );
+    }
+}
+
+
+export interface DaySelectorProps {
+    initialDay?: Moment | KnockoutObservable<Moment>;
+    handleUpdate?: (newDate: Moment) => void;
+}
+
+export class DaySelector extends React.Component<DaySelectorProps, {}> {
+    render() {
+        let isSame = (curDate: moment.Moment, nextDate: moment.Moment): boolean => {
+            return curDate.isSame(nextDate, 'day');
+        };
+
+        return (
+            <DateSelector format="YYYY-MM-DD" initialDate={this.props.initialDay} isEqual={isSame} handleUpdate={this.props.handleUpdate}/>
+        );
+    }
+}
+
+export interface DateTimeSelectorProps {
+    initialMoment?: Moment | KnockoutObservable<Moment>;
+    handleUpdate?: (newDate: Moment) => void;
+}
+
+
+export class DateTimeSelector extends React.Component<DateTimeSelectorProps, {}> {
+    render() {
+        let isSame = (curDate: moment.Moment, nextDate: moment.Moment): boolean => {
+            return curDate.isSame(nextDate, 'minute');
+        };
+
+        return (
+            <DateSelector format="YYYY-MM-DD HH:mm" initialDate={this.props.initialMoment} isEqual={isSame} handleUpdate={this.props.handleUpdate}/>
+        );
     }
 }

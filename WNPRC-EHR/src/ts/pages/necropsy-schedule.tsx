@@ -62,7 +62,7 @@ class Page extends Component<{}, PageState> {
                             </div>
 
                             <div className="col-sm-12 col-md-4">
-                                <NxScheduleRequestFormPanel necropsyLsid={this.state.selectedNxRequestLsid} />
+                                <NxScheduleRequestFormPanel necropsyLsid={this.state.selectedNxRequestLsid} clearForm={() => {this.setState({selectedNxRequestLsid: null})}} />
                             </div>
                         </div>
                     )}

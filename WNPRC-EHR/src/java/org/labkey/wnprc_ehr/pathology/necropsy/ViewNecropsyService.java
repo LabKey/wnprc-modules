@@ -6,18 +6,21 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
+import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.NecropsyDetailsForm;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.NecropsyEventForm;
+import org.labkey.wnprc_ehr.pathology.necropsy.messages.NecropsySuiteInfo;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.ScheduledNecropsiesForm;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ViewNecropsyPermission;
 import org.labkey.wnprc_ehr.service.dataentry.DataEntryService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Created by jon on 5/16/17.
@@ -72,5 +75,37 @@ public class ViewNecropsyService extends DataEntryService {
         detailsForm.hasTissuesForAVRL = row.getBoolean("has_tissues_for_avrl");
 
         return detailsForm;
+    }
+
+    public List<NecropsySuiteInfo> getNecropsySuites() {
+        List<NecropsySuiteInfo> suites = new ArrayList<>();
+
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        List<JSONObject> necropsySuites = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "necropsy_suite"));
+
+        for (JSONObject json : necropsySuites) {
+            NecropsySuiteInfo info = new NecropsySuiteInfo();
+            info.roomCode = json.getString("room");
+            info.suiteName = json.getString("displayName");
+            info.color = json.getString("display_color");
+
+            suites.add(info);
+        }
+
+        return suites;
+    }
+
+    public Map<String, String> getPathologists() {
+        Map<String, String> pathologists = new HashMap<>();
+
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimpleQuery pathologistQuery = queryFactory.makeQuery("ehr_lookups", "pathologists");
+        List<JSONObject> pathologistJSONList = JsonUtils.getSortedListFromJSONArray(pathologistQuery.getResults().getJSONArray("rows"), "userid");
+
+        for (JSONObject pathologistJSON : pathologistJSONList) {
+            pathologists.put(pathologistJSON.getString("internaluserid"), pathologistJSON.getString("userid"));
+        }
+
+        return pathologists;
     }
 }

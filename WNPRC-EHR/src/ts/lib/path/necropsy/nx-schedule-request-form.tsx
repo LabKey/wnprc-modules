@@ -2,23 +2,33 @@ import * as React from "react";
 import Component = React.Component;
 import * as moment from "moment";
 import Moment = moment.Moment;
-import {YearSelector} from "../../DatePicker";
+import {YearSelector, DateTimeSelector} from "../../DatePicker";
 import {
     ScheduleNecropsyForm, NecropsyRequestDetailsForm,
-    RequestStaticInfo
+    RequestStaticInfo, NecropsySuiteInfo
 } from "../../../../../build/generated-ts/GeneratedFromJava";
 import {buildURLWithParams, getCurrentContainer} from "WebUtils/LabKey";
-import {getNecropsyRequestDetails} from "./nx-api";
+import {getNecropsyRequestDetails, NecropsySuites, Pathologists} from "./nx-api";
 import * as _ from "underscore";
+import ChangeEvent = React.ChangeEvent;
+import {UserSelector} from "../../UserSelector";
 
 export interface NxScheduleRequestFormPanelProps {
     necropsyLsid: string | null;
+    clearForm?: () => void;
 }
 
 interface NxScheduleRequestFormPanelState {
     isLoading: boolean;
     form: ScheduleNecropsyForm;
     info: RequestStaticInfo;
+    locations: NecropsySuiteInfo[];
+    pathologists: Pathologist[];
+}
+
+interface Pathologist {
+    id: string;
+    displayname: string;
 }
 
 export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormPanelProps, NxScheduleRequestFormPanelState> {
@@ -28,14 +38,39 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
         this.state = {
             isLoading: false,
             form: new ScheduleNecropsyForm(),
-            info: new RequestStaticInfo()
+            info: new RequestStaticInfo(),
+            locations: [],
+            pathologists: []
         };
+
+        this.handleDateChange = this.handleDateChange.bind(this);
+        this.handlePathologistChange = this.handlePathologistChange.bind(this);
+        this.handleProsectorChange = this.handleProsectorChange.bind(this);
+        this.handleLocationChange = this.handleLocationChange.bind(this);
+        this.handleAssignedToChange = this.handleAssignedToChange.bind(this);
     }
 
     componentDidMount() {
         if (this.props.necropsyLsid != null) {
             this.load();
         }
+
+        NecropsySuites.then((locations: NecropsySuiteInfo[]) => {
+            this.setState({locations});
+        });
+
+        Pathologists.then((map: {[name: string]: string}) => {
+            let pathologists = [];
+
+            for (let id in map) {
+                pathologists.push({
+                    id,
+                    displayname: map[id]
+                })
+            }
+
+            this.setState({pathologists});
+        })
     }
 
     componentWillReceiveProps(nextProps: NxScheduleRequestFormPanelProps) {
@@ -65,6 +100,44 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
                 }
             });
         }
+    }
+
+    handleDateChange(newDate: Moment) {
+        let form = this.state.form;
+        form.scheduledDate = newDate;
+        this.setState({form});
+    }
+
+    handleLocationChange(e: ChangeEvent<HTMLSelectElement>) {
+        let form = this.state.form;
+        form.location = e.target.value;
+        this.setState({
+            form
+        });
+    }
+
+    handlePathologistChange(e: ChangeEvent<HTMLSelectElement>) {
+        let form = this.state.form;
+        form.pathologist = parseInt(e.target.value);
+        this.setState({
+            form
+        });
+    }
+
+    handleProsectorChange(e: ChangeEvent<HTMLSelectElement>) {
+        let form = this.state.form;
+        form.assistant = parseInt(e.target.value);
+        this.setState({
+            form
+        });
+    }
+
+    handleAssignedToChange(val: number) {
+        let form = this.state.form;
+        form.assignedTo = val;
+        this.setState({
+            form
+        });
     }
 
     render() {
@@ -104,13 +177,63 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
                 <div className="form-group">
                     <label className="col-xs-4 control-label">Date</label>
                     <div className="col-xs-8">
-                        <YearSelector />
+                        <DateTimeSelector initialMoment={this.state.form.scheduledDate} handleUpdate={this.handleDateChange}/>
+                    </div>
+                </div>
+
+
+                <div className="form-group">
+                    <label className="col-xs-4 control-label">Location</label>
+                    <div className="col-xs-8">
+                        <select className="form-control" value={this.state.form.location || ''} onChange={this.handleLocationChange}>
+                            <option value=""></option>
+                            {this.state.locations.map((suite: NecropsySuiteInfo, i: number) => {
+                                return (
+                                    <option value={suite.roomCode} key={i}>{suite.roomCode}</option>
+                                )
+                            })}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <label className="col-xs-4 control-label">Pathologist</label>
+                    <div className="col-xs-8">
+                        <select className="form-control" value={this.state.form.pathologist || ''} onChange={this.handlePathologistChange}>
+                            <option value=""></option>
+                            {this.state.pathologists.map((pathologist: Pathologist, i: number) => {
+                                return (
+                                    <option key={i} value={pathologist.id}>{pathologist.displayname}</option>
+                                )
+                            })}
+                        </select>
+                    </div>
+                </div>
+
+
+                <div className="form-group">
+                    <label className="col-xs-4 control-label">Prosector</label>
+                    <div className="col-xs-8">
+                        <select className="form-control" value={this.state.form.assistant || ''} onChange={this.handleProsectorChange}>
+                            <option value=""></option>
+                            {this.state.pathologists.map((pathologist: Pathologist, i: number) => {
+                                return (
+                                    <option key={i} value={pathologist.id}>{pathologist.displayname}</option>
+                                )
+                            })}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <label className="col-xs-4 control-label">Assigned To</label>
+                    <div className="col-xs-8">
+                        <UserSelector initialUser={this.state.form.assignedTo} onChange={this.handleAssignedToChange} />
                     </div>
                 </div>
 
             </fieldset>
         );
-
 
         return (
             <div className="panel panel-primary">
@@ -127,7 +250,18 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
                             <p><em>Please select a pending request.</em></p>
                         </div>
                     ) : (
-                        form
+                        <div>
+                            {form}
+
+                            <div style={{"textAlign": "right"}}>
+                                {
+                                    (this.props.clearForm) && (
+                                        <button className="btn btn-default" onClick={this.props.clearForm}>Cancel</button>
+                                    )
+                                }
+                                <button className="btn btn-primary">Schedule Necropsy</button>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

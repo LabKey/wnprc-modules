@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.pathology.necropsy;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
@@ -67,6 +68,11 @@ public class NecropsyController extends SpringActionController {
 
         public Object execute(FORM form, BindException e) throws Exception {
             ObjectMapper mapper = new ObjectMapper();
+            mapper.setVisibilityChecker(
+                    mapper.getSerializationConfig()
+                            .getDefaultVisibilityChecker()
+                            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+            );
 
             Object obj = this.execute(form);
 

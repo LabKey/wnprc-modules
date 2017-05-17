@@ -111,10 +111,10 @@ public class ScheduleNecropsyService extends DataEntryService {
 
         ScheduleNecropsyForm form = new ScheduleNecropsyForm();
         form.assignedTo    = GroupManager.getGroup(container, "pathology (LDAP)", GroupEnumType.SITE).getUserId();
-        form.assistant     = row.getInt("assistant");
+        form.assistant     = row.isNull("assistant") ? null : row.getInt("assistant");
         form.location      = row.getString("location");
         form.scheduledDate = _parseDate(row.getString("date"));
-        form.pathologist   = row.getInt("pathologist");
+        form.pathologist   = row.isNull("pathologist") ? null : row.getInt("pathologist");
         response.form = form;
 
         return response;

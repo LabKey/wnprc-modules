@@ -12,6 +12,7 @@ import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.security.GroupManager;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
@@ -35,7 +36,7 @@ public class ScheduleNecropsyService extends DataEntryService {
     }
 
 
-    public void scheduleNecropsy(String requestId, Date scheduledDate, User assignedTo, User pathogist, User assistant) {
+    public void scheduleNecropsy(String requestId, Date scheduledDate, UserPrincipal assignedTo, User pathogist, User assistant) {
         String comment = "Scheduling Necropsy";
         String taskid = UUID.randomUUID().toString().toUpperCase();
         Date taskDueDate = (Date) scheduledDate.clone();
@@ -50,7 +51,7 @@ public class ScheduleNecropsyService extends DataEntryService {
             newTask.put("taskid",     taskid);
             newTask.put("title",      "Necropsy");
             newTask.put("category",   "task");
-            newTask.put("assignedTo", assignedTo.getUserId());
+            newTask.put("assignedTo", (assignedTo == null) ? null : assignedTo.getUserId());
             newTask.put("QCState",    EHRService.QCSTATES.Scheduled.getQCState(container).getRowId());
             newTask.put("duedate",    taskDueDate);
             newTask.put("formtype",   "Necropsy");
@@ -67,8 +68,8 @@ public class ScheduleNecropsyService extends DataEntryService {
                     row.put("date",    scheduledDate);
 
                     if ("necropsies".equals(tableName)) {
-                        row.put("performedby", pathogist.getUserId());
-                        row.put("assistant",   assistant.getUserId());
+                        row.put("performedby", (pathogist == null) ? null : pathogist.getUserId());
+                        row.put("assistant",   (assistant == null) ? null : assistant.getUserId());
                     }
 
                     rowsToUpdate.add(row);

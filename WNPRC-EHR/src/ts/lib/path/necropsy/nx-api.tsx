@@ -1,6 +1,9 @@
-import {NecropsyRequestDetailsForm, NecropsySuiteInfo} from "../../../../../build/generated-ts/GeneratedFromJava";
+import {
+    NecropsyRequestDetailsForm, NecropsySuiteInfo,
+    ScheduleNecropsyForm
+} from "../../../../../build/generated-ts/GeneratedFromJava";
 import {buildURL, buildURLWithParams, getCurrentContainer} from "../../../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
-import {getJSON} from "../../../../../lkpm/modules/WebUtils/src/ts/WebUtils/API";
+import {getJSON, postJSON} from "../../../../../lkpm/modules/WebUtils/src/ts/WebUtils/API";
 
 const NECROPSY_CONTROLLER = "wnprc_ehr-necropsy";
 const NECROPSY_LSID_NAME = 'necropsy-lsid';
@@ -23,4 +26,12 @@ export function getNecropsyRequestDetails(lsid: string): Promise<NecropsyRequest
     return getJSON(url, {}).then((data: any) => {
         return NecropsyRequestDetailsForm.fromJSON(data);
     });
+}
+
+export function scheduleNecropsy(requestid: string, form: ScheduleNecropsyForm): Promise<any> {
+    let url = buildURLWithParams(NECROPSY_CONTROLLER, 'scheduleNecropsy', CONTAINER, {
+        requestid: requestid
+    });
+
+    return postJSON(url, form);
 }

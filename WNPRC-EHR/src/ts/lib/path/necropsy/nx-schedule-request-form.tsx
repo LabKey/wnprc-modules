@@ -8,10 +8,24 @@ import {
     RequestStaticInfo, NecropsySuiteInfo
 } from "../../../../../build/generated-ts/GeneratedFromJava";
 import {buildURLWithParams, getCurrentContainer} from "WebUtils/LabKey";
-import {getNecropsyRequestDetails, NecropsySuites, Pathologists} from "./nx-api";
+import {getNecropsyRequestDetails, NecropsySuites, Pathologists, scheduleNecropsy} from "./nx-api";
 import * as _ from "underscore";
 import ChangeEvent = React.ChangeEvent;
 import {UserSelector} from "../../UserSelector";
+import * as $ from "jquery";
+import * as rsvp from "rsvp";
+import * as toastr from "toastr";
+
+
+let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
+    return new rsvp.Promise((resolve, reject) => {
+        promise.then((val) => {
+            resolve(val);
+        }).catch((val) => {
+            reject(val);
+        });
+    });
+};
 
 export interface NxScheduleRequestFormPanelProps {
     necropsyLsid: string | null;
@@ -20,6 +34,7 @@ export interface NxScheduleRequestFormPanelProps {
 
 interface NxScheduleRequestFormPanelState {
     isLoading: boolean;
+    isSaving: boolean;
     form: ScheduleNecropsyForm;
     info: RequestStaticInfo;
     locations: NecropsySuiteInfo[];
@@ -32,6 +47,8 @@ interface Pathologist {
 }
 
 export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormPanelProps, NxScheduleRequestFormPanelState> {
+    _divToBlock: HTMLDivElement;
+
     constructor(props: NxScheduleRequestFormPanelProps) {
         super(props);
 
@@ -40,7 +57,8 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
             form: new ScheduleNecropsyForm(),
             info: new RequestStaticInfo(),
             locations: [],
-            pathologists: []
+            pathologists: [],
+            isSaving: false
         };
 
         this.handleDateChange = this.handleDateChange.bind(this);
@@ -48,6 +66,8 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
         this.handleProsectorChange = this.handleProsectorChange.bind(this);
         this.handleLocationChange = this.handleLocationChange.bind(this);
         this.handleAssignedToChange = this.handleAssignedToChange.bind(this);
+        this.submit = this.submit.bind(this);
+        this.clearForm = this.clearForm.bind(this);
     }
 
     componentDidMount() {
@@ -71,6 +91,25 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
 
             this.setState({pathologists});
         })
+    }
+
+    clearForm() {
+        if (this.props.clearForm) {
+            this.props.clearForm();
+        }
+    }
+
+    componentDidUpdate() {
+        if (this._divToBlock) {
+            let $div = $(this._divToBlock) as any;
+
+            if (this.state.isSaving) {
+                $div.block({message: "Saving..."})
+            }
+            else {
+                $div.unblock();
+            }
+        }
     }
 
     componentWillReceiveProps(nextProps: NxScheduleRequestFormPanelProps) {
@@ -137,6 +176,30 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
         form.assignedTo = val;
         this.setState({
             form
+        });
+    }
+
+    submit() {
+        this.setState({
+            isSaving: true
+        }, () => {
+            if (this.props.necropsyLsid != null) {
+                convertToRSVP(scheduleNecropsy(this.props.necropsyLsid, this.state.form)).then(() => {
+                    toastr.success("Successfully scheduled necropsy.");
+                    this.clearForm();
+                }).catch(() => {
+                    toastr.error("Failed to schedule necropsy.");
+                }).finally(() => {
+                    this.setState({
+                        isSaving: false
+                    });
+                })
+            }
+            else {
+                this.setState({
+                    isSaving: false
+                })
+            }
         });
     }
 
@@ -232,6 +295,16 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
                     </div>
                 </div>
 
+
+                <div style={{"textAlign": "right"}}>
+                    {
+                        (this.props.clearForm) && (
+                            <button className="btn btn-default" onClick={this.clearForm}>Cancel</button>
+                        )
+                    }
+                    <button className="btn btn-primary" onClick={this.submit}>Schedule Necropsy</button>
+                </div>
+
             </fieldset>
         );
 
@@ -239,7 +312,7 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
             <div className="panel panel-primary">
                 <div className="panel-heading">Schedule Request</div>
 
-                <div className="panel-body">
+                <div className="panel-body" ref={(div) => {this._divToBlock = div;}}>
 
                     {(this.state.isLoading) ? (
                         <div>
@@ -252,15 +325,6 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
                     ) : (
                         <div>
                             {form}
-
-                            <div style={{"textAlign": "right"}}>
-                                {
-                                    (this.props.clearForm) && (
-                                        <button className="btn btn-default" onClick={this.props.clearForm}>Cancel</button>
-                                    )
-                                }
-                                <button className="btn btn-primary">Schedule Necropsy</button>
-                            </div>
                         </div>
                     )}
                 </div>

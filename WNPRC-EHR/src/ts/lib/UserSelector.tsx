@@ -12,6 +12,7 @@ export interface UserSelectorProps {
 
 export class UserSelectorState {
     options: Record[];
+    selectedRecord?: Record;
 }
 
 interface Record {
@@ -21,8 +22,11 @@ interface Record {
     UserId: number;
 }
 
+const schema = "core";
+
 export class UserSelector extends React.Component<UserSelectorProps, UserSelectorState> {
     inputElement: HTMLInputElement;
+    initialRecord: Promise<Record>;
 
     constructor(props: UserSelectorProps) {
         super(props);
@@ -31,14 +35,30 @@ export class UserSelector extends React.Component<UserSelectorProps, UserSelecto
             options: []
         };
 
+        if (props.initialUser) {
+            this.initialRecord = executeSql(schema, `SELECT * FROM core.PrincipalsWithoutAdmin WHERE UserId = '${props.initialUser}'`).then((data: any) => {
+                return data.rows[0] as Record;
+            })
+        }
+
+
         this.handleSearch = this.handleSearch.bind(this);
         this.renderMenuItemChildren = this.renderMenuItemChildren.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
 
+    componentDidMount() {
+        if (this.initialRecord) {
+            this.initialRecord.then((r: Record) => {
+                this.setState({
+                    selectedRecord: r
+                });
+            })
+        }
+    }
+
     handleSearch(q: string) {
         let sql = `SELECT * FROM core.PrincipalsWithoutAdmin WHERE DisplayName LIKE '%${q}%'`;
-        let schema = "core";
 
         executeSql(schema, sql).then((data:any) => {
             this.setState({
@@ -63,6 +83,9 @@ export class UserSelector extends React.Component<UserSelectorProps, UserSelecto
 
     handleChange(records: Record[]) {
         if (this.props.onChange && records.length > 0 && !_.isUndefined(records[0])) {
+            this.setState({
+                selectedRecord: records[0]
+            });
             this.props.onChange(records[0].UserId);
         }
     }
@@ -78,6 +101,7 @@ export class UserSelector extends React.Component<UserSelectorProps, UserSelecto
                                 multiple={false}
                                 renderMenuItemChildren={this.renderMenuItemChildren}
                                 onChange={this.handleChange}
+                                selected={(this.state.selectedRecord) ? [this.state.selectedRecord] : []}
                 />
             </div>
         );

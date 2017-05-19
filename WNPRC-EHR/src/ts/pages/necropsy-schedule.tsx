@@ -45,6 +45,16 @@ class Page extends Component<{}, PageState> {
         return (
             <div className="container-fluid">
                 <div className="row">
+                    <div className="col-sm-12 col-xl-8">
+                        <div className="col-sm-12 col-md-4">
+                            <NxDetailsPanel necropsyLsid={this.state.selectedNxLsid} isPathologist={isPathologist}/>
+                        </div>
+
+                        <div className="col-sm-12 col-md-8">
+                            <NxCalendar handleClick={this.handleEventClick} />
+                        </div>
+                    </div>
+
                     {isPathologist && (
                         <div className="col-sm-12 col-xl-8">
                             <div className="col-sm-12 col-md-8">

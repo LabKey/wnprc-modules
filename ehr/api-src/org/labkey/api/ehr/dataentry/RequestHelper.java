@@ -46,6 +46,12 @@ public class RequestHelper {
             // TODO: throw a better error.
             throw new RuntimeException("Request not found");
         }
+
+        if (rows.length > 1) {
+            throw new RuntimeException("Multiple rows returned with key of " + _requestId);
+        }
+
+        this._row = rows[0];
     }
 
     private SimpleQueryFactory _getQueryFactory() {
@@ -81,7 +87,11 @@ public class RequestHelper {
         List<String> recipients = new ArrayList<>();
 
         for (String fieldName : Arrays.asList("notify1", "notify2", "notify3")) {
-            Integer userid = _row.has(fieldName) ? _row.getInt(fieldName) : null;
+            Integer userid = null;
+
+            if (_row.has(fieldName) && !_row.isNull(fieldName)) {
+                userid = _row.getInt(fieldName);
+            }
 
             if (userid != null) {
                 User notifiedUser = UserManager.getUser(userid);

@@ -26,11 +26,8 @@ import org.labkey.api.util.ResultSetUtil;
 
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jon on 1/12/16.
@@ -60,7 +57,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
         return view != null;
     }
 
-    public List<RowType> getResults (Class<RowType> rowTypeClass) throws NoSuchMethodException, Exception {
+    public List<RowType> getResults(Class<RowType> rowTypeClass) throws NoSuchMethodException, Exception {
         // Create the output container
         List<RowType> resultRows = new ArrayList<>();
 
@@ -85,13 +82,27 @@ public class SimpleQuery<RowType> extends QueryHelper {
             TableInfo    tableInfo    = userSchema.getTable(getQueryName());
 
             // Determine the columns to include
-            List<FieldKey> columns;
+            List<FieldKey> columns = new ArrayList<>();
             if (viewExists() && (getCustomView().getColumns().size() > 0)) {
-                columns = getCustomView().getColumns();
+                columns.addAll(getCustomView().getColumns());
             }
             else {
-                columns = tableInfo.getDefaultVisibleColumns();
+                columns.addAll(tableInfo.getDefaultVisibleColumns());
             }
+
+
+            Set<String> columnNames = new HashSet<>();
+            for(FieldKey column : columns) {
+                columnNames.add(column.getName().toLowerCase());
+            }
+
+            for(String pkName : tableInfo.getPkColumnNames()) {
+                if (!columnNames.contains(pkName.toLowerCase())) {
+                    columns.add(FieldKey.fromParts(pkName));
+                    columnNames.add(pkName.toLowerCase());
+                }
+            }
+
 
             // Now get the actual columnInfo
             Map<FieldKey, ColumnInfo> map = queryService.getColumns(tableInfo, columns);
@@ -149,12 +160,25 @@ public class SimpleQuery<RowType> extends QueryHelper {
             TableInfo    tableInfo    = userSchema.getTable(getQueryName());
 
             // Determine the columns to include
-            List<FieldKey> columns;
+            List<FieldKey> columns = new ArrayList<>();
             if (viewExists() && (getCustomView().getColumns().size() > 0)) {
-                columns = getCustomView().getColumns();
+                columns.addAll(getCustomView().getColumns());
             }
             else {
-                columns = tableInfo.getDefaultVisibleColumns();
+                columns.addAll(tableInfo.getDefaultVisibleColumns());
+            }
+
+
+            Set<String> columnNames = new HashSet<>();
+            for(FieldKey column : columns) {
+                columnNames.add(column.getName().toLowerCase());
+            }
+
+            for(String pkName : tableInfo.getPkColumnNames()) {
+                if (!columnNames.contains(pkName.toLowerCase())) {
+                    columns.add(FieldKey.fromParts(pkName));
+                    columnNames.add(pkName.toLowerCase());
+                }
             }
 
             // Now get the actual columnInfo

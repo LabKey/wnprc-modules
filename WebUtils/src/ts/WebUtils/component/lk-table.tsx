@@ -210,20 +210,24 @@ export interface FilterableTableParams {
 }
 
 export function registerKoComponent(): void {
-    ko.components.register('lk-table', {
-        viewModel: {
-            createViewModel: function(params: FilterableTableParams, componentinfo: any) {
-                if (componentinfo) {
-                    let $element = $(componentinfo.element).find('.lk-table-react');
+    let componentName = "lk-table";
 
-                    ReactDOM.render(
-                        <FilterableTable table={params.table} />,
-                        $element.get(0)
-                    )
+    if (!ko.components.isRegistered(componentName)) {
+        ko.components.register(componentName, {
+            viewModel: {
+                createViewModel: function(params: FilterableTableParams, componentinfo: any) {
+                    if (componentinfo) {
+                        let $element = $(componentinfo.element).find('.lk-table-react');
+
+                        ReactDOM.render(
+                            <FilterableTable table={params.table} />,
+                            $element.get(0)
+                        )
+                    }
+
                 }
-
-            }
-        },
-        template: '<div class="lk-table-react"></div>'
-    });
+            },
+            template: '<div class="lk-table-react"></div>'
+        });
+    }
 }

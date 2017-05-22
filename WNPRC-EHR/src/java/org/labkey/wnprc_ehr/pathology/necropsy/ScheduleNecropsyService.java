@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.pathology.necropsy;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.data.CompareType;
@@ -14,7 +15,6 @@ import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.security.GroupManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
-import org.labkey.api.security.permissions.Permission;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
@@ -22,7 +22,6 @@ import org.labkey.security.xml.GroupEnumType;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.*;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecropsyPermission;
 import org.labkey.wnprc_ehr.service.dataentry.DataEntryService;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,6 +31,9 @@ import java.util.*;
  * Created by jon on 5/16/17.
  */
 public class ScheduleNecropsyService extends DataEntryService {
+    protected static final Logger _log = Logger.getLogger(ScheduleNecropsyService.class);
+
+
     public ScheduleNecropsyService(User user, Container container) throws MissingPermissionsException {
         super(user, container, ScheduleNecropsyPermission.class);
     }
@@ -88,11 +90,16 @@ public class ScheduleNecropsyService extends DataEntryService {
 
             transaction.commit();
 
-            RequestHelper requestHelper = new RequestHelper(requestId, user, container);
-            requestHelper.sendEmail("Your Necropsy Request Has Been Scheduled", "");
+            try {
+                RequestHelper requestHelper = new RequestHelper(requestId, user, container);
+                requestHelper.sendEmail("Your Necropsy Request Has Been Scheduled", "");
+            }
+            catch(Throwable e) {
+                _log.error("Failed to send notification for Necropsy Scheduling: " + e.getMessage());
+            }
 
         } catch (DuplicateKeyException |BatchValidationException |InvalidKeyException e) {
-            e.printStackTrace();
+            _log.error("Failed to schedule necropsy: " + e.getMessage());
             throw new ApiUsageException("Failed to schedule necropsy: " + e.getMessage(), e);
         }
     }

@@ -5,14 +5,19 @@ import Moment = moment.Moment;
 import * as api from "WebUtils/API";
 import {URLForAction} from "../../../../../lkpm/modules/WebUtils/build/generated-ts/GeneratedFromJava";
 import {urlFromAction} from "../../../../../lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
-import {ScheduledNecropsiesForm, NecropsyEventForm} from "../../../../../build/generated-ts/GeneratedFromJava";
+import {
+    ScheduledNecropsiesForm, NecropsyEventForm,
+    NecropsySuiteInfo
+} from "../../../../../build/generated-ts/GeneratedFromJava";
+import {NecropsySuites} from "./nx-api";
 
 export interface NxCalendarProps {
     handleClick?: (nxLsid: string) => void
 }
 
 interface NxCalendarState {
-    isLoading: boolean
+    isLoading: boolean,
+    suites: NecropsySuiteInfo[]
 }
 
 interface CalendarEvent {
@@ -33,8 +38,14 @@ export class NxCalendar extends Component<NxCalendarProps, NxCalendarState> {
         super(props);
 
         this.state = {
-            isLoading: false
+            isLoading: false,
+            suites: []
         };
+
+
+        NecropsySuites.then((suites: NecropsySuiteInfo[]) => {
+            this.setState({ suites });
+        })
     }
 
     componentDidMount() {
@@ -110,6 +121,18 @@ export class NxCalendar extends Component<NxCalendarProps, NxCalendarState> {
 
                 <div className="panel-body">
                     <div ref={(div) => {this._calDiv = div;}}></div>
+
+                    {this.state.suites.length > 0 && (
+                        <div className="pull-right">
+                            {this.state.suites.map((suite: NecropsySuiteInfo, i: number) => {
+                                return (
+                                    <span key={i} style={{marginRight: '5px'}}>
+                                        <span style={{color: suite.color}}>&#x2589;</span><span>{suite.suiteName || suite.roomCode}</span>
+                                    </span>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
         )

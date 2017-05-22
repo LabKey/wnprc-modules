@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.pathology.necropsy;
 
 import org.json.JSONObject;
+import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -68,8 +69,8 @@ public class ScheduleNecropsyService extends DataEntryService {
                     row.put("date",    scheduledDate);
 
                     if ("necropsies".equals(tableName)) {
-                        row.put("performedby", (pathogist == null) ? null : pathogist.getUserId());
-                        row.put("assistant",   (assistant == null) ? null : assistant.getUserId());
+                        row.put("performedby", (pathogist == null) ? null : pathogist.getDisplayName(user));
+                        row.put("assistant",   (assistant == null) ? null : assistant.getDisplayName(user));
                     }
 
                     rowsToUpdate.add(row);
@@ -92,7 +93,7 @@ public class ScheduleNecropsyService extends DataEntryService {
 
         } catch (DuplicateKeyException |BatchValidationException |InvalidKeyException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to schedule necropsy", e);
+            throw new ApiUsageException("Failed to schedule necropsy: " + e.getMessage(), e);
         }
     }
 

@@ -17,6 +17,9 @@ let global = window as any;
 let isPathologist: boolean = ('isPathologist' in global.PageLoadData) ? global.PageLoadData.isPathologist : false;
 
 class Page extends Component<{}, PageState> {
+    r$calendar: NxCalendar;
+    r$requests: NxPendingRequestsPanel;
+
     constructor(props: {}) {
         super(props);
 
@@ -27,6 +30,8 @@ class Page extends Component<{}, PageState> {
 
         this.handleEventClick = this.handleEventClick.bind(this);
         this.handleSelectLsid = this.handleSelectLsid.bind(this);
+        this.handleSelectLsid = this.handleSelectLsid.bind(this);
+        this.handleScheduleSuccess = this.handleScheduleSuccess.bind(this);
     }
 
     handleEventClick(nxLsid: string) {
@@ -41,6 +46,16 @@ class Page extends Component<{}, PageState> {
         });
     }
 
+    handleScheduleSuccess() {
+        if (this.r$calendar) {
+            this.r$calendar.refresh();
+        }
+
+        if (this.r$requests) {
+            this.r$requests.reload();
+        }
+    }
+
     render() {
         return (
             <div className="container-fluid">
@@ -51,18 +66,21 @@ class Page extends Component<{}, PageState> {
                         </div>
 
                         <div className="col-sm-12 col-md-8">
-                            <NxCalendar handleClick={this.handleEventClick} />
+                            <NxCalendar handleClick={this.handleEventClick} ref={(el) => {this.r$calendar = el}}/>
                         </div>
                     </div>
 
                     {isPathologist && (
                         <div className="col-sm-12 col-xl-8">
                             <div className="col-sm-12 col-md-8">
-                                <NxPendingRequestsPanel handleClick={this.handleSelectLsid} />
+                                <NxPendingRequestsPanel handleClick={this.handleSelectLsid} ref={(el) => {this.r$requests = el}} />
                             </div>
 
                             <div className="col-sm-12 col-md-4">
-                                <NxScheduleRequestFormPanel necropsyLsid={this.state.selectedNxRequestLsid} clearForm={() => {this.setState({selectedNxRequestLsid: null})}} />
+                                <NxScheduleRequestFormPanel necropsyLsid={this.state.selectedNxRequestLsid}
+                                                            clearForm={() => {this.setState({selectedNxRequestLsid: null})}}
+                                                            handleSchedule={this.handleScheduleSuccess}
+                                />
                             </div>
                         </div>
                     )}

@@ -30,6 +30,7 @@ let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
 export interface NxScheduleRequestFormPanelProps {
     necropsyLsid: string | null;
     clearForm?: () => void;
+    handleSchedule?: () => void;
 }
 
 interface NxScheduleRequestFormPanelState {
@@ -186,9 +187,12 @@ export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormP
             if (this.props.necropsyLsid != null) {
                 convertToRSVP(scheduleNecropsy(this.props.necropsyLsid, this.state.form)).then(() => {
                     toastr.success("Successfully scheduled necropsy.");
+                    if (this.props.handleSchedule) {
+                        this.props.handleSchedule();
+                    }
                     this.clearForm();
-                }).catch(() => {
-                    toastr.error("Failed to schedule necropsy.");
+                }).catch((e: any) => {
+                    toastr.error(('exception' in e) ? e.exception : `Failed to schedule necropsy: ${e.message}`);
                 }).finally(() => {
                     this.setState({
                         isSaving: false

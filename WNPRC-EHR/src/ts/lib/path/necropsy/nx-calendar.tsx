@@ -90,6 +90,11 @@ export class NxCalendar extends Component<NxCalendarProps, NxCalendarState> {
         })
     }
 
+    refresh() {
+        let $calendar = $(this._calDiv);
+        ($calendar as any).fullCalendar('refetchEvents');
+    }
+
     render() {
         return (
             <div className="panel panel-primary">

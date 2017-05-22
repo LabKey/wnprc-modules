@@ -86,7 +86,7 @@ public class ViewNecropsyService extends DataEntryService {
         for (JSONObject json : necropsySuites) {
             NecropsySuiteInfo info = new NecropsySuiteInfo();
             info.roomCode = json.getString("room");
-            info.suiteName = json.getString("displayName");
+            info.suiteName = json.getString("displayname");
             info.color = json.getString("display_color");
 
             suites.add(info);

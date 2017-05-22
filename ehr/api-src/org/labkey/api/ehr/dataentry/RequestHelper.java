@@ -6,9 +6,8 @@ import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.notification.NotificationService;
-import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
-import org.labkey.api.security.ValidEmail;
+import org.labkey.api.security.*;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.util.MailHelper;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
@@ -94,7 +93,11 @@ public class RequestHelper {
             }
 
             if (userid != null) {
-                User notifiedUser = UserManager.getUser(userid);
+                UserPrincipal notifiedUser = UserManager.getUser(userid);
+                if (notifiedUser == null) {
+                    notifiedUser = SecurityManager.getGroup(userid);
+                }
+
                 try {
                     List<Address> addresses = NotificationService.get().getEmailsForPrincipal(notifiedUser);
 

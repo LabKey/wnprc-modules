@@ -3,7 +3,12 @@
 
 <style>
     #necropsyRequestNotice {
+        font-family: Roboto-Bold, Helvetica-Bold, sans-serif;
         padding: 10px;
+    }
+
+    #necropsyRequestNotice  .nobold {
+        font-family: Roboto, Helvetica, sans-serif;
     }
 
     #necropsyRequestNotice > ul {
@@ -44,7 +49,7 @@
         </li>
         <li>
             Investigators are responsible for providing all solutions for tissue preservation other than 10% neutral
-            buffered formalin the day before or morning of necropsy. <span style="font-weight: normal">If a member of
+            buffered formalin the day before or morning of necropsy. <span class="nobold">If a member of
             the investigating lab cannot order or does not provide the solutions needed for a specific necropsy, prior
             arrangements with SPI to prepare PFA, PBS and other solutions on a fee-for-service basis need to be made.
             Please indicate in the notes section of the necropsy request form that arrangements have been made for SPI

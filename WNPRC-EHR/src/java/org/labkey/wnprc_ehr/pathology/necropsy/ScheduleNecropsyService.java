@@ -19,6 +19,7 @@ import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
 import org.labkey.security.xml.GroupEnumType;
+import org.labkey.wnprc_ehr.email.JspEmail;
 import org.labkey.wnprc_ehr.pathology.necropsy.messages.*;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecropsyPermission;
 import org.labkey.wnprc_ehr.service.dataentry.DataEntryService;
@@ -91,8 +92,7 @@ public class ScheduleNecropsyService extends DataEntryService {
             transaction.commit();
 
             try {
-                RequestHelper requestHelper = new RequestHelper(requestId, user, container);
-                requestHelper.sendEmail("Your Necropsy Request Has Been Scheduled", "");
+                _sendSchedulingNotificationEmail(requestId);
             }
             catch(Throwable e) {
                 _log.error("Failed to send notification for Necropsy Scheduling: " + e.getMessage());
@@ -102,6 +102,18 @@ public class ScheduleNecropsyService extends DataEntryService {
             _log.error("Failed to schedule necropsy: " + e.getMessage());
             throw new ApiUsageException("Failed to schedule necropsy: " + e.getMessage(), e);
         }
+    }
+
+    void _sendSchedulingNotificationEmail(String requestid) throws Exception {
+        RequestHelper requestHelper = new RequestHelper(requestid, user, container);
+        requestHelper.sendEmail("Your Necropsy Request Has Been Scheduled", getOnScheduleEmailNotificationContents(requestid));
+    }
+
+    private String getOnScheduleEmailNotificationContents(String requestid) throws Exception {
+        ScheduledNecropsyRequestModel model = new ScheduledNecropsyRequestModel(requestid, user, container);
+
+        JspEmail email = new JspEmail("/org/labkey/wnprc_ehr/pathology/necropsy/view/OnScheduleNotification.jsp");
+        return email.renderEmail(model);
     }
 
     public NecropsyRequestDetailsForm getNecropsyRequestDetails(String necropsyLsid) throws ParseException {

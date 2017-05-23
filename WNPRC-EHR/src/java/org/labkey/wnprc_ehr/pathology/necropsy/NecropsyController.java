@@ -10,6 +10,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
 import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.ReactPageAction;
@@ -153,6 +154,25 @@ public class NecropsyController extends SpringActionController {
         @Override
         public Object execute(Object form) throws MissingPermissionsException {
             return getViewService().getPathologists();
+        }
+    }
+
+    @ActionNames("sendSchedulingNotification")
+    @RequiresSiteAdmin()
+    public class TestOnScheduleNotification extends NecropsyAPIAction<Object> {
+        @Override
+        public Object execute(Object form) throws MissingPermissionsException {
+            JSONObject returnObj = new JSONObject();
+
+            try {
+                getSchedulerService()._sendSchedulingNotificationEmail(this.getParameter("requestid"));
+                returnObj.put("status", "success");
+            } catch (Exception e) {
+                returnObj.put("status", "failed");
+                returnObj.put("reason", e.getMessage());
+            }
+
+            return returnObj;
         }
     }
 

@@ -1,3 +1,4 @@
+const fs = require("fs");
 const gulp = require("gulp");
 const lkpm = require('lkpm');
 const path = require('path');
@@ -9,10 +10,18 @@ var taskExporter = new lkpm.TaskExporter({
 }, gulp);
 
 taskExporter.enableWebpack({
-    entry: {
-        'pages/path-case-list': path.join(__dirname, 'src', 'ts', 'pages', 'PathCaseList.tsx'),
-        'pages/necropsy-schedule': path.join(__dirname, 'src', 'ts', 'pages', 'necropsy-schedule.tsx')
-    },
+    entry: (function() {
+        var pages_dir = path.join(__dirname, 'src', 'ts', 'pages');
+        var config = {};
+
+        fs.readdirSync(pages_dir).forEach(function(filename) {
+            var basename = filename.replace(/.tsx$/, '');
+
+            config['pages/' + basename] = path.join(__dirname, 'src', 'ts', 'pages', filename);
+        });
+
+        return config;
+    })(),
 
     output: {
         path: path.resolve(taskExporter.getCompiledResourceDir(), 'web', 'wnprc_ehr', 'js')

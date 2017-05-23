@@ -37,6 +37,9 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
+import org.labkey.wnprc_ehr.dataentry.templates.TemplateController;
+import org.labkey.wnprc_ehr.dataentry.templates.permission.TemplateAdminPermission;
+import org.labkey.wnprc_ehr.dataentry.templates.permission.TemplateAdminRole;
 import org.labkey.wnprc_ehr.demographics.MedicalFieldDemographicsProvider;
 import org.labkey.wnprc_ehr.demographics.MostRecentObsDemographicsProvider;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
@@ -107,6 +110,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
         addController(NecropsyController.NAME, NecropsyController.class);
+        addController(TemplateController.NAME, TemplateController.class);
     }
 
     @Override
@@ -188,6 +192,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         RoleManager.registerPermission(new BehaviorAssignmentsPermission());
         RoleManager.registerPermission(new ViewNecropsyPermission());
         RoleManager.registerPermission(new ScheduleNecropsyPermission());
+        RoleManager.registerPermission(new TemplateAdminPermission());
     }
 
     private void registerServices() {
@@ -293,6 +298,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         RoleManager.registerRole(new WNPRCAdminRole());
         RoleManager.registerRole(new NecropsyViewer());
         RoleManager.registerRole(new NecropsyScheduler());
+        RoleManager.registerRole(new TemplateAdminRole());
     }
 
 

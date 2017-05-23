@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.security.roles;
 
+import org.labkey.wnprc_ehr.dataentry.templates.permission.TemplateAdminRole;
 import org.labkey.wnprc_ehr.pathology.necropsy.security.role.NecropsyScheduler;
 
 /**
@@ -11,5 +12,6 @@ public class WNPRCAdminRole extends InheritableRole {
 
         inheritPermissionsFrom(new NecropsyScheduler());
         inheritPermissionsFrom(new BehaviorServiceWorker());
+        inheritPermissionsFrom(new TemplateAdminRole());
     }
 }

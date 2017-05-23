@@ -3,38 +3,38 @@
     <properties>
       <sourceFilesUrls>
         <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules/@types" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules/@types" />
         <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules" />
-        <item url="file://$PROJECT_DIR$/node_modules" />
-        <item url="file://$PROJECT_DIR$/node_modules/lkpm/node_modules" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/build/generated-ts" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules/lkpm/node_modules" />
-        <item url="file://$PROJECT_DIR$/build/generated-ts" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules" />
-        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/bower_components" />
         <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules/lkpm/node_modules" />
         <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/build/generated-ts" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
+        <item url="file://$PROJECT_DIR$/build/generated-ts" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules/lkpm/node_modules" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/bower_components" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules/@types" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules" />
+        <item url="file://$PROJECT_DIR$/node_modules" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules" />
+        <item url="file://$PROJECT_DIR$/node_modules/lkpm/node_modules" />
+        <item url="file://$PROJECT_DIR$/lkpm/modules/Compliance/build/generated-ts" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules/@types" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules/@types" />
       <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules" />
-      <root url="file://$PROJECT_DIR$/node_modules" />
-      <root url="file://$PROJECT_DIR$/node_modules/lkpm/node_modules" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/build/generated-ts" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules/lkpm/node_modules" />
-      <root url="file://$PROJECT_DIR$/build/generated-ts" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules" />
-      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/bower_components" />
       <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/node_modules/lkpm/node_modules" />
       <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/build/generated-ts" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/WebUtils/bower_components" />
+      <root url="file://$PROJECT_DIR$/build/generated-ts" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules/lkpm/node_modules" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/bower_components" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules/@types" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/lkpm/modules/WebUtils/node_modules" />
+      <root url="file://$PROJECT_DIR$/node_modules" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/node_modules" />
+      <root url="file://$PROJECT_DIR$/node_modules/lkpm/node_modules" />
+      <root url="file://$PROJECT_DIR$/lkpm/modules/Compliance/build/generated-ts" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

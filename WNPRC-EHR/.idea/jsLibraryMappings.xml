@@ -2,5 +2,8 @@
 <project version="4">
   <component name="JavaScriptLibraryMappings">
     <file url="PROJECT" libraries="{tsconfig$roots}" />
+    <excludedPredefinedLibrary name="WNPRC-EHR/lkpm/modules/DBUtils/node_modules" />
+    <excludedPredefinedLibrary name="WNPRC-EHR/lkpm/modules/ehr/node_modules" />
+    <excludedPredefinedLibrary name="WNPRC-EHR/node_modules" />
   </component>
 </project>

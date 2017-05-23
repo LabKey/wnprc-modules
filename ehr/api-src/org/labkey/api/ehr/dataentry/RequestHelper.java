@@ -73,7 +73,7 @@ public class RequestHelper {
 
             // Set subject and body
             msg.setSubject(subject);
-            msg.setHtmlContent(htmlContents);
+            msg.setEncodedHtmlContent(htmlContents);
 
             MailHelper.send(msg, _user, _container);
         }

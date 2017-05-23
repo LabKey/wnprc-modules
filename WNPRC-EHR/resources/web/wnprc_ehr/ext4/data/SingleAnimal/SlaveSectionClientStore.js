@@ -16,6 +16,10 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
         var self = this;
         var masterClientStore = this.getMasterClientStore();
 
+        if (!_.isArray(records)) {
+            records = [records];
+        }
+
         if (masterClientStore !== null) {
             var masterRecord = masterClientStore.getRange()[0];
 

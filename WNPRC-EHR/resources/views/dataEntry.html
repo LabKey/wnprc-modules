@@ -334,6 +334,14 @@ Ext.onReady(function(){
                     }
                 ],
                 requests: true
+            },
+            {
+                header: 'Templates',
+                items: [{
+                    url:     LABKEY.ActionURL.buildURL('wnprc_ehr-templates', 'manageTemplates', ctx['EHRStudyContainer']),
+                    title:   'Manage Templates',
+                    queries: []
+                }]
             }
         ];
 
@@ -346,6 +354,11 @@ Ext.onReady(function(){
             section.items = section.items.filter(function(item) {
                 item.qcstate = item.qcstate || qcState;
                 item.permission = item.permission || 'insert';
+
+                if (item.queries.length == 0) {
+                    return true;
+                }
+
                 return EHR.Security.hasPermission(item.qcstate, item.permission, item.queries.map(function(queryName) {
                     return {
                         schemaName: 'study',

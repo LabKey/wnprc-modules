@@ -1,1 +1,0 @@
-SELECT rowid, templateid FROM ehr.formtemplaterecords

@@ -9,8 +9,12 @@ import com.github.jonathonrichardson.java2ts.annotation.SerializeToTS;
 public class DataEntryTemplateInfo {
     public String entityid;
     public String title;
-    public boolean isOwner;
-    public String formType;
     public int ownerId;
     public String ownerName;
+    public String formType;
+    public String description;
+    public boolean isOwner;
+    public boolean isPublic;
+    public boolean isInGroup;
+    public String createdBy;
 }

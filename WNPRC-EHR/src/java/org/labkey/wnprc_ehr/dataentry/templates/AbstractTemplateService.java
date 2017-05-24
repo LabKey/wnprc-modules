@@ -1,13 +1,20 @@
 package org.labkey.wnprc_ehr.dataentry.templates;
 
+import org.json.JSONObject;
 import org.labkey.api.data.Container;
+import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.view.UnauthorizedException;
+import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
+import org.labkey.wnprc_ehr.dataentry.templates.message.DataEntryTemplateInfo;
 import org.labkey.wnprc_ehr.dataentry.templates.message.ManageTemplatesInfo;
+import org.labkey.wnprc_ehr.dataentry.templates.permission.TemplateAdminPermission;
 import org.labkey.wnprc_ehr.service.dataentry.DataEntryService;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.util.ArrayList;
 
 /**
  * Created by jon on 5/23/17.
@@ -46,6 +53,29 @@ public abstract class AbstractTemplateService extends DataEntryService {
     }
 
     public ManageTemplatesInfo getManageableTemplates() {
-        throw new NotImplementedException();
+        ManageTemplatesInfo returnInfo = new ManageTemplatesInfo();
+        returnInfo.templates = new ArrayList<>();
+        returnInfo.isAdmin = container.hasPermission(user, TemplateAdminPermission.class);
+
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+
+        for (JSONObject row : queryFactory.selectRows("ehr", "AllTemplates").toJSONObjectArray()) {
+            DataEntryTemplateInfo info = new DataEntryTemplateInfo();
+
+            info.entityid    = row.getString("entityid");
+            info.title       = row.getString("title");
+            info.ownerId     = row.optInt("owner_id", 0);
+            info.ownerName   = row.getString("owner_name");
+            info.formType    = row.getString("form_type");
+            info.description = row.optString("description", "");
+            info.isOwner     = row.getBoolean("is_owner");
+            info.isPublic    = row.getBoolean("is_public");
+            info.isInGroup   = row.getBoolean("is_in_group");
+            info.createdBy   = row.optString("creator", "");
+
+            returnInfo.templates.add(info);
+        }
+
+        return returnInfo;
     }
 }

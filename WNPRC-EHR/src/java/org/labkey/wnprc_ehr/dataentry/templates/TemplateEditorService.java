@@ -20,7 +20,7 @@ public class TemplateEditorService extends AbstractTemplateService {
             return true;
         }
 
-        DataEntryTemplateInfo template = _generateTemplateInfo(getTemplate(templateId));
+        DataEntryTemplateInfo template = _generateTemplateInfo(getTemplateWithMetaData(templateId));
 
         // If the record is public and we aren't an admin, we can't delete...
         if (template.ownerId == 0) {
@@ -36,7 +36,7 @@ public class TemplateEditorService extends AbstractTemplateService {
             return true;
         }
 
-        DataEntryTemplateInfo template = _generateTemplateInfo(getTemplate(templateId));
+        DataEntryTemplateInfo template = _generateTemplateInfo(getTemplateWithMetaData(templateId));
 
         // If the record is public and we aren't an admin, we can't edit...
         if (template.ownerId == 0) {

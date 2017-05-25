@@ -43,7 +43,7 @@ public abstract class AbstractTemplateService extends DataEntryService {
             templateRecordUpdateService.delete(recordsToDelete);
 
             // Now, delete the template
-            templateUpdateService.delete(getTemplate(templateId));
+            templateUpdateService.delete(getRawTemplate(templateId));
 
             transaction.commit();
         }
@@ -51,9 +51,20 @@ public abstract class AbstractTemplateService extends DataEntryService {
 
     abstract protected boolean allowedToEdit(String templateId) throws Exception;
 
-    protected JSONObject getTemplate(String id) throws Exception {
+    protected JSONObject getRawTemplate(String id) throws Exception {
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
         JSONObject[] rows = queryFactory.selectRows("ehr", "formtemplates", new SimplerFilter("entityid", CompareType.EQUAL, id)).toJSONObjectArray();
+
+        if (rows.length == 0) {
+            throw new Exception("Template " + id + " does not exist.");
+        }
+
+        return rows[0];
+    }
+
+    protected JSONObject getTemplateWithMetaData(String id) throws Exception {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        JSONObject[] rows = queryFactory.selectRows("ehr", "AllTemplates", new SimplerFilter("entityid", CompareType.EQUAL, id)).toJSONObjectArray();
 
         if (rows.length == 0) {
             throw new Exception("Template " + id + " does not exist.");
@@ -67,7 +78,7 @@ public abstract class AbstractTemplateService extends DataEntryService {
             throw new Exception("You must be a Template Admin, template owner, or a member of the owning group of a template to rename a template.");
         }
 
-        JSONObject template = getTemplate(templateId);
+        JSONObject template = getRawTemplate(templateId);
         template.put("title", form.title);
         template.put("description", form.description);
         template.put("userid", (form.owner == 0) ? null : form.owner);

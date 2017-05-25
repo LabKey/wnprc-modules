@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.RequiresLogin;
@@ -11,6 +13,7 @@ import org.labkey.dbutils.api.exception.MissingPermissionsException;
 import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.annotation.JspPath;
 import org.labkey.webutils.api.action.annotation.PageTitle;
+import org.labkey.wnprc_ehr.dataentry.templates.message.UpdateTemplateForm;
 import org.labkey.wnprc_ehr.dataentry.templates.permission.TemplateAdminPermission;
 import org.springframework.validation.BindException;
 
@@ -60,12 +63,13 @@ public class TemplateController extends SpringActionController {
         }
     }
 
-    @ActionNames("renameTemplate")
+    @ActionNames("updateTemplate")
+    @Marshal(Marshaller.Jackson)
     @RequiresLogin()
-    public class RenameTemplateAPI extends TemplateApiAction<NullForm> {
+    public class UpdateTemplateAPI extends TemplateApiAction<UpdateTemplateForm> {
         @Override
-        public Object execute(NullForm nullForm, BindException e) throws Exception {
-            getService().renameTemplate(getTemplateId(), getViewContext().getRequest().getParameter("newname"));
+        public Object execute(UpdateTemplateForm form, BindException e) throws Exception {
+            getService().updateTemplate(getTemplateId(), form);
             return new JSONObject();
         }
     }

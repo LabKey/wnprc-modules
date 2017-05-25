@@ -36,7 +36,7 @@ export class UserSelector extends React.Component<UserSelectorProps, UserSelecto
         };
 
         if (props.initialUser) {
-            this.initialRecord = executeSql(schema, `SELECT * FROM core.PrincipalsWithoutAdmin WHERE UserId = '${props.initialUser}'`).then((data: any) => {
+            this.initialRecord = executeSql(schema, `SELECT * FROM core.UsersAndGroups WHERE UserId = '${props.initialUser}'`).then((data: any) => {
                 return data.rows[0] as Record;
             })
         }
@@ -58,7 +58,7 @@ export class UserSelector extends React.Component<UserSelectorProps, UserSelecto
     }
 
     handleSearch(q: string) {
-        let sql = `SELECT * FROM core.PrincipalsWithoutAdmin WHERE DisplayName LIKE '%${q}%'`;
+        let sql = `SELECT * FROM core.UsersAndGroups WHERE DisplayName LIKE '%${q}%'`;
 
         executeSql(schema, sql).then((data:any) => {
             this.setState({

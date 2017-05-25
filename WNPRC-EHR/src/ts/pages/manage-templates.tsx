@@ -2,11 +2,103 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Component = React.Component;
 import * as s from "underscore.string";
-import {ManageTemplatesInfo, DataEntryTemplateInfo} from "../../../build/generated-ts/GeneratedFromJava";
+import {
+    ManageTemplatesInfo, DataEntryTemplateInfo,
+    UpdateTemplateForm
+} from "../../../build/generated-ts/GeneratedFromJava";
 import ChangeEvent = React.ChangeEvent;
+import * as toastr from "toastr";
+
+
+import {modal, ModalWrapper, displayError} from "WebUtils/component/modal";
+import {UserSelector} from "../lib/UserSelector";
+import {deleteTemplate, updateTemplate} from "../lib/dataentry/templates-api";
+import {executeSql} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/API";
+
+interface EditTemplateMetadataFormProps {
+    entityId: string;
+    title: string;
+    description: string;
+    owner: number;
+}
+
+interface EditTemplateMetadataFormState {
+    form: UpdateTemplateForm
+}
+
+class EditTemplateMetadataForm extends Component<EditTemplateMetadataFormProps, EditTemplateMetadataFormState> {
+    constructor(props: EditTemplateMetadataFormProps) {
+        super(props);
+
+        let form = new UpdateTemplateForm();
+        form.title = props.title;
+        form.description = props.description;
+        form.owner = props.owner;
+
+        this.state = {
+            form
+        };
+
+        this.handleTitleUpdate = this.handleTitleUpdate.bind(this);
+        this.handleDescriptionUpdate = this.handleDescriptionUpdate.bind(this);
+        this.handleOwnerUpdate = this.handleOwnerUpdate.bind(this);
+    }
+
+    handleTitleUpdate(e: ChangeEvent<HTMLInputElement>) {
+        let form = this.state.form;
+        form.title = e.target.value;
+        this.setState({form});
+    }
+
+    handleDescriptionUpdate(e: ChangeEvent<HTMLTextAreaElement>) {
+        let form = this.state.form;
+        form.description = e.target.value;
+        this.setState({form});
+    }
+
+    handleOwnerUpdate(num: number) {
+        let form = this.state.form;
+        form.owner = num;
+        this.setState({form});
+    }
+
+    render() {
+        let form = this.state.form;
+
+        return (
+            <div>
+                <form className="form">
+                    <div className="form-group">
+                        <label>Original Title</label>
+                        <p type="text" className="form-control-static">{this.props.title}</p>
+                    </div>
+
+                    <div className="form-group">
+                        <label>New Title</label>
+                        <input type="text" className="form-control" value={form.title} onChange={this.handleTitleUpdate} />
+                    </div>
+
+
+                    <div className="form-group">
+                        <label>Owner</label>
+                        <UserSelector initialUser={this.props.owner} onChange={this.handleOwnerUpdate}></UserSelector>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Description</label>
+                        <textarea type="text" rows={3} style={{height: '150px'}} className="form-control" value={form.description} onChange={this.handleDescriptionUpdate} />
+                    </div>
+                </form>
+            </div>
+        )
+    }
+}
 
 interface PageProps {
-    info: ManageTemplatesInfo;
+    templates: DataEntryTemplateInfo[];
+    isAdmin: boolean;
+    handleDelete: (template: DataEntryTemplateInfo) => void;
+    handleUpdate: (id: string, form: UpdateTemplateForm) => void;
 }
 
 interface PageState {
@@ -25,11 +117,77 @@ class Page extends Component<PageProps, PageState> {
 
         this.handleFilterChange = this.handleFilterChange.bind(this);
         this.toggleShowAll = this.toggleShowAll.bind(this);
+        this.edit = this.edit.bind(this);
+        this.deleteTemplate = this.deleteTemplate.bind(this);
     }
 
     handleFilterChange(e: ChangeEvent<HTMLInputElement>) {
         this.setState({
             filter: e.target.value
+        });
+    }
+
+    deleteTemplate(t: DataEntryTemplateInfo) {
+        let onDelete = () => {
+            modal.pop();
+
+            deleteTemplate(t.entityid).then(() => {
+                this.props.handleDelete(t);
+                toastr.success(`Successfully deleted ${t.title}.`);
+            }).catch((e) => {
+                displayError(e);
+            })
+        };
+
+        modal.pushState({
+            title: "Confirm Deletion",
+            body: (
+                <div>
+                    <p>Are you sure you want to delete <strong>{t.title}</strong>?</p>
+                </div>
+            ),
+            footer: (
+                <div>
+                    <button type="button" className="btn btn-default" onClick={() => {modal.pop()}}>Cancel</button>
+                    <button type="button" className="btn btn-danger" onClick={() => {onDelete()}}>Delete</button>
+                </div>
+            )
+        });
+    }
+
+    edit(t: DataEntryTemplateInfo) {
+        let formEditor: EditTemplateMetadataForm;
+
+        let save = () => {
+            modal.pop();
+
+            if (formEditor) {
+                let id = t.entityid;
+                let form = formEditor.state.form;
+
+                updateTemplate(id, form).then(() => {
+                    this.props.handleUpdate(id, form);
+
+                    let message = (form.title == t.title) ? `Successfully updated ${t.title}` : `Successfully updated ${t.title} to ${form.title}`;
+                    toastr.success(message);
+                }).catch((e) => {
+                    displayError(e);
+                });
+            }
+            else {
+                displayError(new Error("Can't find form contents."));
+            }
+        };
+
+        modal.pushState({
+            title: "Edit Template Metadata",
+            body: (<EditTemplateMetadataForm entityId={t.entityid} title={t.title} description={t.description} owner={t.ownerId} ref={(editor) => {formEditor = editor}} />),
+            footer: (
+                <div>
+                    <button type="button" className="btn btn-default" onClick={() => {modal.pop()}}>Cancel</button>
+                    <button type="button" className="btn btn-primary" onClick={() => {save()}}>Save</button>
+                </div>
+            )
         });
     }
 
@@ -43,7 +201,7 @@ class Page extends Component<PageProps, PageState> {
 
     render() {
         let filter = this.state.filter;
-        let templates = this.props.info.templates;
+        let templates = this.props.templates;
 
         if (!s.isBlank(filter)) {
             templates = templates.filter((template: DataEntryTemplateInfo) => {
@@ -58,18 +216,18 @@ class Page extends Component<PageProps, PageState> {
         }
 
         let templateRows = templates.map((template: DataEntryTemplateInfo) => {
-            let canEdit = this.props.info.isAdmin || template.isInGroup;
-            let canDelete = this.props.info.isAdmin || template.isOwner;
+            let canEdit = this.props.isAdmin || template.isInGroup;
+            let canDelete = this.props.isAdmin || template.isOwner;
 
             return (
                 <tr key={template.entityid}>
                     <td>
-                        <button className={`btn btn-${canEdit ? 'primary' : 'default'} btn-sm`} disabled={!canEdit}>
+                        <button className={`btn btn-${canEdit ? 'primary' : 'default'} btn-sm`} disabled={!canEdit} onClick={() => {this.edit(template)}}>
                             <i className="fa fa-pencil" />
                         </button>
                     </td>
                     <td>
-                        <button className={`btn btn-${canDelete ? 'danger' : 'default'} btn-sm`} disabled={!canDelete}>
+                        <button className={`btn btn-${canDelete ? 'danger' : 'default'} btn-sm`} disabled={!canDelete} onClick={() => {this.deleteTemplate(template)}}>
                             <i className="fa fa-trash" />
                         </button>
                     </td>
@@ -143,8 +301,75 @@ class Page extends Component<PageProps, PageState> {
     }
 }
 
+interface PageWrapperState {
+    templates: DataEntryTemplateInfo[];
+    isAdmin: boolean;
+}
+
+class PageWrapper extends Component<{}, PageWrapperState> {
+    page: Page;
+
+    constructor(props: {}) {
+        super(props);
+
+        let info = ManageTemplatesInfo.fromJSON((window as any).PageLoadData);
+
+        this.state = {
+            templates: info.templates,
+            isAdmin: info.isAdmin
+        };
+
+        this.handleTemplateDeletion = this.handleTemplateDeletion.bind(this);
+        this.updateTemplate = this.updateTemplate.bind(this);
+    }
+
+    handleTemplateDeletion(templateToDelete: DataEntryTemplateInfo) {
+        let templates = this.state.templates;
+
+        templates = templates.filter((curTemplate) => {
+            return curTemplate.entityid != templateToDelete.entityid;
+        });
+
+        this.setState({templates});
+    }
+
+    updateTemplate(templateId: string, templateToUpdate: UpdateTemplateForm) {
+        let schema = 'core';
+
+        let update = (ownerName: string) => {
+            let templates = this.state.templates;
+
+            templates.forEach((curTemplate) => {
+                if (curTemplate.entityid == templateId) {
+                    curTemplate.title = templateToUpdate.title;
+                    curTemplate.description = templateToUpdate.description;
+                    curTemplate.ownerId = templateToUpdate.owner;
+                    curTemplate.ownerName = ownerName;
+                }
+            });
+
+            if (this.page) {
+                this.page.forceUpdate();
+            }
+        };
+
+        if (templateToUpdate.owner != 0) {
+            executeSql(schema, `SELECT * FROM core.UsersAndGroups WHERE UserId = '${templateToUpdate.owner}'`).then((data: any) => {
+                update(data.rows[0]["DisplayName"]);
+            });
+        }
+        else {
+            update('');
+        }
+    }
+
+    render() {
+        return (<Page templates={this.state.templates} isAdmin={this.state.isAdmin} handleDelete={this.handleTemplateDeletion} handleUpdate={this.updateTemplate} ref={(p) => {this.page = p}} />)
+    }
+}
+
 // Render the page into the react div
 ReactDOM.render(
-    <Page info={ManageTemplatesInfo.fromJSON((window as any).PageLoadData)}/>,
+    <PageWrapper />,
     $("#manageTemplates").get(0)
 );

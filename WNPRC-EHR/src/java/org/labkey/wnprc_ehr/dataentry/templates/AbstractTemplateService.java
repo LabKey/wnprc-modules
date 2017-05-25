@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.dataentry.templates;
 
 import org.json.JSONObject;
+import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -30,7 +31,7 @@ public abstract class AbstractTemplateService extends DataEntryService {
 
     public void deleteTemplate(String templateId) throws Exception {
         if (!allowedToDelete(templateId)) {
-            throw new Exception("You must be a Template Admin or the owner of a template to delete a template.");
+            throw new ApiUsageException("You must be a Template Admin or the owner of a template to delete a template.");
         }
 
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
@@ -75,7 +76,7 @@ public abstract class AbstractTemplateService extends DataEntryService {
 
     public void updateTemplate(String templateId, UpdateTemplateForm form) throws Exception {
         if (!allowedToEdit(templateId)) {
-            throw new Exception("You must be a Template Admin, template owner, or a member of the owning group of a template to rename a template.");
+            throw new ApiUsageException("You must be a Template Admin, template owner, or a member of the owning group of a template to rename a template.");
         }
 
         JSONObject template = getRawTemplate(templateId);

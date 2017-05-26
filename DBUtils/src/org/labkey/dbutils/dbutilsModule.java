@@ -1,12 +1,14 @@
 package org.labkey.dbutils;
 
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ldk.ExtendedSimpleModule;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JobRunner;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.dbutils.file.FileToucher;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Collection;
@@ -15,6 +17,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class dbutilsModule extends ExtendedSimpleModule {
+    private static Logger _log = Logger.getLogger(dbutilsModule.class);
+
     @Override
     public boolean hasScripts() { return true; }
 
@@ -30,7 +34,12 @@ public class dbutilsModule extends ExtendedSimpleModule {
     }
 
     @Override
-    public void doStartupAfterSpringConfig(ModuleContext moduleContext) {}
+    public void doStartupAfterSpringConfig(ModuleContext moduleContext) {
+        if (AppProps.getInstance().isDevMode()) {
+            _log.info("Starting File Toucher");
+            JobRunner.getDefault().execute(new FileToucher());
+        }
+    }
 
     @Override
     @NotNull

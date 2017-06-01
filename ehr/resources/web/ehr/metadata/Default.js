@@ -135,7 +135,9 @@ EHR.Metadata.registerMetadata('Default', {
         }
         ,enddate: {
             xtype: 'xdatetime',
-            shownInInsertView: true,
+            hidden: true,
+            shownInGrid: false,
+            shownInInsertView: false,
             colModel: {
                 fixed: true,
                 width: 130

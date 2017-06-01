@@ -41,6 +41,9 @@ EHR.Metadata.registerMetadata('Task', {
                     readOnly: true
                 }
             }
+            /*enddate:{
+                hidden: true
+            }*/
         }
         ,Deaths: {
             tattoo: {

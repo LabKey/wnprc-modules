@@ -8,6 +8,10 @@ EHR.model.DataModelManager.registerMetadata('Default', {
         },
         project: {
             xtype: 'wnprc-projectentryfield'
+        },
+        enddate:{
+            hidden: true,
+            allowBlank: false
         }
     }
 });

@@ -92,6 +92,40 @@ public class NamespaceWriter {
         };
     }
 
+    private Type _allowNullForType(final Type oldType) {
+        return new Type() {
+            @Override
+            public Set<Class> getJavaClasses() {
+                return oldType.getJavaClasses();
+            }
+
+            @Override
+            public String getCastString(String input) {
+                return String.format(
+                        "(%s == null) ? null : ((val: any) => {return %s;})(%s)",
+                        input,
+                        oldType.getCastString("val"),
+                        input
+                );
+            }
+
+            @Override
+            public String getTypescriptTypeName() {
+                return oldType.getTypescriptTypeName() + " | null";
+            }
+
+            @Override
+            public String getCloneString(String input) {
+                return String.format(
+                        "(%s == null) ? null : ((val: any) => {return %s;})(%s)",
+                        input,
+                        oldType.getCloneString("val"),
+                        input
+                );
+            }
+        };
+    }
+
     private void writeClass(Namespace.TSClass tsClass) throws IOException {
         writeLine("");
 
@@ -107,8 +141,13 @@ public class NamespaceWriter {
             String accessString = String.format("json['%s']", fieldName);
             String memberAccessString = String.format("this.%s", fieldName);
 
-            if (tsClass.memberMetaData.get(fieldName)) {
+            if (tsClass.memberMetaData.get(fieldName).isList) {
                 type = _wrapTypeInArray(type);
+            }
+
+
+            if (tsClass.memberMetaData.get(fieldName).allowNull) {
+                type = _allowNullForType(type);
             }
 
             Map<String, String> field = new HashMap<>();

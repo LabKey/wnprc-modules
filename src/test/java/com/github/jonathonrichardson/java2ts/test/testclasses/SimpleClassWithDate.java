@@ -1,5 +1,7 @@
 package com.github.jonathonrichardson.java2ts.test.testclasses;
 
+import com.github.jonathonrichardson.java2ts.annotation.AllowNull;
+
 import java.util.Date;
 
 /**
@@ -8,4 +10,6 @@ import java.util.Date;
 public class SimpleClassWithDate {
     public String value;
     public Date startDate;
+    @AllowNull
+    public Date nullableStartDate;
 }

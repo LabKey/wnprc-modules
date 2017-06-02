@@ -1,5 +1,6 @@
 package com.github.jonathonrichardson.java2ts;
 
+import com.github.jonathonrichardson.java2ts.annotation.AllowNull;
 import com.github.jonathonrichardson.java2ts.annotation.SerializeToTS;
 import com.github.jonathonrichardson.java2ts.type.Moment;
 import com.github.jonathonrichardson.java2ts.type.TSBoolean;
@@ -83,10 +84,20 @@ public class Namespace {
         }
     }
 
+    public static class MemberMetadata {
+        public boolean isList;
+        public boolean allowNull;
+
+        public MemberMetadata(boolean isList, boolean allowNull) {
+            this.isList = isList;
+            this.allowNull = allowNull;
+        }
+    }
+
     public class TSClass implements Type {
         private Class clazz;
         Map<String, Type> members = new HashMap<>();
-        Map<String, Boolean> memberMetaData = new HashMap<>();
+        Map<String, MemberMetadata> memberMetaData = new HashMap<>();
 
         public TSClass(Class clazz) {
             this.clazz = clazz;
@@ -103,6 +114,10 @@ public class Namespace {
                 Class fieldClass = field.getType();
 
                 boolean isList = false;
+
+
+                boolean allowNull = (field.getAnnotation(AllowNull.class) != null);
+
 
                 if (field.getGenericType() instanceof ParameterizedType) {
                     ParameterizedType pType = (ParameterizedType) field.getGenericType();
@@ -136,7 +151,7 @@ public class Namespace {
                 fieldType = Namespace.this.classes_to_types.get(fieldClass);
 
                 this.members.put(fieldName, fieldType);
-                this.memberMetaData.put(fieldName, isList);
+                this.memberMetaData.put(fieldName, new MemberMetadata(isList, allowNull));
             }
         }
 

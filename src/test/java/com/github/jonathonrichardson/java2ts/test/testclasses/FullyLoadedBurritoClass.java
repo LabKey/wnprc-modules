@@ -1,5 +1,6 @@
 package com.github.jonathonrichardson.java2ts.test.testclasses;
 
+import com.github.jonathonrichardson.java2ts.annotation.AllowNull;
 import com.github.jonathonrichardson.java2ts.annotation.SerializeToTS;
 
 /**
@@ -28,4 +29,7 @@ public class FullyLoadedBurritoClass {
     public String string;
 
     public SimpleEnum enumValue;
+
+    @AllowNull
+    public SimpleEnum enumValueThatCouldBeNull;
 }

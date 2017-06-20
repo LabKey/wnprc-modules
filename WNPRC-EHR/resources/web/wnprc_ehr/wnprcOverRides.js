@@ -7,44 +7,45 @@ Ext4.namespace('WNPRC_EHR');
 
 EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
     var dataRegion = LABKEY.DataRegions[dataRegionName],
-        headerEl = Ext4.get('dataregion_header_row_' + dataRegion.name),
+        headerEl = Ext4.DomQuery.select('table[lk-region-name=' + dataRegion.name + ']'),
         menu_customized = false;
 
     if (headerEl) {
-        var btnEls = Ext4.DomQuery.select('.labkey-menu-button', headerEl.dom);
+        var btnEls = Ext4.DomQuery.select('.labkey-menu-button', headerEl);
         Ext4.each(btnEls, function(btnEl) {
             if (btnEl.innerHTML.indexOf('More Actions') > -1) {
                 var menu = Ext4.menu.MenuMgr.get(Ext4.get(btnEl).getAttribute('lk-menu-id'));
                 if (menu) {
                     menu_customized = true;
                     var action = LABKEY.ActionURL.getAction();
-                    if (dataRegion.schemaName.match(/^study$/i) && dataRegion.queryName.match(/^Demographics$/i)) {
+                    var queryName = dataRegion.queryName.replace(' ', '');
+                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^Demographics$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Weight', schemaName: 'study'})) {
                             WNPRC_EHR.DatasetButtons.addCreateTaskFromIdsBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Weight'}], formType: 'Weight'});
                         }
                     }
 
-                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && dataRegion.queryName.match(/^ClinpathRuns$/i)) {
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
                             WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Clinpath Runs'}], formType: 'Clinpath'});
                             WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
                         }
                     }
 
-                    if (dataRegion.schemaName.match(/^study$/i) && dataRegion.queryName.match(/^ClinpathRuns$/i)) {
+                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
                         if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
                             WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
                         }
                     }
 
-                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && dataRegion.queryName.match(/^Blood$/i)) {
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^BloodDraws$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Blood Draws', schemaName: 'study'})) {
                             WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Blood Draws'}], formType: 'Blood Draws'});
                             WNPRC_EHR.DatasetButtons.addChangeBloodQCStateBtn(dataRegion.name, menu);
                         }
                     }
 
-                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && dataRegion.queryName.match(/^StudyData$/i)) {
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^StudyData$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Blood Draws', schemaName: 'study'})) {
                             WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
                         }

@@ -84,7 +84,12 @@ export class FilterableTable extends React.Component<FilterableTableViewModel, F
     handleFilterChange(event: ChangeEvent<HTMLElement>) {
         let $target = $(event.target);
         let filters = this.state.filters;
-        filters[$target.attr('data-column-number')] = $target.val();
+
+        let column_no = $target.attr('data-column-number');
+        let filterValue = $target.val();
+        if (column_no && filterValue) {
+            filters[column_no] = _.isArray(filterValue) ? filterValue.join(' ') : `${filterValue}`;
+        }
 
         this.setState({filters:  filters});
     }

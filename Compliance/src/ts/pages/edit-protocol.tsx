@@ -68,7 +68,7 @@ function formatDate(moment: Moment): string {
 }
 
 class Page extends React.Component<PageProps, PageState> {
-    dropdownButton: HTMLElement;
+    dropdownButton: HTMLElement | null;
     protocolRevisionsFormPromise: Promise<ProtocolRevisionsForm>;
 
     constructor(props: PageProps) {
@@ -92,7 +92,9 @@ class Page extends React.Component<PageProps, PageState> {
             });
         });
 
-        ($(this.dropdownButton) as any).dropdown();
+        if (this.dropdownButton != null) {
+            ($(this.dropdownButton) as any).dropdown();
+        }
     }
 
     setSectionToEdit(name: string) {
@@ -117,10 +119,10 @@ class Page extends React.Component<PageProps, PageState> {
         let sortedRevisions: ProtocolRevisionForm[] = [];
         if (this.state.protocolRevisions) {
             sortedRevisions = this.state.protocolRevisions.revisions.sort((left, right): number => {
-                if (left.approval_date.isBefore(right)) {
+                if (left.approval_date.isBefore(right.approval_date)) {
                     return 1;
                 }
-                else if (left.approval_date.isAfter(right)) {
+                else if (left.approval_date.isAfter(right.approval_date)) {
                     return -1;
                 }
                 else {

@@ -52,7 +52,7 @@ export class SpeciesSelector extends React.Component<SpeciesSelectorProps, Speci
         return (
             <form className="form-inline">
                 <div className="form-group">
-                    <select value={this.state.value} onChange={this.handleChange} className="form-control" placeholder="Please Select a Species">
+                    <select value={this.state.value} onChange={this.handleChange} className="form-control">
                         <option value="" style={{fontStyle: 'italic'}}>Please Select a Species</option>
                         {options}
                     </select>

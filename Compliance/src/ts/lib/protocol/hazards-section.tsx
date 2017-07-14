@@ -78,11 +78,11 @@ export class HazardsEditor extends React.Component<HazardsEditorProps, {}> {
                         };
                     };
 
-                    let _checkInput: HTMLInputElement;
+                    let _checkInput: HTMLInputElement | null;
 
                     return (
                         <div className="checkbox checkbox-primary col-sm-3" key={fieldName}>
-                            <div className="form-group" onClick={() => {$(_checkInput).click()}}>
+                            <div className="form-group" onClick={() => {(_checkInput != null) && $(_checkInput).click()}}>
                                 <input type="checkbox" ref={(input) => {_checkInput = input}} checked={!!form[fieldName]} name={id} onChange={handleChange(fieldName)} />
 
                                 <label htmlFor={id}>

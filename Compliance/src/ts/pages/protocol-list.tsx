@@ -204,7 +204,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
 
     render() {
         return (
-            <div className="modal fade" ref={(div) => { this.$modalDiv = $(div); }} tabIndex={-1} role="dialog">
+            <div className="modal fade" ref={(div) => { if(div != null) {this.$modalDiv = $(div);} }} tabIndex={-1} role="dialog">
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">

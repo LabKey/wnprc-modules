@@ -1,13 +1,14 @@
 import * as React from "react";
 import * as $ from "jquery";
+import * as _ from "underscore";
 
 export interface UnblockedSectionProps {
     isUnblocked: boolean;
 }
 
 export class UnblockedSection extends React.Component<UnblockedSectionProps, {}> {
-    private _innerDiv: HTMLDivElement;
-    private _outerDiv: HTMLDivElement;
+    private _innerDiv: HTMLDivElement | null;
+    private _outerDiv: HTMLDivElement | null;
 
     constructor(props: UnblockedSectionProps) {
         super(props);
@@ -29,28 +30,29 @@ export class UnblockedSection extends React.Component<UnblockedSectionProps, {}>
     }
 
     makeEditable(): void {
-        if (!this._innerDiv || !this._outerDiv) {
-            return;
+        if (this._innerDiv && this._outerDiv) {
+            let $innerDiv = $(this._innerDiv);
+            let $outerDiv = $(this._outerDiv);
+
+            let forceNumber = (num: number | undefined): number => {
+                return _.isUndefined(num) ? 0 : num as number;
+            };
+
+            $outerDiv
+                .width(forceNumber($innerDiv.width()))
+                .height(forceNumber($innerDiv.height()));
+
+            $innerDiv.css({
+                position: 'absolute',
+                'z-index': 2000, // The Z-index of jQuery.blockUI elements are between 1000 and 1020.
+                'background-color': 'white',
+                'border-radius': '8px'
+            });
+
+            $innerDiv
+                .width(forceNumber($outerDiv.outerWidth()))
+                .height(forceNumber($outerDiv.outerHeight()));
         }
-
-        let $innerDiv = $(this._innerDiv);
-        let $outerDiv = $(this._outerDiv);
-
-        $outerDiv
-            .width($innerDiv.width())
-            .height($innerDiv.height());
-
-        $innerDiv.css({
-            position: 'absolute',
-            'z-index': 2000, // The Z-index of jQuery.blockUI elements are between 1000 and 1020.
-            'background-color': 'white',
-            'border-radius': '8px'
-        });
-
-        $innerDiv
-            .width($outerDiv.outerWidth())
-            .height($outerDiv.outerHeight());
-
     }
 
     unmakeEditable() {

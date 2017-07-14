@@ -7,7 +7,7 @@ export interface BlockableDivProps {
 }
 
 export class BlockableDiv extends React.Component<BlockableDivProps, {isBlocked: boolean}> {
-    _div: HTMLDivElement;
+    _div: HTMLDivElement | null;
     private _isBlocked: boolean;
 
     constructor(props: BlockableDivProps) {

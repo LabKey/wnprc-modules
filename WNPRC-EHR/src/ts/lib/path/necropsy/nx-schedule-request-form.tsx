@@ -48,7 +48,7 @@ interface Pathologist {
 }
 
 export class NxScheduleRequestFormPanel extends Component<NxScheduleRequestFormPanelProps, NxScheduleRequestFormPanelState> {
-    _divToBlock: HTMLDivElement;
+    _divToBlock: HTMLDivElement | null;
 
     constructor(props: NxScheduleRequestFormPanelProps) {
         super(props);

@@ -70,7 +70,7 @@ class EditTemplateMetadataForm extends Component<EditTemplateMetadataFormProps, 
                 <form className="form">
                     <div className="form-group">
                         <label>Original Title</label>
-                        <p type="text" className="form-control-static">{this.props.title}</p>
+                        <p className="form-control-static">{this.props.title}</p>
                     </div>
 
                     <div className="form-group">
@@ -86,7 +86,7 @@ class EditTemplateMetadataForm extends Component<EditTemplateMetadataFormProps, 
 
                     <div className="form-group">
                         <label>Description</label>
-                        <textarea type="text" rows={3} style={{height: '150px'}} className="form-control" value={form.description} onChange={this.handleDescriptionUpdate} />
+                        <textarea rows={3} style={{height: '150px'}} className="form-control" value={form.description} onChange={this.handleDescriptionUpdate} />
                     </div>
                 </form>
             </div>
@@ -181,7 +181,7 @@ class Page extends Component<PageProps, PageState> {
 
         modal.pushState({
             title: "Edit Template Metadata",
-            body: (<EditTemplateMetadataForm entityId={t.entityid} title={t.title} description={t.description} owner={t.ownerId} ref={(editor) => {formEditor = editor}} />),
+            body: (<EditTemplateMetadataForm entityId={t.entityid} title={t.title} description={t.description} owner={t.ownerId} ref={(editor) => {if (editor != null) {formEditor = editor}}} />),
             footer: (
                 <div>
                     <button type="button" className="btn btn-default" onClick={() => {modal.pop()}}>Cancel</button>
@@ -364,7 +364,7 @@ class PageWrapper extends Component<{}, PageWrapperState> {
     }
 
     render() {
-        return (<Page templates={this.state.templates} isAdmin={this.state.isAdmin} handleDelete={this.handleTemplateDeletion} handleUpdate={this.updateTemplate} ref={(p) => {this.page = p}} />)
+        return (<Page templates={this.state.templates} isAdmin={this.state.isAdmin} handleDelete={this.handleTemplateDeletion} handleUpdate={this.updateTemplate} ref={(p) => {if (p != null) {this.page = p}}} />)
     }
 }
 

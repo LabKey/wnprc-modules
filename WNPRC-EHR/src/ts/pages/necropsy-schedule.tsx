@@ -66,14 +66,14 @@ class Page extends Component<{}, PageState> {
                         </div>
 
                         <div className="col-sm-12 col-md-8">
-                            <NxCalendar handleClick={this.handleEventClick} ref={(el) => {this.r$calendar = el}}/>
+                            <NxCalendar handleClick={this.handleEventClick} ref={(el) => {if (el != null) {this.r$calendar = el}}}/>
                         </div>
                     </div>
 
                     {isPathologist && (
                         <div className="col-sm-12 col-xl-8">
                             <div className="col-sm-12 col-md-8">
-                                <NxPendingRequestsPanel handleClick={this.handleSelectLsid} ref={(el) => {this.r$requests = el}} />
+                                <NxPendingRequestsPanel handleClick={this.handleSelectLsid} ref={(el) => {if (el != null) {this.r$requests = el}}} />
                             </div>
 
                             <div className="col-sm-12 col-md-4">

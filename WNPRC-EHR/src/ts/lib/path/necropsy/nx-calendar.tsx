@@ -120,7 +120,7 @@ export class NxCalendar extends Component<NxCalendarProps, NxCalendarState> {
                 </div>
 
                 <div className="panel-body">
-                    <div ref={(div) => {this._calDiv = div;}}></div>
+                    <div ref={(div) => {if (div != null) {this._calDiv = div;}}}></div>
 
                     {this.state.suites.length > 0 && (
                         <div className="pull-right">

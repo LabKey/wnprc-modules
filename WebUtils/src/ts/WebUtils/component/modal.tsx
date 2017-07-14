@@ -84,7 +84,7 @@ export class ModalWrapper extends Component<ModalWrapperProps, ModalWrapperState
         let body = (top) ? top.body : null;
 
         return (
-            <div className="modal fade" tabIndex={-1} role="dialog" ref={(div) => {this.modal = div}}>
+            <div className="modal fade" tabIndex={-1} role="dialog" ref={(div) => {if (div != null) {this.modal = div}}}>
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
@@ -119,7 +119,7 @@ $('#bootstrap-box').prepend($modalDiv);
 let modal: ModalWrapper;
 
 ReactDOM.render(
-    <ModalWrapper ref={(component) => {modal = component}}/>,
+    <ModalWrapper ref={(component) => {if (component != null) {modal = component}}}/>,
     $modalDiv.get(0)
 );
 

@@ -23,7 +23,7 @@
     "@types/underscore.string": "0.0.30",
     "gulp": "github:gulpjs/gulp#4.0",
     "react": "^15.4.2",
-    "typescript": "^2.2.1"
+    "typescript": "2.4.1"
   },
   "devDependencies": {}
 }

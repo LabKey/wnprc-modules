@@ -94,6 +94,6 @@
     "awesome-typescript-loader": "^3.0.8",
     "imports-loader": "^0.7.1",
     "source-map-loader": "^0.1.6",
-    "typescript": "^2.2.1"
+    "typescript": "2.4.1"
   }
 }

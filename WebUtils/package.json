@@ -79,7 +79,7 @@
     "style-loader": "^0.13.2",
     "toastr": "^2.1.2",
     "ts-loader": "^2.0.1",
-    "typescript": "^2.2.1",
+    "typescript": "2.4.1",
     "underscore": "^1.8.3",
     "underscore.string": "^3.3.4",
     "uri": "^0.1.0",

@@ -28,7 +28,7 @@
     "@types/react": "^15.0.14",
     "@types/react-dom": "^0.14.23",
     "@types/react-tabs": "^0.5.22",
-    "@types/rsvp": "^3.3.0",
+    "@types/rsvp": "3.3.0",
     "@types/toastr": "^2.1.32",
     "@types/underscore": "^1.7.36",
     "@types/underscore.string": "0.0.30",

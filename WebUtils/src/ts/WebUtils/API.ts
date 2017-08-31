@@ -3,14 +3,14 @@ import {getCSRF, getPageLoadData, getBaseURL} from "./LabKey";
 import * as s from "underscore.string";
 import * as _ from "underscore";
 
-import rsvp = require('rsvp');
+import RSVP = require('rsvp');
 import {makeURLForHTTPAction} from "./URL";
 import moment = require("moment");
 import Moment = moment.Moment;
 const fetch = require("fetch");
 
-let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
-    return new rsvp.Promise((resolve, reject) => {
+let convertToRSVP = function<T>(promise: Promise<T>): RSVP.Promise<T> {
+    return new RSVP.Promise((resolve:any, reject:any) => {
         promise.then((val) => {
             resolve(val);
         }).catch((val) => {
@@ -19,7 +19,7 @@ let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
     });
 };
 
-let makeRequest = function(url: string, config?: RequestInit): rsvp.Promise<Response> {
+let makeRequest = function(url: string, config?: RequestInit): RSVP.Promise<Response> {
     if (!config) {
         config = {};
     }
@@ -55,21 +55,21 @@ let makeRequest = function(url: string, config?: RequestInit): rsvp.Promise<Resp
     })
 };
 
-let extractJson = function(response: Response): rsvp.Promise<{[name: string]: any}> {
+let extractJson = function(response: Response): RSVP.Promise<{[name: string]: any}> {
     let contentType = response.headers.get('content-type');
 
     if (contentType && contentType.indexOf('application/json') !== -1) {
         return convertToRSVP(response.json());
     }
     else {
-        return rsvp.Promise.resolve({});
+        return RSVP.Promise.resolve({});
     }
 };
 
-let makeRequestJSON = function(url: string, config?: RequestInit): rsvp.Promise<{[name: string]: any}> {
-    return makeRequest(url, config).catch((e) => {
-        return extractJson(e.response).then((data) => {
-            return rsvp.Promise.reject(data);
+let makeRequestJSON = function(url: string, config?: RequestInit): RSVP.Promise<{[name: string]: any}> {
+    return makeRequest(url, config).catch((e:any) => {
+        return extractJson(e.response).then((data:any) => {
+            return RSVP.Promise.reject(data);
         });
     }).then((response) => {
         return extractJson(response);
@@ -101,7 +101,7 @@ export function selectRowsFromCache(schema: string, query: string, view?: string
     }
 }
 
-export function selectRows(schema: string, query: string, config: SelectRowsConfig): rsvp.Promise<{[name: string]: any}>  {
+export function selectRows(schema: string, query: string, config: SelectRowsConfig): RSVP.Promise<{[name: string]: any}>  {
     // Check for required parameters
     if (!schema) {
         throw "You must specify a schemaName!";
@@ -236,7 +236,7 @@ export function get(url: string, config: RequestInit) {
 }
 
 export function getText(path: string) {
-    return makeRequest(getBaseURL() + path).then(function(response) {
+    return makeRequest(getBaseURL() + path).then(function(response:any) {
         return response.text();
     });
 }

@@ -46,7 +46,7 @@ export class Lookup {
 
             config[`${this.keyColumn}~eq`] = key;
 
-            selectRows(this.schemaName, this.queryName, config).then((raw_data) => {
+            selectRows(this.schemaName, this.queryName, config).then((raw_data:any) => {
                 let data = raw_data as any;
                 if (data.rows.length > 0) {
                     _.each(data.rows, (data, i: number) => {

@@ -49,7 +49,7 @@ export class QueryTable extends Table {
             });
         }
         catch(e) {
-            selectRows(this.schemaName, this.queryName, queryConfig).then(function(data) {
+            selectRows(this.schemaName, this.queryName, queryConfig).then(function(data:any) {
                 let anyData = data as any;
 
                 this._handleData({

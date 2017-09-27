@@ -1,0 +1,39 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+       <column name="date" />
+       <column name="project" />
+       <column name="account" />
+       <column name="type" />
+       <column name="sampletype" />
+       <column name="servicerequested" />
+       <!--<column name="collectionDate" />-->
+       <column name="collectionMethod" />
+       <column name="collectedBy" />
+       <!--<column name="quantity" />-->
+       <!--<column name="quantityUnits" />-->
+       <column name="remark" />
+        <column name="Id/Dataset/Demographics/birth">
+            <properties>
+                <property name="columnTitle" value="Birth"/>
+            </properties>
+        </column>
+       <column name="reviewedBy" />
+       <column name="dateReviewed" />
+       <column name="qcstate" />
+       <column name="taskid" />
+       <column name="requestid" />
+      <column name="requestid/description">
+        <properties>
+            <property name="columnTitle" value="Requestor"/>
+        </properties>
+      </column>
+   </columns>
+   <sorts>
+       <sort column="date" descending="false"/>
+       <sort column="Id" descending="false"/>
+   </sorts>
+    <filters>
+        <filter column="QCState/Label" operator="eq" value="Completed"/>
+    </filters>
+</customView>

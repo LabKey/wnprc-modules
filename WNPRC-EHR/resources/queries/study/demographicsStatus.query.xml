@@ -1,0 +1,18 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsStatus" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Center_Animal">
+                        <columnTitle>Is Center Animal?</columnTitle>
+                    </column>
+                </columns>
+            <titleColumn>Status</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

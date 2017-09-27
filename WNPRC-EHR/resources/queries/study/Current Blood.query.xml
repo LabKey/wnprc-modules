@@ -1,0 +1,71 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Current Blood" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Lsid">
+                        <isKeyField>true</isKeyField>
+                        <!--<isHidden>true</isHidden>-->
+                    </column>
+                    <column columnName="Id">
+                        <displayWidth>40</displayWidth>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>Animal</fkTable>
+                          <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="BloodLast30">
+                        <columnTitle>Previous 30 Days (inclusive)</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Blood Draws&amp;
+                            query.viewName=Blood Summary&amp;                            
+                            query.Id~eq=${Id}&amp;
+                            query.Date~datelte=${Date}&amp;
+                            query.Date~dategte=${minDate}&amp;
+                            query.sort=-Date&amp;
+                        </url>
+                    </column>                  
+                    <column columnName="BloodNext30">
+                        <columnTitle>Next 30 Days (inclusive)</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Blood Draws&amp;
+                            query.viewName=Blood Summary&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.Date~dategte=${Date}&amp;
+                            query.sort=-Date&amp;
+                        </url>
+                    </column>
+                    <column columnName="weight">
+                        <columnTitle>Latest Weight (kg)</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Weight&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.wDate~gt=${wDate}&amp;
+                            query.sort=-Date&amp;
+                        </url>
+                    </column>
+                    <column columnName="mindate">
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="maxdate">
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="wdate">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="MaxBlood">
+                        <columnTitle>Max Allowable Blood At Time</columnTitle>
+                    </column>
+                    <column columnName="AvailBlood">
+                        <columnTitle>Volume Remaining After Draw (mL)</columnTitle>
+                    </column>
+                </columns>
+                <titleColumn>BloodLast30</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

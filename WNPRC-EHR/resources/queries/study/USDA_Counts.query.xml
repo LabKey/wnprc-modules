@@ -1,0 +1,25 @@
+<query xmlns="http://labkey.org/data/xml/query">
+  <metadata>
+    <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="USDA_Report" tableDbType="TABLE">
+                <columns>
+                    <column columnName="total">
+                        <columnTitle>Total Animals</columnTitle>
+                        <url>/ehr/executeQuery.view?schemaName=study&amp;
+                            query.queryName=USDA_Summary_Report&amp;
+                            query.max_usda_letter~eq=${max_usda_letter}&amp;
+                            query.param.StartDate=${StartDate}&amp;
+                            query.param.EndDate=${EndDate}&amp;
+                        </url>
+                    </column>
+                    <column columnName="StartDate">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="EndDate">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+  </metadata>
+</query>

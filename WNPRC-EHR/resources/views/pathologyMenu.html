@@ -1,0 +1,39 @@
+<html>
+    <script type="text/javascript">
+        LABKEY.requiresScript("/ehr/ext3/navMenu.js");
+    </script>
+
+    <script type="text/javascript">
+        (function() {
+            var createNavMenu = function() {
+                if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu) {
+                    createNavMenu.defer(10);
+                    return;
+                }
+
+                new EHR.ext.NavMenu({
+                    renderTo: 'pathologyMenu',
+                    sections: [
+                        {
+                            header: 'Manage Lists',
+                            items: [
+                                {
+                                    name: 'External Labs',
+                                    url: LABKEY.ActionURL.buildURL('ehr', 'updateQuery', 'WNPRC/EHR', {
+                                        schemaName: 'wnprc',
+                                        'query.queryName': 'external_labs'
+                                    })
+                                }
+                            ]
+                        }
+                    ]
+                });
+            };
+
+            Ext.onReady(createNavMenu);
+        })();
+    </script>
+    <body>
+        <div id="pathologyMenu"></div>
+    </body>
+</html>

@@ -1,0 +1,18 @@
+<!--
+    This is a template for the Prenatal Death Additional Information form.  It is called by the
+    FINALIZE_DEATH button defined in DataEntryButtons.js
+-->
+
+<form>
+    <div class="form-group">
+        <label>Remark</label>
+        <input type="text" class="form-control" data-bind="textInput: form.remark">
+    </div>
+
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" data-bind="checked: form.notAtCenter">
+            Animal Not At Center
+        </label>
+    </div>
+</form>

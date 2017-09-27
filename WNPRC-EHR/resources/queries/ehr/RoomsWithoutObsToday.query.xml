@@ -1,0 +1,30 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="roomsWithoutObsToday" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="room">
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>room_list</fkTable>
+                          <fkColumnName>room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="hasObs">
+                        <textAlign>center</textAlign>
+                        <displayWidth>40</displayWidth>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="N"/>
+                                </filters>
+                                <backgroundColor>E3170D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

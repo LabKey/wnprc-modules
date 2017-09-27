@@ -1,0 +1,25 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="protocolTotalProjects" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="protocol">
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>protocol</fkTable>
+                          <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="TotalProjects">
+                        <url>/query/executeQuery.view?schemaName=ehr&amp;
+                            query.queryName=project&amp;
+                            query.protocol~eq=${protocol}&amp;
+                            query.sort=project&amp;
+                        </url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

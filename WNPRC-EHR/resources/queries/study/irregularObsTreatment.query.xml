@@ -1,0 +1,103 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="irregularObsTreatment" tableDbType="TABLE">
+                <tableUrl>/study/datasetDetailRedirect.view?datasetId=${dataset}&amp;lsid=${lsid}</tableUrl>
+                <columns>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="Id">
+                        <displayWidth>40</displayWidth>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>Animal</fkTable>
+                          <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Room">
+                        <displayWidth>40</displayWidth>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>rooms_quick</fkTable>
+                          <fkColumnName>room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Cage">
+                        <displayWidth>40</displayWidth>                        
+                    </column>
+                    <column columnName="remark">
+                        <displayWidth>250</displayWidth>
+                    </column>
+                    <column columnName="description">
+                        <displayWidth>250</displayWidth>
+                    </column>
+                    <column columnName="dataset">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Notes" wrappedColumnName="date">
+                        <columnTitle>Notes</columnTitle>
+                        <formatString>'&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;'</formatString>
+                        <isHidden>false</isHidden>
+                        <displayWidth>200</displayWidth>
+                    </column>
+                    <column columnName="QCState">
+                        <displayWidth>90</displayWidth>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>qcstate</fkTable>
+                          <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+                <buttonBarOptions position="both" includeStandardButtons="false">
+                    <includeScript>/ehr/studyButtons.js</includeScript>
+                    <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
+                    <item text="Views">
+                        <originalText>Views</originalText>
+                    </item>
+                    <item text="Insert New">
+                        <originalText>Insert New</originalText>
+                    </item>
+                    <!--<item text="Cohorts">-->
+                        <!--<originalText>Cohorts</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="QCState">-->
+                        <!--<originalText>QC State</originalText>-->
+                    <!--</item>-->
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                    <item text="Import Data">
+                        <originalText>Import Data</originalText>
+                    </item>
+                    <item text="Page Size">
+                        <originalText>Page Size</originalText>
+                    </item>
+                    <item text="Delete">
+                        <originalText>Delete</originalText>
+                    </item>
+                    <item text="More Actions" insertPosition="end" >
+                        <item text="Jump To History">
+                            <onClick>
+                                EHR.DatasetButtons.historyHandler(dataRegion, dataRegionName);
+                            </onClick>
+                            <!--<target>javascript:void(0)</target>-->
+                        </item>
+                        <item text="Return Distinct Values">
+                            <onClick>
+                                EHR.window.GetDistinctWindow.getDistinctHandler(dataRegionName);
+                            </onClick>
+                        </item>
+                    </item>
+                    <item text=" " requiresSelection="true" insertAfter="More Actions">
+                        <onClick>javascript:void(0);</onClick>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

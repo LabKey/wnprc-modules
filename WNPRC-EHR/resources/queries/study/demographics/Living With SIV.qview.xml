@@ -1,0 +1,63 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <!--<column name="Id/curLocation/Room">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Room"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <!--<column name="Id/curLocation/Cage">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Cage"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="species"/>
+        <column name="gender"/>
+        <!--<column name="Status">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Status"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="calculated_status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <column name="Id/activeAssignments/projects">
+            <properties>
+                <property name="columnTitle" value="Active Projects"/>
+            </properties>
+        </column>
+        <column name="dam"/>
+        <column name="sire"/>
+        <column name="birth"/>
+        <column name="Id/MostRecentWeight/MostRecentWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentWeight/MostRecentWeightDate">
+            <properties>
+                <property name="columnTitle" value="Weight Date"/>
+            </properties>
+        </column>
+        <column name="Id/ViralLoad/MaxViralLoad">
+            <properties>
+                <property name="columnTitle" value="Max Viral Load"/>
+            </properties>
+        </column>
+        <column name="Id/ViralLoad/LastViralLoadDate">
+            <properties>
+                <property name="columnTitle" value="Date of Last Viral Load"/>
+            </properties>
+        </column>
+        <column name="medical"/>
+    </columns>
+    <filters>
+        <filter column="calculated_status" operator="eq" value="Alive"/>
+        <filter column="Id/ViralLoad/MaxViralLoad" operator="gte" value="100"/>
+    </filters>
+    <sorts>
+        <sort column="Id" descending="false"/>
+    </sorts>
+</customView>

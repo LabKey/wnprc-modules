@@ -1,0 +1,122 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="colonyAssignmentSummary" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="v_status">
+                        <columnTitle>Cohort</columnTitle>
+                    </column>
+                    <column columnName="TotalAnimals">
+                        <columnTitle>Total Animals</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                        </url>
+                    </column>
+                    <column columnName="ActiveAssignments">
+                        <columnTitle># Assigned To One Or More Projects</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveAssignments~gt=0&amp;
+                        </url>
+                    </column>
+                    <column columnName="NoAssignments">
+                        <columnTitle># With No Active Assignments</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveAssignments~eq=0&amp;
+                        </url>
+                    </column>
+                    <column columnName="PendingAssignments">
+                        <columnTitle># With Pending Assignments</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.PendingAssignments~gt=0&amp;
+                        </url>
+                    </column>
+                    <column columnName="ActiveResearchAssignments">
+                        <columnTitle># Assigned To One Or More Research Projects (avail=r or n)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveResearchAssignments~gt=0&amp;
+                        </url>
+                    </column>
+                    <column columnName="ActiveBreedingAssignments">
+                        <columnTitle># Assigned to Breeding (avail=b)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveBreedingAssignments~gt=0&amp;                            
+                        </url>
+                    </column>
+                    <column columnName="ActiveTrainingAssignments">
+                        <columnTitle># Assigned to Training (avail=t)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveTrainingAssignments~gt=0&amp;                            
+                        </url>
+                    </column>
+                    <column columnName="ActiveVetAssignments">
+                        <columnTitle># With A Vet Exemption (avail=v)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveVetAssignments~gt=0&amp;                            
+                        </url>
+                    </column>
+                    <column columnName="ActiveSPF_StockAssignments">
+                        <columnTitle>Assigned to SPF Stock</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveSPF_StockAssignment~eq=Y&amp;
+                        </url>
+                    </column>
+                    <column columnName="ActiveConventionalStockAssignments">
+                        <columnTitle>Assigned to Conventional Stock</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveConventionalStockAssignment~eq=Y&amp;
+                        </url>
+                    </column>
+                    <column columnName="ActiveMarmStockAssignments">
+                        <columnTitle>Assigned to Marm Stock</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveMarmStockAssignment~eq=Y&amp;
+                        </url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

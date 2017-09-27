@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tables xmlns="http://labkey.org/data/xml">
+    <table tableName="necropsy_suite" tableDbType="TABLE">
+        <columns>
+            <column columnName="room"/>
+            <column columnName="disabled_on"/>
+            <column columnName="display_color"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="external_labs" tableDbType="TABLE">
+        <columns>
+            <column columnName="code"/>
+            <column columnName="lab_name"/>
+            <column columnName="disabled_on"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+</tables>

@@ -1,0 +1,33 @@
+<query xmlns="http://labkey.org/data/xml/query">
+  <metadata>
+      <tables xmlns="http://labkey.org/data/xml">
+          <table tableName="AlleleFrequencies" tableDbType="NOT_IN_DB">
+              <columns>
+                  <column columnName="Allele">
+                      <fk>
+
+                          <fkColumnName>PrimerName</fkColumnName>
+                          <fkTable>SSP_primers</fkTable>
+                          <fkDbSchema>lists</fkDbSchema>
+                      </fk>
+                  </column>
+                  <column columnName="TotalPositive">
+                      <!--<url>/ehr/executeQuery.view?schemaName=assay&amp;-->
+                          <!--query.queryName=SSP_Summary&amp;-->
+                          <!--query.Status~eq=POS&amp;-->
+                          <!--query.Institution~eq=${Institution}&amp;-->
+                          <!--query.Allele~eq=${Allele}-->
+                      <!--</url>-->
+                  </column>
+                  <column columnName="TotalTyped">
+                      <!--<url>/ehr/executeQuery.view?schemaName=assay&amp;-->
+                          <!--query.queryName=SSP_Summary&amp;-->
+                          <!--query.Institution~eq=${Institution}&amp;-->
+                          <!--query.Allele~eq=${Allele}-->
+                      <!--</url>-->
+                  </column>
+              </columns>
+          </table>
+      </tables>
+  </metadata>
+</query>

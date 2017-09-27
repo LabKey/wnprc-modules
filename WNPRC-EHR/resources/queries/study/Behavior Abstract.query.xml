@@ -1,0 +1,38 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="behavetrem" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+
+
+
+                    <column columnName="Behavior">
+                        <displayWidth>350</displayWidth>
+                    </column>
+
+                    <column columnName="CreatedBy">
+                        <columnTitle >UserId</columnTitle>
+
+                    </column>
+                    <!--<column columnName="code">-->
+                        <!--<columnTitle>SNOMED</columnTitle>-->
+                        <!--<fk>-->
+                            <!--<fkDbSchema>ehr_lookups</fkDbSchema>-->
+                            <!--<fkTable>snomed</fkTable>-->
+                            <!--<fkColumnName>code</fkColumnName>-->
+                        <!--</fk>-->
+                    <!--</column>                    -->
+
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

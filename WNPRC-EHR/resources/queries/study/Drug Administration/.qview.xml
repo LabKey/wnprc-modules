@@ -1,0 +1,34 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id"/>
+       <column name="date"/>
+       <column name="enddate"/>
+       <column name="project"/>
+       <column name="code"/>
+       <column name="code/code">
+           <properties>
+               <property name="columnTitle" value="SNOMED Code"/>
+           </properties>
+       </column>
+       <column name="qualifier"/>
+       <column name="amount"/>
+       <column name="amount_units"/>
+       <column name="volume"/>
+       <column name="vol_units"/>
+       <column name="route"/>
+       <column name="remark"/>
+       <column name="category"/>
+       <column name="restraint"/>
+       <column name="restraintDuration"/>
+       <column name="performedby"/>
+       <!--<column name="HeaderDate"/>-->
+       <column name="qcstate" />
+       <column name="taskid" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

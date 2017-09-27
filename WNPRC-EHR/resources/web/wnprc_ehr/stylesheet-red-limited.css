@@ -1,0 +1,218 @@
+
+/*gets rid of nav trail*/
+.labkey-crumb-trail {
+    display: none
+}
+
+
+
+/*
+    NOTE: these could be condensed and cleaned considerably.
+    there are basically 2 overrides this does: set a gold background or set a gold border
+    however, i left them as is to mirror the organization labkey's stylesheet
+*/
+
+ a:hover, a:visited:hover, .labkey-link:hover, .labkey-link:visited:hover
+{
+    color: #cc9900;
+}
+
+/*td.labkey-proj*/
+
+/*{*/
+    /*border-top: 3px solid #C90;*/
+/*}*/
+
+
+a.labkey-text-link:hover {
+	color: #cc9900;
+}
+
+ /* Override for top bar */
+/*table.menubar*/
+/*{*/
+    /*border-top:1px solid #CC9900;*/
+/*}*/
+
+fieldset
+{
+    border: 1px solid #CC9900;
+}
+
+/*.labkey-app-bar*/
+/*{*/
+    /*border-top: 1px solid #CC9900;*/
+/*}*/
+
+.labkey-data-region-header-container
+{
+    border: 1px solid #CC9900;
+}
+
+.labkey-customview-item.x-view-selected {
+    border-top: 1px solid #CC9900;
+    border-bottom: 1px solid #CC9900;
+}
+
+/*td.labkey-main-menu*/
+/*{*/
+    /*border-top:2px solid #CC9900;*/
+/*}*/
+
+.labkey-search-navresults
+{
+    border-left:1px solid #CC9900;
+}
+
+#menuBarFolder_menu .labkey-expandable-nav
+{
+    border-left: 1px solid #CC9900;
+}
+
+.labkey-callout-tip {
+    border-left:1px dotted #CC9900;
+}
+
+.labkey-callout-tip-over {
+    background-color: #CC9900;
+}
+
+.gwt-DialogBox {
+  border: 8px solid #CC9900;
+}
+
+.gwt-DialogBox .Caption {
+  border: 1px solid #CC9900;
+}
+
+.gwt-HorizontalSplitter .Bar {
+  background-color: #CC9900;
+}
+
+.gwt-VerticalSplitter .Bar {
+  background-color: #CC9900;
+}
+
+.gwt-MenuBar {
+  border: 1px solid #CC9900;
+}
+
+.gwt-MenuBar .gwt-MenuItem-selected {
+  background-color: #CC9900;
+}
+
+.x-panel-header {
+	border: 1px solid #CC9900;
+}
+
+.x-grid-group-hd {
+    border-color: #CC9900;
+}
+
+.x-menu {
+    border-color: #CC9900;
+}
+
+.extContainer .x-menu-item-active {
+    border:1px solid #CC9900;
+}
+
+td.labkey-tab-selected, .labkey-tab-selected {
+    border-top: solid 1px #CC9900;
+    border-left: solid 1px #CC9900;
+    border-right: solid 1px #CC9900;
+    /*border-bottom: solid 1px #ffffff;*/
+}
+
+.labkey-tab-selected a {
+    border-top: solid 1px #CC9900;
+    /*border-bottom: solid 1px #ffffff;*/
+}
+
+td.labkey-tab, .labkey-tab {
+    border: solid 1px #CC9900;
+}
+
+ /*This tab has a bottom border and its text is shaded so it looks like it is back and unselectable*/
+
+td.labkey-tab-inactive {
+    border:solid 1px #CC9900;
+}
+
+td.labkey-tab-content, .labkey-tab-content {
+    border-left: solid 1px #CC9900;
+    border-right: solid 1px #CC9900;
+    border-bottom: solid 1px #CC9900;
+}
+
+td.labkey-tab-space, .labkey-tab-space
+{
+    border-bottom: 1px solid #CC9900;
+}
+
+ul.labkey-tab-strip a
+{
+    border-top : 1px solid #CC9900;
+    border-right : 1px solid #CC9900;
+    border-left : 1px solid #CC9900;
+}
+
+.labkey-tab-strip-spacer
+{
+	border-left : 1px solid #CC9900;
+	border-right : 1px solid #CC9900;
+}
+
+.labkey-tab-strip-content
+{
+	border: 1px solid #CC9900;
+}
+
+.gwt-TabPanelBottom {
+	border: 1px solid #CC9900;
+}
+
+.gwt-TabBar .gwt-TabBarItem {
+  border-top: 1px solid #CC9900;
+  border-left: 1px solid #CC9900;
+  border-right: 1px solid #CC9900;
+}
+
+.x-tab-panel-body {
+    border-color: #CC9900;
+}
+
+ul.x-tab-strip-top li {
+    border-top:1px solid #CC9900;
+    border-right:1px solid #CC9900;
+    border-left:1px solid #CC9900;
+
+}
+
+.x-tab-panel-header-plain .x-tab-strip-spacer,
+.x-tab-panel-footer-plain .x-tab-strip-spacer,
+.x-tab-panel-header .x-tab-strip-spacer
+{
+    border-left:1px solid #CC9900;
+	border-right:1px solid #CC9900;
+}
+
+ul.x-tab-strip-top {
+    border-bottom-color: #CC9900;
+}
+
+.ehr-nav-header.x-panel-header-noborder
+{
+    border-bottom-color: #CC9900 !important;
+}
+
+fieldset
+{
+    border: #CC9900;
+}
+
+legend
+{
+    border: #CC9900;
+}
+

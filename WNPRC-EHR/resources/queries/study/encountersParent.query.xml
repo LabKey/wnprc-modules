@@ -1,0 +1,17 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="encountersParent" tableDbType="TABLE">
+                <pkColumnName>objectid</pkColumnName>
+                <columns>
+                    <column columnName="lsid">
+                        <isKeyField>false</isKeyField>
+                    </column>
+                    <column columnName="objectid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

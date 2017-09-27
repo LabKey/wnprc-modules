@@ -1,0 +1,28 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+       <column name="date" />
+       <column name="score" />
+       <column name="cause" />
+       <column name="head" />
+       <column name="shoulders" />
+       <column name="upperArms" />
+       <column name="lowerArms" />
+       <column name="hips" />
+       <column name="rump" />
+       <column name="dorsum" />
+       <column name="upperLegs" />
+       <column name="lowerLegs" />
+       <column name="other" />
+       <column name="remark" />
+       <column name="performedby" />
+       <column name="qcstate" />
+       <column name="taskid" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

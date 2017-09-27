@@ -1,0 +1,65 @@
+<!--
+This template is used by wnprc_ehr/ext4/components/MultiSelectField.js
+-->
+
+<style>
+    ::-webkit-scrollbar {
+        -webkit-appearance: none;
+        width: 7px;
+    }
+    ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: rgba(0,0,0,.5);
+        -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+    }
+</style>
+
+
+<!-- This requires a really high z-index to ensure it appears above the modal. -->
+<div class="modal fade" tabindex="-1" style="z-index: 20000" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong class="modal-title" style="font-size: medium">{{title}}</strong>
+            </div>
+            <div class="modal-body">
+                <h5>Selected Values:</h5>
+                <div style="overflow: scroll; height: 90px">
+                    <!-- ko foreach: checkedOptions -->
+                    <div>
+                        <label>
+                            <input type="checkbox" data-bind="checked: $parent.checkedOptions" value="{{$data}}">
+                            <span data-bind="text: $parent.lookup($data)"></span>
+                        </label>
+                    </div>
+                    <!-- /ko -->
+                </div>
+                <hr style="margin-bottom: 5px; margin-top: 0px">
+
+                <form>
+                    <div class="form-group">
+                        <label>Filter</label>
+                        <input type="text" class="form-control filter-box" data-bind="textInput: filter">
+                    </div>
+                </form>
+
+                <hr style="margin-bottom: 5px; margin-top: 0px">
+
+                <div style="overflow: scroll; height: 180px">
+                    <!-- ko foreach: filteredOptions -->
+                    <div>
+                        <label>
+                            <input type="checkbox" data-bind="checked: $parent.checkedOptions" value="{{$data}}">
+                            <span data-bind="text: $parent.lookup($data)"></span>
+                        </label>
+                    </div>
+                    <!-- /ko -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

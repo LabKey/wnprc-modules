@@ -1,0 +1,89 @@
+<query xmlns="http://labkey.org/data/xml/query">
+  <metadata>
+    <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="USDA_Report" tableDbType="TABLE">
+                <columns>
+                    <column columnName="lsid">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <!--<column columnName="Id">-->
+                        <!--<fk>-->
+                            <!--<fkFolderPath>/wnprc/ehr/</fkFolderPath>-->
+                            <!--<fkDbSchema>study</fkDbSchema>-->
+                            <!--<fkTable>animal</fkTable>-->
+                            <!--<fkColumnName>id</fkColumnName>-->
+                        <!--</fk>-->
+                    <!--</column>-->
+                    <column columnName="usda_letters">
+                        <columnTitle>All USDA Letters</columnTitle>
+                    </column>
+                    <column columnName="max_usda_letter">
+                        <columnTitle>Max USDA Letter</columnTitle>
+                        <url>/ehr/executeQuery.view?schemaName=study&amp;
+                            query.queryName=USDA_Preliminary_Report&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.param.StartDate=${StartDate}&amp;
+                            query.param.EndDate=${EndDate}&amp;
+                        </url>
+                    </column>
+                    <column columnName="totalRecords">
+                        <columnTitle>Total Records</columnTitle>
+                        <url>/ehr/executeQuery.view?schemaName=study&amp;
+                            query.queryName=USDA_Preliminary_Report&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.param.StartDate=${StartDate}&amp;
+                            query.param.EndDate=${EndDate}&amp;
+                        </url>
+                    </column>
+                    <column columnName="StartDate">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="EndDate">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+                <!--<buttonBarOptions position="both" includeStandardButtons="false">-->
+                    <!--<includeScript>/ehr/studyButtons.js</includeScript>-->
+                    <!--<onRender>moreActionsHandler</onRender>-->
+                    <!--<item text="Views">-->
+                        <!--<originalText>Views</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="Insert New">-->
+                        <!--<originalText>Insert New</originalText>-->
+                    <!--</item>-->
+                    <!--&lt;!&ndash;<item text="Cohorts">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<originalText>Cohorts</originalText>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</item>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<item text="QCState">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<originalText>QC State</originalText>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</item>&ndash;&gt;-->
+                    <!--<item text="Export">-->
+                        <!--<originalText>Export</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="Print">-->
+                        <!--<originalText>Print</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="Import Data">-->
+                        <!--<originalText>Import Data</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="Page Size">-->
+                        <!--<originalText>Page Size</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="Delete">-->
+                        <!--<originalText>Delete</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="More Actions" insertPosition="end" >-->
+                        <!--<item text="Return Distinct Values">-->
+                            <!--<onClick>-->
+                                <!--getDistinct(dataRegion, dataRegionName);-->
+                            <!--</onClick>-->
+                        <!--</item>-->
+                    <!--</item>-->
+                    <!--<item text=" " requiresSelection="true" insertAfter="More Actions">-->
+                        <!--<onClick>javascript:void(0);</onClick>-->
+                    <!--</item>-->
+                <!--</buttonBarOptions>-->
+            </table>
+        </tables>
+  </metadata>
+</query>

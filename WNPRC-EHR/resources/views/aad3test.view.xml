@@ -1,0 +1,8 @@
+<view xmlns="http://labkey.org/data/xml/view"
+      title="D3 Test">
+      <dependencies>
+            <dependency path="/wnprc_ehr/lib/c3"></dependency>
+            <dependency path="/wnprc_ehr/lib/knockout"></dependency>
+            <dependency path="/wnprc_ehr/lib/supersqlstore"></dependency>
+      </dependencies>
+</view>

@@ -1,0 +1,82 @@
+<html>
+<script type="text/javascript">
+
+LABKEY.requiresScript("/ehr/ext3/navMenu.js");
+
+Ext.onReady(createNavMenu);
+
+function createNavMenu()
+{
+    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
+    {
+        createNavMenu.defer(10);
+        return;
+    }
+
+    //NOTE: edit these lines to fit your installation
+    var container = 'WNPRC/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB/';
+
+    LABKEY.Assay.getByType({
+        containerPath: container,
+        success: onSuccess,
+        failure: function(error){
+
+        },
+        type: 'SSP Typing'
+    });
+
+
+    function onSuccess(assayConfig){
+        var cfg = {
+            renderTo: 'wnprc_mhcSSP',
+            //width: 350,
+            renderer: function(item){
+                var cfg;
+                if(item.isAssay){
+                    cfg = {
+                        html: '<div style="float:left;width:250px;">'+item.name+':</div> [<a href="'+LABKEY.ActionURL.buildURL('query', 'searchPanel', container, {schemaName: item.schemaName, 'queryName': item.queryName})+'">Search</a>] [<a href="'+LABKEY.ActionURL.buildURL('query', 'executeQuery', container, {schemaName: item.schemaName, 'query.queryName': item.queryName})+'">View All Records</a>] [<a href="'+LABKEY.ActionURL.buildURL('assay', 'moduleAssayUpload', container, {rowId: item.id})+'">Import Data</a>]',
+                        style: 'padding-left:5px;padding-bottom:8px'
+                    };
+                }
+                else {
+                    cfg = {
+                        html: '<div style="float:left;width:250px;">'+item.name+':</div> [<a href="'+LABKEY.ActionURL.buildURL('query', 'searchPanel', container, {schemaName: item.schemaName, queryName: item.queryName})+'">Search</a>] [<a href="'+LABKEY.ActionURL.buildURL('query', 'executeQuery', container, {schemaName: item.schemaName, 'query.queryName': item.queryName})+'">View All Records</a>]',
+                        style: 'padding-left:5px;padding-bottom:8px'
+                    };
+                }
+
+                return cfg;
+            },
+            sections: [
+                {header: 'Public Pages',
+                items: [
+                    {name: 'Result Summary', schemaName: 'assay', queryName: 'SSP_Summary', url: LABKEY.ActionURL.buildURL("query", "executeQuery", container, {schemaName: 'assay', 'query.queryName':'SSP_Summary'})},
+                    {name: 'Result Summary, Pivoted By Allele', schemaName: 'assay', queryName: 'SSP_Pivot', url: LABKEY.ActionURL.buildURL("query", "executeQuery", container, {schemaName: 'assay', 'query.queryName':'SSP_Pivot'})},
+                    {name: 'Allele Frequencies', schemaName: 'assay', queryName: 'AlleleFrequencies', url: LABKEY.ActionURL.buildURL("query", "executeQuery", container, {schemaName: 'assay', 'query.queryName':'AlleleFrequencies'})}
+                ]},
+                {header: 'MHC Typing Data',
+                items: [
+                    {name: 'View and Edit DNA Samples', schemaName: 'laboratory', 'queryName':'Samples'},
+                    {name: 'View and Edit SSP Primers', schemaName: 'SSP_Assay', 'queryName':'Primers'}
+                ]}
+            ]
+        }
+
+        if(Ext.isArray(assayConfig)){
+            Ext.each(assayConfig, function(row){
+                cfg.sections[1].items.push({isAssay: true, schemaName: 'assay', queryName: row.name+' Data', name: row.name+' Data', id: row.id, url: LABKEY.ActionURL.buildURL("assay", "assayResults", container, {rowId: row.id})});
+            }, this);
+        }
+
+        new EHR.ext.NavMenu(cfg);
+    }
+}
+
+</script>
+<body>
+
+<div id="wnprc_mhcSSP"></div>
+
+</body>
+</html>
+

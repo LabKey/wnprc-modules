@@ -1,0 +1,18 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+        <column name="room/area">
+             <properties>
+                 <property name="columnTitle" value="Area"/>
+             </properties>
+         </column>
+        <column name="room"/>
+        <column name="TotalCages" />
+        <column name="CagesUsed"/>
+        <column name="CagesEmpty"/>
+        <column name="TotalAnimals"/>
+   </columns>
+   <sorts>
+       <sort column="room/area"/>
+       <sort column="room"/>
+   </sorts>
+</customView>

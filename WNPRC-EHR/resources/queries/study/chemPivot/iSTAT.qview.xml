@@ -1,0 +1,49 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="GLUC::results"/>
+
+        <column name="BUN::results"/>
+
+        <column name="CREAT::results"/>
+
+        <column name="NA::results"/>
+
+        <column name="K::results"/>
+
+        <column name="CL::results"/>
+
+        <column name="iCa::results"/>
+
+        <column name="TCO2::results"/>
+
+        <column name="AnGap::results"/>
+
+        <column name="pH::results"/>
+
+        <column name="PCO2::results"/>
+
+        <column name="HCO3::results"/>
+
+        <column name="PO2::results"/>
+
+        <column name="sO2::results"/>
+
+        <column name="HGB::results"/>
+
+        <column name="HCT::results"/>
+
+        <column name="BE::results"/>
+
+        <column name="LACT::results"/>
+
+        <column name="CEACT::results"/>
+
+        <column name="CTPNI::results"/>
+
+
+
+
+    </columns>
+</customView>

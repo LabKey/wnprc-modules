@@ -1,0 +1,6 @@
+#
+# cron-jobs for kinship calculation
+#
+
+0 20 * * 3     root R CMD BATCH /usr/local/labkey/tools/populateKinship.r /usr/local/labkey/kinshipOut.txt;
+0 21 * * 3     root R CMD BATCH /usr/local/labkey/tools/populateInbreeding.r /usr/local/labkey/inbreedingOut.txt;

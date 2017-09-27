@@ -1,0 +1,61 @@
+
+<p style="text-align: right">
+    <label>
+        <input type="checkbox" data-bind="checked: housingBarMode">
+        Separate Bands Vertically
+    </label>
+</p>
+<br/>
+<d3-graph params="graph: graph"></d3-graph>
+<svg height="0" width="0">
+    <defs>
+        <pattern id="exemptionPattern"
+                 x="10"
+                 y="10"
+                 width="10"
+                 height="5"
+                 patternUnits="userSpaceOnUse"
+                 patternTransform="rotate(45)">
+
+            <rect width="15" height="5" fill="#ffd517"></rect>
+            <rect width="15" height="5" fill="#000000" x="5"></rect>
+
+        </pattern>
+        <pattern id="pendingPattern" width="10" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(0)">
+            <rect width="10" height="5" fill="#aaaaaa"></rect>
+            <g>
+                <path fill="#FFFFFF" d="M-7.5,1.5c2.5,0,2.5,2,5,2c2.5,0,2.5-2,5-2c2.5,0,2.5,2,5,2c2.5,0,2.5-2,5-2c2.5,0,2.5,2,5,2"></path>
+                <path fill="none" stroke="#000000" stroke-miterlimit="10" d="M-7.5,1.5c2.5,0,2.5,2,5,2c2.5,0,2.5-2,5-2c2.5,0,2.5,2,5,2c2.5,0,2.5-2,5-2c2.5,0,2.5,2,5,2"></path>
+            </g>
+        </pattern>
+    </defs>
+</svg>
+
+<div data-bind="with: selectedHousingItem" class="animal-housing-tooltip" style="opacity: 0">
+    <p class="animal-housingassignments-tooltip-header"><span data-bind="text: descriptionTitleCase"></span></p>
+    <p><span data-bind="text: room"></span>-<span data-bind="text: cage"></span></p>
+    <p style="font-style: italic"><span data-bind="text: startDate"></span> - <span data-bind="text: endDate"></span></p>
+    <br/>
+    <!-- ko if: reason -->
+    <p><span data-bind="text: reason"></span></p>
+    <!-- /ko -->
+    <!-- ko ifnot: reason -->
+    <p><span>(no reason specified)</span></p>
+    <!-- /ko -->
+</div>
+
+<div data-bind="with: selectedAssignmentItem" class="animal-assignments-tooltip" style="opacity: 0">
+    <p class="animal-housingassignments-tooltip-header">
+        <!-- ko if: descriptionTitleCase -->
+        <span data-bind="text: descriptionTitleCase"></span>
+        <!-- /ko -->
+        <!-- ko ifnot: descriptionTitleCase -->
+        <span style="color: darkred">(Unrecognized assignment code: "<span data-bind="text: code"></span>")</span>
+        <!-- /ko -->
+    </p>
+    <p style="font-style: italic"><span data-bind="text: startDate"></span> - <span data-bind="text: endDate"></span></p>
+    <br/>
+    <p>Project: <a data-bind="attr: { href: '/ehr/WNPRC/EHR/projectDetails.view?project=' + project}"><span data-bind="text: project"></span></a></p>
+    <p><span data-bind="text: projectTitle"></span></p>
+</div>
+

@@ -1,0 +1,24 @@
+#
+# This is a system-wide cron tab, meant to be stored as "/etc/crontab" or in "/etc/cron.d/".  This
+# is as opposed to user specific crontab files, which don't include the user.
+#
+# Possible Values:
+#  - Min (0 - 59)
+#  - Hour (0 - 23)
+#  - Day [of Month] (1 - 31)
+#  - Month (1 - 12)
+#  - Weekday (0 - 6)
+#     - 0 = Sunday, 6 = Saturday
+#
+#---------------------------------------------------------------------------------------
+# Environment Variables
+#---------------------------------------------------------------------------------------
+DELETE_DIR=/usr/local/labkey/deleteStudyRecords/
+MAIL_SERVER=mailserver
+LK_BASE_URL=http://labkey:8080/
+#
+#---------------------------------------------------------------------------------------
+#Min   Hour     Day   Month   Weekday   User   Command
+#---------------------------------------------------------------------------------------
+*/15   *        *     *       *         root   $DELETE_DIR/deleteStudyRecords.pl;
+

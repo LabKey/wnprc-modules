@@ -1,0 +1,9 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart"
+         title="wnprcUnits">
+   <view name="wnprcUnits"/>
+   <locations>
+		<location name="right"/>
+		<location name="menu"/>
+        <location name="body"/>
+   </locations>    
+</webpart>

@@ -1,0 +1,205 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsAssignmentHistory" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricAssignments">
+                        <columnTitle>Historic Assignments (avail=all)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                            <!--query.queryName=Assignment&amp;-->
+                            <!--query.Id~eq=${Id}&amp;-->
+                        <!--</url>-->
+                    </column>
+                    <column columnName="HistoricResearchAssignments">
+                        <columnTitle>Historic Research Assignments (avail=r or n)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                            <!--query.queryName=Assignment&amp;-->
+                            <!--query.Id~eq=${Id}&amp;-->
+                            <!--query.project/avail~in=r;e;n&amp;-->
+                        <!--</url>-->
+                    </column>
+                    <column columnName="HistoricBreedingAssignments">
+                        <columnTitle>Historic Breeding Assignments (avail=b)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                            <!--query.queryName=Assignment&amp;-->
+                            <!--query.Id~eq=${Id}&amp;-->
+                            <!--query.project/avail~eq=b-->
+                        <!--</url>-->
+                    </column>
+                    <column columnName="HistoricVetAssignments">
+                        <columnTitle>Historic Vet Exemptions (avail=v)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                            <!--query.queryName=Assignment&amp;-->
+                            <!--query.Id~eq=${Id}&amp;-->
+                            <!--query.project/avail~eq=v-->
+                        <!--</url>-->
+                    </column>
+                    <column columnName="HistoricTrainingAssignments">
+                        <columnTitle>Historic Training Assignments (avail=t)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                            <!--query.queryName=Assignment&amp;-->
+                            <!--query.Id~eq=${Id}&amp;-->
+                            <!--query.project/avail~eq=t-->
+                        <!--</url>-->
+                    </column>
+                    <column columnName="HistoricSPF_StockAssignment">
+                        <columnTitle>Assigned to SPF Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                            <!--query.queryName=Assignment&amp;-->
+                            <!--query.Id~eq=${Id}&amp;-->
+                            <!--query.project~eq=20020201-->
+                        <!--</url>-->
+                    </column>
+                    <column columnName="HistoricConventionalStockAssignment">
+                        <columnTitle>Assigned to Conventional Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project~eq=20070202
+                        </url>
+                    </column>
+                    <column columnName="HistoricMarmStockAssignment">
+                        <columnTitle>Assigned to Marm Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project~eq=20070801
+                        </url>
+                    </column>
+                    <column columnName="HistoricStockAssignments">
+                        <columnTitle>Historic Stock Assignments (any)?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project~in=20020201;20070801;20070202
+                        </url>
+                    </column>
+                    <column columnName="NumHistoricAssignments">
+                        <columnTitle># Historic Assignments (avail=all)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                        </url>
+                    </column>
+                    <column columnName="NumHistoricResearchAssignments">
+                        <columnTitle># Historic Research Assignments (avail=r or n)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project/avail~in=r;e;n&amp;
+                        </url>
+                    </column>
+                    <column columnName="NumHistoricBreedingAssignments">
+                        <columnTitle># Historic Breeding Assignments (avail=b)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project/avail~eq=b
+                        </url>
+                    </column>
+                    <column columnName="NumHistoricVetAssignments">
+                        <columnTitle># Historic Vet Exemptions (avail=v)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project/avail~eq=v
+                        </url>
+                    </column>
+                    <column columnName="NumHistoricTrainingAssignments">
+                        <columnTitle># Historic Training Assignments (avail=t)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project/avail~eq=t
+                        </url>
+                    </column>
+                    <column columnName="HistoricSPF_StockAssignment">
+                        <columnTitle>Ever Assigned to SPF Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project~eq=20020201
+                        </url>
+                    </column>
+                    <column columnName="HistoricConventionalStockAssignment">
+                        <columnTitle>Ever Assigned to Conventional Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project~eq=20070202
+                        </url>
+                    </column>
+                    <column columnName="HistoricMarmStockAssignment">
+                        <columnTitle>Ever Assigned to Marm Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project~eq=20070801
+                        </url>
+                    </column>
+                    <column columnName="NumHistoricStockAssignments">
+                        <columnTitle># Historic Stock Assignments (any)?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.project~in=20020201;20070801;20070202
+                        </url>
+                    </column>
+                    <column columnName="HistoricAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="PendingAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricResearchAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricVetAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricTrainingAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricSPF_StockAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricConventionalStockAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricMarmStockAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricStockAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="HistoricBreedingAssignments2">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+                <titleColumn>HistoricAssignments</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

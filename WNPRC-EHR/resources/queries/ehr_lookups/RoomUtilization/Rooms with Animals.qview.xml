@@ -1,0 +1,9 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <sorts>
+        <sort column="room/area"/>
+        <sort column="room"/>
+    </sorts>
+    <filters>
+        <filter column="TotalAnimals" operator="gt" value="0"/>
+    </filters>
+</customView>

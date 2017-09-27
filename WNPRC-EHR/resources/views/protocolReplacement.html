@@ -1,0 +1,533 @@
+<script type="text/javascript">
+
+LABKEY.requiresScript("/ehr/Utils.js");
+
+Ext.onReady(function (){
+    var thePanel = new Ext.Panel({
+        reservedProtocols: ['wprc00'],
+        initComponent: function(){
+            this.protocolStore = new LABKEY.ext.Store({
+                schemaName: 'ehr',
+                queryName: 'protocol',
+                autoLoad: true
+            });
+
+            this.protocolCountStore = new LABKEY.ext.Store({
+                schemaName: 'ehr',
+                queryName: 'protocol_counts',
+                autoLoad: true
+            });
+
+            Ext.apply(this, {
+                title: 'Protocol Replacement Helper'
+                ,border: true
+                ,bodyBorder: false
+                ,style: 'padding: 5px'
+                ,bodyStyle: 'padding: 5px'
+                ,defaults: {
+                    border: false
+                    ,bodyBorder: false
+                    ,style: 'padding: 5px'
+                    //,bodyStyle: 'padding: 5px'
+                }
+                ,items: [{
+                    html: 'STEP 1: Cut/paste the RARC Protocol list into the box below and hit "process"'
+                },{
+                    xtype: 'textarea'
+                    ,height: 400
+                    ,width: 700
+                    ,ref: 'rawProtocolList'
+                },{
+                    xtype: 'button'
+                    ,text: 'Process'
+                    ,handler: this.processRawData
+                    ,scope: this
+
+                },{
+                    xtype: 'panel'
+                    ,ref: 'resultsArea'
+                    ,border: true
+                    ,bodyBorder: false
+                    ,style: 'padding: 5px'
+                    ,bodyStyle: 'padding: 5px'
+                    ,defaults: {
+                        border: false
+                        ,bodyBorder: false
+                        ,style: 'padding: 5px'
+                        //,bodyStyle: 'padding: 5px'
+                    }
+                }]
+            });
+
+            Ext.Panel.prototype.initComponent.call(this);
+        },
+        parseLine: function(line) {
+            //Format should always be TSV
+            var fields = line.split(/\t/g);
+
+            var protocol = fields.shift();
+            if ( !protocol || !protocol.match(/^[a-z]\d{5}/i) ) {
+                throw new this.ParseException("Invalid Protocol");
+            }
+            protocol = protocol.toLowerCase();
+
+
+            var name = fields.shift();
+
+            var date = fields.shift();
+            if ( !date.match(/\d\d\d\d-\d\d-\d\d/) ) {
+                throw new this.ParseException("Invalid Date");
+            }
+
+            var restrictions = [];
+
+            //All that's left are species restrictions:
+            while( fields.length > 0 ) {
+                if ( fields.length == 1 ) {
+                    throw new this.ParseException("Wrong Number of Fields");
+                }
+
+                var species = fields.shift();
+                var number = fields.shift();
+
+                if ( !number.match(/^\d+$/) ) {
+                    throw new this.ParseException("Species Max Needs to Be Number");
+                }
+                number = number / 1;
+
+                var normalizedSpecies = this.normalizeSpecies(species);
+
+                if ( normalizedSpecies === null ) {
+                    throw new this.ParseException("Unrecognized Species");
+                }
+
+                if ( normalizedSpecies === this.availableSpecies.Macaque ) {
+                    // If the file just mentions Macaque, add it as a restriction for both
+                    restrictions.push({
+                        protocol: protocol,
+                        species:  this.availableSpecies.Cynomolgus,
+                        allowed:  number,
+                        count:    number
+                    });
+                    restrictions.push({
+                        protocol: protocol,
+                        species:  this.availableSpecies.Rhesus,
+                        allowed:  number,
+                        count:    number
+                    });
+                    console.log("Generic macaque:",restrictions);
+                }
+
+                restrictions.push({
+                    protocol: protocol,
+                    species:  normalizedSpecies,
+                    allowed:  number,
+                    count:    number
+                });
+
+            }
+
+            return {
+                Protocol: protocol,
+                Name: name,
+                Date: date,
+                SpeciesRestriction: restrictions
+            };
+        },
+        ParseException: function(message) {
+            this.message = message;
+            this.name = "ParseException";
+        },
+        processRawData: function(btn){
+            Ext.Msg.wait('Processing...');
+
+            this.resultsArea.removeAll();
+            this.doLayout();
+
+            var list = this.rawProtocolList.getValue();
+            if(!list){
+                Ext.Msg.hide();
+                alert('Must provide protocol list');
+                return;
+            }
+
+            this.newProtocols = {};
+            this.newProtocolCounts = {};
+
+            list = list.split(/[\n|\r|^]+/);
+
+            var errors = [];
+
+            //
+            // Loop over each line and populate this.newProtocols with the list of protocols and errors with the list
+            // of lines that failed to parse.
+            //
+            Ext.each(list, function(line, idx){
+                //skip blank lines
+                if( !line || line.match(/^\s*$/) ) { return }
+
+                // parseLine() will throw a "ParseException" if it encounters any errors, so use a try block.
+                try {
+                    var protocol = this.parseLine(line);
+
+                    if ( protocol.Protocol in this.newProtocols ) {
+                        throw new this.ParseException("Duplicate Entry for Protocol: " + protocol.Protocol)
+                    }
+
+                    this.newProtocols[protocol.Protocol] = {
+                        row: {
+                            protocol: protocol.Protocol,
+                            inves:    protocol.Name,
+                            approve:  protocol.Date
+                        },
+                        species: protocol.SpeciesRestriction
+                    };
+
+                    Ext.each(protocol.SpeciesRestriction, function(restriction) {
+                        this.newProtocolCounts[protocol.Protocol + '||' + restriction.species] = restriction;
+                    }, this);
+                }
+                catch (e) {
+                    errors.push([
+                        idx+1,
+                        e.message,
+                        line
+                    ]);
+                }
+            }, this);
+
+            if (errors.length > 0){
+                // Make the error store and load the list of errors.
+                var errorStore = new Ext4.data.ArrayStore({
+                    fields: [
+                        { name: 'Line No.'     },
+                        { name: 'Error Type'   },
+                        { name: 'Line Content' }
+                    ]
+                });
+                errorStore.loadData(errors);
+
+                // Display a window with the errors.
+                Ext4.create('Ext.window.Window', {
+                    title: 'Errors Encountered',
+                    modal: true,
+                    width: 720,
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: 'fit',
+                            html: '<em style="color: red">' +
+                            'The following lines encountered errors during parsing and will not be imported.' +
+                            '</em>'
+                        },
+                        {
+                            xtype: 'grid',
+                            border: false,
+                            columns: [
+                                {
+                                    header: 'Line No.',
+                                    dataIndex: 'Line No.',
+                                    maxWidth: 64
+                                },
+                                {
+                                    header: 'Error',
+                                    dataIndex: 'Error Type',
+                                    minWidth: 200
+                                },
+                                {
+                                    header: 'Line Content',
+                                    dataIndex: 'Line Content',
+                                    flex: 1
+                                }
+                            ],
+                            store:  errorStore
+                        }
+                    ]
+                }).show();
+            }
+
+            this.compareProtocols();
+        },
+        availableSpecies: {
+            Cynomolgus: 'Cynomolgus',
+            Rhesus:     'Rhesus',
+            Vervet:     'Vervet',
+            Pigtail:    'Pigtail',
+            Marmoset:   'Marmoset',
+            Macaque:    'Macaque'
+        },
+        normalizeSpecies: function(species){
+            if(!species){
+                return null;
+            }
+
+            if(species.match(/cyno/i)) {
+                return this.availableSpecies.Cynomolgus;
+            }
+            else if(species.match(/rhesus/i)) {
+                return this.availableSpecies.Rhesus;
+            }
+            else if(species.match(/vervet/i)) {
+                return this.availableSpecies.Vervet;
+            }
+            else if(species.match(/pigtail/i)) {
+                return this.availableSpecies.Pigtail;
+            }
+            else if(species.match(/marmoset/i)) {
+                return this.availableSpecies.Marmoset;
+            }
+            else if(species.match(/macaque/i)) {
+                return this.availableSpecies.Macaque;
+            }
+
+            return null;
+        },
+        compareProtocols: function(){
+            if(!this.protocolStore.fields || !this.protocolCountStore.fields){
+                console.log('retrying...');
+                this.compareProtocols.defer(500, this);
+            }
+
+            //first compare protocols
+            var toUpdate = [];
+            var toInsert = [];
+            var toDelete = [];
+
+            var protocol;
+            var newProtocol;
+            this.protocolStore.each(function(rec){
+                protocol = rec.get('protocol');
+                newProtocol = this.newProtocols[protocol];
+
+                if(!newProtocol){
+                    if(!this.reservedProtocols || this.reservedProtocols.indexOf(protocol)==-1){
+                        toDelete.push({protocol: protocol});
+                    }
+
+                    return;
+                }
+
+                newProtocol.existsInTable = true;
+
+                if(newProtocol.row.approve != rec.get('approve').format('Y-m-d') ||
+                    newProtocol.row.inves != rec.get('inves')
+                ){
+                    toUpdate.push(newProtocol.row);
+                }
+            }, this);
+
+            Ext.iterate(this.newProtocols, function(protocol){
+                if(!this.newProtocols[protocol].existsInTable){
+                    toInsert.push({
+                        protocol: this.newProtocols[protocol].row.protocol,
+                        inves: this.newProtocols[protocol].row.inves,
+                        approve: this.newProtocols[protocol].row.approve
+                    });
+                }
+            }, this);
+
+            //then compare protocol counts
+            var countToUpdate = [];
+            var countToInsert = [];
+            var countToDelete = [];
+
+            var species;
+            var key;
+            this.protocolCountStore.each(function(rec){
+                protocol = rec.get('protocol');
+                species = rec.get('species');
+                key = protocol+'||'+species;
+                newProtocol = this.newProtocolCounts[key];
+                if(!newProtocol){
+                    if(!this.reservedProtocols || this.reservedProtocols.indexOf(protocol)==-1){
+                        countToDelete.push({rowid: rec.get('rowid'), protocol: rec.get('protocol'), allowed: rec.get('allowed'), species: rec.get('species')});
+                    }
+                    return;
+                }
+
+                newProtocol.existsInTable = true;
+
+                if(newProtocol.allowed != rec.get('allowed')){
+                    countToUpdate.push({
+                        rowid: rec.get('rowid'),
+                        protocol: newProtocol.protocol,
+                        species: newProtocol.species,
+                        allowed: newProtocol.allowed
+                    });
+                }
+            }, this);
+
+            Ext.iterate(this.newProtocolCounts, function(key){
+                if(!this.newProtocolCounts[key].existsInTable){
+                    countToInsert.push(this.newProtocolCounts[key]);
+                }
+            }, this);
+
+            var commands = [];
+            var html;
+
+            this.resultsArea.add({html: 'STEP 2: Review changes to protocols:'});
+
+            if(this.reservedProtocols && this.reservedProtocols.length){
+                html  = '<h3>Protocols that will be ignored:</h3>';
+                Ext.each(this.reservedProtocols, function(p){
+                    html += p + '<br>';
+                }, this);
+                html += '<p></p>';
+                this.resultsArea.add({html: html});
+            }
+
+            if(toDelete.length){
+                html  = '<h3>Protocols to be deleted:</h3>';
+                Ext.each(toDelete, function(p){
+                    html += p.protocol + '<br>';
+                }, this);
+                html += '<p></p>';
+                this.resultsArea.add({html: html});
+
+                commands.push({
+                    command: 'delete',
+                    schemaName: 'ehr',
+                    queryName: 'protocol',
+                    rows: toDelete
+                });
+            }
+            if(toInsert.length){
+                html  = '<h3>Protocols to be added:</h3>';
+                Ext.each(toInsert, function(p){
+                    html += p.protocol + '<br>';
+                }, this);
+                html += '<p></p>';
+                this.resultsArea.add({html: html});
+
+                commands.push({
+                    command: 'insert',
+                    schemaName: 'ehr',
+                    queryName: 'protocol',
+                    rows: toInsert
+                });
+            }
+            if(toUpdate.length){
+                html  = '<h3>Protocols to be updated:</h3>';
+                Ext.each(toUpdate, function(p){
+                    html += p.protocol + '<br>';
+                }, this);
+                html += '<p></p>';
+                this.resultsArea.add({html: html});
+
+                commands.push({
+                    command: 'update',
+                    schemaName: 'ehr',
+                    queryName: 'protocol',
+                    rows: toUpdate
+                });
+            }
+
+            //
+            if(countToDelete.length){
+                html  = '<h3>Protocol allowable animals to be deleted:</h3>';
+                Ext.each(countToDelete, function(p){
+                    html += p.protocol +': ' + p.species + ', ' + p.allowed + '<br>';
+                }, this);
+                html += '<p></p>';
+                this.resultsArea.add({html: html});
+
+                commands.push({
+                    command: 'delete',
+                    schemaName: 'ehr',
+                    queryName: 'protocol_counts',
+                    rows: countToDelete
+                });
+            }
+            if(countToInsert.length){
+                html  = '<h3>Protocol allowable animals to be added:</h3>';
+                Ext.each(countToInsert, function(p){
+                    html += p.protocol +': ' + p.species + ', ' + p.allowed + '<br>';
+                }, this);
+                html += '<p></p>';
+                this.resultsArea.add({html: html});
+
+                commands.push({
+                    command: 'insert',
+                    schemaName: 'ehr',
+                    queryName: 'protocol_counts',
+                    rows: countToInsert
+                });
+            }
+            if(countToUpdate.length){
+                html  = '<h3>Protocol allowable animals to be updated:</h3>';
+                Ext.each(countToUpdate, function(p){
+                    html += p.protocol +': ' + p.species + ', ' + p.allowed + '<br>';
+                }, this);
+                html += '<p></p>';
+                this.resultsArea.add({html: html});
+
+                commands.push({
+                    command: 'update',
+                    schemaName: 'ehr',
+                    queryName: 'protocol_counts',
+                    rows: countToUpdate
+                });
+            }
+
+            Ext.Msg.hide();
+
+            this.commands = [];
+            if(commands.length){
+                this.resultsArea.add({xtype: 'button', scope: this, handler: this.submitChanges, text: 'Submit Changes'});
+                this.doLayout();
+                this.commands = commands;
+            }
+            else {
+                Ext.Msg.hide();
+                alert('No updates needed')
+            }
+
+
+
+        },
+        submitChanges: function(){
+            if(this.commands.length){
+                LABKEY.Query.saveRows({
+                    commands: this.commands,
+                    scope: this,
+                    success: this.onUpdateComplete,
+                    failure: function(errorInfo) {
+                        //Default error message
+                        var message = "An unknown error occurred while submitting the data.";
+
+                        if ( errorInfo && (errorInfo.exception === 'Unauthorized') ) {
+                            message = "You do not have the security to make this update."
+                        }
+
+                        Ext4.Msg.alert('Failed to Submit Data',message);
+
+                        EHR.Utils.onError(errorInfo);
+                    }
+                })
+            }
+            else {
+                alert('Nothing to save')
+            }
+        },
+        onUpdateComplete: function(){
+            Ext.Msg.hide();
+            //reload the stores in case the user submits again
+            this.protocolStore.load();
+            this.protocolCountStore.load();
+            alert('Success!');
+        }
+    });
+
+    thePanel.render('protocolUploadPage');
+});
+
+
+</script>
+
+This page is designed to help simplify the process of updating the WNPRC protocol tables from an RARC list.<p></p>
+
+<div id='protocolUploadPage'></div>
+
+
+

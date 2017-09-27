@@ -1,0 +1,30 @@
+<div id="chart"></div>
+<script type="application/javascript">
+    var chart = c3.generate({
+        bindto: '#chart',
+        data: {
+            xs: {
+                'data1': 'x1',
+                'data2': 'x2'
+            },
+            columns: [
+                ['x1', 10, 30, 45, 50, 70, 100],
+                ['x2', 30, 50, 75, 100, 120],
+                ['data1', 30, 200, 100, 400, 150, 250],
+                ['data2', 20, 180, 240, 100, 190]
+            ]
+        }
+    });
+</script>
+
+<script src="<%=contextPath%>/wnprc_ehr/HousingAndAssignmentHistory.js"></script>
+<link type="text/css" rel="stylesheet" href="<%=contextPath%>/wnprc_ehr/HousingAndAssignmentHistory.css">
+
+<animal-housing params="animalid: 'r95061'"></animal-housing>
+<animal-housing params="animalid: 'r09026'"></animal-housing>
+<animal-housing params="animalid: 'r92031'"></animal-housing>
+<animal-housing params="animalid: 'r95003'"></animal-housing>
+
+<script>
+    ko.applyBindings();
+</script>

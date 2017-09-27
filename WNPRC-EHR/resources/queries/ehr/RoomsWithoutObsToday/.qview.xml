@@ -1,0 +1,11 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+        <column name="area" />
+        <column name="room"/>
+        <column name="hasObs" />
+   </columns>
+   <sorts>
+       <sort column="area"/>
+       <sort column="room"/>
+   </sorts>
+</customView>

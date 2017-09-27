@@ -1,0 +1,33 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+        <column name="Id/curLocation/Room">
+            <properties>
+                <property name="columnTitle" value="Room"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/Cage">
+            <properties>
+                <property name="columnTitle" value="Cage"/>
+            </properties>
+        </column>
+       <column name="Id"/>
+       <!--<column name="date"/>-->
+
+       <column name="amount"/>
+       <column name="type"/>
+       <column name="remark"/>
+       <!--<column name="performedby"/>-->
+       <column name="modified" />
+       <!--<column name="modifiedby" />-->
+       <column name="qcstate" />
+       <!--<column name="taskid" />-->
+   </columns>
+   <sorts>
+       <!--<sort column="date" descending="true"/>-->
+       <sort column="Id/curLocation/cage" descending="false"/>
+       <sort column="Id/curLocation/room" descending="false"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

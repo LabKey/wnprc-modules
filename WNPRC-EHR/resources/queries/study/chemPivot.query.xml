@@ -1,0 +1,133 @@
+    <query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="chemPivot" tableDbType="TABLE">
+                <tableTitle>Chemistry Results</tableTitle>
+                <columns>
+                    <column columnName="resultOORIndicator">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="result OOR Indicator">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Id">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>animal</fkTable>
+                            <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="GLUC::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="BUN::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="CREAT::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="CPK::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="CHOL::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="TRIG::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="SGOT::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="LDH::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="TB::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="GGT::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="SGPT::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="TP::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="ALB::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="ALKP::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="CA::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="PHOS::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="FE::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="NA::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="K::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="CL::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="iCa::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="TCO2::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="AnGap::results">
+                        <displayWidth>140</displayWidth>
+                    </column>
+                    <column columnName="pH::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="PCO2::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="HCO3::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="BEecf::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="HCT::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="HGB::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="PO2::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="sO2::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="BE::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="LDL::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="LACT::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="CEACT::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+                    <column columnName="CTPNI::results">
+                        <displayWidth>120</displayWidth>
+                    </column>
+
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+    </query>

@@ -1,0 +1,57 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+       <column name="date" />
+       <!--<column name="qcstate" />-->
+       <column name="project" />
+       <column name="project/protocol">
+            <properties>
+                <property name="columnTitle" value="Protocol"/>
+            </properties>
+       </column>
+       <column name="quantity" />
+       <column name="performedby" />
+       <!--<column name="requestor" />-->
+       <!--<column name="p_s" />-->
+       <!--<column name="a_v" />-->
+       <column name="assayCode" />
+       <column name="billedby" />
+       <column name="tube_type" />
+       <column name="remark" />
+       <column name="BloodRemaining/BloodLast30">
+            <properties>
+                <property name="columnTitle" value="Drawn in Previous 30 Days"/>
+            </properties>
+       </column>
+       <!--<column name="BloodRemaining/BloodNext30">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Scheduled in Next 30 Days"/>-->
+            <!--</properties>-->
+       <!--</column>-->
+       <column name="BloodRemaining/weight">
+            <properties>
+                <property name="columnTitle" value="Latest Weight At Time (kg)"/>
+            </properties>
+       </column>
+       <column name="BloodRemaining/MaxBlood">
+            <properties>
+                <property name="columnTitle" value="Max Allowable Blood At Time"/>
+            </properties>
+       </column>
+       <column name="BloodRemaining/AvailBlood">
+            <properties>
+                <property name="columnTitle" value="Volume Remaining After Draw (mL)"/>
+            </properties>
+       </column>
+       <column name="qcstate" />
+       <column name="taskid" />
+       <column name="requestid" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+       <sort column="Id" descending="false"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

@@ -1,0 +1,30 @@
+<query xmlns="http://labkey.org/data/xml/query">
+<metadata>
+    <tables xmlns="http://labkey.org/data/xml">
+        <table tableName="SOP_PDFs" tableDbType="NOT_IN_DB">            
+            <columns>
+                <column columnName="entityid">
+                    <isHidden>true</isHidden>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                </column>
+            </columns>
+            <buttonBarOptions includeStandardButtons="false">
+                <item text="Views">
+                    <originalText>Views</originalText>
+                </item>
+                <item text="Export">
+                    <originalText>Export</originalText>
+                </item>
+                <item text="Print">
+                    <originalText>Print</originalText>
+                </item>
+                <item text="Page Size">
+                    <originalText>Page Size</originalText>
+                </item>
+            </buttonBarOptions>
+        </table>
+    </tables>
+</metadata>
+</query>

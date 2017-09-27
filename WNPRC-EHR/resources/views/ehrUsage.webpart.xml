@@ -1,0 +1,8 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart"
+    title="EHR Usage">
+   <view name="ehrUsage"/>
+   <locations>
+		<location name="right"/>
+		<location name="menu"/>
+   </locations>
+</webpart>

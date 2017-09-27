@@ -1,0 +1,66 @@
+package org.labkey.wnprc_ehr;
+
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
+import org.labkey.dbutils.api.SimpleQueryFactory;
+import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.wnprc_ehr.notification.DeathNotification;
+
+import java.util.List;
+
+/**
+ * Created by jon on 7/13/16.
+ */
+public class TriggerScriptHelper {
+    protected final Container container;
+    protected final User user;
+    protected static final Logger log = Logger.getLogger(TriggerScriptHelper.class);
+    protected final SimpleQueryFactory queryFactory;
+
+    private TriggerScriptHelper(int userId, String containerId) {
+        user = UserManager.getUser(userId);
+        if (user == null) {
+            throw new RuntimeException("User does not exist: " + userId);
+        }
+
+        container = ContainerManager.getForId(containerId);
+        if (container == null) {
+            throw new RuntimeException("Container does not exist: " + containerId);
+        }
+
+        queryFactory = new SimpleQueryFactory(user, container);
+    }
+
+    public static TriggerScriptHelper create(int userId, String containerId) {
+        return new TriggerScriptHelper(userId, containerId);
+    }
+
+    public void sendDeathNotification(final List<String> ids) {
+        for (String id : ids) {
+            DeathNotification notification = new DeathNotification();
+            notification.setParam(DeathNotification.idParamName, id);
+            notification.sendManually(container, user);
+        }
+    }
+
+    public String lookupValue(String key, String study, String queryName, String keyCol, String displayColumn) {
+        JSONArray results = queryFactory.selectRows(study, queryName, new SimplerFilter(keyCol, CompareType.EQUAL, key));
+        if (results.length() > 0) {
+            return results.getJSONObject(0).getString(displayColumn);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String lookupGender(String code) {
+        return lookupValue(code, "ehr_lookups", "gender_codes", "code", "meaning");
+    }
+}

@@ -1,0 +1,63 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+      <column name="Id/curLocation/room">
+        <properties>
+            <property name="columnTitle" value="Current Room"/>
+        </properties>
+      </column>
+      <column name="Id/curLocation/cage">
+          <properties>
+            <property name="columnTitle" value="Current Cage"/>
+          </properties>
+      </column>
+       <column name="date" />
+       <column name="project" />
+       <column name="project/account">
+            <properties>
+                <property name="columnTitle" value="Account"/>
+            </properties>
+       </column>
+      <column name="Id/mostRecentWeight/MostRecentWeight">
+        <properties>
+            <property name="columnTitle" value="Most Recent Weight"/>
+        </properties>
+      </column>
+       <!--<column name="project/protocol">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Protocol"/>-->
+            <!--</properties>-->
+       <!--</column>-->
+       <column name="performedby" />
+       <!--<column name="requestor" />-->
+       <!--<column name="p_s" />-->
+       <!--<column name="a_v" />-->
+       <!--<column name="assayCode" />-->
+       <column name="billedby" />
+       <column name="tube_vol" />
+       <column name="tube_type" />
+       <column name="num_tubes" />
+       <column name="quantity" />
+       <column name="additionalServices" />
+       <column name="instructions" />
+       <column name="remark" />
+       <column name="QCState" />
+       <column name="taskid" />
+       <column name="requestid" />
+      <column name="requestid/description">
+        <properties>
+            <property name="columnTitle" value="Requestor"/>
+        </properties>
+      </column>
+    </columns>
+   <sorts>
+       <sort column="Id/curLocation/room_order"/>
+       <sort column="Id/curLocation/cage_order"/>
+       <sort column="Id" descending="false"/>
+   </sorts>
+    <filters>
+        <filter column="QCState/Label" operator="neqornull" value="Delete Requested"/>
+        <filter column="QCState/Label" operator="neqornull" value="Request: Denied"/>
+        <filter column="QCState/Label" operator="neqornull" value="Request: Pending"/>
+    </filters>
+</customView>

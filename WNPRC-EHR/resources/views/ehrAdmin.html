@@ -1,0 +1,111 @@
+<script type="text/javascript">
+    LABKEY.requiresScript("/ehr/ext3/navMenu.js");
+</script>
+<script type="text/javascript">
+
+Ext.onReady(function (){
+
+if (LABKEY.Security.currentUser.isAdmin){
+    var webpart = <%=webpartContext%>;
+
+    new EHR.ext.NavMenu({
+        renderTo: webpart.wrapperDivId,
+        width: 350,
+        sections: [
+            {header: 'Admin',
+                items: [
+                    {name: 'Client Errors', url: '<%=contextPath%>/query/shared/executeQuery.view?schemaName=auditlog&query.queryName=Client%20API%20Actions'},
+                    {name: 'EHR Backups', url: '<%=contextPath%>/project<%=containerPath%>/Backups/begin.view?'},
+                    {name: 'ETL Admin', url: '<%=contextPath%>/ONPRC_EHR<%=containerPath%>/etlAdmin.view?'},
+                    {name: 'Genetics Calculations', url: '<%=contextPath%>/ehr<%=containerPath%>/geneticCalculationSettings.view?'},
+                    //{name: 'ETL Duration', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=core&query.queryName=Sync Duration'},
+                    //{name: 'ETL History', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=core&query.queryName=Sync History'},
+                    {name: 'Gems Backups', url: '<%=contextPath%>/project<%=containerPath%>/Backups/Gems Backups/begin.view?'},
+                    {name: 'Junit Tests', url: '<%=contextPath%>/junit/begin.view?'},
+                    {name: 'Manage EHR Study', url: '<%=contextPath%>/study<%=containerPath%>/manageStudy.view?'},
+                    {name: 'Populate Initial Data', url: '<%=contextPath%>/EHR<%=containerPath%>/populateInitialData.view?'},
+                    {name: 'Set EHR Properties', url: '<%=contextPath%>/core<%=containerPath%>/modulePropertyAdmin.view?moduleName=EHR'}
+                    //{name: 'Reload Study', url: '<%=contextPath%>/pipeline<%=containerPath%>/begin.view?'},
+                    //{name: 'Generate Schema XML', url: '<%=contextPath%>/admin/getSchemaXmlDoc.view?full=true&dbSchema=core'},
+                    //{name: 'View Site Errors', url: '<%=contextPath%>/query/Shared/executeQuery.view?schemaName=auditlog&query.queryName=Client%20API%20Actions'}
+                ]
+            },
+            {header: 'Documentation',
+                items: [
+                    {name: 'Admin/Operations Documentation', url: '<%=contextPath%>/project<%=containerPath%>/Documentation/Admin/begin.view?'},
+                    {name: 'Data Management Documentation', url: '<%=contextPath%>/project<%=containerPath%>/Documentation/Data Management/begin.view?'},
+                    {name: 'Training and Operations Material', url: '<%=contextPath%>/project<%=containerPath%>/Development Notes/begin.view?'}
+                ]
+            },
+            {header: 'Logs',
+                items: [
+                    {name: 'All Logs', url: '<%=contextPath%>/project<%=containerPath%>/Logs/begin.view?'},
+                    {name: 'Labkey.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/labkey.log'},
+                    {name: 'Labkey-errors.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/labkey-errors.log'},
+                    {name: 'ETL Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/ehr-etl.log'},
+                    {name: 'ETL Errors Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Tomcat%20Logs/ehr-etl-errors.log'},
+                    {name: 'ActiveMQ.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/ActiveMQ/activemq.log'},
+                    {name: 'Monit.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Monit/monit.log'},
+                    {name: 'Munin.log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Munin/munin.log'},
+                    {name: 'Inbreeding Coefficients Reload Cron Job Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Kinship/kinshipOut.txt'},
+                    {name: 'Kinship Reload Cron Job Log', url: '<%=contextPath%>/files<%=containerPath%>/Logs/%40filesets/Kinship/inbreedingOut.txt'}
+                ]
+            },
+            {header: 'Notifications',
+                items: [
+                    {name: 'Manage Notification Recipients', url: '<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName=ehr&query.queryName=NotificationRecipients'},
+                    {name: 'Notification Admin', url: '<%=contextPath%>/ldk<%=containerPath%>/notificationAdmin.view?'}
+
+                ]
+            },
+            {header: 'Monit',
+                items: [
+                    {name: 'EHR', url: 'http://ehr.primate.wisc.edu:2812/'},
+                    {name: 'Test-EHR', url: 'http://test-ehr.primate.wisc.edu:2812/'},
+                    {name: 'Gems', url: 'http://gems.primate.wisc.edu:2812/'}
+                ]
+            },
+            {header: 'Munin',
+                items: [
+                    {name: 'EHR', url: 'http://ehr.primate.wisc.edu:8449/'},
+                    {name: 'Test-EHR', url: 'http://test-ehr.primate.wisc.edu/munin/'},                                                
+                    {name: 'Gems', url: 'http://gems.primate.wisc.edu/munin/'}
+                ]
+            },
+            {header: 'Other Tables',
+                items: [
+                    {name: 'Manage Animal History Reports', url: '<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName=ehr&query.queryName=reports'},
+                    {name: 'Manage Notification Types', url: '<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName=ehr&query.queryName=NotificationTypes'},
+                    {name: 'Manage Form Types', url: '<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName=ehr&query.queryName=formtypes'},
+                    {name: 'Manage Form Sections', url: '<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName=ehr&query.queryName=FormPanelSections'},
+                    {name: 'Manage Templates', url: '<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName=ehr&query.queryName=formtemplates'},
+                    {name: 'Manage Template Records', url: '<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName=ehr&query.queryName=formtemplaterecords'}
+                ]
+            },
+            {header: 'Usage',
+                items: [
+                    {name: 'Site Logins By Day', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=core&query.queryName=SiteUsageByDay'},
+                    {name: 'Site Logins By Month', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=core&query.queryName=SiteUsageByMonth'},
+                    {name: 'Site Logins By Group', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=core&query.queryName=SiteUsageByGroup'}
+                ]
+            },
+            {header: 'Validation',
+                items: [
+                    {name: 'Housing Problems', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=study&query.queryName=housingProblems'},
+                    {name: 'Housing Condition Problems', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=study&query.queryName=housingConditionProblems'},
+                    {name: 'Postgres/mySQL Comparison', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=col_dump&query.queryName=mysql_check'},
+                    {name: 'Postgres/mySQL Comparison - To Excel', url: '<%=contextPath%>/query<%=containerPath%>/exportRowsExcel.view?schemaName=col_dump&query.queryName=mysql_check'},
+                    {name: 'Review Required', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=study&query.queryName=studyData&query.viewName=Review Required'},
+                    {name: 'Rooms/Cages Missing From List', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=ehr&query.queryName=missingCages'},
+                    {name: 'Update Housing Snapshot', url: '<%=contextPath%>/study<%=containerPath%>/editSnapshot.view?schemaName=study&snapshotName=ActiveHousing&query.queryName=ActiveHousing'},
+                    {name: 'Validate Housing Snapshot', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=study&query.queryName=ValidateHousingSnapshot'},
+                    {name: 'Validate Status Field Calculation', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=study&query.queryName=Validate_status'}
+                ]
+            }
+        ]
+    })
+}
+
+});
+
+</script>

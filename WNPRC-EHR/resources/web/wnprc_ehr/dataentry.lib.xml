@@ -1,0 +1,28 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="/wnprc_ehr/model/sources/Assay.js"/>
+        <script path="/wnprc_ehr/model/sources/Biopsy.js"/>
+        <script path="/wnprc_ehr/model/sources/BloodDraws.js"/>
+        <script path="/wnprc_ehr/model/sources/Default.js"/>
+        <script path="/wnprc_ehr/model/sources/Encounter.js"/>
+        <script path="/wnprc_ehr/model/sources/InRooms.js"/>
+        <script path="/wnprc_ehr/model/sources/IrregularObs.js"/>
+        <script path="/wnprc_ehr/model/sources/IrregularObs_OKRooms.js"/>
+        <script path="/wnprc_ehr/model/sources/MPR.js"/>
+        <script path="/wnprc_ehr/model/sources/Necropsy.js"/>
+        <script path="/wnprc_ehr/model/sources/NecropsyRequest.js"/>
+        <script path="/wnprc_ehr/model/sources/NecropsyTask.js"/>
+        <script path="/wnprc_ehr/model/sources/NewAnimal.js"/>
+        <script path="/wnprc_ehr/model/sources/Pathology.js"/>
+        <script path="/wnprc_ehr/model/sources/PhysicalExam.js"/>
+        <script path="/wnprc_ehr/model/sources/PhysicalExamNWM.js"/>
+        <script path="/wnprc_ehr/model/sources/PhysicalExamOWM.js"/>
+        <script path="/wnprc_ehr/model/sources/Request.js"/>
+        <script path="/wnprc_ehr/model/sources/SimpleRemarks.js"/>
+        <script path="/wnprc_ehr/model/sources/Surgery.js"/>
+        <script path="/wnprc_ehr/model/sources/Treatments.js"/>
+    </library>
+    <dependencies>
+        <dependency path="/wnprc_ehr/wnprc_ext4"/>
+    </dependencies>
+</libraries>

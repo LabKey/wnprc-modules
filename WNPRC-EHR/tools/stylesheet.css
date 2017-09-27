@@ -1,0 +1,10 @@
+/*
+This file can be used as the stylesheet on the EHR servers.  when you load a project stylesheet, this file cannot as easily be version tracked
+or used for development, you'd need to reload it each time.  If this file is used, it will simply load a css file located in the EHR module.
+
+*/
+@import url("/ehr/stylesheet.css");
+/*@import url("/ehr/stylesheet-red.css");*/
+
+
+

@@ -1,0 +1,38 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsMostRecentTBDate" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="MostRecentTBDate">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=TB Tests&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.Date~eq=${MostRecentTBDate}
+                        </url>
+                        <columnTitle>Most Recent TB Date</columnTitle>
+                    </column>
+                    <column columnName="MonthsSinceLastTB">
+                        <columnTitle>Months Since Last TB</columnTitle>
+                    </column>
+                    <column columnName="eyeTested">
+                        <columnTitle>Eye Last Tested</columnTitle>
+                    </column>
+                    <column columnName="24H">
+                        <displayWidth>40</displayWidth>
+                    </column>
+                    <column columnName="48H">
+                        <displayWidth>40</displayWidth>
+                    </column>
+                    <column columnName="72H">
+                        <displayWidth>40</displayWidth>
+                    </column>
+                </columns>
+                <titleColumn>MostRecentTBDate</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

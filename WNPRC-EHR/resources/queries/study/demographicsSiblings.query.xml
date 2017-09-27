@@ -1,0 +1,44 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <description>Siblings of Any Animal</description>
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsSiblings" tableDbType="NOT_IN_DB">
+                <description>Siblings of Any Animal</description>
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <!--<isHidden>true</isHidden>-->
+                    </column>
+                    <column columnName="Relationship">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsSiblings&amp;
+                            query.Id~eq=${Id}
+                        </url>
+                    </column>
+                    <column columnName="Sibling">
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>animal</fkTable>
+                          <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="SiblingDam">
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>animal</fkTable>
+                          <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="SiblingSire">
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>animal</fkTable>
+                          <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+                <titleColumn>Relationship</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

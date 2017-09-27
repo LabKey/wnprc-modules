@@ -1,0 +1,33 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+       <column name="date" />
+       <column name="project" />
+       <column name="project/protocol">
+            <properties>
+                <property name="columnTitle" value="Protocol"/>
+            </properties>
+       </column>
+       <column name="quantity" />
+       <column name="performedby" />
+       <!--<column name="requestor" />-->
+       <!--<column name="p_s" />-->
+       <!--<column name="a_v" />-->
+       <column name="assayCode" />
+       <column name="billedby" />
+       <column name="tube_type" />
+       <column name="additionalServices" />
+       <column name="instructions" />
+       <column name="remark" />
+       <column name="qcstate" />
+       <column name="taskid" />
+       <column name="requestid" />
+    </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+       <sort column="Id" />
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

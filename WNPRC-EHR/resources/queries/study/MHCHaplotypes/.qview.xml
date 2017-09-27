@@ -1,0 +1,15 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="date" />
+        <column name="MHCHaplotypesConcatenated" />
+        <column name="Status" />
+        <column name="mamuAHaplotype1"/>
+        <column name="mamuAHaplotype2"/>
+        <column name="mamuBHaplotype1"/>
+        <column name="mamuBHaplotype2"/>
+    </columns>
+    <sorts>
+        <sort column="Id" descending="false"/>
+    </sorts>
+</customView>

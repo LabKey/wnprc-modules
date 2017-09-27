@@ -1,0 +1,7 @@
+lkpm
+node_modules
+build
+
+.idea/uiDesigner.xml
+.idea/workspace.xml
+.idea/*.local.xml

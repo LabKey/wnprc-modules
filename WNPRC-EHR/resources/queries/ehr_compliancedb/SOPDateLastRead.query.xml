@@ -1,0 +1,20 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="SOPDateLastRead" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="employeeid"/>
+                    <column columnName="SOP_ID">
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                            <fkDbSchema>lists</fkDbSchema>
+                            <fkTable>sops</fkTable>
+                            <fkColumnName>id</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+                <pkColumnName>SOP_ID</pkColumnName>
+            </table>
+        </tables>
+    </metadata>
+</query>

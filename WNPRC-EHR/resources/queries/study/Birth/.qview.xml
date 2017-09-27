@@ -1,0 +1,27 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="date" />
+        <column name="estimated" />
+        <column name="gender" />
+        <column name="weight" />
+        <column name="wdate" />
+        <column name="dam" />
+        <column name="sire" />
+        <column name="room" />
+        <column name="cage" />
+        <column name="cond" />
+        <column name="origin" />
+        <column name="conception" />
+        <column name="type" />
+        <column name="remark" />
+        <column name="qcstate" />
+        <column name="taskid" />
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+    <!--<filters>-->
+    <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

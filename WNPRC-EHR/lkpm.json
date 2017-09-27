@@ -1,0 +1,20 @@
+{
+  "name": "WNPRC_EHR",
+  "label": "WNPRC-specific extensions and customizations for EHR",
+  "server": {
+    "requiredVersion": 16.3,
+    "supportedBranches": {
+      "wnprc16.3": "jsptest"
+    },
+    "moduleDependencies": [
+      "LDK"
+    ]
+  },
+  "moduleClass": "org.labkey.wnprc_ehr.WNPRC_EHRModule",
+  "lkpmDependencies": {
+    "https://github.com/WNPRC-EHR-Services/ehr.git": "",
+    "https://github.com/WNPRC-EHR-Services/WebUtils.git": "",
+    "https://github.com/WNPRC-EHR-Services/DBUtils.git": "",
+    "https://github.com/WNPRC-EHR-Services/Compliance.git": ""
+  }
+}

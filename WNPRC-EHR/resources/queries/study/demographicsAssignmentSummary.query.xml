@@ -1,0 +1,175 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsAssignmentSummary" tableDbType="NOT_IN_DB">
+                <tableTitle>Assignment Summary By Animal</tableTitle>
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="ActiveSPF_StockAssignment">
+                        <columnTitle>Assigned to SPF Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project~eq=20020201
+                        </url>
+                    </column>
+                    <column columnName="ActiveConventionalStockAssignment">
+                        <columnTitle>Assigned to Conventional Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project~eq=20070202
+                        </url>
+                    </column>
+                    <column columnName="ActiveMarmStockAssignment">
+                        <columnTitle>Assigned to Marm Stock?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project~eq=20070801
+                        </url>
+                    </column>
+                    <column columnName="NumActiveStockAssignments">
+                        <columnTitle>Active Stock Assignments (any)?</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project~in=20020201;20070801;20070202
+                        </url>
+                    </column>
+
+                    <column columnName="ActiveAssignments">
+                         <columnTitle>Active Assignments (avail=all)</columnTitle>
+                         <displayWidth>110</displayWidth>
+                         <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                             <!--query.queryName=Assignment&amp;-->
+                             <!--query.Id~eq=${Id}&amp;-->
+                             <!--query.enddate~isblank&amp;-->
+                         <!--</url>-->
+                     </column>
+                     <column columnName="PendingAssignments">
+                         <columnTitle>Pending Assignments (avail=p)</columnTitle>
+                         <displayWidth>110</displayWidth>
+                         <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                             <!--query.queryName=Assignment&amp;-->
+                             <!--query.Id~eq=${Id}&amp;-->
+                             <!--query.enddate~isblank&amp;-->
+                             <!--query.project/avail~eq=p-->
+                         <!--</url>-->
+                     </column>
+                     <column columnName="ActiveResearchAssignments">
+                         <columnTitle>Active Research Assignments (avail=r or n)</columnTitle>
+                         <displayWidth>110</displayWidth>
+                         <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                             <!--query.queryName=Assignment&amp;-->
+                             <!--query.Id~eq=${Id}&amp;-->
+                             <!--query.enddate~isblank&amp;-->
+                             <!--query.project/avail~in=r;e;n&amp;-->
+                         <!--</url>-->
+                     </column>
+                     <column columnName="ActiveBreedingAssignments">
+                         <columnTitle>Active Breeding Assignments (avail=b)</columnTitle>
+                         <displayWidth>110</displayWidth>
+                         <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                             <!--query.queryName=Assignment&amp;-->
+                             <!--query.Id~eq=${Id}&amp;-->
+                             <!--query.enddate~isblank&amp;-->
+                             <!--query.project/avail~eq=b-->
+                         <!--</url>-->
+                     </column>
+                     <column columnName="ActiveVetAssignments">
+                         <columnTitle>Active Vet Exemptions (avail=v)</columnTitle>
+                         <displayWidth>110</displayWidth>
+                         <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                             <!--query.queryName=Assignment&amp;-->
+                             <!--query.Id~eq=${Id}&amp;-->
+                             <!--query.enddate~isblank&amp;-->
+                             <!--query.project/avail~eq=v-->
+                         <!--</url>-->
+                     </column>
+                     <column columnName="ActiveTrainingAssignments">
+                         <columnTitle>Active Training Assignments (avail=t)</columnTitle>
+                         <displayWidth>110</displayWidth>
+                         <!--<url>/query/executeQuery.view?schemaName=study&amp;-->
+                             <!--query.queryName=Assignment&amp;-->
+                             <!--query.Id~eq=${Id}&amp;-->
+                             <!--query.enddate~isblank&amp;-->
+                             <!--query.project/avail~eq=t-->
+                         <!--</url>-->
+                     </column>
+                    <column columnName="NumActiveAssignments">
+                        <columnTitle># Active Assignments (avail=all)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                        </url>
+                    </column>
+                    <column columnName="NumPendingAssignments">
+                        <columnTitle># Pending Assignments (avail=p)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project/avail~eq=p
+                        </url>
+                    </column>
+                    <column columnName="NumActiveResearchAssignments">
+                        <columnTitle># Active Research Assignments (avail=r or n)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project/avail~in=r;e;n&amp;
+                        </url>
+                    </column>
+                    <column columnName="NumActiveBreedingAssignments">
+                        <columnTitle># Active Breeding Assignments (avail=b)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project/avail~eq=b
+                        </url>
+                    </column>
+                    <column columnName="NumActiveVetAssignments">
+                        <columnTitle># Active Vet Exemptions (avail=v)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project/avail~eq=v
+                        </url>
+                    </column>
+                    <column columnName="NumActiveTrainingAssignments">
+                        <columnTitle># Active Training Assignments (avail=t)</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.enddate~isblank&amp;
+                            query.project/avail~eq=t
+                        </url>
+                    </column>
+                </columns>
+                <titleColumn>ActiveAssignments</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

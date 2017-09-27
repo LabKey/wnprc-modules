@@ -1,0 +1,42 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="ViralLoadsWpi" tableDbType="NOT_IN_DB">
+                <!--<tableUrl>/EHR/clinpathDetails.view?runId=${objectid}&amp;dataset=${dataset}</tableUrl>-->
+                <pkColumnName>rowid</pkColumnName>
+                <columns>
+                    <column columnName="rowid">
+                        <isHidden>true</isHidden>
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="Id">
+                        <displayWidth>60</displayWidth>
+                        <fk>
+                            <fkFolderPath>/wnprc/ehr/</fkFolderPath>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>animal</fkTable>
+                            <fkColumnName>id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="wpi">
+                        <columnTitle>WPI</columnTitle>
+                        <displayWidth>280</displayWidth>
+                    </column>
+                    <column columnName="dpi">
+                        <columnTitle>DPI</columnTitle>
+                        <displayWidth>280</displayWidth>
+                    </column>
+                    <column columnName="code">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="virus">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="challengeDate">
+                        <columnTitle>Challenge Date(s)</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

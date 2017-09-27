@@ -1,0 +1,18 @@
+<!--
+    This is a template for popup windows and is called by ExtUtils.js
+-->
+
+<!-- This requires a really high z-index to ensure it appears above the modal. -->
+<div class="modal fade" tabindex="-1" style="z-index: 20000" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body" data-bind="with: innerVM">
+                <!-- The template will load the window's html into here. -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-bind="click: submit, disable: submitDisabled">Submit</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

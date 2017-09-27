@@ -1,0 +1,17 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="code/code">
+            <properties>
+                <property name="columnTitle" value="Code"/>
+            </properties>
+        </column>
+        <column name="code">
+            <properties>
+                <property name="columnTitle" value="Meaning"/>
+            </properties>
+        </column>
+    </columns>
+   <sorts>
+       <sort column="code/code" />
+   </sorts>
+</customView>

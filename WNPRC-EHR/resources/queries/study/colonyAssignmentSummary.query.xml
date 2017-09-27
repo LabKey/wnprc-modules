@@ -1,0 +1,23 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="colonyAssignmentSummary" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="viralstatus">
+                        <columnTitle>Viral Status</columnTitle>
+                    </column>
+                    <column columnName="ActiveMarmStockAssignments">
+                        <columnTitle>Assigned to Marm Stock</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographicsAssignmentSummary&amp;
+                            query.Id/DataSet/Demographics/v_status~eq=${v_status}&amp;
+                            query.Id/DataSet/Demographics/species~eq=${species}&amp;
+                            query.ActiveMarmStockAssignment~eq=Y&amp;
+                        </url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

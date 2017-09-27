@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "noImplicitAny": true,
+        "alwaysStrict": true,
+        "strictNullChecks": true,
+        "sourceMap": true,
+        "jsx" : "react",
+        "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"],
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "node_modules/*",
+                "node_modules/lkpm/node_modules/*",
+                "lkpm/modules/WebUtils/node_modules/*",
+                "lkpm/modules/WebUtils/node_modules/@types/*",
+                "lkpm/modules/WebUtils/bower_components/*",
+                "lkpm/modules/WebUtils/src/ts/*",
+                "build/generated-ts/*"
+            ]
+        },
+        "rootDirs": [
+            "./src/ts",
+            "./lkpm/modules/WebUtils/src/ts"
+        ]
+    },
+    "include": [
+        "src/ts/pages/*.tsx",
+        "lkpm/modules/WebUtils/node_modules/@types"
+    ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "webutils",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Jon Richardson"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/WNPRC-EHR-Services/WebUtils",
+  "moduleType": [
+    "amd"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.7",
+    "c3": "~0.4.11",
+    "blockUI": "blockui#*",
+    "qunit": "~2.1.1",
+    "fetch": "~2.0.2",
+    "typeahead.js": "~0.11.1",
+    "eonasdan-bootstrap-datetimepicker": "~4.17.47",
+    "react": "~15.4.2",
+    "knockout": "^3.4.2",
+    "knockout.mapping": "bower-knockout.mapping-shim#^2.4.1",
+    "knockout.punches": "bower-knockout.punches-shim#^0.5.1",
+    "fullcalendar": "^3.2.0",
+    "awesome-bootstrap-checkbox": "^0.3.7",
+    "react-tabs": "^0.8.2"
+  }
+}

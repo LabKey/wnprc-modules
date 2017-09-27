@@ -1,0 +1,11 @@
+{
+  "label": "Generic Web Utilities and Library Code",
+  "server": {
+    "requiredVersion": 16.3,
+    "supportedBranches": {
+      "wnprc16.3": "jsptest"
+    },
+    "moduleDependencies": []
+  },
+  "moduleClass": "org.labkey.webutils.WebUtilsModule"
+}

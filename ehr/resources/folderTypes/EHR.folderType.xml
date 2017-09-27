@@ -1,0 +1,52 @@
+<folderType xmlns="http://labkey.org/data/xml/folderType">
+    <name>EHR</name>
+    <description>Folder type used for the Primate Electronic Health Record.</description>
+    <requiredWebParts>
+
+    </requiredWebParts>
+    <preferredWebParts>
+        <webPart>
+            <name>Electronic Health Record</name>
+            <location>menu</location>
+        </webPart>
+        <webPart>
+            <name>Quick Search</name>
+            <location>menu</location>
+        </webPart>
+    </preferredWebParts>
+    <folderTabs>
+        <folderTab>
+            <name>overview</name>
+            <caption>Overview</caption>
+            <preferredWebParts>
+                <webPart>
+                    <name>Electronic Health Record</name>
+                    <location>body</location>
+                </webPart>
+            </preferredWebParts>
+        </folderTab>
+        <folderTab>
+            <name>animalHistory</name>
+            <caption>Animal History</caption>
+            <selectors>
+                <selector>
+                    <view>animalHistory</view>
+                </selector>
+            </selectors>
+            <preferredWebParts>
+                <webPart>
+                    <name>Animal History</name>
+                    <location>body</location>
+                </webPart>
+            </preferredWebParts>
+        </folderTab>
+    </folderTabs>
+    <modules>
+        <moduleName>Core</moduleName>
+        <moduleName>Study</moduleName>
+        <moduleName>EHR</moduleName>
+    </modules>
+    <defaultModule>Core</defaultModule>
+    <workbookType>false</workbookType>
+    <menubarEnabled>true</menubarEnabled>
+</folderType>

@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Datasets" tableDbType="NOT_IN_DB">
+                <titleColumn>Label</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

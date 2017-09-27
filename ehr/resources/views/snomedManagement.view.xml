@@ -1,0 +1,7 @@
+<view xmlns="http://labkey.org/data/xml/view" title="SNOMED Code Details" frame="none">
+    <dependencies>
+        <dependency path="ehr.context" />
+        <dependency path="ehr/ehr_api.lib.xml" />
+        <dependency path="ehr/ehr_ext4_dataEntry.lib.xml" />
+    </dependencies>
+</view>

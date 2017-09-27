@@ -1,0 +1,10 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="taskSummary" tableDbType="NOT_IN_DB">
+                <tableTitle>Task Summary</tableTitle>
+
+            </table>
+        </tables>
+    </metadata>
+</query>

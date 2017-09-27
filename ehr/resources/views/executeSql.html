@@ -1,0 +1,84 @@
+<script type="text/javascript">
+
+Ext.onReady(function(){
+    var webpart = <%=webpartContext%>;
+    new Ext.Panel({
+        border: false,
+        autoHeight: true,
+        defaults: {
+            border: false
+        },
+        items: [{
+            xtype: 'form',
+            title: 'Enter SQL',
+            buttonAlign: 'left',
+            border: true,
+            bodyStyle: 'padding:5px;',
+            autoHeight: true,
+            items: [{
+                xtype: 'textfield',
+                fieldLabel: 'Schema',
+                ref: 'schemaName',
+                width: 200,
+                value: (LABKEY.ActionURL.getParameter('schemaName') || 'study')
+            },{
+                xtype: 'textfield',
+                fieldLabel: 'Container Name',
+                ref: 'containerPath',
+                width: 200,
+                value: (LABKEY.ActionURL.getParameter('containerPath') || '')
+            },{
+                xtype: 'textarea',
+                width: 800,
+                height: 300,
+                fieldLabel: 'SQL',
+                ref: 'sql'
+            }],
+            buttons: [{
+                text: 'Execute SQL',
+                handler: function(b){
+                    var formPanel = b.ownerCt.ownerCt;
+                    var panel = formPanel.ownerCt;
+
+                    formPanel.ownerCt.grid.body.update('Loading...');
+                    LABKEY.Query.executeSql({
+                        method: 'POST',
+                        containerPath: formPanel.containerPath.getValue(),
+                        schemaName: formPanel.schemaName.getValue(),
+                        sql: formPanel.sql.getValue(),
+                        saveInSession: true,
+                        scope: this,
+                        success: function(results){
+                            new LABKEY.QueryWebPart({
+                                schemaName: results.schemaName,
+                                queryName: results.queryName,
+                                allowChooseQuery: false,
+                                allowChooseView: true,
+                                showRecordSelectors: true,
+                                frame: 'none',
+                                showDeleteButton: false,
+                                timeout: 0,
+                                linkTarget: '_blank',
+                                scope: this,
+                                failure: function(error){
+                                    EHR.Utils.onError(error)
+                                }
+                            }).render(formPanel.ownerCt.grid.body.id)
+                        },
+                        failure: function(error){
+                            formPanel.ownerCt.grid.body.update('');
+                            alert(error.exception);
+                        }
+                    });
+
+                }
+            }]
+        },{
+            xtype: 'panel',
+            autoHeight: true,
+            ref: 'grid'
+        }]
+    }).render(webpart.wrapperDivId);
+});
+
+</script>

@@ -1,0 +1,34 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="protocolTotalHistoricAnimalsBySpecies" tableDbType="NOT_IN_DB">
+                <tableTitle>Total Historic Animals Assigned To Protocol, By Species</tableTitle>
+                <columns>
+                    <column columnName="protocol">
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>protocol</fkTable>
+                          <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Species">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>species</fkTable>
+                          <fkColumnName>common</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="TotalAnimals">
+                        <url>/query/executeQuery.view?schemaName=ehr&amp;
+                            query.queryName=protocolHistoricAnimals&amp;
+                            query.protocol~eq=${protocol}&amp;
+                            query.species~eq=${species}&amp;
+                        </url>
+                    </column>
+                </columns>
+                <titleColumn>TotalAnimals</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,26 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="encounter_flags_summary" tableDbType="TABLE">
+                <titleColumn>flags</titleColumn>
+                <tableTitle>Encounter Flags</tableTitle>
+                <columns>
+                    <column columnName="parentid">
+                        <nullable>false</nullable>
+                        <columnTitle>Encounter Id</columnTitle>
+                        <isKeyField>true</isKeyField>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>Clinical Encounters</fkTable>
+                          <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="flags">
+                        <columnTitle>Flags</columnTitle>
+                        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,52 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function(){
+        var webpart = <%=webpartContext%>;
+        Ext4.get(webpart.wrapperDivId).update(
+            '<div>This page is designed to provide a breakdown of the selected population by age and species.  The filters used to generate this report are shown below.  You are able to click any of the numbers in the population summary in order to view more detail for those animals.</div>' +
+            '<p></p>' +
+            '<div id="' + webpart.wrapperDivId + '_filters" style="padding-left:5px;"></div>' +
+            '<p>' +
+            '<div id="' + webpart.wrapperDivId + '_population"></div>'
+        );
+
+        var params = LABKEY.ActionURL.getParameters();
+        var filterArray = [];
+        var name = 'query';
+
+        for (var param in params){
+            if (param.match(/^query\./i)){
+                if (param.indexOf(name + ".") == 0 && param.indexOf('~') > -1)
+                {
+                    var tilde = param.indexOf('~');
+                    var fieldKey = param.substring(name.length + 1, tilde);
+                    var op = param.substring(tilde + 1);
+                    var filterType = LABKEY.Filter.getFilterTypeForURLSuffix(op);
+
+                    var value = params[param];
+
+                    filterArray.push(LABKEY.Filter.create(fieldKey, value, filterType));
+                }
+            }
+        }
+
+        if (filterArray.length){
+            var lines = [];
+            Ext4.each(filterArray, function(filter){
+                lines.push('<span style="padding-left: 10px;">' + filter.getColumnName() + ' ' + filter.getFilterType().getDisplayText().toLowerCase() + ' ' + filter.getValue() + '</span>')
+            }, this);
+
+            Ext4.get(webpart.wrapperDivId + '_filters').update('<b>Filters:</b><hr>' + lines.join('<br>'));
+
+            Ext4.create('EHR.panel.PopulationPanel', {
+                filterArray: filterArray,
+                titleText: 'Population Breakdown By Age',
+                rowField: EHR.panel.PopulationPanel.FIELDS.species,
+                colFields: [EHR.panel.PopulationPanel.FIELDS.ageclass, EHR.panel.PopulationPanel.FIELDS.gender]
+            }).render(webpart.wrapperDivId + '_population');
+        }
+
+
+
+    });
+</script>

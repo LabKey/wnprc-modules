@@ -1,0 +1,42 @@
+<!--NOTE: I believe this page can be removed-->
+<script type="text/javascript">
+//this page reenables the edit UI on a table, using EHR-specific Ext widgets
+Ext4.onReady(function (){
+    var query = LABKEY.ActionURL.getParameter('query.queryName') || LABKEY.ActionURL.getParameter('queryName');
+    var schema = LABKEY.ActionURL.getParameter('schemaName');
+
+    LABKEY.NavTrail.setTrail(EHR.Utils.toTitleCase(query));
+
+    var updateURL = '/ehr/manageRecord.view?schemaName='+schema+'&queryName='+query+'&keyField='+LABKEY.ActionURL.getParameter('keyField')+'&key=${'+LABKEY.ActionURL.getParameter('keyField')+'}&update=1';
+    var insertURL = '/ehr/manageRecord.view?schemaName='+schema+'&queryName='+query+'&keyField='+LABKEY.ActionURL.getParameter('keyField')+'&update=1';
+    var deleteURL = '/query/deleteQueryRows.view?schemaName='+schema+'&query.queryName='+query;
+
+    var config = {
+        title: query,
+        schemaName: schema,
+        queryName: query,
+        allowChooseQuery: false,
+        allowChooseView: true,
+        //showInsertNewButton: false,
+        //showDeleteButton: false,
+        showDetailsColumn: true,
+        showUpdateColumn: true,
+        showRecordSelectors: true,
+        buttonBarPosition: 'top',
+        frame: 'none',
+        dataRegionName: 'query',
+        updateURL: updateURL,
+        insertURL: insertURL,
+        deleteURL: deleteURL,
+        scope: this,
+        timeout: 0,
+        linkTarget: '_blank',
+        failure: EHR.Utils.onError
+    };
+
+    var webpart = <%=webpartContext%>;
+    new LABKEY.QueryWebPart(config).render(webpart.wrapperDivId);
+
+});
+
+</script>

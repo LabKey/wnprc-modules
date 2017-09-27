@@ -1,0 +1,37 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="CageUtilization" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <tableUrl>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}</tableUrl>
+                <columns>
+                    <column columnName="location">
+                        <isKeyField>true</isKeyField>
+                        <displayWidth>60</displayWidth>
+                        <columnTitle>Location</columnTitle>
+                    </column>
+                    <column columnName="room">
+                        <displayWidth>40</displayWidth>
+                    </column>
+                    <column columnName="cage">
+                        <displayWidth>40</displayWidth>
+                    </column>
+                    <column columnName="TotalAnimals">
+                      <columnTitle>Total Animals</columnTitle>
+                        <url>/query/executeQuery.view?
+                            schemaName=study&amp;
+                            query.queryName=Housing&amp;
+                            query.room~eq=${room}&amp;
+                            query.cage~eq=${cage}&amp;
+                            query.sort=Id&amp;
+                            query.enddate~isblank
+                        </url>
+                    </column>
+                    <column columnName="animals">
+                        <columnTitle>Animals</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

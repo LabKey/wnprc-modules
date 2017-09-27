@@ -1,0 +1,29 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="colonyPopulationByAgeClass" tableDbType="NOT_IN_DB">
+                <tableTitle>Population Summary, By Age and Species</tableTitle>
+                <columns>
+                    <column columnName="species">
+                        <columnTitle>Species</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>species</fkTable>
+                          <fkColumnName>common</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="animalCount">
+                        <columnTitle>Animal Count</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=demographics&amp;
+                            query.species~eq=${species}&amp;
+                            query.gender~eq=${gender}&amp;
+                            query.Id/ageClass/label~eq=${ageclass}&amp;
+                            query.viewName=Alive%2C at Center&amp;
+                        </url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

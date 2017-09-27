@@ -1,0 +1,94 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Dataset/Demographics/gender">
+            <properties>
+                <property name="columnTitle" value="Gender"/>
+            </properties>
+        </column>
+        <!--<column name="Dataset/Demographics/Status">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Status"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="Dataset/Demographics/calculated_status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <column name="activeAssignments/projects">
+            <properties>
+                <property name="columnTitle" value="Active Assignments"/>
+            </properties>
+        </column>
+        <column name="Dataset/Demographics/dam">
+            <properties>
+                <property name="columnTitle" value="Dam"/>
+            </properties>
+        </column>
+        <column name="Dataset/Demographics/sire">
+            <properties>
+                <property name="columnTitle" value="Sire"/>
+            </properties>
+        </column>
+        <column name="Dataset/Demographics/origin"/>
+        <column name="Dataset/Demographics/birth">
+            <properties>
+                <property name="columnTitle" value="Birth"/>
+            </properties>
+        </column>
+        <column name="Dataset/Demographics/death">
+            <properties>
+                <property name="columnTitle" value="Death"/>
+            </properties>
+        </column>
+        <!--<column name="Id/MostRecentArrival/MostRecentArrival">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Most Recent Arrival"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <!--<column name="Id/MostRecentDeparture/MostRecentDeparture">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Most Recent Departure"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="curLocation/room">
+            <properties>
+                <property name="columnTitle" value="Room"/>
+            </properties>
+        </column>
+        <column name="curLocation/cage">
+            <properties>
+                <property name="columnTitle" value="Cage"/>
+            </properties>
+        </column>
+        <column name="curLocation/cond">
+            <properties>
+                <property name="columnTitle" value="Condition"/>
+            </properties>
+        </column>
+        <column name="MostRecentWeight/MostRecentWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="MostRecentWeight/MostRecentWeightDate">
+            <properties>
+                <property name="columnTitle" value="Weight Date"/>
+            </properties>
+        </column>
+        <!--<column name="Dataset/Demographics/tbdate">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Last TB Date"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <column name="Dataset/Demographics/medical">
+            <properties>
+                <property name="columnTitle" value="Medical"/>
+            </properties>
+        </column>
+    </columns>
+    <sorts>
+        <sort column="id" descending="false"/>
+    </sorts>
+</customView>

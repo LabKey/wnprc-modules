@@ -1,0 +1,25 @@
+{
+  "name": "ehr",
+  "version": "16.3.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WNPRC-EHR-Services/ehr.git"
+  },
+  "author": "Ben Bimber",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/WNPRC-EHR-Services/ehr/issues"
+  },
+  "homepage": "https://github.com/WNPRC-EHR-Services/ehr#readme",
+  "dependencies": {
+    "gulp": "github:gulpjs/gulp#4.0"
+  }
+}

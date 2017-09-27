@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="alopecia_score" tableDbType="TABLE">
+                <titleColumn>score</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

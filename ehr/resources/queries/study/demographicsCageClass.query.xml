@@ -1,0 +1,24 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsCageClass" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="ReqSqFt">
+                        <columnTitle>Required Sq Ft</columnTitle>
+                    </column>
+                    <column columnName="ReqHeight">
+                        <columnTitle>Required Height</columnTitle>
+                    </column>
+                    <column columnName="MostRecentWeight">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+                <titleColumn>Location</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,35 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="ageclass" tableDbType="TABLE">
+            <tableTitle>Age Class</tableTitle>
+            <columns>
+              <column columnName="key">
+                <columnTitle>Key</columnTitle>
+                <nullable>false</nullable>
+                <isKeyField>true</isKeyField>
+                <isAutoInc>true</isAutoInc>
+              </column>
+              <column columnName="species">
+                <columnTitle>Species</columnTitle>
+                <fk>
+                  <fkDbSchema>ehr_lookups</fkDbSchema>
+                  <fkTable>species</fkTable>
+                  <fkColumnName>common</fkColumnName>
+                </fk>
+              </column>
+              <column columnName="ageclass">
+                <columnTitle>Age Class</columnTitle>
+              </column>
+              <column columnName="min">
+                <columnTitle>Min</columnTitle>
+              </column>
+              <column columnName="max">
+                <columnTitle>Max</columnTitle>
+              </column>
+            </columns>
+            <pkColumnName>key</pkColumnName>
+            </table>
+        </tables>
+    </metadata>
+</query>

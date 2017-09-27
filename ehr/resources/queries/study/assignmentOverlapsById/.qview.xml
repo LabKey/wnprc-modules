@@ -1,0 +1,49 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Id/curLocation/room">
+            <properties>
+                <property name="columnTitle" value="Current Room"/>
+            </properties>
+        </column>
+        <column name="Id/curLocation/cage">
+            <properties>
+                <property name="columnTitle" value="Current Cage"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/species">
+            <properties>
+                <property name="columnTitle" value="Species"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/gender">
+            <properties>
+                <property name="columnTitle" value="Gender"/>
+            </properties>
+        </column>
+        <column name="id/Dataset/Demographics/calculated_status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentWeight/MostRecentWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="Id/MostRecentWeight/MostRecentWeightDate">
+            <properties>
+                <property name="columnTitle" value="Weight Date"/>
+            </properties>
+        </column>
+        <column name="earliestAssignment"/>
+        <column name="ageOnEarliestAssignment"/>
+        <column name="protocols"/>
+        <column name="projects"/>
+        <column name="releaseTypes"/>
+        <column name="totalAssignments"/>
+    </columns>
+    <sorts>
+        <sort column="id" descending="false"/>
+    </sorts>
+</customView>

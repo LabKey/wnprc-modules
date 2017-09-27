@@ -1,0 +1,29 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date" />
+        <column name="weight" />
+        <column name="remark" />
+        <column name="relChange/PctChange">
+            <properties>
+                <property name="columnTitle" value="Percent Change"/>
+            </properties>
+        </column>
+        <column name="relChange/IntervalInMonths">
+            <properties>
+                <property name="columnTitle" value="Interval (Months)"/>
+            </properties>
+        </column>
+        <column name="qcstate" />
+        <column name="taskid" />
+   </columns>
+   <sorts>
+       <sort column="Id" />
+       <sort column="date" descending="true"/>
+   </sorts>
+    <filters>
+        <filter column="relChange/PctChange" operator="lte" value="-10"/>
+        <filter column="relChange/IntervalInMonths" operator="lte" value="6"/>
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    </filters>
+</customView>

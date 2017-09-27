@@ -1,0 +1,96 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function (){
+        if (!LABKEY.ActionURL.getParameter('code')){
+            alert('Must Provide A SNOMED Code');
+            return;
+        }
+
+        var code = LABKEY.ActionURL.getParameter('code');
+
+        var webpart = <%=webpartContext%>;
+        var domSpec = [{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'codeDetails_' + webpart.wrapperDivId
+        },{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'codeSubsets_' + webpart.wrapperDivId
+        },{
+            tag: 'div',
+            style: 'padding-bottom: 10px;',
+            id: 'drugDefaults_' + webpart.wrapperDivId
+        }];
+
+        var el = Ext4.get(webpart.wrapperDivId);
+        Ext4.DomHelper.append(el, domSpec);
+
+        if (LABKEY.ActionURL.getParameter('doEdit')) {
+            Ext4.create('LDK.panel.WebpartPanel', {
+                title: 'Details',
+                items: [{
+                    xtype: 'ldk-formpanel',
+                    border: false,
+                    ignoreFilter: true,
+                    showTitle: false,
+                    store: {
+                        schemaName: 'ehr_lookups',
+                        queryName: 'snomed',
+                        columns: '*',
+                        filterArray: [
+                            LABKEY.Filter.create('code', code, LABKEY.Filter.Types.EQUAL)
+                        ],
+                        autoLoad: true
+                    },
+                    bindConfig: {
+                        autoCreateRecordOnChange: true,
+                        autoBindFirstRecord: true
+                    },
+                    metadata: {
+                        code: {
+                            xtype: 'displayfield'
+                        }
+                    }
+                }],
+                renderTo: 'codeDetails_' + webpart.wrapperDivId
+            });
+        }
+        else {
+            Ext4.create('LDK.panel.DetailsPanel', {
+                showBackBtn: false,
+                store: {
+                    schemaName: 'ehr_lookups',
+                    queryName: 'snomed',
+                    columns: 'code,meaning',
+                    filterArray: [
+                        LABKEY.Filter.create('code', code, LABKEY.Filter.Types.EQUAL)
+                    ]
+                },
+                title: 'Details',
+                renderTo: 'codeDetails_' + webpart.wrapperDivId
+            });
+        }
+
+        LDK.Utils.getBasicQWP({
+            title: 'Medication/Treatment Defaults',
+            schemaName: 'ehr_lookups',
+            queryName: 'drug_defaults',
+            filters: [LABKEY.Filter.create('code', code, LABKEY.Filter.Types.EQUAL)],
+            importURL: LABKEY.ActionURL.getParameter('doEdit') ? '/ehr/dataEntryFormForQuery.view?schemaName=ehr_lookups&queryName=drug_defaults' : null,
+            updateURL: LABKEY.ActionURL.getParameter('doEdit') ? '/ehr/dataEntryFormForQuery.view?schemaName=ehr_lookups&queryName=drug_defaults&rowid=${rowid}' : null,
+            deleteURL: LABKEY.ActionURL.getParameter('doEdit') ? '/query/deleteQueryRows.view?schemaName=study&query.queryName=drug_defaults' : null
+        }).render('drugDefaults_' + webpart.wrapperDivId);
+
+        LDK.Utils.getBasicQWP({
+            title: 'Subsets Using This Code',
+            schemaName: 'ehr_lookups',
+            queryName: 'snomed_subset_codes',
+            filters: [LABKEY.Filter.create('code', code, LABKEY.Filter.Types.EQUAL)],
+            importURL: LABKEY.ActionURL.getParameter('doEdit') ? '/ehr/dataEntryFormForQuery.view?schemaName=ehr_lookups&queryName=snomed_subset_codes' : null,
+            updateURL: LABKEY.ActionURL.getParameter('doEdit') ? '/ehr/dataEntryFormForQuery.view?schemaName=ehr_lookups&queryName=snomed_subset_codes&rowid=${rowid}' : null,
+            deleteURL: LABKEY.ActionURL.getParameter('doEdit') ? '/query/deleteQueryRows.view?schemaName=study&query.queryName=snomed_subset_codes' : null
+        }).render('codeSubsets_' + webpart.wrapperDivId);
+    });
+
+</script>

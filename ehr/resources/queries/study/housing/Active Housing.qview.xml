@@ -1,0 +1,28 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="enddate"/>
+        <column name="room"/>
+        <column name="cage"/>
+        <column name="cond"/>
+        <column name="reason"/>
+       <column name="duration">
+           <properties>
+               <property name="columnTitle" value="Days In This Cage"/>
+           </properties>
+       </column>
+       <column name="daysInRoom"/>
+       <column name="daysInArea"/>
+       <column name="previousLocation/location"/>
+       <column name="remark"/>
+       <column name="qcstate"/>
+   </columns>
+   <filters>
+       <filter column="isActive" operator="eq" value="true"/>
+   </filters>
+   <sorts>
+       <sort column="room/sort_order"/>
+       <sort column="cage"/>
+   </sorts>
+</customView>

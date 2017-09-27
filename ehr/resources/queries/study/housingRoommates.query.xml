@@ -1,0 +1,65 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="housingRoommates" tableDbType="NOT_IN_DB">
+                <titleColumn>Cagemate History</titleColumn>
+                <columns>
+                    <column columnName="lsid">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="room">
+                        <url>
+
+                        </url>
+                    </column>
+                    <column columnName="Id">
+                        <fk>
+                            <fkColumnName>Id</fkColumnName>
+                            <fkTable>Animal</fkTable>
+                            <fkDbSchema>study</fkDbSchema>
+                        </fk>
+                    </column>
+                    <column columnName="RoommateId">
+                        <columnTitle>Other Id</columnTitle>
+                        <fk>
+                            <fkColumnName>Id</fkColumnName>
+                            <fkTable>Animal</fkTable>
+                            <fkDbSchema>study</fkDbSchema>
+                        </fk>
+                    </column>
+                    <!--<column columnName="qcstate">-->
+                        <!--<isHidden>true</isHidden>-->
+                    <!--</column>-->
+                    <!--<column columnName="RoommateId">-->
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>animal</fkTable>-->
+                          <!--<fkColumnName>Id</fkColumnName>-->
+                        <!--</fk>-->
+                    <!--</column>-->
+                    <column columnName="roommateStart">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Cagemate Start</columnTitle>
+                    </column>
+                    <column columnName="roommateEnd">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Cagemate End</columnTitle>
+                    </column>
+                    <column columnName="startDate">
+                        <columnTitle>Housing Start</columnTitle>
+                    </column>
+                    <column columnName="removalDate">
+                        <columnTitle>Housing End</columnTitle>
+                    </column>
+                    <column columnName="DaysCoHoused">
+                        <columnTitle>Days In This Condition</columnTitle>
+                    </column>
+                    <column columnName="duration">
+                        <columnTitle>Total Days In This Location</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

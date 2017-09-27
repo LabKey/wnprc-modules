@@ -1,0 +1,50 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="weightConsecutiveDrops" tableDbType="NOT_IN_DB">
+                <tableTitle>Weights Representing 3 Consecutive Drops</tableTitle>
+                <description>This query shows any weight that is the third of 3 consecutive weight drops</description>
+                <columns>
+                    <column columnName="lsid">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+
+                    </column>
+                    <column columnName="curWeight">
+                        <columnTitle>Current Weight</columnTitle>
+                    </column>
+                    <column columnName="prevDate1">
+                        <columnTitle>Previous Date 1</columnTitle>
+                    </column>
+                    <column columnName="prevWeight1">
+                        <columnTitle>Previous Weight 1</columnTitle>
+                    </column>
+                    <column columnName="interval1">
+                        <columnTitle>Interval 1</columnTitle>
+                    </column>
+                    <column columnName="pctChange1">
+                        <columnTitle>% Change 1</columnTitle>
+                    </column>
+                    <column columnName="prevDate2">
+                        <columnTitle>Previous Date 2</columnTitle>
+                    </column>
+                    <column columnName="prevWeight2">
+                        <columnTitle>Previous Weight 2</columnTitle>
+                    </column>
+                    <column columnName="interval2">
+                        <columnTitle>Interval 2</columnTitle>
+                    </column>
+                    <column columnName="pctChange2">
+                        <columnTitle>% Change 2</columnTitle>
+                    </column>
+
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

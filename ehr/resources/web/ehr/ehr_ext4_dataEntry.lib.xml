@@ -1,0 +1,71 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="ehr/DataEntryUtils.js"/>
+
+        <!--NOTE: model/metadata sources loaded as part of ehr.lib.xml, which allows proper order when modules override them-->
+
+        <!--data-->
+        <script path="ehr/data/Errors.js"/>
+        <script path="ehr/data/DataEntryServerStore.js"/>
+        <script path="ehr/data/DataEntryClientStore.js"/>
+        <script path="ehr/data/BloodDrawClientStore.js"/>
+        <script path="ehr/data/AssignmentClientStore.js"/>
+        <script path="ehr/data/HousingClientStore.js"/>
+        <script path="ehr/data/StoreCollection.js"/>
+        <script path="ehr/data/TaskStoreCollection.js"/>
+        <script path="ehr/data/RequestStoreCollection.js"/>
+        <script path="ehr/data/EncounterStoreCollection.js"/>
+
+        <!--plugins-->
+        <script path="ehr/plugin/DataBind.js"/>
+        <script path="ehr/plugin/ResizableTextArea.js"/>
+        <script path="ehr/plugin/RowEditor.js"/>
+
+        <!--fields-->
+        <script path="ehr/form/field/AnimalField.js"/>
+        <script path="ehr/form/field/RemarkField.js"/>
+        <script path="ehr/form/field/SnomedCombo.js"/>
+        <script path="ehr/form/field/TimeOfDayField.js" />
+        <script path="ehr/form/field/TriggerNumberField.js" />
+        <script path="ehr/form/field/AnimalIdGeneratorField.js" />
+        <script path="ehr/form/field/ProjectIdGeneratorField.js" />
+        <script path="ehr/form/field/DrugDoseField.js" />
+        <script path="ehr/form/field/DrugVolumeField.js" />
+        <script path="ehr/form/field/RoomEntryField.js" />
+        <script path="ehr/form/field/UrinalysisResultField.js" />
+
+        <!--panels / windows-->
+        <script path="ehr/form/Panel.js"/>
+        <script path="ehr/grid/Panel.js"/>
+        <script path="ehr/panel/BulkEditPanel.js"/>
+        <script path="ehr/panel/DataEntryErrorPanel.js"/>
+        <script path="ehr/window/BulkEditWindow.js"/>
+        <script path="ehr/window/FormTemplateWindow.js"/>
+        <script path="ehr/window/AddAnimalsWindow.js"/>
+        <script path="ehr/window/SubmitForReviewWindow.js"/>
+        <script path="ehr/window/CopyFromRunsWindow.js"/>
+        <script path="ehr/window/RecordDuplicatorWindow.js"/>
+        <script path="ehr/window/RepeatSelectedWindow.js"/>
+        <script path="ehr/window/ApplyTemplateWindow.js"/>
+        <script path="ehr/window/SaveTemplateWindow.js"/>
+        <script path="ehr/window/CaseNumberWindow.js"/>
+        <script path="ehr/window/LabworkAddRecordWindow.js"/>
+        <script path="ehr/window/CopyFromSectionWindow.js"/>
+        <script path="ehr/window/GuessProjectWindow.js"/>
+        <script path="ehr/panel/SnapshotPanel.js"/>
+        <script path="ehr/panel/AnimalDetailsPanel.js"/>
+        <script path="ehr/panel/AnimalDetailsExtendedPanel.js"/>
+        <script path="ehr/panel/DataEntryPanel.js"/>
+        <script path="ehr/panel/TaskDataEntryPanel.js"/>
+        <script path="ehr/panel/RequestDataEntryPanel.js"/>
+        <script path="ehr/panel/SimpleDataEntryPanel.js"/>
+        <script path="ehr/window/TaskWindow.js"/>
+        <script path="ehr/window/DrugAmountWindow.js"/>
+        <script path="ehr/window/CopyTaskWindow.js"/>
+        <script path="ehr/window/CopyRequestWindow.js"/>
+    </library>
+    <dependencies>
+        <dependency path="ehr.context"/>
+        <dependency path="ldk/tsort.js"/>
+    </dependencies>
+</libraries>

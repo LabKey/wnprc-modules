@@ -1,0 +1,8 @@
+@page {
+    size: 11in 8.5in;  /* width height */
+}
+
+body {
+    width: 11in;
+    margin: 0in .1in;
+}

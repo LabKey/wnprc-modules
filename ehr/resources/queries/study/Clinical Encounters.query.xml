@@ -1,0 +1,105 @@
+    <query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="encounters" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl>/ehr/encounterDetails.view?objectid=${objectid}&amp;formtype=${taskid/formtype}&amp;taskid=${taskid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Date</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="enddate">
+                        <columnTitle>End Time</columnTitle>
+                        <isHidden>false</isHidden>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="project">
+
+                    </column>
+                    <column columnName="type">
+                        <columnTitle>Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>encounter_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="chargetype">
+                        <columnTitle>Charge Unit</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>procedureChargeType</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="assistingstaff">
+                        <columnTitle>Assisting Staff</columnTitle>
+                        <isHidden>false</isHidden>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>procedureChargeType</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="caseno">
+                        <columnTitle>Case Number</columnTitle>
+                    </column>
+                    <column columnName="procedureid">
+                        <columnTitle>Procedure</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>procedures</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="major">
+                        <columnTitle>Major Surgery?</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>yesno</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="serviceRequested">
+                        <columnTitle>Service Requested</columnTitle>
+                    </column>
+                    <column columnName="instructions">
+                        <columnTitle>Special Instructions</columnTitle>
+                        <inputType>textarea</inputType>
+                    </column>
+                    <column columnName="title">
+                        <columnTitle>Title</columnTitle>
+                    </column>
+                    <column columnName="restraint">
+                        <columnTitle>Restraint</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="restraintDuration">
+                        <columnTitle>Time Restrained</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_duration</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="daterequested">
+                        <columnTitle>Date Requested</columnTitle>
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

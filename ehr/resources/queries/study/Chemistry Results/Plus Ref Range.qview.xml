@@ -1,0 +1,43 @@
+
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="testid"/>
+        <column name="method"/>
+        <column name="result"/>
+        <column name="units"/>
+        <column name="qualresult"/>
+        <column name="refRange/status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <column name="refRange/ref_range_min">
+            <properties>
+                <property name="columnTitle" value="Normal Range Min"/>
+            </properties>
+        </column>
+        <column name="refRange/ref_range_max">
+            <properties>
+                <property name="columnTitle" value="Normal Range Max"/>
+            </properties>
+        </column>
+        <column name="refRange/AgeAtTime">
+            <properties>
+                <property name="columnTitle" value="Age At Time"/>
+            </properties>
+        </column>
+        <column name="remark"/>
+        <column name="qcstate" />
+        <column name="taskid" />
+    </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+       <sort column="Id" />
+       <sort column="testid/sort_order" />
+   </sorts>
+    <filters>
+        <filter column="refRange/ref_range_max" operator="isnonblank" value=""/>
+    </filters>
+</customView>

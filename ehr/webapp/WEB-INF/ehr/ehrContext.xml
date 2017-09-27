@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="kinshipPipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
+        <property name="factoryImpls">
+            <list>
+                <bean class="org.labkey.ehr.pipeline.GeneticCalculationsInitTask$Factory">
+                    <property name="location" value="webserver" />
+                    <property name="join" value="false" />
+                </bean>
+                <bean class="org.labkey.ehr.pipeline.GeneticCalculationsRTask$Factory">
+                    <property name="location" value="webserver" />
+                    <property name="join" value="false" />
+                </bean>
+                <bean class="org.labkey.ehr.pipeline.GeneticCalculationsImportTask$Factory">
+                    <property name="location" value="webserver" />
+                    <property name="join" value="false" />
+                </bean>
+            </list>
+        </property>
+        <property name="pipelines">
+            <list>
+                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
+                    <constructor-arg value="kinshipPipeline"/>
+                    <property name="description" value="Recalculate kinship data on all animals in the EHR using the R package kinship2."/>
+                    <property name="protocolName" value="Kinship" />
+                    <property name="protocolFactoryName" value="kinship"/>
+                    <property name="defaultDisplayState" value="disabled"/>
+                    <!--<property name="initialInputExt" ref="kinshipFileType" />-->
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <value type="java.lang.Class">org.labkey.ehr.pipeline.GeneticCalculationsInitTask</value>
+                            <value type="java.lang.Class">org.labkey.ehr.pipeline.GeneticCalculationsRTask</value>
+                            <value type="java.lang.Class">org.labkey.ehr.pipeline.GeneticCalculationsImportTask</value>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!--<bean id="kinshipCommand" class="org.labkey.api.pipeline.cmd.CommandTaskFactorySettings">-->
+        <!--<constructor-arg value="kinshipCommamd"/>-->
+        <!--<property name="statusName" value="Kinship"/>-->
+        <!--<property name="groupParameterName" value="kinship" />-->
+        <!--<property name="protocolActionName" value="Kinship" />-->
+        <!--<property name="outputExtension" value=".kinship.txt"/>-->
+        <!--<property name="switchFormat" ref="unixDefaultSwitch"/>-->
+        <!--<property name="outputPaths">-->
+            <!--<map>-->
+                <!--<entry key="txt">-->
+                    <!--<bean class="org.labkey.api.pipeline.cmd.TaskPath">-->
+                        <!--<constructor-arg ref="kinshipFileType" />-->
+                    <!--</bean>-->
+                <!--</entry>-->
+            <!--</map>-->
+        <!--</property>-->
+        <!--<property name="converters">-->
+            <!--<list>-->
+                <!--<bean class="org.labkey.api.pipeline.cmd.EnumToCommandArgs">-->
+                    <!--<property name="parameter" value="accurate mass"/>-->
+                    <!--&lt;!&ndash;<property name="default" value="true"/>&ndash;&gt;-->
+                    <!--<property name="converters">-->
+                        <!--<map>-->
+                            <!--<entry key="true">-->
+                                <!--<bean class="org.labkey.api.pipeline.cmd.ListToCommandArgs">-->
+                                    <!--<property name="converters">-->
+                                        <!--<list>-->
+                                            <!--<bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">-->
+                                                <!--<property name="parameter" value="containerPath"/>-->
+                                                <!--<property name="switchName" value="containerPath"/>-->
+                                                <!--<property name="help" value="The containerPath holding pedigree data."/>-->
+                                            <!--</bean>-->
+                                            <!--<bean class="org.labkey.api.pipeline.cmd.ValueWithSwitch">-->
+                                                <!--<property name="parameter" value="baseURL"/>-->
+                                                <!--<property name="switchName" value="baseURL"/>-->
+                                                <!--<property name="help" value="The baseURL of the server."/>-->
+                                            <!--</bean>-->
+                                        <!--</list>-->
+                                    <!--</property>-->
+                                <!--</bean>-->
+                            <!--</entry>-->
+                        <!--</map>-->
+                    <!--</property>-->
+                <!--</bean>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <bean id="kinshipFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value="kinship.txt"/>
+    </bean>
+
+    <!--<bean id="kinshipFileType" class="org.labkey.api.util.FileType">-->
+        <!--<constructor-arg>-->
+            <!--<list>-->
+                <!--<value>.kinship.txt</value>-->
+            <!--</list>-->
+        <!--</constructor-arg>-->
+        <!--<constructor-arg value=".kinship.txt"/>-->
+    <!--</bean>-->
+
+    <!--<bean id="unixDefaultSwitch" class="org.labkey.api.pipeline.cmd.UnixSwitchFormat"/>-->
+
+</beans>

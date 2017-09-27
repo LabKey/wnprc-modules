@@ -1,0 +1,81 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <properties>
+        <propertyDescriptor name="EHRStudyContainer">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the path to the container holding the EHR study.  Use of slashes is very important - it should be in the format '/myProject/ehr'</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="InstitutionName">
+            <canSetPerContainer>true</canSetPerContainer>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="EHRAdminUser">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>The is the email address of a valid LabKey site admin user that will used to execute many background processes.  The email does not need to match a valid address, but this user must be created within LabKey.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="EHRDefaultClinicalProjectName">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>The is the display name of the default clinical project, which is typically used to handle no-cost and general clinical case.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="CacheDemographicsOnStartup">
+            <canSetPerContainer>true</canSetPerContainer>
+            <defaultValue>false</defaultValue>
+            <description>If true, on startup the EHR will cache demographics data on all living animals, which can speed data entry</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="DefaultAnimalHistoryReport">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>The ID of the default report to show on the Animal History page.  It defaults to 'abstract'.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="ProtocolPDFContainer">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the path to the container holding PDFs of IACUC protocols.  It is usually separate from the EHR study.  Use of slashes is very important - it should be in the format '/myProject/ehr'</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="EHRDocumentationContainer">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the path to the container holding documentation and other materials.  These material need to be created by the admins of the site.  Use of slashes is very important - it should be in the format '/myProject/ehr'</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="EHRIssuesContainer">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the path to a container with an issue tracker for the EHR.  It is usually separate from the EHR study, and the issue tracker need to be configured manually be the admin.  Use of slashes is very important - it should be in the format '/myProject/ehr'</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="EHRSubmitForReviewPrincipal">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the name of the user or group that will be used as the default for the Review Required dialog in EHR data entry</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+    </properties>
+    <requiredModuleContext>
+        <requiredModule name="LDK"/>
+    </requiredModuleContext>
+    <clientDependencies>
+        <dependency path="ehr/ehr_api"/>
+        <dependency path="ehr/ehr_ext3_api"/>
+    </clientDependencies>
+</module>

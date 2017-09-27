@@ -1,0 +1,17 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="" tableDbType="TABLE">
+                <columns>
+                    <column columnName="lsid_pointer" wrappedColumnName="Key1">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>studydata</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,25 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="TasksById" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <isHidden>true</isHidden>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="formtype">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="title">
+                        <url>/ehr/taskDetails.view?formtype=${formtype}&amp;taskid=${taskid}</url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

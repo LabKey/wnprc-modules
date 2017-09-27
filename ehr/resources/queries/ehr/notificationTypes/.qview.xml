@@ -1,0 +1,6 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <sorts>
+       <sort column="notificationtype" />
+       <!--<sort column="recipient" />-->
+   </sorts>
+</customView>

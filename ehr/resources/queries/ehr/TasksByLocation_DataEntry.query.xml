@@ -1,0 +1,29 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="TasksByLocation_DataEntry" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <!--<isHidden>true</isHidden>-->
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="formtype">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="room">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

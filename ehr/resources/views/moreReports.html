@@ -1,0 +1,44 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var webpart = <%=webpartContext%>;
+    var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+    if(!ctx)
+        return;
+
+    EHR.Utils.getReportLinks({
+        linkTypes: ['moreReports'],
+        scope: this,
+        success: function(results){
+            results = results.moreReports || {};
+            if (!results)
+                return;
+
+            var categories = Ext4.Object.getKeys(results.sections);
+            categories = categories.sort();
+
+            var sections = [];
+            Ext4.each(categories, function(category){
+                var section = {
+                    header: category,
+                    items: []
+                };
+
+                Ext4.each(results.sections[category], function(item){
+                    section.items.push({
+                        name: item.label,
+                        url: item.url || LABKEY.ActionURL.buildURL(item.controller, item.action, ctx['EHRStudyContainer'], item.params)
+                    });
+                }, this);
+
+                sections.push(section);
+            }, this);
+
+            Ext4.create('LDK.panel.NavPanel', {
+                sections: sections
+            }).render(webpart.wrapperDivId);
+        }
+    });
+});
+
+</script>

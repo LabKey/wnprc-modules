@@ -1,0 +1,7 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Details">
+    <dependencies>
+        <dependency path="ehr.context" />
+        <dependency path="ehr/ehr_ext4_dataEntry.lib.xml" />
+        <dependency path="ehr/panel/DataEntryFormDetailsPanel.js"/>
+    </dependencies>
+</view>

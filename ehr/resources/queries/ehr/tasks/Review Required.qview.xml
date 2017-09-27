@@ -1,0 +1,24 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="rowid"/>
+       <column name="updateTitle" />
+        <column name="assignedto" />
+        <column name="duedate"/>
+        <column name="createdby"/>
+        <column name="created"/>
+        <column name="qcstate">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <!--<column name="ModifiedBy"/>-->
+        <!--<column name="Modified"/>-->
+   </columns>
+   <filters>
+       <filter column="qcstate/Label" operator="eq" value="Review Required"/>
+   </filters>
+   <sorts>
+       <sort column="duedate" descending="true"/>
+       <sort column="created" descending="true"/>
+   </sorts>
+</customView>

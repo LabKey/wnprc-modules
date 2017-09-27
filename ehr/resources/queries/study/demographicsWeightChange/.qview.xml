@@ -1,0 +1,28 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="MostRecentWeightDate" />
+        <column name="MostRecentWeight" />
+        <column name="MinLast30" />
+        <column name="MaxLast30" />
+        <column name="MaxLoss30" />
+        <column name="MaxGain30" />
+        <!--<column name="MaxChange30" />-->
+        <column name="MinLast90" />
+        <column name="MaxLast90" />
+        <column name="MaxLoss90" />
+        <column name="MaxGain90" />
+        <!--<column name="MaxChange90" />-->
+        <column name="MinLast180" />
+        <column name="MaxLast180" />
+        <column name="MaxLoss180" />
+        <column name="MaxGain180" />
+        <!--<column name="MaxChange180" />-->
+    </columns>
+    <sorts>
+        <sort column="Id"/>
+    </sorts>
+    <!--<filters>-->
+    <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

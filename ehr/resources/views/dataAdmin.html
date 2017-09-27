@@ -1,0 +1,176 @@
+<script type="text/javascript">
+
+Ext4.onReady(function (){
+
+    EHR.Security.init({
+        success: onSuccess,
+        scope: this
+    });
+
+    var webpart = <%=webpartContext%>;
+
+    //TODO: make data driven
+    function onSuccess(data){
+        var menuCfg = {
+            renderTo: webpart.wrapperDivId,
+            sections: new Array(),
+            columns: 3,
+            colWidth: 400,
+            renderer: function(item){
+                var cfg = {
+                    html: '<a href="<%=contextPath%>/ehr<%=containerPath%>/updateTable.view?schemaName='+item.schemaName+'&query.queryName='+item.queryName+'">'+item.title+'</a>',
+                    style: 'padding-left:5px;padding-bottom:8px'
+                };
+
+                return cfg;
+            }
+        }
+
+        menuCfg.sections = [{
+            header: 'Room/Cage',
+            items: [
+                {queryName: 'areas', schemaName: 'ehr_lookups', title: 'Areas'},
+                {queryName: 'rooms', schemaName: 'ehr_lookups', title: 'Rooms Located In Each Area'},
+                {queryName: 'rooms', schemaName: 'ehr_lookups', title: 'Edit Rooms in the System'},
+
+                {queryName: 'cage', schemaName: 'ehr_lookups', title: 'Cages And Dimensions'},
+                {queryName: 'cageclass', schemaName: 'ehr_lookups', title: 'Cage Classes and Their SqFt/Height'}
+            ]
+        },{
+            header: 'Other Lists',
+            items: [
+                {queryName: 'snomed', schemaName: 'ehr_lookups', title: 'SNOMED Codes'},
+                {queryName: 'full_snomed', schemaName: 'ehr_lookups', title: 'Full SNOMED Set'},
+                {queryName: 'snomap', schemaName: 'ehr_lookups', title: 'SNOMED Old/New Code Mapping'},
+                {queryName: 'snomed_qualifiers', schemaName: 'ehr_lookups', title: 'SNOMED Qualifiers'},
+                {queryName: 'snomed_subsets', schemaName: 'ehr_lookups', title: 'SNOMED Subsets'},
+                {queryName: 'snomed_subset_codes', schemaName: 'ehr_lookups', title: 'SNOMED Subset Codes'},
+                {queryName: 'weight_ranges', schemaName: 'ehr_lookups', title: 'Weight: Min/Max Allowable Per Species'}
+
+            ]
+        },{
+            header: 'Tables Controlling Form Drop-down Menus',
+            items: [
+                {queryName: 'alopecia_cause', schemaName: 'ehr_lookups', title: 'Alopecia Causes'},
+                {queryName: 'alopecia_score', schemaName: 'ehr_lookups', title: 'Alopecia Score'},
+                {queryName: 'avail_codes', schemaName: 'ehr_lookups', title: 'Availability Codes'},
+                {queryName: 'bacteriology_sensitivity', schemaName: 'ehr_lookups', title: 'Bacteriology Sensitivity'},
+                {queryName: 'bacteriology_method', schemaName: 'ehr_lookups', title: 'Bacteriology Method Field'},
+                {queryName: 'bcs_score', schemaName: 'ehr_lookups', title: 'Body Condition Scores'},
+                {queryName: 'behavior_category', schemaName: 'ehr_lookups', title: 'Behavior Category Field'},
+                {queryName: 'birth_type', schemaName: 'ehr_lookups', title: 'Birth Type Field'},
+                {queryName: 'biopsy_type', schemaName: 'ehr_lookups', title: 'Biopsy Types'},
+                {queryName: 'blood_billed_by', schemaName: 'ehr_lookups', title: 'Blood Billed By Field'},
+                {queryName: 'blood_draw_services', schemaName: 'ehr_lookups', title: 'Blood Additional Services Field'},
+                {queryName: 'blood_draw_tube_type', schemaName: 'ehr_lookups', title: 'Blood Tube Types'},
+                {queryName: 'blood_billed_by', schemaName: 'ehr_lookups', title: 'Blood Billed By Field'},
+                {queryName: 'charge_items', schemaName: 'ehr_lookups', title: 'Charge Items and Prices'},
+                //{queryName: 'clinpath_services', schemaName: 'ehr_lookups', title: 'Clinpath Services'},
+                {queryName: 'chemistry_method', schemaName: 'ehr_lookups', title: 'Chemistry Method'},
+                {queryName: 'chemistry_tests', schemaName: 'ehr_lookups', title: 'Chemistry Tests'},
+                {queryName: 'chow_types', schemaName: 'ehr_lookups', title: 'Chow Types'},
+				{queryName: 'sample_types', schemaName: 'ehr_lookups', title: 'Cytology Sample Types'},
+				{queryName: 'stain_types', schemaName: 'ehr_lookups', title: 'Cytology Stain Types'},
+				{queryName: 'cytology_tests', schemaName: 'ehr_lookups', title: 'Cytology Tests'},
+                {queryName: 'clinpath_collection_method', schemaName: 'ehr_lookups', title: 'Clinpath Collection Method Field'},
+                {queryName: 'clinpath_status', schemaName: 'ehr_lookups', title: 'Clinpath Request Status Field'},
+                {queryName: 'clinpath_tests', schemaName: 'ehr_lookups', title: 'Clinpath Services'},
+                {queryName: 'clinremarks_category', schemaName: 'ehr_lookups', title: 'Clinremarks Category Field'},
+                {queryName: 'container_types', schemaName: 'ehr_lookups', title: 'Container Types'},
+                {queryName: 'qualitative_results', schemaName: 'ehr_lookups', title: 'Clinpath Qualitative Results Field'},
+                {queryName: 'preservation_solutions', schemaName: 'ehr_lookups', title: 'Preservation Solutions'},
+                {queryName: 'urinalysis_qualitative_results', schemaName: 'ehr_lookups', title: 'Clinpath Urinalysis Qualitative Results Field'},
+
+                {queryName: 'amount_units', schemaName: 'ehr_lookups', title: 'Drug Amount Units'},
+                {queryName: 'drug_categories', schemaName: 'ehr_lookups', title: 'Drug Categories'},
+                {queryName: 'conc_units', schemaName: 'ehr_lookups', title: 'Drug Concentration Units'},
+                {queryName: 'dosage_units', schemaName: 'ehr_lookups', title: 'Drug Dosage Units'},
+                {queryName: 'volume_units', schemaName: 'ehr_lookups', title: 'Drug Volume Units'},
+                //{queryName: 'drug_defaults', schemaName: 'ehr_lookups', title: 'Drug Default Values'},
+                {queryName: 'routes', schemaName: 'ehr_lookups', title: 'Drug Routes'},
+
+
+
+                {queryName: 'death_cause', schemaName: 'ehr_lookups', title: 'Death Causes'},
+                {queryName: 'death_codes', schemaName: 'ehr_lookups', title: 'Death Codes'},
+
+                {queryName: 'dental_gingivitis', schemaName: 'ehr_lookups', title: 'Dental Gingivitis Field'},
+                {queryName: 'dental_jaw', schemaName: 'ehr_lookups', title: 'Dental Jaw Field'},
+                {queryName: 'dental_priority', schemaName: 'ehr_lookups', title: 'Dental Priority Field'},
+                {queryName: 'dental_side', schemaName: 'ehr_lookups', title: 'Dental Side Field'},
+                {queryName: 'dental_status', schemaName: 'ehr_lookups', title: 'Dental Status Field'},
+                {queryName: 'dental_tartar', schemaName: 'ehr_lookups', title: 'Dental Tartar Field'},
+                {queryName: 'dental_teeth', schemaName: 'ehr_lookups', title: 'Dental Teeth Field'},
+
+                {queryName: 'encounter_types', schemaName: 'ehr_lookups', title: 'Encounter Types'},
+                {queryName: 'error_types', schemaName: 'ehr_lookups', title: 'Error Report Error Types'},
+                {queryName: 'gender_codes', schemaName: 'ehr_lookups', title: 'Gender Codes'},
+                {queryName: 'hematology_method', schemaName: 'ehr_lookups', title: 'Hematology Method'},
+                {queryName: 'hematology_tests', schemaName: 'ehr_lookups', title: 'Hematology Tests'},
+                {queryName: 'hematology_morphology', schemaName: 'ehr_lookups', title: 'Hematology Morphology'},
+                {queryName: 'hematology_score', schemaName: 'ehr_lookups', title: 'Hematology Scores'},
+
+                {queryName: 'histology_stain', schemaName: 'ehr_lookups', title: 'Histology Stains'},
+
+                {queryName: 'hold_codes', schemaName: 'ehr_lookups', title: 'Hold Codes'},
+
+                {queryName: 'housing_condition_codes', schemaName: 'ehr_lookups', title: 'Housing Condition Codes'},
+                {queryName: 'housing_reason', schemaName: 'ehr_lookups', title: 'Housing Reasons For Transfer'},
+                {queryName: 'restraint_type', schemaName: 'ehr_lookups', title: 'Restraint Types'},
+                {queryName: 'restraint_duration', schemaName: 'ehr_lookups', title: 'Restraint Durations'},
+
+
+                {queryName: 'immunology_method', schemaName: 'ehr_lookups', title: 'Immunology Method'},
+                {queryName: 'immunology_tests', schemaName: 'ehr_lookups', title: 'Immunology Tests'},
+
+                {queryName: 'lab_test_range', schemaName: 'ehr_lookups', title: 'Lab Test Normal Ranges'},
+
+                {queryName: 'necropsy_condition', schemaName: 'ehr_lookups', title: 'Necropsy Condition Field'},
+                {queryName: 'necropsy_perfusion', schemaName: 'ehr_lookups', title: 'Necropsy Perfusion Field'},
+                {queryName: 'necropsy_perfusion_area', schemaName: 'ehr_lookups', title: 'Necropsy Perfusion Area Field'},
+                {queryName: 'tissue_distribution', schemaName: 'ehr_lookups', title: 'Necropsy Tissue Distribution'},
+
+                {queryName: 'obs_behavior', schemaName: 'ehr_lookups', title: 'Obs Behavior Field'},
+                {queryName: 'obs_feces', schemaName: 'ehr_lookups', title: 'Obs Feces Field'},
+                {queryName: 'obs_mens', schemaName: 'ehr_lookups', title: 'Obs Mens Field'},
+                {queryName: 'obs_other', schemaName: 'ehr_lookups', title: 'Obs Other Behavior Field'},
+                {queryName: 'obs_remarks', schemaName: 'ehr_lookups', title: 'Obs Default Remarks'},
+                {queryName: 'obs_tlocation', schemaName: 'ehr_lookups', title: 'Obs Trauma Location Field'},
+
+                {queryName: 'observations_anesthesia_recovery', schemaName: 'ehr_lookups', title: 'Anesthesia Recovery Remarks'},
+                {queryName: 'source', schemaName: 'ehr_lookups', title: 'Source Codes'},
+
+                {queryName: 'pairtest_bhav', schemaName: 'ehr_lookups', title: 'Pairtest Behavior Remark'},
+                {queryName: 'pairtest_conclusion', schemaName: 'ehr_lookups', title: 'Pairtest Conclusion Field'},
+
+                {queryName: 'parasitology_method', schemaName: 'ehr_lookups', title: 'Parasitology Method Field'},
+                {queryName: 'pe_region', schemaName: 'ehr_lookups', title: 'PE Region Field'},
+                {queryName: 'problem_list_category', schemaName: 'ehr_lookups', title: 'Problem List Category Field'},
+                {queryName: 'procedures', schemaName: 'ehr_lookups', title: 'Known Procedures'},
+                {queryName: 'request_priority', schemaName: 'ehr_lookups', title: 'Request Priority Field'},
+
+                {queryName: 'species', schemaName: 'ehr_lookups', title: 'Species'},
+                {queryName: 'species_codes', schemaName: 'ehr_lookups', title: 'Species Codes'},
+                {queryName: 'status_codes', schemaName: 'ehr_lookups', title: 'Status Codes'},
+                {queryName: 'tattoo_status', schemaName: 'ehr_lookups', title: 'Tattoo Status Field'},
+                {queryName: 'tb_eye', schemaName: 'ehr_lookups', title: 'TB Eye Field'},
+                {queryName: 'tb_result', schemaName: 'ehr_lookups', title: 'TB Results'},
+                {queryName: 'treatment_codes', schemaName: 'ehr_lookups', title: 'Common Treatments'},
+                {queryName: 'treatment_frequency', schemaName: 'ehr_lookups', title: 'Treatment Frequencies'},
+
+                {queryName: 'urinalysis_method', schemaName: 'ehr_lookups', title: 'Urinalysis Method'},
+                {queryName: 'urinalysis_tests', schemaName: 'ehr_lookups', title: 'Urinalysis Tests'},
+
+                {queryName: 'tb_result', schemaName: 'ehr_lookups', title: 'TB Results'},
+                {queryName: 'virology_method', schemaName: 'ehr_lookups', title: 'Virology Method'},
+                {queryName: 'virology_source', schemaName: 'ehr_lookups', title: 'Virology Source'},
+                {queryName: 'virology_tests', schemaName: 'ehr_lookups', title: 'Virology Tests'}
+            ]
+        }];
+        var section;
+
+        Ext4.create('LDK.panel.NavPanel', menuCfg);
+    }
+});
+
+</script>

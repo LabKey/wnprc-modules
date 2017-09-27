@@ -1,0 +1,188 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var webpart = <%=webpartContext%>;
+    var queriesDivId = 'queries' + Ext4.id();
+
+    var domSpec = [{
+        style: 'padding-bottom: 20px;',
+        html: 'The purpose of this page is to provide an overview of the colony.  It includes summaries of animals by species, graphs of population changes, and other queries.'
+    },{
+        tag: 'div',
+        html: '<span class="loading-indicator">Loading...</span>',
+        id: 'colonyPopulationSummary_' + webpart.wrapperDivId
+    },{
+        tag: 'p'
+    },{
+        tag: 'table',
+        cls: 'labkey-wp',
+        children: [{
+            tag: 'tbody',
+            children: [{
+                tag: 'tr',
+                cls: 'labkey-wp-header',
+                children: [{
+                    tag: 'th',
+                    cls: 'labkey-wp-title-left',
+                    html: 'Population Changes:'
+                },{
+                    tag: 'th',
+                    cls: 'labkey-wp-title-right',
+                    html: '&nbsp;'
+                }]
+            },{
+                tag: 'tr',
+                children: [{
+                    tag: 'td',
+                    cls: 'labkey-wp-body',
+                    children: [{
+                        tag: 'div',
+                        id: 'dateRange_' + webpart.wrapperDivId
+                    },{
+                        tag: 'div',
+                        id: 'colonyPopulationChange_' + webpart.wrapperDivId
+                    }]
+                }]
+            }]
+        }]
+    },{
+       tag: 'p'
+    },{
+        tag: 'table',
+        cls: 'labkey-wp',
+        children: [{
+            tag: 'tbody',
+            children: [{
+                tag: 'tr',
+                cls: 'labkey-wp-header',
+                children: [{
+                    tag: 'th',
+                    cls: 'labkey-wp-title-left',
+                    html: 'Other Population Queries:'
+                },{
+                    tag: 'th',
+                    cls: 'labkey-wp-title-right',
+                    html: '&nbsp;'
+                }]
+            },{
+                tag: 'tr',
+                children: [{
+                    tag: 'td',
+                    cls: 'labkey-wp-body',
+                    children: [{
+                        tag: 'span',
+                        id: queriesDivId
+                    }]
+                }]
+            }]
+        }]
+    }]
+
+    var el = Ext4.get(webpart.wrapperDivId);
+    Ext4.DomHelper.append(el, domSpec);
+
+    Ext4.create('LDK.panel.NavPanel', {
+        renderTo: queriesDivId,
+        width: 450,
+        sections: [{
+            header: '',
+            items: [{
+                url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'study', 'query.queryName': 'colonyPopulationByAge'}),
+                name: 'Population By Age and Species'
+            }]
+        }]
+    });
+
+    LDK.Utils.getReadOnlyQWP({
+        title: 'Current Population Counts',
+        schemaName: 'study',
+        queryName: 'colonyPopulationSummary',
+        //allowChooseView: false,
+        frame: 'portal'
+    }).render('colonyPopulationSummary_' + webpart.wrapperDivId);
+
+
+    Ext4.create('Ext.panel.Panel', {
+        style: 'padding-bottom: 20px;',
+        bodyBorder: false,
+        border: false,
+        items: [{
+            xtype: 'ldk-daterangepanel'
+        },{
+            xtype: 'button',
+            text: 'Display Report',
+            handler: function(btn){
+                var target = document.getElementById('colonyPopulationChange_' + webpart.wrapperDivId);
+                target.innerHTML = '';
+                var loading = document.createElement('span');
+                loading.innerHTML = 'Loading...<p>';
+                loading.setAttribute('class', "loading-indicator");
+                target.appendChild(loading);
+
+                var config = {
+                    partName: 'Report',
+                    renderTo: 'colonyPopulationChange_' + webpart.wrapperDivId,
+                    //reportId : 'module:ehr/schemas/study/colonyPopulationChange/Bar Chart.r',
+                    reportName: 'Bar Chart',
+                    schemaName: 'study',
+                    queryName: 'colonyPopulationChange',
+                    title: 'Summary',
+                    reportProperties: {
+                        showSection: 'barchart&tsvfile&message',
+                        'query.Id/dataset/demographics/species~neqornull': 'Unknown'
+                    },
+                    webPartConfig: {
+                        frame: 'none'
+                    },
+                    failure: LDK.Utils.getErrorCallback({logToServer: true})
+                };
+
+                var panel = btn.up('panel');
+                config.reportProperties['query.param.StartDate'] = panel.down('#startDateField').getValue();
+                config.reportProperties['query.param.EndDate'] = panel.down('#endDateField').getValue();
+
+
+
+
+
+                var webPart = (function(config){
+                    var $ = jQuery;
+                    var wpConfig = $.extend({}, config.webPartConfig);
+                    wpConfig.partName = 'Report';
+
+                    // for convenience, support these wp properties in config
+                    $.each(['renderTo', 'success', 'failure'], function(index,prop)
+                    {
+                        if (LABKEY.Utils.isDefined(config[prop]))
+                        {
+                            wpConfig[prop] = config[prop];
+                        }
+                    });
+
+                    // then merge the partConfig options. we document specific Report-specific options for clarity to the user
+                    wpConfig.partConfig = $.extend({}, config.reportProperties);
+                    $.each(['reportId', 'reportName', 'schemaName', 'queryName', 'title'], function(index,prop)
+                    {
+                        if (LABKEY.Utils.isDefined(config[prop]))
+                        {
+                            wpConfig.partConfig[prop] = config[prop];
+                        }
+                    });
+
+                    return new LABKEY.WebPart(wpConfig);
+
+                })(config);
+
+
+                //LABKEY.WebPart.createReportWebpart(config).render();
+
+                webPart.render();
+
+
+
+            }
+        }]
+    }).render('dateRange_' + webpart.wrapperDivId);
+});
+
+</script>

@@ -1,0 +1,67 @@
+<script type="text/javascript">
+
+Ext4.onReady(function (){
+    if (!LABKEY.ActionURL.getParameter('key')){
+        alert('Must Provide Necropsy Number');
+        return;
+    }
+
+    var key = LABKEY.ActionURL.getParameter('key');
+    var webpart = <%=webpartContext%>;
+    var domSpec = [{
+        tag: 'div',
+        id: 'necropsyDetails_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyReport_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyDiagnosis_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyImages_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyHistology_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'necropsyTissues_' + webpart.wrapperDivId
+    }]
+
+    var el = Ext4.get(webpart.wrapperDivId);
+    Ext4.DomHelper.append(el, domSpec);
+
+    Ext4.create('LDK.panel.DetailsPanel', {
+        store: {
+            schemaName: 'study',
+            queryName: 'Necropsies',
+            viewName: 'Summary',
+            filterArray: [LABKEY.Filter.create('objectId', key, LABKEY.Filter.Types.EQUAL)]
+        },
+        showBackBtn: false,
+        title: 'Necropsy Details:',
+        renderTo: 'necropsyDetails_' + webpart.wrapperDivId
+    });
+
+    LDK.Utils.getReadOnlyQWP({
+        title: 'Morphologic Diagnoses',
+        schemaName: 'study',
+        queryName: 'Morphologic Diagnosis',
+        filters: [LABKEY.Filter.create('parentid', key, LABKEY.Filter.Types.EQUAL)]
+     }).render('necropsyDiagnosis_' + webpart.wrapperDivId);
+
+    LDK.Utils.getReadOnlyQWP({
+        title: 'Histology',
+        schemaName: 'study',
+        queryName: 'histology',
+        filters: [LABKEY.Filter.create('parentid', key, LABKEY.Filter.Types.EQUAL)],
+        sort: '-Date'
+     }).render('necropsyHistology_' + webpart.wrapperDivId);
+});
+
+</script>

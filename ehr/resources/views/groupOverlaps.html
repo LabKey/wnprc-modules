@@ -1,0 +1,183 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var webpart = <%=webpartContext%>;
+
+    var qwpDiv = Ext4.DomHelper.insertAfter(webpart.wrapperDivId, {
+        tag: 'div',
+        id: 'qwp_' + Ext4.id()
+    });
+
+    Ext4.QuickTips.init();
+    Ext4.define('EHR.panel.GroupOverlapPanel', {
+        extend: 'Ext.panel.Panel',
+
+        initComponent: function(){
+            Ext4.apply(this, {
+                border: false,
+                width: 460,
+                qwpDiv: qwpDiv,
+                style: 'margin-bottom: 20px;',
+                defaults: {
+                    border: false,
+                    labelWidth: 180
+                },
+                items: [{
+                    html: 'This page allows you to find animals that were part of the select animal group at a specific point in time, or over a range of dates.  This report may include non-living animals if viewing a historic date range.',
+                    style: 'padding-bottom: 10px'
+                },{
+                    xtype: 'textfield',
+                    width: 450,
+                    fieldLabel: 'Group Name (blank for all)',
+                    itemId: 'groupField',
+                    value: LABKEY.ActionURL.getParameter('name')
+                },{
+                    xtype: 'radiogroup',
+                    itemId: 'searchType',
+                    fieldLabel: 'Search Type',
+                    width: 500,
+                    columns: 1,
+                    items: [{
+                        boxLabel: 'Single Date',
+                        checked: true,
+                        name: 'searchType',
+                        inputValue: 'animalGroupOverlaps'
+                    },{
+                        boxLabel: 'Range of Dates',
+                        name: 'searchType',
+                        inputValue: 'animalGroupOverlapsRange'
+                    }],
+                    listeners: {
+                        change: function(btn){
+                            var panel = btn.up('panel');
+                            panel.onSearchTypeChange();
+                        }
+                    }
+                },{
+                    itemId: 'datePanel',
+                    defaults: {
+                        border: false,
+                        labelWidth: 180
+                    },
+                    items: this.getDateItems()
+                },{
+                    xtype: 'radiogroup',
+                    itemId: 'outputType',
+                    fieldLabel: 'Output',
+                    width: 500,
+                    columns: 1,
+                    items: [{
+                        boxLabel: 'List of Animals',
+                        checked: true,
+                        name: 'outputType',
+                        inputValue: 'animalGroupOverlaps'
+                    },{
+                        boxLabel: '# of Animals',
+                        name: 'outputType',
+                        inputValue: 'animalGroupOverlapSummary'
+                    }]
+                }],
+                dockedItems: {
+                    xtype: 'toolbar',
+                    dock: 'bottom',
+                    ui: 'footer',
+                    items: [{
+                        xtype: 'tbfill'
+                    },{
+                        xtype: 'button',
+                        text: 'Submit',
+                        handler: function(btn){
+                            btn.up('panel').onSubmit();
+                        }
+                    }]
+                }
+            });
+
+            this.callParent(arguments);
+        },
+
+        getDateRangeItems: function(){
+            return [{
+                xtype: 'datefield',
+                width: 450,
+                helpPopup: 'This will be used at the start of the interval.',
+                fieldLabel: 'Start Date',
+                itemId: 'startField'
+            },{
+                xtype: 'datefield',
+                width: 450,
+                helpPopup: 'This will be used at the end of the interval.  If left blank, the current date will be used.',
+                fieldLabel: 'End Date (optional)',
+                itemId: 'endField'
+            }]
+        },
+
+        getDateItems: function(){
+            return [{
+                xtype: 'datefield',
+                width: 450,
+                fieldLabel: 'Date',
+                allowBlank: false,
+                itemId: 'startField'
+            }]
+        },
+
+        onSearchTypeChange: function(){
+            var type = this.down('#searchType').getValue().searchType;
+            var datePanel = this.down('#datePanel');
+            datePanel.removeAll();
+
+            if (type == 'animalGroupOverlaps'){
+                datePanel.add(this.getDateItems());
+            }
+            else {
+                datePanel.add(this.getDateRangeItems());
+            }
+        },
+
+        onSubmit: function(){
+            var queryName = this.down('#outputType').getValue().outputType;
+
+            var startField = this.down('#startField');
+            var start = startField.getValue();
+            if (!startField.allowBlank && !start){
+                Ext4.Msg.alert('Error', 'Must provide a date');
+                return;
+            }
+
+            var endField = this.down('#endField');
+            var end = endField ? endField.getValue() : start;
+            var groupName = this.down('#groupField').getValue();
+
+            var config = {
+                frame: 'portal',
+                renderTo: this.qwpDiv.id,
+                schemaName: 'study',
+                queryName: queryName,
+                title: 'Group Members'
+            };
+
+            if (!start){
+                Ext4.Msg.alert('Error', 'Must provide a start date');
+                return;
+            }
+
+            if (groupName)
+                config.removeableFilters = [LABKEY.Filter.create('groupId/name', groupName, LABKEY.Filter.Types.EQUAL)];
+
+            var params = {
+                StartDate: start,
+                EndDate: end
+            };
+
+            config.parameters = params;
+
+            LDK.Utils.getReadOnlyQWP(config).render(this.qwpDiv.id);
+        }
+
+    });
+
+    Ext4.create('EHR.panel.GroupOverlapPanel').render(webpart.wrapperDivId);
+});
+
+</script>

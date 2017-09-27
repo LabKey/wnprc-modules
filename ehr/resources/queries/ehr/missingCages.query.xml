@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="missingCages" tableDbType="TABLE">
+                <tableTitle>Cages With Animals, But Missing From The Cages Table</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

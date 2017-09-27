@@ -1,0 +1,23 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="assignmentTotalCoAssigned" tableDbType="NOT_IN_DB">
+                <tableTitle>Total Concurrent Assignments</tableTitle>
+                <columns>
+                    <column columnName="lsid">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="ConcurrentAssignments">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=assignmentCoAssignedAnimals&amp;
+                            query.lsid~eq=${lsid}&amp;
+                            query.sort=-Date
+                        </url>
+                    </column>
+                </columns>
+                <titleColumn>ConcurrentAssignments</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

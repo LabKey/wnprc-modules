@@ -1,0 +1,41 @@
+<div>
+    This is the prototype of EHR data entry.  For the time being, all data entry is shown on a single page.  Eventually this will likely be split into many smaller pages, specific to vets, animal care, colony records, SPI, etc.
+
+    <p/>
+    There are two major concepts: tasks and requests:
+<ul>
+    <li>
+        Requests are designed to be submitted by end users, although they could be submitted internally by animal care or other staff.  Imagine someone requesting blood draws on 10 animals, requesting a biopsy or requesting a BAL.
+    </li>
+    <li>
+        Requests will go into a queue.  These can be managed by the appropriate members of each unit (ie. the people who manage SPI or Vet scheduling).
+    </li>
+    <li>
+        Requests can be converted into Tasks.  Tasks are a unit of work that needs to be performed.  It could be thought of as roughly equivalent to a paper form.
+    </li>
+    <li>
+        Tasks can be given a due date, which is essentialy simple scheduling.  They can be assigned to either a person or a group (ie. 'SPI techs', 'Vets', etc).  In this prototype you can only assign them to a specific person, but this will change shortly.
+    </li>
+    <li>
+        Because tasks can be created and partially completed in advance of actually performing the work, they should help serve as an organizational tool, and they also serve to identify which information was gathered together.  For example, a necropsy or procedure can be a task.
+    </li>
+</ul>
+<p/>
+
+Forms and data entry can go through several states called 'status':
+
+<ul>
+    <li>
+        All forms can be saved as drafts, meaning the data is saved in the computer, but not public.  This will enable forms to be partially completed ahead of time and/or partially completed inside the barrier.
+    </li>
+    <li>
+        Certain types of forms can be directly submitted by the people who enter it (aka 'Submit Final')
+    </li>
+    <li>
+        Other types of information can only be submitted 'For Review', which means it will be sent to colony records for validation, SNOMED coding, and approval.
+    </li>
+    <li>
+        Submitted data by also be flagged as 'Attention Needed', meaning some part of the form needs to be clarified or corrected.
+    </li>
+</ul>
+</div>

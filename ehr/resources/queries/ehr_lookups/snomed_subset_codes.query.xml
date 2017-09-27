@@ -1,0 +1,24 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="snomed_subset_codes" tableDbType="TABLE">
+                <titleColumn>code</titleColumn>
+                <!--<tableTitle>Cage Notes</tableTitle>-->
+                <columns>
+                    <column columnName="code">
+                        <!--<columnTitle>Room</columnTitle>-->
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="primaryCategory">
+                        <columnTitle>Subset</columnTitle>
+                    </column>
+                </columns>
+                <pkColumnName>RowId</pkColumnName>
+            </table>
+        </tables>
+    </metadata>
+</query>

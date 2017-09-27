@@ -1,0 +1,20 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="Id2"/>
+        <column name="Id2/status_code">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <column name="coefficient" />
+    </columns>
+
+    <filters>
+        <filter column="Id2/status_code" operator="eq" value="Alive"/>
+    </filters>
+   <sorts>
+       <sort column="Id"/>
+       <sort column="coefficient" descending="true"/>
+   </sorts>
+</customView>

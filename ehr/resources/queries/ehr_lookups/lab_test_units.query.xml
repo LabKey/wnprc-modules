@@ -1,0 +1,15 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="lab_test_units" tableDbType="TABLE">
+                <pkColumnName>units</pkColumnName>
+                <columns>
+                    <column columnName="units">
+                        <columnTitle>Units</columnTitle>
+                        <isKeyField>true</isKeyField>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

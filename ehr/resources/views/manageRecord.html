@@ -1,0 +1,30 @@
+<script type="text/javascript">
+
+Ext.onReady(function(){
+    var btns = 'VALIDATE,BASICSUBMIT,FORCESUBMIT,'+(LABKEY.ActionURL.getParameter('update') ? '' : 'SUBMITANDNEXT')+',DELETEBTN';
+
+    var metaSources = LABKEY.ActionURL.getParameter('metaSources') || '';
+    metaSources = metaSources.split(';');
+    if(metaSources.indexOf('SimpleForm') == -1)
+        metaSources.push('SimpleForm');
+
+    var panel = new EHR.ext.ImportPanel.SimpleImportPanel({
+        allowableButtons: btns,
+        formType: LABKEY.ActionURL.getParameter('queryName'),
+        formSections: [{
+            xtype: 'ehr-formpanel',
+            schemaName: LABKEY.ActionURL.getParameter('schemaName'),
+            queryName: LABKEY.ActionURL.getParameter('queryName'),
+            keyField: LABKEY.ActionURL.getParameter('keyField'),
+            keyValue: Ext.util.Format.htmlDecode(LABKEY.ActionURL.getParameter('key')),
+            title: LABKEY.ActionURL.getParameter('queryName'),
+            metadata: EHR.Metadata.getTableMetadata(LABKEY.ActionURL.getParameter('queryName'), metaSources)
+        }]
+    });
+    var webpart = <%=webpartContext%>;
+    panel.render(webpart.wrapperDivId);
+    LABKEY.NavTrail.setTrail(LABKEY.ActionURL.getParameter('title') || EHR.Utils.toTitleCase(LABKEY.ActionURL.getParameter('queryName')));
+
+});
+
+</script>

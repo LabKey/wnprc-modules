@@ -1,0 +1,15 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Animal Details" frame="portal">
+    <dependencies>
+        <dependency path="ehr.context" />
+
+        <dependency path="ehr/form/field/RoomField.js"/>
+        <dependency path="ehr/form/field/CageField.js"/>
+
+        <dependency path="ehr/panel/MultiAnimalFilterType.js"/>
+        <dependency path="ehr/panel/LocationFilterType.js"/>
+        <dependency path="ehr/panel/HiddenSingleSubjectFilterType.js"/>
+
+        <dependency path="ehr/panel/AnimalHistoryPanel.js"/>
+        <dependency path="ehr/panel/ParticipantDetailsPanel.js"/>
+    </dependencies>
+</view>

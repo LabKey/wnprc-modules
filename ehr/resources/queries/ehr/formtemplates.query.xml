@@ -1,0 +1,23 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="formtemplates" tableDbType="TABLE">
+                <pkColumnName>entityid</pkColumnName>
+                <columns>
+                    <column columnName="entityid">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="userid">
+                        <columnTitle>User Id</columnTitle>
+                        <nullable>true</nullable>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>PrincipalsWithoutAdmin</fkTable>
+                            <fkColumnName>userid</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,0 +1,22 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="assignmentTotalDaysAssigned" tableDbType="NOT_IN_DB">
+                <tableTitle>Total Days Coassigned</tableTitle>
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="TotalDaysAssigned">
+                        <columnTitle>Total Days Assigned (concurrent assignments count twice)</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.Id~eq=${id}&amp;
+                            query.Project/avail/code~in=r;n&amp;
+                        </url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

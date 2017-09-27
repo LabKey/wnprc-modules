@@ -1,0 +1,27 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date" />
+        <column name="weight" />
+        <column name="relChange/LatestWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="relChange/PctChange"/>
+        <column name="relChange/IntervalInMonths">
+            <properties>
+                <property name="columnTitle" value="Interval (Months)"/>
+            </properties>
+        </column>
+        <column name="remark" />
+        <column name="qcstate" />
+        <column name="taskid" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

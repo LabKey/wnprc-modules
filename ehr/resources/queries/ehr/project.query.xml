@@ -1,0 +1,68 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="project" tableDbType="TABLE">
+                <tableUrl>/EHR/projectDetails.view?project=${project}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="lastAssignment" wrappedColumnName="project">
+                        <columnTitle>Last Assignment Date</columnTitle>
+                        <isUnselectable>true</isUnselectable>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>projectLastAssignmentDate</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="protocol">
+                        <columnTitle>IACUC Protocol</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>protocol</fkTable>
+                            <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="avail">
+                        <columnTitle>Availability</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>avail_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="use_category">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>project_use_category</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="projectType">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>project_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="project">
+                        <!--<formatString>00000000</formatString>-->
+                    </column>
+                    <column columnName="qcstate">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="inves">
+                        <columnTitle>Investigator</columnTitle>
+                    </column>
+                    <column columnName="reqname">
+                        <columnTitle>Requestor Name</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

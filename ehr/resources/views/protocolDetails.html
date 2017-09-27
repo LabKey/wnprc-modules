@@ -1,0 +1,239 @@
+<script type="text/javascript">
+
+Ext4.onReady(function (){
+    var protocol = LABKEY.ActionURL.getParameter('protocol') || LABKEY.ActionURL.getParameter('key');
+    if (!protocol){
+        alert('Must Provide Protocol Number');
+        return false;
+    }
+    protocol = protocol.toLowerCase();
+
+    var webpart = <%=webpartContext%>;
+    var domSpec = [{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'protocolDetails_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        id: 'protocolPdf_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'protocolLinks_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'protocolProjects_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'protocolAssignments_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'protocolTotalAnimalsBySpecies_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        style: 'padding-bottom: 10px;',
+        id: 'protocolTotalHistoricAnimalsBySpecies_' + webpart.wrapperDivId
+    },{
+        tag: 'div',
+        id: 'protocolProcedures_' + webpart.wrapperDivId
+    }]
+
+    var el = Ext4.get(webpart.wrapperDivId);
+    Ext4.DomHelper.append(el, domSpec);
+
+    Ext4.create('LDK.panel.DetailsPanel', {
+        store: {
+            schemaName: 'ehr',
+            queryName: 'protocol',
+            filterArray: [
+                LABKEY.Filter.create('protocol', protocol, LABKEY.Filter.Types.EQUAL)
+            ]
+        },
+        title: 'Protocol Details:',
+        renderTo: 'protocolDetails_' + webpart.wrapperDivId
+    });
+
+    new LABKEY.QueryWebPart({
+        title: 'Projects Under This Protocol',
+        schemaName: 'ehr',
+        queryName: 'project',
+        allowChooseQuery: false,
+        allowChooseView: true,
+        showInsertNewButton: false,
+        showDeleteButton: false,
+        showDetailsColumn: true,
+        showUpdateColumn: false,
+        buttonBarPosition: 'top',
+        filters: [LABKEY.Filter.create('protocol', protocol, LABKEY.Filter.Types.EQUAL)],
+        //sort: '-Date',
+        scope: this,
+        failure: EHR.Utils.onError
+     }).render('protocolProjects_' + webpart.wrapperDivId);
+
+    new LABKEY.QueryWebPart({
+        title: 'Active Animal Assignments',
+        schemaName: 'study',
+        queryName: 'Assignment',
+        viewName: 'Active Assignments',
+        allowChooseQuery: false,
+        allowChooseView: true,
+        showInsertNewButton: false,
+        showRecordSelectors: true,
+        showDeleteButton: false,
+        showDetailsColumn: true,
+        showUpdateColumn: false,
+        buttonBarPosition: 'top',
+        filters: [LABKEY.Filter.create('project/protocol', protocol, LABKEY.Filter.Types.EQUAL)],
+        //viewName: 'Active Assignments',
+        sort: '-Date',
+        scope: this,
+        failure: EHR.Utils.onError
+    }).render('protocolAssignments_' + webpart.wrapperDivId);
+
+    new LABKEY.QueryWebPart({
+        title: 'Historic Assignments By Species Since Approve Date',
+        schemaName: 'ehr',
+        queryName: 'protocolTotalAnimalsBySpecies',
+        viewName: 'With Animals',
+        allowChooseQuery: false,
+        allowChooseView: true,
+        showInsertNewButton: false,
+        showDeleteButton: false,
+        showDetailsColumn: true,
+        showUpdateColumn: false,
+        buttonBarPosition: 'top',
+        filters: [LABKEY.Filter.create('protocol', protocol, LABKEY.Filter.Types.EQUAL)],
+        //viewName: '',
+        //sort: '-Date',
+        scope: this,
+        failure: EHR.Utils.onError
+    }).render('protocolTotalAnimalsBySpecies_' + webpart.wrapperDivId);
+
+    new LABKEY.QueryWebPart({
+        title: 'Total Historic Assignments By Species',
+        schemaName: 'ehr',
+        queryName: 'protocolTotalHistoricAnimalsBySpecies',
+        allowChooseQuery: false,
+        allowChooseView: true,
+        showInsertNewButton: false,
+        showDeleteButton: false,
+        showDetailsColumn: true,
+        showUpdateColumn: false,
+        buttonBarPosition: 'top',
+        filters: [LABKEY.Filter.create('protocol', protocol, LABKEY.Filter.Types.EQUAL)],
+        //viewName: '',
+        //sort: '-Date',
+        scope: this,
+        failure: EHR.Utils.onError
+    }).render('protocolTotalHistoricAnimalsBySpecies_' + webpart.wrapperDivId);
+
+    Ext4.create('LDK.panel.WebpartPanel', {
+        title: 'Protocol Information',
+        bodyStyle: 'padding:5px;',
+        defaults: {
+            linkCls: 'labkey-text-link',
+            style: 'padding-bottom:10px'
+        },
+        items: [{
+            xtype: 'ldk-linkbutton',
+            text: 'View Charges Under This Protocol',
+            handler: function(c){
+                var params = {schemaName: 'study'};
+                params['query.queryName'] = 'charges';
+                params['query.project/protocol~eq'] = protocol;
+
+                window.open(LABKEY.ActionURL.buildURL(
+                    'query',
+                    'executeQuery.view',
+                    LABKEY.ActionURL.getContainer(),
+                    params
+                ));
+            }
+        },{
+            xtype: 'ldk-linkbutton',
+            text: 'View Procedures Under This Protocol',
+            handler: function(c){
+                var params = {schemaName: 'study'};
+                params['query.queryName'] = 'encounters';
+                params['query.project/protocol~eq'] = protocol;
+
+                window.open(LABKEY.ActionURL.buildURL(
+                    'query',
+                    'executeQuery.view',
+                    LABKEY.ActionURL.getContainer(),
+                    params
+                ));
+            }
+        },{
+            xtype: 'ldk-linkbutton',
+            text: 'View All Items Under This Protocol',
+            handler: function(c){
+                var params = {schemaName: 'study'};
+                params['query.queryName'] = 'studyData';
+                params['query.project/protocol~eq'] = protocol;
+
+                window.open(LABKEY.ActionURL.buildURL(
+                    'query',
+                    'executeQuery.view',
+                    LABKEY.ActionURL.getContainer(),
+                    params
+                ));
+            }
+        }]
+    }).render('protocolLinks_' + webpart.wrapperDivId);
+
+    new LABKEY.QueryWebPart({
+        title: 'Procedures Allowed Under This Protocol',
+        //containerPath: pdfContainer,
+        schemaName: 'ehr',
+        queryName: 'ProtocolProcedures',
+        allowChooseQuery: false,
+        allowChooseView: true,
+        showInsertNewButton: false,
+        showDeleteButton: false,
+        showDetailsColumn: true,
+        showUpdateColumn: false,
+        buttonBarPosition: 'top',
+        filters: [LABKEY.Filter.create('protocol', protocol, LABKEY.Filter.Types.EQUAL)],
+        //viewName: '',
+        //sort: '-Date',
+        scope: this,
+        failure: EHR.Utils.onError
+     }).render('protocolProcedures_' + webpart.wrapperDivId);
+
+    var pdfContainer = LABKEY.getModuleContext('ehr')['ProtocolPDFContainer'];
+    if(pdfContainer){
+        LABKEY.Security.getSecurableResources({
+            containerPath: pdfContainer,
+            includeEffectivePermissions: false,
+            scope: this,
+            success: function(map){
+                new LABKEY.QueryWebPart({
+                    title: 'Protocol PDF',
+                    containerPath: pdfContainer,
+                    schemaName: 'lists',
+                    queryName: 'ProtocolPDFs',
+                    allowChooseQuery: false,
+                    allowChooseView: false,
+                    showInsertNewButton: false,
+                    showDeleteButton: false,
+                    showDetailsColumn: false,
+                    showUpdateColumn: false,
+                    buttonBarPosition: 'none',
+                    filters: [LABKEY.Filter.create('protocol', protocol, LABKEY.Filter.Types.EQUAL)],
+                    scope: this,
+                    failure: EHR.Utils.onError
+                 }).render('protocolPdf_' + webpart.wrapperDivId);
+            },
+            failure: function(e){
+                console.log('Error with getSecurableResources');
+                console.log(e);
+            }
+        });
+    }
+});
+
+</script>

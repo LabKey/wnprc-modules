@@ -1,0 +1,77 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="ehr/Constants.js"/>
+        <script path="ehr/utils.js"/>
+        <script path="ehr/DemographicsRecord.js"/>
+        <script path="ehr/DemographicsCache.js"/>
+        <script path="ehr/Security.js"/>
+
+        <!--Misc Ext4 components-->
+        <script path="ehr/panel/WeightGraphPanel.js"/>
+        <script path="ehr/panel/WeightSummaryPanel.js"/>
+        <script path="ehr/panel/KinshipPanel.js"/>
+        <script path="ehr/panel/SnapshotPanel.js"/>
+        <script path="ehr/panel/SmallFormSnapshotPanel.js"/>
+        <script path="ehr/panel/NarrowSnapshotPanel.js"/>
+        <script path="ehr/panel/LabworkSummaryPanel.js"/>
+        <script path="ehr/data/ClinicalHistoryStore.js"/>
+        <script path="ehr/panel/ClinicalHistoryPanel.js"/>
+        <script path="ehr/panel/ClinicalManagementPanel.js"/>
+        <script path="ehr/form/field/VetFieldCombo.js"/>
+        <script path="ehr/form/field/UsersAndGroupsCombo.js" />
+        <script path="ehr/form/field/HxTextArea.js"/>
+        <script path="ehr/form/field/PlanTextArea.js"/>
+        <script path="ehr/panel/CaseHistoryPanel.js"/>
+        <script path="ehr/panel/ManageCasesPanel.js"/>
+        <script path="ehr/panel/ClinicalRemarkPanel.js"/>
+        <script path="ehr/panel/EnterRemarkPanel.js"/>
+        <script path="ehr/panel/ObservationsPanel.js"/>
+        <script path="ehr/panel/ManageTreatmentsPanel.js"/>
+        <script path="ehr/panel/BloodSummaryPanel.js"/>
+
+        <script path="ehr/buttons/ClinicalActionsButton.js"/>
+
+        <script path="ehr/window/ChangeRequestStatusWindow.js"/>
+        <script path="ehr/window/ClinicalHistoryWindow.js"/>
+        <script path="ehr/window/RecentRemarksWindow.js"/>
+        <script path="ehr/window/CaseHistoryWindow.js"/>
+        <script path="ehr/window/CompareWeightsWindow.js"/>
+        <script path="ehr/window/ManageRecordWindow.js"/>
+        <script path="ehr/window/GetDistinctWindow.js"/>
+        <script path="ehr/window/MarkCompletedWindow.js"/>
+        <script path="ehr/window/ManageCasesWindow.js"/>
+        <script path="ehr/window/ManageTreatmentsWindow.js"/>
+        <script path="ehr/studyButtons.js"/>
+        <script path="ehr/reports.js" />
+        <script path="ehr/stylesheet.css"/>
+
+        <!--model-->
+        <script path="ehr/model/DataModelManager.js"/>
+        <script path="ehr/model/sources/Default.js"/>
+        <script path="ehr/model/sources/Task.js"/>
+        <script path="ehr/model/sources/Request.js"/>
+
+        <script path="ehr/model/DefaultClientModel.js"/>
+
+        <!--fields-->
+        <script path="ehr/form/field/SimpleCombo.js"/>
+        <script path="ehr/form/field/ProjectEntryField.js"/>
+        <script path="ehr/form/field/ProjectField.js"/>
+        <script path="ehr/form/field/ProtocolField.js"/>
+        <script path="ehr/form/field/CageField.js"/>
+        <script path="ehr/form/field/RoomField.js"/>
+        <script path="ehr/form/field/AreaField.js"/>
+        <script path="ehr/form/field/AnimalGroupField.js"/>
+        <script path="ehr/form/field/RoomFieldSingle.js"/>
+
+    </library>
+    <dependencies>
+        <dependency path="Ext4"/>
+        <dependency path="clientapi"/>
+        <dependency path="LDK.context"/>
+
+        <!--These are Ext4-->
+        <dependency path="ux/CheckCombo/CheckCombo.css"/>
+        <dependency path="ux/CheckCombo/CheckCombo.js"/>
+    </dependencies>
+</libraries>

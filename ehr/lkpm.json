@@ -1,0 +1,21 @@
+{
+  "name": "EHR",
+  "label": "",
+  "server": {
+    "requiredVersion": 16.3,
+    "supportedBranches": {
+      "wnprc16.3": 46998
+    },
+    "moduleDependencies": [
+      "Study",
+      "Experiment",
+      "Query",
+      "LDK"
+    ]
+  },
+  "moduleClass": "org.labkey.ehr.EHRModule",
+  "moduleFileName": "ehr",
+  "lkpmDependencies": {
+    "https://github.com/WNPRC-EHR-Services/DBUtils.git": ""
+  }
+}

@@ -1,0 +1,6 @@
+<view xmlns="http://labkey.org/data/xml/view" frame="none" template="print" title="Clinical History Export">
+    <dependencies>
+        <dependency path="ehr.context" />
+        <!--<dependency path="ehr/printFormatting.css" />-->
+    </dependencies>
+</view>

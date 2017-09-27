@@ -1,0 +1,27 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <!--<column name="project"/>-->
+        <column name="category" />
+        <column name="parentid/type">
+            <properties>
+                <property name="columnTitle" value="Type"/>
+            </properties>
+        </column>
+        <column name="area" />
+        <column name="observation" />
+        <column name="remark"/>
+        <column name="description" />
+        <column name="performedby"/>
+        <column name="category"/>
+        <column name="qcstate" />
+        <column name="taskid" />
+    </columns>
+    <sorts>
+           <sort column="date" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="taskid/formtype" operator="startswith" value="Physical Exam"/>
+    </filters>
+</customView>

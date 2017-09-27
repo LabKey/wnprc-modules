@@ -1,0 +1,37 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsCurrentRoommates" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="Id">
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="NumRoommates">
+                        <columnTitle># Cagemates</columnTitle>
+                        <description>The total number of animals in this cage, excluding the current animal</description>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=housing&amp;
+                            query.room~eq=${Id/curLocation/room/room}&amp;
+                            query.cage~eq=${Id/curLocation/cage}&amp;
+                            query.enddate~isblank&amp;
+                            query.sort=Id&amp;
+                        </url>
+                    </column>
+                    <column columnName="AnimalsInCage">
+                        <columnTitle>Total Animals In Cage</columnTitle>
+                        <description>The total number of animals in this cage, including the current animal</description>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=housing&amp;
+                            query.room~eq=${Id/curLocation/room/room}&amp;
+                            query.cage~eq=${Id/curLocation/cage}&amp;
+                            query.enddate~isblank&amp;
+                            query.sort=Id&amp;
+                        </url>
+                    </column>
+                </columns>
+                <titleColumn>NumRoommates</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

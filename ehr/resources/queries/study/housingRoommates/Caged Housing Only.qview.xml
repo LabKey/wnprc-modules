@@ -1,0 +1,9 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <filters>
+        <filter column="room/housingType/value" operator="eq" value="Cage Location"/>
+    </filters>
+    <sorts>
+        <sort column="Id" descending="true"/>
+        <sort column="RoommateStart" descending="true"/>
+    </sorts>
+</customView>

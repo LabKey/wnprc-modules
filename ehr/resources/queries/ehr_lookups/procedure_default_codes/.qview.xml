@@ -1,0 +1,15 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="procedureId"/>
+        <column name="groupnum"/>
+        <column name="code"/>
+        <column name="code/code"/>
+        <column name="qualifier"/>
+        <column name="sort_order"/>
+    </columns>
+    <sorts>
+        <sort column="procedureId" descending="false"/>
+        <sort column="groupnum" descending="false"/>
+        <sort column="sort_order" descending="false"/>
+    </sorts>
+</customView>

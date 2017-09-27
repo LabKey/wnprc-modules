@@ -1,0 +1,26 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="projectTotalActivelyAssignedBySpecies" tableDbType="NOT_IN_DB">
+                <tableTitle>Active Assignments To Each Project, By Species</tableTitle>
+                <pkColumnName>project</pkColumnName>
+                <columns>
+                    <column columnName="project">
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="activeAssignments">
+                        <columnTitle>Animals Assigned</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Assignment&amp;
+                            query.viewName=Active Assignments&amp;
+                            query.project~eq=${project}&amp;
+                            query.sort=-Date&amp;
+                            query.enddate~isblank
+                        </url>
+                    </column>
+                </columns>
+                <titleColumn>activeAssignments</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

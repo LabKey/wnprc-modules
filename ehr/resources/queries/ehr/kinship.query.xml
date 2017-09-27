@@ -1,0 +1,44 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="kinship" tableDbType="TABLE">
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="rowid">
+                        <shownInDetailsView>false</shownInDetailsView>
+                        <isHidden>true</isHidden>
+                        <columnTitle>Row Id</columnTitle>
+                    </column>
+                    <column columnName="Id">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>animal</fkTable>
+                            <fkColumnName>id</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="Id2">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>Pedigree</fkTable>
+                            <fkColumnName>Id</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                        <url>/ehr/participantView.view?participantId=${Id2}</url>
+                    </column>
+                </columns>
+                <buttonBarOptions alwaysShowRecordSelectors="true" includeStandardButtons="true">
+                    <includeScript>/ehr/studyButtons.js</includeScript>
+                    <item insertPosition="end" text="More Actions">
+                        <item text="Limit To Animals In Selection">
+                            <onClick>EHR.DatasetButtons.limitKinshipSelection(dataRegionName);</onClick>
+                        </item>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

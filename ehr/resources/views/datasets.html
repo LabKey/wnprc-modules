@@ -1,0 +1,97 @@
+<script type="text/javascript">
+
+Ext4.onReady(function () {
+    var webpart = <%=webpartContext%>;
+    Ext4.get(webpart.wrapperDivId).update('Loading...');
+
+    var config = {displayField: 'Label', headerField: 'categoryId/label', target: webpart.wrapperDivId};
+
+    EHR.Security.init({
+        success: function(){
+            LABKEY.Query.selectRows({
+                schemaName: 'study',
+                queryName: 'DataSets',
+                columns: 'categoryId/label,label,ShowByDefault',
+                success: function(results){
+                    onSuccess(results)
+                },
+                scope: this,
+                failure: EHR.Utils.onError,
+                sort: config.headerField+','+config.displayField,
+                filterArray: config.filterArray
+            });
+        },
+        scope: this
+    });
+
+    function onSuccess(data){
+        var menuCfg = {
+            renderTo: config.target,
+            sections: new Array(),
+            sectionHeaderCls: 'class',
+            renderer: function(record){
+                var item = {
+                    schemaName: 'study',
+                    queryName: record.data.Label
+                }
+
+                var cfg = {
+                    layout: 'hbox',
+                    bodyStyle: 'background-color: transparent;',
+                    defaults: LDK.panel.NavPanel.ITEM_DEFAULTS,
+                    items: [
+                        this.getLabelItemCfg(item)
+                    ,
+//                        this.getSearchItemCfg(item, {
+//                            url: LABKEY.ActionURL.buildURL("query", "searchPanel", null, {schemaName: item.schemaName, queryName: item.queryName})
+//                        })
+//                    ,
+                        this.getBrowseItemCfg(item, {
+                            url: LABKEY.ActionURL.buildURL("query", "executeQuery", null, {schemaName: item.schemaName, 'query.queryName': item.queryName})
+                        })
+                    ]
+                }
+
+                //NOTE: disabled because there is now a menu item on each dataset under 'more actions' that toggles to the edit UI.  that link will retain filters, and is accessible from all pages
+                //if (EHR.Security.hasPermission('Completed', 'admin', {schemaName: 'study', queryName: item.queryName})){
+                //    cfg.items.push({
+                //        xtype: 'ldk-linkbutton',
+                //        tooltip: item.searchTooltip || 'Click to update records',
+                //        href: LABKEY.ActionURL.buildURL('ehr', 'updateQuery', null, {schemaName: 'study', 'query.queryName': item.queryName, 'keyField': 'lsid'}),
+                //        text: 'Update Records'
+                //    });
+                //}
+
+                return cfg;
+            }
+        }
+
+        var sections = {};
+        var section;
+        for (var i=0;i<data.rows.length;i++){
+            var row = data.rows[i];
+            if(!row.ShowByDefault){
+                continue;
+            }
+
+            var sectionName = row[config.headerField] || '';
+            if (!sections[sectionName]){
+                section = {header: sectionName, items: []};
+                sections[sectionName] = section;
+
+                menuCfg.sections.push(section);
+            }
+            else
+                section = sections[sectionName];
+
+            section.items.push({name: row[config.displayField], data: row})
+
+        }
+
+        Ext4.get(webpart.wrapperDivId).update(null);
+        Ext4.create('LDK.panel.NavPanel', menuCfg);
+    }
+
+});
+
+</script>

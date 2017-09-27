@@ -1,0 +1,31 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date" />
+        <column name="weight" />
+        <column name="percentChange/PrevWeight">
+            <properties>
+                <property name="columnTitle" value="Previous Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="percentChange/PctChange">
+            <properties>
+                <property name="columnTitle" value="Percent Change"/>
+            </properties>
+        </column>
+        <column name="percentChange/Interval">
+            <properties>
+                <property name="columnTitle" value="Interval"/>
+            </properties>
+        </column>
+        <column name="remark" />
+        <column name="qcstate" />
+        <column name="taskid" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

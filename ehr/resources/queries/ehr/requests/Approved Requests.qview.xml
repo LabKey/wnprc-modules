@@ -1,0 +1,29 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+        <column name="rowid"/>
+        <column name="title" />
+        <!--<column name="formtype" />-->
+        <column name="priority"/>
+        <column name="notify1"/>
+        <column name="notify2"/>
+       <column name="notify3"/>
+        <!--<column name="pi"/>-->
+
+        <column name="createdby"/>
+        <column name="created"/>
+       <!--<column name="description"/>-->
+        <!--<column name="qcstate">-->
+            <!--<properties>-->
+                <!--<property name="columnTitle" value="Status"/>-->
+            <!--</properties>-->
+        <!--</column>-->
+        <!--<column name="ModifiedBy"/>-->
+        <!--<column name="Modified"/>-->
+   </columns>
+   <filters>
+       <filter column="qcstate/Label" operator="eq" value="Request: Approved"/>
+   </filters>
+   <sorts>
+       <sort column="created" descending="true"/>
+   </sorts>
+</customView>

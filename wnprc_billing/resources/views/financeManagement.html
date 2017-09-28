@@ -1,0 +1,74 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function(){
+
+        var webpart = <%=webpartContext%>;
+        var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+        if(!ctx)
+            return;
+
+        var billingCtx = LABKEY.getModuleContext('wnprc_billing');
+        var issuesContainer = billingCtx ? billingCtx.IssuesContainer : null;
+
+        Ext4.create('Ext.panel.Panel', {
+            renderTo: webpart.wrapperDivId,
+            bodyStyle: 'padding: 10px;',
+            border: false,
+            items: [{
+                html: 'This is the homepage for finance data at WNPRC.<br>',
+                border: false,
+                style: 'padding-bottom: 10px;'
+            },{
+                xtype: 'ldk-navpanel',
+                itemDefaults: {
+                    linkCls: 'none'
+                },
+                //TODO: Potential candidates for EHR_Billing - since these are straight up/built-in queries on db tables
+                sections: [{
+                    header: 'Historic Billing Data',
+                    items: [
+                        {name: 'Billing Periods', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'invoiceRuns'})},
+                        {name: 'All Invoiced Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'invoicedItems'})},
+                        {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'dataAccess'})}
+                    ]
+                },{
+                    header: 'Current Billing Period / Adjustments',
+                    items: [
+                        {name: 'Work In Progress'}
+                    ].concat(issuesContainer ? [{name: 'Finance Issue Tracker', url: LABKEY.ActionURL.buildURL('issues', 'begin', issuesContainer)}] : [])
+                },{
+                    header: 'Reference Tables',
+                    items: [
+                        {name: 'IACUC Protocols', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'protocol'})},
+                        {name: 'WNPRC Projects', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'project', showImport: true})},
+                        {name: 'Grants', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'grants'})},
+                        {name: 'Grant Projects', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'grantProjects'})},
+                        {name: 'Aliases', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'aliases'})},
+                    ]
+                },{
+                    header: 'Rates and Fee Structure',
+                    items: [
+//                        {name: 'Explanation of Rates', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'rateCalculation')},
+                        {name: 'Chargeable Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'chargeableItems', showImport: true})},
+                        {name: 'Standard Rates', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'chargeRates', showImport: true})},
+                        {name: 'Alias-Level Multipliers', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'projectMultipliers', showImport: true})},
+                        {name: 'Item-Level Rate Exemptions', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'chargeRateExemptions', showImport: true})},
+                        {name: 'Aliases Receiving Credit Per Item', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'creditAccount', showImport: true})},
+                        {name: 'Charge Units', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'chargeUnits', showImport: true})},
+                        {name: 'Charge Unit Credit Aliases', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'chargeUnitAccounts', showImport: true})},
+                        {name: 'Alias Types & Rate Modifiers', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'aliasTypes'})},
+
+                        {name: 'Labwork Fee Structure', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'labworkFeeDefinition'})},
+                        {name: 'Replacement Fee Structure', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'replacementFeeDefinition'})},
+                        {name: 'Medication Fee Structure', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'medicationFeeDefinition'})},
+                        {name: 'NHP Per Diem Fee Structure', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'perDiemFeeDefinition'})},
+                        {name: 'Procedure Fee Structure', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'procedureFeeDefinition', showImport: true})},
+                        {name: 'WNPRC Annual Rate Change', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'AnnualRateChange',showImport: true})},
+
+                    ]
+                }]
+            }]
+        });
+    });
+
+</script>

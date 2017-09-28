@@ -1,0 +1,90 @@
+import java.util.regex.Pattern
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.4.1'
+}
+
+allprojects {
+    repositories {
+        maven { url "https://artifactory.labkey.com/artifactory/libs-release" }
+        maven { url "https://artifactory.labkey.com/artifactory/libs-snapshot" }
+    }
+}
+
+subprojects {
+
+    apply plugin: 'java'
+
+    ext {
+        explodedModuleDir = "${project.buildDir}/explodedModule"
+        configDir         = "${project.explodedModuleDir}/config"
+    }
+
+    sourceSets {
+        module {
+            resources { srcDirs = ['resources'] }
+            output.resourcesDir = project.explodedModuleDir
+        }
+    }
+
+    task("createModuleXml", group: "Build", description: "Create the module.xml file from the module.properties and module.template.xml files") {
+        def moduleTemplateFile = file("$rootDir/module.template.xml")
+        inputs.file(moduleTemplateFile)
+
+        def modulePropertiesFile = file("module.properties")
+        inputs.file(modulePropertiesFile)
+
+        def moduleXmlFile = file("${project.configDir}/module.xml")
+        outputs.file(moduleXmlFile)
+
+        doLast {
+            final PROPERTY_PATTERN = Pattern.compile("@@([^@]+)@@")
+
+            // read the properties from the module.properties file
+            def modProperties = new Properties()
+            modulePropertiesFile.withInputStream { modProperties.load(it) }
+
+            // set a few more that are dependent on the build itself
+            modProperties.setProperty("BuildType", "Development")
+            modProperties.setProperty("BuildPath",  project.explodedModuleDir.toString())
+            modProperties.setProperty("SourcePath", project.getProjectDir().getAbsolutePath())
+            modProperties.setProperty("ConsolidateScripts", "false")
+            modProperties.setProperty("ManageVersion", "false")
+
+            // make sure the config directory exists (and create it if not)
+            moduleXmlFile.getParentFile().mkdirs()
+
+            // read the template file and replace all the placeholders
+            moduleTemplateFile.withReader { reader ->
+                moduleXmlFile.withWriter { writer ->
+                    reader.readLines().each { raw ->
+                        def matcher = PROPERTY_PATTERN.matcher(raw)
+                        def changed = raw
+                        while (matcher.find()) {
+                            def prp = modProperties.get(matcher.group(1))
+                            changed = changed.replace(matcher.group(), prp == null ? "" : prp)
+                        }
+                        writer.println(changed)
+                    }
+                }
+            }
+        }
+    }
+
+    task("createModule", group: "Build", type: Jar, dependsOn: [ createModuleXml, processModuleResources ] ) { Jar jar ->
+        jar.from file(project.explodedModuleDir)
+        jar.baseName project.name
+        jar.extension 'module'
+        jar.destinationDir project.buildDir
+    }
+
+    task("deployModule", group: "Deploy", type: Copy, dependsOn: createModule) {
+        from buildDir
+        into '/usr/local/var/labkey/modules'
+        include '*.module'
+    }
+}
+
+task ("createModules", group: "Build",  dependsOn: subprojects.collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
+task ("deployModules", group: "Deploy", dependsOn: subprojects.collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
+

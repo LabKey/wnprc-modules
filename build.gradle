@@ -50,6 +50,7 @@ subprojects {
             modProperties.setProperty("SourcePath", project.getProjectDir().getAbsolutePath())
             modProperties.setProperty("ConsolidateScripts", "false")
             modProperties.setProperty("ManageVersion", "false")
+            modProperties.setProperty("RequiredServerVersion", "0.0")
 
             // make sure the config directory exists (and create it if not)
             moduleXmlFile.getParentFile().mkdirs()

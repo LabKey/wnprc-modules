@@ -6,8 +6,9 @@ task wrapper(type: Wrapper) {
 
 allprojects {
     repositories {
-        maven { url "https://artifactory.labkey.com/artifactory/libs-release" }
-        maven { url "https://artifactory.labkey.com/artifactory/libs-snapshot" }
+        mavenCentral()
+        maven { url "${project.labkeyArtifactoryUrl}/libs-release" }
+        maven { url "${project.labkeyArtifactoryUrl}/libs-snapshot" }
     }
 }
 
@@ -21,10 +22,40 @@ subprojects {
     }
 
     sourceSets {
+        main {
+            java { srcDirs = ['src'] }
+        }
+        api {
+            java { srcDirs = ['api-src'] }
+            output.classesDir = "${project.buildDir}/api-classes"
+        }
         module {
             resources { srcDirs = ['resources'] }
             output.resourcesDir = project.explodedModuleDir
         }
+        spring {
+            resources { srcDirs = ["webapp/WEB-INF"] }
+            output.resourcesDir = "${project.explodedModuleDir}/config"
+        }
+    }
+
+    configurations {
+        external
+        compile.extendsFrom(external)
+
+        apiExternal
+        apiCompile.extendsFrom(apiExternal)
+    }
+
+    dependencies {
+        compile 'org.jetbrains:annotations:15.0'
+        apiCompile 'org.jetbrains:annotations:15.0'
+    }
+
+    task("processExternalDependencies", group: "Build", type: Copy) {
+        from project.configurations.external
+        from project.configurations.apiExternal
+        into "${project.explodedModuleDir}/lib"
     }
 
     task("createModuleXml", group: "Build", description: "Create the module.xml file from the module.properties and module.template.xml files") {
@@ -63,7 +94,7 @@ subprojects {
                         def changed = raw
                         while (matcher.find()) {
                             def prp = modProperties.get(matcher.group(1))
-                            changed = changed.replace(matcher.group(), prp == null ? "" : prp)
+                            changed = changed.replace(matcher.group(), prp == null ? "" : prp.toString())
                         }
                         writer.println(changed)
                     }
@@ -72,17 +103,30 @@ subprojects {
         }
     }
 
-    task("createModule", group: "Build", type: Jar, dependsOn: [ createModuleXml, processModuleResources ] ) { Jar jar ->
+    task("apiJar", group: "Build", type: Jar, dependsOn: [ apiClasses ]) { Jar jar ->
+        jar.classifier "api"
+        jar.from project.sourceSets['api'].output.classesDir
+        jar.baseName "${project.name}_api"
+        jar.destinationDir = file("${project.explodedModuleDir}/lib")
+    }
+
+    jar { destinationDir file("${project.explodedModuleDir}/lib") }
+
+    task("createModule", group: "Build", type: Jar, dependsOn: [ jar, apiJar, processExternalDependencies, processModuleResources, createModuleXml ] ) { Jar jar ->
         jar.from file(project.explodedModuleDir)
         jar.baseName project.name
         jar.extension 'module'
         jar.destinationDir project.buildDir
     }
 
-    task("deployModule", group: "Deploy", type: Copy, dependsOn: createModule) {
+    task("deployModule", group: "Deploy", type: Copy, dependsOn: [ createModule ]) {
         from buildDir
         into '/usr/local/var/labkey/modules'
         include '*.module'
+    }
+
+    artifacts {
+        apiCompile apiJar
     }
 }
 

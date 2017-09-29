@@ -16,10 +16,11 @@
 package org.labkey.ehr;
 
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.module.ModuleHtmlView;
+import org.labkey.api.data.Container;
+import org.labkey.api.module.Module;
 import org.labkey.api.module.SimpleAction;
-import org.labkey.api.resource.Resource;
-import org.springframework.web.servlet.ModelAndView;
+import org.labkey.api.util.Pair;
+import org.labkey.api.util.Path;
 import org.springframework.web.servlet.mvc.Controller;
 
 /**
@@ -32,11 +33,6 @@ public class EHRActionResolver extends SpringActionController.DefaultActionResol
     public EHRActionResolver()
     {
         super(EHRController.class);
-    }
-
-    public Controller resolveActionName(Controller actionController, String actionName)
-    {
-        return super.resolveActionName(actionController, actionName);
     }
 
     protected SpringActionController.HTMLFileActionResolver getHTMLFileActionResolver()
@@ -52,59 +48,26 @@ public class EHRActionResolver extends SpringActionController.DefaultActionResol
         }
 
         @Override
-        protected HTMLFileActionDescriptor createFileActionDescriptor(String actionName, Resource r)
+        protected HTMLFileActionDescriptor createFileActionDescriptor(Module module, String actionName)
         {
-            return new EHRHTMLFileActionDescriptor(actionName, r);
+            return new EHRHTMLFileActionDescriptor(module, actionName);
         }
 
         private class EHRHTMLFileActionDescriptor extends HTMLFileActionDescriptor
         {
-            private EHRHTMLFileActionDescriptor(String primaryName, Resource resource)
+            private EHRHTMLFileActionDescriptor(Module module, String primaryName)
             {
-                super(primaryName, resource);
-            }
-
-            @Override
-            public Class<? extends Controller> getActionClass()
-            {
-                return EHRSimpleAction.class;
+                super(module, primaryName);
             }
 
             @Override
             public Controller createController(Controller actionController)
             {
-                return new EHRSimpleAction(_resource);
+                Container c = ((SpringActionController)actionController).getViewContext().getContainer();
+                Pair<Module, Path> pair = EHRServiceImpl.get().getActionOverride(getPrimaryName(), c);
+
+                return (null == pair ? super.createController(actionController) : new SimpleAction(pair.first, pair.second));
             }
-        }
-    }
-
-    private class EHRSimpleAction extends SimpleAction
-    {
-
-        public EHRSimpleAction(Resource r)
-        {
-            super(r);
-        }
-
-        @Override
-        public ModelAndView handleRequest() throws Exception
-        {
-            EHRServiceImpl service = EHRServiceImpl.get();
-
-            //TODO: best method to find action name?
-            Resource r = service.getActionOverride(getViewContext().getActionURL().getAction(), getContainer());
-            if (r != null)
-            {
-                ModuleHtmlView view = new ModuleHtmlView(r);
-
-                //override page template if view requests
-                if (null != view.getPageTemplate())
-                    getPageConfig().setTemplate(view.getPageTemplate());
-
-                return view;
-            }
-
-            return super.handleRequest();
         }
     }
 }

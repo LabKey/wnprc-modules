@@ -155,7 +155,7 @@ public class EHRLookupsUserSchema extends SimpleUserSchema
         return nameMap;
     }
 
-    protected TableInfo createTable(String name)
+    public TableInfo createTable(String name)
     {
         Set<String> available = super.getTableNames();
 

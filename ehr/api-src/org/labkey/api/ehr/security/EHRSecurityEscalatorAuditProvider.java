@@ -1,7 +1,7 @@
 package org.labkey.api.ehr.security;
 
 import org.labkey.api.audit.query.AbstractAuditDomainKind;
-import org.labkey.api.study.security.SecurityEscalationAuditProvider;
+import org.labkey.dbutils.api.security.SecurityEscalationAuditProvider;
 
 /**
  * @see SecurityEscalationAuditProvider

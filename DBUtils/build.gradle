@@ -1,0 +1,8 @@
+dependencies {
+    compile "org.labkey:query:${project.labkeyVersion}"
+    compile fileTree(dir: "lib", include: ['*.jar'])
+    external "org.jooq:jooq:3.8.4"
+
+    apiCompile "org.labkey:internal:${project.labkeyVersion}"
+    apiCompile "com.google.guava:guava:22.0"
+}

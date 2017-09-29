@@ -1,7 +1,5 @@
 package org.labkey.dbutils.file;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.*;
 import java.nio.file.Path;
 import java.util.UUID;

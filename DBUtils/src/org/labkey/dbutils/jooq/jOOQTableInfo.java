@@ -5,10 +5,7 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Table;
-import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.JdbcType;
-import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.*;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.UserSchema;
 
@@ -19,7 +16,7 @@ public abstract class jOOQTableInfo<RecordType extends Record> extends AbstractT
     protected UserSchema userSchema;
 
     public jOOQTableInfo(String tableName, String dbSchema, UserSchema userSchema) {
-        super(DbSchema.get(dbSchema), tableName);
+        super(DbSchema.get(dbSchema, DbSchemaType.Module), tableName);
         this.userSchema = userSchema;
 
         registerColumns();

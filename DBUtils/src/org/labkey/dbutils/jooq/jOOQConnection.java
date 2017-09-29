@@ -8,6 +8,7 @@ import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultRecordListenerProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.security.User;
 
@@ -24,7 +25,7 @@ public class jOOQConnection implements AutoCloseable {
     private DbScope _scope;
 
     public jOOQConnection(String dbSchemaName, Container container, User user) {
-        this._scope = DbSchema.get(dbSchemaName).getScope();
+        this._scope = DbSchema.get(dbSchemaName, DbSchemaType.Module).getScope();
         this._connection = null;
         try {
             this._connection = this._scope.getConnection();

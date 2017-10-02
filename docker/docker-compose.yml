@@ -3,9 +3,10 @@ services:
   db:
     image: postgres:9.6
     volumes:
-      - "./data:/var/lib/postgresql/data"
+      - "./data/postgres:/var/lib/postgresql/data"
     ports:
       - "8081:5432"
+    
   labkey:
     image: labkey:17.2
     depends_on:

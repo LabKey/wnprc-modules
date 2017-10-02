@@ -4,5 +4,5 @@ dependencies {
     external "org.jooq:jooq:3.8.4"
 
     apiCompile "org.labkey:internal:${project.labkeyVersion}"
-    apiCompile "com.google.guava:guava:22.0"
+    apiCompile "com.google.guava:guava:17.0"
 }

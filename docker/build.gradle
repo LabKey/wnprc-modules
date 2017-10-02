@@ -1,0 +1,35 @@
+class DockerBuild extends DefaultTask {
+    @TaskAction
+    def dockerBuildAction() {
+
+        def console = System.console()
+        if (console == null) {
+            throw new GradleException(":docker:build must be executed with the '--no-daemon' flag from the command line.")
+        }
+
+        console.writer().println("Enter your LabKey TeamCity credentials:")
+        def username = console.readPassword("username = ")
+        def password = console.readPassword("password = ")
+
+        project.exec {
+            workingDir "${project.rootDir}/docker"
+            executable "docker"
+            args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${username}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${password}", "-t", "labkey:17.2", "."
+        }
+    }
+}
+
+task("build", group: "Docker", type: DockerBuild)
+
+task("up", group: "Docker", type: Exec) {
+    workingDir "${project.rootDir}/docker"
+    executable "docker-compose"
+    args "up", "-d"
+    environment CATALINA_OPTS: "-ea -Ddevmode=true"
+}
+
+task("down", group: "Docker", type: Exec) {
+    workingDir "${project.rootDir}/docker"
+    executable "docker-compose"
+    args "down"
+}

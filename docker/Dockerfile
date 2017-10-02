@@ -40,7 +40,7 @@ COPY --from=download /tmp/labkey $LABKEY_HOME
 RUN cp $LABKEY_HOME/tomcat-lib/*.jar lib
 
 # add the session path to the tomcat config
-RUN sed -i 's/<Manager pathname="" *\/>/<Manager pathname="${LABKEY_HOME//\//\\/}\/sessions\/sessions.ser" \/>/' conf/context.xml
+RUN sed -i "s/<Manager pathname=\"\" *\/>/<Manager pathname=\"${LABKEY_HOME//\//\\/}\/sessions\/sessions.ser\" \/>/" conf/context.xml
 
 # configure LabKey for tomcat
 RUN mkdir -p conf/Catalina/localhost
@@ -58,5 +58,5 @@ EXPOSE 8080
 # copy the script to wait for the postgres instance (and chmod it for execution)
 COPY wait-for-postgres.sh /etc/
 RUN yum -y -q install postgresql && chmod +x /etc/wait-for-postgres.sh
-CMD ["/etc/wait-for-postgres.sh", "db", "$CATALINA_HOME/bin/catalina.sh", "run"]
+CMD ["/etc/wait-for-postgres.sh", "db", "bin/catalina.sh", "run"]
 

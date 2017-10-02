@@ -12,7 +12,7 @@ allprojects {
     }
 }
 
-subprojects {
+configure(subprojects - project(":docker")) {
 
     apply plugin: 'java'
 

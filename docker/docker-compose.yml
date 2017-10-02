@@ -1,13 +1,13 @@
 version: "3"
 services:
   db:
-    image: postgres:latest
+    image: postgres:9.6
     volumes:
       - "./data:/var/lib/postgresql/data"
     ports:
       - "8081:5432"
   labkey:
-    image: labkey:latest
+    image: labkey:17.2
     depends_on:
       - "db"
     volumes:

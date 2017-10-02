@@ -17,4 +17,8 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 
-out/
+docker/data
+
+**/node_modules/
+**/build/
+**/out/

@@ -19,6 +19,7 @@ subprojects {
     ext {
         explodedModuleDir = "${project.buildDir}/explodedModule"
         configDir         = "${project.explodedModuleDir}/config"
+        deployDir         = "${project.rootDir}/build/modules"
     }
 
     sourceSets {
@@ -121,7 +122,7 @@ subprojects {
 
     task("deployModule", group: "Deploy", type: Copy, dependsOn: [ createModule ]) {
         from buildDir
-        into '/usr/local/var/labkey/modules'
+        into deployDir
         include '*.module'
     }
 

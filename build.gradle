@@ -6,9 +6,10 @@ task wrapper(type: Wrapper) {
 
 allprojects {
     repositories {
-        mavenCentral()
         maven { url "${project.labkeyArtifactoryUrl}/libs-release" }
         maven { url "${project.labkeyArtifactoryUrl}/libs-snapshot" }
+        mavenCentral()
+        mavenLocal()
     }
 }
 

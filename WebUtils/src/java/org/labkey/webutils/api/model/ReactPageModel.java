@@ -1,6 +1,6 @@
 package org.labkey.webutils.api.model;
 
-import com.drew.lang.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by jon on 3/7/17.

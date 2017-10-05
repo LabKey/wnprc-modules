@@ -23,7 +23,7 @@ RUN LABKEY_TEAMCITY_BUILD="`wget --http-user="$LABKEY_TEAMCITY_USERNAME" --http-
 
 FROM store/oracle/serverjre:8
 
-ENV TOMCAT_VERSION 8.5.20
+ENV TOMCAT_VERSION 8.5.23
 ENV CATALINA_HOME /usr/local/tomcat
 ENV LABKEY_HOME /usr/local/labkey
 

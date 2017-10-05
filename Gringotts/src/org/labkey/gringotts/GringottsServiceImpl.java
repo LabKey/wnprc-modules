@@ -1,7 +1,7 @@
 package org.labkey.gringotts;
 
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.collections15.map.CaseInsensitiveMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -39,8 +39,8 @@ public class GringottsServiceImpl extends GringottsService {
     }
 
 
-    private CaseInsensitiveMap<RowInfo> getRowMap(Class clazz) {
-        CaseInsensitiveMap<RowInfo>  map = new CaseInsensitiveMap<>();
+    private CaseInsensitiveMap<String, RowInfo> getRowMap(Class clazz) {
+        CaseInsensitiveMap<String, RowInfo>  map = new CaseInsensitiveMap<>();
 
         for (Field field : clazz.getDeclaredFields()) {
             if (field.isAnnotationPresent(SerializeField.class)) {

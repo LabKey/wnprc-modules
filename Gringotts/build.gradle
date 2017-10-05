@@ -1,0 +1,17 @@
+dependencies {
+
+    apiCompile "org.labkey:api:${project.labkeyVersion}"
+
+    apiExternal "xerces:xercesImpl:2.11.0"
+    apiExternal "org.apache.commons:commons-collections4:4.1"
+    apiExternal "joda-time:joda-time:2.9.3"
+
+    compile "org.labkey:api:${project.labkeyVersion}"
+    compile "org.labkey:LDK:${project.labkeyLocalVersion}:api"
+    compile "javax.servlet:jsp-api:2.0"
+    compile files(apiJar)
+
+    external "org.jooq:jooq:3.8.4"
+    external "org.apache.commons:commons-collections4:4.1"
+    external "joda-time:joda-time:2.9.3"
+}

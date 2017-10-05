@@ -1,7 +1,7 @@
 package org.labkey.gringotts.model;
 
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.collections15.map.CaseInsensitiveMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.joda.time.DateTime;
 import org.jooq.DSLContext;
 import org.jooq.Result;
@@ -39,7 +39,7 @@ public class VaultSerializationInfo {
     private final String internalId;
 
     // A list of the versions
-    private final List<CaseInsensitiveMap<ColumnInfo>> versions;
+    private final List<CaseInsensitiveMap<String, ColumnInfo>> versions;
 
     // Current Version FieldMaps
     private Map<Field, String> currentDateFields = new HashMap<>();
@@ -84,13 +84,13 @@ public class VaultSerializationInfo {
         return VaultUtils.getInternalId(token);
     }
 
-    public List<CaseInsensitiveMap<ColumnInfo>> getVersions() throws InvalidVaultException {
+    public List<CaseInsensitiveMap<String, ColumnInfo>> getVersions() throws InvalidVaultException {
         if (this.versions != null) {
             return this.versions;
         }
 
         // Create a new list to use
-        List<CaseInsensitiveMap<ColumnInfo>> versions = new ArrayList<>();
+        List<CaseInsensitiveMap<String, ColumnInfo>> versions = new ArrayList<>();
 
         // Fetch a map of previous column maps
         Map<Integer, Result<VaultColumnsRecord>> versionColumnMap = GringottsSchema.getSQLConnection().selectFrom(VAULT_COLUMNS).fetch().intoGroups(VAULT_COLUMNS.VERSION);
@@ -100,7 +100,7 @@ public class VaultSerializationInfo {
 
         // Loop through each version to convert to a ColumnInfo record.
         for (int i = 0; i <= highestIndex; i++) {
-            CaseInsensitiveMap<ColumnInfo> columnMap = new CaseInsensitiveMap();
+            CaseInsensitiveMap<String, ColumnInfo> columnMap = new CaseInsensitiveMap();
             versions.add(columnMap);
 
             for(VaultColumnsRecord columnRecord : versionColumnMap.get(i)) {
@@ -117,7 +117,7 @@ public class VaultSerializationInfo {
         }
 
         // Possibly add the current map to the pool.
-        CaseInsensitiveMap<ColumnInfo> currentMap = getColumnMapForClass(token.getRawType());
+        CaseInsensitiveMap<String, ColumnInfo> currentMap = getColumnMapForClass(token.getRawType());
         if (versions.size() == 0 || !columnMapsAreEqual(currentMap, versions.get(versions.size() - 1))) {
             versions.add(currentMap);
             needsToFlushMostRecentColumnMap = true;
@@ -126,8 +126,8 @@ public class VaultSerializationInfo {
         return versions;
     }
 
-    private CaseInsensitiveMap<ColumnInfo> getColumnMapForClass(Class clazz) throws InvalidVaultException {
-        CaseInsensitiveMap<ColumnInfo> columnMap = new CaseInsensitiveMap();
+    private CaseInsensitiveMap<String, ColumnInfo> getColumnMapForClass(Class clazz) throws InvalidVaultException {
+        CaseInsensitiveMap<String, ColumnInfo> columnMap = new CaseInsensitiveMap();
 
         for (Field field : clazz.getFields()) {
             if (field.isAnnotationPresent(SerializeField.class)) {
@@ -151,7 +151,7 @@ public class VaultSerializationInfo {
                 // Check to see if this column existed in the last version in the same form.  If so, give
                 // it the same internal id.
                 if (versions.size() > 0) {
-                    CaseInsensitiveMap<ColumnInfo> lastMap = versions.get(versions.size() - 1);
+                    CaseInsensitiveMap<String, ColumnInfo> lastMap = versions.get(versions.size() - 1);
 
                     if (lastMap.containsKey(columnName)) {
                         ColumnInfo oldColumn = lastMap.get(columnName);
@@ -192,7 +192,7 @@ public class VaultSerializationInfo {
         return internalColumnName;
     }
 
-    private boolean columnMapsAreEqual(CaseInsensitiveMap<ColumnInfo> map1, CaseInsensitiveMap<ColumnInfo> map2) {
+    private boolean columnMapsAreEqual(CaseInsensitiveMap<String, ColumnInfo> map1, CaseInsensitiveMap<String, ColumnInfo> map2) {
         if (!map1.keySet().containsAll(map2.keySet()) || !map2.keySet().containsAll(map1.keySet())) {
             return false;
         }
@@ -217,7 +217,7 @@ public class VaultSerializationInfo {
     }
 
     private void flushMostRecentColumnMap() {
-        CaseInsensitiveMap<ColumnInfo> map = versions.get(versions.size() - 1);
+        CaseInsensitiveMap<String, ColumnInfo> map = versions.get(versions.size() - 1);
 
         GringottsSchema.getSQLConnection().transaction(conn -> {
             for (String name : map.keySet()) {
@@ -237,7 +237,7 @@ public class VaultSerializationInfo {
     }
 
     public void saveRecord(Vault.Record record) {
-        CaseInsensitiveMap<ColumnInfo> curMap = versions.get(versions.size() - 1);
+        CaseInsensitiveMap<String, ColumnInfo> curMap = versions.get(versions.size() - 1);
 
         Class recordClass = record.getVault().getTypeToken().getRawType();
 

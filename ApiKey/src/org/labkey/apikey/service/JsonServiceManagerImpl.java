@@ -1,6 +1,6 @@
 package org.labkey.apikey.service;
 
-import org.apache.commons.collections15.map.CaseInsensitiveMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.labkey.api.data.Container;
@@ -21,13 +21,13 @@ import java.util.Set;
  * Created by jon on 11/15/16.
  */
 public class JsonServiceManagerImpl extends JsonServiceManager {
-    private Map<Module, CaseInsensitiveMap<JsonService>> moduleMap = new HashMap<>();
+    private Map<Module, CaseInsensitiveMap<String, JsonService>> moduleMap = new HashMap<>();
 
     public JsonServiceManagerImpl() {}
 
-    private CaseInsensitiveMap<JsonService> getServiceMap(Module module) {
+    private CaseInsensitiveMap<String, JsonService> getServiceMap(Module module) {
         if (!moduleMap.containsKey(module)) {
-            CaseInsensitiveMap<JsonService> serviceMap = new CaseInsensitiveMap<>();
+            CaseInsensitiveMap<String, JsonService> serviceMap = new CaseInsensitiveMap<>();
             moduleMap.put(module, serviceMap);
         }
 
@@ -40,7 +40,7 @@ public class JsonServiceManagerImpl extends JsonServiceManager {
     }
 
     @Override
-    public CaseInsensitiveMap<JsonService> getServices(Module module) {
+    public CaseInsensitiveMap<String, JsonService> getServices(Module module) {
         return getServiceMap(module);
     }
 

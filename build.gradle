@@ -132,6 +132,6 @@ configure(subprojects - project(":docker")) {
     }
 }
 
-task ("createModules", group: "Build",  dependsOn: subprojects.collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
-task ("deployModules", group: "Deploy", dependsOn: subprojects.collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
+task ("createModules", group: "Build",  dependsOn: (subprojects - project(":docker")).collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
+task ("deployModules", group: "Deploy", dependsOn: (subprojects - project(":docker")).collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
 

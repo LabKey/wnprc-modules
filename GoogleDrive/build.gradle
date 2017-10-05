@@ -1,0 +1,14 @@
+dependencies {
+
+    apiCompile "org.labkey:api:${project.labkeyVersion}"
+
+    compile "org.labkey:api:${project.labkeyVersion}"
+    compile "org.labkey:query:${project.labkeyVersion}"
+    compile "org.labkey:LDK:${project.labkeyLocalVersion}:api"
+    compile files(apiJar)
+    compile project(":WebUtils")
+    compile project(path: ":DBUtils",  configuration: "apiCompile")
+
+    external 'com.google.api-client:google-api-client:1.22.0'
+    external 'com.google.apis:google-api-services-drive:v3-rev85-1.23.0'
+}

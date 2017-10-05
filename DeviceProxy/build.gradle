@@ -1,0 +1,9 @@
+dependencies {
+
+    compile "org.labkey:api:${project.labkeyVersion}"
+    compile "org.labkey:LDK:${project.labkeyLocalVersion}:api"
+    compile "javax.servlet:jsp-api:2.0"
+    compile project(path: ":ApiKey", configuration: "apiCompile")
+
+    external "org.jooq:jooq:3.8.4"
+}

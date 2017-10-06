@@ -135,3 +135,6 @@ configure(subprojects - project(":docker")) {
 task ("createModules", group: "Build",  dependsOn: (subprojects - project(":docker")).collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
 task ("deployModules", group: "Deploy", dependsOn: (subprojects - project(":docker")).collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
 
+task ("cleanAll", group: "Build", type: Delete, dependsOn: (subprojects - project(":docker")).collect { "${it.path}:clean" }, description: "Cleans all the build artifacts") {
+    delete "build"
+}

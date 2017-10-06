@@ -13,6 +13,10 @@ allprojects {
     }
 }
 
+ext {
+    deployDir = "$rootDir/build/modules"
+}
+
 configure(subprojects - project(":docker")) {
 
     apply plugin: 'java'
@@ -20,7 +24,6 @@ configure(subprojects - project(":docker")) {
     ext {
         explodedModuleDir = "${project.buildDir}/explodedModule"
         configDir         = "${project.explodedModuleDir}/config"
-        deployDir         = "${project.rootDir}/build/modules"
     }
 
     sourceSets {
@@ -123,7 +126,7 @@ configure(subprojects - project(":docker")) {
 
     task("deployModule", group: "Deploy", type: Copy, dependsOn: [ createModule ]) {
         from buildDir
-        into deployDir
+        into rootProject.deployDir
         include '*.module'
     }
 
@@ -135,6 +138,9 @@ configure(subprojects - project(":docker")) {
 task ("createModules", group: "Build",  dependsOn: (subprojects - project(":docker")).collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
 task ("deployModules", group: "Deploy", dependsOn: (subprojects - project(":docker")).collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
 
-task ("cleanAll", group: "Build", type: Delete, dependsOn: (subprojects - project(":docker")).collect { "${it.path}:clean" }, description: "Cleans all the build artifacts") {
-    delete "build"
+task ("cleanModules", group: "Deploy", type: Delete, description: "Cleans the modules from the deploy directory") {
+    delete deployDir
 }
+
+task ("cleanAll", group: "Build", type: Delete, dependsOn: (subprojects - project(":docker")).collect { "${it.path}:clean" }, description: "Cleans all the build artifacts")
+cleanAll.dependsOn(":cleanModules")

@@ -2,14 +2,14 @@ package org.labkey.wnprc_ehr.service.dataentry;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.ehr.EHRService;
-import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.study.security.SecurityEscalator;
-import org.labkey.api.study.security.StudySecurityEscalator;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
+import org.labkey.dbutils.api.security.SecurityEscalator;
+import org.labkey.dbutils.api.security.StudySecurityEscalator;
 import org.labkey.dbutils.api.service.SecurityEscalatedService;
 
+import java.org.labkey.wnprc_ehr.security.EHRSecurityEscalator;
 import java.util.HashSet;
 import java.util.Set;
 

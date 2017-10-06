@@ -3,6 +3,7 @@ package org.labkey.wnprc_ehr.history;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.ehr.history.AbstractDataSource;
+import org.labkey.api.module.ModuleLoader;
 
 import java.sql.SQLException;
 
@@ -15,7 +16,7 @@ public class DefaultAlopeciaDataSource extends AbstractDataSource
 {
     public DefaultAlopeciaDataSource()
     {
-        super("study", "Alopecia");
+        super("study", "Alopecia", ModuleLoader.getInstance().getModule("WNPRC_EHR"));
     }
 
     @Override

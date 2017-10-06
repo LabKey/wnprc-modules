@@ -1,0 +1,13 @@
+dependencies {
+
+    compile "org.labkey:api:${project.labkeyVersion}"
+    compile "org.labkey:study:${project.labkeyVersion}"
+    compile "org.labkey:ehr:${project.labkeyLocalVersion}:api"
+    compile "org.labkey:LDK:${project.labkeyLocalVersion}:api"
+
+    compile project(path: ":DBUtils",  configuration: "apiCompile")
+    compile project(":WebUtils")
+
+    external "joda-time:joda-time:2.9.3"
+    external "org.jsoup:jsoup:1.10.3"
+}

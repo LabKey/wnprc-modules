@@ -3,6 +3,7 @@ package org.labkey.wnprc_ehr.history;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.ehr.history.AbstractDataSource;
+import org.labkey.api.module.ModuleLoader;
 
 import java.sql.SQLException;
 
@@ -15,7 +16,7 @@ public class DefaultTBDataSource extends AbstractDataSource
 {
     public DefaultTBDataSource()
     {
-        super("study", "TB Tests", "TB Test", "TB Tests");
+        super("study", "TB Tests", "TB Test", "TB Tests", ModuleLoader.getInstance().getModule("WNPRC_EHR"));
     }
 
     @Override

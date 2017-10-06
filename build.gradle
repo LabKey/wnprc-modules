@@ -28,7 +28,7 @@ configure(subprojects - project(":docker")) {
 
     sourceSets {
         main {
-            java { srcDirs = ['src', 'gen-src'] }
+            java { srcDirs = ['src'] }
         }
         api {
             java { srcDirs = ['api-src'] }
@@ -50,6 +50,14 @@ configure(subprojects - project(":docker")) {
 
         apiExternal
         apiCompile.extendsFrom(apiExternal)
+    }
+
+    compileJava {
+        options.compilerArgs << "-Werror"
+    }
+
+    compileApiJava {
+        options.compilerArgs << "-Werror"
     }
 
     dependencies {

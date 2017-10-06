@@ -9,3 +9,9 @@ dependencies {
     external "org.jooq:jooq:3.8.4"
     external "org.apache.pdfbox:pdfbox:2.0.7"
 }
+
+sourceSets {
+    main {
+        java { srcDirs = [ "src/java", "gen-src/java-jooq" ]}
+    }
+}

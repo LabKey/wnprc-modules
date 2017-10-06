@@ -16,7 +16,6 @@ import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.ConvertibleToJSON;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -76,7 +75,7 @@ public class EmailServerConfig implements ConvertibleToJSON {
 
             @Override
             public Properties getProperties(EmailServerConfig config) {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException("Not implemented");
             }
         }
         ;

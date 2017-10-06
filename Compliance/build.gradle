@@ -1,0 +1,11 @@
+dependencies {
+
+    compile "org.labkey:api:${project.labkeyVersion}"
+    compile "org.labkey:LDK:${project.labkeyLocalVersion}:api"
+    compile project(":WebUtils")
+    compile project(path: ":DBUtils", configuration: "apiCompile")
+    compile project(":DBUtils")
+
+    external "org.jooq:jooq:3.8.4"
+    external "org.apache.pdfbox:pdfbox:2.0.7"
+}

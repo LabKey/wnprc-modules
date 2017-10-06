@@ -19,6 +19,12 @@ class DockerBuild extends DefaultTask {
     }
 }
 
+apply plugin: 'idea'
+
+idea.module {
+    excludeDirs += file("data")
+}
+
 task("build", group: "Docker", type: DockerBuild, description: "Generates the LabKey docker image using the Dockerfile in this folder. Must be run with '--no-daemon'")
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {

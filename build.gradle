@@ -25,7 +25,7 @@ configure(subprojects - project(":docker")) {
 
     sourceSets {
         main {
-            java { srcDirs = ['src'] }
+            java { srcDirs = ['src', 'gen-src'] }
         }
         api {
             java { srcDirs = ['api-src'] }

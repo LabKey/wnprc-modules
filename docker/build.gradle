@@ -19,16 +19,16 @@ class DockerBuild extends DefaultTask {
     }
 }
 
-task("build", group: "Docker", type: DockerBuild)
+task("build", group: "Docker", type: DockerBuild, description: "Generates the LabKey docker image using the Dockerfile in this folder. Must be run with '--no-daemon'")
 
-task("up", group: "Docker", type: Exec) {
+task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
     workingDir "${project.rootDir}/docker"
     executable "docker-compose"
     args "up", "-d"
     environment CATALINA_OPTS: "-ea -Ddevmode=true"
 }
 
-task("down", group: "Docker", type: Exec) {
+task("down", group: "Docker", type: Exec, description: "Shuts down the docker-compose environment (labkey + postgres)") {
     workingDir "${project.rootDir}/docker"
     executable "docker-compose"
     args "down"

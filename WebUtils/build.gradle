@@ -5,3 +5,9 @@ dependencies {
 
     external fileTree("${project.projectDir}/lib")
 }
+
+sourceSets {
+    main {
+        java { srcDirs = [ "src/java" ]}
+    }
+}

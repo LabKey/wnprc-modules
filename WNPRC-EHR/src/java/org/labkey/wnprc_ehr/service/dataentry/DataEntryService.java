@@ -9,7 +9,7 @@ import org.labkey.dbutils.api.security.SecurityEscalator;
 import org.labkey.dbutils.api.security.StudySecurityEscalator;
 import org.labkey.dbutils.api.service.SecurityEscalatedService;
 
-import java.org.labkey.wnprc_ehr.security.EHRSecurityEscalator;
+import org.labkey.wnprc_ehr.security.EHRSecurityEscalator;
 import java.util.HashSet;
 import java.util.Set;
 

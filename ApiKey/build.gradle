@@ -1,5 +1,4 @@
 dependencies {
-    apiCompile  "org.labkey:internal:${project.labkeyVersion}"
     apiExternal "org.apache.commons:commons-collections4:4.1"
 
     compile "javax.servlet:jsp-api:2.0"

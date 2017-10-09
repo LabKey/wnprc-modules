@@ -3,11 +3,11 @@ var webpack = require("webpack");
 
 module.exports = {
     entry: {
-        "legacy": __dirname + '/web/legacy.ts'
+        "legacy": path.resolve(__dirname, 'src', 'ts', 'legacy.ts')
     },
 
     output: {
-        path: path.resolve(__dirname, 'build', 'compiledResources', 'web', 'webutils', 'lib'),
+        path: path.resolve(__dirname, 'build', 'explodedModule', 'web', 'webutils', 'lib'),
         filename: '[name].js',
         // Export the module as the SimpleFilter variable
         library: "WebUtils",
@@ -16,7 +16,7 @@ module.exports = {
     },
 
     // Enable sourcemaps for debugging webpack's output.
-    // TODO: swtich to 'source-map' for production
+    // TODO: switch to 'source-map' for production
     devtool: "eval-source-map",
 
     resolve: {

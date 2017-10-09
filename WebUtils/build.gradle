@@ -1,3 +1,8 @@
+plugins {
+    id "com.moowork.node" version "1.2.0"
+    id "de.richsource.gradle.plugins.typescript" version "1.8.0"
+}
+
 dependencies {
     compile "javax.servlet:jsp-api:2.0"
     external fileTree("${project.projectDir}/lib")
@@ -8,3 +13,25 @@ sourceSets {
         java { srcDirs = [ "src/java" ]}
     }
 }
+
+task("java2ts", type: JavaExec, dependsOn: ["npmInstall"]) {
+
+    doFirst {
+        mkdir "${project.buildDir}/generated-ts"
+    }
+
+    main = 'com.github.jonathonrichardson.java2ts.Compiler'
+    classpath = sourceSets.main.runtimeClasspath
+    args "${project.buildDir}/generated-ts/GeneratedFromJava.ts"
+
+    inputs.dir('src/java')
+    outputs.dir("$buildDir/generated-ts")
+}
+
+task("webpack", type: Exec, dependsOn: ["compileTypeScript"]) {
+    commandLine "$projectDir/node_modules/.bin/webpack"
+}
+
+project.tasks.findByName("compileTypeScript").dependsOn("java2ts")
+project.tasks.findByName("processModuleResources").dependsOn("webpack")
+

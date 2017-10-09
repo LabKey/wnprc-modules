@@ -33,7 +33,7 @@ task("java2ts", type: JavaExec, dependsOn: ["bowerInstall"]) {
 
     main = 'com.github.jonathonrichardson.java2ts.Compiler'
     classpath = sourceSets.main.runtimeClasspath
-    args "${project.buildDir}/generated-ts/GeneratedFromJava.ts"
+    args = [ "${project.buildDir}/generated-ts/GeneratedFromJava.ts" ]
 
     inputs.dir('src/java')
     outputs.dir("$buildDir/generated-ts")

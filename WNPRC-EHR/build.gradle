@@ -1,9 +1,7 @@
 dependencies {
 
-    compile "org.labkey:api:${project.labkeyVersion}"
     compile "org.labkey:study:${project.labkeyVersion}"
     compile "org.labkey:ehr:${project.labkeyLocalVersion}:api"
-    compile "org.labkey:LDK:${project.labkeyLocalVersion}:api"
 
     compile project(path: ":DBUtils",  configuration: "apiCompile")
     compile project(":WebUtils")

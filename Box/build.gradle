@@ -1,4 +1,3 @@
 dependencies {
-    compile "org.labkey:api:${project.labkeyVersion}"
     compile files(apiJar)
 }

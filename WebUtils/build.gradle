@@ -1,8 +1,5 @@
 dependencies {
-
-    compile "org.labkey:api:${project.labkeyVersion}"
     compile "javax.servlet:jsp-api:2.0"
-
     external fileTree("${project.projectDir}/lib")
 }
 

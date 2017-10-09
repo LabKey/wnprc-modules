@@ -1,4 +1,4 @@
-package java.org.labkey.wnprc_ehr.security;
+package org.labkey.wnprc_ehr.security;
 
 import org.labkey.api.audit.query.AbstractAuditDomainKind;
 import org.labkey.dbutils.api.security.SecurityEscalationAuditProvider;

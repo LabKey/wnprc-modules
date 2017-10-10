@@ -6,25 +6,12 @@
         "strictNullChecks": true,
         "sourceMap": true,
         "jsx" : "react",
-        "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"],
+        "lib": [ "ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol" ],
         "baseUrl": ".",
         "paths": {
-            "*": [
-                "node_modules/*",
-                "node_modules/lkpm/node_modules/*",
-                "lkpm/modules/WebUtils/node_modules/*",
-                "lkpm/modules/WebUtils/bower_components/*",
-                "lkpm/modules/WebUtils/src/ts/*",
-                "build/generated-ts/*"
-            ]
+            "*": [ "node_modules/*" ]
         },
-        "rootDirs": [
-            "./src/ts",
-            "./lkpm/modules/WebUtils/src/ts"
-        ]
+        "rootDirs": [ "./src/ts" ]
     },
-    "include": [
-        "src/ts/pages/*.tsx",
-        "lkpm/modules/WebUtils/node_modules/@types"
-    ]
+    "include": [ "src/ts/pages/*.tsx" ]
 }

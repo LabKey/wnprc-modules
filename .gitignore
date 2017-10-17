@@ -19,6 +19,7 @@
 .idea/**/libraries
 
 docker/data
+docker/.env
 
 **/bower_components/
 **/node_modules/

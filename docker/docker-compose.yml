@@ -1,19 +1,26 @@
 version: "3"
 services:
-  db:
-    image: postgres:9.6
+
+  postgres:
+    image: postgres:9.4
     volumes:
-      - "./data/postgres:/var/lib/postgresql/data"
+      - "${PG_DATA_DIR}:/var/lib/postgresql/data"
     ports:
-      - "8081:5432"
+      - "9081:5432"
+    environment:
+      TZ: America/Chicago
     
   labkey:
-    image: labkey:17.2
+    image: labkey:15.2
     depends_on:
-      - "db"
+      - "postgres"
     volumes:
-      - "../build/modules:/usr/local/labkey/externalModules"
+      - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/labkey/externalModules"
     ports: 
-      - "8080:8080"
+      - "9080:8080"
     environment:
-      - CATALINA_OPTS
+      CATALINA_OPTS:
+      JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME}"
+      PG_NAME:
+      PG_PASS:
+      PG_USER:

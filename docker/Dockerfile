@@ -3,19 +3,16 @@
 
 FROM alpine:latest as download
 
-ARG LABKEY_TEAMCITY_USERNAME
-ARG LABKEY_TEAMCITY_PASSWORD
-
-ENV LABKEY_TEAMCITY_CONFIG LabKey_172Modules_Premium_Installers
-ENV LABKEY_TEAMCITY_NUMBER_URI https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number
-ENV LABKEY_TEAMCITY_DOWNLOAD_URI https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/latest.lastSuccessful/wisc
-ENV LABKEY_VERSION 17.2
+ENV LABKEY_TEAMCITY_CONFIG LabkeyModules152_Installers
+ENV LABKEY_TEAMCITY_REST https://teamcity.labkey.org/guestAuth/app/rest
+ENV LABKEY_TEAMCITY_NUMBER_URI ${LABKEY_TEAMCITY_REST}/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number
+ENV LABKEY_VERSION 15.2
 
 WORKDIR /tmp/labkey
 
 RUN apk add --no-cache wget tar ca-certificates && update-ca-certificates
-RUN LABKEY_TEAMCITY_BUILD="`wget --http-user="$LABKEY_TEAMCITY_USERNAME" --http-password="$LABKEY_TEAMCITY_PASSWORD" -qO- ${LABKEY_TEAMCITY_NUMBER_URI}`" \
- && wget --http-user="$LABKEY_TEAMCITY_USERNAME" --http-password="$LABKEY_TEAMCITY_PASSWORD" -qO- ${LABKEY_TEAMCITY_DOWNLOAD_URI}/Labkey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD%%\.[[:digit:]]*}-UWisc-bin.tar.gz \
+RUN LABKEY_TEAMCITY_BUILD="`wget -qO- ${LABKEY_TEAMCITY_NUMBER_URI}`" \
+ && wget -qO- ${LABKEY_TEAMCITY_REST}/builds/number:${LABKEY_TEAMCITY_BUILD}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD}-UWisc-bin.tar.gz \
   | tar -xz --strip-components=1
 
 # -----------------------------------------------------------------------------
@@ -23,7 +20,7 @@ RUN LABKEY_TEAMCITY_BUILD="`wget --http-user="$LABKEY_TEAMCITY_USERNAME" --http-
 
 FROM store/oracle/serverjre:8
 
-ENV TOMCAT_VERSION 8.5.23
+ENV TOMCAT_VERSION 7.0.82
 ENV CATALINA_HOME /usr/local/tomcat
 ENV LABKEY_HOME /usr/local/labkey
 
@@ -45,9 +42,9 @@ RUN sed -i "s/<Manager pathname=\"\" *\/>/<Manager pathname=\"${LABKEY_HOME//\//
 # configure LabKey for tomcat
 RUN mkdir -p conf/Catalina/localhost
 RUN sed -e "s/@@appDocBase@@/${LABKEY_HOME//\//\\/}\/labkeywebapp/" \
-        -e 's/jdbc:postgresql:\/\/localhost\/labkey/jdbc:postgresql:\/\/db\/labkey/' \
-        -e 's/@@jdbcUser@@/postgres/' \
-        -e 's/@@jdbcPassword@@//' \
+        -e 's/jdbc:postgresql:\/\/localhost\/labkey/${jdbc.url}/' \
+        -e 's/@@jdbcUser@@/${jdbc.user}/' \
+        -e 's/@@jdbcPassword@@/${jdbc.pass}/' \
         -e 's/@@smtpHost@@/mailserver/' \
         -e 's/@@smtpUser@@//' \
         -e 's/@@smtpPort@@/1025/' \

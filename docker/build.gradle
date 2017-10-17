@@ -1,31 +1,14 @@
-class DockerBuild extends DefaultTask {
-    @TaskAction
-    def dockerBuildAction() {
-
-        def console = System.console()
-        if (console == null) {
-            throw new GradleException(":docker:build must be executed with the '--no-daemon' flag from the command line.")
-        }
-
-        console.writer().println("Enter your LabKey TeamCity credentials:")
-        def username = console.readPassword("username = ")
-        def password = console.readPassword("password = ")
-
-        project.exec {
-            workingDir "${project.rootDir}/docker"
-            executable "docker"
-            args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${username}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${password}", "-t", "labkey:17.2", "."
-        }
-    }
-}
-
 apply plugin: 'idea'
 
 idea.module {
     excludeDirs += file("data")
 }
 
-task("build", group: "Docker", type: DockerBuild, description: "Generates the LabKey docker image using the Dockerfile in this folder. Must be run with '--no-daemon'")
+task("build", group: "Docker", type: Exec, description: "Generates the LabKey docker image using the Dockerfile in this folder") {
+    workingDir "${project.rootDir}/docker"
+    executable "docker"
+    args "build", ".", "-t", "labkey:15.2"
+}
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
     workingDir "${project.rootDir}/docker"

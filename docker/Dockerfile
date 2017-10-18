@@ -1,39 +1,26 @@
 # -----------------------------------------------------------------------------
-# HELPER IMAGE (to download LabKey)
-
-FROM alpine:latest as download
-
-ENV LABKEY_TEAMCITY_CONFIG LabkeyModules152_Installers
-ENV LABKEY_TEAMCITY_REST https://teamcity.labkey.org/guestAuth/app/rest
-ENV LABKEY_TEAMCITY_NUMBER_URI ${LABKEY_TEAMCITY_REST}/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number
-ENV LABKEY_VERSION 15.2
-
-WORKDIR /tmp/labkey
-
-RUN apk add --no-cache wget tar ca-certificates && update-ca-certificates
-RUN LABKEY_TEAMCITY_BUILD="`wget -qO- ${LABKEY_TEAMCITY_NUMBER_URI}`" \
- && wget -qO- ${LABKEY_TEAMCITY_REST}/builds/number:${LABKEY_TEAMCITY_BUILD}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD}-UWisc-bin.tar.gz \
-  | tar -xz --strip-components=1
-
-# -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
 
 FROM store/oracle/serverjre:8
 
-ENV TOMCAT_VERSION 7.0.82
 ENV CATALINA_HOME /usr/local/tomcat
-ENV LABKEY_HOME /usr/local/labkey
-
 WORKDIR $CATALINA_HOME
 
 # download and untar tomcat
+ENV TOMCAT_VERSION 7.0.82
 RUN yum -y -q install wget tar gzip \
  && wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
   | tar -xz --strip-components=1 \
  && chmod -R 755 .
 
-# copy in LabKey from the other stage of the build and copy the jars to tomcat
-COPY --from=download /tmp/labkey $LABKEY_HOME
+# download and untar LabKey
+ENV LABKEY_HOME /usr/local/labkey
+ENV LABKEY_TEAMCITY_CONFIG LabkeyModules152_Installers
+ENV LABKEY_VERSION 15.2
+RUN mkdir -p $LABKEY_HOME
+RUN LABKEY_TEAMCITY_BUILD="`wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
+ && wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/builds/number:${LABKEY_TEAMCITY_BUILD}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD}-UWisc-bin.tar.gz \
+  | tar -xz -C $LABKEY_HOME --strip-components=1
 RUN cp $LABKEY_HOME/tomcat-lib/*.jar lib
 
 # add the session path to the tomcat config

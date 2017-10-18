@@ -19,6 +19,7 @@
 .idea/**/libraries
 
 docker/data
+docker/logs
 docker/.env
 
 **/bower_components/

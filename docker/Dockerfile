@@ -39,8 +39,16 @@ RUN sed -e "s/@@appDocBase@@/${LABKEY_HOME//\//\\/}\/labkeywebapp/" \
 
 EXPOSE 8080
 
+# install the Munin node system
+ENV CENTOS_URI http://mirror.centos.org/centos/7/os/x86_64/Packages
+RUN yum -y -q install perl \
+ && rpm -U --quiet http://mirror.centos.org/centos/7/os/x86_64/Packages/perl-Crypt-DES-2.05-20.el7.x86_64.rpm \
+ && rpm -U --quiet http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+ && yum -y -q install munin-node
+RUN echo 'cidr_allow 172.18.0.0/16' >> /etc/munin/munin-node.conf
+
 # copy the script to wait for the postgres instance (and chmod it for execution)
 COPY wait-for-postgres.sh /etc/
 RUN yum -y -q install postgresql && chmod +x /etc/wait-for-postgres.sh
-CMD ["/etc/wait-for-postgres.sh", "postgres", "bin/catalina.sh", "run"]
+CMD ["sh", "-c", "munin-node && /etc/wait-for-postgres.sh postgres bin/catalina.sh run"]
 

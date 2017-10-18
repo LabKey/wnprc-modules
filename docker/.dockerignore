@@ -1,1 +1,5 @@
-build.gradle
+# ignore everything unless otherwise specified
+*
+
+# whitelist the following files:
+!wait-for-postgres.sh

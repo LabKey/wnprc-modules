@@ -47,17 +47,4 @@ services:
     environment:
       TZ: America/Chicago
 
-  munin:
-    image: scalingo/munin-server:v7
-    depends_on:
-      - "labkey"
-    volumes:
-      - "${MUNIN_CACHE_DIR}:/var/cache/munin"
-      - "${MUNIN_LIB_DIR}:/var/lib/munin"
-      - "${MUNIN_LOG_DIR}:/var/log/munin"
-      - "${MUNIN_RUN_DIR}:/var/run/munin"
-    ports:
-      - "9088:8080"
-    environment:
-      NODES: "${MUNIN_NODES}"
 

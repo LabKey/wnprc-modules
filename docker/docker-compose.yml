@@ -11,13 +11,30 @@ services:
       - "5432"
     environment:
       TZ: America/Chicago
+
+  mailcatcher:
+    image: schickling/mailcatcher
+    environment:
+      TZ: America/Chicago
     
+  mailserver:
+    image: wnprcehr/postfix:v0.1.0
+    depends_on:
+      - "mailcatcher"
+    environment:
+      MAIL_SERVER:
+      TZ: America/Chicago
+
   labkey:
     image: labkey:15.2
     depends_on:
+      - "mailserver"
       - "postgres"
     volumes:
+      - "${LABKEY_FILES_DIR}:/usr/local/labkey/files"
+      - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"
       - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/labkey/externalModules"
+      - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"
     ports: 
       - "9080:8080"
     expose:
@@ -44,7 +61,18 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "1080:1080"
     environment:
       TZ: America/Chicago
 
+  perlscripts:
+    image: wnprcehr/ehrcron:v0.1.0
+    depends_on:
+      - "labkey"
+    volumes:
+      - "${BACKUP_DIR}:/backups"
+    environment:
+      LK_BACKGROUND_USER: 
+      LK_BACKGROUND_USER_PASSWORD:
+      TZ: America/Chicago
 

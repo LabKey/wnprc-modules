@@ -35,6 +35,7 @@ RUN sed -e "s/@@appDocBase@@/${LABKEY_HOME//\//\\/}\/labkeywebapp/" \
         -e 's/@@smtpHost@@/mailserver/' \
         -e 's/@@smtpUser@@//' \
         -e 's/@@smtpPort@@/1025/' \
+        -e 's/@@masterEncryptionKey@@/defaultKey/' \
             $LABKEY_HOME/labkey.xml > conf/Catalina/localhost/ROOT.xml
 
 EXPOSE 8080

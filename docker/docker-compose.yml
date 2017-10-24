@@ -2,7 +2,7 @@ version: "3"
 services:
 
   postgres:
-    image: postgres:9.4
+    image: postgres:9.2
     volumes:
       - "${PG_DATA_DIR}:/var/lib/postgresql/data"
     ports:
@@ -24,6 +24,8 @@ services:
     environment:
       MAIL_SERVER:
       TZ: America/Chicago
+    ports:
+      - "1025:1025"
 
   labkey:
     image: labkey:15.2
@@ -39,7 +41,6 @@ services:
       - "9080:8080"
     expose:
       - "8080"
-      - "4949"
     environment:
       CATALINA_OPTS:
       JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME}"
@@ -75,4 +76,3 @@ services:
       LK_BACKGROUND_USER: 
       LK_BACKGROUND_USER_PASSWORD:
       TZ: America/Chicago
-

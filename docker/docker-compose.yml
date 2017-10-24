@@ -81,8 +81,10 @@ services:
     image: wnprcehr/monit:latest
     depends_on:
       - "mailserver"
+      - "postgres"
     links:
       - mailserver:mailserver-container
+      - postgres
     volumes:
       - "${MONIT_CONFIG_FILE}:/etc/monit/monitrc"
       - "${MONIT_HOST_BACKUP_DIR}:/host/backup"

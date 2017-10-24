@@ -88,3 +88,5 @@ services:
       - "${MONIT_HOST_BACKUP_DIR}:/host/backup"
       - "${MONIT_HOST_ROOT_DIR}:/host"
       - "${MONIT_LOG_DIR}:/etc/monit/logs"
+    environment:
+      TZ: America/Chicago

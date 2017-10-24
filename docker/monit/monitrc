@@ -15,19 +15,15 @@
 ###############################################################################
 ##
 ## Start Monit in the background (run as a daemon):
-#
+
 set daemon  30              # check services at 30 seconds intervals
-#   with start delay 240    # optional: delay the first check by 4-minutes (by 
-#                           # default Monit check immediately after Monit start)
-#
-#
+#   with start delay 240    # optional: delay the first check by 4-minutes
+
 ## Set syslog logging. If you want to log to a standalone log file instead,
 ## specify the full path to the log file
-#
-set logfile syslog
 
-#
-#
+set logfile /etc/monit/logs/monit.log
+
 ## Set the location of the Monit lock file which stores the process id of the
 ## running Monit instance. By default this file is stored in $HOME/.monit.pid
 #
@@ -57,20 +53,21 @@ set logfile syslog
 #                localhost                   # fallback relay
 #
 #
-set mailserver localhost port 1025
+
+set mailserver mailserver-container port 1025
+
 ## By default Monit will drop alert events if no mail servers are available. 
 ## If you want to keep the alerts for later delivery retry, you can use the 
 ## EVENTQUEUE statement. The base directory where undelivered alerts will be 
 ## stored is specified by the BASEDIR option. You can limit the queue size 
 ## by using the SLOTS option (if omitted, the queue is limited by space
 ## available in the back end filesystem).
-#
+
 set eventqueue
-    basedir /var/monit  # set the base directory where events will be stored
-    slots 100           # optionally limit the queue size
-#
-#
-## Send status and events to M/Monit (for more informations about M/Monit 
+    basedir /etc/monit/events # set the base directory where events will be stored
+    slots 100                 # optionally limit the queue size
+
+## Send status and events to M/Monit (for more informations about M/Monit
 ## see http://mmonit.com/). By default Monit registers credentials with 
 ## M/Monit so M/Monit can smoothly communicate back to Monit and you don't
 ## have to register Monit credentials manually in M/Monit. It is possible to
@@ -80,7 +77,6 @@ set eventqueue
 #
 # set mmonit http://monit:monit@192.168.1.10:8080/collector
 #     # and register without credentials     # Don't register credentials
-#
 #
 ## Monit by default uses the following format for alerts if the the mail-format
 ## statement is missing::
@@ -105,8 +101,7 @@ set eventqueue
 #
 # set mail-format { from: monit@foo.bar }
 #
-#
-## You can set alert recipients whom will receive alerts if/when a 
+## You can set alert recipients whom will receive alerts if/when a
 ## service defined in this file has errors. Alerts may be restricted on 
 ## events by using a filter as in the second example below.
 #
@@ -116,10 +111,11 @@ set eventqueue
 ## This filter is recommended to avoid getting alerts for trivial cases.
 #
 # set alert your-name@your.domain not on { instance, action }
+#
+
 set alert ehrservices@g-groups.wisc.edu
-#
-#
-## Monit has an embedded HTTP interface which can be used to view status of 
+
+## Monit has an embedded HTTP interface which can be used to view status of
 ## services monitored and manage services from a web interface. The HTTP 
 ## interface is also required if you want to issue Monit commands from the
 ## command line, such as 'monit status' or 'monit restart service' The reason
@@ -131,7 +127,7 @@ set alert ehrservices@g-groups.wisc.edu
 #    use address localhost  # only accept connection from localhost
 #    allow localhost        # allow localhost to connect to the server and
 #    allow admin:monit      # require user 'admin' with password 'monit'
-
+#
 ###############################################################################
 ## Services
 ###############################################################################
@@ -261,25 +257,25 @@ set alert ehrservices@g-groups.wisc.edu
 #  check program myscript with path /usr/local/bin/myscript.sh
 #    if status != 0 then alert
 #
-#
-check system localhost
+
+check system $HOST
   if loadavg (5min) > 5 then alert
   if memory usage > 95% for 5 times within 15 cycles then alert
   if cpu usage (wait) > 50% for 5 times within 15 cycles then alert
-  group server
-check filesystem rootfs with path /
+
+check filesystem host_root with path /host/
   if space usage > 95% for 5 times within 15 cycles then alert
   if space usage > 99% then alert
-  group server
-check filesystem backupsfs with path /backups
+
+check filesystem host_backup with path /host/backup
   if space usage > 80% for 5 times within 15 cycles then alert
   if space usage > 90% then alert
-  group server
-check program postgres_long_running_query 
-  with path "/bin/bash -c /usr/local/bin/postgres_long_running_query.sh"
+
+check program postgres_long_running_query
+  with path "/bin/bash -c /etc/monit/checks/postgres_long_running_query.sh"
   every "* 7 * * *"
   if status != 0 then alert
-  group server
+
 ###############################################################################
 ## Includes
 ###############################################################################
@@ -287,5 +283,5 @@ check program postgres_long_running_query
 ## It is possible to include additional configuration parts from other files or
 ## directories.
 #
-include /etc/monit.d/*
+#include /etc/monit.d/*
 #

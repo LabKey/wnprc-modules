@@ -28,7 +28,7 @@ services:
       - "1025:1025"
 
   labkey:
-    image: labkey:15.2
+    image: wnprcehr/labkey:15.2
     depends_on:
       - "mailserver"
       - "postgres"
@@ -76,3 +76,15 @@ services:
       LK_BACKGROUND_USER: 
       LK_BACKGROUND_USER_PASSWORD:
       TZ: America/Chicago
+
+  monit:
+    image: wnprcehr/monit:latest
+    depends_on:
+      - "mailserver"
+    links:
+      - mailserver:mailserver-container
+    volumes:
+      - "${MONIT_CONFIG_FILE}:/etc/monit/monitrc"
+      - "${MONIT_HOST_BACKUP_DIR}:/host/backup"
+      - "${MONIT_HOST_ROOT_DIR}:/host"
+      - "${MONIT_LOG_DIR}:/etc/monit/logs"

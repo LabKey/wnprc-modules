@@ -2,13 +2,22 @@ apply plugin: 'idea'
 
 idea.module {
     excludeDirs += file("data")
+    excludeDirs += file("logs")
 }
 
-task("build", group: "Docker", type: Exec, description: "Generates the LabKey docker image using the Dockerfile in this folder") {
-    workingDir "${project.rootDir}/docker"
+task("buildLabkey", group: "Docker", type: Exec, description: "Generates the LabKey docker image") {
+    workingDir "${project.rootDir}/docker/labkey"
     executable "docker"
-    args "build", ".", "-t", "labkey:15.2"
+    args "build", ".", "-t", "wnprcehr/labkey:15.2"
 }
+
+task("buildMonit", group: "Docker", type: Exec, description: "Generates the Monit docker image") {
+    workingDir "${project.rootDir}/docker/monit"
+    executable "docker"
+    args "build", ".", "-t", "wnprcehr/monit:latest"
+}
+
+task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildLabkey", "buildMonit" ] )
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
     workingDir "${project.rootDir}/docker"

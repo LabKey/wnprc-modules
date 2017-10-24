@@ -2,7 +2,7 @@ version: "3"
 services:
 
   postgres:
-    image: postgres:9.2
+    image: postgres:9.4
     volumes:
       - "${PG_DATA_DIR}:/var/lib/postgresql/data"
     ports:
@@ -28,7 +28,7 @@ services:
       - "1025:1025"
 
   labkey:
-    image: wnprcehr/labkey:15.2
+    image: wnprcehr/labkey:17.2
     depends_on:
       - "mailserver"
       - "postgres"

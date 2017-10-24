@@ -8,7 +8,7 @@ idea.module {
 task("buildLabkey", group: "Docker", type: Exec, description: "Generates the LabKey docker image") {
     workingDir "${project.rootDir}/docker/labkey"
     executable "docker"
-    args "build", ".", "-t", "wnprcehr/labkey:15.2"
+    args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2"
 }
 
 task("buildMonit", group: "Docker", type: Exec, description: "Generates the Monit docker image") {

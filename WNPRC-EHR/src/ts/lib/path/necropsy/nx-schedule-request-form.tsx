@@ -2,23 +2,23 @@ import * as React from "react";
 import Component = React.Component;
 import * as moment from "moment";
 import Moment = moment.Moment;
-import {YearSelector, DateTimeSelector} from "../../DatePicker";
+import { YearSelector, DateTimeSelector } from "../../DatePicker";
 import {
     ScheduleNecropsyForm, NecropsyRequestDetailsForm,
     RequestStaticInfo, NecropsySuiteInfo
 } from "../../../../../build/generated-ts/GeneratedFromJava";
-import {buildURLWithParams, getCurrentContainer} from "WebUtils/LabKey";
-import {getNecropsyRequestDetails, NecropsySuites, Pathologists, scheduleNecropsy} from "./nx-api";
+import { buildURLWithParams, getCurrentContainer } from "WebUtils/LabKey";
+import { getNecropsyRequestDetails, NecropsySuites, Pathologists, scheduleNecropsy } from "./nx-api";
 import * as _ from "underscore";
 import ChangeEvent = React.ChangeEvent;
-import {UserSelector} from "../../UserSelector";
+import { UserSelector } from "../../UserSelector";
 import * as $ from "jquery";
 import * as rsvp from "rsvp";
 import * as toastr from "toastr";
 
 
 let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
-    return new rsvp.Promise((resolve, reject) => {
+    return new rsvp.Promise((resolve: any, reject: any) => {
         promise.then((val) => {
             resolve(val);
         }).catch((val) => {

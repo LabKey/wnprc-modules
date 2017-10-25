@@ -1,11 +1,11 @@
-import {buildURL, buildURLWithParams, getCurrentContainer} from "../../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
-import {getJSON, postJSON} from "../../../../lkpm/modules/WebUtils/src/ts/WebUtils/API";
-import {UpdateTemplateForm} from "../../../../build/generated-ts/GeneratedFromJava";
+import { buildURLWithParams, getCurrentContainer } from "WebUtils/LabKey";
+import { postJSON } from "WebUtils/API";
+import { UpdateTemplateForm } from "../../../../build/generated-ts/GeneratedFromJava";
 
 const CONTROLLER = 'wnprc_ehr-templates';
 
 function genTemplateUrl(templateid: string, actionName: string) {
-    return buildURLWithParams(CONTROLLER, actionName, getCurrentContainer(), {templateid});
+    return buildURLWithParams(CONTROLLER, actionName, getCurrentContainer(), { templateid });
 }
 
 export function deleteTemplate(id: string): Promise<any> {

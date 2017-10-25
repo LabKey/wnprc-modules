@@ -3,8 +3,8 @@ import Component = React.Component;
 import * as moment from "moment";
 import Moment = moment.Moment;
 import * as api from "WebUtils/API";
-import {URLForAction} from "../../../../../lkpm/modules/WebUtils/build/generated-ts/GeneratedFromJava";
-import {urlFromAction} from "../../../../../lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+import { URLForAction } from "../../../../../../WebUtils/build/generated-ts/GeneratedFromJava";
+import { urlFromAction } from "WebUtils/LabKey";
 import {
     ScheduledNecropsiesForm, NecropsyEventForm,
     NecropsySuiteInfo

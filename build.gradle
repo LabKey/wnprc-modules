@@ -1,9 +1,5 @@
 import java.util.regex.Pattern
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
-}
-
 allprojects {
     repositories {
         maven { url "${project.labkeyArtifactoryUrl}/libs-release" }

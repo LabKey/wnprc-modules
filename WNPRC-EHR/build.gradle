@@ -10,6 +10,8 @@ dependencies {
 
     external "joda-time:joda-time:2.9.3"
     external "org.jsoup:jsoup:1.10.3"
+
+    external fileTree("${project.projectDir}/lib")
 }
 
 sourceSets {
@@ -18,18 +20,27 @@ sourceSets {
     }
 }
 
-task("compileTypescript", type: Exec, dependsOn: ["npmInstall"]) {
+task("java2ts", type: JavaExec) {
+    inputs.dir('src/java')
+    outputs.dir("$projectDir/build/generated-ts")
 
-    workingDir projectDir
-    commandLine "node_modules/.bin/tsc"
+    doFirst {
+        mkdir "$projectDir/build/generated-ts"
+    }
 
+    main = 'com.github.jonathonrichardson.java2ts.Compiler'
+    classpath = sourceSets.main.runtimeClasspath
+    args = [ "$projectDir/build/generated-ts/GeneratedFromJava.ts" ]
+}
+
+task("compileTypescript", type: Exec, dependsOn: ["java2ts", "npmInstall"]) {
     inputs.file('tsconfig.json')
     inputs.dir('src/ts')
-    outputs.dir("$buildDir/compiled-ts")
+    inputs.dir("$projectDir/build/generated-ts")
+    outputs.dir("$projectDir/build/compiled-ts")
+
+    workingDir projectDir
+    commandLine "$projectDir/node_modules/.bin/tsc"
 }
 
-task("webpack", type: Exec, dependsOn: ["compileTypescript"]) {
-    commandLine "$projectDir/node_modules/.bin/webpack"
-}
-
-project.tasks.findByName("processModuleResources").dependsOn("webpack")
+project.tasks.findByName("processModuleResources").dependsOn("compileTypescript")

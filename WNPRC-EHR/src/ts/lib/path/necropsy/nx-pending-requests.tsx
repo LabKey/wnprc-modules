@@ -2,13 +2,13 @@ import * as React from "react";
 import Component = React.Component;
 import * as moment from "moment";
 import Moment = moment.Moment;
-import {NecropsyRequestForm, NecropsyRequestListForm} from "../../../../../build/generated-ts/GeneratedFromJava";
+import { NecropsyRequestForm, NecropsyRequestListForm } from "../../../../../build/generated-ts/GeneratedFromJava";
 import * as api from "WebUtils/API";
-import {URLForAction} from "../../../../../lkpm/modules/WebUtils/build/generated-ts/GeneratedFromJava";
-import {urlFromAction} from "WebUtils/LabKey";
-import {TableRow, SimpleStringColumn} from "WebUtils/model/TableRow";
-import {Table} from "WebUtils/model/Table";
-import {FilterableTable} from "WebUtils/component/lk-table";
+import { URLForAction } from "../../../../../../WebUtils/build/generated-ts/GeneratedFromJava";
+import { urlFromAction } from "WebUtils/LabKey";
+import { TableRow, SimpleStringColumn } from "WebUtils/model/TableRow";
+import { Table } from "WebUtils/model/Table";
+import { FilterableTable } from "WebUtils/component/lk-table";
 
 interface NxPendingRequestsPanelProps {
     handleClick: (data: any) => void

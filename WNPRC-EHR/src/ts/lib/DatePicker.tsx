@@ -56,7 +56,7 @@ class DateSelector extends React.Component<DateSelectorProps, DateSelectorState>
             format: this.props.format
         });
 
-        this.getInputElement().on("dp.change", (e: Event) => {
+        this.getInputElement().on("dp.change", (e: any) => {
             if ('date' in e) {
                 let date = (e as any).date as any;
 

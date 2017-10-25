@@ -2,8 +2,8 @@ import {
     NecropsyRequestDetailsForm, NecropsySuiteInfo,
     ScheduleNecropsyForm
 } from "../../../../../build/generated-ts/GeneratedFromJava";
-import {buildURL, buildURLWithParams, getCurrentContainer} from "../../../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
-import {getJSON, postJSON} from "../../../../../lkpm/modules/WebUtils/src/ts/WebUtils/API";
+import { buildURL, buildURLWithParams, getCurrentContainer } from "WebUtils/LabKey";
+import { getJSON, postJSON } from "WebUtils/API";
 
 const NECROPSY_CONTROLLER = "wnprc_ehr-necropsy";
 const NECROPSY_LSID_NAME = 'necropsy-lsid';

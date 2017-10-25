@@ -1,9 +1,9 @@
 import * as React from "react";
-import {executeSql} from "../../../lkpm/modules/Compliance/lkpm/modules/WebUtils/src/ts/WebUtils/API";
+import { executeSql } from "WebUtils/API";
 import * as s from "underscore.string";
 import * as _ from "underscore";
 
-const AsyncTypeahead: new() => React.Component<any, any> = require('react-bootstrap-typeahead').AsyncTypeahead;
+const AsyncTypeahead = require('react-bootstrap-typeahead').AsyncTypeahead;
 
 export interface UserSelectorProps {
     initialUser?: number;
@@ -105,13 +105,5 @@ export class UserSelector extends React.Component<UserSelectorProps, UserSelecto
                 />
             </div>
         );
-
-        /*
-        return (
-            <div>
-                <input type="text" value={this.state.selectedUser} className="form-control" ref={(el) => {this.inputElement = el}}/>
-            </div>
-        )
-        */
     }
 }

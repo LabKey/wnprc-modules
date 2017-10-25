@@ -1,3 +1,5 @@
+apply plugin: 'com.moowork.node'
+
 dependencies {
     compile "javax.servlet:jsp-api:2.0"
     external fileTree("${project.projectDir}/lib")
@@ -5,14 +7,6 @@ dependencies {
 
 sourceSets {
     main { java { srcDirs = [ "src/java" ]} }
-}
-
-task("npmInstall", type: Exec) {
-
-    commandLine "npm", "install"
-
-    inputs.file('packages.json')
-    outputs.dir('node_modules')
 }
 
 task("bowerInstall", type: Exec, dependsOn: ["npmInstall"]) {
@@ -25,27 +19,27 @@ task("bowerInstall", type: Exec, dependsOn: ["npmInstall"]) {
     outputs.dir('bower_components')
 }
 
-task("java2ts", type: JavaExec, dependsOn: ["bowerInstall"]) {
+task("java2ts", type: JavaExec) {
 
     doFirst {
-        mkdir "${project.buildDir}/generated-ts"
+        mkdir "$projectDir/build/generated-ts"
     }
 
     main = 'com.github.jonathonrichardson.java2ts.Compiler'
     classpath = sourceSets.main.runtimeClasspath
-    args = [ "${project.buildDir}/generated-ts/GeneratedFromJava.ts" ]
+    args = [ "$projectDir/build/generated-ts/GeneratedFromJava.ts" ]
 
     inputs.dir('src/java')
-    outputs.dir("$buildDir/generated-ts")
+    outputs.dir("$projectDir/build/generated-ts")
 }
 
-task("compileTypescript", type: Exec, dependsOn: ["java2ts"]) {
+task("compileTypescript", type: Exec, dependsOn: ["java2ts", "bowerInstall"]) {
     commandLine "$projectDir/node_modules/.bin/tsc"
 
     inputs.file('tsconfig.json')
     inputs.dir('src/ts')
-    inputs.dir("$buildDir/generated-ts")
-    outputs.dir("$buildDir/compiled-ts")
+    inputs.dir("$projectDir/build/generated-ts")
+    outputs.dir("$projectDir/build/compiled-ts")
 }
 
 task("webpack", type: Exec, dependsOn: ["compileTypescript"]) {

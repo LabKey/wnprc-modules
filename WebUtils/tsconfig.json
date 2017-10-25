@@ -1,12 +1,10 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
-        "noImplicitAny": true,
-        "sourceMap": true,
-        "strictNullChecks": true,
-        "jsx" : "react",
         "baseUrl": ".",
+        "jsx" : "react",
+        "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"],
+        "module": "commonjs",
+        "noImplicitAny": true,
         "outDir": "build/compiled-ts",
         "paths": {
             "*": [
@@ -16,7 +14,9 @@
                 "build/generated-ts/*"
             ]
         },
-        "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"]
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "target": "es5"
     },
     "include": [
       "src/ts/WebUtils.ts",

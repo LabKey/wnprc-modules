@@ -13,7 +13,7 @@ import * as toastr from "toastr";
 import {modal, ModalWrapper, displayError} from "WebUtils/component/modal";
 import {UserSelector} from "../lib/UserSelector";
 import {deleteTemplate, updateTemplate} from "../lib/dataentry/templates-api";
-import {executeSql} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/API";
+import {executeSql} from "WebUtils/API";
 
 interface EditTemplateMetadataFormProps {
     entityId: string;

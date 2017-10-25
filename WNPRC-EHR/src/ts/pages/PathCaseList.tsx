@@ -4,19 +4,19 @@ import * as ReactDOM from "react-dom";
 import * as $ from 'jquery';
 import * as moment from 'moment';
 import {YearSelector} from "../lib/DatePicker";
-import {Table} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/Table";
-import {FilterableTable} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/component/lk-table";
+import {Table} from "WebUtils/model/Table";
+import {FilterableTable} from "WebUtils/component/lk-table";
 import {
     TableRow, ReactTableColumn,
     SimpleStringColumn, SimpleLinkColumn
-} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/TableRow";
+} from "WebUtils/model/TableRow";
 import * as s from "underscore.string";
 import * as _ from "underscore";
 import Moment = moment.Moment;
 import {
     getLinkToAnimal, buildURLWithParams,
     getCurrentContainer
-} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+} from "WebUtils/LabKey";
 import * as rsvp from "rsvp";
 
 let pageLoadData: any = (window as any)['PageLoadData'];

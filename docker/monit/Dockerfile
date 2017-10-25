@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-COPY postgres_long_running_query.sh /etc/monit/checks
+COPY postgres_long_running_query.sh /etc/monit/checks/postgres_long_running_query.sh
 
 RUN apk --no-cache add monit bash tzdata \
  && mkdir -p /etc/monit/events

@@ -17,7 +17,7 @@ ext {
     deployDir = "$rootDir/build/modules"
 }
 
-configure(subprojects - project(":docker")) {
+configure(subprojects - project("docker")) {
 
     apply plugin: 'java'
 
@@ -76,7 +76,7 @@ configure(subprojects - project(":docker")) {
     }
 
     task("createModuleXml", group: "Build", description: "Create the module.xml file from the module.properties and module.template.xml files") {
-        def moduleTemplateFile = file("$rootDir/module.template.xml")
+        def moduleTemplateFile = file("${project.projectDir}/../module.template.xml")
         inputs.file(moduleTemplateFile)
 
         def modulePropertiesFile = file("module.properties")
@@ -138,7 +138,7 @@ configure(subprojects - project(":docker")) {
 
     task("deployModule", group: "Deploy", type: Copy, dependsOn: [ createModule ]) {
         from buildDir
-        into rootProject.deployDir
+        into deployDir
         include '*.module'
     }
 
@@ -147,12 +147,12 @@ configure(subprojects - project(":docker")) {
     }
 }
 
-task ("createModules", group: "Build",  dependsOn: (subprojects - project(":docker")).collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
-task ("deployModules", group: "Deploy", dependsOn: (subprojects - project(":docker")).collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
+task ("createModules", group: "Build",  dependsOn: (subprojects - project("docker")).collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
+task ("deployModules", group: "Deploy", dependsOn: (subprojects - project("docker")).collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
 
 task ("cleanModules", group: "Deploy", type: Delete, description: "Cleans the modules from the deploy directory") {
     delete deployDir
 }
 
-task ("cleanAll", group: "Build", type: Delete, dependsOn: (subprojects - project(":docker")).collect { "${it.path}:clean" }, description: "Cleans all the build artifacts")
-cleanAll.dependsOn(":cleanModules")
+task ("cleanAll", group: "Build", type: Delete, dependsOn: (subprojects - project("docker")).collect { "${it.path}:clean" }, description: "Cleans all the build artifacts")
+cleanAll.dependsOn("cleanModules")

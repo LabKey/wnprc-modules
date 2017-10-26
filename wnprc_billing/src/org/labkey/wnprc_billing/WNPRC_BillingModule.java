@@ -19,10 +19,12 @@ package org.labkey.wnprc_billing;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.template.ClientDependency;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -67,6 +69,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)    {
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_BillingContainerListener());
+        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_billing/panel/WNPRCBillingSettingsPanel.js"), this);
     }
 
     @Override

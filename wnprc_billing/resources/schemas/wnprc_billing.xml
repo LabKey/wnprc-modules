@@ -17,34 +17,6 @@
 
  -->
 <tables xmlns="http://labkey.org/data/xml">
-    <table tableName="chargeRates" tableDbType="TABLE" useColumnOrder="true">
-        <tableTitle>Charge Rates</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
-        <auditLogging>DETAILED</auditLogging>
-        <columns>
-            <column columnName="rowId"/>
-            <column columnName="chargeId"/>
-            <column columnName="unitCost">
-                <columnTitle>Unit Cost</columnTitle>
-            </column>
-            <column columnName="subsidy">
-                <columnTitle>Base Grant Subsidy (%)</columnTitle>
-            </column>
-            <column columnName="startDate">
-                <columnTitle>Start Date</columnTitle>
-            </column>
-            <column columnName="endDate">
-                <columnTitle>End Date</columnTitle>
-                <nullable>false</nullable>
-                <formatString>yyyy-MM-dd</formatString>
-            </column>
-            <column columnName="container"/>
-            <column columnName="createdBy"/>
-            <column columnName="created"/>
-            <column columnName="modifiedBy"/>
-            <column columnName="modified"/>
-        </columns>
-    </table>
     <table tableName="chargeRateExemptions" tableDbType="TABLE" useColumnOrder="true">
         <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
@@ -373,7 +345,7 @@
                 <columnTitle>Debit Alias</columnTitle>
                 <isHidden>true</isHidden>
                 <fk>
-                    <fkDbSchema>wnprc_billing</fkDbSchema>
+                    <fkDbSchema>ehr_billing</fkDbSchema>
                     <fkTable>aliases</fkTable>
                     <fkColumnName>alias</fkColumnName>
                     <fkDisplayColumnName useRawValue="true"/>
@@ -387,7 +359,7 @@
                 <columnTitle>Credit Alias</columnTitle>
                 <isHidden>true</isHidden>
                 <fk>
-                    <fkDbSchema>wnprc_billing</fkDbSchema>
+                    <fkDbSchema>ehr_billing</fkDbSchema>
                     <fkTable>aliases</fkTable>
                     <fkColumnName>alias</fkColumnName>
                     <fkDisplayColumnName useRawValue="true"/>
@@ -1059,89 +1031,6 @@
             <column columnName="comment">
                 <columnTitle>Comment</columnTitle>
                 <isHidden>true</isHidden>
-            </column>
-            <column columnName="container"/>
-            <column columnName="createdBy"/>
-            <column columnName="created"/>
-            <column columnName="modifiedBy"/>
-            <column columnName="modified"/>
-        </columns>
-    </table>
-    <table tableName="aliases" tableDbType="TABLE" useColumnOrder="true">
-        <tableTitle>Aliases</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
-        <auditLogging>DETAILED</auditLogging>
-        <tableUrl>/query/recordDetails.view?schemaName=wnprc_billing&amp;query.queryName=aliases&amp;keyField=rowid&amp;key=${rowid}</tableUrl>
-        <columns>
-            <column columnName="rowid"/>
-            <column columnName="alias">
-                <columnTitle>Alias</columnTitle>
-            </column>
-            <column columnName="category">
-                <columnTitle>Category</columnTitle>
-                <fk>
-                    <fkDbSchema>wnprc_billing</fkDbSchema>
-                    <fkTable>aliasCategories</fkTable>
-                    <fkColumnName>category</fkColumnName>
-                    <fkDisplayColumnName>category</fkDisplayColumnName>
-                </fk>
-            </column>
-            <column columnName="aliasEnabled">
-                <columnTitle>Alias Enabled</columnTitle>
-            </column>
-            <column columnName="projectNumber">
-                <columnTitle>OGA Project Number</columnTitle>
-            </column>
-            <column columnName="grantNumber">
-                <columnTitle>OGA Grant Number</columnTitle>
-            </column>
-            <column columnName="agencyAwardNumber">
-                <columnTitle>Agency Award Number</columnTitle>
-            </column>
-            <column columnName="investigatorId">
-                <columnTitle>Investigator</columnTitle>
-                <shownInInsertView>true</shownInInsertView>
-            </column>
-            <column columnName="investigatorName">
-                <columnTitle>Investigator Name</columnTitle>
-                <shownInInsertView>false</shownInInsertView>
-            </column>
-            <column columnName="fiscalAuthority">
-                <columnTitle>Fiscal Authority</columnTitle>
-                <shownInInsertView>true</shownInInsertView>
-            </column>
-            <column columnName="fiscalAuthorityName">
-                <columnTitle>Fiscal Authority Name</columnTitle>
-                <shownInInsertView>false</shownInInsertView>
-            </column>
-            <column columnName="budgetStartDate">
-                <columnTitle>Alias Start Date</columnTitle>
-            </column>
-            <column columnName="budgetEndDate">
-                <columnTitle>Alias End Date</columnTitle>
-            </column>
-            <column columnName="faRate">
-                <columnTitle>F&amp;A Rate</columnTitle>
-            </column>
-            <column columnName="faSchedule">
-                <columnTitle>F&amp;A Schedule</columnTitle>
-            </column>
-            <column columnName="projectTitle">
-                <columnTitle>Project Title</columnTitle>
-            </column>
-            <column columnName="projectDescription">
-                <columnTitle>Project Description</columnTitle>
-            </column>
-            <column columnName="projectStatus">
-                <columnTitle>Project Status</columnTitle>
-            </column>
-            <column columnName="aliasType">
-                <columnTitle>Alias Type</columnTitle>
-                <fk>
-                    <fkDbSchema>wnprc_billing</fkDbSchema>
-                    <fkTable>aliasTypes</fkTable>
-                    <fkColumnName>aliasType</fkColumnName>
-                </fk>
             </column>
             <column columnName="container"/>
             <column columnName="createdBy"/>

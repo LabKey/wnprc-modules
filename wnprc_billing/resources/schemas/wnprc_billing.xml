@@ -360,6 +360,7 @@
         <columns>
             <column columnName="Id">
                 <columnTitle>Id</columnTitle>
+                <description>Animal Id</description>
                 <facetingBehavior>ALWAYS_OFF</facetingBehavior>
             </column>
             <column columnName="date">
@@ -1455,6 +1456,39 @@
             <column columnName="created"/>
             <column columnName="modifiedBy"/>
             <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="tierRates" tableDbType="TABLE" useColumnOrder="true">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="tierRate_2"/>
+            <column columnName="tierRate_2a"/>
+            <column columnName="tierRate_3"/>
+            <column columnName="startDate"/>
+            <column columnName="endDate"/>
+            <column columnName="container"/>
+            <column columnName="createdBy"/>
+            <column columnName="created"/>
+            <column columnName="modifiedBy"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="groups" tableDbType="TABLE" useColumnOrder="true">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="name"/>
+            <column columnName="active"/>
+            <column columnName="container"/>
+            <column columnName="createdBy"/>
+            <column columnName="created"/>
+            <column columnName="modifiedBy"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="affiliates" tableDbType="TABLE" useColumnOrder="true">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="affiliate"/>
         </columns>
     </table>
 </tables>

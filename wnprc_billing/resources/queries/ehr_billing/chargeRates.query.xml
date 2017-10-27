@@ -1,0 +1,17 @@
+<table tableName="chargeRates" tableDbType="TABLE" useColumnOrder="true">
+    <tableTitle>Charge Rates</tableTitle>
+    <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+    <auditLogging>DETAILED</auditLogging>
+    <columns>
+        <column columnName="serviceCode"/>
+        <column columnName="descriptions"/>
+        <column columnName="genCredits"/>
+        <column columnName="groupName">
+            <fk>
+                <fkDbSchema>wnprc_billing</fkDbSchema>
+                <fkTable>groups</fkTable>
+                <fkColumnName>name</fkColumnName>
+            </fk>
+        </column>
+    </columns>
+</table>

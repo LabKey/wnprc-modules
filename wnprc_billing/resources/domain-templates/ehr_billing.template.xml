@@ -4,10 +4,117 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <template xsi:type="EHRBillingTemplateType">
-        <table tableName="ChargeRates" tableDbType="NOT_IN_DB">
+        <table tableName="chargeRates" tableDbType="NOT_IN_DB">
             <dat:columns>
-                <dat:column columnName="testing">
+                <dat:column columnName="serviceCode">
                     <dat:rangeURI>int</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="description">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>255</dat:scale>
+                </dat:column>
+                <dat:column columnName="genCredits">
+                    <dat:rangeURI>boolean</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="groupName ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>50</dat:scale>
+                </dat:column>
+            </dat:columns>
+        </table>
+    </template>
+    <template xsi:type="EHRBillingTemplateType">
+    <table tableName="aliases" tableDbType="NOT_IN_DB">
+            <dat:columns>
+                <dat:column columnName="tier_rate">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
+                </dat:column>
+                <dat:column columnName="type">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>25</dat:scale>
+                </dat:column>
+                <dat:column columnName="affiliate">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>50</dat:scale>
+                </dat:column>
+                <dat:column columnName="contact_name">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>50</dat:scale>
+                </dat:column>
+                <dat:column columnName="contact_phone ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>20</dat:scale>
+                </dat:column>
+                <dat:column columnName="contact_email">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>50</dat:scale>
+                </dat:column>
+                <dat:column columnName="address">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>255</dat:scale>
+                </dat:column>
+                <dat:column columnName="city">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>30</dat:scale>
+                </dat:column>
+                <dat:column columnName="state">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>2</dat:scale>
+                </dat:column>
+                <dat:column columnName="zip ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>10</dat:scale>
+                </dat:column>
+                <dat:column columnName="comments">
+                    <dat:rangeURI>string</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="po_number">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>20</dat:scale>
+                </dat:column>
+                <dat:column columnName="po_amount">
+                    <dat:rangeURI>float</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="charge_grant_accounts_id">
+                    <dat:rangeURI>int</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="uw_fund ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
+                </dat:column>
+                <dat:column columnName="uw_account ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
+                </dat:column>
+                <dat:column columnName="uw_udds ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
+                </dat:column>
+                <dat:column columnName="uw_class_code ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
+                </dat:column>
+                <dat:column columnName="grant_period_end ">
+                    <dat:rangeURI>dateTime</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="order_cutoff ">
+                    <dat:rangeURI>dateTime</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="successor_account ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
+                </dat:column>
+                <dat:column columnName="predecessor_account ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
+                </dat:column>
+                <dat:column columnName="gencredits ">
+                    <dat:rangeURI>boolean</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="mds_number ">
+                    <dat:rangeURI>string</dat:rangeURI>
+                    <dat:scale>12</dat:scale>
                 </dat:column>
             </dat:columns>
         </table>

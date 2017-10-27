@@ -43,7 +43,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     @Override
     public double getVersion()
     {
-        return 17.23;
+        return 17.30;
     }
 
     @Override

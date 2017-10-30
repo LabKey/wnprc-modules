@@ -12,7 +12,6 @@ import TabPanel = ReactTabs.TabPanel;
 import Tab = ReactTabs.Tab;
 import {ProtocolFlags, ProtocolFlagName, Protocol, SpeciesProtocolInfo} from "../lib/protocol/protocol";
 import {CheckBoxSet} from "../lib/checkboxset";
-import {newUUID} from "../../../../WebUtils/src/ts/WebUtils/Util";
 import CSSProperties = React.CSSProperties;
 import {NewProtocolForm, ProtocolRevisionsForm, ProtocolRevisionForm} from "GeneratedFromJava";
 import {BlockableDiv} from "../lib/blockable-div";
@@ -27,9 +26,11 @@ import Promise = rsvp.Promise;
 import {getAllRevisions, getEditProtocolRevisionLink} from "../lib/protocol/protocol-api";
 import * as _ from "underscore";
 
+const uuidv4 = require("uuid/v4");
+
 function submit(): void {
     let form = new NewProtocolForm();
-    form.id = newUUID();
+    form.id = uuidv4();
 }
 
 class ProtocolCheckboxSet extends CheckBoxSet<ProtocolFlagName> {

@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/WNPRC-EHR-Services/Compliance#readme",
   "dependencies": {
-    "gulp": "github:gulpjs/gulp#4.0"
+    "gulp": "github:gulpjs/gulp#4.0",
+    "uuid": "^3.1.0"
   }
 }

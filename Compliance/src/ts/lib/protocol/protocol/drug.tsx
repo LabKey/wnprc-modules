@@ -1,6 +1,7 @@
-import {newUUID} from "WebUtils/Util";
 import * as React from "react";
 import ChangeEvent = React.ChangeEvent;
+
+const uuidv4 = require("uuid/v4");
 
 export class Drug {
     id: string;
@@ -11,7 +12,7 @@ export class Drug {
     substance_type: string;
 
     constructor() {
-        this.id = newUUID();
+        this.id = uuidv4();
     }
 }
 

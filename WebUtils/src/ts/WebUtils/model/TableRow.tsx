@@ -1,6 +1,7 @@
 import * as _ from "underscore";
 import * as React from "react";
-import {newUUID} from "../Util";
+
+const uuidv4 = require("uuid/v4");
 
 export interface HTMLTableColumn {
     getHTML(): string;
@@ -60,7 +61,7 @@ export class TableRow {
     isEven:     KnockoutObservable<boolean> = ko.observable(false);
     isHidden:   KnockoutObservable<boolean> = ko.observable(false);
 
-    key: string = newUUID();
+    key: string = uuidv4();
 
     warn: KnockoutComputed<boolean>;
     err:  KnockoutComputed<boolean>;

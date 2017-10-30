@@ -10,8 +10,9 @@ import {TextInput} from "./fields/text-input";
 import {FormProvider, SimpleFormEditor, SimpleFormProps} from "../editable-form";
 import {URLForAction} from "../../../../../WebUtils/build/generated-ts/GeneratedFromJava";
 import ChangeEvent = React.ChangeEvent;
-import {newUUID} from "../../../../lkpm/modules/WebUtils/src/ts/WebUtils/Util";
 import * as s from "underscore.string";
+
+const uuidv4 = require("uuid/v4");
 
 export interface HazardsEditorProps {
     revision_id: string;
@@ -26,7 +27,7 @@ class HazardsFormEditor extends SimpleFormEditor<HazardsForm> {
 }
 
 export class HazardsEditor extends React.Component<HazardsEditorProps, {}> {
-    private _id: string = newUUID();
+    private _id: string = uuidv4();
 
     render() {
         let hazardFormProvider: FormProvider<HazardsForm> = {

@@ -489,9 +489,9 @@
         shouldHide: function(buttonConfig) {
             var taskDataEntryPanel = this;
             var necropsyStore = this.storeCollection.getServerStoreForQuery('study', 'necropsy');
-            var necropsyRecord = _.isDefined(necropsyStore) ? necropsyStore.getAt(0) : undefined;
+            var necropsyRecord = (necropsyStore !== undefined) ? necropsyStore.getAt(0) : undefined;
 
-            if (_.isDefined(necropsyRecord)) {
+            if (necropsyRecord !== undefined) {
                 var Id = necropsyRecord.get('Id');
 
                 Promise.resolve().then(function() {
@@ -509,7 +509,7 @@
                     var panel = taskDataEntryPanel;
                     var btn = panel.queryById(buttonConfig.itemId);
 
-                    if (_.isDefined(btn)) {
+                    if (btn !== undefined) {
                         if (data && data.rows && data.rows.length > 0) {
                             btn.hide();
                         }
@@ -540,9 +540,9 @@
         shouldHide: function(buttonConfig) {
             var taskDataEntryPanel = this;
             var necropsyStore = taskDataEntryPanel.storeCollection.getServerStoreForQuery('study', 'necropsy');
-            var necropsyRecord = _.isDefined(necropsyStore) ? necropsyStore.getAt(0) : undefined;
+            var necropsyRecord = (necropsyStore !== undefined) ? necropsyStore.getAt(0) : undefined;
 
-            if (_.isDefined(necropsyRecord)) {
+            if (necropsyRecord !== undefined) {
                 var Id = necropsyRecord.get('Id');
 
                 Promise.resolve().then(function() {
@@ -560,7 +560,7 @@
                     var panel = taskDataEntryPanel;
                     var btn = panel.queryById(buttonConfig.itemId);
 
-                    if (_.isDefined(btn)) {
+                    if (btn !== undefined) {
                         if (data && data.rows && data.rows.length > 0) {
                             btn.show();
                         }

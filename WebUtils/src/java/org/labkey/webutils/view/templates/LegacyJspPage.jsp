@@ -65,7 +65,7 @@
         // Defining a deep isDefined custom assertion to be able to test that variables exist (X.Y.Z) without first checking
         // for parent variables (X.Y)
         QUnit.assert.isDefined = function(string, message) {
-            var jsCode = "if (_.isDefined(" + string + ")) { varIsDefined = true }";
+            var jsCode = "if (" + string + " !== undefined) { varIsDefined = true }";
             var varIsDefined = false;
             try {
                 eval(jsCode);
@@ -136,8 +136,6 @@
         }
 
         QUnit.test("(All Pages) Plugins and Extensions Loaded Correctly", function(assert) {
-            assert.isDefined("_.isDefined");
-
             // Check for Strings module
             assert.isDefined("_.trim", "Underscore.String module loaded")
         });

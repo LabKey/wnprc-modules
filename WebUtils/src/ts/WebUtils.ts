@@ -52,7 +52,7 @@ interface Assert {
 // Defining a deep isDefined custom assertion to be able to test that variables exist (X.Y.Z) without first checking
 // for parent variables (X.Y)
 let isDefined = function(string: string, message: string): void {
-    var jsCode = "if (_.isDefined(" + string + ")) { varIsDefined = true }";
+    var jsCode = "if (" + string + " !== undefined) { varIsDefined = true }";
     var varIsDefined = false;
     try {
         eval(jsCode);

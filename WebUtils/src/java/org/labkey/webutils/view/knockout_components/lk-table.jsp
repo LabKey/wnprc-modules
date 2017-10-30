@@ -51,10 +51,10 @@
                     <div class="input-group">
                         <input class="form-control input-sm" placeholder="No active filter" type="text" data-bind="textInput: filter">
                     <span class="input-group-addon">
-                        <!-- ko if: _.isDefined(filter()) && filter() !== "" -->
+                        <!-- ko if: (filter() !== undefined) && filter() !== "" -->
                         <span class="glyphicon glyphicon-remove" data-toggle="modal" data-bind="click: function() { filter('') } "></span>
                         <!-- /ko -->
-                        <!-- ko ifnot: _.isDefined(filter()) && filter() !== "" -->
+                        <!-- ko ifnot: (filter() !== undefined) && filter() !== "" -->
                         <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#tableFilterInfoModal"></span>
                         <!-- /ko -->
                     </span>

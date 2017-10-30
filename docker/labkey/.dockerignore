@@ -2,4 +2,5 @@
 *
 
 # whitelist the following files:
+!public-yum-ol7.repo
 !wait-for-postgres.sh

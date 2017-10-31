@@ -1,12 +1,13 @@
-import {getCSRF, getPageLoadData, getBaseURL} from "./LabKey";
+import { getCSRF, getPageLoadData, getBaseURL } from "./LabKey";
 
 import * as s from "underscore.string";
 import * as _ from "underscore";
 
 import RSVP = require('rsvp');
-import {makeURLForHTTPAction} from "./URL";
+import { makeURLForHTTPAction } from "./URL";
 import moment = require("moment");
 import Moment = moment.Moment;
+
 const fetch = require("fetch");
 
 let convertToRSVP = function<T>(promise: Promise<T>): RSVP.Promise<T> {

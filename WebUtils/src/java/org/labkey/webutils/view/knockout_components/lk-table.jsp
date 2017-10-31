@@ -30,7 +30,7 @@
                 <th class="filter-false" data-sorter="false" style="width: 10px"><!-- Leave this cell blank --></th>
                 <!-- /ko -->
 
-                <!-- ko foreach2: {data: $parent.rowHeaders} -->
+                <!-- ko foreach: {data: $parent.rowHeaders} -->
                 <th class="header" data-bind="click: function(){ $component.sortTable($index()) }, css: getCSSClass ">
                     {{data}}
                     <!-- ko if: sort() != 0 -->
@@ -64,7 +64,7 @@
                 <!-- /ko -->
             </tr>
 
-            <!-- ko foreach2: {data: $parent.table.rows } -->
+            <!-- ko foreach: {data: $parent.table.rows } -->
             <!-- ko if: !isHidden() -->
             <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err }">
                 <!-- ko if: $component.rowsAreSelectable -->

@@ -3,11 +3,9 @@ import * as $ from "jquery";
 import * as ko from "knockout";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import * as ReactDomServer from "react-dom/server";
-import CSSProperties = React.CSSProperties;
-import {Table} from "../model/Table";
-import {TableRow, TableColumn, isHTMLTableColumn} from "../model/TableRow";
-import {Filterer} from "simplefilter";
+import { Table } from "../model/Table";
+import { TableRow, TableColumn, isHTMLTableColumn } from "../model/TableRow";
+import { Filterer } from "simplefilter";
 import ChangeEvent = React.ChangeEvent;
 
 export class FilterableTableColumn extends React.Component<{'cellData': TableColumn}, {}> {

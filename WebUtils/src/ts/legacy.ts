@@ -13,9 +13,9 @@ const markdown: any = require('markdown');
 
 knockout.punches.enableAll();
 
-import {Util, Model} from "./WebUtils";
+import { Util, Model } from "./WebUtils";
 let utils = Util, Models = Model;
-export {utils, Models};
+export { utils, Models };
 
 export function exportGlobals() {
     // (0, eval)('this') is a robust way of getting a reference to the global object

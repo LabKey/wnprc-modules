@@ -1,8 +1,6 @@
 import * as ko from "knockout";
 import * as _ from "underscore";
-import * as foreach2 from "./knockout/foreach2";
-import {getBaseURL} from "../LabKey";
-export {foreach2};
+import { getBaseURL } from "../LabKey";
 
 // Register the component loader that allows us to load relative to the contextPath.
 let loader: any = {
@@ -20,7 +18,6 @@ let loader: any = {
         }
     }
 };
-
 
 export function registerCustomComponentLoader(): void {
     ko.components.loaders.unshift(loader);

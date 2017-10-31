@@ -1,6 +1,6 @@
-import {Table} from "./Table";
-import {TableRow} from "./TableRow";
-import {selectRows, selectRowsFromCache, SelectRowsConfig} from "../API";
+import { Table } from "./Table";
+import { TableRow } from "./TableRow";
+import { selectRows, selectRowsFromCache, SelectRowsConfig } from "../API";
 import * as _ from "underscore";
 
 export interface QueryTableConfig {

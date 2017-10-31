@@ -2,34 +2,34 @@ import * as API from "./WebUtils/API";
 import * as Model from "./WebUtils/Model";
 import * as URL from "./WebUtils/URL";
 import * as Util from "./WebUtils/Util";
-import {foreach2, registerCustomComponentLoader} from "./WebUtils/util/Knockout";
-import {extendUnderscore} from "./WebUtils/Util";
-import {getModuleContext} from "./WebUtils/LabKey";
+import { registerCustomComponentLoader } from "./WebUtils/util/Knockout";
+import { getModuleContext } from "./WebUtils/LabKey";
 
-export {API, Model, URL, Util};
+export { API, Model, URL, Util };
+
+//----------------------------------------------------------------------------------------------------------------------
+// Register a custom component loader for Knockout to load stuff asynchronously while still respecting the context path.
+import * as ko from "knockout"
+
+require("knockout.mapping");
+require("knockout.punches");
+
+ko.punches.enableAll();
 
 import * as lkTable from "./WebUtils/component/lk-table";
-
-declare interface IterableIterator<T> {}
-declare interface Symbol {}
-
-// Include Knockout plugins
-import * as ko from "./WebUtils/externals/knockout-enhanced";
-
 lkTable.registerKoComponent();
 
-/*
- * TODO:  Although this is used in lk-table, it no longer needs the beforeRenderAll/afterRenderAll methods, which were
- *        originally to allow the use of Sunny Walker's jQuery.FilterTable.  But, as I no longer use that, consider
- *        removing that usage and then removing this export.
- */
-foreach2.registerCustomBinding();
-
-// Register a custom component loader for Knockout to load stuff asynchronously while still respecting the context path.
 registerCustomComponentLoader();
 
-// Export underscore.string and an "isDefined" method to underscore
-extendUnderscore();
+//----------------------------------------------------------------------------------------------------------------------
+// Export underscore.string methods to underscore proper
+
+import * as _ from "underscore";
+import * as s from "underscore.string";
+_.mixin(s.exports());
+
+//----------------------------------------------------------------------------------------------------------------------
+// Configure QUnit to set whether or not to run and add a new custom assert (isDefined)
 
 require("qunit");
 declare const QUnit: QUnit;
@@ -41,12 +41,6 @@ let qunitEnabled = (ctx['PerformUnitTestingPerPage'] || "").match(/true/i);
 QUnit.config.altertitle = false;
 if (!qunitEnabled) {
     QUnit.config.autostart = false;
-}
-
-
-// Now tell typescript about our new function:
-interface Assert {
-    isDefined(string: string, message: string): void;
 }
 
 // Defining a deep isDefined custom assertion to be able to test that variables exist (X.Y.Z) without first checking

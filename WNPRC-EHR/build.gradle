@@ -1,14 +1,10 @@
 dependencies {
-
-    compile "org.labkey:study:${project.labkeyVersion}"
-    compile "org.labkey:ehr:${project.labkeyLocalVersion}:api"
-
+    compile project(":server:modules:study")
+    compile project(path: ":server:customModules:ehr", configuration: "apiCompile")
     compile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
     compile project("${project.parent.path}:WebUtils")
-
     external "joda-time:joda-time:2.9.3"
     external "org.jsoup:jsoup:1.10.3"
-
     external fileTree("${project.projectDir}/../lib")
 }
 

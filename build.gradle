@@ -69,12 +69,11 @@ configure(subprojects - project("docker")) {
     }
 
     dependencies {
-        compile 'org.jetbrains:annotations:15.0'
-        compile "org.labkey:api:${project.labkeyVersion}"
-        compile "org.labkey:LDK:${project.labkeyLocalVersion}:api"
-
         apiCompile 'org.jetbrains:annotations:15.0'
-        apiCompile "org.labkey:api:${project.labkeyVersion}"
+        apiCompile project(":server:api")
+        compile 'org.jetbrains:annotations:15.0'
+        compile project(":server:api")
+        compile project(":externalModules:labModules:LDK")
     }
 
     task("processExternalDependencies", group: "Build", type: Copy) {

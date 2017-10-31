@@ -1,6 +1,12 @@
 import java.util.regex.Pattern
 
 apply plugin: 'com.moowork.node'
+apply plugin: 'idea'
+
+idea.module {
+    excludeDirs += file('gradle')
+    excludeDirs += file('node_modules')
+}
 
 allprojects {
     repositories {
@@ -18,6 +24,11 @@ ext {
 configure(subprojects - project("docker")) {
 
     apply plugin: 'java'
+    apply plugin: 'idea'
+
+    idea.module {
+        excludeDirs += file('build')
+    }
 
     ext {
         explodedModuleDir = "${project.buildDir}/explodedModule"

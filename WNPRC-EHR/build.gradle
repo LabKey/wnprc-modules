@@ -1,4 +1,3 @@
-
 dependencies {
 
     compile "org.labkey:study:${project.labkeyVersion}"

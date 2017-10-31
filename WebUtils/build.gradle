@@ -8,7 +8,7 @@ idea.module {
 
 dependencies {
     compile "javax.servlet:jsp-api:2.0"
-    external fileTree("${project.projectDir}/lib")
+    external fileTree("${project.projectDir}/../lib")
 }
 
 sourceSets {

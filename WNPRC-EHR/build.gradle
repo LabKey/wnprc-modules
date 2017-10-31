@@ -11,7 +11,7 @@ dependencies {
     external "joda-time:joda-time:2.9.3"
     external "org.jsoup:jsoup:1.10.3"
 
-    external fileTree("${project.projectDir}/lib")
+    external fileTree("${project.projectDir}/../lib")
 }
 
 sourceSets {

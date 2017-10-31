@@ -1,4 +1,3 @@
-apply plugin: 'com.moowork.node'
 
 dependencies {
 
@@ -33,14 +32,14 @@ task("java2ts", type: JavaExec) {
     args = [ "$projectDir/build/generated-ts/GeneratedFromJava.ts" ]
 }
 
-task("compileTypescript", type: Exec, dependsOn: ["java2ts", "npmInstall"]) {
+task("compileTypescript", type: Exec, dependsOn: ["java2ts", "${project.parent.path}:npmInstall"]) {
     inputs.file('tsconfig.json')
     inputs.dir('src/ts')
     inputs.dir("$projectDir/build/generated-ts")
     outputs.dir("$projectDir/build/compiled-ts")
 
     workingDir projectDir
-    commandLine "$projectDir/node_modules/.bin/tsc"
+    commandLine "$projectDir/../node_modules/.bin/tsc"
 }
 
 project.tasks.findByName("processModuleResources").dependsOn("compileTypescript")

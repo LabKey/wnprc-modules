@@ -8,8 +8,8 @@
         "outDir": "build/compiled-ts",
         "paths": {
             "*": [
-                "node_modules/*",
-                "node_modules/@types/*",
+                "../node_modules/*",
+                "../node_modules/@types/*",
                 "build/generated-ts/*"
             ]
         },

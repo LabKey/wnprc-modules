@@ -1,4 +1,3 @@
-apply plugin: 'com.moowork.node'
 apply plugin: 'idea'
 
 idea.module {
@@ -29,8 +28,8 @@ task("java2ts", type: JavaExec) {
     outputs.dir("$projectDir/build/generated-ts")
 }
 
-task("compileTypescript", type: Exec, dependsOn: ["java2ts", "npmInstall"]) {
-    commandLine "$projectDir/node_modules/.bin/tsc"
+task("compileTypescript", type: Exec, dependsOn: ["java2ts", "${project.parent.path}:npmInstall"]) {
+    commandLine "$projectDir/../node_modules/.bin/tsc"
 
     inputs.file('tsconfig.json')
     inputs.dir('src/ts')

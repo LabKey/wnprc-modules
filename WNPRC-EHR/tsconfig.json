@@ -9,8 +9,8 @@
         "outDir": "build/compiled-js",
         "paths": {
             "*": [
-                "node_modules/*",
-                "node_modules/@types/*",
+                "../node_modules/*",
+                "../node_modules/@types/*",
                 "build/generated-ts/*",
                 "../WebUtils/build/generated-ts/*",
                 "../WebUtils/src/ts/*"

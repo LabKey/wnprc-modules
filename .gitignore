@@ -22,7 +22,5 @@ docker/data
 docker/logs
 docker/.env
 
-**/bower_components/
 **/node_modules/
 **/build/
-**/out/

@@ -22,7 +22,7 @@ RUN X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${L
 FROM store/oracle/serverjre:8
 
 ENV LANG en_US.utf8
-git
+
 # copy in some additional yum repositories
 COPY public-yum-ol7.repo /etc/yum.repos.d
 

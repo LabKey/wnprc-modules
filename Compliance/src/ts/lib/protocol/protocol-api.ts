@@ -5,7 +5,7 @@ import {
 } from "GeneratedFromJava";
 import {buildURLWithParams, getCurrentContainer} from "WebUtils/LabKey";
 import * as rsvp from "rsvp";
-type Promise<T> = rsvp.Promise<T>;
+type Promise<T> = rsvp.Promise<T, any>;
 
 
 const controller = "wnprc_compliance-protocol-api";

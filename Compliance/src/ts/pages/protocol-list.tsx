@@ -115,7 +115,7 @@ interface NewProtocolModalState {
     isSaving: boolean;
 }
 
-let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
+let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T, any> {
     return new rsvp.Promise((resolve, reject) => {
         promise.then((val) => {
             resolve(val);
@@ -185,7 +185,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
 
         let postURL = buildURL('wnprc_compliance-protocol-api', 'newProtocol', getCurrentContainer());
 
-        convertToRSVP(api.postJSON(postURL, form, {}).then((jsonData: any) => {
+        convertToRSVP(api.postJSON(postURL, form, {})).then((jsonData: any) => {
             let data = jsonData as NewProtocolResponse;
 
             toastr.success("Successfully saved new protocol.");
@@ -193,7 +193,7 @@ class NewProtocolModal extends React.Component<NewProtocolModalProps, NewProtoco
             console.log(e.message, e);
 
             alert("failed");
-        })).finally(() => {
+        }).finally(() => {
             self.props.handleClose();
 
             self.setState({

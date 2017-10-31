@@ -36,7 +36,7 @@ interface ProtocolSpeciesTabsetState {
 }
 
 export class ProtocolSpeciesTabset extends React.Component<ProtocolSpeciesTabsetProps, ProtocolSpeciesTabsetState> {
-    initialValue: Promise<AllowedSpeciesForm>;
+    initialValue: Promise<AllowedSpeciesForm, any>;
 
     constructor(props: ProtocolSpeciesTabsetProps) {
         super(props);

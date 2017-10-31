@@ -1,16 +1,14 @@
 import { getCSRF, getPageLoadData, getBaseURL } from "./LabKey";
-
-import * as s from "underscore.string";
-import * as _ from "underscore";
-
-import RSVP = require('rsvp');
 import { makeURLForHTTPAction } from "./URL";
-import moment = require("moment");
-import Moment = moment.Moment;
+
+import * as moment from "moment";
+import * as RSVP from "rsvp";
+import * as _ from "underscore";
+import * as s from "underscore.string";
 
 const fetch = require("fetch");
 
-let convertToRSVP = function<T>(promise: Promise<T>): RSVP.Promise<T> {
+let convertToRSVP = function<T>(promise: Promise<T>): RSVP.Promise<T, any> {
     return new RSVP.Promise((resolve:any, reject:any) => {
         promise.then((val) => {
             resolve(val);
@@ -20,7 +18,7 @@ let convertToRSVP = function<T>(promise: Promise<T>): RSVP.Promise<T> {
     });
 };
 
-let makeRequest = function(url: string, config?: RequestInit): RSVP.Promise<Response> {
+let makeRequest = function(url: string, config?: RequestInit): RSVP.Promise<Response, any> {
     if (!config) {
         config = {};
     }
@@ -56,7 +54,7 @@ let makeRequest = function(url: string, config?: RequestInit): RSVP.Promise<Resp
     })
 };
 
-let extractJson = function(response: Response): RSVP.Promise<{[name: string]: any}> {
+let extractJson = function(response: Response): RSVP.Promise<{[name: string]: any}, any> {
     let contentType = response.headers.get('content-type');
 
     if (contentType && contentType.indexOf('application/json') !== -1) {
@@ -67,7 +65,7 @@ let extractJson = function(response: Response): RSVP.Promise<{[name: string]: an
     }
 };
 
-let makeRequestJSON = function(url: string, config?: RequestInit): RSVP.Promise<{[name: string]: any}> {
+let makeRequestJSON = function(url: string, config?: RequestInit): RSVP.Promise<{[name: string]: any}, any> {
     return makeRequest(url, config).catch((e:any) => {
         return extractJson(e.response).then((data:any) => {
             return RSVP.Promise.reject(data);
@@ -102,7 +100,7 @@ export function selectRowsFromCache(schema: string, query: string, view?: string
     }
 }
 
-export function selectRows(schema: string, query: string, config: SelectRowsConfig): RSVP.Promise<{[name: string]: any}>  {
+export function selectRows(schema: string, query: string, config: SelectRowsConfig): RSVP.Promise<{[name: string]: any}, any>  {
     // Check for required parameters
     if (!schema) {
         throw "You must specify a schemaName!";
@@ -273,7 +271,7 @@ export function postJSON(url: string, data: Object, config?: RequestInit) {
 
 let dbFormat = "YYYY/MM/DD HH:mm:ss";
 
-export function formatDateForDB(momentObj: Moment) {
+export function formatDateForDB(momentObj: moment.Moment) {
     return momentObj.format(dbFormat)
 }
 

@@ -6,7 +6,7 @@ import { YearSelector, DateTimeSelector } from "../../DatePicker";
 import {
     ScheduleNecropsyForm, NecropsyRequestDetailsForm,
     RequestStaticInfo, NecropsySuiteInfo
-} from "../../../../../build/generated-ts/GeneratedFromJava";
+} from "GeneratedFromJava";
 import { buildURLWithParams, getCurrentContainer } from "WebUtils/LabKey";
 import { getNecropsyRequestDetails, NecropsySuites, Pathologists, scheduleNecropsy } from "./nx-api";
 import * as _ from "underscore";
@@ -17,7 +17,7 @@ import * as rsvp from "rsvp";
 import * as toastr from "toastr";
 
 
-let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T> {
+let convertToRSVP = function<T>(promise: Promise<T>): rsvp.Promise<T, any> {
     return new rsvp.Promise((resolve: any, reject: any) => {
         promise.then((val) => {
             resolve(val);

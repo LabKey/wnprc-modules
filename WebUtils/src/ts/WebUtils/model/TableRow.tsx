@@ -1,7 +1,6 @@
 import * as _ from "underscore";
 import * as React from "react";
-
-const uuidv4 = require("uuid/v4");
+import { v4 as uuidv4 } from "uuid";
 
 export interface HTMLTableColumn {
     getHTML(): string;

@@ -70,7 +70,7 @@ function formatDate(moment: Moment): string {
 
 class Page extends React.Component<PageProps, PageState> {
     dropdownButton: HTMLElement | null;
-    protocolRevisionsFormPromise: Promise<ProtocolRevisionsForm>;
+    protocolRevisionsFormPromise: Promise<ProtocolRevisionsForm, any>;
 
     constructor(props: PageProps) {
         super(props);

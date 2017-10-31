@@ -20,7 +20,7 @@ import {EditableSection} from "../lib/editable-section";
 import {ProtocolBasicInfoEditor} from "../lib/protocol/basic-info-section";
 import {URLForAction} from "../../../../WebUtils/build/generated-ts/GeneratedFromJava";
 import {HazardsEditor} from "../lib/protocol/hazards-section";
-import {buildURL, getCurrentContainer} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+import {buildURL, getCurrentContainer} from "WebUtils/LabKey";
 import * as rsvp from "rsvp";
 import Promise = rsvp.Promise;
 import {getAllRevisions, getEditProtocolRevisionLink} from "../lib/protocol/protocol-api";

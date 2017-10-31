@@ -2,8 +2,8 @@ import * as api from "WebUtils/API";
 import {
     SpeciesClass, SpeciesForm, AllowedSpeciesForm,
     ProtocolRevisionsForm
-} from "../../../../build/generated-ts/GeneratedFromJava";
-import {buildURLWithParams, getCurrentContainer} from "../../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+} from "GeneratedFromJava";
+import {buildURLWithParams, getCurrentContainer} from "WebUtils/LabKey";
 import * as rsvp from "rsvp";
 type Promise<T> = rsvp.Promise<T>;
 

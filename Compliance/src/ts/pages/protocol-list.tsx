@@ -5,16 +5,16 @@ import ChangeEvent = React.ChangeEvent;
 import * as $ from "jquery";
 import * as moment from "moment";
 import Moment = moment.Moment;
-import {NewProtocolForm, NewProtocolResponse, ProtocolListItem} from "../../../build/generated-ts/GeneratedFromJava";
+import {NewProtocolForm, NewProtocolResponse, ProtocolListItem} from "GeneratedFromJava";
 import * as api from "WebUtils/API";
 import {buildURL, getCurrentContainer, buildURLWithParams} from "WebUtils/LabKey";
 import * as toastr from "toastr";
 import {
     TableRow, SimpleStringColumn,
     ReactTableColumn
-} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/TableRow";
-import {Table} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/model/Table";
-import {FilterableTable} from "../../../lkpm/modules/WebUtils/src/ts/WebUtils/component/lk-table";
+} from "WebUtils/model/TableRow";
+import {Table} from "WebUtils/model/Table";
+import {FilterableTable} from "WebUtils/component/lk-table";
 import * as rsvp from "rsvp";
 
 export interface DateSelectorProps {
@@ -67,7 +67,7 @@ export class DateSelector extends React.Component<DateSelectorProps, DateSelecto
             format: 'YYYY-MM-DD'
         });
 
-        this.getInputElement().on("dp.change", (e: Event) => {
+        this.getInputElement().on("dp.change", (e: any) => {
             if ('date' in e) {
                 let date = (e as any).date as any;
 

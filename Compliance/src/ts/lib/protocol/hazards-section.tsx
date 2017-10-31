@@ -1,14 +1,14 @@
 import * as React from "react";
 import Component = React.Component;
-import {BasicInfoForm, HazardsForm} from "../../../../build/generated-ts/GeneratedFromJava";
+import {BasicInfoForm, HazardsForm} from "GeneratedFromJava";
 import {
     buildURLWithParams, getCurrentContainer,
     urlFromAction
-} from "../../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
+} from "WebUtils/LabKey";
 import {getJSON, postJSON} from "WebUtils/API";
 import {TextInput} from "./fields/text-input";
 import {FormProvider, SimpleFormEditor, SimpleFormProps} from "../editable-form";
-import {URLForAction} from "../../../../../WebUtils/build/generated-ts/GeneratedFromJava";
+import {URLForAction} from "GeneratedFromJava";
 import ChangeEvent = React.ChangeEvent;
 import * as s from "underscore.string";
 

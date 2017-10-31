@@ -1,14 +1,14 @@
 import * as React from "react";
 import Component = React.Component;
-import {BasicInfoForm} from "../../../../build/generated-ts/GeneratedFromJava";
+import { BasicInfoForm } from "GeneratedFromJava";
 import {
     buildURLWithParams, getCurrentContainer,
     urlFromAction
-} from "../../../../lkpm/modules/WebUtils/src/ts/WebUtils/LabKey";
-import {getJSON, postJSON} from "WebUtils/API";
-import {TextInput} from "./fields/text-input";
-import {FormProvider, SimpleFormEditor, SimpleFormProps} from "../editable-form";
-import {URLForAction} from "../../../../../WebUtils/build/generated-ts/GeneratedFromJava";
+} from "WebUtils/LabKey";
+import { getJSON, postJSON } from "WebUtils/API";
+import { TextInput } from "./fields/text-input";
+import { FormProvider, SimpleFormEditor, SimpleFormProps } from "../editable-form";
+import { URLForAction } from "GeneratedFromJava";
 
 export interface ProtocolBasicInfoProps {
     revision_id: string;

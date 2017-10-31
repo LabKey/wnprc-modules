@@ -29,8 +29,8 @@ module.exports = {
         extensions: [".ts", ".tsx", ".js"],
 
         // Include Bower to find certain modules.
-        modules: ["node_modules", "bower_components"],
-        descriptionFiles: ["package.json", ".bower.json", "bower.json"]
+        modules: ["node_modules"],
+        descriptionFiles: ["package.json"]
     },
 
     module: {

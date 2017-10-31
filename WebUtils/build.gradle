@@ -1,4 +1,10 @@
 apply plugin: 'com.moowork.node'
+apply plugin: 'idea'
+
+idea.module {
+    excludeDirs += file("build")
+    excludeDirs += file("node_modules")
+}
 
 dependencies {
     compile "javax.servlet:jsp-api:2.0"
@@ -7,16 +13,6 @@ dependencies {
 
 sourceSets {
     main { java { srcDirs = [ "src/java" ]} }
-}
-
-task("bowerInstall", type: Exec, dependsOn: ["npmInstall"]) {
-
-    commandLine "$projectDir/node_modules/.bin/bower", "install", "--allow-root"
-
-    inputs.file('bower.json')
-    inputs.file('packages.json')
-
-    outputs.dir('bower_components')
 }
 
 task("java2ts", type: JavaExec) {
@@ -33,7 +29,7 @@ task("java2ts", type: JavaExec) {
     outputs.dir("$projectDir/build/generated-ts")
 }
 
-task("compileTypescript", type: Exec, dependsOn: ["java2ts", "bowerInstall"]) {
+task("compileTypescript", type: Exec, dependsOn: ["java2ts", "npmInstall"]) {
     commandLine "$projectDir/node_modules/.bin/tsc"
 
     inputs.file('tsconfig.json')
@@ -44,6 +40,10 @@ task("compileTypescript", type: Exec, dependsOn: ["java2ts", "bowerInstall"]) {
 
 task("webpack", type: Exec, dependsOn: ["compileTypescript"]) {
     commandLine "$projectDir/node_modules/.bin/webpack"
+}
+
+clean {
+    delete "$projectDir/build", "$projectDir/node_modules"
 }
 
 project.tasks.findByName("processModuleResources").dependsOn("webpack")

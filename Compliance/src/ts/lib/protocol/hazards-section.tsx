@@ -11,8 +11,7 @@ import {FormProvider, SimpleFormEditor, SimpleFormProps} from "../editable-form"
 import {URLForAction} from "GeneratedFromJava";
 import ChangeEvent = React.ChangeEvent;
 import * as s from "underscore.string";
-
-const uuidv4 = require("uuid/v4");
+import { v4 as uuidv4 } from "uuid"
 
 export interface HazardsEditorProps {
     revision_id: string;

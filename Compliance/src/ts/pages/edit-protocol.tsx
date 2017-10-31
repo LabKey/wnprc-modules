@@ -2,8 +2,7 @@ import {ToolBar} from "../lib/toolbar";
 import * as ReactDOM from "react-dom";
 import * as React from "react";
 import ChangeEvent = React.ChangeEvent;
-import Moment = moment.Moment;
-import moment = require("moment");
+import * as moment from "moment";
 import {ProtocolSpeciesTabset} from "../lib/protocol/species-tabset";
 import * as ReactTabs from 'react-tabs';
 import TabList = ReactTabs.TabList;
@@ -18,15 +17,14 @@ import {BlockableDiv} from "../lib/blockable-div";
 import {UnblockedSection} from "../lib/unblocked-section";
 import {EditableSection} from "../lib/editable-section";
 import {ProtocolBasicInfoEditor} from "../lib/protocol/basic-info-section";
-import {URLForAction} from "../../../../WebUtils/build/generated-ts/GeneratedFromJava";
+import {URLForAction} from "WebUtils/GeneratedFromJava";
 import {HazardsEditor} from "../lib/protocol/hazards-section";
 import {buildURL, getCurrentContainer} from "WebUtils/LabKey";
 import * as rsvp from "rsvp";
 import Promise = rsvp.Promise;
 import {getAllRevisions, getEditProtocolRevisionLink} from "../lib/protocol/protocol-api";
 import * as _ from "underscore";
-
-const uuidv4 = require("uuid/v4");
+import { v4 as uuidv4 } from "uuid";
 
 function submit(): void {
     let form = new NewProtocolForm();
@@ -64,7 +62,7 @@ interface PageState {
     protocolRevisions: ProtocolRevisionsForm | null;
 }
 
-function formatDate(moment: Moment): string {
+function formatDate(moment: moment.Moment): string {
     return moment.format('MMMM Do, YYYY')
 }
 

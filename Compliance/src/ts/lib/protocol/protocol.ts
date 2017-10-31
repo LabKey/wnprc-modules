@@ -1,5 +1,4 @@
-import moment = require("moment");
-import Moment = moment.Moment;
+import * as moment from "moment"
 import {FlagSet} from "../checkboxset";
 import {Drug} from "./protocol/drug";
 import * as ko from "knockout";
@@ -11,8 +10,8 @@ export interface Protocol {
     principal_investigator: string,
     spi_primary: string,
     spi_secondary: string,
-    original_approval_date: Moment
-    approval_date: Moment,
+    original_approval_date: moment.Moment
+    approval_date: moment.Moment,
 
     flags: ProtocolFlags;
     species: SpeciesProtocolInfo[]

@@ -3,12 +3,17 @@
 
 FROM store/oracle/serverjre:8
 
+ENV LANG en_US.utf8
+
+# copy in some additional yum repositories
+COPY public-yum-ol7.repo /etc/yum.repos.d
+
 ENV CATALINA_HOME /usr/local/tomcat
 WORKDIR $CATALINA_HOME
 
 # download and untar tomcat
 ENV TOMCAT_VERSION 7.0.82
-RUN yum -y -q install wget tar gzip \
+RUN yum -y -q install wget tar gzip R-3.2.0 \
  && wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
   | tar -xz --strip-components=1 \
  && chmod -R 755 .

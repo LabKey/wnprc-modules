@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "alwaysStrict": true,
         "baseUrl": ".",
         "jsx" : "react",
         "lib": [ "ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol", "ES2015.Iterable" ],

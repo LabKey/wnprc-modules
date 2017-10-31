@@ -4,7 +4,6 @@ apply plugin: 'com.moowork.node'
 apply plugin: 'idea'
 
 idea.module {
-    excludeDirs += file('gradle')
     excludeDirs += file('node_modules')
 }
 

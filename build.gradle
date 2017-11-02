@@ -1,12 +1,60 @@
+/***********************************************************************************************************************
+ * wnprc-modules "main" build file
+ *
+ * This file is the "main" build definition for the wnprc-modules folders that lie under it, with the caveat that this
+ * file itself is expected to be a subproject of the main _LabKey_ build. As such, the folder structure is assumed to
+ * be as follows:
+ *
+ *   [labkey root]
+ *     -> externalModules
+ *       -> wnprc-modules (this folder)
+ *         -> docker
+ *         -> lib
+ *         -> [module]
+ *         -> [module]
+ *         ...
+ *
+ * To include all the subprojects (including docker, which does get some special treatment later), add the following to
+ * the top-level (LabKey root) settings.gradle file or to a "module set" in [labkey root]/gradle/settings:
+ *
+ *   include 'externalModules:wnprc-modules'
+ *   file('externalModules/wnprc-modules').listFiles().findAll { d ->
+ *     d.isDirectory() && (new File(d.getAbsolutePath(), 'build.gradle')).exists()
+ *   }.each { d ->
+ *     include "externalModules:wnprc-modules:${d.getName()}"
+ *   }
+ *
+ * In case it is not immediately obvious, that code will add every subfolder containing a build.gradle file as a
+ * subproject to the gradle build under the ":externalModules:wnprc-modules" project.
+ *
+ * Each module subproject (i.e., not docker) will automatically get the 'java' plugin (and corresponding sourceSets)
+ * and a few module-specific tasks:
+ *
+ *   - createModuleXml
+ *   - createModule
+ *   - deployModule
+ *   - undeployModule
+ *
+ * The "main" wnprc-modules build also has some tasks to manage all the modules:
+ *
+ *   - createModules
+ *   - deployModules
+ *   - undeployModules
+ *
+ **********************************************************************************************************************/
 import java.util.regex.Pattern
 
+// using this to manage our node_modules and package.json in the base directory rather than module by module
 apply plugin: 'com.moowork.node'
-apply plugin: 'idea'
 
+// using this to ignore the node_modules and other "base" folders in IntelliJ IDEA
+apply plugin: 'idea'
 idea.module {
     excludeDirs += file('node_modules')
 }
 
+// set up the LabKey artifactory and the local maven repository (~/.m2) as build sources. this would
+// be of more use if we were building modules "externally" rather than inside the exising LabKey structure
 allprojects {
     repositories {
         maven { url "${project.labkeyArtifactoryUrl}/libs-release" }
@@ -17,10 +65,15 @@ allprojects {
 }
 
 ext {
-    deployDir = "$rootDir/build/modules"
+    // directory from which the development version of LabKey will deploy modules
+    deployDir = "$rootDir/build/deploy/modules"
+
+    // directory into which .module files are staged (presumably for production builds)
+    stagingDir = "$rootDir/build/staging/modules"
 }
 
-configure(subprojects - project("docker")) {
+def modules = subprojects - project("docker")
+configure(modules) {
 
     apply plugin: 'java'
     apply plugin: 'idea'
@@ -100,7 +153,7 @@ configure(subprojects - project("docker")) {
             modulePropertiesFile.withInputStream { modProperties.load(it) }
 
             // set a few more that are dependent on the build itself
-            modProperties.setProperty("BuildType", "Development")
+            modProperties.setProperty("BuildType", project.hasProperty('deployMode') ? project.property('deployMode') : 'Development')
             modProperties.setProperty("BuildPath",  project.explodedModuleDir.toString())
             modProperties.setProperty("SourcePath", project.getProjectDir().getAbsolutePath())
             modProperties.setProperty("ConsolidateScripts", "false")
@@ -136,17 +189,30 @@ configure(subprojects - project("docker")) {
 
     jar { destinationDir file("${project.explodedModuleDir}/lib") }
 
+    // creates the .module file from the exploded module directory in the build folder and copies that
+    // jar file to the staging directory for later consumption
     task("createModule", group: "Build", type: Jar, dependsOn: [ jar, apiJar, processExternalDependencies, processModuleResources, createModuleXml ] ) { Jar jar ->
         jar.from file(project.explodedModuleDir)
         jar.baseName project.name
         jar.extension 'module'
-        jar.destinationDir project.buildDir
+        jar.destinationDir file(stagingDir)
     }
 
+    // copies the project-specific .module file from the staging directory into the deploy directory
     task("deployModule", group: "Deploy", type: Copy, dependsOn: [ createModule ]) {
-        from buildDir
+        from stagingDir
         into deployDir
-        include '*.module'
+        include "${project.name}-${project.version}.module"
+    }
+
+    // removes the .module file and the exploded directory from the deploy directory
+    task("undeployModule", group: "Deploy", type: Delete) {
+        delete "$deployDir/${project.name}-${project.version}", "$deployDir/${project.name}-${project.version}.module"
+    }
+
+    // removes the .module file from the staging directory (and undeploys it, too)
+    task("cleanModule", group: "Build", type: Delete, dependsOn: [ undeployModule ]) {
+        delete "$stagingDir/${project.name}-${project.version}.module"
     }
 
     artifacts {
@@ -154,12 +220,7 @@ configure(subprojects - project("docker")) {
     }
 }
 
-task ("createModules", group: "Build",  dependsOn: (subprojects - project("docker")).collect { "${it.path}:createModule" }, description: "Builds and jars the .module file for each subproject")
-task ("deployModules", group: "Deploy", dependsOn: (subprojects - project("docker")).collect { "${it.path}:deployModule" }, description: "Deploys all subprojects")
-
-task ("cleanModules", group: "Deploy", type: Delete, description: "Cleans the modules from the deploy directory") {
-    delete deployDir
-}
-
-task ("cleanAll", group: "Build", type: Delete, dependsOn: (subprojects - project("docker")).collect { "${it.path}:clean" }, description: "Cleans all the build artifacts")
-cleanAll.dependsOn("cleanModules")
+task ("createModules",   group: "Build",  dependsOn: modules.collect { "${it.path}:createModule" },   description: "Builds and jars the .module file for each subproject")
+task ("deployModules",   group: "Deploy", dependsOn: modules.collect { "${it.path}:deployModule" },   description: "Deploys all child modules")
+task ("undeployModules", group: "Deploy", dependsOn: modules.collect { "${it.path}:undeployModule" }, description: "Undeploys all child modules")
+task ("cleanModules",    group: "Build",  dependsOn: modules.collect { "${it.path}:cleanModule" },    description: "Cleans/unstages all child modules")

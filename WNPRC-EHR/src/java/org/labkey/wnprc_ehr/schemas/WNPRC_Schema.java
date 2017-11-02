@@ -1,6 +1,6 @@
 package org.labkey.wnprc_ehr.schemas;
 
-import com.drew.lang.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.json.JSONArray;

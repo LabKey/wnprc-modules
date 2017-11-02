@@ -42,6 +42,7 @@ import org.labkey.api.gwt.client.FacetingBehaviorType;
 import org.labkey.api.ldk.LDKService;
 import org.labkey.api.ldk.table.ButtonConfigFactory;
 import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.query.BatchValidationException;
@@ -90,7 +91,7 @@ public class EHRServiceImpl extends EHRService
     private Set<Module> _registeredModules = new HashSet<>();
     private List<DemographicsProvider> _demographicsProviders = new ArrayList<>();
     private Map<REPORT_LINK_TYPE, List<ReportLink>> _reportLinks = new HashMap<>();
-    private Map<String, List<Pair<Module, String>>> _actionOverrides = new HashMap<>();
+    private Map<String, List<Pair<Module, Path>>> _actionOverrides = new HashMap<>();
     private List<Pair<Module, Resource>> _extraTriggerScripts = new ArrayList<>();
     private Map<Module, LinkedHashSet<ClientDependency>> _clientDependencies = new HashMap<>();
     private Map<String, Map<String, List<Pair<Module, Class<? extends TableCustomizer>>>>> _tableCustomizers = new CaseInsensitiveHashMap<>();
@@ -421,28 +422,28 @@ public class EHRServiceImpl extends EHRService
 
     public void registerActionOverride(String actionName, Module owner, String resourcePath)
     {
-        List<Pair<Module, String>> list = _actionOverrides.get(actionName);
+        List<Pair<Module, Path>> list = _actionOverrides.get(actionName);
         if (list == null)
             list = new ArrayList<>();
 
-        list.add(Pair.of(owner, resourcePath));
+        list.add(Pair.of(owner, Path.parse(resourcePath)));
 
         _actionOverrides.put(actionName, list);
     }
 
-    public Resource getActionOverride(String actionName, Container c)
+    public Pair<Module, Path> getActionOverride(String actionName, Container c)
     {
         if (!_actionOverrides.containsKey(actionName))
             return null;
 
         Set<Module> activeModules = c.getActiveModules();
-        for (Pair<Module, String> pair : _actionOverrides.get(actionName))
+
+        for (Pair<Module, Path> pair : _actionOverrides.get(actionName))
         {
             if (activeModules.contains(pair.first))
             {
-                Resource r = pair.first.getModuleResource(Path.parse(pair.second));
-                if (r != null)
-                    return r;
+                if (ModuleHtmlView.exists(pair.first, pair.second))
+                    return pair;
                 else
                     _log.error("Unable to find registered EHR action: " + pair.first.getName() + " / " + pair.second);
             }

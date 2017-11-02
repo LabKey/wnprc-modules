@@ -1,0 +1,6 @@
+dependencies {
+    compile "org.labkey:query:${project.labkeyVersion}"
+    external "org.jooq:jooq:3.8.4"
+
+    apiCompile "com.google.guava:guava:17.0"
+}

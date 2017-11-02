@@ -2,8 +2,8 @@ package org.labkey.api.ehr.security;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
-import org.labkey.api.study.security.SecurityEscalationAuditProvider;
-import org.labkey.api.study.security.SecurityEscalator;
+import org.labkey.dbutils.api.security.SecurityEscalationAuditProvider;
+import org.labkey.dbutils.api.security.SecurityEscalator;
 
 /**
  * A class to bypass the security checks made by study datasets.  To use, call

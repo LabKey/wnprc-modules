@@ -1,6 +1,6 @@
 package org.labkey.gringotts.api.model;
 
-import org.apache.commons.collections15.map.CaseInsensitiveMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.joda.time.DateTime;
 
 /**
@@ -9,9 +9,9 @@ import org.joda.time.DateTime;
 public class RawRecordValues {
     public final int version;
 
-    public final CaseInsensitiveMap<String>   textValues = new CaseInsensitiveMap<>();
-    public final CaseInsensitiveMap<DateTime> dateValues = new CaseInsensitiveMap<>();
-    public final CaseInsensitiveMap<Integer>  intValues  = new CaseInsensitiveMap<>();
+    public final CaseInsensitiveMap<String, String>   textValues = new CaseInsensitiveMap<>();
+    public final CaseInsensitiveMap<String, DateTime> dateValues = new CaseInsensitiveMap<>();
+    public final CaseInsensitiveMap<String, Integer>  intValues  = new CaseInsensitiveMap<>();
 
     public RawRecordValues(int version) {
         this.version = version;

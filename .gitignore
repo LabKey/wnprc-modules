@@ -2,6 +2,8 @@
 
 .idea/**/workspace.xml
 .idea/**/tasks.xml
+.idea/**/modules.xml
+.idea/modules
 .idea/dictionaries
 
 .idea/**/dataSources/
@@ -11,8 +13,16 @@
 .idea/**/sqlDataSources.xml
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
+.idea/**/jsLibraryMappings.xml
 
 .idea/**/gradle.xml
 .idea/**/libraries
 
-out/
+docker/data
+docker/logs
+docker/.env
+
+**/bower_components/
+**/node_modules/
+**/build/
+**/out/

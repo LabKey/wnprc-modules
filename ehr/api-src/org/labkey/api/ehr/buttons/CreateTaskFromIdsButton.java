@@ -51,7 +51,7 @@ public class CreateTaskFromIdsButton extends SimpleButtonConfigFactory
         Container c = ti.getUserSchema().getContainer();
         User u = ti.getUserSchema().getUser();
 
-        StudyService.Service svc = StudyService.get();
+        StudyService svc = StudyService.get();
         if (svc == null)
             return false;
 

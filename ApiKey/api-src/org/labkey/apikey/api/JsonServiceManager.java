@@ -1,6 +1,6 @@
 package org.labkey.apikey.api;
 
-import org.apache.commons.collections15.map.CaseInsensitiveMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.labkey.api.data.Container;
@@ -24,7 +24,7 @@ public abstract class JsonServiceManager {
     }
 
     abstract public void registerService(Module module, JsonService service);
-    abstract public CaseInsensitiveMap<JsonService> getServices(Module module);
+    abstract public CaseInsensitiveMap<String, JsonService> getServices(Module module);
 
     @Nullable
     abstract public JsonService getService(Module module, String name);

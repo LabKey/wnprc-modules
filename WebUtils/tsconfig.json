@@ -7,10 +7,10 @@
         "strictNullChecks": true,
         "jsx" : "react",
         "baseUrl": ".",
+        "outDir": "build/compiled-ts",
         "paths": {
             "*": [
                 "node_modules/*",
-                "node_modules/lkpm/node_modules/*",
                 "node_modules/@types/*",
                 "bower_components/*",
                 "build/generated-ts/*"

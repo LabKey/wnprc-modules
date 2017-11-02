@@ -163,7 +163,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource());
         EHRService.get().registerHistoryDataSource(new DefaultTBDataSource());
 
-        EHRService.get().addModuleRequiringLegagyExt3EditUI(this);
+        EHRService.get().addModuleRequiringLegacyExt3EditUI(this);
 
         this.registerNotifications();
         this.registerDataEntryForms();

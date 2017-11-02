@@ -1,0 +1,7 @@
+dependencies {
+
+    compile "javax.servlet:jsp-api:2.0"
+    compile project(path: ":ApiKey", configuration: "apiCompile")
+
+    external "org.jooq:jooq:3.8.4"
+}

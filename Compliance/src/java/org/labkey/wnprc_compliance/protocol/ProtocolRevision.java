@@ -1,6 +1,6 @@
 package org.labkey.wnprc_compliance.protocol;
 
-import com.drew.lang.annotations.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.jooq.impl.DSL;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;

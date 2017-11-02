@@ -6,7 +6,7 @@ import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.study.security.SecurityEscalator;
+import org.labkey.dbutils.api.security.SecurityEscalator;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
 import org.labkey.dbutils.api.schema.DecoratedTableInfo;
 import org.labkey.api.query.BatchValidationException;

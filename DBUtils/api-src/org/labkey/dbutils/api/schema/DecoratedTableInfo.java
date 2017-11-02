@@ -430,23 +430,6 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public void setAuditBehavior(AuditBehaviorType type) {
-        _tableInfo.setAuditBehavior(type);
-    }
-
-    @Override
-    public AuditBehaviorType getAuditBehavior()
-    {
-        return _tableInfo.getAuditBehavior();
-    }
-
-    @Nullable
-    @Override
-    public FieldKey getAuditRowPk() {
-        return _tableInfo.getAuditRowPk();
-    }
-
-    @Override
     public Set<ColumnInfo> getAllInvolvedColumns(Collection<ColumnInfo> selectColumns) {
         return _tableInfo.getAllInvolvedColumns(selectColumns);
     }
@@ -454,5 +437,10 @@ public class DecoratedTableInfo implements TableInfo {
     @Override
     public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm) {
         return _tableInfo.hasPermission(user, perm);
+    }
+
+    @Override
+    public boolean supportsAuditTracking() {
+        return _tableInfo.supportsAuditTracking();
     }
 }

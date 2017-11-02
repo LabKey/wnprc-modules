@@ -1,0 +1,33 @@
+apply plugin: 'idea'
+
+idea.module {
+    excludeDirs += file("data")
+    excludeDirs += file("logs")
+}
+
+task("buildLabkey", group: "Docker", type: Exec, description: "Generates the LabKey docker image") {
+    workingDir "${project.rootDir}/docker/labkey"
+    executable "docker"
+    args "build", ".", "-t", "wnprcehr/labkey:15.2"
+}
+
+task("buildMonit", group: "Docker", type: Exec, description: "Generates the Monit docker image") {
+    workingDir "${project.rootDir}/docker/monit"
+    executable "docker"
+    args "build", ".", "-t", "wnprcehr/monit:latest"
+}
+
+task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildLabkey", "buildMonit" ] )
+
+task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
+    workingDir "${project.rootDir}/docker"
+    executable "docker-compose"
+    args "up", "-d"
+    environment CATALINA_OPTS: "-ea -Ddevmode=true"
+}
+
+task("down", group: "Docker", type: Exec, description: "Shuts down the docker-compose environment (labkey + postgres)") {
+    workingDir "${project.rootDir}/docker"
+    executable "docker-compose"
+    args "down"
+}

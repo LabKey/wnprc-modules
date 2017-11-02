@@ -9,7 +9,6 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.dbutils.file.FileToucher;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -50,10 +49,10 @@ public class dbutilsModule extends ExtendedSimpleModule {
     }
 
     public Container getPrivateContainer() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     public Container getPrivateFilesContainer() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 }

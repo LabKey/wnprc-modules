@@ -1,7 +1,7 @@
 package org.labkey.gringotts.model;
 
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.collections15.map.CaseInsensitiveMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -149,7 +149,7 @@ public class Transaction implements AutoCloseable {
 
         // Start by saving the date values
         Map<String, DateTime> curDateValues = info.getTimestampValues(record);
-        CaseInsensitiveMap<DateTime> oldDateValues = record.getOldValues().dateValues;
+        CaseInsensitiveMap<String, DateTime> oldDateValues = record.getOldValues().dateValues;
 
         for(String key : curDateValues.keySet()) {
             if (!curDateValues.get(key).isEqual(oldDateValues.get(key))) {
@@ -163,7 +163,7 @@ public class Transaction implements AutoCloseable {
 
         // Now, do the text values.
         Map<String, String> curTextValues = info.getTextValues(record);
-        CaseInsensitiveMap<String> oldTextValues = record.getOldValues().textValues;
+        CaseInsensitiveMap<String, String> oldTextValues = record.getOldValues().textValues;
 
         for(String key : curTextValues.keySet()) {
             if (!curTextValues.get(key).equals(oldTextValues.get(key))) {
@@ -177,7 +177,7 @@ public class Transaction implements AutoCloseable {
 
         // Finally, do the ints
         Map<String, Integer> curIntValues = info.getIntValues(record);
-        CaseInsensitiveMap<Integer> oldIntValues = record.getOldValues().intValues;
+        CaseInsensitiveMap<String, Integer> oldIntValues = record.getOldValues().intValues;
 
         for(String key : curIntValues.keySet()) {
             if (!curIntValues.get(key).equals(oldIntValues.get(key))) {

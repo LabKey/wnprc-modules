@@ -8,7 +8,6 @@ import org.labkey.api.security.User;
 import org.labkey.gringotts.api.GringottsService;
 import org.labkey.gringotts.api.exception.InvalidVaultException;
 import org.labkey.gringotts.api.exception.RecordNotFoundException;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -112,10 +111,9 @@ public abstract class Vault<RecordType extends Vault.Record> {
      *
      * @param recordType
      * @param rawRecordValues
-     * @throws NotImplementedException if the
      */
-    public void upgrade(RecordType recordType, RawRecordValues rawRecordValues) throws NotImplementedException {
-        throw new NotImplementedException();
+    public void upgrade(RecordType recordType, RawRecordValues rawRecordValues) {
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     /**

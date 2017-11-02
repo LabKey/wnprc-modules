@@ -31,11 +31,7 @@ task("compileTypescript", type: Exec, dependsOn: ["java2ts", "${project.parent.p
 }
 
 task("webpack", type: Exec, dependsOn: ["compileTypescript"]) {
-    commandLine "$projectDir/node_modules/.bin/webpack"
-}
-
-clean {
-    delete "$projectDir/build", "$projectDir/node_modules"
+    commandLine "$projectDir/../node_modules/.bin/webpack"
 }
 
 project.tasks.findByName("processModuleResources").dependsOn("webpack")

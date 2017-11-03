@@ -31,7 +31,7 @@ ENV CATALINA_HOME /usr/local/tomcat
 WORKDIR $CATALINA_HOME
 
 ENV TOMCAT_VERSION 8.5.23
-RUN yum -y -q install wget tar gzip R-3.2.0 \
+RUN yum -y -q install wget tar gzip R-3.2.0 tzdata \
  && wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
   | tar -xz --strip-components=1 \
  && chmod -R 755 .
@@ -61,5 +61,5 @@ EXPOSE 8080
 # copy the script to wait for the postgres instance (and chmod it for execution)
 COPY wait-for-postgres.sh /etc/
 RUN yum -y -q install postgresql && chmod +x /etc/wait-for-postgres.sh
-CMD ["sh", "-c", "/etc/wait-for-postgres.sh postgres bin/catalina.sh run"]
+CMD ["sh", "-c", "ln -snf /usr/chare/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && /etc/wait-for-postgres.sh postgres bin/catalina.sh run"]
 

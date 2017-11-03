@@ -103,6 +103,10 @@ configure(modules) {
             resources { srcDirs = ["webapp/WEB-INF"] }
             output.resourcesDir = "${project.explodedModuleDir}/config"
         }
+        jsp {
+            java { srcDirs = ["$buildDir/jspTempDir/classes"] }
+            output.classesDir = "$buildDir/jspTempDir/classes"
+        }
     }
 
     configurations {
@@ -111,6 +115,15 @@ configure(modules) {
 
         apiExternal
         apiCompile.extendsFrom(apiExternal)
+
+        jspCompile
+        jsp
+    }
+
+    project.configurations.jspCompile {
+        resolutionStrategy {
+            force "javax.servlet:servlet-api:3.0"
+        }
     }
 
     compileJava {
@@ -127,6 +140,17 @@ configure(modules) {
         compile 'org.jetbrains:annotations:15.0'
         compile project(":server:api")
         compile project(":externalModules:labModules:LDK")
+        jspCompile 'org.apache.tomcat:jasper'
+        jspCompile 'org.apache.tomcat:jsp-api'
+        jspCompile 'org.apache.tomcat:tomcat-juli'
+        jspCompile fileTree(dir: "${project.tomcatDir}/lib", includes: ['*.jar'])
+        jspCompile project.files(project.tasks.jar)
+        if (project.hasProperty('apiJar')) {
+            jspCompile project.files(project.tasks.apiJar)
+        }
+        jsp 'org.apache.tomcat:jasper'
+        jsp 'org.apache.tomcat:bootstrap'
+        jsp 'org.apache.tomcat:tomcat-juli'
     }
 
     task("processExternalDependencies", group: "Build", type: Copy) {
@@ -189,6 +213,113 @@ configure(modules) {
 
     jar { destinationDir file("${project.explodedModuleDir}/lib") }
 
+    task('copyJsp', group: "Build", type: Copy, description: "Copy jsp files to jsp compile directory",
+            { CopySpec copy ->
+                copy.from 'src'
+                copy.into "${project.buildDir}/jspTempDir/webapp"
+                copy.include '**/*.jsp'
+            }).doFirst {
+        project.delete "${project.buildDir}/jspTempDir/webapp/org"
+    }
+
+    task('copyResourceJsp', group: "Build", type: Copy, description: "Copy resource jsp files to jsp compile directory") { CopySpec copy ->
+        copy.from 'resources'
+        copy.into "${project.buildDir}/jspTempDir/webapp/org/labkey/${project.name}"
+        copy.include '**/*.jsp'
+    }
+
+    task('copyTagLibs', group: "Build", type: Copy, description: "Copy the tag library (.tld) files to jsp compile directory",
+            { CopySpec copy ->
+                copy.from "${project.rootProject.buildDir}/webapp"
+                copy.into "${project.buildDir}/jspTempDir/webapp"
+                copy.include 'WEB-INF/web.xml'
+                copy.include 'WEB-INF/*.tld'
+                copy.include 'WEB-INF/tags/**'
+            })
+
+    task('jsp2Java', group: "Build", description: "compile jsp files into Java classes") {
+        inputs.file copyJsp
+        inputs.file copyResourceJsp
+        inputs.file copyTagLibs
+        outputs.dir "${project.buildDir}/jspTempDir/classes"
+
+        doFirst {
+            project.delete "${project.buildDir}/jspTempDir/classes"
+        }
+
+        if (project.hasProperty('apiJar'))
+            dependsOn 'apiJar'
+        dependsOn 'jar'
+
+        doLast {
+            File uriRoot = new File("${project.buildDir}/jspTempDir/webapp")
+            if (!uriRoot.exists())
+                uriRoot.mkdirs();
+            ant.taskdef(
+                    name: 'jasper',
+                    classname: 'org.apache.jasper.JspC',
+                    classpath: project.configurations.jspCompile.asPath
+            )
+            ant.jasper(
+                    uriroot: "${project.buildDir}/jspTempDir/webapp",
+                    outputDir: "${project.buildDir}/jspTempDir/classes",
+                    package: "org.labkey.jsp.compiled",
+                    compilerTargetVM: project.targetCompatibility,
+                    compilerSourceVM: project.sourceCompatibility,
+                    trimSpaces: false,
+                    compile: false,
+                    listErrors: true
+            )
+        }
+    }
+
+    task('jspJar', group: "Build", type: Jar, description: "produce jar file of jsps", dependsOn: [ 'jsp2Java' ]) { Jar jar ->
+        jar.classifier = 'jsp'
+        jar.from "${project.buildDir}/jspTempDir/classes"
+        jar.baseName = "${project.name}_jsp"
+        jar.destinationDir = project.file("$buildDir/explodedModule/lib")
+    }
+
+    if (file("$projectDir/tsconfig.json").exists()) {
+
+        task("java2ts", type: JavaExec) {
+
+            doFirst {
+                mkdir "$projectDir/build/generated-ts"
+            }
+
+            main = 'com.github.jonathonrichardson.java2ts.Compiler'
+            classpath = sourceSets.main.runtimeClasspath
+            args = [ "$projectDir/build/generated-ts/GeneratedFromJava.ts" ]
+
+            inputs.dir("$projectDir/src/java")
+            outputs.dir("$projectDir/build/generated-ts")
+        }
+
+        task("compileTypescript", type: Exec, dependsOn: ["java2ts", "${project.parent.path}:npmInstall"]) {
+            workingDir "$projectDir"
+            commandLine "../node_modules/.bin/tsc"
+
+            inputs.file("$projectDir/tsconfig.json")
+            inputs.dir("$projectDir/src/ts")
+            inputs.dir("$projectDir/build/generated-ts")
+            outputs.dir("$projectDir/build/compiled-ts")
+        }
+
+        project.tasks.findByName("processModuleResources").dependsOn("compileTypescript")
+    }
+
+    if (file("$projectDir/webpack.config.js").exists()){
+        task("webpack", type: Exec) {
+            if (project.tasks.findByName("compileTypescript")) {
+                dependsOn compileTypescript
+            }
+            workingDir "$projectDir"
+            commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR='$buildDir'"
+        }
+        project.tasks.findByName("processModuleResources").dependsOn("webpack")
+    }
+
     // creates the .module file from the exploded module directory in the build folder and copies that
     // jar file to the staging directory for later consumption
     task("createModule", group: "Build", type: Jar, dependsOn: [ jar, apiJar, processExternalDependencies, processModuleResources, createModuleXml ] ) { Jar jar ->
@@ -217,6 +348,7 @@ configure(modules) {
 
     artifacts {
         apiCompile apiJar
+        jspCompile jspJar
     }
 }
 

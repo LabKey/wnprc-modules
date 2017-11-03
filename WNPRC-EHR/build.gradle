@@ -13,28 +13,3 @@ sourceSets {
         java { srcDirs = [ "src/java" ] }
     }
 }
-
-task("java2ts", type: JavaExec) {
-    inputs.dir('src/java')
-    outputs.dir("$projectDir/build/generated-ts")
-
-    doFirst {
-        mkdir "$projectDir/build/generated-ts"
-    }
-
-    main = 'com.github.jonathonrichardson.java2ts.Compiler'
-    classpath = sourceSets.main.runtimeClasspath
-    args = [ "$projectDir/build/generated-ts/GeneratedFromJava.ts" ]
-}
-
-task("compileTypescript", type: Exec, dependsOn: ["java2ts", "${project.parent.path}:npmInstall"]) {
-    inputs.file('tsconfig.json')
-    inputs.dir('src/ts')
-    inputs.dir("$projectDir/build/generated-ts")
-    outputs.dir("$projectDir/build/compiled-ts")
-
-    workingDir projectDir
-    commandLine "$projectDir/../node_modules/.bin/tsc"
-}
-
-project.tasks.findByName("processModuleResources").dependsOn("compileTypescript")

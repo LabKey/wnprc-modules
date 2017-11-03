@@ -8,13 +8,8 @@
         "noImplicitAny": true,
         "outDir": "build/compiled-js",
         "paths": {
-            "*": [
-                "../node_modules/*",
-                "../node_modules/@types/*",
-                "build/generated-ts/*",
-                "../WebUtils/build/generated-ts/*",
-                "../WebUtils/src/ts/*"
-            ]
+            "WebUtils/*": [ "../WebUtils/src/ts/WebUtils/*", "../WebUtils/build/generated-ts/*" ],
+            "*": [ "build/generated-ts/*", "../node_modules/*", "../node_modules/@types/*" ]
         },
         "sourceMap": true,
         "strictNullChecks": true,

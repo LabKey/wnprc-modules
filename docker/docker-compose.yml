@@ -70,7 +70,7 @@ services:
       TZ: America/Chicago
 
   perlscripts:
-    image: wnprcehr/ehrcron:v0.1.0
+    image: wnprcehr/ehrcron:v1.0.0
     depends_on:
       - "labkey"
     volumes:
@@ -78,6 +78,7 @@ services:
     environment:
       LK_BACKGROUND_USER: 
       LK_BACKGROUND_USER_PASSWORD:
+      LK_BASE_URL:
       TZ: America/Chicago
 
   monit:

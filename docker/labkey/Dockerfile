@@ -48,5 +48,5 @@ EXPOSE 8080
 # copy the script to wait for the postgres instance (and chmod it for execution)
 COPY wait-for-postgres.sh /etc/
 RUN yum -y -q install postgresql && chmod +x /etc/wait-for-postgres.sh
-CMD ["sh", "-c", "ln -snf /usr/chare/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && /etc/wait-for-postgres.sh postgres bin/catalina.sh run"]
+CMD ["sh", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && /etc/wait-for-postgres.sh postgres bin/catalina.sh run"]
 

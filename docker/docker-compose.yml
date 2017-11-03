@@ -4,8 +4,9 @@ services:
   postgres:
     image: postgres:9.2
     volumes:
-      - "${PG_DATA_DIR}:/var/lib/postgresql/data"
       - "${PG_CONF_FILE}:/var/lib/postgresql/data/postgresql.conf"
+      - "${PG_DATA_DIR}:/var/lib/postgresql/data"
+      - "${PG_LOG_DIR}:/var/lib/postgresql/data/pg_log"
     ports:
       - "9081:5432"
     expose:
@@ -48,6 +49,7 @@ services:
       PG_NAME:
       PG_PASS:
       PG_USER:
+      TZ: America/Chicago
 
   nginx:
     image: nginx:1.13.0

@@ -21,8 +21,6 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
-#$baseUrl = 'http://localhost:8080/labkey/';
-
 my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Site Error Alerts';

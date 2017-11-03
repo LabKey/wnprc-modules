@@ -1,0 +1,7 @@
+# ignore everything unless otherwise specified
+*
+
+# whitelist the following files:
+!netrc
+!ssmtp.conf
+!scripts/

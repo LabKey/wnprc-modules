@@ -5,6 +5,12 @@ idea.module {
     excludeDirs += file("logs")
 }
 
+task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the ehrcron docker image") {
+    workingDir "${project.rootDir}/docker/ehrcron"
+    executable "docker"
+    args "build", ".", "-t", "wnprcehr/ehrcron:v1.0.0"
+}
+
 task("buildLabkey", group: "Docker", type: Exec, description: "Generates the LabKey docker image") {
     workingDir "${project.rootDir}/docker/labkey"
     executable "docker"
@@ -17,7 +23,7 @@ task("buildMonit", group: "Docker", type: Exec, description: "Generates the Moni
     args "build", ".", "-t", "wnprcehr/monit:latest"
 }
 
-task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildLabkey", "buildMonit" ] )
+task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildEhrcron", "buildLabkey", "buildMonit" ] )
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
     workingDir "${project.rootDir}/docker"

@@ -6,4 +6,7 @@ dependencies {
     external "joda-time:joda-time:2.9.3"
     external "org.jsoup:jsoup:1.10.3"
     external fileTree("${project.projectDir}/../lib")
+    jspCompile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
+    jspCompile project("${project.parent.path}:WebUtils")
+    jspCompile "joda-time:joda-time:2.9.3"
 }

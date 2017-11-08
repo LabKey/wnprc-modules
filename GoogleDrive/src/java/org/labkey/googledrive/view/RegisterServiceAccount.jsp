@@ -1,13 +1,12 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.googledrive.GoogleDriveController" %>
-<%@ page import="org.labkey.api.util.HString" %>
 <%@ page import="org.labkey.googledrive.GoogleDriveSchema" %>
 <%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    HString manageURL = new HString(getContextPath() + "/query/" + ContainerManager.getHomeContainer().getEncodedPath() + "/executeQuery.view?schemaName=" + GoogleDriveSchema.NAME + "&query.queryName=service_accounts");
-    HString apiURL = new ActionURL(GoogleDriveController.AddAcount.class, getContainer()).toHString();
+    String manageURL = getContextPath() + "/query/" + ContainerManager.getHomeContainer().getEncodedPath() + "/executeQuery.view?schemaName=" + GoogleDriveSchema.NAME + "&query.queryName=service_accounts";
+    String apiURL = new ActionURL(GoogleDriveController.AddAcount.class, getContainer()).toString();
 %>
 
 <div class="panel panel-primary">

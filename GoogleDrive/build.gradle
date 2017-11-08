@@ -5,4 +5,6 @@ dependencies {
     compile files(apiJar)
     external 'com.google.api-client:google-api-client:1.22.0'
     external 'com.google.apis:google-api-services-drive:v3-rev85-1.23.0'
+    jspCompile project(':server:api')
+    jspCompile project("${project.parent.path}:WebUtils")
 }

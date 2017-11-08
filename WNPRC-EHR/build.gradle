@@ -7,9 +7,3 @@ dependencies {
     external "org.jsoup:jsoup:1.10.3"
     external fileTree("${project.projectDir}/../lib")
 }
-
-sourceSets {
-    main {
-        java { srcDirs = [ "src/java" ] }
-    }
-}

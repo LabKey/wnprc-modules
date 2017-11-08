@@ -1,0 +1,110 @@
+apply plugin: 'java-base'
+
+sourceSets {
+    jsp {
+        java { srcDirs = ["${project.buildDir}/jspTempDir/classes"] }
+        output.classesDir = "${project.buildDir}/jspTempDir/classes"
+    }
+}
+
+configurations {
+    jspCompile {
+        resolutionStrategy {
+            force "javax.servlet:servlet-api:3.0"
+        }
+    }
+    jsp
+}
+
+dependencies {
+    jspCompile 'org.apache.tomcat:jasper'
+    jspCompile 'org.apache.tomcat:jsp-api'
+    jspCompile 'org.apache.tomcat:tomcat-juli'
+    jspCompile fileTree(dir: "${project.tomcatDir}/lib", includes: ['*.jar'])
+    jspCompile project(":server:api")
+    jspCompile project(":server:internal")
+    if (project.hasProperty('jar')) {
+        jspCompile project.files(project.tasks.jar)
+    }
+    if (project.hasProperty('apiJar')) {
+        jspCompile project.files(project.tasks.apiJar)
+    }
+
+    jsp 'org.apache.tomcat:jasper'
+    jsp 'org.apache.tomcat:bootstrap'
+    jsp 'org.apache.tomcat:tomcat-juli'
+}
+
+task('copyJsp', group: "JSP", type: Copy, description: "Copy jsp files to jsp compile directory",
+        { CopySpec copy ->
+            copy.from 'src/java'
+            copy.into "${project.buildDir}/jspTempDir/webapp"
+            copy.include '**/*.jsp'
+        }).doFirst {
+    project.delete "${project.buildDir}/jspTempDir/webapp/org"
+}
+
+task('copyResourceJsp', group: "JSP", type: Copy, description: "Copy resource jsp files to jsp compile directory") { CopySpec copy ->
+    copy.from 'resources'
+    copy.into "${project.buildDir}/jspTempDir/webapp/org/labkey/${project.name}"
+    copy.include '**/*.jsp'
+}
+
+task('copyTagLibs', group: "JSP", type: Copy, description: "Copy the tag library (.tld) files to jsp compile directory",
+        { CopySpec copy ->
+            copy.from "${project.rootProject.buildDir}/webapp"
+            copy.into "${project.buildDir}/jspTempDir/webapp"
+            copy.include 'WEB-INF/web.xml'
+            copy.include 'WEB-INF/*.tld'
+            copy.include 'WEB-INF/tags/**'
+        })
+
+task('jsp2Java', group: "JSP", description: "compile jsp files into Java classes") {
+    inputs.file copyJsp
+    inputs.file copyResourceJsp
+    inputs.file copyTagLibs
+    outputs.dir "${project.buildDir}/jspTempDir/classes"
+
+    doFirst {
+        project.delete "${project.buildDir}/jspTempDir/classes"
+    }
+
+    if (project.hasProperty('apiJar'))
+        dependsOn 'apiJar'
+    dependsOn 'jar'
+
+    doLast {
+        File uriRoot = new File("${project.buildDir}/jspTempDir/webapp")
+        if (!uriRoot.exists())
+            uriRoot.mkdirs();
+        ant.taskdef(
+                name: 'jasper',
+                classname: 'org.apache.jasper.JspC',
+                classpath: project.configurations.jspCompile.asPath
+        )
+        ant.jasper(
+                uriroot: "${project.buildDir}/jspTempDir/webapp",
+                outputDir: "${project.buildDir}/jspTempDir/classes",
+                package: "org.labkey.jsp.compiled",
+                compilerTargetVM: project.targetCompatibility,
+                compilerSourceVM: project.sourceCompatibility,
+                trimSpaces: false,
+                compile: false,
+                listErrors: true
+        )
+    }
+}
+project.tasks.compileJspJava.dependsOn('jsp2Java')
+
+task('jspJar', group: "JSP", type: Jar, description: "produce jar file of jsps", dependsOn: [ 'compileJspJava' ]) { Jar jar ->
+    jar.classifier = 'jsp'
+    jar.from "${project.buildDir}/jspTempDir/classes"
+    jar.baseName = "${project.name}_jsp"
+    jar.destinationDir = project.file("${project.buildDir}/explodedModule/lib")
+
+    ext.included = true
+}
+
+artifacts {
+    jspCompile jspJar
+}

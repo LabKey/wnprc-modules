@@ -1,0 +1,49 @@
+apply plugin: 'java-base'
+
+// compile the API java source code
+sourceSets {
+    api {
+        java { srcDirs = ['api-src'] }
+        output.classesDir = "${project.buildDir}/api-classes"
+    }
+}
+
+// set up a configuration for included java dependencies and also
+// "external" ones that will need to be specifically included in
+// the lib directory when packing up the module
+configurations {
+    apiExternal
+    apiCompile.extendsFrom(apiExternal)
+}
+
+// set up the java build such that warnings are treated as errors
+tasks.compileApiJava {
+    options.compilerArgs << '-Werror'
+}
+
+dependencies {
+    apiCompile 'org.jetbrains:annotations:15.0'
+    apiCompile project(':server:api')
+}
+
+task('apiJar', group: 'API', type: Jar, dependsOn: [ 'apiClasses' ],
+        description: 'Builds and jars the java classes for the module API') { Jar jar ->
+    jar.classifier 'api'
+    jar.from sourceSets.api.output.classesDir
+    jar.baseName "${project.name}_api"
+    jar.destinationDir = file("${project.explodedModuleDir}/lib")
+
+    ext.included = true
+}
+
+task('copyApiExternalLibs', group: 'API', type: Copy,
+        description: 'Copies the external libraries necessary for the API to the lib directory') {
+    from project.configurations.apiExternal
+    into "${project.explodedModuleDir}/lib"
+
+    ext.included = true
+}
+
+artifacts {
+    apiCompile apiJar
+}

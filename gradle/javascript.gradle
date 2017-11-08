@@ -1,0 +1,23 @@
+
+task("java2ts", group: 'JavaScript', type: JavaExec,
+        description: 'Generates TypeScript files for certain annotated classes in the Java source') {
+
+    doFirst {
+        mkdir "$projectDir/build/generated-ts"
+    }
+
+    main = 'com.github.jonathonrichardson.java2ts.Compiler'
+    classpath = sourceSets.main.runtimeClasspath
+    args = [ "$projectDir/build/generated-ts/GeneratedFromJava.ts" ]
+
+    inputs.dir("$projectDir/src/java")
+    outputs.dir("$projectDir/build/generated-ts")
+}
+
+task("webpack", group: 'JavaScript', type: Exec, dependsOn: ['java2ts', "${project.parent.path}:npmInstall"],
+        description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
+    workingDir "$projectDir"
+    commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
+
+    ext.included = true
+}

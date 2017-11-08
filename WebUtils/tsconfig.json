@@ -3,9 +3,7 @@
         "baseUrl": ".",
         "jsx" : "react",
         "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol"],
-        "module": "commonjs",
         "noImplicitAny": true,
-        "outDir": "build/compiled-ts",
         "paths": {
             "*": [
                 "../node_modules/*",
@@ -15,7 +13,7 @@
         },
         "sourceMap": true,
         "strictNullChecks": true,
-        "target": "es5"
+        "target": "ES5"
     },
     "include": [
       "src/ts/WebUtils.ts",

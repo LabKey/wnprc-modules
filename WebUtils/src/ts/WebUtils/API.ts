@@ -5,8 +5,7 @@ import * as moment from "moment";
 import * as RSVP from "rsvp";
 import * as _ from "underscore";
 import * as s from "underscore.string";
-
-const fetch = require("fetch");
+import "whatwg-fetch";
 
 let convertToRSVP = function<T>(promise: Promise<T>): RSVP.Promise<T, any> {
     return new RSVP.Promise((resolve:any, reject:any) => {
@@ -42,7 +41,7 @@ let makeRequest = function(url: string, config?: RequestInit): RSVP.Promise<Resp
     }
 
 
-    return fetch(url, config).then((response: Response) => {
+    return convertToRSVP(fetch(url, config).then((response: Response, ) => {
         if (response.status >= 200 && response.status < 300) {
             return response;
         }
@@ -51,7 +50,7 @@ let makeRequest = function(url: string, config?: RequestInit): RSVP.Promise<Resp
             error['response'] = response;
             throw error;
         }
-    })
+    }));
 };
 
 let extractJson = function(response: Response): RSVP.Promise<{[name: string]: any}, any> {

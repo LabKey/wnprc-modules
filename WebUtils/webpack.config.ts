@@ -1,29 +1,30 @@
-const path = require('path');
-
-// expected environment variables:
 //
 //   env.BUILD_DIR: the Gradle build directory (i.e., '[labkey root]/build/modules/[module name]')
 //
-module.exports = function(env) {
+import { Configuration as WebpackConfig, optimize as Optimize } from 'webpack'
+
+module.exports = function(env: any): WebpackConfig {
     return {
-        entry: path.resolve(__dirname, 'src', 'ts', 'legacy.ts'),
+        entry: {
+          legacy: './src/ts/legacy.ts',
+        },
 
         output: {
-            path: path.resolve(env.BUILD_DIR, 'explodedModule', 'web', 'webutils', 'lib'),
-            filename: 'webutils.js',
+            path: `${env.BUILD_DIR}/explodedModule/web/webutils/lib`,
+            filename: '[name].js',
             library: 'WebUtils',
             libraryTarget: 'umd',
-            sourceMapFilename: 'webutils.js.map'
+            sourceMapFilename: '[name].js.map'
         },
 
         // Enable sourcemaps for debugging webpack's output.
         // TODO: switch to 'source-map' for production
-        devtool: "eval-source-map",
+        devtool: "source-map",
 
         resolve: {
             alias: {
-                classify: path.join(__dirname, "./external_resources/js/classify.js"),
-                supersqlstore: path.join(__dirname, "./external_resources/js/supersqlstore.js")
+                classify: "../../external_resources/js/classify.js",
+                supersqlstore: "../../external_resources/js/supersqlstore.js"
             },
 
             // Add '.ts' and '.tsx' as resolvable extensions.
@@ -46,20 +47,14 @@ module.exports = function(env) {
             ]
         },
 
-        externals: {
-            'c3': 'c3',
-            'd3': 'd3',
-            'fetch': 'fetch',
-            'jquery': 'jQuery',
-            'knockout': 'ko',
-            'moment': 'moment',
-            'qunit': 'QUnit',
-            'Qunit': 'Qunit',
-            'react': 'React',
-            'React': 'React',
+        plugins: [
 
-            'react-dom': 'ReactDOM',
-            'react-dom/server': 'ReactDOMServer'
-        }
+            new Optimize.CommonsChunkPlugin({
+                filename: 'externals.js',
+                name:     'externals',
+                minChunks: m => typeof m.context == 'string' && (m.context.indexOf('node_modules') != -1 || m.context.indexOf('external_resources') != -1)
+            }),
+            new Optimize.UglifyJsPlugin({sourceMap: true})
+        ]
     }
 };

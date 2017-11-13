@@ -19,4 +19,5 @@
 
 <div id="reactDiv"></div>
 
-<script type="application/javascript" src="<%= getContextPath() %>/wnprc_ehr/pages/necropsy-schedule.js"></script>
+<script type="application/javascript" src="<%= getContextPath() %>/wnprc_ehr/necropsy-schedule.js"></script>
+<link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/wnprc_ehr/css/wnprc_ehr.css" />

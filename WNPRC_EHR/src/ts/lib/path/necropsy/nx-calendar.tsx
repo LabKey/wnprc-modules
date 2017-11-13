@@ -3,13 +3,15 @@ import Component = React.Component;
 import * as moment from "moment";
 import Moment = moment.Moment;
 import * as api from "WebUtils/API";
-import { URLForAction } from "../../../../../../WebUtils/build/generated-ts/GeneratedFromJava";
+import { URLForAction } from "WebUtils/GeneratedFromJava";
 import { urlFromAction } from "WebUtils/LabKey";
 import {
     ScheduledNecropsiesForm, NecropsyEventForm,
     NecropsySuiteInfo
-} from "../../../../../build/generated-ts/GeneratedFromJava";
+} from "GeneratedFromJava";
 import {NecropsySuites} from "./nx-api";
+
+require("fullcalendar");
 
 export interface NxCalendarProps {
     handleClick?: (nxLsid: string) => void

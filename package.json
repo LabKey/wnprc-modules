@@ -35,7 +35,6 @@
     "@types/urijs": "^1.0.0",
     "@types/uuid": "^3.0.0",
     "@types/webpack": "^3.0.0",
-    "@types/whatwg-fetch": "0.0.33",
     "expose-loader": "~0.7.0",
     "less": "^2.0.0",
     "ts-loader": "^3.0.0",
@@ -45,6 +44,7 @@
   },
   "dependencies": {
     "bootstrap": "^3.0.0",
+    "fullcalendar": "^3.6.2",
     "jquery": "^3.2.1",
     "knockout": "^3.0.0",
     "knockout.mapping": "~2.4.0",
@@ -53,6 +53,7 @@
     "moment": "^2.0.0",
     "qunit": "^2.0.0",
     "react": "^15.0.0",
+    "react-bootstrap-typeahead": "^2.0.0-rc.4",
     "react-dom": "^15.0.0",
     "react-tabs": "^1.0.0",
     "rsvp": "~3.3.0",

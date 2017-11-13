@@ -4,16 +4,14 @@
         "baseUrl": ".",
         "jsx" : "react",
         "lib": ["ES5", "DOM", "ScriptHost", "ES2015.Promise", "ES2015.Symbol", "ES2015.Iterable"],
-        "module": "commonjs",
         "noImplicitAny": true,
-        "outDir": "build/compiled-js",
         "paths": {
             "WebUtils/*": [ "../WebUtils/src/ts/WebUtils/*", "../WebUtils/build/generated-ts/*" ],
             "*": [ "build/generated-ts/*", "../node_modules/*", "../node_modules/@types/*" ]
         },
         "sourceMap": true,
         "strictNullChecks": true,
-        "target": "es5"
+        "target": "ES5"
     },
     "include": [
         "src/ts/pages/*.tsx"

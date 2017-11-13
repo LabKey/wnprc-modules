@@ -1,8 +1,11 @@
 import * as _ from "underscore";
 import { selectRows } from "../API";
-import * as knockout from "knockout";
+import * as ko from "knockout";
 
-let ko = knockout as any;
+require("knockout.mapping");
+require("knockout.punches");
+
+ko.punches.enableAll()
 
 export interface LookupConfig {
     seedData?:  {[name: string]: string},
@@ -78,7 +81,7 @@ export class Lookup {
 
 
 // Register this class as a knockout filter.
-ko.filters['lookup'] = function(value: string, lookup: Lookup): string {
+(ko as any).filters['lookup'] = function(value: string, lookup: Lookup): string {
     if (lookup) {
         return lookup.lookup(value);
     }

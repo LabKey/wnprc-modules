@@ -37,6 +37,7 @@
     "@types/webpack": "^3.0.0",
     "@types/whatwg-fetch": "0.0.33",
     "expose-loader": "~0.7.0",
+    "less": "^2.0.0",
     "ts-loader": "^3.0.0",
     "ts-node": "^3.3.0",
     "typescript": "~2.4.0",

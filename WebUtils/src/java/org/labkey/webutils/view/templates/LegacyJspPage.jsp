@@ -21,7 +21,6 @@
 <script type="application/javascript" src="<%= getContextPath() %>/webutils/lib/legacy.js"></script>
 
 <link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/webutils/css/webutils.css" />
-<link rel="stylesheet" type="text/css" href="<%= getContextPath() %>/webutils/css/bootstrap-in-a-box.css" />
 
 <!-- Include any user supplied resources -->
 <% view.include(new JspView<JspPageModel>("/org/labkey/webutils/view/fragments/Resources.jsp", model), out); %>

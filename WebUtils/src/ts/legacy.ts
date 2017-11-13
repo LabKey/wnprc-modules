@@ -36,6 +36,8 @@ export function exportGlobals() {
 
     global.Classify = require("expose-loader?Classify!classify");
     global.SuperSQLStore = require("expose-loader?SuperSQLStore!supersqlstore");
+    global.ko = require("expose-loader?ko!knockout");
+    global.$ = require("expose-loader?$!jquery");
 
     if (global.Promise) {
         global.Promise.prototype["finally"] = rsvp.Promise.prototype["finally"];

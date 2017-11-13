@@ -50,11 +50,11 @@ module.exports = function(env: any): WebpackConfig {
         plugins: [
 
             new Optimize.CommonsChunkPlugin({
-                filename: 'externals.js',
+                filename: 'externals-debug.js',
                 name:     'externals',
                 minChunks: m => typeof m.context == 'string' && (m.context.indexOf('node_modules') != -1 || m.context.indexOf('external_resources') != -1)
-            }),
-            new Optimize.UglifyJsPlugin({sourceMap: true})
+            })
+            //,new Optimize.UglifyJsPlugin({sourceMap: true})
         ]
     }
 };

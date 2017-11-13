@@ -91,9 +91,7 @@ configure(modules) {
         apply from: "${project.parent.projectDir}/gradle/java.gradle"
         apply from: "${project.parent.projectDir}/gradle/jsp.gradle"
     }
-    if (file("${project.projectDir}/webpack.config.js").exists()) {
-        apply from: "${project.parent.projectDir}/gradle/javascript.gradle"
-    }
+    apply from: "${project.parent.projectDir}/gradle/javascript.gradle"
 
     // generate the module.xml file that LabKey uses to configure the module and display all the module properties.
     // this is based on both the module.properties file and some build-specific params (like the build OS, etc.)
@@ -201,7 +199,7 @@ configure(modules) {
     // removes the .module file from the staging directory (and undeploys it, too)
     task("cleanModule", group: "Build", type: Delete, dependsOn: [ 'undeployModule' ],
             description: 'Removes the .module file from the staging directory') {
-        delete "$stagingDir/${project.name}-${project.version}.module"
+        delete "$stagingDir/${project.name}-${project.version}.module", "$buildDir"
     }
 }
 

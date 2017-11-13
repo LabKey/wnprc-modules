@@ -14,10 +14,46 @@ task("java2ts", group: 'JavaScript', type: JavaExec,
     outputs.dir("$projectDir/build/generated-ts")
 }
 
-task("webpack", group: 'JavaScript', type: Exec, dependsOn: ['java2ts', "${project.parent.path}:npmInstall"],
-        description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
-    workingDir "$projectDir"
-    commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
+if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) {
+    task("webpack", group: 'JavaScript', type: Exec, dependsOn: ['java2ts', "${project.parent.path}:npmInstall"],
+            description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
+        workingDir "$projectDir"
+        commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
 
-    ext.included = true
+        ext.included = true
+    }
+} else if (file("$projectDir/tsconfig.json").exists()) {
+    task("tsc", group: 'JavaScript', type: Exec, dependsOn: ['java2ts', "${project.parent.path}:npmInstall"],
+            description: 'Compiles the TypeScript for the module using the tsconfig.json') {
+        workingDir "$projectDir"
+        commandLine "../node_modules/.bin/tsc", "--outDir", "$buildDir/explodedModule/web/${project.name.toLowerCase()}"
+
+        ext.included = true
+    }
 }
+
+if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
+    task("lessc", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
+            description: 'Compiles the less styles for the module') {
+        workingDir "$projectDir"
+        commandLine "../node_modules/.bin/lessc", "src/less/${project.name.toLowerCase()}.less", "$buildDir/explodedModule/web/${project.name.toLowerCase()}/css/${project.name.toLowerCase()}.css"
+
+        ext.included = true
+    }
+
+    task("fonts", group: 'JavaScript', type: Copy, dependsOn: [ "${project.parent.path}:npmInstall" ],
+            description: 'Copies all the fonts for the module') {
+        from("${project.parent.projectDir}/node_modules") {
+            include '*/fonts/*'
+        }
+        into "$buildDir/explodedModule/web/${project.name.toLowerCase()}/fonts"
+
+        // flatten the hierarchy so that the files go directly
+        // in fonts/ instead of (e.g.) fonts/bootstrap/fonts/
+        eachFile { path = name }
+        includeEmptyDirs = false
+
+        ext.included = true
+    }
+}
+

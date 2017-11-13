@@ -10,3 +10,7 @@ dependencies {
     jspCompile project("${project.parent.path}:WebUtils")
     jspCompile "joda-time:joda-time:2.9.3"
 }
+
+[ project.tasks.findByName("tsc"), project.tasks.findByName("webpack") ].each {
+    if (it != null) it.dependsOn("${project.parent.path}:WebUtils:java2ts")
+}

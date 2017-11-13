@@ -13,6 +13,16 @@ services:
       - "5432"
     environment:
       TZ: America/Chicago
+ 
+  pgbadger:
+    image: wnprcehr/pgbadger:latest
+    depends_on:
+      - "postgres"
+    volumes:
+      - "${PG_LOG_DIR}:/var/log/postgresql"
+      - "${PG_REPORTS_DIR}:/var/www/pg_reports"
+    environment:
+      TZ: America/Chicago
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -26,8 +36,8 @@ services:
     environment:
       MAIL_SERVER:
       TZ: America/Chicago
-    ports:
-      - "1025:1025"
+    expose:
+      - "1025"
 
   labkey:
     image: wnprcehr/labkey:17.2
@@ -37,10 +47,8 @@ services:
     volumes:
       - "${LABKEY_FILES_DIR}:/usr/local/labkey/files"
       - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"
-      - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/labkey/externalModules"
+      - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"
-    ports: 
-      - "9080:8080"
     expose:
       - "8080"
     environment:
@@ -55,6 +63,7 @@ services:
     image: nginx:1.13.0
     depends_on:
       - "labkey"
+      - "pgbadger"
     volumes:
       - "${NGINX_CLIENT_CER_FILE}:/usr/local/ssl/client-ca.pem"
       - "${NGINX_CLIENT_CRL_FILE}:/usr/local/ssl/crl.pem"
@@ -62,10 +71,12 @@ services:
       - "${NGINX_SERVER_CER_FILE}:/usr/local/ssl/cert.pem"
       - "${NGINX_SERVER_KEY_FILE}:/usr/local/ssl/key.pem"
       - "${NGINX_WELL_KNOWN_DIR}:/usr/share/nginx/html"
+      - "${PG_REPORTS_DIR}:/var/www/pg_reports"
     ports:
       - "80:80"
       - "443:443"
       - "1080:1080"
+      - "1180:1180"
     environment:
       TZ: America/Chicago
 

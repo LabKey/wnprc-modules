@@ -22,9 +22,15 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.QuerySchema;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
+import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +49,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     @Override
     public double getVersion()
     {
-        return 17.30;
+        return 17.33;
     }
 
     @Override
@@ -69,7 +75,20 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)    {
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_BillingContainerListener());
+        PipelineService.get().registerPipelineProvider(new BillingPipelineProvider(this));
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_billing/panel/WNPRCBillingSettingsPanel.js"), this);
+    }
+
+    @Override
+    protected void registerSchemas()
+    {
+        DefaultSchema.registerProvider(WNPRC_BillingSchema.NAME, new DefaultSchema.SchemaProvider(this)
+        {
+            public QuerySchema createSchema(final DefaultSchema schema, Module module)
+            {
+                return new WNPRC_BillingUserSchema(WNPRC_BillingSchema.NAME, null, schema.getUser(), schema.getContainer(), WNPRC_BillingSchema.getInstance().getSchema());
+            }
+        });
     }
 
     @Override

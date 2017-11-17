@@ -1,0 +1,50 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="project"/>
+        <column name="quantity"/>
+        <column name="unitCost"/>
+        <column name="totalcost"/>
+        <column name="item"/>
+        <column name="category"/>
+        <column name="comment">
+            <properties>
+                <property name="columnTitle" value="Item Description"/>
+            </properties>
+        </column>
+        <column name="debitedAccount">
+            <properties>
+                <property name="columnTitle" value="Debited Account"/>
+            </properties>
+        </column>
+        <column name="debitedAccount/investigatorName">
+            <properties>
+                <property name="columnTitle" value="Principal Investigator"/>
+            </properties>
+        </column>
+        <column name="debitedAccount/contact_name">
+            <properties>
+                <property name="columnTitle" value="Contact Name"/>
+            </properties>
+        </column>
+        <column name="debitedAccount/contact_email"/>
+        <column name="debitedAccount/address"/>
+        <column name="debitedAccount/contact_phone"/>
+        <column name="debitedAccount/po_number">
+            <properties>
+                <property name="columnTitle" value="PO Number"/>
+            </properties>
+        </column>
+        <column name="debitedAccount/po_amount">
+            <properties>
+                <property name="columnTitle" value="PO Amount"/>
+            </properties>
+        </column>
+        <column name="debitedAccount/charge_grant_accounts_id"/>
+        <column name="chargeId"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true" />
+    </sorts>
+</customView>

@@ -1,0 +1,23 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="tierRates" tableDbType="TABLE" useColumnOrder="true">
+                <tableTitle>Tier Rates</tableTitle>
+                <columns>
+                    <column columnName="tierRateType">
+                        <columnTitle>Tier Rate Type</columnTitle>
+                    </column>
+                    <column columnName="tierRate">
+                        <columnTitle>Tier Rate</columnTitle>
+                    </column>
+                    <column columnName="startDate">
+                        <columnTitle>Start Date</columnTitle>
+                    </column>
+                    <column columnName="endDate">
+                        <columnTitle>End Date</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

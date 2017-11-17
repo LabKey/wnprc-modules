@@ -16,7 +16,7 @@
                 <dat:column columnName="genCredits">
                     <dat:rangeURI>boolean</dat:rangeURI>
                 </dat:column>
-                <dat:column columnName="groupName ">
+                <dat:column columnName="groupName">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>50</dat:scale>
                 </dat:column>
@@ -42,7 +42,7 @@
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>50</dat:scale>
                 </dat:column>
-                <dat:column columnName="contact_phone ">
+                <dat:column columnName="contact_phone">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>20</dat:scale>
                 </dat:column>
@@ -62,7 +62,7 @@
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>2</dat:scale>
                 </dat:column>
-                <dat:column columnName="zip ">
+                <dat:column columnName="zip">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>10</dat:scale>
                 </dat:column>
@@ -74,45 +74,45 @@
                     <dat:scale>20</dat:scale>
                 </dat:column>
                 <dat:column columnName="po_amount">
-                    <dat:rangeURI>float</dat:rangeURI>
+                    <dat:rangeURI>double</dat:rangeURI>
                 </dat:column>
                 <dat:column columnName="charge_grant_accounts_id">
                     <dat:rangeURI>int</dat:rangeURI>
                 </dat:column>
-                <dat:column columnName="uw_fund ">
+                <dat:column columnName="uw_fund">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
                 </dat:column>
-                <dat:column columnName="uw_account ">
+                <dat:column columnName="uw_account">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
                 </dat:column>
-                <dat:column columnName="uw_udds ">
+                <dat:column columnName="uw_udds">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
                 </dat:column>
-                <dat:column columnName="uw_class_code ">
+                <dat:column columnName="uw_class_code">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
                 </dat:column>
-                <dat:column columnName="grant_period_end ">
+                <dat:column columnName="grant_period_end">
                     <dat:rangeURI>dateTime</dat:rangeURI>
                 </dat:column>
-                <dat:column columnName="order_cutoff ">
+                <dat:column columnName="order_cutoff">
                     <dat:rangeURI>dateTime</dat:rangeURI>
                 </dat:column>
-                <dat:column columnName="successor_account ">
+                <dat:column columnName="successor_account">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
                 </dat:column>
-                <dat:column columnName="predecessor_account ">
+                <dat:column columnName="predecessor_account">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
                 </dat:column>
-                <dat:column columnName="gencredits ">
+                <dat:column columnName="gencredits">
                     <dat:rangeURI>boolean</dat:rangeURI>
                 </dat:column>
-                <dat:column columnName="mds_number ">
+                <dat:column columnName="mds_number">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
                 </dat:column>

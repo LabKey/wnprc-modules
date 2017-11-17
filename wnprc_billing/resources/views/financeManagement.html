@@ -31,14 +31,17 @@
                 sections: [{
                     header: 'Historic Billing Data',
                     items: [
-                        {name: 'Billing Periods', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'invoiceRuns'})},
-                        {name: 'All Invoiced Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'invoicedItems'})},
+                        {name: 'Billing Periods', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRuns'})},
+                        {name: 'Monthly Summary', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRunMonthlySummary'})},
+                        {name: 'All Invoiced Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoicedItems'})},
                         {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'dataAccess'})}
                     ]
                 },{
                     header: 'Current Billing Period / Adjustments',
                     items: [
-//                        {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'MiscChargesNotBilledUpdate'})},
+                        {name: 'Perform Billing Run', url: LABKEY.ActionURL.buildURL('ehr_billing', 'billingPipeline', null)},
+                        {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('ehr_billing', queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'miscCharges', showImport: true})},
+
                     ].concat(issuesContainer ? [{name: 'Finance Issue Tracker', url: LABKEY.ActionURL.buildURL('issues', 'begin', issuesContainer)}] : [])
                 },{
                     header: 'Reference Tables',
@@ -46,23 +49,16 @@
                         {name: 'IACUC Protocols', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'protocol'})},
                         {name: 'WNPRC Projects', url: LABKEY.ActionURL.buildURL(ehrQueryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'project', showImport: true})},
 
-                        {name: 'Grants', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'grants', 'query.viewName': 'Active Grants'})},
-                        {name: 'Grant Projects', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'wnprc_billing', 'query.queryName': 'grantProjects', 'query.viewName': 'Active Grant Projects'})},
-                        {name: 'Aliases', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'aliases', 'query.viewName': 'Active Aliases'})},
-
-                        //{name: 'Approved IACUC Funding Sources', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'iacucFundingSources'})},
-
+                        {name: 'Grant Accounts', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'aliases', showImport: true})},
                         {name: 'Investigators', url: LABKEY.ActionURL.buildURL(ehrQueryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'wnprc_ehr', 'query.queryName': 'investigators', showImport: true})},
                         {name: 'Financial Analysts', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'fiscalAuthorities', showImport: true})},
-                        {name: 'OGA Raw Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'OGA', 'query.queryName': 'ZGMS_PRIM_ALL_V'})},
                         {name: 'Groups', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'groups',showImport: true})}
-
                     ]
                 },{
                     header: 'Rates and Fee Structure',
                     items: [
 //                        {name: 'Explanation of Rates', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'rateCalculation')},
-                        {name: 'Chargeable Items', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'chargeableItems', 'query.viewName': 'Active Items', showImport: true})},
+                        {name: 'Chargeable Items', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeableItems', 'query.viewName': 'Active Items', showImport: true})},
                         {name: 'Standard Rates', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeRates', showImport: true})},
                         //note: exemptions uses ehr controller so we can apply metadata for the project field.
                         {name: 'Alias-Level Multipliers', url: LABKEY.ActionURL.buildURL(ehrQueryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'projectMultipliers', 'query.viewName': 'Active Items', showImport: true})},
@@ -74,8 +70,8 @@
 
                         {name: 'Labwork Fee Structure', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'labworkFeeDefinition'})},
                         {name: 'Replacement Fee Structure', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'leaseFeeDefinition'})},
-                        {name: 'WNPRC Annual Rate Change', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'AnnualRateChange',showImport: true})},
-                        {name: 'Tier Rates', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'tierRates',showImport: true})},
+                        {name: 'WNPRC Annual Rate Change', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'AnnualRateChange', showImport: true})},
+                        {name: 'Tier Rates', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'tierRates', showImport: true})},
                     ]
                 }]
             }]

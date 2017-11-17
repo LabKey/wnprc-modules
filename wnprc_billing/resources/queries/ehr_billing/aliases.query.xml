@@ -1,0 +1,61 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="aliases" tableDbType="TABLE" useColumnOrder="true">
+            <tableTitle>Aliases</tableTitle>
+            <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+            <auditLogging>DETAILED</auditLogging>
+            <columns>
+                <column columnName="alias">
+                    <columnTitle>Account Number</columnTitle>
+                </column>
+                <column columnName="projectNumber">
+                    <columnTitle>Project Number</columnTitle>
+                </column>
+                <column columnName="grantNumber">
+                    <columnTitle>Grant Number</columnTitle>
+                </column>
+                <column columnName="tier_rate">
+                    <fk>
+                        <fkDbSchema>wnprc_billing</fkDbSchema>
+                        <fkTable>tierRates</fkTable>
+                        <fkColumnName>tierRateType</fkColumnName>
+                    </fk>
+                </column>
+                <column columnName="type"/>
+                <column columnName="budgetStartDate">
+                    <columnTitle>Current Service Begin</columnTitle>
+                </column>
+                <column columnName="budgetEndDate">
+                    <columnTitle>Current Service End</columnTitle>
+                </column>
+                <column columnName="investigatorName">
+                    <columnTitle>Principal Investigator</columnTitle>
+                </column>
+                <column columnName="affiliate"/>
+                <column columnName="contact_name"/>
+                <column columnName="contact_phone"/>
+                <column columnName="contact_email"/>
+                <column columnName="address"/>
+                <column columnName="city"/>
+                <column columnName="state"/>
+                <column columnName="zip"/>
+                <column columnName="comments"/>
+                <column columnName="po_number"/>
+                <column columnName="po_amount"/>
+                <column columnName="charge_grant_accounts_id"/>
+                <column columnName="uw_fund"/>
+                <column columnName="uw_account"/>
+                <column columnName="uw_udds"/>
+                <column columnName="uw_class_code"/>
+                <column columnName="grant_period_end"/>
+                <column columnName="order_cutoff"/>
+                <column columnName="successor_account"/>
+                <column columnName="predecessor_account"/>
+                <column columnName="gencredits"/>
+                <column columnName="mds_number"/>
+            </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

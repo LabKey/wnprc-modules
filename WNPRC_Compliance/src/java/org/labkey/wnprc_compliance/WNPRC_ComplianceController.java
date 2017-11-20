@@ -51,6 +51,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
+    @ActionNames("begin")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class TBDashboardPage extends HRJspPageAction {
         @Override

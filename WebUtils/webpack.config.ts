@@ -47,6 +47,10 @@ module.exports = function(env: any): WebpackConfig {
             ]
         },
 
+        externals: {
+            'jquery':   'jQuery'
+        },
+
         plugins: [
 
             new Optimize.CommonsChunkPlugin({

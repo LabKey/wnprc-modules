@@ -8,6 +8,7 @@ import * as toastr from "toastr";
 import * as uri from "urijs";
 import * as _ from "underscore";
 import * as s from "underscore.string";
+import 'bootstrap';
 
 const markdown: any = require('markdown');
 
@@ -36,8 +37,6 @@ export function exportGlobals() {
 
     global.Classify = require("expose-loader?Classify!classify");
     global.SuperSQLStore = require("expose-loader?SuperSQLStore!supersqlstore");
-    global.ko = require("expose-loader?ko!knockout");
-    global.$ = require("expose-loader?$!jquery");
 
     if (global.Promise) {
         global.Promise.prototype["finally"] = rsvp.Promise.prototype["finally"];

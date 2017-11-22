@@ -174,8 +174,7 @@ configure(modules) {
     task('createModule', group: 'Module', type: Jar, dependsOn: [ 'copyModuleResources', 'createModuleXml' ],
             description: 'Creates the .module jar for LabKey to use and places it in the staging folder') { Jar jar ->
         jar.from file(project.explodedModuleDir)
-        jar.baseName project.name
-        jar.extension 'module'
+        jar.archiveName "${project.name}-${project.version}.module"
         jar.destinationDir file(stagingDir)
 
         // include all the sub-file tasks that are necessary to make the actual module

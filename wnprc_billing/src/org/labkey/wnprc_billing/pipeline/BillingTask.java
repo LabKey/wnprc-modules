@@ -431,7 +431,7 @@ public class BillingTask extends PipelineJob.Task<BillingTask.Factory>
         List<Map<String, Object>> rows = getRowList(ehrContainer, "wnprc_billing", queryName, colNames, params);
         getJob().getLogger().info(rows.size() + " rows found");
 
-        writeToInvoicedItems(rows, "Per Diems", colNames, queryName, false);
+        writeToInvoicedItems(rows, "Per Diems", colNames, queryName, true);
         getJob().getLogger().info("Finished Caching Per Diem Fees");
     }
 
@@ -462,7 +462,7 @@ public class BillingTask extends PipelineJob.Task<BillingTask.Factory>
         List<Map<String, Object>> rows = getRowList(ehrContainer, "wnprc_billing", queryName, colNames, params);
         getJob().getLogger().info(rows.size() + " rows found");
 
-        writeToInvoicedItems(rows, "Procedure Fees", colNames, queryName, false);
+        writeToInvoicedItems(rows, "Procedure Fees", colNames, queryName, true);
         getJob().getLogger().info("Finished Caching Procedure Fees");
     }
 }

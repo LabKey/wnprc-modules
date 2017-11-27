@@ -30,7 +30,8 @@ FROM
   cr1.chargeId as chargeId,
   ci1.name as item,
   ci1.category as category,
-  cr1.serviceCode as serviceCenter
+  cr1.serviceCode as serviceCenter,
+  NULL AS isMiscCharge
  FROM wnprc_billing.procedureFees pFees1
  LEFT JOIN ehr_billing.chargeRates cr1 ON (
    CAST(pFees1.date AS DATE) >= CAST(cr1.startDate AS DATE) AND
@@ -54,7 +55,8 @@ SELECT
   cr2.chargeId as chargeId,
   ci2.name as item,
   ci2.category as category,
-  cr2.serviceCode as serviceCenter
+  cr2.serviceCode as serviceCenter,
+  NULL AS isMiscCharge
 FROM wnprc_billing.procedureFees pFees2
   LEFT JOIN ehr_billing.chargeRates cr2 ON (
     CAST(pFees2.date AS DATE) >= CAST(cr2.startDate AS DATE) AND

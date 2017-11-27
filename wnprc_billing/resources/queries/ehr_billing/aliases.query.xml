@@ -2,7 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="aliases" tableDbType="TABLE" useColumnOrder="true">
-            <tableTitle>Aliases</tableTitle>
+            <tableTitle>Grant Accounts</tableTitle>
             <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
             <auditLogging>DETAILED</auditLogging>
             <columns>
@@ -42,7 +42,9 @@
                 <column columnName="zip"/>
                 <column columnName="comments"/>
                 <column columnName="po_number"/>
-                <column columnName="po_amount"/>
+                <column columnName="po_amount">
+                    <formatString>$###,##0.00</formatString>
+                </column>
                 <column columnName="charge_grant_accounts_id"/>
                 <column columnName="uw_fund"/>
                 <column columnName="uw_account"/>

@@ -25,7 +25,8 @@
     ci1.name as item,
     ci1.category as category,
     pdt.quantity * cr1.unitCost AS totalCost,
-    cr1.serviceCode AS serviceCenter
+    cr1.serviceCode AS serviceCenter,
+    NULL AS isMiscCharge
   FROM wnprc_billing.perDiemWithTierRates pdt
   LEFT JOIN ehr_billing.chargeRates cr1 ON (
     CAST(pdt.adate AS DATE) >= CAST(cr1.startDate AS DATE) AND

@@ -5,6 +5,10 @@ sourceSets {
         java { srcDirs = ["${project.buildDir}/jspTempDir/classes"] }
         output.classesDir = "${project.buildDir}/jspTempDir/classes"
     }
+    webapp {
+        resources { srcDirs = [ 'webapp' ] }
+        output.resourcesDir = "${project.buildDir}/explodedModule/web"
+    }
 }
 
 configurations {
@@ -17,6 +21,7 @@ configurations {
 }
 
 dependencies {
+    jspCompile 'javax.servlet:jstl:1.2'
     jspCompile 'org.apache.tomcat:jasper'
     jspCompile 'org.apache.tomcat:jsp-api'
     jspCompile 'org.apache.tomcat:tomcat-juli'
@@ -52,12 +57,13 @@ task('copyResourceJsp', group: "JSP", type: Copy, description: "Copy resource js
 
 task('copyTagLibs', group: "JSP", type: Copy, description: "Copy the tag library (.tld) files to jsp compile directory",
         { CopySpec copy ->
-            copy.from "${project.rootProject.buildDir}/webapp"
+            copy.from "${project.rootProject.buildDir}/webapp", "${project.projectDir}/webapp"
             copy.into "${project.buildDir}/jspTempDir/webapp"
             copy.include 'WEB-INF/web.xml'
             copy.include 'WEB-INF/*.tld'
             copy.include 'WEB-INF/tags/**'
         })
+
 
 task('jsp2Java', group: "JSP", description: "compile jsp files into Java classes") {
     inputs.file copyJsp
@@ -95,6 +101,7 @@ task('jsp2Java', group: "JSP", description: "compile jsp files into Java classes
     }
 }
 project.tasks.compileJspJava.dependsOn('jsp2Java')
+project.tasks.processResources.dependsOn('processWebappResources')
 
 task('jspJar', group: "JSP", type: Jar, description: "produce jar file of jsps", dependsOn: [ 'compileJspJava' ]) { Jar jar ->
     jar.classifier = 'jsp'

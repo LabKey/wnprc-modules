@@ -1,8 +1,0 @@
-# All module directories listed here will be built by "ant build" and "ant rebuild".
-server/modules/*
-server/customModules/*
-server/optionalModules/*
-externalModules/labModules/*
-externalModules/onprcEHRModules/mergesync
-externalModules/wnprcModules/webutils
-externalModules/wnprcModules/dbutils

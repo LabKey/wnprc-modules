@@ -28,7 +28,7 @@
     _safe.module = module;
     module = undefined;
 </script>
-<script type="application/javascript" src="<%= getContextPath()%>/compliance/dropzone.js"></script>
+<script type="application/javascript" src="<%= getContextPath()%>/wnprc_compliance/dropzone.js"></script>
 <link rel="stylesheet" href="https://rawgit.com/enyo/dropzone/master/dist/dropzone.css">
 <script>
     module = _safe.module;

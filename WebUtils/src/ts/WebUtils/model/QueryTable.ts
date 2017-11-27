@@ -1,5 +1,5 @@
 import {Table} from "./Table";
-import {TableRow} from "./TableRow";
+import {SimpleStringColumn, TableRow} from "./TableRow";
 import {selectRows, selectRowsFromCache, SelectRowsConfig} from "../API";
 import * as _ from "underscore";
 
@@ -56,7 +56,7 @@ export class QueryTable extends Table {
                     rows:    data.rows
                 });
             }).catch((label) => {
-                console.error("Error loading table: "+label);
+                console.error("Error loading table for ["+this.schemaName+"."+this.queryName+"]: "+label);
             });
         }
     }
@@ -71,7 +71,7 @@ export class QueryTable extends Table {
         this.rows(
             data.rows.map((row: any) => {
                 return new TableRow({
-                    columns: columns.map((columnName: string) => { return row[columnName]; })
+                    columns: columns.map((columnName: string) => new SimpleStringColumn(row[columnName]) )
                 });
             })
         );

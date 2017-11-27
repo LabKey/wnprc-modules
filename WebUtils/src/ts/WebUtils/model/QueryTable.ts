@@ -1,6 +1,6 @@
-import { Table } from "./Table";
-import { TableRow } from "./TableRow";
-import { selectRows, selectRowsFromCache, SelectRowsConfig } from "../API";
+import {Table} from "./Table";
+import {TableRow} from "./TableRow";
+import {selectRows, selectRowsFromCache, SelectRowsConfig} from "../API";
 import * as _ from "underscore";
 
 export interface QueryTableConfig {
@@ -20,7 +20,7 @@ export class QueryTable extends Table {
         });
 
         this.queryName  = config.queryName;
-        this.schemaName = config.queryName;
+        this.schemaName = config.schemaName;
 
         if (config.viewName) {
             this.viewName = config.viewName;
@@ -49,14 +49,14 @@ export class QueryTable extends Table {
             });
         }
         catch(e) {
-            selectRows(this.schemaName, this.queryName, queryConfig).then(function(data:any) {
-                let anyData = data as any;
-
+            selectRows(this.schemaName, this.queryName, queryConfig).then((data) => {
                 this._handleData({
-                    headers: anyData.columnModel.map((columnObject: any) => { return columnObject.header;    }),
-                    columns: anyData.columnModel.map((columnObject: any) => { return columnObject.dataIndex; }),
-                    rows:    anyData.rows
+                    headers: data.columnModel.map((columnObject: any) => { return columnObject.header;    }),
+                    columns: data.columnModel.map((columnObject: any) => { return columnObject.dataIndex; }),
+                    rows:    data.rows
                 });
+            }).catch((label) => {
+                console.error("Error loading table: "+label);
             });
         }
     }

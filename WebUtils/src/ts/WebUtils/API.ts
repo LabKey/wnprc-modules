@@ -1,10 +1,12 @@
-import { getCSRF, getPageLoadData, getBaseURL } from "./LabKey";
-import { makeURLForHTTPAction } from "./URL";
+import {getCSRF, getPageLoadData, getBaseURL} from "./LabKey";
 
-import * as moment from "moment";
-import * as RSVP from "rsvp";
-import * as _ from "underscore";
 import * as s from "underscore.string";
+import * as _ from "underscore";
+
+import RSVP = require('rsvp');
+import {makeURLForHTTPAction} from "./URL";
+import moment = require("moment");
+import Moment = moment.Moment;
 import "whatwg-fetch";
 
 let convertToRSVP = function<T>(promise: Promise<T>): RSVP.Promise<T, any> {
@@ -41,7 +43,7 @@ let makeRequest = function(url: string, config?: RequestInit): RSVP.Promise<Resp
     }
 
 
-    return convertToRSVP(fetch(url, config).then((response: Response, ) => {
+    return convertToRSVP(fetch(url, config).then((response: Response) => {
         if (response.status >= 200 && response.status < 300) {
             return response;
         }
@@ -270,7 +272,7 @@ export function postJSON(url: string, data: Object, config?: RequestInit) {
 
 let dbFormat = "YYYY/MM/DD HH:mm:ss";
 
-export function formatDateForDB(momentObj: moment.Moment) {
+export function formatDateForDB(momentObj: Moment) {
     return momentObj.format(dbFormat)
 }
 

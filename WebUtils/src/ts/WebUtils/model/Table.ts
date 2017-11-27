@@ -1,4 +1,4 @@
-import { TableRow, TableColumn } from "./TableRow";
+import {TableRow, TableColumn} from "./TableRow";
 
 export interface TableConfig {
     rows: TableRow[] | KnockoutObservableArray<TableRow>

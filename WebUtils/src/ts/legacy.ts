@@ -1,7 +1,7 @@
 export * from "./WebUtils";
 
 import * as jQuery from "jquery";
-import * as knockout from "knockout";
+import ko from './WebUtils/externals/knockout-enhanced';
 import * as moment from 'moment';
 import * as rsvp from "rsvp";
 import * as toastr from "toastr";
@@ -9,14 +9,13 @@ import * as uri from "urijs";
 import * as _ from "underscore";
 import * as s from "underscore.string";
 import 'bootstrap';
+import 'blockUI';
 
 const markdown: any = require('markdown');
 
-knockout.punches.enableAll();
-
-import { Util, Model } from "./WebUtils";
+import {Util, Model} from "./WebUtils";
 let utils = Util, Models = Model;
-export { utils, Models };
+export {utils, Models};
 
 export function exportGlobals() {
     // (0, eval)('this') is a robust way of getting a reference to the global object
@@ -26,7 +25,7 @@ export function exportGlobals() {
     _.extend(global, {
         _:             _,
         $:             jQuery,
-        ko:            knockout,
+        ko:            ko,
         markdown:      markdown,
         moment:        moment,
         RSVP:          rsvp,

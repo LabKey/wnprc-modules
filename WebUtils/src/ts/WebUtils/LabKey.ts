@@ -1,4 +1,4 @@
-import { URLForAction } from "GeneratedFromJava";
+import {URLForAction} from "GeneratedFromJava";
 import * as $ from "jquery";
 import * as URI from "urijs";
 

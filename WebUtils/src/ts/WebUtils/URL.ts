@@ -1,4 +1,4 @@
-import { getCurrentContainer, buildURL, getBaseURL } from "./LabKey";
+import {getCurrentContainer, buildURL, getBaseURL} from "./LabKey";
 
 export interface makeURLConfig {
     controller: string,
@@ -8,6 +8,7 @@ export interface makeURLConfig {
 export function makeURL(action: string, config: makeURLConfig): string {
     return buildURL(config.controller, action, config.container || getCurrentContainer());
 }
+
 
 export type LabKeyHttpAPICommand = 'selectRows' | 'saveRows' | 'executeSql';
 

@@ -53,47 +53,10 @@
                            actionButtons: actions"
     ></lk-querytable>
 </div>
-
+<%
+    String markExemptUri = new ActionURL(WNPRC_ComplianceController.MarkCardExemptAPI.class, getContainer()).toString();
+%>
+<script type="application/javascript" src="<%= getContextPath() %>/wnprc_compliance/unidentifiedCards.js"></script>
 <script>
-    (function() {
-        var $exemptDialog = $('#exemptDialog').modal({
-            show: false
-        });
-
-        var form = {
-            selectedCardIds: ko.observableArray(),
-            notes: ko.observable('')
-        };
-        WebUtils.VM.form = form;
-
-        WebUtils.VM.actions = [
-            {
-                title: "Mark as Exempt",
-                execute: function(tableRows, table) {
-                    form.selectedCardIds(tableRows.map(function(val) {
-                        return val.rowData[0];
-                    }));
-
-                    $exemptDialog.modal('show');
-                }
-            }
-        ];
-
-        WebUtils.VM.submit = function() {
-            $exemptDialog.modal('hide');
-
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.MarkCardExemptAPI.class, getContainer()) %>", {
-                exemptions: form.selectedCardIds().map(function(id) {
-                    return {
-                        cardId: id,
-                        reason: form.notes()
-                    }
-                })
-            }).then(function(d) {
-                toastr.success("Success!  Please reload the page to see the changes.")
-            }).catch(function(e) {
-                toastr.error("Hit an error: " + e.message || e);
-            });
-        }
-    })();
+    applyKnockoutBindings("<%= markExemptUri %>");
 </script>

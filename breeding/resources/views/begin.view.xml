@@ -1,0 +1,11 @@
+<view xmlns="http://labkey.org/data/xml/view" frame="none" title="">
+    <permissions>
+        <permission name="read"/>
+    </permissions>
+    <dependencies>
+        <dependency path="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"/>
+        <dependency path="https://unpkg.com/react@15.6.2/dist/react.min.js"/>
+        <dependency path="https://unpkg.com/react-dom@15.6.2/dist/react-dom.min.js"/>
+        <dependency path="https://cdnjs.cloudflare.com/ajax/libs/react-data-grid/2.0.78/react-data-grid.min.js"/>
+    </dependencies>
+</view>

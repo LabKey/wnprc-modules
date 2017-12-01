@@ -18,7 +18,25 @@ class MasterDetailExpandView extends React.Component<{row?: any}, {}> {
 export class Breeding extends React.Component<any, any> {
 
     private columns: ReactDataGrid.Column[];
-    private grid: React.ReactElement<MasterDetailDataGrid>;
+
+    private loaderStyle: React.CSSProperties =
+    {
+        backgroundColor: 'rgba(51,122,183,0.10)',
+        position: 'absolute',
+        top:  0,
+        left: 0,
+        height: '100%',
+        width:  '100%',
+        zIndex: 10
+    };
+    private spinnerStyle: React.CSSProperties =
+    {
+        fontSize: '6em',
+        position: 'absolute',
+        bottom: 20,
+        right:  20,
+        top:    'auto'
+    };
 
     constructor(props: any, context: any) {
         super(props, context);
@@ -128,7 +146,7 @@ export class Breeding extends React.Component<any, any> {
 
     render() {
         return (
-            <div>
+            <div style={{position: 'relative'}}>
                 <MasterDetailDataGrid
                     columns              = {this.columns}
                     detailRenderer       = {<MasterDetailExpandView />}
@@ -143,9 +161,8 @@ export class Breeding extends React.Component<any, any> {
                 />
                 {
                     this.state.isLoading
-                        ?  (<div style={{position: 'absolute',top: 0,left: 0,height: '100%',width: '100%',backgroundColor: 'rgba(51,122,183,0.10)',zIndex: 10}}>
-                                <span className="glyphicon glyphicon-refresh spinning text-primary" style={{fontSize: '6em', position: 'absolute', bottom: 20, right: 20, top: 'auto'}}/>
-                            </div>)
+                        ?  [(<div  style={this.loaderStyle}/>),
+                            (<span style={this.spinnerStyle} className="glyphicon glyphicon-refresh spinning text-primary"/>)]
                         : null
                 }
             </div>);

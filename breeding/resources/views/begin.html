@@ -1,8 +1,16 @@
+<style>
+    /* this rule is a necessary hack to make the React data table resize properly when you
+     * shrink the browser window. if you leave it off and go with the default
+     * 'auto', the table will faithfully grow if you increase the window size,
+     * but will never get smaller. using the 'fixed' value solves that by forcing
+     * the table to respect the table's own width and resizing the content. */
+    table.labkey-proj { table-layout: fixed }
+</style>
 <div id="bootstrap-box">
     <div class="container-fluid">
         <div class="panel panel-primary">
             <div class="panel-heading"><h1 class="panel-title">Breeding/Pregnancy Home</h1></div>
-            <div class="panel-body" id="breeding-container"></div>
+            <div class="panel-body" id="breeding-container" style="position: relative"></div>
         </div>
     </div>
 </div>

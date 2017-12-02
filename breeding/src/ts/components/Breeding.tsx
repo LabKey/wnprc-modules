@@ -19,23 +19,23 @@ export class Breeding extends React.Component<any, any> {
 
     private columns: ReactDataGrid.Column[];
 
-    private loaderStyle: React.CSSProperties =
+    private loadStyle: React.CSSProperties =
     {
         backgroundColor: 'rgba(51,122,183,0.10)',
         position: 'absolute',
-        top:  0,
-        left: 0,
-        height: '100%',
-        width:  '100%',
-        zIndex: 10
+        top:      0,
+        left:     0,
+        height:   '100%',
+        width:    '100%',
+        zIndex:   10
     };
-    private spinnerStyle: React.CSSProperties =
+    private spinStyle: React.CSSProperties =
     {
         fontSize: '6em',
         position: 'absolute',
-        bottom: 20,
-        right:  20,
-        top:    'auto'
+        bottom:   20,
+        right:    20,
+        top:      'auto'
     };
 
     constructor(props: any, context: any) {
@@ -122,34 +122,34 @@ export class Breeding extends React.Component<any, any> {
         });
     }
 
-    onDataFailed = (errorInfo: { exception: string, exceptionClass: string, stackTrace: string }, responseObj: XMLHttpRequestResponseType, options: any) =>
-    {
+    onDataFailed = (errorInfo: { exception: string, exceptionClass: string, stackTrace: string }, responseObj: XMLHttpRequestResponseType, options: any) => {
         console.error(`Data retrieval failed: ${errorInfo.exception}`);
         this.setState({ isLoading: false });
     };
 
-    onDataLoaded = (data: any) =>
-    {
-        let rows = [];
-        for (let i = 1; i <= data.getRowCount(); i++) {
-            let row = data.getRow(i - 1);
-            rows.push({
-                id: i,
-                'FirstName': row.getValue('FirstName') || "",
-                'LastName' : row.getValue('LastName') || "",
-                'Email'    : row.getValue('Email') || "",
-                'LastLogin': row.getValue('LastLogin') || ""
-            });
-        }
-        this.setState({rows: rows, isLoading: false });
+    onDataLoaded = (data: any) => {
+        setTimeout(() => {
+            let rows = [];
+            for (let i = 1; i <= data.getRowCount(); i++) {
+                let row = data.getRow(i - 1);
+                rows.push({
+                    id: i,
+                    'FirstName': row.getValue('FirstName') || "",
+                    'LastName':  row.getValue('LastName')  || "",
+                    'Email':     row.getValue('Email')     || "",
+                    'LastLogin': row.getValue('LastLogin') || ""
+                });
+            }
+            this.setState({rows: rows, isLoading: false});
+        }, 2000);
     };
 
     render() {
         return (
-            <div style={{position: 'relative'}}>
+            <div>
                 <MasterDetailDataGrid
                     columns              = {this.columns}
-                    detailRenderer       = {<MasterDetailExpandView />}
+                    detailRenderer       = {<MasterDetailExpandView/>}
                     getValidFilterValues = {this.getValidFilterValues}
                     minHeight            = {500}
                     onAddFilter          = {this.handleFilterChange}
@@ -157,13 +157,13 @@ export class Breeding extends React.Component<any, any> {
                     onGridSort           = {this.handleGridSort}
                     rowsCount            = {this.rowsCount()}
                     rowGetter            = {this.rowGetter}
-                    toolbar              = {<ReactDataGridPlugins.Toolbar enableFilter={true} />}
+                    toolbar              = {<ReactDataGridPlugins.Toolbar enableFilter={true}/>}
                 />
                 {
-                    this.state.isLoading
-                        ?  [(<div  style={this.loaderStyle}/>),
-                            (<span style={this.spinnerStyle} className="glyphicon glyphicon-refresh spinning text-primary"/>)]
-                        : null
+                    this.state.isLoading ? [
+                        (<div  style={this.loadStyle}/>),
+                        (<span style={this.spinStyle} className="glyphicon glyphicon-refresh spinning text-primary"/>)
+                    ] : null
                 }
             </div>);
     }

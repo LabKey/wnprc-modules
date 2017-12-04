@@ -5,6 +5,7 @@ import * as React from "react";
 import * as ReactDataGrid from "react-data-grid";
 import * as ReactDataGridPlugins from "react-data-grid-addons";
 
+import { LoadingOverlay } from "./LoadingOverlay";
 import { MasterDetailDataGrid } from "./react-data-grid/MasterDetailDataGrid";
 
 class MasterDetailExpandView extends React.Component<{row?: any}, {}> {
@@ -18,25 +19,6 @@ class MasterDetailExpandView extends React.Component<{row?: any}, {}> {
 export class Breeding extends React.Component<any, any> {
 
     private columns: ReactDataGrid.Column[];
-
-    private loadStyle: React.CSSProperties =
-    {
-        backgroundColor: 'rgba(51,122,183,0.10)',
-        position: 'absolute',
-        top:      0,
-        left:     0,
-        height:   '100%',
-        width:    '100%',
-        zIndex:   10
-    };
-    private spinStyle: React.CSSProperties =
-    {
-        fontSize: '6em',
-        position: 'absolute',
-        bottom:   20,
-        right:    20,
-        top:      'auto'
-    };
 
     constructor(props: any, context: any) {
         super(props, context);
@@ -159,12 +141,7 @@ export class Breeding extends React.Component<any, any> {
                     rowGetter            = {this.rowGetter}
                     toolbar              = {<ReactDataGridPlugins.Toolbar enableFilter={true}/>}
                 />
-                {
-                    this.state.isLoading ? [
-                        (<div  style={this.loadStyle}/>),
-                        (<span style={this.spinStyle} className="glyphicon glyphicon-refresh spinning text-primary"/>)
-                    ] : null
-                }
+                { this.state.isLoading ? <LoadingOverlay/> : null }
             </div>);
     }
 }

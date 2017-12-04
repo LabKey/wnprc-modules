@@ -12,8 +12,25 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
     constructor(props: MasterDetailDataGridProps, context: any) {
         super(props, context);
 
-        // define the expando column and add it to the left of the view. a couple of things to note about
-        // the react-data-grid column that may not be obvious:
+        this.createExpando = this.createExpando.bind(this);
+        this.expandRow     = this.expandRow.bind(this);
+        this.getExpandRow  = this.getExpandRow.bind(this);
+
+        this.columns = props.columns || [];
+        this.columns.unshift(this.createExpando());
+
+        this.state = { mdExpandedRowIds: [] };
+    }
+
+    /** List of columns to display in the data grid */
+    private columns: ReactDataGrid.Column[];
+
+    /**
+     * Defines the expando column for the left of the view.
+     * @returns {ReactDataGrid.Column}
+     */
+    private createExpando(): ReactDataGrid.Column {
+        // a couple of things to note about the react-data-grid column that may not be obvious:
         //
         //   * in order to get the row information into the column formatter, we need to define 'getRowMetaData'
         //     and pass it the row. anything that gets returned from that function will end up in the formatter
@@ -29,24 +46,22 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
         //
         //     since we don't care about the event or about any of the other args, those got left out of the click
         //     event handler for now.
-        this.columns = props.columns || [];
-        this.columns.unshift({
-            key: 'master-detail-expando-column',
-            name: '',
-            width: 30,
+        //
+        // also of note, we must create a new instance of the expando column with this method in order to
+        // survive re-rendering if the columns change in this.props. if we use the same instance each time,
+        // the 'getExpandRow' function will lose its context binding.
+        return {
+            key:            'master-detail-expando-column',
+            name:           '',
+            width:          30,
             locked:         true,
-            formatter: (<MasterDetailExpandoColumnFormatter getExpandRow={this.getExpandRow}/>),
+            formatter:      (<MasterDetailExpandoColumnFormatter getExpandRow={this.getExpandRow}/>),
             getRowMetaData: (row: any) => row,
-            filterable: false,
-            sortable: false,
-            events: {onClick: (evt: any, args: { rowIdx: number }) => this.expandRow(args.rowIdx)}
-        });
-
-        this.state = { mdExpandedRowIds: [] };
+            filterable:     false,
+            sortable:       false,
+            events:         {onClick: (evt: any, args: { rowIdx: number }) => this.expandRow(args.rowIdx)}
+        };
     }
-
-    /** List of columns to display in the data grid */
-    private columns: ReactDataGrid.Column[];
 
     /**
      * Expands the row at the passed index. Note that that index is for the currently-visible rows,
@@ -54,7 +69,7 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
      * respect any filtering or sorting.
      * @param {number} rowidx
      */
-    private expandRow = (rowidx: number) => {
+    private expandRow(rowidx: number) {
         let row: any = (typeof(this.props.rowGetter) === 'function')
             ? this.props.rowGetter(rowidx)
             : this.props.rowGetter[rowidx];
@@ -72,17 +87,26 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
      * @param {string} id
      * @returns {boolean}
      */
-    private getExpandRow = (id: string) => {
-        return this.state.mdExpandedRowIds.indexOf(id) !== -1;
+    private getExpandRow(id: string) {
+        if (!this.state)
+            console.warn("Master detail grid state is undefined when checking whether to expand detail view");
+        return this.state && this.state.mdExpandedRowIds.indexOf(id) !== -1;
     };
+
+    componentWillReceiveProps(props: MasterDetailDataGridProps) {
+        if (this.props.columns !== props.columns) {
+            this.columns = props.columns || [];
+            this.columns.unshift(this.createExpando());
+        }
+    }
 
     render() {
         return (<ReactDataGrid
-            columns={this.columns}
-            rowRenderer={
+            columns     = {this.columns}
+            rowRenderer = {
                 <MasterDetailRowRenderer
-                    detailRenderer={this.props.detailRenderer}
-                    getExpandRow={this.getExpandRow}
+                    detailRenderer = {this.props.detailRenderer}
+                    getExpandRow   = {this.getExpandRow}
                 />}
             {...this.props}
         />);

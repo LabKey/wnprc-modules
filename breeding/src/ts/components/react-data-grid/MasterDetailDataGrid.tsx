@@ -7,8 +7,10 @@ import * as ReactDataGrid from 'react-data-grid';
  * an "expando" that--when clicked--expands the row to show a detail panel under the normal row. All other
  * customizations are passed through to the inner ReactDataGrid.
  */
-export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridProps, { mdExpandedRowIds: string[] }>
-{
+export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridProps, { mdExpandedRowIds: string[] }> {
+    /** List of columns to display in the data grid */
+    private columns: ReactDataGrid.Column[];
+
     constructor(props: MasterDetailDataGridProps, context: any) {
         super(props, context);
 
@@ -22,8 +24,25 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
         this.state = { mdExpandedRowIds: [] };
     }
 
-    /** List of columns to display in the data grid */
-    private columns: ReactDataGrid.Column[];
+    public componentWillReceiveProps(props: MasterDetailDataGridProps) {
+        if (this.props.columns !== props.columns) {
+            this.columns = props.columns || [];
+            this.columns.unshift(this.createExpando());
+        }
+    }
+
+    public render() {
+        return (
+            <ReactDataGrid
+                columns={this.columns}
+                rowRenderer={
+                    <MasterDetailRowRenderer
+                        detailRenderer={this.props.detailRenderer}
+                        getExpandRow={this.getExpandRow}
+                    />}
+                {...this.props}
+            />);
+    }
 
     /**
      * Defines the expando column for the left of the view.
@@ -37,7 +56,7 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
         //     in the 'dependentValues' member of the formatter's properties. the function prototype allows for
         //     passing the column as well:
         //
-        //       (rowdata: any, column?: ReactDataGrid.Column): any
+        //       (rowData: any, column?: ReactDataGrid.Column): any
         //
         //   * events added to the column need to be named like 'onXxxxxx' where 'Xxxxxx' is the camel-case
         //     event name. the interface for the function (which is in the react-data-grid types) is defined as:
@@ -50,16 +69,17 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
         // also of note, we must create a new instance of the expando column with this method in order to
         // survive re-rendering if the columns change in this.props. if we use the same instance each time,
         // the 'getExpandRow' function will lose its context binding.
+        // noinspection JSUnusedGlobalSymbols -- for the 'onClick' and the 'getRowMetaData'
         return {
-            key:            'master-detail-expando-column',
-            name:           '',
-            width:          30,
-            locked:         true,
+            events:         {onClick: (evt: any, args: { rowIdx: number }) => this.expandRow(args.rowIdx)},
+            filterable:     false,
             formatter:      (<MasterDetailExpandoColumnFormatter getExpandRow={this.getExpandRow}/>),
             getRowMetaData: (row: any) => row,
-            filterable:     false,
+            key:            'master-detail-expando-column',
+            locked:         true,
+            name:           '',
             sortable:       false,
-            events:         {onClick: (evt: any, args: { rowIdx: number }) => this.expandRow(args.rowIdx)}
+            width:          30,
         };
     }
 
@@ -67,70 +87,53 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
      * Expands the row at the passed index. Note that that index is for the currently-visible rows,
      * so we need to pass that into the row getter supplied to the data grid itself to make sure we
      * respect any filtering or sorting.
-     * @param {number} rowidx
+     * @param {number} rowIndex
      */
-    private expandRow(rowidx: number) {
-        let row: any = (typeof(this.props.rowGetter) === 'function')
-            ? this.props.rowGetter(rowidx)
-            : this.props.rowGetter[rowidx];
-        let exp = this.state.mdExpandedRowIds.slice();
-        let idx = exp.indexOf(row.rowid);
-        if (idx === -1)
-            exp.push(row.rowid);
-        else
+    private expandRow(rowIndex: number) {
+        const row: any = (typeof(this.props.rowGetter) === 'function')
+            ? this.props.rowGetter(rowIndex)
+            : this.props.rowGetter[rowIndex];
+        const exp = this.state.mdExpandedRowIds.slice();
+        const idx = exp.indexOf(row.rowId);
+        if (idx === -1) {
+            exp.push(row.rowId);
+        } else {
             exp.splice(idx, 1);
+        }
         this.setState({ mdExpandedRowIds: exp });
-    };
+    }
 
     /**
      * Predicate that determines whether or not a row should be expanded by checking the component's current state.
-     * @param {string} rowid
+     * @param {string} rowId
      * @returns {boolean}
      */
-    private getExpandRow(rowid: string) {
-        if (!this.state)
-            console.warn("Master detail grid state is undefined when checking whether to expand detail view");
-        return this.state && this.state.mdExpandedRowIds.indexOf(rowid) !== -1;
-    };
-
-    componentWillReceiveProps(props: MasterDetailDataGridProps) {
-        if (this.props.columns !== props.columns) {
-            this.columns = props.columns || [];
-            this.columns.unshift(this.createExpando());
+    private getExpandRow(rowId: string) {
+        if (!this.state) {
+            console.warn('Master detail grid state is undefined when checking whether to expand detail view');
         }
-    }
-
-    render() {
-        return (<ReactDataGrid
-            columns     = {this.columns}
-            rowRenderer = {
-                <MasterDetailRowRenderer
-                    detailRenderer = {this.props.detailRenderer}
-                    getExpandRow   = {this.getExpandRow}
-                />}
-            {...this.props}
-        />);
+        return this.state && this.state.mdExpandedRowIds.indexOf(rowId) !== -1;
     }
 }
 
 /** Properties for the MasterDetailDataGrid component. */
-interface MasterDetailDataGridProps extends AdazzleReactDataGrid.GridProps
-{
+interface MasterDetailDataGridProps extends AdazzleReactDataGrid.GridProps {
     /** Renderer element which will be shown as the row details when expanded. */
     detailRenderer?: React.ReactElement<any>;
 }
 
 /** Formatter for the master detail expando column, which displays one or the other of two glyphs */
-class MasterDetailExpandoColumnFormatter extends React.Component<MasterDetailExpandoColumnFormatterProps, {}>
-{
-    render() {
+class MasterDetailExpandoColumnFormatter extends React.Component<MasterDetailExpandoColumnFormatterProps, {}> {
+    public render() {
         // make sure we got the row information (otherwise we can't check the state)
-        let rowinfo = this.props.dependentValues;
-        if (!rowinfo)
-            console.warn("Row info is necessary for the MasterDetailExpandoColumnFormatter. Define 'getRowMetaData' on the column definition.");
+        const rowInfo = this.props.dependentValues;
+        if (!rowInfo) {
+            console.warn('Row info is necessary for the MasterDetailExpandoColumnFormatter. ' +
+                'Define \'getRowMetaData\' on the column definition.');
+        }
 
         // check if the row is expanded or not, and show the appropriate bootstrap glyph
-        let icon    = rowinfo && this.props.getExpandRow(rowinfo.rowid)
+        const icon    = rowInfo && this.props.getExpandRow(rowInfo.rowId)
             ? 'glyphicon-triangle-bottom'
             : 'glyphicon-triangle-right';
         return (<span className={`glyphicon ${icon}`}/>);
@@ -138,37 +141,36 @@ class MasterDetailExpandoColumnFormatter extends React.Component<MasterDetailExp
 }
 
 /** Properties for the MasterDetailExpandoColumnFormatter component. */
-interface MasterDetailExpandoColumnFormatterProps
-{
+interface MasterDetailExpandoColumnFormatterProps {
     /** Predicate called with the row id to determine whether or not to expand. */
-    getExpandRow:       MasterDetailExpandRowCallback;
+    getExpandRow: MasterDetailExpandRowCallback;
 
     /**
      * Row details passed in via the getRowMetaData function defined on the column.
      * @default undefined
-     * */
-    dependentValues?:   any;
+     */
+    dependentValues?: any;
 }
 
 /** Predicate used to determine whether or not to expand the detail panel. */
-interface MasterDetailExpandRowCallback { (id: string): boolean }
+type MasterDetailExpandRowCallback = (id: string) => boolean;
 
 /** Renderer for the master detail rows, which will show the detail if expanded by hide it otherwise. */
-class MasterDetailRowRenderer extends React.Component<MasterDetailRowRendererProps, {}>
-{
+class MasterDetailRowRenderer extends React.Component<MasterDetailRowRendererProps, {}> {
     /**
      * Renders the detail section by either using the passed renderer or emitting a blank panel body.
      * @param renderer
      * @param props
      * @returns {React.ReactElement<any>}
      */
-    private static renderDetail(renderer: any, props: any): React.ReactElement<any>
-    {
+    private static renderDetail(renderer: any, props: any): React.ReactElement<any> {
         // if we have a renderer for the details, use it
-        if (React.isValidElement(renderer))
+        if (React.isValidElement(renderer)) {
             return React.cloneElement(renderer, props);
+        }
         // otherwise, fail-over to emitting a blank panel (but complain about it in the console)
-        console.warn("No detail renderer was provided to MasterDetailRowRenderer, so nothing will show up in the row details.");
+        console.warn(
+            'No detail renderer was provided to MasterDetailRowRenderer, so nothing will show up in the row details.');
         return (<div className="panel-body react-grid-Cell">&nbsp;</div>);
     }
 
@@ -178,32 +180,30 @@ class MasterDetailRowRenderer extends React.Component<MasterDetailRowRendererPro
      * @param props
      * @returns {React.ReactElement<any>}
      */
-    private static renderRow(renderer: any, props: any): React.ReactElement<any>
-    {
+    private static renderRow(renderer: any, props: any): React.ReactElement<any> {
         // if we have a renderer for the row, use it
-        if (React.isValidElement(renderer))
+        if (React.isValidElement(renderer)) {
             return React.cloneElement(renderer, props);
+        }
         // otherwise, render a default row
         return (<ReactDataGrid.Row {...props}/>);
     }
 
-    render()
-    {
+    public render() {
         // remove the extra properties added to handle the master/detail. those
         // do not need to be passed in to the inner row rendering.
-        let innerProps = _.assign({}, this.props) as any;
+        const innerProps = _.assign({}, this.props) as any;
         delete innerProps.detailRenderer;
         delete innerProps.rowRenderer;
 
         // if the row is expanded, render both the row and the detail inside
         // a dedicated <div>. if there is no row information, do not expand
-        let rowinfo =  this.props.row;
-        if (rowinfo && this.props.getExpandRow(rowinfo.rowid))
-        {
+        const rowInfo =  this.props.row;
+        if (rowInfo && this.props.getExpandRow(rowInfo.rowId)) {
             return (
                 <div>
-                    { MasterDetailRowRenderer.renderRow(this.props.rowRenderer, innerProps) }
-                    { MasterDetailRowRenderer.renderDetail(this.props.detailRenderer, innerProps) }
+                    {MasterDetailRowRenderer.renderRow(this.props.rowRenderer, innerProps)}
+                    {MasterDetailRowRenderer.renderDetail(this.props.detailRenderer, innerProps)}
                 </div>);
         }
 
@@ -213,10 +213,9 @@ class MasterDetailRowRenderer extends React.Component<MasterDetailRowRendererPro
 }
 
 /** Properties for the MasterDetailRowRenderer component. */
-interface MasterDetailRowRendererProps
-{
+interface MasterDetailRowRendererProps {
     /** Predicate called with the row id to determine whether or not to expand. */
-    getExpandRow:    MasterDetailExpandRowCallback;
+    getExpandRow: MasterDetailExpandRowCallback;
 
     /**
      * Renderer component to use for the detail section of the row if expanded.
@@ -227,10 +226,10 @@ interface MasterDetailRowRendererProps
      * Renderer component to use for the row section of the row.
      * @default undefined
      */
-    rowRenderer?:    React.ReactElement<any> | React.ComponentClass<any> | React.StatelessComponent<any>
+    rowRenderer?: React.ReactElement<any> | React.ComponentClass<any> | React.StatelessComponent<any>;
     /**
-     * Metadata about the row. Expected to contain a 'rowid' property.
+     * Metadata about the row. Expected to contain a 'rowId' property.
      * @default undefined
-     * */
-    row?:            { rowid: string };
+     */
+    row?: { rowId: string };
 }

@@ -2,3 +2,10 @@ dependencies {
     compile "javax.servlet:jsp-api:2.0"
     external fileTree("${project.projectDir}/../lib")
 }
+
+task('lesscBootstrapXl', group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
+        description: 'Compiles the less styles for Bootstrap XL, which this project depends on') {
+    commandLine "../node_modules/.bin/lessc", "src/less/bootstrap-xl.less", "build/css/bootstrap-xl.css"
+    workingDir "$projectDir"
+}
+project.tasks.lessc.dependsOn('lesscBootstrapXl')

@@ -12,8 +12,7 @@ export class Breeding extends React.Component<any, BreedingState> {
 
     private gridColumns: ReactDataGrid.Column[];
     private gridFilters: any = {
-        Id:           ReactDataGridPlugins.Filters.AutoCompleteFilter,
-        Investigator: ReactDataGridPlugins.Filters.AutoCompleteFilter,
+        '*': ReactDataGridPlugins.Filters.AutoCompleteFilter,
     };
     private query = {
         name:   'ActiveAssignments',
@@ -23,14 +22,15 @@ export class Breeding extends React.Component<any, BreedingState> {
     constructor(props: any, context: any) {
         super(props, context);
 
-        this.changeFilters      = this.changeFilters.bind(this);
-        this.clearFilters       = this.clearFilters.bind(this);
-        this.failureCallback    = this.failureCallback.bind(this);
-        this.getRow             = this.getRow.bind(this);
-        this.getRowCount        = this.getRowCount.bind(this);
-        this.loadColumns        = this.loadColumns.bind(this);
-        this.sort               = this.sort.bind(this);
-        this.successCallback    = this.successCallback.bind(this);
+        this.changeFilters          = this.changeFilters.bind(this);
+        this.clearFilters           = this.clearFilters.bind(this);
+        this.failureCallback        = this.failureCallback.bind(this);
+        this.getRow                 = this.getRow.bind(this);
+        this.getRowCount            = this.getRowCount.bind(this);
+        this.getValidFilterValues   = this.getValidFilterValues.bind(this);
+        this.loadColumns            = this.loadColumns.bind(this);
+        this.sort                   = this.sort.bind(this);
+        this.successCallback        = this.successCallback.bind(this);
 
         this.gridColumns = [];
         this.state   = {
@@ -109,7 +109,10 @@ export class Breeding extends React.Component<any, BreedingState> {
     }
 
     private getValidFilterValues(columnId: any) {
-        return _.uniq(this.state.rows.map((r: any[]) => r[columnId])).sort();
+        return _.uniq(this.state.rows
+            .map((r) => r[columnId]))
+            .filter((r) => r != null)
+            .sort();
     }
 
     private loadColumns(columns: Array<{ name: string, caption: string, sortable: boolean }>) {
@@ -120,9 +123,11 @@ export class Breeding extends React.Component<any, BreedingState> {
                 resizable:  true,
                 sortable:   cm.sortable,
             };
-            if (this.gridFilters[c.name]) {
+            // do not add filters to columns that are blacklisted (e.g., '^Column Name'), but do add
+            // filters for columns that are whitelisted and the default filter (i.e., '*')
+            if (!this.gridFilters[`^${c.name}`] && (this.gridFilters[c.name] || this.gridFilters['*'])) {
                 c.filterable     = true;
-                c.filterRenderer = this.gridFilters[c.name];
+                c.filterRenderer = this.gridFilters[c.name] || this.gridFilters['*'];
             }
             return c;
         });
@@ -137,7 +142,7 @@ export class Breeding extends React.Component<any, BreedingState> {
         for (let i = 1; i <= data.getRowCount(); i++) {
             const row = data.getRow(i - 1);
             const obj = { rowId: i } as any;
-            this.gridColumns.forEach((v) => obj[v.key] = row.getValue(v.key));
+            this.gridColumns.forEach((v) => obj[v.key] = row.getValue(v.key) || '');
             rows.push(obj);
         }
         this.setState({rows, isLoading: false});

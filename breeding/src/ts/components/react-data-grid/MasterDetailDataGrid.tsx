@@ -74,9 +74,9 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
             ? this.props.rowGetter(rowidx)
             : this.props.rowGetter[rowidx];
         let exp = this.state.mdExpandedRowIds.slice();
-        let idx = exp.indexOf(row.id);
+        let idx = exp.indexOf(row.rowid);
         if (idx === -1)
-            exp.push(row.id);
+            exp.push(row.rowid);
         else
             exp.splice(idx, 1);
         this.setState({ mdExpandedRowIds: exp });
@@ -84,13 +84,13 @@ export class MasterDetailDataGrid extends React.Component<MasterDetailDataGridPr
 
     /**
      * Predicate that determines whether or not a row should be expanded by checking the component's current state.
-     * @param {string} id
+     * @param {string} rowid
      * @returns {boolean}
      */
-    private getExpandRow(id: string) {
+    private getExpandRow(rowid: string) {
         if (!this.state)
             console.warn("Master detail grid state is undefined when checking whether to expand detail view");
-        return this.state && this.state.mdExpandedRowIds.indexOf(id) !== -1;
+        return this.state && this.state.mdExpandedRowIds.indexOf(rowid) !== -1;
     };
 
     componentWillReceiveProps(props: MasterDetailDataGridProps) {
@@ -130,7 +130,7 @@ class MasterDetailExpandoColumnFormatter extends React.Component<MasterDetailExp
             console.warn("Row info is necessary for the MasterDetailExpandoColumnFormatter. Define 'getRowMetaData' on the column definition.");
 
         // check if the row is expanded or not, and show the appropriate bootstrap glyph
-        let icon    = rowinfo && this.props.getExpandRow(rowinfo.id)
+        let icon    = rowinfo && this.props.getExpandRow(rowinfo.rowid)
             ? 'glyphicon-triangle-bottom'
             : 'glyphicon-triangle-right';
         return (<span className={`glyphicon ${icon}`}/>);
@@ -198,7 +198,7 @@ class MasterDetailRowRenderer extends React.Component<MasterDetailRowRendererPro
         // if the row is expanded, render both the row and the detail inside
         // a dedicated <div>. if there is no row information, do not expand
         let rowinfo =  this.props.row;
-        if (rowinfo && this.props.getExpandRow(rowinfo.id))
+        if (rowinfo && this.props.getExpandRow(rowinfo.rowid))
         {
             return (
                 <div>
@@ -229,8 +229,8 @@ interface MasterDetailRowRendererProps
      */
     rowRenderer?:    React.ReactElement<any> | React.ComponentClass<any> | React.StatelessComponent<any>
     /**
-     * Metadata about the row. Expected to contain an 'id' property.
+     * Metadata about the row. Expected to contain a 'rowid' property.
      * @default undefined
      * */
-    row?:            { id: string };
+    row?:            { rowid: string };
 }

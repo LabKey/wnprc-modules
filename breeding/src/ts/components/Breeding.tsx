@@ -42,6 +42,7 @@ export class Breeding extends React.Component<any, BreedingState> {
         this.gridColumns = [];
         this.state   = {
             filters:        {},
+            hasError:       false,
             isLoading:      true,
             rows:           [],
             sortColumn:     null,
@@ -50,12 +51,14 @@ export class Breeding extends React.Component<any, BreedingState> {
     }
 
     public componentWillMount() {
+        this.setState({loadMessage: 'Loading query details...'});
         LABKEY.Query.getQueryDetails({
             failure:    this.failureCallback,
             queryName:  this.query.name,
             schemaName: this.query.schema,
             success:    (info: any) => {
                 this.gridColumns = this.loadColumns(info.defaultView.columns);
+                this.setState({loadMessage: 'Requesting data...'});
                 LABKEY.Query.selectRows({
                     failure:            this.failureCallback,
                     queryName:          this.query.name,
@@ -72,6 +75,11 @@ export class Breeding extends React.Component<any, BreedingState> {
     public render() {
         return (
             <div>
+                { !this.state.hasError ? null : (
+                    <div className="alert alert-danger">
+                        The page has encountered an error. Please try again or contact Informatics and Data Services.
+                    </div>)
+                }
                 <MasterDetailDataGrid
                     columns={this.gridColumns}
                     detailRenderer={<MasterDetailExpandView/>}
@@ -84,7 +92,7 @@ export class Breeding extends React.Component<any, BreedingState> {
                     rowGetter={this.getRow}
                     toolbar={<ReactDataGridPlugins.Toolbar enableFilter={true}/>}
                 />
-                {this.state.isLoading ? <LoadingOverlay/> : null}
+                {this.state.isLoading ? <LoadingOverlay message={this.state.loadMessage}/> : null}
             </div>);
     }
 
@@ -114,8 +122,8 @@ export class Breeding extends React.Component<any, BreedingState> {
      * @param {{exception: string}} error
      */
     private failureCallback(error: { exception: string }) {
-        console.warn(`Data retrieval failed: ${error.exception}`);
-        this.setState({ isLoading: false });
+        console.error(`There was an error loading the the component: ${error.exception}`);
+        this.setState({ hasError: true, isLoading: false });
     }
 
     /**
@@ -149,10 +157,10 @@ export class Breeding extends React.Component<any, BreedingState> {
 
     /**
      * Dynamically loads the columns in the grid from the passed set of column metadata
-     * @param {Array<{ caption: string, name: string, sortable: boolean }>} columns
+     * @param {LabkeyQueryFieldMetaData[]} columns
      * @returns {ReactDataGrid.Column[]}
      */
-    private loadColumns(columns: Array<{ caption: string, name: string, sortable: boolean }>) {
+    private loadColumns(columns: LabkeyQueryFieldMetaData[]) {
         return columns.map((cm) => {
             const c: ReactDataGrid.Column = {
                 key:        cm.name,
@@ -185,6 +193,7 @@ export class Breeding extends React.Component<any, BreedingState> {
      * @param data
      */
     private successCallback(data: any) {
+        this.setState({loadMessage: 'Rendering data...'});
         const rows = [];
         for (let i = 1; i <= data.getRowCount(); i++) {
             const row = data.getRow(i - 1);
@@ -192,17 +201,26 @@ export class Breeding extends React.Component<any, BreedingState> {
             this.gridColumns.forEach((v) => obj[v.key] = row.getValue(v.key) || '');
             rows.push(obj);
         }
-        this.setState({rows, isLoading: false});
+        this.setState({rows, loadMessage: undefined, isLoading: false});
     }
 }
 
 /** State definition for the main breeding module component */
 interface BreedingState {
+    hasError: boolean;
     filters: any;
     isLoading: boolean;
+    loadMessage?: string;
     rows: any[];
     sortColumn: string | null;
     sortDirection: 'ASC' | 'DESC' | 'NONE' | null;
+}
+
+/** Type definition for the LABKEY.Query.FieldMetaData */
+interface LabkeyQueryFieldMetaData {
+    caption: string;
+    name: string;
+    sortable: boolean;
 }
 
 /** Component used to display the detail for the main breeding component rows */

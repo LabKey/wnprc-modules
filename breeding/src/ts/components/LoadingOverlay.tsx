@@ -5,7 +5,7 @@ import * as React from 'react';
  * the container to cover has a "position: relative" somewhere in the stack which will demarcate the area
  * to be covered by the loading panel. Also assumes Bootstrap's css is included in the page.
  */
-export class LoadingOverlay extends React.Component {
+export class LoadingOverlay extends React.Component<{message?: string}> {
     /** Style for the loading overlay panel */
     private loadStyle: React.CSSProperties = {
         backgroundColor: 'rgba(51,122,183,0.10)',
@@ -20,7 +20,7 @@ export class LoadingOverlay extends React.Component {
     /** Style for the (Bootstrap) glyph spinner */
     private spinStyle: React.CSSProperties = {
         bottom:   20,
-        fontSize: '6em',
+        fontSize: '3em',
         position: 'absolute',
         right:    20,
         top:      'auto',
@@ -29,7 +29,10 @@ export class LoadingOverlay extends React.Component {
     public render() {
         return (
             <div style={this.loadStyle}>
-                <span className="glyphicon glyphicon-refresh text-primary spinning" style={this.spinStyle}/>
+                <div className="text-primary" style={this.spinStyle}>
+                    <span style={{marginRight: '0.5em'}}>{this.props.message}</span>
+                    <span className="glyphicon glyphicon-refresh spinning"/>
+                </div>
             </div>);
     }
 }

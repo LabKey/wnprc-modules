@@ -8,13 +8,31 @@ import * as ReactDataGridPlugins from 'react-data-grid-addons';
 import { LoadingOverlay } from './LoadingOverlay';
 import { MasterDetailDataGrid } from './react-data-grid/MasterDetailDataGrid';
 
+/** Main component for the LabKey breeding module. */
 export class Breeding extends React.Component<any, BreedingState> {
 
+    /** List of columns to show in the data grid */
     private gridColumns: ReactDataGrid.Column[];
+
+    /**
+     * Map of column captions to filter components. Columns can be:
+     *
+     *   - disabled individually  '^Column Title': null
+     *   -  enabled individually   'Column Title': FilterComponent
+     *   -    enabled by default              '*': FilterComponent
+     *
+     * Precedence flows in listed order, in that 'disable' directives
+     * override 'enable' directives, and an enabled column will use
+     * its specific filter component rather than the default. If there
+     * is no default, columns that are not listed individually will not
+     * be filterable.
+     */
     private gridFilters: any = {
         '*': ReactDataGridPlugins.Filters.AutoCompleteFilter,
     };
-    private query = {
+
+    /** Query configuration data. Lists the schama, query name (name), and (optionally) the view */
+    private query: { name: string, schema: string, view?: string } = {
         name:   'ActiveAssignments',
         schema: 'study',
     };
@@ -81,6 +99,10 @@ export class Breeding extends React.Component<any, BreedingState> {
             </div>);
     }
 
+    /**
+     * Updates the current grid filters
+     * @param filter
+     */
     private changeFilters(filter: any) {
         const newFilters = _.assign({}, this.state.filters);
         if (filter.filterTerm) {
@@ -91,23 +113,44 @@ export class Breeding extends React.Component<any, BreedingState> {
         this.setState({ filters: newFilters });
     }
 
+    /**
+     * Clears all current grid filters
+     */
     private clearFilters() {
         this.setState({ filters: {} });
     }
 
+    /**
+     * Handles failures during grid initialization
+     * @param {{exception: string}} error
+     */
     private failureCallback(error: { exception: string }) {
         console.warn(`Data retrieval failed: ${error.exception}`);
         this.setState({ isLoading: false });
     }
 
+    /**
+     * Returns the row information from the state for the passed visual index
+     * @param {number} index
+     * @returns {Object}
+     */
     private getRow(index: number) {
         return ReactDataGridPlugins.Data.Selectors.getRows(this.state)[index];
     }
 
+    /**
+     * Returns the number of rows in the data set
+     * @returns {number}
+     */
     private getRowCount() {
         return ReactDataGridPlugins.Data.Selectors.getRows(this.state).length;
     }
 
+    /**
+     * Returns the filter values to display for column with the passed id
+     * @param columnId
+     * @returns {any[]}
+     */
     private getValidFilterValues(columnId: any) {
         return _.uniq(this.state.rows
             .map((r) => r[columnId]))
@@ -115,6 +158,11 @@ export class Breeding extends React.Component<any, BreedingState> {
             .sort();
     }
 
+    /**
+     * Dynamically loads the columns in the grid from the passed set of column metadata
+     * @param {Array<{name: string; caption: string; sortable: boolean}>} columns
+     * @returns {ReactDataGrid.Column[]}
+     */
     private loadColumns(columns: Array<{ name: string, caption: string, sortable: boolean }>) {
         return columns.map((cm) => {
             const c: ReactDataGrid.Column = {
@@ -125,7 +173,8 @@ export class Breeding extends React.Component<any, BreedingState> {
             };
             // do not add filters to columns that are blacklisted (e.g., '^Column Name'), but do add
             // filters for columns that are whitelisted and the default filter (i.e., '*')
-            if (!this.gridFilters[`^${c.name}`] && (this.gridFilters[c.name] || this.gridFilters['*'])) {
+            if (!this.gridFilters.hasOwnProperty(`^${c.name}`)
+                    && (this.gridFilters.hasOwnProperty(c.name) || this.gridFilters.hasOwnProperty('*'))) {
                 c.filterable     = true;
                 c.filterRenderer = this.gridFilters[c.name] || this.gridFilters['*'];
             }
@@ -133,10 +182,19 @@ export class Breeding extends React.Component<any, BreedingState> {
         });
     }
 
+    /**
+     * Sorts the grid based on the passed column and direction
+     * @param {string} sortColumn
+     * @param {"ASC" | "DESC" | "NONE"} sortDirection
+     */
     private sort(sortColumn: string, sortDirection: 'ASC' | 'DESC' | 'NONE') {
         this.setState({ sortColumn, sortDirection });
     }
 
+    /**
+     * Loads the rows into the component state following a successful retrieval from the database
+     * @param data
+     */
     private successCallback(data: any) {
         const rows = [];
         for (let i = 1; i <= data.getRowCount(); i++) {
@@ -149,6 +207,7 @@ export class Breeding extends React.Component<any, BreedingState> {
     }
 }
 
+/** State definition for the main breeding module component */
 interface BreedingState {
     filters: any;
     isLoading: boolean;
@@ -157,6 +216,7 @@ interface BreedingState {
     sortDirection: 'ASC' | 'DESC' | 'NONE' | null;
 }
 
+/** Component used to display the detail for the main breeding component rows */
 class MasterDetailExpandView extends React.Component<{row?: { rowId: string }}, {}> {
     public render() {
         const rowId = this.props.row && this.props.row.rowId;

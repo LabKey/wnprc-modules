@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import * as ReactDataGrid from 'react-data-grid';
 import * as ReactDataGridPlugins from 'react-data-grid-addons';
+import { ReactDataGridFilterSpec, ReactDataGridQuerySpec } from './react-data-grid/ReactDataGridHelperTypes';
 
 import { LoadingOverlay } from './LoadingOverlay';
 import { MasterDetailDataGrid } from './react-data-grid/MasterDetailDataGrid';
@@ -14,25 +15,13 @@ export class Breeding extends React.Component<any, BreedingState> {
     /** List of columns to show in the data grid */
     private gridColumns: ReactDataGrid.Column[];
 
-    /**
-     * Map of column captions to filter components. Columns can be:
-     *
-     *   - disabled individually  '^Column Title': null
-     *   -  enabled individually   'Column Title': FilterComponent
-     *   -    enabled by default              '*': FilterComponent
-     *
-     * Precedence flows in listed order, in that 'disable' directives
-     * override 'enable' directives, and an enabled column will use
-     * its specific filter component rather than the default. If there
-     * is no default, columns that are not listed individually will not
-     * be filterable.
-     */
-    private gridFilters: any = {
+    /** Define the filter renderers available for the grid */
+    private gridFilters: ReactDataGridFilterSpec = {
         '*': ReactDataGridPlugins.Filters.AutoCompleteFilter,
     };
 
-    /** Query configuration data. Lists the schama, query name (name), and (optionally) the view */
-    private query: { name: string, schema: string, view?: string } = {
+    /** Query configuration data. Lists the schema, query name (name), and (optionally) the view */
+    private query: ReactDataGridQuerySpec = {
         name:   'ActiveAssignments',
         schema: 'study',
     };
@@ -160,10 +149,10 @@ export class Breeding extends React.Component<any, BreedingState> {
 
     /**
      * Dynamically loads the columns in the grid from the passed set of column metadata
-     * @param {Array<{name: string; caption: string; sortable: boolean}>} columns
+     * @param {Array<{ caption: string, name: string, sortable: boolean }>} columns
      * @returns {ReactDataGrid.Column[]}
      */
-    private loadColumns(columns: Array<{ name: string, caption: string, sortable: boolean }>) {
+    private loadColumns(columns: Array<{ caption: string, name: string, sortable: boolean }>) {
         return columns.map((cm) => {
             const c: ReactDataGrid.Column = {
                 key:        cm.name,

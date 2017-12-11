@@ -5,7 +5,7 @@
     "interface-name": [true, "never-prefix"],
     "jsx-no-multiline-js": [false],
     "max-classes-per-file": [true, 5],
-    "no-console": [true, "error"],
+    "no-console": [false],
     "no-unbound-method": true,
     "quotemark": [true, "single", "jsx-double"]
   }

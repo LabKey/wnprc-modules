@@ -5,7 +5,7 @@ import * as React from 'react';
  * the container to cover has a "position: relative" somewhere in the stack which will demarcate the area
  * to be covered by the loading panel. Also assumes Bootstrap's css is included in the page.
  */
-export class LoadingOverlay extends React.Component<{message?: string}> {
+export class LoadingOverlay extends React.Component<{message?: string, minHeight?: number}> {
     /** Style for the loading overlay panel */
     private loadStyle: React.CSSProperties = {
         backgroundColor: 'rgba(51,122,183,0.10)',
@@ -29,7 +29,7 @@ export class LoadingOverlay extends React.Component<{message?: string}> {
     public render() {
         return (
             <div style={this.loadStyle}>
-                <div className="text-primary" style={this.spinStyle}>
+                <div className="text-primary" style={{minHeight: this.props.minHeight, ...this.spinStyle}}>
                     <span style={{marginRight: '0.5em'}}>{this.props.message}</span>
                     <span className="glyphicon glyphicon-refresh spinning"/>
                 </div>

@@ -1,3 +1,5 @@
+import {GridViewSelector} from './GridViewSelector';
+
 declare const LABKEY: any;
 
 import * as _ from 'lodash';
@@ -12,9 +14,6 @@ import { MasterDetailDataGrid } from './react-data-grid/MasterDetailDataGrid';
 /** Main component for the LabKey breeding module. */
 export class Breeding extends React.Component<any, BreedingState> {
 
-    /** List of columns to show in the data grid */
-    private gridColumns: ReactDataGrid.Column[];
-
     /** Define the filter renderers available for the grid */
     private gridFilters: ReactDataGridFilterSpec = {
         '*': ReactDataGridPlugins.Filters.AutoCompleteFilter,
@@ -22,7 +21,7 @@ export class Breeding extends React.Component<any, BreedingState> {
 
     /** Query configuration data. Lists the schema, query name (name), and (optionally) the view */
     private query: ReactDataGridQuerySpec = {
-        name:   'ActiveAssignments',
+        name:   'arrival',
         schema: 'study',
     };
 
@@ -36,43 +35,30 @@ export class Breeding extends React.Component<any, BreedingState> {
         this.getRowCount            = this.getRowCount.bind(this);
         this.getValidFilterValues   = this.getValidFilterValues.bind(this);
         this.loadColumns            = this.loadColumns.bind(this);
+        this.reloadGrid             = this.reloadGrid.bind(this);
+        this.setView                = this.setView.bind(this);
         this.sort                   = this.sort.bind(this);
         this.successCallback        = this.successCallback.bind(this);
 
-        this.gridColumns = [];
         this.state   = {
+            columns:        [],
             filters:        {},
             hasError:       false,
             isLoading:      true,
             rows:           [],
             sortColumn:     null,
             sortDirection:  null,
+            view:           null,
+            views:          [],
         };
     }
 
     public componentWillMount() {
-        this.setState({loadMessage: 'Loading query details...'});
-        LABKEY.Query.getQueryDetails({
-            failure:    this.failureCallback,
-            queryName:  this.query.name,
-            schemaName: this.query.schema,
-            success:    (info: any) => {
-                this.gridColumns = this.loadColumns(info.defaultView.columns);
-                this.setState({loadMessage: 'Requesting data...'});
-                LABKEY.Query.selectRows({
-                    failure:            this.failureCallback,
-                    queryName:          this.query.name,
-                    requiredVersion:    13.2,
-                    schemaName:         this.query.schema,
-                    success:            this.successCallback,
-                    timeout:            5000,
-                    viewName:           info.defaultView.name,
-                });
-            },
-        });
+        this.reloadGrid(true);
     }
 
     public render() {
+        const options = this.state.views.map((v) => ({value: v.name, label: v.label || '(default)'}));
         return (
             <div>
                 { !this.state.hasError ? null : (
@@ -81,7 +67,7 @@ export class Breeding extends React.Component<any, BreedingState> {
                     </div>)
                 }
                 <MasterDetailDataGrid
-                    columns={this.gridColumns}
+                    columns={this.state.columns}
                     detailRenderer={<MasterDetailExpandView/>}
                     getValidFilterValues={this.getValidFilterValues}
                     minHeight={500}
@@ -90,7 +76,10 @@ export class Breeding extends React.Component<any, BreedingState> {
                     onGridSort={this.sort}
                     rowsCount={this.getRowCount()}
                     rowGetter={this.getRow}
-                    toolbar={<ReactDataGridPlugins.Toolbar enableFilter={true}/>}
+                    toolbar={
+                        <ReactDataGridPlugins.Toolbar enableFilter={true}>
+                            <GridViewSelector setView={this.setView} options={options}/>
+                        </ReactDataGridPlugins.Toolbar>}
                 />
                 {this.state.isLoading ? <LoadingOverlay message={this.state.loadMessage}/> : null}
             </div>);
@@ -163,20 +152,65 @@ export class Breeding extends React.Component<any, BreedingState> {
     private loadColumns(columns: LabkeyQueryFieldMetaData[]) {
         return columns.map((cm) => {
             const c: ReactDataGrid.Column = {
-                key:        cm.name,
-                name:       cm.caption,
-                resizable:  true,
-                sortable:   cm.sortable,
+                key: cm.name,
+                name: _.capitalize(cm.caption || cm.name),
+                resizable: true,
+                sortable: cm.sortable,
             };
             // do not add filters to columns that are blacklisted (e.g., '^Column Name'), but do add
             // filters for columns that are whitelisted and the default filter (i.e., '*')
             if (!this.gridFilters.hasOwnProperty(`^${c.name}`)
-                    && (this.gridFilters.hasOwnProperty(c.name) || this.gridFilters.hasOwnProperty('*'))) {
-                c.filterable     = true;
+                && (this.gridFilters.hasOwnProperty(c.name) || this.gridFilters.hasOwnProperty('*'))) {
+                c.filterable = true;
                 c.filterRenderer = this.gridFilters[c.name] || this.gridFilters['*'];
             }
             return c;
         });
+    }
+
+    /**
+     * Reloads the entire grid, including the columns and a new row request
+     * @param {boolean} first
+     */
+    private reloadGrid(first: boolean) {
+        this.setState({isLoading: true, loadMessage: 'Loading query details...'});
+        LABKEY.Query.getQueryDetails({
+            failure:    this.failureCallback,
+            queryName:  this.query.name,
+            schemaName: this.query.schema,
+            success:    (info: LabkeyQueryInfo) => {
+                if (first) {
+                    this.setState({
+                        views: info.views
+                            .filter((v) => !v.hidden)
+                            .sort((a, b) => (a.label || '').localeCompare(b.label || '')),
+                    });
+                }
+                const viewName = this.state.view && this.state.view.value;
+                const view = (viewName && _.head(info.views.filter((v) => v.name === viewName)))
+                    || info.defaultView;
+                this.setState({ columns: this.loadColumns(view.columns), loadMessage: 'Requesting data...' });
+                LABKEY.Query.selectRows({
+                    failure:            this.failureCallback,
+                    queryName:          this.query.name,
+                    requiredVersion:    13.2,
+                    schemaName:         this.query.schema,
+                    success:            this.successCallback,
+                    timeout:            5000,
+                    viewName:           view.name,
+                });
+            },
+            viewName:   '*',
+        });
+    }
+
+    /**
+     * Sets the view to the passed view name (based on the dropdown selection)
+     * @param {{label: string; value: string}} selectedItem
+     */
+    private setView(selectedItem: { label: string, value: string }) {
+        this.setState({ view: selectedItem });
+        this.reloadGrid(false);
     }
 
     /**
@@ -198,7 +232,7 @@ export class Breeding extends React.Component<any, BreedingState> {
         for (let i = 1; i <= data.getRowCount(); i++) {
             const row = data.getRow(i - 1);
             const obj = { rowId: i } as any;
-            this.gridColumns.forEach((v) => obj[v.key] = row.getValue(v.key) || '');
+            this.state.columns.forEach((v) => obj[v.key] = row.getValue(v.key) || '');
             rows.push(obj);
         }
         this.setState({rows, loadMessage: undefined, isLoading: false});
@@ -207,13 +241,16 @@ export class Breeding extends React.Component<any, BreedingState> {
 
 /** State definition for the main breeding module component */
 interface BreedingState {
-    hasError: boolean;
+    columns: ReactDataGrid.Column[];
     filters: any;
+    hasError: boolean;
     isLoading: boolean;
     loadMessage?: string;
     rows: any[];
     sortColumn: string | null;
     sortDirection: 'ASC' | 'DESC' | 'NONE' | null;
+    view: { value: string, label: string } | null;
+    views: LabkeyViewMetaData[];
 }
 
 /** Type definition for the LABKEY.Query.FieldMetaData */
@@ -221,6 +258,24 @@ interface LabkeyQueryFieldMetaData {
     caption: string;
     name: string;
     sortable: boolean;
+}
+
+/** Type definition for LABKEY.Query.QueryInfo */
+interface LabkeyQueryInfo {
+    schemaName: string;
+    name: string;
+    title: string;
+    columns: LabkeyQueryFieldMetaData[];
+    defaultView: LabkeyViewMetaData;
+    views: LabkeyViewMetaData[];
+}
+
+/** Type definition for the Labkey view metadata */
+interface LabkeyViewMetaData {
+    columns: LabkeyQueryFieldMetaData[];
+    name: string;
+    hidden: boolean;
+    label: string;
 }
 
 /** Component used to display the detail for the main breeding component rows */

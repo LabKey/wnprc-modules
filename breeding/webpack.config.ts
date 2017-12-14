@@ -4,8 +4,9 @@ import { Configuration as WebpackConfig, optimize as Optimize } from 'webpack';
 module.exports = function wp(env: any): WebpackConfig {
     return {
         devtool:    'source-map',
-        entry:      './src/ts/index.tsx',
+        entry:      './src/ts/breeding.ts',
         externals: {
+            'jquery':           'jQuery',
             'react':            'React',
             'react-data-grid':  'ReactDataGrid',
             'react-dom':        'ReactDOM',
@@ -17,8 +18,11 @@ module.exports = function wp(env: any): WebpackConfig {
             ],
         },
         output: {
-            filename:   'breeding.js',
-            path:       `${env.BUILD_DIR}/explodedModule/web/breeding`,
+            filename:       'breeding.js',
+            library:        'Breeding',
+            libraryExport:  'default',
+            libraryTarget:  'umd',
+            path:           `${env.BUILD_DIR}/explodedModule/web/breeding`,
         },
         plugins: [
             // new Optimize.UglifyJsPlugin()

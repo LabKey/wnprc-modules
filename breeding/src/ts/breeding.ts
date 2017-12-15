@@ -5,10 +5,12 @@ import * as $ from 'jquery';
 export class Breeding {
     private PLACEHOLDER: string = 'placeholder.view?id=';
 
+    // noinspection JSUnusedGlobalSymbols: called from HTML
     public displayPregnancyGrid(gridElementId: string, detailElementId: string) {
+        // noinspection JSUnusedGlobalSymbols: 'success' is called when the query finishes
         const x = new LABKEY.QueryWebPart({
             detailsURL: `/breeding/${this.PLACEHOLDER}\${objectid}`,
-            queryName: 'pregnancies_current',
+            queryName: 'PregnancyInfo',
             schemaName: 'study',
             showDetailsColumn: true,
             success: () => {
@@ -18,14 +20,17 @@ export class Breeding {
                         .click(this.ondetailclick.bind(this, id, detailElementId));
                 });
             },
-            title: 'Current Pregnancies',
+            title: 'Pregnancies',
         });
         x.render(gridElementId);
         this.ondetailclick(null, detailElementId);
     }
 
+    // noinspection JSUnusedGlobalSymbols, JSMethodCanBeStatic: called from HTML
     public displayPregnancyDetail(webpart: { id: string | null, wrapperDivId: string }) {
         if (webpart.id) {
+            // ldk-detailspanel defined in labkey/externalModules/labModules/LDK/resources/web/LDK/panel/DetailsPanel.js
+            // noinspection JSUnresolvedExtXType
             Ext4.create('Ext.panel.Panel', {
                 bodyStyle: 'background: transparent',
                 border: false,
@@ -37,22 +42,23 @@ export class Breeding {
                         showBackBtn: false,
                         store: {
                             filterArray: [LABKEY.Filter.create('objectid', webpart.id, LABKEY.Filter.Types.EQUAL)],
-                            queryName: 'pregnancies_current',
+                            queryName: 'PregnancyInfo',
                             schemaName: 'study',
+                            viewName: '_details',
                         },
-                        title: `Pregnancy Detail`,
+                        title: 'Pregnancy Detail',
                         xtype: 'ldk-detailspanel',
                     },
                     {
                         border: false,
-                        flex: 4,
+                        flex: 3,
                         frame: false,
                         xtype: 'panel',
                     },
                 ],
                 layout: {
-                    align:  'stretch',
-                    type:   'hbox',
+                    align: 'stretch',
+                    type: 'hbox',
                 },
                 renderTo: webpart.wrapperDivId,
             });
@@ -61,13 +67,16 @@ export class Breeding {
         }
     }
 
+    // noinspection JSMethodCanBeStatic
     private ondetailclick(id: string | null, detailElementId: string) {
         const x = new LABKEY.WebPart({
-            partConfig: { id },
-            partName:   'Pregnancy Detail',
-            renderTo:   detailElementId,
+            partConfig: {id},
+            partName: 'Pregnancy Detail',
+            renderTo: detailElementId,
         });
         x.render();
     }
 }
+
+// noinspection JSUnusedGlobalSymbols: invoked in the browser
 export default new Breeding();

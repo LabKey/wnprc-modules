@@ -1,0 +1,140 @@
+<tables xmlns="http://labkey.org/data/xml">
+    <table tableName="pregnancies" tableDbType="TABLE">
+        <description>Contains one row for each pregnancy detected at the center.</description>
+        <columns>
+            <column columnName="Id">
+                <datatype>varchar</datatype>
+                <columnTitle>Dam</columnTitle>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+                <nullable>false</nullable>
+                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+                <importAliases>
+                    <importAlias>ptid</importAlias>
+                </importAliases>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>Animal</fkTable>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+                <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                <scale>32</scale>
+            </column>
+            <column columnName="date">
+                <datatype>timestamp</datatype>
+                <columnTitle>Date</columnTitle>
+                <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
+                <nullable>false</nullable>
+                <formatString>DateTime</formatString>
+            </column>
+            <column columnName="objectid">
+                <datatype>entityid</datatype>
+                <columnTitle>Key</columnTitle>
+                <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+                <isHidden>true</isHidden>
+                <shownInInsertView>false</shownInInsertView>
+                <shownInUpdateView>false</shownInUpdateView>
+                <shownInDetailsView>false</shownInDetailsView>
+                <scale>36</scale>
+                <isKeyField>true</isKeyField>
+            </column>
+            <column columnName="sire_id">
+                <datatype>varchar</datatype>
+                <columnTitle>Sire</columnTitle>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+                <nullable>true</nullable>
+                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>Animal</fkTable>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+                <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                <scale>32</scale>
+            </column>
+            <column columnName="breeding_start_date">
+                <datatype>timestamp</datatype>
+                <columnTitle>Breeding Start</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+            </column>
+            <column columnName="breeding_end_date">
+                <datatype>timestamp</datatype>
+                <columnTitle>Breeding End</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+            </column>
+            <column columnName="breeding_reason">
+                <datatype>varchar</datatype>
+                <columnTitle>Breeding Reason</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+                <scale>4000</scale>
+            </column>
+            <column columnName="breeding_comment">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <columnTitle>Breeding Comment</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+                <scale>4000</scale>
+            </column>
+            <column columnName="estimated_conception_date">
+                <datatype>timestamp</datatype>
+                <columnTitle>Estimated Date of Conception</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+            </column>
+            <column columnName="ultrasound_date">
+                <datatype>timestamp</datatype>
+                <columnTitle>3rd Trimester Ultrasound Date</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+            </column>
+            <column columnName="ultrasound_comment">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <columnTitle>3rd Trimester Ultrasound Comment</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+                <scale>4000</scale>
+            </column>
+            <column columnName="ejaculation_confirmation">
+                <datatype>varchar</datatype>
+                <columnTitle>Ejaculation Confirmed?</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+                <scale>4000</scale>
+            </column>
+            <column columnName="outcome">
+                <datatype>varchar</datatype>
+                <columnTitle>Outcome</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+                <scale>4000</scale>
+            </column>
+            <column columnName="outcome_comment">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <columnTitle>Outcome Comment</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+                <scale>4000</scale>
+            </column>
+            <column columnName="outcome_date">
+                <datatype>timestamp</datatype>
+                <columnTitle>Outcome Date</columnTitle>
+                <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+            </column>
+            <column columnName="infant_id">
+                <datatype>varchar</datatype>
+                <columnTitle>Infant</columnTitle>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+                <nullable>true</nullable>
+                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>Animal</fkTable>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+                <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+                <scale>32</scale>
+            </column>
+        </columns>
+        <tableTitle>pregnancies</tableTitle>
+    </table>
+</tables>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tables xmlns="http://labkey.org/data/xml">
+    <table tableName="pregnancies" tableDbType="TABLE">
+        <tableTitle>Pregnancies</tableTitle>
+        <description>Contains one row for each pregnancy detected at the center.</description>
+        <columns>
+            <column columnName="Id">
+                <datatype>varchar</datatype>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <importAliases>
+                    <importAlias>ptid</importAlias>
+                </importAliases>
+            </column>
+            <column columnName="date">
+                <datatype>timestamp</datatype>
+                <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+            </column>
+            <column columnName="objectid">
+                <columnTitle>Pregnancy ID</columnTitle>
+                <datatype>entityid</datatype>
+                <isHidden>true</isHidden>
+                <isKeyField>true</isKeyField>
+            </column>
+            <column columnName="sire_id">
+                <columnTitle>Sire</columnTitle>
+                <datatype>varchar</datatype>
+                <nullable>true</nullable>
+                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${sire_id}</url>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>Animal</fkTable>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="breeding_start_date">
+                <columnTitle>Breeding Start Date</columnTitle>
+                <datatype>timestamp</datatype>
+            </column>
+            <column columnName="breeding_end_date">
+                <columnTitle>Breeding End Date</columnTitle>
+                <datatype>timestamp</datatype>
+            </column>
+            <column columnName="breeding_reason">
+                <columnTitle>Breeding Reason</columnTitle>
+                <datatype>varchar</datatype>
+            </column>
+            <column columnName="breeding_comment">
+                <columnTitle>Breeding Comment</columnTitle>
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+            </column>
+            <column columnName="estimated_conception_date">
+                <columnTitle>Est. Conception Date</columnTitle>
+                <datatype>timestamp</datatype>
+            </column>
+            <column columnName="ultrasound_date">
+                <columnTitle>3T Ultrasound Date</columnTitle>
+                <datatype>timestamp</datatype>
+            </column>
+            <column columnName="ultrasound_comment">
+                <columnTitle>3T Ultrasound Comment</columnTitle>
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+            </column>
+            <column columnName="ejaculation_confirmation">
+                <columnTitle>Ejaculation Confirmed</columnTitle>
+                <datatype>varchar</datatype>
+            </column>
+            <column columnName="outcome">
+                <columnTitle>Outcome</columnTitle>
+                <datatype>varchar</datatype>
+            </column>
+            <column columnName="outcome_comment">
+                <columnTitle>Outcome Comment</columnTitle>
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+            </column>
+            <column columnName="outcome_date">
+                <columnTitle>Outcome Date/Time</columnTitle>
+                <datatype>timestamp</datatype>
+            </column>
+            <column columnName="infant_id">
+                <columnTitle>Infant</columnTitle>
+                <datatype>varchar</datatype>
+                <nullable>true</nullable>
+                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${infant_id}</url>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>Animal</fkTable>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+            </column>
+        </columns>
+    </table>
+</tables>

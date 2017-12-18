@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <datasets metaDataFile="datasets_metadata.xml" xmlns="http://labkey.org/study/xml">
     <categories>
         <category>Colony Management</category>

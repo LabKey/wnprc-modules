@@ -18,6 +18,7 @@ dependencies {
     compile project(":server:api")
     compile project(":server:internal")
     compile project(":externalModules:labModules:LDK")
+    external fileTree("${project.projectDir}/../lib")
 }
 
 tasks.jar {

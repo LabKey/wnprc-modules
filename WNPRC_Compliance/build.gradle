@@ -4,7 +4,6 @@ dependencies {
     compile project("${project.parent.path}:WebUtils")
     external "org.jooq:jooq:3.8.4"
     external "org.apache.pdfbox:pdfbox:2.0.7"
-    external fileTree("${project.projectDir}/../lib")
     jspCompile project("${project.parent.path}:WebUtils")
     jspCompile project(":server:modules:experiment")
 }

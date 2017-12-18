@@ -1,6 +1,5 @@
 dependencies {
     compile "javax.servlet:jsp-api:2.0"
-    external fileTree("${project.projectDir}/../lib")
 }
 
 task('lesscBootstrapXl', group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],

@@ -67,6 +67,24 @@ export class Breeding {
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols: called from HTML
+    public importDatasetMetadata(target: HTMLButtonElement) {
+        $(target).prop('disabled', true);
+        LABKEY.Ajax.request({
+            failure: () => {
+                alert('E_FAIL');
+                $(target).prop('disabled', false);
+            },
+            method: 'POST',
+            scope: this,
+            success: () => {
+                alert('S_OK');
+                $(target).prop('disabled', false);
+            },
+            url: LABKEY.ActionURL.buildURL('breeding', 'importDatasetMetadata'),
+        });
+    }
+
     // noinspection JSMethodCanBeStatic
     private ondetailclick(id: string | null, detailElementId: string) {
         const x = new LABKEY.WebPart({

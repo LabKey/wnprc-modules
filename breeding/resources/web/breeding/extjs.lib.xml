@@ -1,0 +1,11 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="/breeding/extjs/PregnancyChildRecordsPanel.js"/>
+        <script path="/breeding/extjs/PregnancySimpleDetailPanel.js"/>
+        <script path="/breeding/extjs/PregnancyExpandedDetailPanel.js"/>
+    </library>
+    <dependencies>
+        <dependency path="clientapi/ext4.lib.xml"/>
+        <dependency path="ldk/LDKApi.lib.xml"/>
+    </dependencies>
+</libraries>

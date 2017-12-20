@@ -14,8 +14,6 @@
         <column name="estimated_conception_date_plus_120"/>
         <column name="estimated_conception_date_plus_150"/>
         <column name="estimated_conception_date_plus_165"/>
-        <column name="ultrasound_date"/>
-        <column name="ultrasound_comment"/>
         <column name="outcome"/>
         <column name="outcome_date"/>
         <column name="outcome_comment"/>

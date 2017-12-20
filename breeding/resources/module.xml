@@ -1,9 +1,6 @@
 <module xmlns="http://labkey.org/moduleProperties/xml/">
     <clientDependencies>
-        <dependency path="clientapi/ext4.lib.xml"/>
-        <dependency path="Ext4"/>
-        <dependency path="LDK/LDKApi"/>
-        <dependency path="/webutils/css/webutils.css"/>
+        <dependency path="/breeding/extjs.lib.xml"/>
         <dependency path="/breeding/breeding.js"/>
     </clientDependencies>
 </module>

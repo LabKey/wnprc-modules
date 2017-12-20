@@ -53,15 +53,6 @@
                 <columnTitle>Est. Conception Date</columnTitle>
                 <datatype>timestamp</datatype>
             </column>
-            <column columnName="ultrasound_date">
-                <columnTitle>3T Ultrasound Date</columnTitle>
-                <datatype>timestamp</datatype>
-            </column>
-            <column columnName="ultrasound_comment">
-                <columnTitle>3T Ultrasound Comment</columnTitle>
-                <datatype>varchar</datatype>
-                <inputType>textarea</inputType>
-            </column>
             <column columnName="ejaculation_confirmation">
                 <columnTitle>Ejaculation Confirmed</columnTitle>
                 <datatype>varchar</datatype>
@@ -89,6 +80,38 @@
                     <fkTable>Animal</fkTable>
                     <fkColumnName>Id</fkColumnName>
                 </fk>
+            </column>
+        </columns>
+    </table>
+    <table tableName="ultrasounds" tableDbType="TABLE">
+        <tableTitle>Ultrasounds</tableTitle>
+        <description>Contains one row for each ultrasound performed at the center.</description>
+        <columns>
+            <column columnName="Id">
+                <datatype>varchar</datatype>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <importAliases>
+                    <importAlias>ptid</importAlias>
+                </importAliases>
+            </column>
+            <column columnName="date">
+                <datatype>timestamp</datatype>
+                <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+            </column>
+            <column columnName="objectid">
+                <columnTitle>Ultrasound ID</columnTitle>
+                <datatype>entityid</datatype>
+                <isHidden>true</isHidden>
+                <isKeyField>true</isKeyField>
+            </column>
+            <column columnName="performed_by">
+                <columnTitle>Performed By</columnTitle>
+                <datatype>varchar</datatype>
+            </column>
+            <column columnName="remark">
+                <columnTitle>Remark</columnTitle>
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
             </column>
         </columns>
     </table>

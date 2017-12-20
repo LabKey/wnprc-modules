@@ -27,40 +27,19 @@ export class Breeding {
     }
 
     // noinspection JSUnusedGlobalSymbols, JSMethodCanBeStatic: called from HTML
-    public displayPregnancyDetail(webpart: { id: string | null, wrapperDivId: string }) {
+    public displayPregnancyDetail(webpart: WebPartConfig) {
         if (webpart.id) {
-            // ldk-detailspanel defined in labkey/externalModules/labModules/LDK/resources/web/LDK/panel/DetailsPanel.js
-            // noinspection JSUnresolvedExtXType
-            Ext4.create('Ext.panel.Panel', {
-                bodyStyle: 'background: transparent',
-                border: false,
-                frame: false,
-                items: [
-                    {
-                        flex: 1,
-                        margin: '0 10 0 0',
-                        showBackBtn: false,
-                        store: {
-                            filterArray: [LABKEY.Filter.create('objectid', webpart.id, LABKEY.Filter.Types.EQUAL)],
-                            queryName: 'PregnancyInfo',
-                            schemaName: 'study',
-                            viewName: '_details',
-                        },
-                        title: 'Pregnancy Detail',
-                        xtype: 'ldk-detailspanel',
-                    },
-                    {
-                        border: false,
-                        flex: 3,
-                        frame: false,
-                        xtype: 'panel',
-                    },
-                ],
-                layout: {
-                    align: 'stretch',
-                    type: 'hbox',
-                },
+            // noinspection JSUnresolvedExtXType: defined in resources/web/breeding/extjs/
+            Ext4.create('WNPRC.breeding.PregnancyExpandedDetailPanel', {
+                minHeight: 300,
                 renderTo: webpart.wrapperDivId,
+                store: {
+                    filterArray: [LABKEY.Filter.create('objectid', webpart.id, LABKEY.Filter.Types.EQUAL)],
+                    queryName: 'PregnancyInfo',
+                    schemaName: 'study',
+                    viewName: '_details',
+                },
+                title: 'Pregnancy Detail',
             });
         } else {
             $(`#${webpart.wrapperDivId}`).empty();
@@ -70,22 +49,22 @@ export class Breeding {
     // noinspection JSUnusedGlobalSymbols: called from HTML
     public importDatasetMetadata(target: HTMLButtonElement) {
         $(target).prop('disabled', true);
+        // noinspection JSUnusedGlobalSymbols: called by the request handler
         LABKEY.Ajax.request({
-            failure: () => {
-                alert('E_FAIL');
+            failure: (error) => {
+                LABKEY.Utils.onError(error);
                 $(target).prop('disabled', false);
             },
             method: 'POST',
             scope: this,
             success: () => {
-                alert('S_OK');
                 $(target).prop('disabled', false);
             },
             url: LABKEY.ActionURL.buildURL('breeding', 'importDatasetMetadata'),
         });
     }
 
-    // noinspection JSMethodCanBeStatic
+    // noinspection JSMethodCanBeStatic: called from HTML, we don't want static
     private ondetailclick(id: string | null, detailElementId: string) {
         const x = new LABKEY.WebPart({
             partConfig: {id},
@@ -98,3 +77,8 @@ export class Breeding {
 
 // noinspection JSUnusedGlobalSymbols: invoked in the browser
 export default new Breeding();
+
+interface WebPartConfig {
+    id: string | null;
+    wrapperDivId: string;
+}

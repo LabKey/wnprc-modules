@@ -1,4 +1,4 @@
-<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="All Pregnancies" name="history">
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="All Pregnancies" name="all">
     <columns>
         <column name="Id"/>
         <column name="sire_id"/>
@@ -12,7 +12,6 @@
         <column name="estimated_conception_date_plus_120"/>
         <column name="estimated_conception_date_plus_150"/>
         <column name="estimated_conception_date_plus_165"/>
-        <column name="ultrasound_date"/>
         <column name="outcome"/>
         <column name="outcome_date"/>
         <column name="infant_id"/>

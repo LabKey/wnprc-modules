@@ -12,7 +12,6 @@
         <column name="estimated_conception_date_plus_120"/>
         <column name="estimated_conception_date_plus_150"/>
         <column name="estimated_conception_date_plus_165"/>
-        <column name="ultrasound_date"/>
     </columns>
     <sorts>
         <sort column="estimated_conception_date" descending="true"/>

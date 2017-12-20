@@ -34,13 +34,6 @@
                         <columnTitle>+ 165</columnTitle>
                         <formatString>MM/dd/yyyy</formatString>
                     </column>
-                    <column columnName="ultrasound_date">
-                        <columnTitle>3rd Tri. Ultrasound Date</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
-                    </column>
-                    <column columnName="ultrasound_comment">
-                        <columnTitle>3rd Tri. Ultrasound Comment</columnTitle>
-                    </column>
                     <column columnName="breeding_start_date">
                         <formatString>MM/dd/yyyy</formatString>
                     </column>
@@ -48,7 +41,7 @@
                         <formatString>MM/dd/yyyy</formatString>
                     </column>
                     <column columnName="outcome_date">
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>MM/dd/yyyy hh:mm</formatString>
                     </column>
                     <column columnName="breeding_comment">
                         <columnTitle>Breeding Comment</columnTitle>

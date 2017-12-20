@@ -12,8 +12,6 @@ SELECT p.objectid
       ,timestampadd('SQL_TSI_DAY', 120, p.estimated_conception_date) estimated_conception_date_plus_120
       ,timestampadd('SQL_TSI_DAY', 150, p.estimated_conception_date) estimated_conception_date_plus_150
       ,timestampadd('SQL_TSI_DAY', 165, p.estimated_conception_date) estimated_conception_date_plus_165
-      ,p.ultrasound_date
-      ,p.ultrasound_comment
       ,p.ejaculation_confirmation
       ,p.outcome
       ,p.outcome_comment

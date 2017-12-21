@@ -1,18 +1,9 @@
 // noinspection JSUnresolvedVariable: Ext4 is pulled in by other code in the browser
 (function (Ext4) {
-    // noinspection JSUnusedGlobalSymbols: the functions are called by ExtJS
-    Ext4.define('WNPRC.breeding.PregnancySimpleDetailPanel', {
-        alias: 'widget.wnprc-pregnancysimpledetail',
+    Ext4.define('WNPRC.breeding.DetailPanel', {
+        alias: 'widget.wnprc-breeding-detail',
         extend: 'Ext.form.Panel',
-        initComponent: function () {
-            // noinspection JSUnusedGlobalSymbols, JSUnresolvedExtXType: render is real, xtypes are just fine
-            Ext4.apply(this, {
-                bodyStyle: 'padding: 5px;'
-            });
-
-            // call the parent to set up the form panel
-            this.callParent(arguments);
-        },
+        bodyStyle: 'padding: 5px;',
 
         loadFromStore: function (store) {
             var children = [];
@@ -55,7 +46,6 @@
             }, this);
 
             // cycle the children of the panel to show the new fields
-            // noinspection JSUnresolvedFunction: defined in Ext.AbstractComponent
             this.removeAll();
             this.add(children);
         }

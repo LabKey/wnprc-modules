@@ -1,5 +1,6 @@
-declare const LABKEY: any;
 declare const Ext4: any;
+declare const LABKEY: any;
+
 import * as $ from 'jquery';
 
 export class Breeding {
@@ -30,7 +31,7 @@ export class Breeding {
     public displayPregnancyDetail(webpart: WebPartConfig) {
         if (webpart.id) {
             // noinspection JSUnresolvedExtXType: defined in resources/web/breeding/extjs/
-            Ext4.create('WNPRC.breeding.PregnancyExpandedDetailPanel', {
+            Ext4.create('WNPRC.breeding.PregnancyDetailPanel', {
                 minHeight: 300,
                 renderTo: webpart.wrapperDivId,
                 store: {

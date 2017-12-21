@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 /**
  * Spring action controller for WNPRC's breeding/pregnancy module.
  */
-public class BreedingController extends SpringActionController
+public final class BreedingController extends SpringActionController
 {
     /**
      * Default action resolver. Expected to follow the "*Action" naming convention as well as looking for

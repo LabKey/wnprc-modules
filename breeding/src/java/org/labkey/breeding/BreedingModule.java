@@ -8,7 +8,10 @@ import org.labkey.api.view.WebPartFactory;
 import java.util.Collection;
 import java.util.Collections;
 
-public class BreedingModule extends DefaultModule
+/**
+ * Module class for the WNPRC breeding/pregnancy tracking module.
+ */
+public final class BreedingModule extends DefaultModule
 {
     @Override
     protected void init()

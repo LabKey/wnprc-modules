@@ -1,5 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
     <columns>
+        <column name="objectid"/>
         <column name="Id"/>
         <column name="sire_id"/>
         <column name="breeding_start_date"/>

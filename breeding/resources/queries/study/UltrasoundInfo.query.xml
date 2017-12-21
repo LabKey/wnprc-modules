@@ -1,0 +1,21 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="pregnancy_info" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="objectid">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="Id">
+                        <columnTitle>Dam</columnTitle>
+                    </column>
+                    <column columnName="Date">
+                        <formatString>MM/dd/yyyy hh:mm</formatString>
+                    </column>
+                    <column columnName="Performed_By"/>
+                    <column columnName="Remark"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

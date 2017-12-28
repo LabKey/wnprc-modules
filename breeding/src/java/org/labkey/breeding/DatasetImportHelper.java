@@ -35,11 +35,6 @@ final class DatasetImportHelper
      * @param user         User executing the import. Expected to have admin privileges
      * @param container    Container into which to import the dataset. Expected to have an active 'study' module
      * @param studyXmlFile XML file defining the study, including the manifest and the metadata.
-     * @throws IOException
-     * @throws SQLException
-     * @throws DatasetImportUtils.DatasetLockExistsException
-     * @throws XmlException
-     * @throws ImportException
      */
     static void importDatasetMetadata(@NotNull User user, @NotNull Container container, @NotNull File studyXmlFile)
             throws IOException, SQLException, DatasetImportUtils.DatasetLockExistsException, XmlException, ImportException

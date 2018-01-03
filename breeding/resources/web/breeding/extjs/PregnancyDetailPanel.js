@@ -37,7 +37,7 @@
             const onStoreLoad = function (store) {
                 // noinspection JSUnresolvedFunction: Ext.suspendLayouts (4.1.1)
                 Ext.suspendLayouts();
-                this.down(DETAIL_PANEL_XTYPE + ', ' + CHILD_RECORD_XTYPE).forEach(function (i) {
+                this.query(DETAIL_PANEL_XTYPE + ', ' + CHILD_RECORD_XTYPE).forEach(function (i) {
                     i.loadFromStore(store);
                 }, this);
             };

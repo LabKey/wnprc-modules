@@ -32,13 +32,13 @@
             }.bind(this));
 
             // define the handler for loading the child records after the initial loading is complete
-            const simpleDetailId = 'simpledetail';
-            const childRecordsId = 'childrecords';
+            const DETAIL_PANEL_XTYPE = 'wnprc-detailpanel';
+            const CHILD_RECORD_XTYPE = 'wnprc-childrecordspanel';
             const onStoreLoad = function (store) {
                 // noinspection JSUnresolvedFunction: Ext.suspendLayouts (4.1.1)
                 Ext.suspendLayouts();
-                [simpleDetailId, childRecordsId].forEach(function (id) {
-                    this.down('#' + id)[0].loadFromStore(store);
+                this.down(DETAIL_PANEL_XTYPE + ', ' + CHILD_RECORD_XTYPE).forEach(function (i) {
+                    i.loadFromStore(store);
                 }, this);
             };
 
@@ -63,18 +63,16 @@
                         bodyStyle: 'padding: 5px;',
                         border: false,
                         columnWidth: 0.25,
-                        itemId: simpleDetailId,
-                        xtype: 'wnprc-breeding-detail'
+                        xtype: DETAIL_PANEL_XTYPE
                     }, {
                         border: false,
                         childRecords: children,
                         columnWidth: 0.75,
-                        itemId: childRecordsId,
                         listeners: {
                             'childload': loader.promise()
                         },
                         margin: '0 0 0 20',
-                        xtype: 'wnprc-breeding-childrecords'
+                        xtype: CHILD_RECORD_XTYPE
                     }],
                     layout: 'column',
                     minHeight: 300,

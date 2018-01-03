@@ -1,7 +1,7 @@
 // noinspection JSUnresolvedVariable: Ext4 provided by LabKey
 (function (Ext) {
-    Ext.define('WNPRC.breeding.DetailPanel', {
-        alias: 'widget.wnprc-breeding-detail',
+    Ext.define('WNPRC.ext4.DetailPanel', {
+        alias: 'widget.wnprc-detailpanel',
         extend: 'Ext.form.Panel',
         loadFromStore: function (store) {
             const children = [];

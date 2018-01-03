@@ -1,12 +1,11 @@
 // noinspection JSUnresolvedVariable: Ext4 provided by LabKey
 (function (Ext) {
-    Ext.define('WNPRC.breeding.ChildRecordsPanel', {
-        alias: 'widget.wnprc-breeding-childrecords',
+    Ext.define('WNPRC.ext4.ChildRecordsPanel', {
+        alias: 'widget.wnprc-childrecordspanel',
         childRecords: [],
         extend: 'Ext.panel.Panel',
         layout: 'fit',
         loadFromStore: function (store) {
-
             // creates a scoped helper object to co-ordinate the async functions from each of the children. essentially
             // a poor-man's 'promise' library, which will only work in-so-far as all the calls to 'promise' happen
             // before any of the calls to 'resolve' (which--in this instance--they _should_, but still be advised that
@@ -24,12 +23,8 @@
                 };
             };
 
-            // this funky-looking business generates a distinct success handler closure for each child
-            // record config, complete with its own 'promise' for the scoped loader object generated above.
-            // it looks strange (with the whole function-returning-an-object-with-a-function thing) because
-            // that enables us to create a _new_ closure for each child configuration instead of re-using
-            // an existing one by accident, which is necessary for us to chain up the call to 'hideMessage'
-            // (if we only needed to resolve the 'promise' call, we could just pass the promise in itself)
+            // creates and returns a new handler function for the success handler that closes over the passed resolve
+            // function argument so that each instance of the handler can resolve its own unique promise instance
             const onSuccess = function (resolve) {
                 return function () {
                     // noinspection JSUnresolvedFunction: 'this' is assumed to be a LABKEY.Query.DataRegion

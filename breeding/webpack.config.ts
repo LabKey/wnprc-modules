@@ -6,10 +6,7 @@ module.exports = function wp(env: any): WebpackConfig {
         devtool:    'source-map',
         entry:      './src/ts/breeding.ts',
         externals: {
-            'jquery':           'jQuery',
-            'react':            'React',
-            'react-data-grid':  'ReactDataGrid',
-            'react-dom':        'ReactDOM',
+            jquery:           'jQuery',
         },
         module: {
             rules: [

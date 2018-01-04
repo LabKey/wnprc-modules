@@ -1,4 +1,4 @@
-<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="Pregnancies - Current">
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="Pregnancies - All" name="pregnancies_all">
     <columns>
         <column name="id"/>
         <column name="sireid"/>
@@ -14,12 +14,14 @@
         <column name="conceptiondate_plus_150"/>
         <column name="conceptiondate_plus_165"/>
         <column name="gestation_day"/>
+        <column name="outcome"/>
+        <column name="outcome_date"/>
+        <column name="infantid"/>
     </columns>
     <sorts>
         <sort column="conceptiondate" descending="true"/>
     </sorts>
     <filters>
         <filter column="conceptiondate" operator="isnonblank"/>
-        <filter column="outcome_date"   operator="isblank"/>
     </filters>
 </customView>

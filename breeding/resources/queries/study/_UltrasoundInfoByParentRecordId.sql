@@ -1,7 +1,7 @@
 PARAMETERS ( PARENT_RECORD_ID VARCHAR )
-    SELECT u.Id
-          ,u.Date
-          ,u.Performed_By
-          ,u.Remark
+    SELECT u.date
+          ,u.remark
+          ,u.performedby
       FROM ultrasounds u
-     WHERE u.Id IN (SELECT Id FROM pregnancies p WHERE p.objectid = PARENT_RECORD_ID)
+     WHERE u.parentid = PARENT_RECORD_ID
+     ORDER BY u.date DESC

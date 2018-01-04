@@ -1,23 +1,23 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
     <columns>
         <column name="objectid"/>
-        <column name="Id"/>
-        <column name="sire_id"/>
-        <column name="breeding_start_date"/>
-        <column name="breeding_end_date"/>
-        <column name="breeding_reason"/>
-        <column name="ejaculation_confirmation"/>
-        <column name="breeding_comment"/>
-        <column name="estimated_conception_date"/>
-        <column name="estimated_conception_date_plus_30"/>
-        <column name="estimated_conception_date_plus_60"/>
-        <column name="estimated_conception_date_plus_90"/>
-        <column name="estimated_conception_date_plus_120"/>
-        <column name="estimated_conception_date_plus_150"/>
-        <column name="estimated_conception_date_plus_165"/>
+        <column name="id"/>
+        <column name="sireid"/>
+        <column name="date"/>
+        <column name="dateend"/>
+        <column name="reason"/>
+        <column name="ejaculation"/>
+        <column name="conceptiondate"/>
+        <column name="conceptiondate_plus_30"/>
+        <column name="conceptiondate_plus_60"/>
+        <column name="conceptiondate_plus_90"/>
+        <column name="conceptiondate_plus_120"/>
+        <column name="conceptiondate_plus_150"/>
+        <column name="conceptiondate_plus_165"/>
+        <column name="gestation_day"/>
         <column name="outcome"/>
         <column name="outcome_date"/>
-        <column name="outcome_comment"/>
-        <column name="infant_id"/>
+        <column name="outcome_remark"/>
+        <column name="infantid"/>
     </columns>
 </customView>

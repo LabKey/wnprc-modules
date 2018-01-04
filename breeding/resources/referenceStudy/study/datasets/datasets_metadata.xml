@@ -1,84 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tables xmlns="http://labkey.org/data/xml">
-    <table tableName="pregnancies" tableDbType="TABLE">
-        <tableTitle>Pregnancies</tableTitle>
-        <description>Contains one row for each pregnancy detected at the center.</description>
+    <table tableName="breeding_encounters" tableDbType="TABLE">
+        <tableTitle>Breeding Encounters</tableTitle>
+        <description>Contains one row for each breeding pairing/assignment for a dam at the center.</description>
         <columns>
-            <column columnName="Id">
+            <column columnName="id">
                 <datatype>varchar</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
-                <importAliases>
-                    <importAlias>ptid</importAlias>
-                </importAliases>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>id</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="objectid">
+                <datatype>entityid</datatype>
+                <isHidden>true</isHidden>
+                <isKeyField>true</isKeyField>
+                <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
             </column>
             <column columnName="date">
                 <datatype>timestamp</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
             </column>
-            <column columnName="objectid">
-                <columnTitle>Pregnancy ID</columnTitle>
-                <datatype>entityid</datatype>
-                <isHidden>true</isHidden>
-                <isKeyField>true</isKeyField>
+            <column columnName="dateend">
+                <columnTitle>End Date</columnTitle>
+                <datatype>timestamp</datatype>
             </column>
-            <column columnName="sire_id">
+            <column columnName="remark">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+            </column>
+            <column columnName="description">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+            </column>
+            <column columnName="performedby">
+                <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+            </column>
+            <column columnName="sireid">
                 <columnTitle>Sire</columnTitle>
                 <datatype>varchar</datatype>
-                <nullable>true</nullable>
                 <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${sire_id}</url>
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
-                    <fkTable>Animal</fkTable>
-                    <fkColumnName>Id</fkColumnName>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>id</fkColumnName>
                 </fk>
             </column>
-            <column columnName="breeding_start_date">
-                <columnTitle>Breeding Start Date</columnTitle>
-                <datatype>timestamp</datatype>
-            </column>
-            <column columnName="breeding_end_date">
-                <columnTitle>Breeding End Date</columnTitle>
-                <datatype>timestamp</datatype>
-            </column>
-            <column columnName="breeding_reason">
-                <columnTitle>Breeding Reason</columnTitle>
+            <column columnName="reason">
+                <columnTitle>Reason</columnTitle>
                 <datatype>varchar</datatype>
             </column>
-            <column columnName="breeding_comment">
-                <columnTitle>Breeding Comment</columnTitle>
-                <datatype>varchar</datatype>
-                <inputType>textarea</inputType>
-            </column>
-            <column columnName="estimated_conception_date">
+            <column columnName="conceptiondate">
                 <columnTitle>Est. Conception Date</columnTitle>
                 <datatype>timestamp</datatype>
             </column>
-            <column columnName="ejaculation_confirmation">
+            <column columnName="ejaculation">
                 <columnTitle>Ejaculation Confirmed</columnTitle>
                 <datatype>varchar</datatype>
             </column>
-            <column columnName="outcome">
-                <columnTitle>Outcome</columnTitle>
+        </columns>
+    </table>
+    <table tableName="breeding_remarks" tableDbType="TABLE">
+        <tableTitle>Breeding Remarks</tableTitle>
+        <description>Contains one row for each observation/remark about a breeding encounter.</description>
+        <columns>
+            <column columnName="id">
                 <datatype>varchar</datatype>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>id</fkColumnName>
+                </fk>
             </column>
-            <column columnName="outcome_comment">
-                <columnTitle>Outcome Comment</columnTitle>
+            <column columnName="objectid">
+                <datatype>entityid</datatype>
+                <isHidden>true</isHidden>
+                <isKeyField>true</isKeyField>
+                <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+            </column>
+            <column columnName="parentid">
+                <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                <isHidden>true</isHidden>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>breeding_encounters</fkTable>
+                    <fkColumnName>objectid</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="date">
+                <datatype>timestamp</datatype>
+                <nullable>false</nullable>
+                <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+            </column>
+            <column columnName="remark">
                 <datatype>varchar</datatype>
                 <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
             </column>
-            <column columnName="outcome_date">
-                <columnTitle>Outcome Date/Time</columnTitle>
+            <column columnName="description">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+            </column>
+            <column columnName="performedby">
+                <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+            </column>
+        </columns>
+    </table>
+    <table tableName="pregnancy_outcomes" tableDbType="TABLE">
+        <tableTitle>Pregnancy Outcomes</tableTitle>
+        <description>Contains one row for the outcome of each pregnancy completed/terminated at the center.</description>
+        <columns>
+            <column columnName="id">
+                <datatype>varchar</datatype>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>id</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="objectid">
+                <datatype>entityid</datatype>
+                <isHidden>true</isHidden>
+                <isKeyField>true</isKeyField>
+                <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+            </column>
+            <column columnName="parentid">
+                <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                <isHidden>true</isHidden>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>breeding_encounters</fkTable>
+                    <fkColumnName>objectid</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="date">
                 <datatype>timestamp</datatype>
+                <nullable>false</nullable>
+                <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
             </column>
-            <column columnName="infant_id">
+            <column columnName="remark">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+            </column>
+            <column columnName="description">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+            </column>
+            <column columnName="performedby">
+                <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+            </column>
+            <column columnName="outcome">
+                <datatype>varchar</datatype>
+                <nullable>false</nullable>
+            </column>
+            <column columnName="infantid">
                 <columnTitle>Infant</columnTitle>
                 <datatype>varchar</datatype>
-                <nullable>true</nullable>
                 <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${infant_id}</url>
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
-                    <fkTable>Animal</fkTable>
-                    <fkColumnName>Id</fkColumnName>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>id</fkColumnName>
                 </fk>
             </column>
         </columns>
@@ -87,31 +188,51 @@
         <tableTitle>Ultrasounds</tableTitle>
         <description>Contains one row for each ultrasound performed at the center.</description>
         <columns>
-            <column columnName="Id">
+            <column columnName="id">
                 <datatype>varchar</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
-                <importAliases>
-                    <importAlias>ptid</importAlias>
-                </importAliases>
-            </column>
-            <column columnName="date">
-                <datatype>timestamp</datatype>
-                <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>id</fkColumnName>
+                </fk>
             </column>
             <column columnName="objectid">
-                <columnTitle>Ultrasound ID</columnTitle>
                 <datatype>entityid</datatype>
                 <isHidden>true</isHidden>
                 <isKeyField>true</isKeyField>
+                <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
             </column>
-            <column columnName="performed_by">
-                <columnTitle>Performed By</columnTitle>
+            <column columnName="parentid">
                 <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                <isHidden>true</isHidden>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>breeding_encounters</fkTable>
+                    <fkColumnName>objectid</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="date">
+                <datatype>timestamp</datatype>
+                <nullable>false</nullable>
+                <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
             </column>
             <column columnName="remark">
-                <columnTitle>Remark</columnTitle>
                 <datatype>varchar</datatype>
                 <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+            </column>
+            <column columnName="description">
+                <datatype>varchar</datatype>
+                <inputType>textarea</inputType>
+                <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+            </column>
+            <column columnName="performedby">
+                <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
             </column>
         </columns>
     </table>

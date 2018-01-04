@@ -1,14 +1,34 @@
 PARAMETERS ( PARENT_RECORD_ID VARCHAR )
-    SELECT CASE WHEN (p.objectid = PARENT_RECORD_ID) THEN ('*') ELSE NULL END "*"
-          ,p.Id
-          ,p.sire_id
-          ,p.breeding_start_date
-          ,p.breeding_end_date
-          ,p.breeding_reason
-          ,p.breeding_comment
-          ,p.outcome
-          ,p.outcome_date
-          ,p.infant_id
-      FROM pregnancies p
-     WHERE p.Id IN (SELECT Id FROM pregnancies p2 WHERE p2.objectid = PARENT_RECORD_ID)
-     ORDER BY p.outcome_date DESC
+    SELECT CASE WHEN (be.objectid = PARENT_RECORD_ID) THEN ('*') ELSE NULL END "*"
+          ,be.sireid
+          ,be.date
+          ,be.dateend
+          ,be.reason
+          ,br.remark
+          ,be.conceptiondate
+          ,po.outcome
+          ,po.date outcome_date
+          ,po.remark outcome_remark
+          ,po.infantid
+      FROM breeding_encounters be
+        -- select only the most recent outcome, in case there are multiple outcomes
+        -- (note that we do not expect there to be multiples, but just in case)
+      LEFT OUTER JOIN pregnancy_outcomes po
+        ON po.objectid = (SELECT objectid
+                            FROM pregnancy_outcomes
+                           WHERE parentid = be.objectid
+                           ORDER BY date DESC
+                           LIMIT 1)
+        -- select the most recent remark to show in the list
+      LEFT OUTER JOIN breeding_remarks br
+        ON br.objectid = (SELECT objectid
+                            FROM breeding_remarks
+                           WHERE parentid = be.objectid
+                           ORDER BY date DESC
+                           LIMIT 1)
+        -- select all the pregnancies for the dam of the selected parent record
+     WHERE be.id IN (SELECT id
+                       FROM breeding_encounters be2
+                      WHERE be2.objectid = PARENT_RECORD_ID)
+       AND be.conceptiondate IS NOT NULL
+     ORDER BY po.date DESC

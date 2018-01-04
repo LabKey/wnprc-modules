@@ -3,4 +3,8 @@
 <div>
     <button onclick="Breeding.importDatasetMetadata(this)">Import Dataset</button>
 </div>
-<script type="application/javascript">Ext4.onReady(function(){Breeding.displayPregnancyGrid('pregnancy-grid', 'pregnancy-detail');});</script>
+<script type="application/javascript">
+    Ext4.onReady(function(){
+        Breeding.render('pregnancy-grid', 'pregnancy-detail');
+    });
+</script>

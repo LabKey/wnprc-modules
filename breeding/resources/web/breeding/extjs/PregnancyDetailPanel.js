@@ -42,17 +42,31 @@
                 }, this);
             };
 
-            // configure the queries for the child records. these are all assumed to be
-            // parameterized queries that take the id of the 'parent' record (in this
-            // case a pregnancy.objectid) as the PARENT_RECORD_ID parameter
+            // create some factory methods to generate the appropriate filters/parameters from the
+            // parent record
+            const filterFactory = function(r) {
+                // noinspection JSUnresolvedVariable: LABKEY.Filter.Types defined in the LabKey code
+                return [LABKEY.Filter.create('parentid', r.get('objectid'), LABKEY.Filter.Types.EQUAL)];
+            };
+            const paramsFactory = function(r) {
+                return { PARENT_RECORD_ID: r.get('objectid') };
+            };
+            // configure the queries for the child records
             const children = [{
-                queryName: '_UltrasoundInfoByParentRecordId',
+                queryName: '_PregnancyInfoByParentRecordId',
+                parametersFactory: paramsFactory,
+                schemaName: 'study',
+                title: 'Pregnancy History'
+            }, {
+                filterArrayFactory: filterFactory,
+                queryName: 'ultrasounds',
                 schemaName: 'study',
                 title: 'Ultrasounds'
             }, {
-                queryName: '_PregnancyInfoByParentRecordId',
+                filterArrayFactory: filterFactory,
+                queryName: 'breeding_remarks',
                 schemaName: 'study',
-                title: 'Pregnancy History'
+                title: 'Breeding Remarks'
             }];
 
             // noinspection JSUnresolvedExtXType: Ext.panel.Panel (2.3.0)

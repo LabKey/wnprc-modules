@@ -4,7 +4,9 @@
         <category>Colony Management</category>
     </categories>
     <datasets>
-        <dataset name="pregnancies" id="6000" category="Colony Management" type="Standard"/>
-        <dataset name="ultrasounds" id="6001" category="Colony Management" type="Standard"/>
+        <dataset name="breeding_encounters" id="6000" category="Colony Management" type="Standard"/>
+        <dataset name="breeding_remarks"    id="6001" category="Colony Management" type="Standard"/>
+        <dataset name="pregnancy_outcomes"  id="6002" category="Colony Management" type="Standard"/>
+        <dataset name="ultrasounds"         id="6003" category="Colony Management" type="Standard"/>
     </datasets>
 </datasets>

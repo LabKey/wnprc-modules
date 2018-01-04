@@ -36,9 +36,8 @@
             const loader = onLoad(this.fireEvent.bind(this, 'childload'));
             // set the style for the child divs
             const style = 'margin: 0px 0px 10px 0px';
-            // set up the parameters for the child record queries, which are all assumed to be parameterized queries
-            // taking a single 'PARENT_RECORD_ID' as the parameter (which the query would then know what to do with)
-            const params = {PARENT_RECORD_ID: store.getAt(0).get('objectid')};
+            // get the first record for the filtering
+            const record = store.getAt(0);
             // loop over each of the child record configs passed to the component and generate a new QueryWebPart to
             // display the data for the child record. that involves creating a blank div into which to render, adding
             // the parameters and the success handler, then creating and rendering the web part
@@ -47,9 +46,18 @@
                 const childId = this.id + '-child-' + i;
                 Ext.DomHelper.append(this.body, {tag: 'div', id: childId, style: style});
                 // add the filter for the participant id and the success handler
+                // noinspection JSUnresolvedVariable, JSUnresolvedFunction: standardButtons defined in the LABKEY code
                 Ext.apply(c, {
+                    buttonBar: {
+                        items: [
+                            LABKEY.QueryWebPart.standardButtons.insertNew,
+                            LABKEY.QueryWebPart.standardButtons.exportRows,
+                            LABKEY.QueryWebPart.standardButtons.print
+                        ]
+                    },
                     failure: LABKEY.Utils.onError,
-                    parameters: params,
+                    filterArray: c.filterArrayFactory ? c.filterArrayFactory(record) : null,
+                    parameters: c.parametersFactory ? c.parametersFactory(record) : null,
                     success: onSuccess(loader.promise())
                 });
                 // noinspection JSUnresolvedFunction: LABKEY.QueryWebPart defined in the LabKey code

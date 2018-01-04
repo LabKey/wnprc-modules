@@ -1,5 +1,6 @@
-SELECT u.Id
-,u.Date
-,u.Performed_By
-,u.Remark
-FROM ultrasounds u
+SELECT u.objectid
+      ,u.id
+      ,u.date
+      ,u.performedby
+      ,u.remark
+  FROM ultrasounds u

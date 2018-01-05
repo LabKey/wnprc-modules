@@ -17,40 +17,6 @@
 
  -->
 <tables xmlns="http://labkey.org/data/xml">
-    <table tableName="chargeRateExemptions" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
-        <auditLogging>DETAILED</auditLogging>
-        <tableTitle>Exemptions to Default Rates</tableTitle>
-        <columns>
-            <column columnName="rowId"/>
-            <column columnName="project">
-                <nullable>false</nullable>
-            </column>
-            <column columnName="chargeId">
-                <nullable>false</nullable>
-            </column>
-            <column columnName="unitCost">
-                <columnTitle>Unit Cost</columnTitle>
-            </column>
-            <column columnName="remark">
-                <columnTitle>Remark</columnTitle>
-            </column>
-            <column columnName="startDate">
-                <columnTitle>Start Date</columnTitle>
-                <nullable>false</nullable>
-            </column>
-            <column columnName="endDate">
-                <columnTitle>End Date</columnTitle>
-                <nullable>false</nullable>
-                <formatString>yyyy-MM-dd</formatString>
-            </column>
-            <column columnName="container"/>
-            <column columnName="createdBy"/>
-            <column columnName="created"/>
-            <column columnName="modifiedBy"/>
-            <column columnName="modified"/>
-        </columns>
-    </table>
     <table tableName="creditAccount" tableDbType="TABLE" useColumnOrder="true">
         <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
@@ -767,40 +733,6 @@
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="category"/>
-        </columns>
-    </table>
-    <table tableName="chargeUnits" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
-        <auditLogging>DETAILED</auditLogging>
-        <tableTitle>Charge Units</tableTitle>
-        <columns>
-            <column columnName="chargetype">
-                <columnTitle>Name</columnTitle>
-            </column>
-            <column columnName="servicecenter">
-                <columnTitle>Service Center</columnTitle>
-            </column>
-            <column columnName="shownInBlood">
-                <columnTitle>Shown In Blood Form?</columnTitle>
-            </column>
-            <column columnName="shownInLabwork">
-                <columnTitle>Shown In Labwork Form?</columnTitle>
-            </column>
-            <column columnName="shownInMedications">
-                <columnTitle>Shown In Medications Form?</columnTitle>
-            </column>
-            <column columnName="shownInProcedures">
-                <columnTitle>Shown In Procedures Form?</columnTitle>
-            </column>
-            <column columnName="active">
-                <columnTitle>Is Active?</columnTitle>
-                <defaultValue>true</defaultValue>
-            </column>
-            <column columnName="container"/>
-            <column columnName="createdBy"/>
-            <column columnName="created"/>
-            <column columnName="modifiedBy"/>
-            <column columnName="modified"/>
         </columns>
     </table>
     <table tableName="chargeUnitAccounts" tableDbType="TABLE" useColumnOrder="true">

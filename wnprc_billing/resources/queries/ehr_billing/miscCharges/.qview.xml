@@ -1,0 +1,15 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="project"/>
+        <column name="chargeId"/>
+        <column name="chargecategory"/>
+        <column name="chargetype"/>
+        <column name="debitedaccount"/>
+        <column name="creditedaccount"/>
+        <column name="quantity"/>
+        <column name="unitCost"/>
+        <column name="comment"/>
+    </columns>
+</customView>

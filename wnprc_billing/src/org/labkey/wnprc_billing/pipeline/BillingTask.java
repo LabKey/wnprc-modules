@@ -15,14 +15,12 @@
  */
 package org.labkey.wnprc_billing.pipeline;
 
-import au.com.bytecode.opencsv.CSVWriter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.ResultsImpl;
@@ -35,6 +33,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr_billing.pipeline.BillingPipelineJobSupport;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
@@ -42,17 +41,14 @@ import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
+import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.GUID;
-import org.labkey.api.ehr_billing.pipeline.BillingPipelineJobSupport;
 import org.labkey.ehr_billing.EHR_BillingSchema;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -128,11 +124,11 @@ public class BillingTask extends PipelineJob.Task<BillingTask.Factory>
             loadTransactionNumber();
             perDiemProcessing(ehrContainer);
             proceduresProcessing(ehrContainer);
-            
+            miscChargesProcessing(ehrContainer);
+
             //TODO:
 //            leaseFeeProcessing(ehrContainer);
 //            labworkProcessing(ehrContainer);
-//            miscChargesProcessing(ehrContainer);
 
             transaction.commit();
         }
@@ -414,20 +410,21 @@ public class BillingTask extends PipelineJob.Task<BillingTask.Factory>
         String[] colNames = new String[]{
                 "Id",
                 "date",
-                null, //project
+                "project",
                 "quantity",
                 "unitCost",
                 "totalcost",
                 null, //sourceRecord
-                null, //comment
+                "comment",
                 "debitedAccount",
                 "chargeId",
                 "item",
                 "category",
-                "serviceCenter"
+                "serviceCenter",
+                null //creditedAccount
         };
 
-        String queryName = "perDiemRates";
+        String queryName = "perDiemFeeRates";
         List<Map<String, Object>> rows = getRowList(ehrContainer, "wnprc_billing", queryName, colNames, params);
         getJob().getLogger().info(rows.size() + " rows found");
 
@@ -455,7 +452,8 @@ public class BillingTask extends PipelineJob.Task<BillingTask.Factory>
                 "chargeid",
                 "item",
                 "category",
-                "serviceCenter"
+                "serviceCenter",
+                null //creditedAccount
         };
 
         String queryName = "procedureFeeRates";
@@ -464,5 +462,37 @@ public class BillingTask extends PipelineJob.Task<BillingTask.Factory>
 
         writeToInvoicedItems(rows, "Procedure Fees", colNames, queryName, true);
         getJob().getLogger().info("Finished Caching Procedure Fees");
+    }
+
+    private void miscChargesProcessing(Container ehrContainer) throws PipelineJobException
+    {
+        getJob().getLogger().info("Caching Other Charges");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("StartDate", getSupport().getStartDate());
+        params.put("EndDate", getSupport().getEndDate());
+        String[] colNames = new String[]{
+                "Id",
+                "date",
+                "project",
+                "quantity",
+                "unitCost",
+                "totalcost",
+                "sourceRecord",
+                "comment",
+                "debitedAccount",
+                "chargeid",
+                "item",
+                "category",
+                "serviceCenter",
+                "creditedAccount"
+        };
+
+        List<Map<String, Object>> rows = getRowList(ehrContainer, "wnprc_billing", MISC_CHARGES_QUERY, colNames, params);
+        getJob().getLogger().info(rows.size() + " rows found");
+
+        writeToInvoicedItems(rows, "Misc Charges", colNames, MISC_CHARGES_QUERY, true);
+
+        getJob().getLogger().info("Finished Caching Misc Charges");
     }
 }

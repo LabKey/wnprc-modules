@@ -16,6 +16,13 @@
                             <fkColumnName>name</fkColumnName>
                         </fk>
                     </column>
+                    <!--<column columnName="chargeId">-->
+                        <!--<fk>-->
+                            <!--<fkDbSchema>ehr_billing</fkDbSchema>-->
+                            <!--<fkTable>chargeableItems</fkTable>-->
+                            <!--<fkColumnName>rowid</fkColumnName>-->
+                        <!--</fk>-->
+                    <!--</column>-->
                 </columns>
             </table>
         </tables>

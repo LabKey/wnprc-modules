@@ -13,6 +13,16 @@
                             <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="creditedAccount">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="quantity">
+                        <formatString>##,##0.00</formatString>
+                    </column>
                     <column columnName="po_amount">
                         <formatString>$###,##0.00</formatString>
                     </column>

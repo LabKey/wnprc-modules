@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr.dataentry.DefaultDataEntryFormFactory;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
@@ -29,6 +30,7 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_billing.dataentry.ChargesFormType;
 import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 
@@ -49,7 +51,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     @Override
     public double getVersion()
     {
-        return 17.34;
+        return 17.35;
     }
 
     @Override
@@ -73,6 +75,9 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
 
     @Override
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)    {
+
+        EHRService.get().registerFormType(new DefaultDataEntryFormFactory(ChargesFormType.class, this));
+
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_BillingContainerListener());
         PipelineService.get().registerPipelineProvider(new BillingPipelineProvider(this));

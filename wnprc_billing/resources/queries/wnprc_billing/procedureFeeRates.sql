@@ -15,7 +15,7 @@
  */
 
 SELECT *,
-(procFees.quantity * procFees.unitCost) as totalCost
+round((CAST((procFees.quantity * procFees.unitCost) AS DOUBLE)), 2) AS totalCost
 FROM
 (SELECT
   pFees1.id,
@@ -23,7 +23,7 @@ FROM
   pFees1.project,
   pFees1.account as debitedAccount,
   pFees1.sourceRecord,
-  (case when pFees1.tubes >= 1 then cr1.unitCost end) as unitCost,
+  (case when pFees1.tubes >= 1 then (cr1.unitCost + (pFees1.tierRate*cr1.unitCost)) end) as unitCost,
   (case when pFees1.tubes >= 1 then ('Blood Draws ' || pFees1.id) end) as comment,
   (case when pFees1.tubes >= 1 then 1 end) as quantity,
   pFees1.taskid,
@@ -31,8 +31,9 @@ FROM
   ci1.name as item,
   ci1.category as category,
   cr1.serviceCode as serviceCenter,
-  NULL AS isMiscCharge
- FROM wnprc_billing.procedureFees pFees1
+  NULL AS isMiscCharge,
+  pFees1.tierRate
+ FROM wnprc_billing.procedureFeesWithTierRates pFees1
  LEFT JOIN ehr_billing.chargeRates cr1 ON (
    CAST(pFees1.date AS DATE) >= CAST(cr1.startDate AS DATE) AND
    (CAST(pFees1.date AS DATE) <= cr1.enddate OR cr1.enddate IS NULL) AND
@@ -48,7 +49,7 @@ SELECT
   pFees2.project,
   pFees2.account as debitedAccount,
   pFees2.sourceRecord,
-  (case when pFees2.tubes > 1 then cr2.unitCost end) as unitCost,
+  (case when pFees2.tubes > 1 then (cr2.unitCost + (pFees2.tierRate*cr2.unitCost)) end) as unitCost,
   null as comment,
   (case when pFees2.tubes > 1 then (pFees2.tubes - 1) else 0 end) as quantity,
   pFees2.taskid,
@@ -56,8 +57,9 @@ SELECT
   ci2.name as item,
   ci2.category as category,
   cr2.serviceCode as serviceCenter,
-  NULL AS isMiscCharge
-FROM wnprc_billing.procedureFees pFees2
+  NULL AS isMiscCharge,
+  pFees2.tierRate
+FROM wnprc_billing.procedureFeesWithTierRates pFees2
   LEFT JOIN ehr_billing.chargeRates cr2 ON (
     CAST(pFees2.date AS DATE) >= CAST(cr2.startDate AS DATE) AND
     (CAST(pFees2.date AS DATE) <= cr2.enddate OR cr2.enddate IS NULL) AND

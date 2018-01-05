@@ -45,7 +45,7 @@ SELECT * FROM
     (
         SELECT
             assgn.Id AS id,
---             project,
+            project,
             project.account AS account,
             hous.area AS location,
             CASE
@@ -91,7 +91,7 @@ SELECT * FROM
     WHERE pd.research = TRUE -- only get research accounts
     GROUP BY -- group by to avoid duplicates rows when an animal is moved around in different rooms in a same day. For ex. animal id cj1363, for month of May 2016
         pd.id,
---         pd.project,
+        pd.project,
         pd.account,
         pd.location,
         pd.adate,

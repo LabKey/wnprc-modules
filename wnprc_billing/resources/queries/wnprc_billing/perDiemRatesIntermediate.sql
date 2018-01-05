@@ -17,24 +17,36 @@ SELECT
   pd.Id,
   pd.adate,
   pd.edate,
---   pd.project,
+  pd.project,
+  pd.account,
   pd.totalAccounts,
   pd.totalDaysPerAccount,
-  pds2.account
+  'Location(s): ' || group_concat(pd.location, ', ') AS comment
   FROM
   (
     SELECT
       pds.Id,
       pds.adate,
       pds.edate,
---       pds.project,
+      pds.account,
+      pds.project,
       count(pds.account)                                                            AS totalAccounts,
-      (TIMESTAMPDIFF('SQL_TSI_DAY', pds.adate, pds.edate) + 1) / count(pds.account) AS totalDaysPerAccount
+      (TIMESTAMPDIFF('SQL_TSI_DAY', pds.adate, pds.edate) + 1) / count(pds.account) AS totalDaysPerAccount,
+      pds.location
     FROM wnprc_billing.perDiems pds
     GROUP BY
       pds.Id,
       pds.adate,
-      pds.edate
---       pds.project
+      pds.edate,
+      pds.project,
+      pds.account,
+      pds.location
   ) pd
-  LEFT JOIN wnprc_billing.perDiems pds2 ON pds2.Id = pd.Id AND pds2.adate = pd.adate AND pds2.edate = pd.edate
+  GROUP BY
+    pd.Id,
+    pd.adate,
+    pd.edate,
+    pd.project,
+    pd.account,
+    pd.totalAccounts,
+    pd.totalDaysPerAccount

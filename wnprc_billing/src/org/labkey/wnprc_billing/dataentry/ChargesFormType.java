@@ -32,6 +32,7 @@ public class ChargesFormType extends TaskForm
         addClientDependency(ClientDependency.fromPath("ehr/DataEntryUtils.js"));
         addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingProjectField.js"));
         addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingProjectEntryField.js"));
+        addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingRowObserverEntryField.js"));
         addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingChargeIdEntryField.js"));
 
         for (FormSection s : getFormSections())

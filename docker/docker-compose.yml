@@ -6,6 +6,7 @@ services:
     volumes:
       - "${PG_CONF_FILE}:/var/lib/postgresql/data/postgresql.conf"
       - "${PG_DATA_DIR}:/var/lib/postgresql/data"
+      - "${PG_HBA_FILE}:/var/lib/postgresql/data/pg_hba.conf"
       - "${PG_LOG_DIR}:/var/lib/postgresql/data/pg_log"
     ports:
       - "9081:5432"
@@ -14,15 +15,15 @@ services:
     environment:
       TZ: America/Chicago
  
-  pgbadger:
-    image: wnprcehr/pgbadger:latest
-    depends_on:
-      - "postgres"
-    volumes:
-      - "${PG_LOG_DIR}:/var/log/postgresql"
-      - "${PG_REPORTS_DIR}:/var/www/pg_reports"
-    environment:
-      TZ: America/Chicago
+#  pgbadger:
+#    image: wnprcehr/pgbadger:latest
+#    depends_on:
+#      - "postgres"
+#    volumes:
+#      - "${PG_LOG_DIR}:/var/log/postgresql"
+#      - "${PG_REPORTS_DIR}:/var/www/pg_reports"
+#    environment:
+#      TZ: America/Chicago
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -40,7 +41,7 @@ services:
       - "1025"
 
   labkey:
-    image: wnprcehr/labkey:15.2
+    image: wnprcehr/labkey:15.2a1
     depends_on:
       - "mailserver"
       - "postgres"
@@ -63,7 +64,7 @@ services:
     image: nginx:1.13.0
     depends_on:
       - "labkey"
-      - "pgbadger"
+#      - "pgbadger"
     volumes:
       - "${NGINX_CLIENT_CER_FILE}:/usr/local/ssl/client-ca.pem"
       - "${NGINX_CLIENT_CRL_FILE}:/usr/local/ssl/crl.pem"
@@ -92,18 +93,18 @@ services:
       LK_BASE_URL:
       TZ: America/Chicago
 
-  monit:
-    image: wnprcehr/monit:latest
-    depends_on:
-      - "mailserver"
-      - "postgres"
-    links:
-      - mailserver:mailserver-container
-      - postgres
-    volumes:
-      - "${MONIT_CONFIG_FILE}:/etc/monit/monitrc"
-      - "${MONIT_HOST_BACKUP_DIR}:/host/backup"
-      - "${MONIT_HOST_ROOT_DIR}:/host"
-      - "${MONIT_LOG_DIR}:/etc/monit/logs"
-    environment:
-      TZ: America/Chicago
+#  monit:
+#    image: wnprcehr/monit:latest
+#    depends_on:
+#      - "mailserver"
+#      - "postgres"
+#    links:
+#      - mailserver:mailserver-container
+#      - postgres
+#    volumes:
+#      - "${MONIT_CONFIG_FILE}:/etc/monit/monitrc"
+#      - "${MONIT_HOST_BACKUP_DIR}:/host/backup"
+#      - "${MONIT_HOST_ROOT_DIR}:/host"
+#      - "${MONIT_LOG_DIR}:/etc/monit/logs"
+#    environment:
+#      TZ: America/Chicago

@@ -32,7 +32,10 @@ labkeyTeamcityPassword=<your password>
 ```
 To build using Docker directly, you will need to pass those same credentials as run-time build arguments on the command line:
 ```
-docker build -t wnprcehr/labkeyXX.X --build-arg LABKEY_TEAMCITY_USERNAME=<your username> --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> labkey
+docker build \
+    --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
+    --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
+    -t wnprcehr/labkeyXX.X labkey
 ```
 
 ## Deploying the Docker Compose Services

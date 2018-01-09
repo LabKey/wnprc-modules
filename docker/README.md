@@ -38,6 +38,13 @@ docker build \
     -t wnprcehr/labkeyXX.X labkey
 ```
 
+The LabKey build also requires the official Oracle Java Server JRE image, which is only available via Docker Hub if you accept the terms and conditions of use from Oracle directly. In order to get the image, you will need:
+
+  1. An account on the [Docker store](https://store.docker.com)
+  1. A "purchased" copy of the (free) [Oracle Java 8 SE (Server JRE)](https://store.docker.com/images/oracle-serverjre-8) image.
+
+You will also need to login via the Docker CLI (`docker login`) with your username and password from the Docker website. Be advised that if you are using `sudo` to execute Docker commands as the super user, you'll need to `sudo docker login` as well.
+
 ## Deploying the Docker Compose Services
 
 To deploy the services, you again either use Gradle or use Docker Compose directly. To use Gradle, execute the following build tasks:

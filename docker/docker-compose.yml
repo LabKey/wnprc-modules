@@ -41,7 +41,7 @@ services:
       - "1025"
 
   labkey:
-    image: wnprcehr/labkey:17.2
+    image: wnprcehr/labkey:17.3-financial
     depends_on:
       - "mailserver"
       - "postgres"

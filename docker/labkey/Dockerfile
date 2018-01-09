@@ -6,14 +6,14 @@ FROM alpine:latest as download
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 
-ENV LABKEY_TEAMCITY_CONFIG LabKey_172Modules_Premium_Installers
-ENV LABKEY_VERSION 17.2
+ENV LABKEY_TEAMCITY_CONFIG LabKey_173wnprc_Premium_Installers
+ENV LABKEY_VERSION 17.3
 
 WORKDIR /tmp/labkey
 
 RUN apk add --no-cache wget tar ca-certificates && update-ca-certificates
-RUN X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
- && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/builds/number:${X}/artifacts/content/wisc/Labkey${LABKEY_VERSION}-${X%%\.[[:digit:]]*}-UWisc-bin.tar.gz \
+RUN X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/id:${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
+ && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/builds/number:${X}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${X}-UWisc-bin.tar.gz \
   | tar -xz --strip-components=1
 
 # -----------------------------------------------------------------------------

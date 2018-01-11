@@ -1,8 +1,8 @@
 // noinspection JSUnresolvedVariable: Ext4 provided by LabKey
 (function (Ext) {
     // noinspection JSUnusedGlobalSymbols: Ext.Component.initComponent (1.1.0)
-    Ext.define('WNPRC.breeding.PregnancyDetailPanel', {
-        alias: 'widget.wnprc-breeding-pregnancy',
+    Ext.define('WNPRC.ext4.ParentChildDetailPanel', {
+        alias: 'widget.wnprc-parentchilddetailpanel',
         extend: 'LDK.panel.WebpartPanel',
 
         initComponent: function () {
@@ -42,33 +42,6 @@
                 }, this);
             };
 
-            // create some factory methods to generate the appropriate filters/parameters from the
-            // parent record
-            const filterFactory = function(r) {
-                // noinspection JSUnresolvedVariable: LABKEY.Filter.Types defined in the LabKey code
-                return [LABKEY.Filter.create('parentid', r.get('objectid'), LABKEY.Filter.Types.EQUAL)];
-            };
-            const paramsFactory = function(r) {
-                return { PARENT_RECORD_ID: r.get('objectid') };
-            };
-            // configure the queries for the child records
-            const children = [{
-                queryName: '_PregnancyInfoByParentRecordId',
-                parametersFactory: paramsFactory,
-                schemaName: 'study',
-                title: 'Pregnancy History'
-            }, {
-                filterArrayFactory: filterFactory,
-                queryName: 'ultrasounds',
-                schemaName: 'study',
-                title: 'Ultrasounds'
-            }, {
-                filterArrayFactory: filterFactory,
-                queryName: 'breeding_remarks',
-                schemaName: 'study',
-                title: 'Breeding Remarks'
-            }];
-
             // noinspection JSUnresolvedExtXType: Ext.panel.Panel (2.3.0)
             Ext.apply(this, {
                 items: [{
@@ -80,7 +53,7 @@
                         xtype: DETAIL_PANEL_XTYPE
                     }, {
                         border: false,
-                        childRecords: children,
+                        childRecords: this.childRecords,
                         columnWidth: 0.75,
                         listeners: {
                             'childload': loader.promise()
@@ -96,8 +69,7 @@
                     'render': function () {
                         this.table.mask('Loading...');
                     }
-                },
-                title: 'Pregnancy Detail'
+                }
             });
             this.callParent(arguments);
 

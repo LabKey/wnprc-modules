@@ -2,7 +2,7 @@
     <library compileInProductionMode="false">
         <script path="/breeding/extjs/ChildRecordsPanel.js"/>
         <script path="/breeding/extjs/DetailPanel.js"/>
-        <script path="/breeding/extjs/PregnancyDetailPanel.js"/>
+        <script path="/breeding/extjs/ParentChildDetailPanel.js"/>
     </library>
     <dependencies>
         <dependency path="clientapi/ext4.lib.xml"/>

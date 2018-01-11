@@ -5,11 +5,57 @@ import * as $ from 'jquery';
 import * as URI from 'urijs';
 
 export class Breeding {
+
+    // <editor-fold desc="--Static Members--">
+
+    /**
+     * Configuration for all the child records to display in the parent-child detail panel
+     * @type ChildRecordConfiguration[]
+     */
+    private static readonly CHILD_RECORDS: ChildRecordConfiguration[] = [{
+        parametersFactory: Breeding.createQueryParams,
+        queryName: '_PregnancyInfoByParentRecordId',
+        schemaName: 'study',
+        title: 'Pregnancy History',
+    }, {
+        filterArrayFactory: Breeding.createQueryFilters,
+        queryName: 'ultrasounds',
+        schemaName: 'study',
+        title: 'Ultrasounds',
+    }, {
+        filterArrayFactory: Breeding.createQueryFilters,
+        queryName: 'breeding_remarks',
+        schemaName: 'study',
+        title: 'Breeding Remarks',
+    }];
+
     /**
      * Placeholder value for the details link. Replaced by a JavaScript click handler
      * @type {string}
      */
     private static readonly DETAIL_PLACEHOLDER: string = '__DETAIL__.view?id=';
+
+    // </editor-fold>
+
+    // <editor-fold desc="--Static Functions--">
+
+    /**
+     * Factory method to create filter arrays for use in the LabKey.QueryWebPart of each child record
+     * @param {DataSetRecord} record
+     * @returns {any[]}
+     */
+    private static createQueryFilters(record: DataSetRecord) {
+        return [LABKEY.Filter.create('parentid', record.get('objectid'), LABKEY.Filter.Types.EQUAL)];
+    }
+
+    /**
+     * Factory method to set the query parameters for each parameterized query in each child LabKey.QueryWebPart
+     * @param {DataSetRecord} record
+     * @returns {{PARENT_RECORD_ID: any}}
+     */
+    private static createQueryParams(record: DataSetRecord) {
+        return {PARENT_RECORD_ID: record.get('objectid')};
+    }
 
     /**
      * Sets the browser state and updates the URL in order to enable linking and using the back/forward buttons
@@ -32,6 +78,10 @@ export class Breeding {
         }
     }
 
+    // </editor-fold>
+
+    // <editor-fold desc="--Members--">
+
     /**
      * HTML id attribute for the element in which to render the grid
      */
@@ -41,6 +91,10 @@ export class Breeding {
      * HTML id attribute for the element in which to render the details
      */
     private detailElementId: string;
+
+    // </editor-fold>
+
+    // <editor-fold desc="--Public Functions (called from HTML)--">
 
     // noinspection JSUnusedGlobalSymbols: called from HTML
     /**
@@ -86,8 +140,8 @@ export class Breeding {
      */
     public renderDetail(webpart: WebPartConfig) {
         if (webpart.breedingId) {
-            // noinspection JSUnresolvedExtXType: defined in resources/web/breeding/extjs/
-            Ext4.create('WNPRC.breeding.PregnancyDetailPanel', {
+            Ext4.create('WNPRC.ext4.ParentChildDetailPanel', {
+                childRecords: Breeding.CHILD_RECORDS,
                 minHeight: 300,
                 renderTo: webpart.wrapperDivId,
                 store: {
@@ -102,6 +156,10 @@ export class Breeding {
             $(`#${webpart.wrapperDivId}`).empty();
         }
     }
+
+    // </editor-fold>
+
+    // <editor-fold desc="--Private Functions--">
 
     /**
      * Handler for clicking the detail links in the pregnancy grid
@@ -132,7 +190,16 @@ export class Breeding {
     private renderGrid(state: PregnancyState) {
         // noinspection JSUnusedGlobalSymbols: 'success' is called when the query finishes
         const x = new LABKEY.QueryWebPart({
+            buttonBar: {
+                items: [
+                    LABKEY.QueryWebPart.standardButtons.views,
+                    LABKEY.QueryWebPart.standardButtons.exportRows,
+                    LABKEY.QueryWebPart.standardButtons.print,
+                    LABKEY.QueryWebPart.standardButtons.pageSize,
+                ],
+            },
             detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${objectid}`,
+            failure: LABKEY.Utils.onError,
             queryName: 'PregnancyInfo',
             schemaName: 'study',
             showDetailsColumn: true,
@@ -163,10 +230,33 @@ export class Breeding {
         });
         x.render();
     }
+
+    // </editor-fold>
 }
 
 // noinspection JSUnusedGlobalSymbols: invoked in the browser
 export default new Breeding();
+
+// <editor-fold desc="--Helper Interface Definitions--">
+
+/**
+ * Child record configuration to pass to the child records panel
+ */
+interface ChildRecordConfiguration {
+    filterArrayFactory?: (record: DataSetRecord) => any[];
+    parametersFactory?: (record: DataSetRecord) => any;
+    queryName: string;
+    schemaName: string;
+    title?: string;
+    viewName?: string;
+}
+
+/**
+ * Single record returned from a data store
+ */
+interface DataSetRecord {
+    get: (key: string) => any;
+}
 
 /**
  * Browser state/get query parameters for loading the pregnancy grid/detail
@@ -183,3 +273,5 @@ interface WebPartConfig {
     breedingId: string | null;
     wrapperDivId: string;
 }
+
+// </editor-fold>

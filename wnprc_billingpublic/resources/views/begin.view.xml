@@ -1,0 +1,6 @@
+<view xmlns="http://labkey.org/data/xml/view" title="WNPRC Billing Public Section">
+    <dependencies>
+        <dependency path="ehr.context" />
+        <dependency path="wnprc_billing.context" />
+    </dependencies>
+</view>

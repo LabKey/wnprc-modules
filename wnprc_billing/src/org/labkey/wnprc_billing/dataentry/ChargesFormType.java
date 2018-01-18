@@ -47,28 +47,20 @@ public class ChargesFormType extends TaskForm
         return false;
     }
 
-//    @Override
-//    protected List<String> getMoreActionButtonConfigs()
-//    {
-//        List<String> defaultButtons = super.getMoreActionButtonConfigs();
-//        defaultButtons.add("FINANCESUBMIT");
-//
-//        return defaultButtons;
-//    }
-//    @Override
-//    protected List<String> getButtonConfigs()
-//    {
-//        List<String> defaultButtons = new ArrayList<String>();
-//        defaultButtons.add("FINANCESUBMIT");
-//
-//        return defaultButtons;
-//    }
-//
-//    @Override
-//    protected List<String> getMoreActionButtonConfigs()
-//    {
-//        return Collections.emptyList();
-//    }
+    @Override
+    protected List<String> getButtonConfigs()
+    {
+        List<String> defaultButtons = new ArrayList<String>();
+        defaultButtons.add("FINANCESUBMIT");
+
+        return defaultButtons;
+    }
+
+    @Override
+    protected List<String> getMoreActionButtonConfigs()
+    {
+        return Collections.emptyList();
+    }
 
     @Override
     public boolean canInsert()

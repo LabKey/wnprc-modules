@@ -40,6 +40,28 @@ export class Breeding {
     // <editor-fold desc="--Static Functions--">
 
     /**
+     * Invokes a simple (success/failure, no return value) API method from the breeding controller. Disables/reenables
+     * the button clicked in the UI
+     * @param {HTMLButtonElement} target
+     * @param action
+     */
+    private static callSimpleApiButtonAction(target: HTMLButtonElement, action: string) {
+        $(target).prop('disabled', true);
+        // noinspection JSUnusedGlobalSymbols: called by the request handler
+        LABKEY.Ajax.request({
+            failure: (error) => {
+                LABKEY.Utils.onError(error);
+                $(target).prop('disabled', false);
+            },
+            method: 'POST',
+            success: () => {
+                $(target).prop('disabled', false);
+            },
+            url: LABKEY.ActionURL.buildURL('breeding', action),
+        });
+    }
+
+    /**
      * Factory method to create filter arrays for use in the LabKey.QueryWebPart of each child record
      * @param {DataSetRecord} record
      * @returns {any[]}
@@ -98,24 +120,20 @@ export class Breeding {
 
     // noinspection JSUnusedGlobalSymbols: called from HTML
     /**
+     * Initiates the dataset data import by invoking the importDatasetData method in the BreedingController
+     * @param {HTMLButtonElement} target
+     */
+    public importDatasetData(target: HTMLButtonElement) {
+        Breeding.callSimpleApiButtonAction(target, 'importDatasetData');
+    }
+
+    // noinspection JSUnusedGlobalSymbols: called from HTML
+    /**
      * Initiates the dataset metadata import by invoking the importDatasetMetadata method in the BreedingController
      * @param {HTMLButtonElement} target
      */
     public importDatasetMetadata(target: HTMLButtonElement) {
-        $(target).prop('disabled', true);
-        // noinspection JSUnusedGlobalSymbols: called by the request handler
-        LABKEY.Ajax.request({
-            failure: (error) => {
-                LABKEY.Utils.onError(error);
-                $(target).prop('disabled', false);
-            },
-            method: 'POST',
-            scope: this,
-            success: () => {
-                $(target).prop('disabled', false);
-            },
-            url: LABKEY.ActionURL.buildURL('breeding', 'importDatasetMetadata'),
-        });
+        Breeding.callSimpleApiButtonAction(target, 'importDatasetMetadata');
     }
 
     // noinspection JSUnusedGlobalSymbols: called from HTML

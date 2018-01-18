@@ -26,11 +26,25 @@ public final class BreedingController extends SpringActionController
     /**
      * Friendly name for the controller.
      */
-    public static final String NAME = "breeding";
+    private static final String NAME = "breeding";
 
     public BreedingController()
     {
         setActionResolver(ACTION_RESOLVER);
+    }
+
+    /**
+     * Action definition to import historical/test data for the breeding datasets.
+     */
+    @RequiresPermission(AdminPermission.class)
+    public class ImportDatasetData extends ApiAction<Void>
+    {
+        @Override
+        public Object execute(Void aVoid, BindException errors) throws Exception
+        {
+            // TODO: create, parse, and load some test data
+            return new ApiSimpleResponse("success", true);
+        }
     }
 
     /**

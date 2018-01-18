@@ -11,9 +11,10 @@
                     <column columnName="genCredits"/>
                     <column columnName="groupName">
                         <fk>
-                            <fkDbSchema>wnprc_billing</fkDbSchema>
-                            <fkTable>groups</fkTable>
-                            <fkColumnName>name</fkColumnName>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeUnits</fkTable>
+                            <fkColumnName>chargetype</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
                     <!--<column columnName="chargeId">-->

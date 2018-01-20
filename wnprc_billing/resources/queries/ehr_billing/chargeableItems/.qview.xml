@@ -12,6 +12,8 @@
         <column name="departmentCode"/>
         <column name="comment"/>
         <column name="active"/>
+        <column name="enddate"/>
+        <column name="startdate"/>
     </columns>
     <sorts>
         <sort column="name"/>

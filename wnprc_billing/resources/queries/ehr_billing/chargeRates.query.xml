@@ -17,13 +17,14 @@
                             <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
-                    <!--<column columnName="chargeId">-->
-                        <!--<fk>-->
-                            <!--<fkDbSchema>ehr_billing</fkDbSchema>-->
-                            <!--<fkTable>chargeableItems</fkTable>-->
-                            <!--<fkColumnName>rowid</fkColumnName>-->
-                        <!--</fk>-->
-                    <!--</column>-->
+                    <column columnName="chargeId">
+                        <columnTitle>Charge Item</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeableItems</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

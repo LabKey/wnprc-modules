@@ -58,20 +58,12 @@ FROM wnprc_billing.miscChargesWithTierRates wmisc
     acct.alias = COALESCE (wmisc.debitedAccount, wmisc.creditedaccount)
     )
 
-  LEFT JOIN
-  (SELECT
-     citems.rowid AS currentChargeId,
-     citems.oldPk AS oldChargeId, --from wnprc's existing finance system
-     citems.name,
-     citems.category,
-     citems.departmentCode,
-     citems.comment
-   FROM ehr_billing.chargeableItems citems) ci
-  ON wmisc.chargeId = coalesce(ci.oldChargeId, ci.currentChargeId)
+  LEFT JOIN ehr_billing.chargeableItems ci
+  ON wmisc.chargeId = ci.rowid
 
   LEFT JOIN
   ehr_billing.chargeRates cr
   ON
   (CAST(wmisc.date AS DATE) >= CAST(cr.startDate AS DATE) AND
    (CAST(wmisc.date AS DATE) <= cr.enddate OR cr.enddate IS NULL) AND
-   wmisc.chargeId = coalesce(ci.oldChargeId, ci.currentChargeId))) miscWithRates
+   wmisc.chargeId = cr.chargeId)) miscWithRates

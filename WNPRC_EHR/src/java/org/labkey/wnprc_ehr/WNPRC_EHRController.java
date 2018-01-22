@@ -16,7 +16,6 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -56,16 +55,12 @@ import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
 import org.labkey.googledrive.api.GoogleDriveService;
-import org.labkey.webutils.api.action.LegacyJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
-import org.labkey.webutils.api.action.annotation.JspPath;
-import org.labkey.webutils.api.action.annotation.PageTitle;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
-import org.labkey.wnprc_ehr.bc.HousingBCReport;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -75,7 +70,6 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
-import org.labkey.wnprc_ehr.bc.TreatmentsBCReport;
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
@@ -577,26 +571,36 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public abstract class WNPRCJspPageAction extends LegacyJspPageAction
+    public abstract class WNPRCJspPageAction extends SimpleJspPageAction
     {
         @Override
-        public Class getBaseClass() {
-            return WNPRC_EHRModule.class;
+        public Module getModule() {
+            return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
         }
     }
 
     public abstract class WNPRCReportPageAction extends SimpleJspReportAction {
         @Override
-        public Class getBaseClass() {
-            return WNPRC_EHRModule.class;
+        public Module getModule() {
+            return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
         }
     }
 
     @ActionNames("NecropsySchedule")
-    @PageTitle("Necropsy Schedule")
-    @JspPath("pages/dataentry/NecropsySchedule.jsp")
     @RequiresLogin()
-    public class NecropsyScheduleAction extends WNPRCJspPageAction { /* no-op */ }
+    public class NecropsyScheduleAction extends WNPRCJspPageAction {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/dataentry/NecropsySchedule.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Necropsy Schedule";
+        }
+    }
 
     @ActionNames("PathologyCaseList")
     @RequiresLogin()

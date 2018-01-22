@@ -1,7 +1,0 @@
-<libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library compileInProductionMode="false">
-        <script path="/webutils/css/webutils.css"/>
-        <script path="/webutils/lib/externals-debug.js"/>
-        <script path="/webutils/lib/legacy.js"/>
-    </library>
-</libraries>

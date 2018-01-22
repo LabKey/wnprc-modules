@@ -75,7 +75,9 @@ public class TreatmentAlertsNotification extends AbstractEHRNotification
         return "This runs every day at 10AM, 1PM, 3PM, and 5PM if there are treatments scheduled that have not yet been marked complete";
     }
 
-    public String getEmailSubject(Container container) {
+    @Override
+    public String getEmailSubject(Container c)
+    {
         return "Daily Treatment Alerts: " + _dateTimeFormat.format(new Date());
     }
 
@@ -90,6 +92,7 @@ public class TreatmentAlertsNotification extends AbstractEHRNotification
         return "daily at 10AM, 1PM, 3PM, 5PM";
     }
 
+    @Override
     public String getMessageBodyHTML(Container c, User u)
     {
         StringBuilder msg = new StringBuilder();

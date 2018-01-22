@@ -40,28 +40,24 @@ public class PersonService {
 
         queryUpdater.upsert(newPerson);
 
-        if (form.cardNumbers != null) {
-            for (Integer cardId : form.cardNumbers) {
-                SimpleQueryUpdater mapUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "persons_to_cards");
+        for (Integer cardId : form.cardNumbers) {
+            SimpleQueryUpdater mapUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "persons_to_cards");
 
-                JSONObject map = new JSONObject();
-                map.put("personid", personId);
-                map.put("cardid", cardId);
-                map.put("container", container.getId());
-                mapUpdater.upsert(map);
-            }
+            JSONObject map = new JSONObject();
+            map.put("personid", personId);
+            map.put("cardid", cardId);
+            map.put("container", container.getId());
+            mapUpdater.upsert(map);
         }
 
-        if (form.userIds != null) {
-            for (Integer userId : form.userIds) {
-                SimpleQueryUpdater mapUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "persons_to_users");
+        for (Integer userId : form.userIds) {
+            SimpleQueryUpdater mapUpdater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "persons_to_users");
 
-                JSONObject map = new JSONObject();
-                map.put("personid",  personId);
-                map.put("userid",    userId);
-                map.put("container", container.getId());
-                mapUpdater.upsert(map);
-            }
+            JSONObject map = new JSONObject();
+            map.put("personid",  personId);
+            map.put("userid",    userId);
+            map.put("container", container.getId());
+            mapUpdater.upsert(map);
         }
 
 

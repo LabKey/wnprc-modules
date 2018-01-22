@@ -86,7 +86,7 @@ Ext4.define('WNPRC.ext.panel.TaskDataEntryPanel', {
 
         $('.ehr-dataentrybtn').each(function(i, btnEl) {
             var btn = Ext4.getCmp(btnEl.id);
-            if (btn !== undefined) {
+            if (_.isDefined(btn)) {
                 self.shouldHideButton(btn) ? btn.hide() : btn.show();
             }
         });
@@ -101,7 +101,7 @@ Ext4.define('WNPRC.ext.panel.TaskDataEntryPanel', {
                 btn.hidden = true;
             }
 
-            if ((btn.text !== undefined) && btn.text.match(/More Actions/i)) {
+            if (_.isDefined(btn.text) && btn.text.match(/More Actions/i)) {
                 jQuery.each(btn.menu, function(i, btn) {
                     if (self.shouldHideButton(btn)) {
                         btn.hidden = true;

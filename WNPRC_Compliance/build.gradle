@@ -13,7 +13,3 @@ sourceSets {
         java { srcDirs = [ "src/java", "gen-src/java-jooq" ]}
     }
 }
-
-[ project.tasks.findByName("tsc"), project.tasks.findByName("webpack") ].each {
-    if (it != null) it.dependsOn("${project.parent.path}:WebUtils:java2ts")
-}

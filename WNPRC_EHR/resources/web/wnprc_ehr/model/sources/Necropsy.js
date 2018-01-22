@@ -56,23 +56,11 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
                     }
                 }
             },
-            account: {
-                xtype: 'textfield',
-                /*
-                 *  Somehow, this field is inheriting a 'textarea' for 'inputType', which
-                 *  triggers it to display a textarea, instead of a normal text input.  Removing
-                 *  that metadata by setting inputType to '' fixes that.
-                 */
-                inputType: ''
-            },
             date: {
                 xtype: 'xdatetime',
                 allowBlank: false,
                 extFormat: 'Y-m-d H:i',
                 hidden: false
-            },
-            enddate: {
-                hidden: true
             },
             remark: {
                 height: 200,

@@ -14,7 +14,7 @@ public class DeathNotification extends AbstractJspEmailNotification {
     }
 
     @Override
-    public String getEmailSubject(Container container) {
+    public String getEmailSubject(Container c) {
         String subject = "Death Notification";
 
         if (params.has(idParamName)) {

@@ -7,7 +7,7 @@
         padding: 10px;
     }
 
-    #necropsyRequestNotice  .nobold {
+    #necropsyRequestNotice .nobold {
         font-family: Roboto, Helvetica, sans-serif;
     }
 

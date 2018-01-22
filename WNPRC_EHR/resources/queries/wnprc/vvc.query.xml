@@ -1,0 +1,97 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="vvc" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <columns>
+                    <column columnName="date">
+                        <columnTitle>Date Requested</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="dateapproved">
+                        <columnTitle>Date Approved</columnTitle>
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                    </column>
+                    <column columnName="protocol">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>protocol</fkTable>
+                            <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="pi">
+                        <columnTitle>Principal Investigator</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>uniqueProtocolInvestigator</fkTable>
+                            <fkColumnName>inves</fkColumnName>
+                            <fkDisplayColumnName>inves</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="createdby">
+                        <columnTitle>Create By</columnTitle>
+                    </column>
+                    <column columnName="veterinarian">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>veterinarians</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="description">
+                        <isHidden>false</isHidden>
+                    </column>
+                    <column columnName="QCState">
+
+                    </column>
+
+
+                </columns>
+                <buttonBarOptions position="both" includeStandardButtons="false">
+                    <includeScript>ehr.context</includeScript>
+                    <includeScript>ehr/studyButtons.js</includeScript>
+                    <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
+                    <item text="Views">
+                        <originalText>Views</originalText>
+                    </item>
+                    <item text="Insert New">
+                        <originalText>Insert New</originalText>
+                    </item>
+                    <!--<item text="Cohorts">-->
+                    <!--<originalText>Cohorts</originalText>-->
+                    <!--</item>-->
+                    <!--<item text="QCState">-->
+                    <!--<originalText>QC State</originalText>-->
+                    <!--</item>-->
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                    <item text="Import Data">
+                        <originalText>Import Data</originalText>
+                    </item>
+                    <item text="Page Size">
+                        <originalText>Page Size</originalText>
+                    </item>
+                    <item text="Delete">
+                        <originalText>Delete</originalText>
+                    </item>
+                    <item text="More Actions" insertPosition="end" requiresSelection="true">
+                        <item text="Jump To History">
+                            <onClick>
+                                EHR.DatasetButtons.historyHandler(dataRegion, dataRegionName, 'Assignment');
+                            </onClick>
+                        </item>
+                        <item text="Return Distinct Values">
+                            <onClick>
+                                EHR.window.GetDistinctWindow.getDistinctHandler(dataRegionName, 'Assignment');
+                            </onClick>
+                        </item>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -4,7 +4,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    String url = (new ActionURL(WNPRC_ComplianceController.TBDashboardPage.class, getContainer())).toString();
+    String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
 %>
 <div class="text-center" style="margin-bottom: 10px;">
     <a class="btn btn-primary" href="<%= url %>">
@@ -61,11 +61,46 @@
                            actionButtons: actions"
     ></lk-querytable>
 </div>
-<%
-    String resolveUrl = new ActionURL(WNPRC_ComplianceController.ResolvePendingTBResultsAPI.class, getContainer()).toString();
-%>
 
-<script type="application/javascript" src="<%= getContextPath() %>/wnprc_compliance/pendingTBResults.js"></script>
 <script>
-    applyKnockoutBindings('<%= resolveUrl %>');
+    (function() {
+        var $resultDialog = $('#resultDialog').modal({
+            show: false
+        });
+
+        var form = {
+            selectedTBIds: ko.observableArray(),
+            notes: ko.observable(''),
+            date: ko.observable(moment())
+        };
+        WebUtils.VM.form = form;
+
+        WebUtils.VM.actions = [
+            {
+                title: "Finalize",
+                execute: function(tableRows, table) {
+                    var ids = tableRows.map(function(val) {
+                        return val.rowData[0];
+                    });
+                    form.selectedTBIds(ids);
+
+                    $resultDialog.modal('show');
+                }
+            }
+        ];
+
+        WebUtils.VM.submit = function() {
+            $resultDialog.modal('hide');
+
+            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.ResolvePendingTBResultsAPI.class, getContainer()) %>", {
+                pendingTBIds: form.selectedTBIds(),
+                notes: form.notes(),
+                date:  moment(form.date()).format()
+            }).then(function(d) {
+                toastr.success("Success!  Please reload the page to see the changes.")
+            }).catch(function(e) {
+                toastr.error("Hit an error: " + e.message || e);
+            });
+        }
+    })();
 </script>

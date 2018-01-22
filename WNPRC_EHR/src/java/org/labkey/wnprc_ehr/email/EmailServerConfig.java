@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.email;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +76,7 @@ public class EmailServerConfig implements ConvertibleToJSON {
 
             @Override
             public Properties getProperties(EmailServerConfig config) {
-                throw new UnsupportedOperationException("Not implemented");
+                throw new NotImplementedException("Email server properties not available for IMAP4");
             }
         }
         ;

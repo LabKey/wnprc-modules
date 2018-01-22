@@ -9,6 +9,7 @@
        <column name="result" />
        <column name="qualResult" />
        <column name="remark" />
+       <column name="performing_lab"/>
        <column name="qcstate" />
        <column name="taskid" />
    </columns>

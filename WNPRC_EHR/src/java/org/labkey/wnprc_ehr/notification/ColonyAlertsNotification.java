@@ -77,7 +77,8 @@ public class ColonyAlertsNotification extends AbstractEHRNotification
         return "Colony Alerts";
     }
 
-    public String getEmailSubject(Container container)
+    @Override
+    public String getEmailSubject(Container c)
     {
         return "Daily Colony Alerts: " + AbstractEHRNotification._dateTimeFormat.format(new Date());
     }
@@ -99,6 +100,7 @@ public class ColonyAlertsNotification extends AbstractEHRNotification
         return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.";
     }
 
+    @Override
     public String getMessageBodyHTML(final Container c, User u)
     {
         final StringBuilder msg = new StringBuilder();

@@ -50,6 +50,17 @@ EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
                             WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
                         }
                     }
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^wnprc$/i) && queryName.match(/^vvc$/i)) {
+                        if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'vvc', schemaName: 'wnprc'})) {
+                            WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
+                        }
+                    }
+                    if (dataRegion.schemaName.match(/^wnprc$/i) && queryName.match(/^vvc$/i)) {
+                        if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'vvc', schemaName: 'wnprc'})) {
+                            WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
+                            WNPRC_EHR.DatasetButtons.addVVCChangeQCStateBtn(dataRegion.name, menu);
+                        }
+                    }
                 }
                 return false;
             }

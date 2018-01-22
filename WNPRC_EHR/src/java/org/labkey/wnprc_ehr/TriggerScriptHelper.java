@@ -6,14 +6,19 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
+import org.labkey.wnprc_ehr.notification.VvcNotification;
 
 import java.util.List;
+
+import static org.labkey.api.data.DbSchemaType.Module;
 
 /**
  * Created by jon on 7/13/16.
@@ -63,4 +68,22 @@ public class TriggerScriptHelper {
     public String lookupGender(String code) {
         return lookupValue(code, "ehr_lookups", "gender_codes", "code", "meaning");
     }
+
+    public void sendHusbandryNotification(String requestId, String id, String project){
+
+
+    }
+
+    //TODO: created methods to record daterequested
+    public void updateVVC(){
+
+    }
+    //TODO: send notification once the vvc is requested
+    public void sendVvcNotification(String requestid){
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        VvcNotification sendNotifcation = new VvcNotification(ehr, requestid);
+    }
+
+
+
 }

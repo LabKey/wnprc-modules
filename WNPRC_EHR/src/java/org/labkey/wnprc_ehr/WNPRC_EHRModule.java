@@ -34,12 +34,12 @@ import org.labkey.api.resource.Resource;
 import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
+import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
-import org.labkey.wnprc_ehr.dataentry.templates.TemplateController;
-import org.labkey.wnprc_ehr.dataentry.templates.permission.TemplateAdminPermission;
-import org.labkey.wnprc_ehr.dataentry.templates.permission.TemplateAdminRole;
+import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
 import org.labkey.wnprc_ehr.demographics.MedicalFieldDemographicsProvider;
 import org.labkey.wnprc_ehr.demographics.MostRecentObsDemographicsProvider;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
@@ -75,23 +75,23 @@ import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
+import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
-import org.labkey.wnprc_ehr.pathology.necropsy.NecropsyController;
-import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ScheduleNecropsyPermission;
-import org.labkey.wnprc_ehr.pathology.necropsy.security.permission.ViewNecropsyPermission;
-import org.labkey.wnprc_ehr.pathology.necropsy.security.role.NecropsyScheduler;
-import org.labkey.wnprc_ehr.pathology.necropsy.security.role.NecropsyViewer;
 import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
-import org.labkey.wnprc_ehr.security.roles.WNPRCAdminRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.api.ldk.notification.NotificationService;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * User: bbimber
@@ -107,10 +107,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     protected void init() {
         TissueSampleTable.registerProperties();
-
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
-        addController(NecropsyController.NAME, NecropsyController.class);
-        addController(TemplateController.NAME, TemplateController.class);
     }
 
     @Override
@@ -159,9 +156,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "my_tasks");
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
 
-        EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource());
-        EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource());
-        EHRService.get().registerHistoryDataSource(new DefaultTBDataSource());
+        EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultTBDataSource(this));
 
         EHRService.get().addModuleRequiringLegacyExt3EditUI(this);
 
@@ -174,6 +171,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         this.registerPermissions();
 
         this.registerServices();
+
+        BCReportRunner.schedule();
 
         for (Container studyContainer : getWNPRCStudyContainers()) {
             User user = EHRService.get().getEHRUser(studyContainer);
@@ -190,9 +189,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     private void registerPermissions() {
         RoleManager.registerPermission(new BehaviorAssignmentsPermission());
-        RoleManager.registerPermission(new ViewNecropsyPermission());
-        RoleManager.registerPermission(new ScheduleNecropsyPermission());
-        RoleManager.registerPermission(new TemplateAdminPermission());
     }
 
     private void registerServices() {
@@ -229,6 +225,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         });
     }
 
+    public static String BC_GOOGLE_DRIVE_PROPERTY_NAME = "BCGoogleDriveAccount";
+    public String getGoogleDriveAccountId(Container container) {
+        return this.getModuleProperties().get(BC_GOOGLE_DRIVE_PROPERTY_NAME).getEffectiveValue(container);
+    }
+
     @Override
     public @NotNull
     LinkedHashSet<ClientDependency> getClientDependencies(Container c) {
@@ -248,7 +249,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 new DeathNotification(),
                 new ColonyAlertsNotification(this),
                 new WaterMonitoringNotification(this),
-                new TreatmentAlertsNotification(this)
+                new TreatmentAlertsNotification(this),
+                new VvcNotification(this)
         );
 
         for(Notification notification : notifications) {
@@ -284,7 +286,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 TBTestsForm.class,
                 TreatmentOrdersForm.class,
                 TreatmentsForm.class,
-                WeightForm.class
+                WeightForm.class,
+                VVCRequestForm.class,
+                VVCForm.class
         );
 
         for(Class form : forms) {
@@ -295,12 +299,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public void registerRoles() {
         RoleManager.registerRole(new WNPRCFullSubmitterWithReviewerRole());
         RoleManager.registerRole(new BehaviorServiceWorker());
-        RoleManager.registerRole(new WNPRCAdminRole());
-        RoleManager.registerRole(new NecropsyViewer());
-        RoleManager.registerRole(new NecropsyScheduler());
-        RoleManager.registerRole(new TemplateAdminRole());
     }
-
 
 
     public Set<Container> getWNPRCStudyContainers() {

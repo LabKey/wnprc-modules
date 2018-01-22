@@ -112,7 +112,7 @@
     <p style="text-align: right;">** Note that population totals specify the amount of animals at the END of the month.</p>
 
 
-    <div class="container">
+    <div class="container" style="width:70%">
         <div class="chart"></div>
     </div>
 </template>
@@ -240,7 +240,15 @@
                             columns: [
                                 ['date'].concat(populationObject.dates),
                                 ['Population'].concat(populationObject.pops)
-                            ]
+                            ],
+                            types: {
+                                Population: 'step'
+                            }
+                        },
+                        line: {
+                            step: {
+                                type: 'step-after'
+                            }
                         },
                         axis: {
                             x: {
@@ -290,6 +298,40 @@
                                 type: _.titleize(key),
                                 count: value.length
                             });
+                        });
+
+                        if (!counts.filter(function(e) { return e.type === 'Arrival'; }).length > 0) {
+                            counts.push({
+                                type: 'Arrival',
+                                count: 0
+                            });
+                        }
+                        if (!counts.filter(function(e) { return e.type === 'Birth'; }).length > 0) {
+                            counts.push({
+                                type: 'Birth',
+                                count: 0
+                            });
+                        }
+                        if (!counts.filter(function(e) { return e.type === 'Death'; }).length > 0) {
+                            counts.push({
+                                type: 'Death',
+                                count: 0
+                            });
+                        }
+                        if (!counts.filter(function(e) { return e.type === 'Departure'; }).length > 0) {
+                            counts.push({
+                                type: 'Departure',
+                                count: 0
+                            });
+                        }
+
+                        counts.sort(function(a, b) {
+                            if (a.type < b.type) {
+                                return -1;
+                            } else if (a.type > b.type) {
+                                return 1;
+                            }
+                            return 0;
                         });
 
                         VM.eventCountsInSelectedDateRange(counts);
@@ -351,7 +393,7 @@
                                 })
                             }));
 
-                            VM.average(parseFloat(populationData["average"]).toFixed(2));
+                            VM.average(parseFloat(populationData["average"]).toFixed());
                             VM.standardDeviation(parseFloat(populationData["stddev"]).toFixed(2));
                             VM.eventsInSelectedDateRange(populationData["events"]);
 
@@ -383,7 +425,10 @@
                                     columns: [
                                         ['date'].concat(populationDates),
                                         ['Population'].concat(populationValues)
-                                    ]
+                                    ],
+                                    types: {
+                                        Population: 'step'
+                                    }
                                 },
                                 axis: {
                                     x: {
@@ -392,6 +437,11 @@
                                             count: 8,
                                             format: '%b %d, %Y'
                                         }
+                                    }
+                                },
+                                line: {
+                                    step: {
+                                        type: 'step-after'
                                     }
                                 },
                                 grid: {
@@ -407,6 +457,8 @@
                             });
                         }).finally(function() {
                             VM.loading(false);
+                            $(window).trigger('resize');
+                            $(window).trigger('resize');
                         });
                     });
 
@@ -448,14 +500,10 @@
             var activeTab = e.target; // newly activated tab
             var prevActiveTab = e.relatedTarget; // previous active tab
 
+            // For some reason when you trigger the event it only scales the graph within about 10%
+            // of where it needs to be, so we do it twice to fully fix the size of the charts.
             $(window).trigger('resize');
-
-            // For some reason (I'm guessing transitions), when you trigger the event right away, it only scales the
-            // graph within about 10% of where it needs to be, so we wait and do it again to fully fix the size of
-            // d3 graphs.
-            setTimeout(function() {
-                $(window).trigger('resize');
-            }, 500);
+            $(window).trigger('resize');
         });
 
         WebUtils.VM.population = {

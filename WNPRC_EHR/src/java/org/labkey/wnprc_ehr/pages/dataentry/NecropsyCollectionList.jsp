@@ -5,10 +5,11 @@
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="org.joda.time.LocalDateTime" %>
 <%@ page import="java.sql.Timestamp" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
-<%@ page import="java.util.List" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.webutils.api.json.NumberKeyComparator" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
@@ -209,6 +210,7 @@
                 List<JSONObject> postmortemTissueSamples = JsonUtils.getSortedListFromJSONArray(queryFactory.selectRows("study", "tissue_samples", preDeathFilter), new NumberKeyComparator("collection_order"));
 
                 for (JSONObject tissueSample : postmortemTissueSamples) {
+
                     String deliveryMethod = tissueSample.getString("ship_to");
                     if (deliveryMethod != null) {
                         NecropsySampleDeliveryDestination.SampleDeliveryDestination deliveryDestination = NecropsySampleDeliveryDestination.SampleDeliveryDestination.valueOf(deliveryMethod);
@@ -224,7 +226,7 @@
                 <td><%= h(tissueSample.optString("preservation_fs_value", "")) %> </td>
                 <td><%= h(tissueSample.optString("tissueremarks")) %>             </td>
                 <td><%= h(tissueSample.optString("quantity")) %>                  </td>
-                <td><%= h(tissueSample.optString("lab_sample_id")) %>             </td>
+                <td><%= h(tissueSample.optString("lab_sample_id")) %>                 </td>
                 <td><%= h(tissueSample.optString("recipient")) %>                 </td>
                 <td><%= h(deliveryMethod) %>                                      </td>
                 <td><%= h(tissueSample.optString("ship_to_comment")) %>           </td>

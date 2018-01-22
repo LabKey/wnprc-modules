@@ -1,0 +1,8 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library>
+        <script path="/webutils/lib/webutils_core/utilities/qunit/qunit_customizations.js"/>
+    </library>
+    <dependencies>
+        <dependency path="/webutils/lib/webutils_core/utilities/qunit/qunit_core"/>
+    </dependencies>
+</libraries>

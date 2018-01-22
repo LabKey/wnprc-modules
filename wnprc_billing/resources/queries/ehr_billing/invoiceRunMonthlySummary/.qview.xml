@@ -5,7 +5,7 @@
     <column name="Animal Per Diem::total"/>
     <column name="Blood Draws::total"/>
     <column name="Misc. Fees::total"/>
-    <column name="Replacement::total"/>
+    <column name="Animal Replacement::total"/>
     <column name="Clinical Lab Test::total"/>
 </columns>
 <sorts>

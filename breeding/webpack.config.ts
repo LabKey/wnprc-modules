@@ -1,32 +1,39 @@
-// noinspection TsLint
-import { Configuration as WebpackConfig, optimize as Optimize } from 'webpack';
+// noinspection TsLint: webpack is in the dev dependencies
+import * as Webpack from 'webpack';
 
-module.exports = function wp(env: any): WebpackConfig {
+// IntelliJ and TsLint get very angry when faced with ambiguity, so this
+// interface constrains our configuration object to using a certain type
+// of loader rule to load modules
+interface Configuration extends Webpack.Configuration {
+    module: {
+        rules: Webpack.NewLoaderRule[];
+    };
+}
+
+declare const module: any;
+module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
     return {
-        devtool:    'source-map',
-        entry:      './src/ts/breeding.ts',
+        devtool: 'source-map',
+        entry: './src/ts/breeding.ts',
         externals: {
-            jquery:     'jQuery',
-            urijs:      'URI',
+            jquery: 'jQuery',
+            urijs: 'URI',
         },
         module: {
             rules: [
-                { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
-                { test: /\.js$/,   loader: 'source-map-loader', enforce: 'pre' },
+                { loader: 'awesome-typescript-loader', test: /\.tsx?$/ },
+                { loader: 'source-map-loader', options: { enforce: 'pre' }, test: /\.js$/ },
             ],
         },
         output: {
-            filename:       'breeding.js',
-            library:        'Breeding',
-            libraryExport:  'default',
-            libraryTarget:  'umd',
-            path:           `${env.BUILD_DIR}/explodedModule/web/breeding`,
+            filename: 'breeding.js',
+            library: 'Breeding',
+            libraryExport: 'default',
+            libraryTarget: 'umd',
+            path: `${env.BUILD_DIR}/explodedModule/web/breeding`,
         },
-        plugins: [
-            // new Optimize.UglifyJsPlugin()
-        ],
         resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.json' ],
+            extensions: ['.ts', '.tsx', '.js', '.json'],
         },
     };
 };

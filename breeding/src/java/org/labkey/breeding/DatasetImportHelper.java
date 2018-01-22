@@ -32,28 +32,23 @@ final class DatasetImportHelper
     /**
      * Executes the dataset metadata import utilizing LabKey's predefined dataset definition importer.
      *
-     * @param user         User executing the import. Expected to have admin privileges
+     * @param user         User executing the import
      * @param container    Container into which to import the dataset. Expected to have an active 'study' module
      * @param studyXmlFile XML file defining the study, including the manifest and the metadata.
      */
     static void importDatasetMetadata(@NotNull User user, @NotNull Container container, @NotNull File studyXmlFile)
             throws IOException, SQLException, DatasetImportUtils.DatasetLockExistsException, XmlException, ImportException
     {
-        assert user.isInSiteAdminGroup();
         assert container.hasActiveModuleByName("study");
         assert studyXmlFile.exists();
 
-        LOG.debug(String.format("[import] loading study XML and root folder (%s)", studyXmlFile.getAbsolutePath()));
+        LOG.debug(String.format("[import] loading dataset metadata... [from=%s,to=%s]",
+                studyXmlFile.getAbsolutePath(), container.getName()));
         FileSystemFile root = new FileSystemFile(studyXmlFile.getParentFile());
-
-        LOG.debug("[import] generating study import context");
         StudyImportContext ctx = new StudyImportContext(user, container, studyXmlFile,
                 Collections.singleton(StudyArchiveDataTypes.DATASET_DEFINITIONS), new StaticLoggerGetter(LOG), root);
-
-        LOG.debug("[import] initiating import");
         DatasetDefinitionImporter ddi = new DatasetDefinitionImporter();
         ddi.process(ctx, root, new NullSafeBindException(container, "import"));
-
-        LOG.debug("[import] done.");
+        LOG.debug("[import] ...done.");
     }
 }

@@ -65,7 +65,7 @@ public class BehaviorNotification extends ColonyAlertsNotification
     }
 
     @Override
-    public String getEmailSubject(Container container)
+    public String getEmailSubject(Container c)
     {
         return "Behavior Alerts: " + _dateTimeFormat.format(new Date());
     }

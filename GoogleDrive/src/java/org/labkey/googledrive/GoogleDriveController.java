@@ -42,9 +42,10 @@ public class GoogleDriveController extends SpringActionController {
     }
 
     public abstract class GoogleDrivePageAction extends SimpleJspPageAction {
-        //@Override
-        public Module getModule() {
-            return ModuleLoader.getInstance().getModule(GoogleDriveModule.class);
+        @Override
+        public Class getBaseClass()
+        {
+            return GoogleDriveModule.class;
         }
     }
 

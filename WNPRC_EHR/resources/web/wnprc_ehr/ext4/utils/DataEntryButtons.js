@@ -489,9 +489,9 @@
         shouldHide: function(buttonConfig) {
             var taskDataEntryPanel = this;
             var necropsyStore = this.storeCollection.getServerStoreForQuery('study', 'necropsy');
-            var necropsyRecord = (necropsyStore !== undefined) ? necropsyStore.getAt(0) : undefined;
+            var necropsyRecord = _.isDefined(necropsyStore) ? necropsyStore.getAt(0) : undefined;
 
-            if (necropsyRecord !== undefined) {
+            if (_.isDefined(necropsyRecord)) {
                 var Id = necropsyRecord.get('Id');
 
                 Promise.resolve().then(function() {
@@ -509,7 +509,7 @@
                     var panel = taskDataEntryPanel;
                     var btn = panel.queryById(buttonConfig.itemId);
 
-                    if (btn !== undefined) {
+                    if (_.isDefined(btn)) {
                         if (data && data.rows && data.rows.length > 0) {
                             btn.hide();
                         }
@@ -540,9 +540,9 @@
         shouldHide: function(buttonConfig) {
             var taskDataEntryPanel = this;
             var necropsyStore = taskDataEntryPanel.storeCollection.getServerStoreForQuery('study', 'necropsy');
-            var necropsyRecord = (necropsyStore !== undefined) ? necropsyStore.getAt(0) : undefined;
+            var necropsyRecord = _.isDefined(necropsyStore) ? necropsyStore.getAt(0) : undefined;
 
-            if (necropsyRecord !== undefined) {
+            if (_.isDefined(necropsyRecord)) {
                 var Id = necropsyRecord.get('Id');
 
                 Promise.resolve().then(function() {
@@ -560,7 +560,7 @@
                     var panel = taskDataEntryPanel;
                     var btn = panel.queryById(buttonConfig.itemId);
 
-                    if (btn !== undefined) {
+                    if (_.isDefined(btn)) {
                         if (data && data.rows && data.rows.length > 0) {
                             btn.show();
                         }
@@ -594,8 +594,8 @@
     /*
      * This is a wrapper on the Request button to allow .
      */
-    var SubmitFinalButtonName = 'WNPRC_REQUEST';
-    registerBtn(SubmitFinalButtonName, _.extend(getBtn("REQUEST"), {
+    var RequestButtonName = 'WNPRC_REQUEST';
+    registerBtn(RequestButtonName, _.extend(getBtn("REQUEST"), {
         disableOn: 'ERROR'
     }));
 
@@ -612,6 +612,7 @@
     EHR.DataEntryUtils.registerGridButton(saveTemplateButtonName, function(config) {
         return Ext4.apply(saveTemplateButton, config);
     });
+
 
     EHR.DataEntryUtils.registerGridButton('WNPRC_AUTO_ASSIGN_ORDER', function(config){
         return Ext4.Object.merge({

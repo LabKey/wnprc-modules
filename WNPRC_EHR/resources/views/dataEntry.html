@@ -245,6 +245,11 @@ Ext.onReady(function(){
                         qcstate: 'Completed',
                         permission: 'admin',
                         queries: ['Demographics']
+                    },
+                    {
+                        url: makeExt4DataEntryURL("VVC"),
+                        title: 'Enter Veterinary Verification and Consultation',
+                        queries: ['vvc']
                     }
                 ]
             },
@@ -301,7 +306,8 @@ Ext.onReady(function(){
                     {
                         url:     makeExt4DataEntryURL("Necropsy"),
                         title:   'Enter Necropsy',
-                        queries: ['Necropsies']},
+                        queries: ['Necropsies']
+                    },
                     {
                         url:     makeURL("manageRecord", { schemaName: 'study', queryName: 'Prenatal Deaths', keyField: 'lsid' }),
                         title:   'Enter Prenatal Death',
@@ -328,20 +334,17 @@ Ext.onReady(function(){
                         queries: ['Necropsies']
                     },
                     {
-                        url:     LABKEY.ActionURL.buildURL('wnprc_ehr-necropsy', 'NecropsySchedule', ctx['EHRStudyContainer']),
+                        url: makeExt4DataEntryURL("VVCRequest"),
+                        title: 'Request VVC',
+                        queries: ['blood']
+                    },
+                    {
+                        url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'NecropsySchedule', ctx['EHRStudyContainer']),
                         title:   'Schedule Necropsy',
                         queries: ['Necropsies']
                     }
                 ],
                 requests: true
-            },
-            {
-                header: 'Templates',
-                items: [{
-                    url:     LABKEY.ActionURL.buildURL('wnprc_ehr-templates', 'manageTemplates', ctx['EHRStudyContainer']),
-                    title:   'Manage Templates',
-                    queries: []
-                }]
             }
         ];
 
@@ -354,11 +357,6 @@ Ext.onReady(function(){
             section.items = section.items.filter(function(item) {
                 item.qcstate = item.qcstate || qcState;
                 item.permission = item.permission || 'insert';
-
-                if (item.queries.length == 0) {
-                    return true;
-                }
-
                 return EHR.Security.hasPermission(item.qcstate, item.permission, item.queries.map(function(queryName) {
                     return {
                         schemaName: 'study',
@@ -396,6 +394,14 @@ Ext.onReady(function(){
                 bloodUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&key=${lsid}&update=1';
                 bloodInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&update=1';
                 bloodDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Blood Draws';
+            }
+
+            var VVCUpdateURL = '';
+            var VVCDeleteURL = '';
+
+            if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
+                VVCUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
+                VVCDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
             }
 
             function onSuccess(dr){
@@ -612,6 +618,24 @@ Ext.onReady(function(){
                                                     filters: [
                                                         LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
                                                     ]
+                                                }
+                                            },
+                                            {
+                                                title: 'VVC Requests',
+                                                ref: 'VVCRequests',
+                                                itemId: 'VVCRequests',
+                                                xtype: 'ehr-qwppanel',
+                                                queryConfig: {
+                                                    schemaName: 'wnprc',
+                                                    queryName: 'vvc',
+                                                    viewName: 'VVC Request',
+                                                    updateURL: VVCUpdateURL,
+                                                    deleteURL: VVCDeleteURL,
+                                                    scope: this,
+                                                    success: onSuccess
+                                                    /*filters: [
+                                                        LABKEY.Filter.create('QCState/Label', 'In', LABKEY.Filter.Types.STARTS_WITH)
+                                                    ]*/
                                                 }
                                             }
                                         ]

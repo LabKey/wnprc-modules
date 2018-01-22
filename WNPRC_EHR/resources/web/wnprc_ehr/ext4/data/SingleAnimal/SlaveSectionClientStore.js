@@ -57,7 +57,7 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
     },
 
     /**
-     * This is split out as a seperate method, so that child classes can reset their slave fields.  Note that this
+     * This is split out as a separate method, so that child classes can reset their slave fields.  Note that this
      * won't trigger a master client store to update it's subscriptions, so you'd need to do that.
      */
     configureSlaveFieldsList: function() {

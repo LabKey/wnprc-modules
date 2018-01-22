@@ -829,7 +829,6 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
     };
 })();
 
-
 (function() {
     var abstractReport = EHR.reports['abstract'];
 
@@ -875,53 +874,51 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
 
 
         LABKEY.Utils.requiresCSS("wnprc_ehr/HousingAndAssignmentHistory.css");
-        LABKEY.requiresScript(['webutils/lib/externals-debug.js'], function() {
-            LABKEY.requiresScript(['webutils/lib/legacy.js'], function() {
-                LABKEY.requiresScript("wnprc_ehr/HousingAndAssignmentHistory.js", function() {
-                    var config = {
-                        xtype: 'ldk-webpartpanel',
-                        title: "Housing and Assignment History - " + animalId,
-                        align: 'stretch',
-                        frame: true,
-                        html: getErrorHTML("Please enable the WebUtils module to view this visualization."),
-                        style: 'margin-bottom: 20px'
-                    };
+        WNPRC_EHR.Utils.Lib.loadLibrary(['/webutils/lib/webutils'], function() {
+            LABKEY.requiresScript("wnprc_ehr/HousingAndAssignmentHistory.js", function() {
+                var config = {
+                    xtype: 'ldk-webpartpanel',
+                    title: "Housing and Assignment History - " + animalId,
+                    align: 'stretch',
+                    frame: true,
+                    html: getErrorHTML("Please enable the WebUtils module to view this visualization."),
+                    style: 'margin-bottom: 20px'
+                };
 
-                    if (ko) {
-                        Ext4.apply(config, {
-                            html: housingHTML,
-                            listeners: {
-                                afterrender: {
-                                    fn: function() {
-                                        var applyBindings = function() {
-                                            var $animalNodes = jQuery('#' + panelId).find('animal-housing');
+                if (WebUtils) {
+                    Ext4.apply(config, {
+                        html: housingHTML,
+                        listeners: {
+                            afterrender: {
+                                fn: function() {
+                                    var applyBindings = function() {
+                                        var $animalNodes = jQuery('#' + panelId).find('animal-housing');
 
-                                            $animalNodes.each(function() {
-                                                if (typeof ko !== 'undefined') {
-                                                    ko.cleanNode(this);
-                                                    ko.applyBindings({}, this);
-                                                }
-                                            });
-                                        };
-                                        applyBindings();
-
-                                        var firstItem = tab.items.get(0);
-
-                                        var oldfn = firstItem.onContentSizeChange;
-                                        firstItem.onContentSizeChange = function() {
-                                            applyBindings();
-                                            if ( typeof oldfn === 'function' ) {
-                                                oldfn();
+                                        $animalNodes.each(function() {
+                                            if (typeof ko !== 'undefined') {
+                                                ko.cleanNode(this);
+                                                ko.applyBindings({}, this);
                                             }
-                                        };
-                                    }
+                                        });
+                                    };
+                                    applyBindings();
+
+                                    var firstItem = tab.items.get(0);
+
+                                    var oldfn = firstItem.onContentSizeChange;
+                                    firstItem.onContentSizeChange = function() {
+                                        applyBindings();
+                                        if ( typeof oldfn === 'function' ) {
+                                            oldfn();
+                                        }
+                                    };
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
+                }
 
-                    tab.add(config);
-                });
+                tab.add(config);
             });
         });
     }

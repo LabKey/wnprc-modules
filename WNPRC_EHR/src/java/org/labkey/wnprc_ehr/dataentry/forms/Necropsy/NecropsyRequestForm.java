@@ -47,7 +47,6 @@ public class NecropsyRequestForm extends SimpleRequestForm {
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Pathology.js"));
     }
 
-
     @Override
     protected List<String> getButtonConfigs() {
         List<String> buttons = new ArrayList<>();

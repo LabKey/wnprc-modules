@@ -1,30 +1,48 @@
 package org.labkey.wnprc_ehr.schemas;
 
-import org.jetbrains.annotations.Nullable;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.data.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr.security.EHRRequestPermission;
+import org.labkey.api.ehr.security.EHRVeternarianPermission;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.SystemProperty;
+import org.labkey.api.ldk.table.CustomPermissionsTable;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.webutils.api.json.JsonUtils;
+import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsyDeliveryOptionTable;
 import org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination;
 
 import java.beans.Introspector;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jon on 2/24/16.
@@ -58,7 +76,6 @@ public class WNPRC_Schema extends SimpleUserSchema {
     public WNPRC_Schema(User user, Container container) {
         super(NAME, DESCRIPTION, user, container, DbSchema.get(NAME));
         _container = container;
-
     }
 
     @Override
@@ -67,6 +84,13 @@ public class WNPRC_Schema extends SimpleUserSchema {
 
         if (enumTables.containsKey(name)) {
             return enumTables.get(name);
+        }
+        if (name.equalsIgnoreCase("vvc")){
+            CustomPermissionsTable vvc = new CustomPermissionsTable(this,_dbSchema.getTable(name));
+            vvc.addPermissionMapping(UpdatePermission.class, EHRVeternarianPermission.class);
+            vvc.addPermissionMapping(InsertPermission.class, EHRRequestPermission.class);
+
+            return vvc.init();
         }
         else {
             return super.createTable(name);
@@ -116,7 +140,6 @@ public class WNPRC_Schema extends SimpleUserSchema {
 
         return rows;
     }
-
 
     public static void ensureStudyShape(User user, Container container) throws ChangePropertyDescriptorException {
         Study study = StudyService.get().getStudy(container);

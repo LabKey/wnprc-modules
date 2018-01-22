@@ -25,3 +25,4 @@ FROM (
 LEFT JOIN study.demographics AS demographics
 ON (events.Id = demographics.Id)
 WHERE (demographics.calculated_status <> 'No Record') -- Animals with no record don't affect the population.
+order by events.id asc, events.dateWithTime asc

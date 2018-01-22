@@ -14,7 +14,7 @@ projectedRelease
 
 FROM study.assignment
 WHERE (
-  project.avail IN ('a1', 'a2', 'a3', 'a4')
+  project.avail IN ('a1', 'a2', 'a3', 'a4', 'ip','ai')
   AND
   (
     enddate IS NULL

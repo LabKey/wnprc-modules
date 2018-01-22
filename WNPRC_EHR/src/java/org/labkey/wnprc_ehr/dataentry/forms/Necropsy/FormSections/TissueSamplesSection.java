@@ -2,7 +2,11 @@ package org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections;
 
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SlaveGridSection;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TissueSamplesSection extends SlaveGridSection {
     public TissueSamplesSection() {
@@ -45,7 +49,6 @@ public class TissueSamplesSection extends SlaveGridSection {
 
         return fields;
     }
-
 
     @Override
     public List<String> getTbarButtons() {

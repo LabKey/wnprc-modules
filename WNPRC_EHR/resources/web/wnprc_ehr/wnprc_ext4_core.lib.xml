@@ -1,5 +1,5 @@
 <libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library compileInProductionMode="false">
+    <library>
         <script path="/wnprc_ehr/ext4/utils/ExtUtils.js"/>
     </library>
     <dependencies>

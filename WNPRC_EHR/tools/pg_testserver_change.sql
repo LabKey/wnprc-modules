@@ -177,4 +177,4 @@ TRUNCATE audit.c3d2181_userauditdomain;
 DROP TABLE audit.keep_audit_dataset;
 
 -- We've left a bit of a mess, so it's best to vacuum before guests arrive.  (Deleting doesn't reclaim the space on it's own, and we just deleted 40-50GB)
-VACUUM FULL;
+--VACUUM FULL;

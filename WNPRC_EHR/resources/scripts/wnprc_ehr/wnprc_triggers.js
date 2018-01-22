@@ -21,6 +21,8 @@ exports.init = function(EHR) {
         "study/Deaths.js",
         "study/PrenatalDeaths.js",
         "study/Necropsies.js"
+        /*,
+        "wnprc/vvc.js"*/
     ];
 
     // Set up a shorthand function.
@@ -750,4 +752,21 @@ exports.init = function(EHR) {
 
         return description;
     });
+
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPDATE, 'wnprc', 'vvc', function(helper, scriptErrors, row, oldRow){
+        console.log("wnprc_trigger gets called");
+        if (row.QCStateLabel=="Request: Approved" && oldRow.QCStateLabel == "Request: Pending")
+        {
+            row.dateapproved = new Date();
+        }
+
+    });
+
+    /*EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_INSERT, 'wnprc', 'vvc', function(helper, scriptErrors, row){
+        if (row.QCStateLabel == "Request: Pending" && row.requestId){
+            var requestid = row.requestId;
+            console.log ("new request submitted "+ requestid);
+            WNPRC.Utils.getJavaHelper().sendVvcNotification(requestid);
+        }
+    });*/
 };

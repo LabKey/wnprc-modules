@@ -47,7 +47,6 @@ export class Breeding {
      */
     private static callSimpleApiButtonAction(target: HTMLButtonElement, action: string) {
         $(target).prop('disabled', true);
-        // noinspection JSUnusedGlobalSymbols: called by the request handler
         LABKEY.Ajax.request({
             failure: (error) => {
                 LABKEY.Utils.onError(error);

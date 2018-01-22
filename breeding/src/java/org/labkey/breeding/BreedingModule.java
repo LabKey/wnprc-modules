@@ -12,9 +12,6 @@ import org.labkey.api.ehr.dataentry.TaskForm;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
-import org.labkey.api.security.ValidEmail;
-import org.labkey.api.settings.AppProps;
 import org.labkey.study.importer.DatasetImportUtils;
 import org.reflections.Reflections;
 
@@ -33,30 +30,40 @@ public final class BreedingModule extends ExtendedSimpleModule
      */
     private static final Logger LOG = Logger.getLogger(BreedingModule.class);
 
+    /**
+     * Flag (from the VM) to indicate we should force the module to re-run all updates
+     * regardless of the actual module version
+     */
+    private boolean forceUpdate = Boolean.getBoolean("labkey.module.forceupdate");
+
+    @Override
+    public void beforeUpdate(ModuleContext moduleContext)
+    {
+        // reset the flag to force the update (so the version reports correctly from now on)
+        forceUpdate = false;
+        try
+        {
+            setUpDatasetsAndForms(moduleContext.getUpgradeUser());
+        }
+        catch (IOException | DatasetImportUtils.DatasetLockExistsException | ImportException | XmlException | SQLException e)
+        {
+            LOG.error("failed during import of breeding dataset metadata", e);
+        }
+        super.beforeUpdate(moduleContext);
+    }
+
+    @Override
+    public double getVersion()
+    {
+        return forceUpdate ? Double.POSITIVE_INFINITY : super.getVersion();
+    }
+
     @Override
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
     {
         Reflections r = new Reflections("org.labkey.breeding.dataentry");
         for (Class<? extends DataEntryForm> c : r.getSubTypesOf(TaskForm.class))
             EHRService.get().registerFormType(new DefaultDataEntryFormFactory(c, this));
-
-        // if this is development mode, load the dataset metadata on every startup
-        if (AppProps.getInstance().isDevMode())
-        {
-            try
-            {
-                User importingUser = moduleContext.getUpgradeUser();
-                if (importingUser == null)
-                    // WARNING: horrible devmode hack detected - clay, 18 Jan 2018
-                    importingUser = UserManager.getUser(new ValidEmail("cdstevens3@wisc.edu"));
-                importDatasetMetadata(importingUser);
-            }
-            catch (IOException | DatasetImportUtils.DatasetLockExistsException | ImportException | XmlException
-                    | SQLException | ValidEmail.InvalidEmailException e)
-            {
-                LOG.error("Failed while loading reference study for breeding module", e);
-            }
-        }
     }
 
     @Override
@@ -65,12 +72,24 @@ public final class BreedingModule extends ExtendedSimpleModule
         addController(getName().toLowerCase(), BreedingController.class);
     }
 
-    private void importDatasetMetadata(User importingUser) throws XmlException, SQLException, ImportException,
+    /**
+     * Executes the import of the dataset metadata into every container that has the breeding module enabled
+     *
+     * @param user
+     * @throws XmlException
+     * @throws SQLException
+     * @throws ImportException
+     * @throws DatasetImportUtils.DatasetLockExistsException
+     * @throws IOException
+     */
+    private void setUpDatasetsAndForms(User user) throws XmlException, SQLException, ImportException,
             DatasetImportUtils.DatasetLockExistsException, IOException
     {
         File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(),
                 "study.xml");
         for (Container c : ContainerManager.getAllChildrenWithModule(ContainerManager.getRoot(), this))
-            DatasetImportHelper.importDatasetMetadata(importingUser, c, file);
+        {
+            DatasetImportHelper.importDatasetMetadata(user, c, file);
+        }
     }
 }

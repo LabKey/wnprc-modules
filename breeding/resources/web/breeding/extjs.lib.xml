@@ -1,6 +1,6 @@
 <libraries xmlns="http://labkey.org/clientLibrary/xml/">
     <library compileInProductionMode="false">
-        <script path="/breeding/extjs/ChildRecordsPanel.js"/>
+        <script path="/breeding/extjs/ChildRecordPanel.js"/>
         <script path="/breeding/extjs/DetailPanel.js"/>
         <script path="/breeding/extjs/ParentChildDetailPanel.js"/>
     </library>

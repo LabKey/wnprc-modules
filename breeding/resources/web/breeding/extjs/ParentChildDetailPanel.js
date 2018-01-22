@@ -7,7 +7,7 @@
         initComponent: function () {
             // define the handler for loading the child records after the initial loading is complete
             const DETAIL_PANEL_XTYPE = 'wnprc-detailpanel';
-            const CHILD_RECORD_XTYPE = 'wnprc-childrecordspanel';
+            const CHILD_RECORD_XTYPE = 'wnprc-childrecordpanel';
             // noinspection JSUnresolvedExtXType: Ext.panel.Panel (2.3.0)
             Ext.apply(this, {
                 items: [{

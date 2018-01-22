@@ -1,9 +1,9 @@
 // noinspection JSUnresolvedVariable: Ext4 provided by LabKey
 (function (Ext) {
-    Ext.define('WNPRC.ext4.ChildRecordsPanel', {
-        alias: 'widget.wnprc-childrecordspanel',
-        childRecords: [],
+    Ext.define('WNPRC.ext4.ChildRecordPanel', {
+        alias: 'widget.wnprc-childrecordpanel',
         extend: 'Ext.panel.Panel',
+        childRecords: [],
         layout: 'fit',
         loadFromStore: function (store) {
             // set the style for the child divs

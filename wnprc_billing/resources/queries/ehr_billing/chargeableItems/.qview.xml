@@ -4,11 +4,8 @@
         <column name="oldPk"/>
         <column name="name"/>
         <column name="itemcode"/>
-        <column name="activeRate/unitcost"/>
-        <column name="activeRate/subsidy"/>
-        <column name="activeCreditAccount/account"/>
-        <column name="totalExemptions"/>
         <column name="category"/>
+        <column name="serviceCode"/>
         <column name="departmentCode"/>
         <column name="comment"/>
         <column name="active"/>

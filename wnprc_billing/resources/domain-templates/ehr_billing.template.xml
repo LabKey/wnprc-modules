@@ -6,19 +6,8 @@
     <template xsi:type="EHRBillingTemplateType">
         <table tableName="chargeRates" tableDbType="NOT_IN_DB">
             <dat:columns>
-                <dat:column columnName="serviceCode">
-                    <dat:rangeURI>int</dat:rangeURI>
-                </dat:column>
-                <dat:column columnName="description">
-                    <dat:rangeURI>string</dat:rangeURI>
-                    <dat:scale>255</dat:scale>
-                </dat:column>
                 <dat:column columnName="genCredits">
                     <dat:rangeURI>boolean</dat:rangeURI>
-                </dat:column>
-                <dat:column columnName="groupName">
-                    <dat:rangeURI>string</dat:rangeURI>
-                    <dat:scale>50</dat:scale>
                 </dat:column>
             </dat:columns>
         </table>
@@ -128,6 +117,9 @@
         <table tableName="chargeableItems" tableDbType="NOT_IN_DB">
             <dat:columns>
                 <dat:column columnName="oldPk">
+                    <dat:rangeURI>int</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="serviceCode">
                     <dat:rangeURI>int</dat:rangeURI>
                 </dat:column>
             </dat:columns>

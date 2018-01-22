@@ -10,6 +10,9 @@
                         <columnTitle>Old Charge Id</columnTitle>
                         <description>PK from the WNPRC's current finance system (from table charges.rate_schedule.Id)</description>
                     </column>
+                    <column columnName="departmentCode">
+                        <columnTitle>Group Name</columnTitle>
+                    </column>
                     <column columnName="category">
                         <fk>
                             <fkDbSchema>wnprc_billing</fkDbSchema>

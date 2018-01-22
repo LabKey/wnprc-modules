@@ -10,7 +10,7 @@ FROM
   wmisc.chargetype,
   wmisc.chargeId,
   ci.departmentCode AS serviceCenter,
-  cr.description AS item,
+  ci.name AS item,
   (CASE
     WHEN wmisc.unitCost IS NULL OR wmisc.unitCost = 0
       THEN (cr.unitCost + (cr.unitCost * wmisc.tierRate))

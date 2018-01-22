@@ -29,12 +29,12 @@
     ci1.name as item,
     ci1.category as category,
     pdt.comment,
-    cr1.serviceCode AS serviceCenter,
+    ci1.serviceCode AS serviceCenter,
     pdt.tierRate AS tierRate,
     NULL AS isMiscCharge
   FROM wnprc_billing.perDiemWithTierRates pdt
   LEFT JOIN ehr_billing.chargeRates cr1 ON (
     CAST(pdt.adate AS DATE) >= CAST(cr1.startDate AS DATE) AND
-    (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL) AND
-    cr1.description = 'Per diems')
-  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.name = cr1.description) pdr
+    (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
+  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId) pdr
+  WHERE pdr.item = 'Per diems'

@@ -9,13 +9,21 @@ export class Breeding {
     // <editor-fold desc="--Static Members--">
 
     /**
+     * Placeholder value for the details link. Replaced by a JavaScript click handler
+     * @type {string}
+     */
+    private static readonly DETAIL_PLACEHOLDER: string = '__DETAIL__.view?id=';
+
+    /**
      * Configuration for all the child records to display in the parent-child detail panel
      * @type ChildRecordConfiguration[]
      */
     private static readonly CHILD_RECORDS: ChildRecordConfiguration[] = [{
+        detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${objectid}`,
         parametersFactory: Breeding.createQueryParams,
-        queryName: '_PregnancyInfoByParentRecordId',
+        queryName: '_PregnancyInfoByTaskId',
         schemaName: 'study',
+        showDetailsColumn: true,
         title: 'Pregnancy History',
     }, {
         filterArrayFactory: Breeding.createQueryFilters,
@@ -29,12 +37,6 @@ export class Breeding {
         title: 'Breeding Remarks',
     }];
 
-    /**
-     * Placeholder value for the details link. Replaced by a JavaScript click handler
-     * @type {string}
-     */
-    private static readonly DETAIL_PLACEHOLDER: string = '__DETAIL__.view?id=';
-
     // </editor-fold>
 
     // <editor-fold desc="--Static Functions--">
@@ -47,6 +49,7 @@ export class Breeding {
      */
     private static callSimpleApiButtonAction(target: HTMLButtonElement, action: string) {
         $(target).prop('disabled', true);
+        // noinspection TypeScriptUnresolvedFunction
         LABKEY.Ajax.request({
             failure: (error) => {
                 LABKEY.Utils.onError(error);
@@ -66,7 +69,8 @@ export class Breeding {
      * @returns {any[]}
      */
     private static createQueryFilters(record: DataSetRecord) {
-        return [LABKEY.Filter.create('parentid', record.get('objectid'), LABKEY.Filter.Types.EQUAL)];
+        // noinspection TypeScriptUnresolvedVariable
+        return [LABKEY.Filter.create('taskid', record.get('taskid'), LABKEY.Filter.Types.EQUAL)];
     }
 
     /**
@@ -75,7 +79,7 @@ export class Breeding {
      * @returns {{PARENT_RECORD_ID: any}}
      */
     private static createQueryParams(record: DataSetRecord) {
-        return {PARENT_RECORD_ID: record.get('objectid')};
+        return {TASK_ID: record.get('taskid')};
     }
 
     /**
@@ -90,8 +94,10 @@ export class Breeding {
                 state[key] = value;
                 const uri = URI(document.location);
                 if (value === null) {
+                    // noinspection TypeScriptUnresolvedFunction
                     uri.removeQuery(key);
                 } else {
+                    // noinspection TypeScriptUnresolvedFunction
                     uri.setQuery(key, value);
                 }
                 window.history.pushState(state, document.title, uri.href());
@@ -117,7 +123,7 @@ export class Breeding {
 
     // <editor-fold desc="--Public Functions (called from HTML)--">
 
-    // noinspection JSUnusedGlobalSymbols: called from HTML
+    // noinspection JSUnusedGlobalSymbols, JSMethodCanBeStatic: called from HTML
     /**
      * Initiates the dataset data import by invoking the importDatasetData method in the BreedingController
      * @param {HTMLButtonElement} target
@@ -126,7 +132,7 @@ export class Breeding {
         Breeding.callSimpleApiButtonAction(target, 'importDatasetData');
     }
 
-    // noinspection JSUnusedGlobalSymbols: called from HTML
+    // noinspection JSUnusedGlobalSymbols, JSMethodCanBeStatic: called from HTML
     /**
      * Initiates the dataset metadata import by invoking the importDatasetMetadata method in the BreedingController
      * @param {HTMLButtonElement} target
@@ -157,7 +163,8 @@ export class Breeding {
      */
     public renderDetail(webpart: WebPartConfig) {
         if (webpart.breedingId) {
-            Ext4.create('WNPRC.ext4.ParentChildDetailPanel', {
+            // noinspection TypeScriptUnresolvedVariable
+            const detailPanel = Ext4.create('WNPRC.ext4.ParentChildDetailPanel', {
                 childRecords: Breeding.CHILD_RECORDS,
                 minHeight: 300,
                 renderTo: webpart.wrapperDivId,
@@ -169,6 +176,7 @@ export class Breeding {
                 },
                 title: 'Pregnancy Detail',
             });
+            detailPanel.on('detailload', this.attachDetailClickHandler, this, {single: true});
         } else {
             $(`#${webpart.wrapperDivId}`).empty();
         }
@@ -177,6 +185,17 @@ export class Breeding {
     // </editor-fold>
 
     // <editor-fold desc="--Private Functions--">
+
+    /**
+     * Overwrites the placeholder detail URI with a javascript:void(0) and attaches the detail click handler
+     */
+    private attachDetailClickHandler() {
+        $(`a[href*='${Breeding.DETAIL_PLACEHOLDER}']`).each((i, e) => {
+            const id = (URI($(e).attr('href')).query(true) as any).id;
+            $(e).attr('href', 'javascript:void(0)')
+                .click(this.onDetailClick.bind(this, id));
+        });
+    }
 
     /**
      * Handler for clicking the detail links in the pregnancy grid
@@ -205,7 +224,7 @@ export class Breeding {
      * @param {PregnancyState} state
      */
     private renderGrid(state: PregnancyState) {
-        // noinspection JSUnusedGlobalSymbols: 'success' is called when the query finishes
+        // noinspection JSUnusedGlobalSymbols, TypeScriptUnresolvedFunction, TypeScriptUnresolvedVariable
         const x = new LABKEY.QueryWebPart({
             buttonBar: {
                 items: [
@@ -222,11 +241,7 @@ export class Breeding {
             showDetailsColumn: true,
             success: (dr) => {
                 Breeding.updateBrowserState('viewName', dr.viewName);
-                $(`a[href*='${Breeding.DETAIL_PLACEHOLDER}']`).each((i, e) => {
-                    const id = (URI($(e).attr('href')).query(true) as any).id;
-                    $(e).attr('href', 'javascript:void(0)')
-                        .click(this.onDetailClick.bind(this, id));
-                });
+                this.attachDetailClickHandler();
                 this.renderWebpart(state.breedingId);
             },
             title: 'Pregnancies',
@@ -240,8 +255,9 @@ export class Breeding {
      * @param {string | null} breedingId
      */
     private renderWebpart(breedingId: string | null) {
+        // noinspection TypeScriptUnresolvedFunction
         const x = new LABKEY.WebPart({
-            partConfig: { breedingId },
+            partConfig: {breedingId},
             partName: 'Pregnancy Detail',
             renderTo: this.detailElementId,
         });
@@ -260,10 +276,12 @@ export default new Breeding();
  * Child record configuration to pass to the child records panel
  */
 interface ChildRecordConfiguration {
+    detailsURL?: string;
     filterArrayFactory?: (record: DataSetRecord) => any[];
     parametersFactory?: (record: DataSetRecord) => any;
     queryName: string;
     schemaName: string;
+    showDetailsColumn?: boolean;
     title?: string;
     viewName?: string;
 }

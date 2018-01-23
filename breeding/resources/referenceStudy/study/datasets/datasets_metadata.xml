@@ -22,13 +22,13 @@
                 <datatype>timestamp</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
             </column>
-            <column columnName="taskid">
-                <datatype>varchar</datatype>
-                <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
-            </column>
             <column columnName="requestid">
                 <datatype>varchar</datatype>
                 <propertyURI>urn:ehr.labkey.org/#RequestId</propertyURI>
+            </column>
+            <column columnName="taskid">
+                <datatype>varchar</datatype>
+                <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
             </column>
             <column columnName="performedby">
                 <datatype>varchar</datatype>
@@ -84,36 +84,14 @@
     <table tableName="breeding_remarks" tableDbType="TABLE">
         <tableTitle>Breeding Remarks</tableTitle>
         <description>Contains one row for each observation/remark about a breeding encounter.</description>
-        <columns>
-            <column columnName="parentid">
-                <datatype>varchar</datatype>
-                <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
-                <isHidden>true</isHidden>
-                <nullable>false</nullable>
-                <fk>
-                    <fkDbSchema>study</fkDbSchema>
-                    <fkTable>breeding_encounters</fkTable>
-                    <fkColumnName>objectid</fkColumnName>
-                </fk>
-            </column>
-        </columns>
+        <columns/>
     </table>
     <table tableName="pregnancy_outcomes" tableDbType="TABLE">
         <tableTitle>Pregnancy Outcomes</tableTitle>
         <description>Contains one row for the outcome of each pregnancy completed/terminated at the center.</description>
         <columns>
-            <column columnName="parentid">
-                <datatype>varchar</datatype>
-                <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
-                <isHidden>true</isHidden>
-                <nullable>false</nullable>
-                <fk>
-                    <fkDbSchema>study</fkDbSchema>
-                    <fkTable>breeding_encounters</fkTable>
-                    <fkColumnName>objectid</fkColumnName>
-                </fk>
-            </column>
             <column columnName="outcome">
+                <columnTitle>Outcome</columnTitle>
                 <datatype>varchar</datatype>
                 <nullable>false</nullable>
             </column>
@@ -132,18 +110,6 @@
     <table tableName="ultrasounds" tableDbType="TABLE">
         <tableTitle>Ultrasounds</tableTitle>
         <description>Contains one row for each ultrasound performed at the center.</description>
-        <columns>
-            <column columnName="parentid">
-                <datatype>varchar</datatype>
-                <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
-                <isHidden>true</isHidden>
-                <nullable>false</nullable>
-                <fk>
-                    <fkDbSchema>study</fkDbSchema>
-                    <fkTable>breeding_encounters</fkTable>
-                    <fkColumnName>objectid</fkColumnName>
-                </fk>
-            </column>
-        </columns>
+        <columns/>
     </table>
 </tables>

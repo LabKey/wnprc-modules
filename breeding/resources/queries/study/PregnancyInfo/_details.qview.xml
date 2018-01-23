@@ -1,6 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
     <columns>
         <column name="objectid"/>
+        <column name="taskid"/>
         <column name="id"/>
         <column name="sireid"/>
         <column name="date"/>

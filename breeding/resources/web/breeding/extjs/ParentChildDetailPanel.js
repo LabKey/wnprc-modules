@@ -34,6 +34,7 @@
                     }
                 }
             });
+            this.addEvents('detailload');
             this.callParent(arguments);
             // noinspection JSUnresolvedFunction: requires native/polyfill ES6 Promise
             const callbacks = [
@@ -62,6 +63,7 @@
             // noinspection JSUnresolvedVariable: requires native/polyfill ES6 Promise
             Promise.all(callbacks).then((function () {
                 Ext.defer(this.table.unmask, 500, this.table);
+                Ext.defer(this.fireEvent, 500, this, ['detailload', this]);
                 // noinspection JSUnresolvedFunction: Ext.resumeLayouts (4.1.0)
                 Ext.resumeLayouts(true);
             }).bind(this));

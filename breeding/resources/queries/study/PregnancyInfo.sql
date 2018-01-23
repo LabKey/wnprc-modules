@@ -1,4 +1,5 @@
 SELECT be.objectid
+      ,be.taskid
       ,be.id
       ,be.sireid
       ,be.date
@@ -24,13 +25,13 @@ SELECT be.objectid
   LEFT OUTER JOIN pregnancy_outcomes po
     ON po.objectid = (SELECT objectid
                         FROM pregnancy_outcomes
-                       WHERE parentid = be.objectid
+                       WHERE taskid = be.taskid
                        ORDER BY date DESC
                        LIMIT 1)
     -- select the most recent remark to show in the list
   LEFT OUTER JOIN breeding_remarks br
     ON br.objectid = (SELECT objectid
                         FROM breeding_remarks
-                       WHERE parentid = be.objectid
+                       WHERE taskid = be.taskid
                        ORDER BY date DESC
                        LIMIT 1)

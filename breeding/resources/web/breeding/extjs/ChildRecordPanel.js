@@ -5,6 +5,10 @@
         extend: 'Ext.panel.Panel',
         childRecords: [],
         layout: 'fit',
+        initComponent: function() {
+            this.addEvents('childload');
+            this.callParent(arguments);
+        },
         loadFromStore: function (store) {
             // set the style for the child divs
             const style = 'margin: 0px 0px 10px 0px';
@@ -45,7 +49,7 @@
             // wait for the child grids to load, then fire the childload event
             // noinspection JSUnresolvedVariable: requires native/polyfill ES6 Promise
             Promise.all(callbacks).then((function () {
-                this.fireEvent('childload');
+                this.fireEvent('childload', this);
             }).bind(this));
         }
     });

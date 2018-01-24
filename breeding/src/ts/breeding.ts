@@ -26,13 +26,13 @@ export class Breeding {
         showDetailsColumn: true,
         title: 'Pregnancy History',
     }, {
-        filterArrayFactory: Breeding.createQueryFilters,
-        queryName: 'ultrasounds',
+        parametersFactory: Breeding.createQueryParams,
+        queryName: '_UltrasoundInfoByTaskId',
         schemaName: 'study',
         title: 'Ultrasounds',
     }, {
-        filterArrayFactory: Breeding.createQueryFilters,
-        queryName: 'breeding_remarks',
+        parametersFactory: Breeding.createQueryParams,
+        queryName: '_BreedingRemarkInfoByTaskId',
         schemaName: 'study',
         title: 'Breeding Remarks',
     }];

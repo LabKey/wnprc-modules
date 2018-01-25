@@ -19,7 +19,7 @@ export class Breeding {
      * @type ChildRecordConfiguration[]
      */
     private static readonly CHILD_RECORDS: ChildRecordConfiguration[] = [{
-        detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${objectid}`,
+        detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${taskid}`,
         parametersFactory: Breeding.createQueryParams,
         queryName: '_PregnancyInfoByTaskId',
         schemaName: 'study',
@@ -162,14 +162,14 @@ export class Breeding {
      * @param {WebPartConfig} webpart
      */
     public renderDetail(webpart: WebPartConfig) {
-        if (webpart.breedingId) {
+        if (webpart.taskId) {
             // noinspection TypeScriptUnresolvedVariable
             const detailPanel = Ext4.create('WNPRC.ext4.ParentChildDetailPanel', {
                 childRecords: Breeding.CHILD_RECORDS,
                 minHeight: 300,
                 renderTo: webpart.wrapperDivId,
                 store: {
-                    filterArray: [LABKEY.Filter.create('objectid', webpart.breedingId, LABKEY.Filter.Types.EQUAL)],
+                    filterArray: [LABKEY.Filter.create('taskid', webpart.taskId, LABKEY.Filter.Types.EQUAL)],
                     queryName: 'PregnancyInfo',
                     schemaName: 'study',
                     viewName: '_details',
@@ -199,11 +199,11 @@ export class Breeding {
 
     /**
      * Handler for clicking the detail links in the pregnancy grid
-     * @param {string | null} breedingId
+     * @param {string | null} taskId
      */
-    private onDetailClick(breedingId: string | null) {
-        Breeding.updateBrowserState('breedingId', breedingId);
-        this.renderWebpart(breedingId);
+    private onDetailClick(taskId: string | null) {
+        Breeding.updateBrowserState('taskId', taskId);
+        this.renderWebpart(taskId);
     }
 
     /**
@@ -234,7 +234,7 @@ export class Breeding {
                     LABKEY.QueryWebPart.standardButtons.pageSize,
                 ],
             },
-            detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${objectid}`,
+            detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${taskid}`,
             failure: LABKEY.Utils.onError,
             queryName: 'PregnancyInfo',
             schemaName: 'study',
@@ -242,7 +242,7 @@ export class Breeding {
             success: (dr) => {
                 Breeding.updateBrowserState('viewName', dr.viewName);
                 this.attachDetailClickHandler();
-                this.renderWebpart(state.breedingId);
+                this.renderWebpart(state.taskId);
             },
             title: 'Pregnancies',
             viewName: state.viewName || '',
@@ -252,12 +252,12 @@ export class Breeding {
 
     /**
      * Renders the detail webpart for the passed breeding encounter id (or clears it)
-     * @param {string | null} breedingId
+     * @param {string | null} taskId
      */
-    private renderWebpart(breedingId: string | null) {
+    private renderWebpart(taskId: string | null) {
         // noinspection TypeScriptUnresolvedFunction
         const x = new LABKEY.WebPart({
-            partConfig: {breedingId},
+            partConfig: {taskId},
             partName: 'Pregnancy Detail',
             renderTo: this.detailElementId,
         });
@@ -297,7 +297,7 @@ interface DataSetRecord {
  * Browser state/get query parameters for loading the pregnancy grid/detail
  */
 interface PregnancyState {
-    breedingId: string | null;
+    taskId: string | null;
     viewName: string | null;
 }
 
@@ -305,7 +305,7 @@ interface PregnancyState {
  * Configuration object passed from the webpart config for the pregnancy detail webpart
  */
 interface WebPartConfig {
-    breedingId: string | null;
+    taskId: string | null;
     wrapperDivId: string;
 }
 

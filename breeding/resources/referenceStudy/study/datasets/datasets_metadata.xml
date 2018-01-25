@@ -47,6 +47,9 @@
             <index type="unique">
                 <column>objectid</column>
             </index>
+            <index type="nonunique">
+                <column>taskid</column>
+            </index>
         </indices>
     </sharedConfig>
     <table tableName="breeding_encounters" tableDbType="TABLE">

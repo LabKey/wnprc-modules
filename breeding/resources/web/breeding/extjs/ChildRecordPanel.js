@@ -26,14 +26,7 @@
                     Ext.DomHelper.append(this.body, {tag: 'div', id: childId, style: style});
                     // add the filter for the participant id and the success handler
                     // noinspection JSUnresolvedVariable, JSUnresolvedFunction: standardButtons defined in the LABKEY code
-                    Ext.apply(c, {
-                        buttonBar: {
-                            items: [
-                                LABKEY.QueryWebPart.standardButtons.insertNew,
-                                LABKEY.QueryWebPart.standardButtons.exportRows,
-                                LABKEY.QueryWebPart.standardButtons.print
-                            ]
-                        },
+                    Ext.merge(c, {
                         failure: reject,
                         filterArray: c.filterArrayFactory ? c.filterArrayFactory(record) : null,
                         parameters: c.parametersFactory ? c.parametersFactory(record) : null,

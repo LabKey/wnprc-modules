@@ -14,11 +14,18 @@ export class Breeding {
      */
     private static readonly DETAIL_PLACEHOLDER: string = '__DETAIL__.view?id=';
 
+    // noinspection TypeScriptUnresolvedVariable
     /**
      * Configuration for all the child records to display in the parent-child detail panel
      * @type ChildRecordConfiguration[]
      */
     private static readonly CHILD_RECORDS: ChildRecordConfiguration[] = [{
+        buttonBar: {
+            items: [
+                LABKEY.QueryWebPart.standardButtons.exportRows,
+                LABKEY.QueryWebPart.standardButtons.print,
+            ],
+        },
         detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${taskid}`,
         parametersFactory: Breeding.createQueryParams,
         queryName: '_PregnancyInfoByTaskId',
@@ -153,9 +160,26 @@ export class Breeding {
      */
     public renderDetail(webpart: WebPartConfig) {
         if (webpart.taskId) {
+            // noinspection TypeScriptUnresolvedVariable, TypeScriptUnresolvedFunction
+            const defaultButtonBarConfig = {
+                buttonBar: {
+                    items: [
+                        LABKEY.QueryWebPart.standardButtons.exportRows,
+                        LABKEY.QueryWebPart.standardButtons.print,
+                        {
+                            text: 'insert new',
+                            url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.ActionURL.getContainer(), {
+                                formType: 'Breeding Encounter',
+                                returnUrl: window.location,
+                                taskid: webpart.taskId,
+                            }),
+                        },
+                    ],
+                },
+            };
             // noinspection TypeScriptUnresolvedVariable
             const detailPanel = Ext4.create('WNPRC.ext4.ParentChildDetailPanel', {
-                childRecords: Breeding.CHILD_RECORDS,
+                childRecords: Breeding.CHILD_RECORDS.map((c) => Ext4.apply(Ext4.apply({}, defaultButtonBarConfig), c)),
                 minHeight: 300,
                 renderTo: webpart.wrapperDivId,
                 store: {
@@ -222,6 +246,14 @@ export class Breeding {
                     LABKEY.QueryWebPart.standardButtons.exportRows,
                     LABKEY.QueryWebPart.standardButtons.print,
                     LABKEY.QueryWebPart.standardButtons.pageSize,
+                    {
+                        text: 'insert new',
+                        url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.ActionURL.getContainer(),
+                            {
+                                formType: 'Breeding Encounter',
+                                returnUrl: window.location,
+                            }),
+                    },
                 ],
             },
             detailsURL: `/breeding/${Breeding.DETAIL_PLACEHOLDER}\${taskid}`,
@@ -266,6 +298,7 @@ export default new Breeding();
  * Child record configuration to pass to the child records panel
  */
 interface ChildRecordConfiguration {
+    buttonBar?: { items: any[] };
     detailsURL?: string;
     filterArrayFactory?: (record: DataSetRecord) => any[];
     parametersFactory?: (record: DataSetRecord) => any;

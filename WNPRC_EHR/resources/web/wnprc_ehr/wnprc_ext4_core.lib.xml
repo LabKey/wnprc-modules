@@ -1,0 +1,8 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library>
+        <script path="/wnprc_ehr/ext4/utils/ExtUtils.js"/>
+    </library>
+    <dependencies>
+        <dependency path="ehr/ehr_api"/>
+    </dependencies>
+</libraries>

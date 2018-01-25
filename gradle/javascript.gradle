@@ -1,0 +1,86 @@
+if (file("${project.projectDir}/src/java").exists())
+{
+    task("java2ts", group: 'JavaScript', type: JavaExec,
+            description: 'Generates TypeScript files for certain annotated classes in the Java source') {
+
+        doFirst {
+            mkdir "$projectDir/build/generated-ts"
+        }
+
+        main = 'com.github.jonathonrichardson.java2ts.Compiler'
+        classpath = sourceSets.main.runtimeClasspath
+        args = ["$projectDir/build/generated-ts/GeneratedFromJava.ts"]
+
+        inputs.dir("$projectDir/src/java")
+        outputs.dir("$projectDir/build/generated-ts")
+    }
+}
+
+if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) {
+    task("webpack", group: 'JavaScript', type: Exec, dependsOn: ['java2ts', "${project.parent.path}:npmInstall"],
+            description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
+        workingDir "$projectDir"
+        commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
+
+        ext.included = true
+    }
+} else if (file("$projectDir/tsconfig.json").exists()) {
+    task("tsc", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
+            description: 'Compiles the TypeScript for the module using the tsconfig.json') {
+        workingDir "$projectDir"
+        commandLine "../node_modules/.bin/tsc", "--outDir", "$buildDir/explodedModule/web/${project.name.toLowerCase()}"
+
+        if (project.tasks.findByName('java2ts')){
+            dependsOn('java2ts')
+        }
+
+        ext.included = true
+    }
+}
+
+if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
+    task("lessc", group: 'JavaScript', dependsOn: ["${project.parent.path}:npmInstall"],
+            description: 'Compiles the less styles for the module') { Task t ->
+        doLast {
+            def stdout = new ByteArrayOutputStream()
+            t.project.exec {
+                commandLine "../node_modules/.bin/lessc", "src/less/${project.name.toLowerCase()}.less"
+                standardOutput stdout
+                workingDir "$projectDir"
+            }
+            // we can't have duplicate id selectors (i.e., "#bootstrap-box #bootstrap-box"), but less
+            // sometimes creates them. this task will remove them from the input before writing it to
+            // the file - clay, 13 Nov 2017
+            def output = file("$buildDir/explodedModule/web/${project.name.toLowerCase()}/css/${project.name.toLowerCase()}.css")
+            output.getParentFile().mkdirs()
+
+            def reader = new InputStreamReader(new ByteArrayInputStream(stdout.toByteArray()))
+            def writer = new BufferedWriter(new FileWriter(output))
+            reader.readLines().each {
+                writer.write(it.replaceAll("(#\\S+ )+", "\$1"))
+                writer.newLine()
+            }
+            stdout.close()
+            writer.close()
+            reader.close()
+        }
+
+        ext.included = true
+    }
+
+    task("fonts", group: 'JavaScript', type: Copy, dependsOn: [ "${project.parent.path}:npmInstall" ],
+            description: 'Copies all the fonts for the module') {
+        from("${project.parent.projectDir}/node_modules") {
+            include '*/fonts/*'
+        }
+        into "$buildDir/explodedModule/web/${project.name.toLowerCase()}/fonts"
+
+        // flatten the hierarchy so that the files go directly
+        // in fonts/ instead of (e.g.) fonts/bootstrap/fonts/
+        eachFile { path = name }
+        includeEmptyDirs = false
+
+        ext.included = true
+    }
+}
+

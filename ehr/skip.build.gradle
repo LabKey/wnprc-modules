@@ -1,9 +1,0 @@
-dependencies {
-    //compile fileTree(dir: "lib", include: ['*.jar'])
-    compile project(path: ":ehr", configuration: "apiCompile")
-    compile "org.labkey:api:${project.labkeyVersion}"
-    compile "javax.servlet:jsp-api:2.0"
-
-    apiCompile fileTree(dir: "lib", include: ['*.jar'])
-    apiCompile project(path: ":DBUtils", configuration: "apiCompile")
-}

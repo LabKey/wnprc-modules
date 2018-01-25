@@ -1,56 +1,6 @@
 dependencies {
+    apiExternal fileTree("${project.projectDir}/../lib")
     compile "javax.servlet:jsp-api:2.0"
-    external fileTree("${project.projectDir}/lib")
+    compile project(path: "${project.parent.path}:WebUtils", configuration: "apiCompile")
+    external fileTree("${project.projectDir}/../lib")
 }
-
-sourceSets {
-    main { java { srcDirs = [ "src/java" ]} }
-}
-
-task("npmInstall", type: Exec) {
-
-    commandLine "npm", "install"
-
-    inputs.file('packages.json')
-    outputs.dir('node_modules')
-}
-
-task("bowerInstall", type: Exec, dependsOn: ["npmInstall"]) {
-
-    commandLine "$projectDir/node_modules/.bin/bower", "install", "--allow-root"
-
-    inputs.file('bower.json')
-    inputs.file('packages.json')
-
-    outputs.dir('bower_components')
-}
-
-task("java2ts", type: JavaExec, dependsOn: ["bowerInstall"]) {
-
-    doFirst {
-        mkdir "${project.buildDir}/generated-ts"
-    }
-
-    main = 'com.github.jonathonrichardson.java2ts.Compiler'
-    classpath = sourceSets.main.runtimeClasspath
-    args = [ "${project.buildDir}/generated-ts/GeneratedFromJava.ts" ]
-
-    inputs.dir('src/java')
-    outputs.dir("$buildDir/generated-ts")
-}
-
-task("compileTypescript", type: Exec, dependsOn: ["java2ts"]) {
-    commandLine "$projectDir/node_modules/.bin/tsc"
-
-    inputs.file('tsconfig.json')
-    inputs.dir('src/ts')
-    inputs.dir("$buildDir/generated-ts")
-    outputs.dir("$buildDir/compiled-ts")
-}
-
-task("webpack", type: Exec, dependsOn: ["compileTypescript"]) {
-    commandLine "$projectDir/node_modules/.bin/webpack"
-}
-
-project.tasks.findByName("processModuleResources").dependsOn("webpack")
-

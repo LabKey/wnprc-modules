@@ -1,0 +1,10 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library>
+        <script path="webutils/models/Chain.js"/>
+        <script path="webutils/models/InputData.js"/>
+        <script path="webutils/models/QueryTable.js"/>
+    </library>
+    <dependencies>
+        <dependency path="webutils/models/base/base"/>
+    </dependencies>
+</libraries>

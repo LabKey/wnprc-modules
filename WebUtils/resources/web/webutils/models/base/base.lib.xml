@@ -1,0 +1,11 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="webutils/models/base/ParseError.js"/>
+        <script path="webutils/models/base/QueryStore.js"/>
+        <script path="webutils/models/base/Table.js"/>
+        <script path="webutils/models/base/TableRow.js"/>
+    </library>
+    <dependencies>
+        <dependency path="webutils/lib/webutils"/>
+    </dependencies>
+</libraries>

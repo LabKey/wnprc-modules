@@ -1,0 +1,7 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="/webutils/lib/bootstrap/js/bootstrap.min.js"/>
+        <script path="/webutils/lib/bootstrap/css/bootstrap-in-a-box.css"/>
+        <script path="/webutils/lib/bootstrap/css/bootstrap-theme.min.css"/>
+    </library>
+</libraries>

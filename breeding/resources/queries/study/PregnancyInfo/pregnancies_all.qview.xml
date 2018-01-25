@@ -1,5 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView" label="Pregnancies - All" name="pregnancies_all">
     <columns>
+        <column name="updatelink"/>
         <column name="id"/>
         <column name="sireid"/>
         <column name="date"/>

@@ -1,5 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView" label="Breeding - All" name="breeding_all">
     <columns>
+        <column name="updatelink"/>
         <column name="id"/>
         <column name="sireid"/>
         <column name="date"/>

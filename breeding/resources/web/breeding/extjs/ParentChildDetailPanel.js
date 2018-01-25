@@ -5,7 +5,7 @@
         alias: 'widget.wnprc-parentchilddetailpanel',
         extend: 'LDK.panel.WebpartPanel',
         initComponent: function () {
-            // define the handler for loading the child records after the initial loading is complete
+            const DETAIL_LOAD_EVENT_NAME = 'detailLoad';
             const DETAIL_PANEL_XTYPE = 'wnprc-detailpanel';
             const CHILD_RECORD_XTYPE = 'wnprc-childrecordpanel';
             // noinspection JSUnresolvedExtXType: Ext.panel.Panel (2.3.0)
@@ -34,7 +34,7 @@
                     }
                 }
             });
-            this.addEvents('detailload');
+            this.addEvents(DETAIL_LOAD_EVENT_NAME);
             this.callParent(arguments);
             // noinspection JSUnresolvedFunction: requires native/polyfill ES6 Promise
             const callbacks = [
@@ -56,14 +56,25 @@
                     this.store.load();
                 }).bind(this)),
                 // wait for each of the child record grids to load (the panel will fire an event)
-                new Promise((function (resolve) {
-                    this.mon(this.down(CHILD_RECORD_XTYPE), 'childload', resolve, null, {single: true});
+                new Promise((function (resolve, reject) {
+                    this.mon(this.down(CHILD_RECORD_XTYPE), 'childLoad', function (e) {
+                        if (e) {
+                            // there was an error, so head for the catch handler
+                            reject(e);
+                        }
+                        else {
+                            // no argument means no problem, proceed as normal
+                            resolve();
+                        }
+                    }, this, {single: true});
                 }).bind(this))
             ];
             // noinspection JSUnresolvedVariable: requires native/polyfill ES6 Promise
-            Promise.all(callbacks).then((function () {
+            Promise.all(callbacks).catch((function (e) {
+                log.error('error loading child detail panel: ' + e);
+            }).bind(this)).finally((function () {
                 Ext.defer(this.table.unmask, 500, this.table);
-                Ext.defer(this.fireEvent, 500, this, ['detailload', this]);
+                Ext.defer(this.fireEvent, 500, this, [DETAIL_LOAD_EVENT_NAME, this]);
                 // noinspection JSUnresolvedFunction: Ext.resumeLayouts (4.1.0)
                 Ext.resumeLayouts(true);
             }).bind(this));

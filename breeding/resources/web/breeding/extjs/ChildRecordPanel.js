@@ -1,12 +1,13 @@
 // noinspection JSUnresolvedVariable: Ext4 provided by LabKey
 (function (Ext) {
+    const CHILD_LOAD_EVENT_NAME = 'childLoad';
     Ext.define('WNPRC.ext4.ChildRecordPanel', {
         alias: 'widget.wnprc-childrecordpanel',
         extend: 'Ext.panel.Panel',
         childRecords: [],
         layout: 'fit',
-        initComponent: function() {
-            this.addEvents('childload');
+        initComponent: function () {
+            this.addEvents(CHILD_LOAD_EVENT_NAME);
             this.callParent(arguments);
         },
         loadFromStore: function (store) {
@@ -46,10 +47,14 @@
                     (new LABKEY.QueryWebPart(c)).render(childId);
                 }).bind(this));
             }, this);
-            // wait for the child grids to load, then fire the childload event
+            // wait for the child grids to load, then fire the child load event
             // noinspection JSUnresolvedVariable: requires native/polyfill ES6 Promise
             Promise.all(callbacks).then((function () {
-                this.fireEvent('childload', this);
+                // pass an explicit 'null' as the argument so the handlers know there is no error
+                this.fireEvent(CHILD_LOAD_EVENT_NAME, null);
+            }).bind(this)).catch((function (e) {
+                // pass the error along to any handlers
+                this.fireEvent(CHILD_LOAD_EVENT_NAME, e);
             }).bind(this));
         }
     });

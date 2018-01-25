@@ -15,7 +15,7 @@
                 // noinspection JSUnresolvedVariable, JSUnresolvedFunction: extFormatFn defined on the field (sometimes)
                 var value = field.extFormatFn ? field.extFormatFn(record.get(field.name)) : record.get(field.name);
                 if (record.raw && record.raw[field.name] && record.raw[field.name].url)
-                    value = '<a href="' + record.raw[field.name].url + '" target="new">' + value + '</a>';
+                    value = '<a href="' + record.raw[field.name].url + '" target="_blank">' + value + '</a>';
                 // noinspection JSUnresolvedExtXType: Ext.form.field.Display (3.4.0)
                 var child = {
                     fieldLabel: field.label || field.caption || field.name,

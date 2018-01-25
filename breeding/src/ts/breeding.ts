@@ -42,7 +42,7 @@ export class Breeding {
     // <editor-fold desc="--Static Functions--">
 
     /**
-     * Invokes a simple (success/failure, no return value) API method from the breeding controller. Disables/reenables
+     * Invokes a simple (success/failure, no return value) API method from the breeding controller. Disables/re-enables
      * the button clicked in the UI
      * @param {HTMLButtonElement} target
      * @param action
@@ -61,16 +61,6 @@ export class Breeding {
             },
             url: LABKEY.ActionURL.buildURL('breeding', action),
         });
-    }
-
-    /**
-     * Factory method to create filter arrays for use in the LabKey.QueryWebPart of each child record
-     * @param {DataSetRecord} record
-     * @returns {any[]}
-     */
-    private static createQueryFilters(record: DataSetRecord) {
-        // noinspection TypeScriptUnresolvedVariable
-        return [LABKEY.Filter.create('taskid', record.get('taskid'), LABKEY.Filter.Types.EQUAL)];
     }
 
     /**
@@ -176,7 +166,7 @@ export class Breeding {
                 },
                 title: 'Pregnancy Detail',
             });
-            detailPanel.on('detailload', this.attachDetailClickHandler, this, {single: true});
+            detailPanel.on('detailLoad', this.attachDetailClickHandler, this, {single: true});
         } else {
             $(`#${webpart.wrapperDivId}`).empty();
         }

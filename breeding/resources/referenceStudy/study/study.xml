@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<study archiveVersion="17.2" xmlns="http://labkey.org/study/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <datasets dir="datasets" file="datasets_manifest.xml">
+        <definition file="breeding.dataset"/>
+    </datasets>
+    <studyDescription rendererType="TEXT_WITH_LINKS">
+        <description xsi:nil="true"/>
+    </studyDescription>
+</study>

@@ -17,10 +17,14 @@ if (file("${project.projectDir}/src/java").exists())
 }
 
 if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) {
-    task("webpack", group: 'JavaScript', type: Exec, dependsOn: ['java2ts', "${project.parent.path}:npmInstall"],
+    task("webpack", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
         workingDir "$projectDir"
         commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
+
+        if (project.tasks.findByName('java2ts')) {
+            dependsOn('java2ts')
+        }
 
         ext.included = true
     }

@@ -1,6 +1,0 @@
-<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="All Flags">
-    <sorts>
-        <sort column="category" />
-        <sort column="code" />
-    </sorts>
-</customView>

@@ -1,5 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" title="Electronic Health Record">
-    <dependencies>
-        <dependency path="ehr.context" />
-    </dependencies>
-</view>

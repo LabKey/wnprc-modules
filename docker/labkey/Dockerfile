@@ -21,10 +21,15 @@ RUN X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${L
 
 FROM store/oracle/serverjre:8
 
+ENV LANG en_US.utf8
+
+# copy in some additional yum repositories
+COPY public-yum-ol7.repo /etc/yum.repos.d
+
+# download and untar tomcat
 ENV CATALINA_HOME /usr/local/tomcat
 WORKDIR $CATALINA_HOME
 
-# download and untar tomcat
 ENV TOMCAT_VERSION 8.5.23
 RUN yum -y -q install wget tar gzip R-3.2.0 tzdata \
  && wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \

@@ -1,10 +1,10 @@
 dependencies {
-
-    compile "org.labkey:query:${project.labkeyVersion}"
-    compile project(path: ":DBUtils",  configuration: "apiCompile")
-    compile project(":WebUtils")
+    compile project(":server:modules:query")
+    compile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
+    compile project("${project.parent.path}:WebUtils")
     compile files(apiJar)
-
     external 'com.google.api-client:google-api-client:1.22.0'
     external 'com.google.apis:google-api-services-drive:v3-rev85-1.23.0'
+    jspCompile project(':server:api')
+    jspCompile project("${project.parent.path}:WebUtils")
 }

@@ -1,0 +1,35 @@
+apply plugin: 'java'
+
+sourceSets {
+    main { java { srcDirs = ['src/java'] } }
+}
+
+configurations {
+    external
+    compile.extendsFrom(external)
+}
+
+tasks.compileJava {
+    options.compilerArgs << "-Werror"
+}
+
+dependencies {
+    compile 'org.jetbrains:annotations:15.0'
+    compile project(":server:api")
+    compile project(":server:internal")
+    compile project(":externalModules:labModules:LDK")
+}
+
+tasks.jar {
+    destinationDir = file("${project.explodedModuleDir}/lib")
+
+    ext.included = true
+}
+
+task('copyExternalLibs', group: 'Java', type: Copy,
+        description: 'Copies the external libraries necessary for the main java module to the lib directory') {
+    from project.configurations.external
+    into "${project.explodedModuleDir}/lib"
+
+    ext.included = true
+}

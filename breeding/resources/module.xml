@@ -1,0 +1,7 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <clientDependencies>
+        <dependency path="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.0/URI.min.js"/>
+        <dependency path="/breeding/extjs.lib.xml"/>
+        <dependency path="/breeding/breeding.js"/>
+    </clientDependencies>
+</module>

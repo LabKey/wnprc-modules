@@ -1,0 +1,26 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="Pregnancies - Current">
+    <columns>
+        <column name="updatelink"/>
+        <column name="id"/>
+        <column name="sireid"/>
+        <column name="date"/>
+        <column name="dateend"/>
+        <column name="reason"/>
+        <column name="remark"/>
+        <column name="conceptiondate"/>
+        <column name="conceptiondate_plus_30"/>
+        <column name="conceptiondate_plus_60"/>
+        <column name="conceptiondate_plus_90"/>
+        <column name="conceptiondate_plus_120"/>
+        <column name="conceptiondate_plus_150"/>
+        <column name="conceptiondate_plus_165"/>
+        <column name="gestation_day"/>
+    </columns>
+    <sorts>
+        <sort column="conceptiondate" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="conceptiondate" operator="isnonblank"/>
+        <filter column="outcome_date"   operator="isblank"/>
+    </filters>
+</customView>

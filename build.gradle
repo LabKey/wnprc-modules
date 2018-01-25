@@ -74,7 +74,7 @@ ext {
     stagingDir = "$rootDir/build/staging/modules"
 }
 
-def modules = subprojects - project('docker')
+def modules = subprojects - project('docker') - project('java2ts')
 configure(modules) {
     // tell IntelliJ to ignore any build directories
     apply plugin: 'idea'

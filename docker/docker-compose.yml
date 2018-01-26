@@ -14,16 +14,6 @@ services:
       - "5432"
     environment:
       TZ: America/Chicago
- 
-#  pgbadger:
-#    image: wnprcehr/pgbadger:latest
-#    depends_on:
-#      - "postgres"
-#    volumes:
-#      - "${PG_LOG_DIR}:/var/log/postgresql"
-#      - "${PG_REPORTS_DIR}:/var/www/pg_reports"
-#    environment:
-#      TZ: America/Chicago
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -64,7 +54,6 @@ services:
     image: nginx:1.13.0
     depends_on:
       - "labkey"
-#      - "pgbadger"
     volumes:
       - "${NGINX_CLIENT_CER_FILE}:/usr/local/ssl/client-ca.pem"
       - "${NGINX_CLIENT_CRL_FILE}:/usr/local/ssl/crl.pem"
@@ -72,12 +61,10 @@ services:
       - "${NGINX_SERVER_CER_FILE}:/usr/local/ssl/cert.pem"
       - "${NGINX_SERVER_KEY_FILE}:/usr/local/ssl/key.pem"
       - "${NGINX_WELL_KNOWN_DIR}:/usr/share/nginx/html"
-      - "${PG_REPORTS_DIR}:/var/www/pg_reports"
     ports:
       - "80:80"
       - "443:443"
       - "1080:1080"
-      - "1180:1180"
     environment:
       TZ: America/Chicago
 
@@ -92,19 +79,3 @@ services:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL:
       TZ: America/Chicago
-
-#  monit:
-#    image: wnprcehr/monit:latest
-#    depends_on:
-#      - "mailserver"
-#      - "postgres"
-#    links:
-#      - mailserver:mailserver-container
-#      - postgres
-#    volumes:
-#      - "${MONIT_CONFIG_FILE}:/etc/monit/monitrc"
-#      - "${MONIT_HOST_BACKUP_DIR}:/host/backup"
-#      - "${MONIT_HOST_ROOT_DIR}:/host"
-#      - "${MONIT_LOG_DIR}:/etc/monit/logs"
-#    environment:
-#      TZ: America/Chicago

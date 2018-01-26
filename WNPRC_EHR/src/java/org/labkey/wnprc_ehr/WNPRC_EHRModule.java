@@ -37,6 +37,7 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
+import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
@@ -99,7 +100,17 @@ import java.util.Set;
  * Time: 1:52 PM
  */
 public class WNPRC_EHRModule extends ExtendedSimpleModule {
+    public static final String NAME = "WNPRC_EHR";
     public static final String CONTROLLER_NAME = "wnprc_ehr";
+    public static final String WNPRC_Category_Name = NAME;
+
+    public String getName() {
+        return NAME;
+    }
+
+    public double getVersion() {
+        return 15.13;
+    }
 
     public boolean hasScripts() {
         return true;
@@ -156,11 +167,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "my_tasks");
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
 
-        EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
-        EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
-        EHRService.get().registerHistoryDataSource(new DefaultTBDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource());
+        EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource());
+        EHRService.get().registerHistoryDataSource(new DefaultTBDataSource());
 
-        EHRService.get().addModuleRequiringLegacyExt3EditUI(this);
+        EHRService.get().addModuleRequiringLegagyExt3EditUI(this);
 
         this.registerNotifications();
         this.registerDataEntryForms();
@@ -288,7 +299,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 TreatmentsForm.class,
                 WeightForm.class,
                 VVCRequestForm.class,
-                VVCForm.class
+                VVCForm.class,
+                ProtocolForm.class
         );
 
         for(Class form : forms) {

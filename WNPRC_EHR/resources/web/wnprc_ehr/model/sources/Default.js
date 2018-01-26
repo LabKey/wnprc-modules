@@ -8,10 +8,6 @@ EHR.model.DataModelManager.registerMetadata('Default', {
         },
         project: {
             xtype: 'wnprc-projectentryfield'
-        },
-        enddate: {
-            hidden: true,
-            allowBlank: false
         }
     },
     byQuery :{
@@ -28,7 +24,7 @@ EHR.model.DataModelManager.registerMetadata('Default', {
                     keyColumn:     'DisplayName'
                 },
                 hidden: false,
-                shownInGrid:true,
+                shownInGrid: true,
                 columnConfig: {
                     width: 150
                 }
@@ -47,11 +43,11 @@ EHR.model.DataModelManager.registerMetadata('Default', {
                 columnConfig: {
                     width: 350
                 },
-                width: 350
+                width: 480
             },
             usda_level:{
-                hidden: false,
-                shownInGrid: true
+                hidden: true,
+                shownInGrid: false
             },
             external_id:{
                 hidden: true,
@@ -63,10 +59,12 @@ EHR.model.DataModelManager.registerMetadata('Default', {
             enddate:{
                 shownInGrid:true,
                 hidden: false
+            },
+            pdf:{
+                shownInGrid: true,
+                hidden: false
             }
-        }
-    },
-    byQuery: {
+        },
         'ehr.requests':{
             requestid:{
                 hidden : true

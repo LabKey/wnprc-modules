@@ -31,7 +31,7 @@ services:
       TZ: America/Chicago
     
   mailserver:
-    image: wnprcehr/postfix:v0.1.0
+    image: wnprcehr/postfix:latest
     depends_on:
       - "mailcatcher"
     environment:

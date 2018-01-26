@@ -29,7 +29,13 @@ task("buildPgbadger", group: "Docker", type: Exec, description: "Generates the p
     args "build", ".", "-t", "wnprcehr/pgbadger:latest"
 }
 
-task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildEhrcron", "buildLabkey", "buildMonit", "buildPgbadger" ] )
+task("buildPostfix", group: "Docker", type: Exec, description: "Generates the postfix docker image") {
+    workingDir "${project.rootDir}/docker/postfix"
+    executable "docker"
+    args "build", ".", "-t", "wnprcehr/postfix:latest"
+}
+
+task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildEhrcron", "buildLabkey", "buildMonit", "buildPgbadger", "buildPostfix" ] )
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
     workingDir "$projectDir"

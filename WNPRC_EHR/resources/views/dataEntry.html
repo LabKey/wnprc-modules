@@ -235,6 +235,18 @@ Ext.onReady(function(){
                         queries: ['Assignment']
                     },
                     {
+                        url: makeExt4DataEntryURL("protocol",{
+                            schemaName: 'ehr',
+                            queryName:  'protocol',
+                            keyField:   'protocol'
+                        }),
+                        title: 'New Enter/Manage Protocols',
+                        qcstate: 'Completed',
+                        permission: 'admin',
+                        queries:['Assignment']
+
+                    },
+                    {
                         url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=SimpleRemark&title=Remark",
                         title: 'Enter Simple Remark',
                         queries: ['Clinical Remarks']

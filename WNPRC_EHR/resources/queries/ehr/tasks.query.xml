@@ -1,0 +1,157 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="tasks" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <tableUrl>/ehr/taskDetails.view?formtype=${formtype}&amp;taskid=${taskid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <titleColumn>rowid</titleColumn>
+                <pkColumnName>taskid</pkColumnName>
+                <columns>
+                    <column columnName="rowid">
+                        <columnTitle>Task Id</columnTitle>
+                        <isAutoInc>true</isAutoInc>
+                        <nullable>true</nullable>
+                        <shownInInsertView>true</shownInInsertView>
+                        <url>/ehr/taskDetails.view?formtype=${formtype}&amp;taskid=${taskid}</url>
+                    </column>
+                    <column columnName="taskid">
+                        <isHidden>true</isHidden>
+                        <isKeyField>true</isKeyField>
+                    </column>
+                    <column columnName="datecompleted">
+                        <columnTitle>Date Finalized</columnTitle>
+                        <formatString>DateTime</formatString>
+                    </column>
+                    <column columnName="formtype">
+                        <columnTitle>Task Type</columnTitle>
+                    </column>
+                    <column columnName="assignedto">
+                        <columnTitle>Assigned To</columnTitle>
+                        <nullable>true</nullable>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>PrincipalsWithoutAdmin</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="duedate">
+                        <columnTitle>Due Date</columnTitle>
+                        <nullable>true</nullable>
+                        <formatString>DateTime</formatString>
+                    </column>
+                    <column columnName="createdby">
+                        <columnTitle>Created By</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>users</fkTable>
+                            <fkColumnName>userid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="created">
+                        <columnTitle>Created</columnTitle>
+                    </column>
+                    <column columnName="modifiedby">
+                        <columnTitle>Modified By</columnTitle>
+                    </column>
+                    <column columnName="modified">
+                        <columnTitle>Modified</columnTitle>
+                    </column>
+                    <column columnName="qcstate">
+                        <isHidden>false</isHidden>
+                        <shownInDetailsView>true</shownInDetailsView>
+                        <columnTitle>Status</columnTitle>
+                        <displayWidth>50</displayWidth>
+                        <!--<url>/ehr/taskDetails.view?formtype=${taskid/formtype}&amp;taskid=${taskid}</url>-->
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="In Progress"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Review Required"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Scheduled"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Delete Requested"/>
+                                </filters>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Approved"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Sample Delivered"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Denied"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Cancelled"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Pending"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="title">
+                        <url>/ehr/taskDetails.view?formtype=${formtype}&amp;taskid=${taskid}</url>
+                    </column>
+                    <column columnName="updateTitle" wrappedColumnName="title">
+                        <columnTitle>Title</columnTitle>
+                        <url>/wnprc_ehr/manageWnprcTask.view?formtype=${formtype}&amp;taskid=${taskid}</url>
+                        <isHidden>true</isHidden>
+                        <displayWidth>150</displayWidth>
+                    </column>
+                </columns>
+                <buttonBarOptions includeStandardButtons="false">
+                    <includeScript>/ehr/studyButtons.js</includeScript>
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
+                    </item>
+                    <item text="Reports">
+                        <originalText>Reports</originalText>
+                    </item>
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                    <item text="Paging">
+                        <originalText>Paging</originalText>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,7 +1,0 @@
-// search through the subdirectories and all the ones containing
-// a build.gradle file as subprojects to the main build
-include rootDir.listFiles().findAll { d ->
-         d.isDirectory() && (new File(d.getName(), 'build.gradle')).exists() 
-    }.collect { 
-        it.getName() 
-    }.toArray(new java.lang.String[0])

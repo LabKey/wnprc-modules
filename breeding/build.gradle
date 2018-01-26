@@ -1,0 +1,4 @@
+dependencies {
+    compile project(":server:modules:study")
+    compile project(":server:customModules:ehr")
+}

@@ -32,7 +32,12 @@ This project is set up assuming the following architecture:
   
 In order to ease that setup, the repo contains a Dockerfile for a "labkey" image and a docker-compose that sets up the system with the appropriate volumes mounted for local development. To run it, do the following:
 
-  1. Execute `:docker:build --no-daemon` **from the command line/terminal**. You will need to provide credentials for the LabKey TeamCity server in order to download the build. You will only need to do this once, to build and store the Docker image.
+  1. Set the following variables in your `~/.gradle/gradle.properties` file:
+      ```gradle
+      labkeyTeamcityUsername=<your username>
+      labkeyTeamcityPassword=<your password>
+      ```
+  1. Execute `:docker:build`. You will only need to do this once, to build and store the Docker image.
   1. Execute `:docker:up` to start the server. This will look at the `docker-compose.yml` file in the docker folder and will start the LabKey image built by the previous step as well as a default postgres database container, hooking the two together and exposing LabKey at `http://localhost:8080`. Any modules built using `:deployModule` will be automatically loaded by LabKey, due to the `build/modules` folder being mounted as a volume in the LabKey container.
   1. Execute `:docker:down` to bring the server down. This will shut down both LabKey and postgres.
   

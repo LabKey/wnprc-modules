@@ -1,0 +1,20 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library>
+        <script path="/wnprc_ehr/ext4/components/MultiSelectField.js"/>
+        <script path="/wnprc_ehr/ext4/components/Participant.js"/>
+        <script path="/wnprc_ehr/ext4/components/ProjectField.js"/>
+        <script path="/wnprc_ehr/ext4/data/RequestStoreCollection.js"/>
+        <script path="/wnprc_ehr/ext4/data/SingleAnimal/MasterSectionClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/SingleAnimal/NecropsyClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/SingleAnimal/SlaveSectionClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/TaskClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/TaskStoreCollection.js"/>
+        <script path="/wnprc_ehr/ext4/panel/AnimalDetailsPanel.js"/>
+        <script path="/wnprc_ehr/ext4/panel/TaskDataEntryPanel.js"/>
+        <script path="/wnprc_ehr/ext4/utils/DataEntryButtons.js"/>
+    </library>
+    <dependencies>
+        <dependency path="/wnprc_ehr/wnprc_ext4_core"/>
+        <dependency path="/webutils/lib/webutils"/>
+    </dependencies>
+</libraries>

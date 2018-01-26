@@ -1,0 +1,8 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="/webutils/lib/c3/d3/d3.min.js"/>
+    </library>
+    <dependencies>
+        <dependency path="vis/vis" />
+    </dependencies>
+</libraries>

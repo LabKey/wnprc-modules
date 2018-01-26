@@ -1,0 +1,17 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="date" />
+        <column name="dateApproved"/>
+        <column name="createdBy"/>
+        <column name="pi"></column>
+        <column name="protocol"></column>
+        <column name="description"></column>
+        <column name="rationale"></column>
+        <column name="veterinarian"></column>
+        <column name="QCState"></column>
+
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+</customView>

@@ -22,7 +22,7 @@ public class ChargesFormType extends TaskForm
     {
         super(ctx, owner, NAME, "Charges", "Billing", Arrays.asList(
                 new TaskFormSection(),
-                new AnimalDetailsFormSection(),
+                new WNPRC_BillingAnimalDetailsFormSection(),
                 new ChargesFormSection()
         ));
 
@@ -33,7 +33,6 @@ public class ChargesFormType extends TaskForm
         addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingProjectField.js"));
         addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingProjectEntryField.js"));
         addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingRowObserverEntryField.js"));
-        addClientDependency(ClientDependency.fromPath("ehr_billing/form/field/EHRBillingChargeIdEntryField.js"));
 
         for (FormSection s : getFormSections())
         {

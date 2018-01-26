@@ -8,8 +8,8 @@
         <column name="departmentCode"/>
         <column name="comment"/>
         <column name="active"/>
-        <column name="enddate"/>
         <column name="startdate"/>
+        <column name="enddate"/>
     </columns>
     <sorts>
         <sort column="name"/>

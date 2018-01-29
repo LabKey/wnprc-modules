@@ -6,6 +6,9 @@ import org.labkey.api.view.template.ClientDependency;
 
 import java.util.Collections;
 
+/**
+ * Class to administer Ext4JS component/panel for ehr_billing.miscCharges table for data entry form.
+ */
 public class ChargesFormSection extends SimpleFormSection
 {
     public ChargesFormSection()

@@ -18,6 +18,9 @@ package org.labkey.wnprc_billing.dataentry;
 import org.labkey.api.ehr.dataentry.NonStoreFormSection;
 import org.labkey.api.view.template.ClientDependency;
 
+/**
+ * Class to administer Ext4JS component for Animal Details/Demographics info for data entry form.
+ */
 public class WNPRC_BillingAnimalDetailsFormSection extends NonStoreFormSection
 {
     public WNPRC_BillingAnimalDetailsFormSection()

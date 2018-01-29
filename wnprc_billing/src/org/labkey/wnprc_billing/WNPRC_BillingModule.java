@@ -22,16 +22,18 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.dataentry.DefaultDataEntryFormFactory;
 import org.labkey.api.ldk.ExtendedSimpleModule;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_billing.dataentry.ChargesFormType;
 import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
+import org.labkey.api.ehr_billing.pipeline.InvoicedItemsProcessingService;
+import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 
 import java.util.Collection;
@@ -71,6 +73,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     protected void init()
     {
         addController(WNPRC_BillingController.NAME, WNPRC_BillingController.class);
+        ServiceRegistry.get().registerService(InvoicedItemsProcessingService.class, InvoicedItemsProcessingServiceImpl.INSTANCE);
     }
 
     @Override

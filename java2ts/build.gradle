@@ -1,20 +1,9 @@
 apply plugin: 'java'
 
-task fatJar(type: Jar) {
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
-build.dependsOn(fatJar);
-
 dependencies {
     compile "org.jtwig:jtwig-core:5.86.1.RELEASE"
     compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     compile "commons-io:commons-io:${commonsIoVersion}"
-
-    runtime "org.slf4j:slf4j-simple:1.6.1"
-
-    testCompile 'junit:junit:4.12'
+    runtime "org.slf4j:slf4j-simple:${slf4jLog4j12Version}"
+    testCompile "junit:junit:${junitVersion}"
 }
-

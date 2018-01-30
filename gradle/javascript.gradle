@@ -2,25 +2,23 @@ if (file("${project.projectDir}/src/java").exists())
 {
     task("java2ts", group: 'JavaScript', type: JavaExec,
             description: 'Generates TypeScript files for certain annotated classes in the Java source') {
+        def generatedTsDir = "$projectDir/build/generated-ts"
+        doFirst { mkdir generatedTsDir }
 
-        doFirst {
-            mkdir "$projectDir/build/generated-ts"
-        }
-
-        main = 'com.github.jonathonrichardson.java2ts.Compiler'
         classpath = sourceSets.main.runtimeClasspath
-        args = ["$projectDir/build/generated-ts/GeneratedFromJava.ts"]
+        main = 'com.github.jonathonrichardson.java2ts.Compiler'
+        args = [ "$generatedTsDir/GeneratedFromJava.ts" ]
 
-        inputs.dir("$projectDir/src/java")
-        outputs.dir("$projectDir/build/generated-ts")
+         inputs.dir("$projectDir/src/java")
+        outputs.dir(generatedTsDir)
     }
 }
 
 if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) {
     task("webpack", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
-        workingDir "$projectDir"
         commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
+        workingDir  "$projectDir"
 
         if (project.tasks.findByName('java2ts')) {
             dependsOn('java2ts')
@@ -31,7 +29,7 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
 } else if (file("$projectDir/tsconfig.json").exists()) {
     task("tsc", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the TypeScript for the module using the tsconfig.json') {
-        workingDir "$projectDir"
+        workingDir  "$projectDir"
         commandLine "../node_modules/.bin/tsc", "--outDir", "$buildDir/explodedModule/web/${project.name.toLowerCase()}"
 
         if (project.tasks.findByName('java2ts')){
@@ -45,17 +43,18 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
 if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
     task("lessc", group: 'JavaScript', dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the less styles for the module') { Task t ->
+        def moduleName = project.name.toLowerCase()
         doLast {
             def stdout = new ByteArrayOutputStream()
             t.project.exec {
-                commandLine "../node_modules/.bin/lessc", "src/less/${project.name.toLowerCase()}.less"
-                standardOutput stdout
-                workingDir "$projectDir"
+                commandLine "../node_modules/.bin/lessc", "src/less/${moduleName}.less"
+                workingDir  "$projectDir"
+                standardOutput = stdout
             }
             // we can't have duplicate id selectors (i.e., "#bootstrap-box #bootstrap-box"), but less
             // sometimes creates them. this task will remove them from the input before writing it to
             // the file - clay, 13 Nov 2017
-            def output = file("$buildDir/explodedModule/web/${project.name.toLowerCase()}/css/${project.name.toLowerCase()}.css")
+            def output = file("$buildDir/explodedModule/web/${moduleName}/css/${moduleName}.css")
             output.getParentFile().mkdirs()
 
             def reader = new InputStreamReader(new ByteArrayInputStream(stdout.toByteArray()))

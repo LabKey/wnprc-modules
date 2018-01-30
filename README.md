@@ -2,26 +2,45 @@
 
 This repository includes all the custom LabKey modules developed by the WNPRC for use in the EHR system. Each subfolder contains a separate module.
 
-## Build Prerequisites
+## Building the WNPRC Modules
 
-In order to build the WNPRC EHR modules, the following steps are required:
+To build the WNPRC EHR modules for development:
 
-  1. Checkout the `release17.2` branch from the LabKey SVN repository.
-  1. Edit the `settings.gradle` file in the root to uncomment/include the following lines (around line 70):
-      ```gradle
-      BuildUtils.includeModules(this.settings, 
-          rootDir, BuildUtils.EHR_EXTERNAL_MODULE_DIRS, excludedExternalModules)
-      BuildUtils.includeModules(this.settings, 
-          [":server:customModules:ehr", ":server:customModules:EHR_ComplianceDB"])
-       ```
-  
-  1. Execute the following gradle build commands from the context of the SVN root:
-      ```bash
-      ./gradlew :externalModules:labModules:LDK:publishLibsPublicationToMavenLocal
-      ./gradlew :server:customModules:ehr:publishLibsPublicationToMavenLocal
-      ```
-      
-In order to run it, we assume you have Docker installed (see the next section for more on that).
+  1. Follow the instructions to [set up a LabKey development machine](https://labkey.org/Documentation/wiki-page.view?name=devMachine).
+  1. From the **LabKey root directory**:
+      1. Switch to the **release17.2** branch from SVN:
+          ```bash
+          svn switch ^/branches/release17.2
+          ```
+      1. Clone this repo into the external modules directory:
+          ```bash
+          git clone https://github.com/WNPRC-EHR-Services/wnprc-modules.git externalModules/wnprc-modules
+          ```
+      1. Add the following to **settings.gradle**, somewhere around line 70:
+          ```gradle
+          BuildUtils.includeModules(this.settings, [
+                   ":externalModules:labModules:laboratory"
+                  ,":externalModules:labModules:LDK"
+                  ,":externalModules:labModules:Viral_Load_Assay"
+                  ,":server:customModules:ehr"
+                  ,":server:customModules:EHR_ComplianceDB"
+          ])
+          
+          include 'externalModules:wnprc-modules'
+          file('externalModules/wnprc-modules').listFiles().findAll { d ->
+              d.isDirectory() && (new File(d.getAbsolutePath(), 'build.gradle')).exists()
+          }.each { d ->
+              include "externalModules:wnprc-modules:${d.getName()}"
+          }
+          ```
+      1. Build LabKey proper, with the lab modules included:
+          ```bash
+          ./gradlew deployApp
+          ```
+      1. Build our modules:
+          ```bash
+          ./gradlew :externalModules:wnprc-modules:deployModules
+          ```
       
 # Using the `:docker` Build Tasks
 

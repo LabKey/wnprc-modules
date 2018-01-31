@@ -1,8 +1,7 @@
 apply plugin: 'java'
 
 sourceSets {
-    main { java { srcDirs = ['src/java']}}
-    test { java { srcDirs = ['src/test']}}
+    main { java { srcDirs = ['src/java', 'src/test']}}
 }
 
 configurations {
@@ -16,11 +15,11 @@ tasks.compileJava {
 
 dependencies {
     compile 'org.jetbrains:annotations:15.0'
+    compile "junit:junit:${junitVersion}"
     compile project(":server:api")
     compile project(":server:internal")
     compile project(":externalModules:labModules:LDK")
     compile project(":externalModules:wnprc-modules:java2ts")
-    testCompile "junit:junit:${project.junitVersion}"
 }
 
 tasks.jar {

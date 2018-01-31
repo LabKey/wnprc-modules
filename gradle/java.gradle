@@ -24,7 +24,9 @@ dependencies {
 
 tasks.jar {
     destinationDir = file("${project.explodedModuleDir}/lib")
-
+    manifest {
+        attributes 'Sealed': 'true'
+    }
     ext.included = true
 }
 

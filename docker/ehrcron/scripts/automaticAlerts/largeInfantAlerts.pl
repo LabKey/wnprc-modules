@@ -62,18 +62,35 @@ sub getHeavyInfants {
 
 }
 sub sendEmail {
-	my @email_recipients = [ "friscino\@primate.wisc.edu", "frost\@primate.wisc.edu" ] ;	
-	my $smtp = MIME::Lite->new(
-		#To 	=>join(", ", @email_recipients),
-		To 	=>'friscino@primate.wisc.edu, frost@primate.wisc.edu',
-		From	=>$from,
-		Subject =>"Subject: Orphans Not in Compliant Cage Alert on $dateString",
-		Type	=>'multipart/alternative'
+	$results = LabKey::Query::selectRows(
+		-baseUrl => $baseUrl,
+		-requiredVersion => 8.3,
+		-containerPath => $default_container,
+		-schemaName => 'ehr',
+		-queryName => 'NotificationRecipientsExpanded',
+		-filterArray => [
+			['notificationtype', 'eq', 'Orphan Alert'],
+		],
 	);
-	$smtp->attach(Type	=> 'text/html',
-		 Encoding	=> 'quoted-printable',
-		 Data		=> $email_html
-	);
-	$smtp->send() || die;
+	if (@{$results->{rows}}) {
+		my @email_recipients;
+		foreach my $row (@{$results->{rows}}) {
+			push(@email_recipients, $$row{email})
+		}
+		if (@email_recipients) {
+			@email_recipients = uniq @email_recipients;
+			my $smtp = MIME::Lite->new(
+				To      => join(", ", @email_recipients),
+				From    => $from,
+				Subject => "Subject: Orphans Not in Compliant Cage Alert on $dateString",
+				Type    => 'multipart/alternative'
+			);
+			$smtp->attach(Type => 'text/html',
+				Encoding       => 'quoted-printable',
+				Data           => $email_html
+			);
+			$smtp->send() || die;
+		}
+	}
 }
 	

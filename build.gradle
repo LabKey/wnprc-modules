@@ -52,12 +52,8 @@ idea.module {
     excludeDirs += file('node_modules')
 }
 
-// set up the LabKey artifactory and the local maven repository (~/.m2) as build sources. this would
-// be of more use if we were building modules "externally" rather than inside the exising LabKey structure
 allprojects {
     repositories {
-        maven { url "${project.labkeyArtifactoryUrl}/libs-release" }
-        maven { url "${project.labkeyArtifactoryUrl}/libs-snapshot" }
         mavenCentral()
         mavenLocal()
     }

@@ -167,11 +167,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "my_tasks");
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
 
-        EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource());
-        EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource());
-        EHRService.get().registerHistoryDataSource(new DefaultTBDataSource());
+        EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultTBDataSource(this));
 
-        EHRService.get().addModuleRequiringLegagyExt3EditUI(this);
+        EHRService.get().addModuleRequiringLegacyExt3EditUI(this);
 
         this.registerNotifications();
         this.registerDataEntryForms();

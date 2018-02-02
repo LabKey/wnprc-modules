@@ -20,7 +20,7 @@ BuildUtils.addModuleDistributionDependencies(project, [
 ])
 
 project.task("distribution", group: GroupNames.DISTRIBUTION, type: ModuleDistribution) { ModuleDistribution dist ->
-    dist.subDirName='wisc'
+    dist.subDirName='wisc_community'
     dist.includeTarGZArchive=true
-    dist.extraFileIdentifier='-UWisc'
+    dist.extraFileIdentifier='-UWisc-Community'
 }

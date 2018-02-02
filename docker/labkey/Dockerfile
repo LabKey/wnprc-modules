@@ -44,6 +44,9 @@ RUN cp $LABKEY_HOME/tomcat-lib/*.jar lib
 # add the session path to the tomcat config
 RUN sed -i "s/<Manager pathname=\"\" *\/>/<Manager pathname=\"${LABKEY_HOME//\//\\/}\/sessions\/sessions.ser\" \/>/" conf/context.xml
 
+# update the length of the default web session
+RUN sed -i "s/<session-timeout>[0-9]+<\/session-timeout>/<session-timeout>240<\/session-timeout>/" conf/web.xml
+
 # configure LabKey for tomcat
 RUN mkdir -p conf/Catalina/localhost
 RUN sed -e "s/@@appDocBase@@/${LABKEY_HOME//\//\\/}\/labkeywebapp/" \

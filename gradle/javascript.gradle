@@ -23,8 +23,8 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
         if (project.tasks.findByName('java2ts')) {
             dependsOn('java2ts')
         }
-
-        ext.included = true
+        if (project.tasks.findByName("module") != null)
+            project.tasks.module.dependsOn 'webpack'
     }
 } else if (file("$projectDir/tsconfig.json").exists()) {
     task("tsc", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
@@ -35,9 +35,9 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
         if (project.tasks.findByName('java2ts')){
             dependsOn('java2ts')
         }
-
-        ext.included = true
     }
+    if (project.tasks.findByName("module") != null)
+        project.tasks.module.dependsOn 'tsc'
 }
 
 if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
@@ -67,8 +67,6 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
             writer.close()
             reader.close()
         }
-
-        ext.included = true
     }
 
     task("fonts", group: 'JavaScript', type: Copy, dependsOn: [ "${project.parent.path}:npmInstall" ],
@@ -82,8 +80,9 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
         // in fonts/ instead of (e.g.) fonts/bootstrap/fonts/
         eachFile { path = name }
         includeEmptyDirs = false
-
-        ext.included = true
     }
+
+    if (project.tasks.findByName("module") != null)
+        project.tasks.module.dependsOn 'fonts', 'lessc'
 }
 

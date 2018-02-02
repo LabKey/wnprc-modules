@@ -193,7 +193,7 @@ sub runPgBackup {
         onExit();
     };
 
-    if ($config{compress} && $config{pgdump_format} != 'c') {
+    if ($config{compress} && $config{pgdump_format} ne 'c') {
         $log->entry("Compressing file: $dailyBackupFile");
         $log->commit;
         $dailyBackupFile = _compressFile($dailyBackupFile, 1);
@@ -237,7 +237,7 @@ onExit() will log the given message and die.
 sub onExit {
     my $msg = shift;
 
-    if (length(@$errors) > 0 && $$errors[0] ne '') {
+    if (scalar(@$errors) > 0 && $$errors[0] ne '') {
         $status = "Error";
         $log->entry("Errors: " . "[@$errors]");
         $log->commit;

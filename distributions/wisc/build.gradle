@@ -1,0 +1,26 @@
+import org.labkey.gradle.plugin.Distribution
+import org.labkey.gradle.task.ModuleDistribution
+import org.labkey.gradle.util.BuildUtils
+import org.labkey.gradle.util.GroupNames
+
+apply plugin: 'org.labkey.distribution'
+
+Distribution.inheritDependencies(project, ":server:distributions:pro_plus")
+
+BuildUtils.addModuleDistributionDependencies(project, [
+         ":externalModules:labModules:GenotypeAssays"
+        ,":externalModules:labModules:laboratory"
+        ,":externalModules:labModules:LDK"
+        ,":externalModules:labModules:SequenceAnalysis"
+        ,":externalModules:labModules:Viral_Load_Assay"
+        ,":externalModules:wnprc-modules:WNPRC_EHR"
+        ,":server:customModules:ehr"
+        ,":server:customModules:EHR_ComplianceDB"
+        ,":server:customModules:genotyping"
+])
+
+project.task("distribution", group: GroupNames.DISTRIBUTION, type: ModuleDistribution) { ModuleDistribution dist ->
+    dist.subDirName='wisc'
+    dist.includeTarGZArchive=true
+    dist.extraFileIdentifier='-UWisc'
+}

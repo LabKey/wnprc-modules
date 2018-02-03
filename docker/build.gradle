@@ -11,10 +11,18 @@ task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the eh
     args "build", ".", "-t", "wnprcehr/ehrcron:v1.0.0"
 }
 
-task("buildLabkey", group: "Docker", type: Exec, description: "Generates the LabKey docker image") {
-    workingDir "$projectDir/labkey"
-    executable "docker"
-    args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2"
+task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image") { Task t ->
+    doLast {
+        if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
+            t.project.exec {
+                workingDir "$projectDir/labkey"
+                executable "docker"
+                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2"
+            }
+        } else {
+            logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
+        }
+    }
 }
 
 task("buildMonit", group: "Docker", type: Exec, description: "Generates the Monit docker image") {

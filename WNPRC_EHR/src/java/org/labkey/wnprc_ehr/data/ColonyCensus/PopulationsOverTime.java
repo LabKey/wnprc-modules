@@ -10,7 +10,7 @@ import org.labkey.webutils.api.json.ConvertibleToJSON;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by jon on 1/17/16.
@@ -55,11 +55,9 @@ public class PopulationsOverTime implements ConvertibleToJSON {
     }
 
     public List<PopulationInstant> getPopulationsForTimePeriod() {
-        Map<LocalDate, PopulationInstant> dateMap = _colonyCensus.getPopulationOverTimeForSpecies(_species);
+        TreeMap<LocalDate, PopulationInstant> dateMap = _colonyCensus.getPopulationOverTimeForSpecies(_species);
 
         List<LocalDate> dates = new ArrayList<>(dateMap.keySet());
-        Collections.sort(dates);
-
         List<PopulationInstant> populationInstantsInRange = new ArrayList<>();
 
         Integer lastPopulationValue = 0;

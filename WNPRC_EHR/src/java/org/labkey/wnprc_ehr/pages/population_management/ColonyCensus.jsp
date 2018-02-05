@@ -23,9 +23,9 @@
         <span style="float: right">
             <span>Rhesus <span class="badge">{{population.rhesus}}</span></span>
             <strong> | </strong>
-            <span>Marmosets <span class="badge">{{population.marm}}</span></span>
+            <span>Marmoset <span class="badge">{{population.marmoset}}</span></span>
             <strong> | </strong>
-            <span>Cynos <span class="badge">{{population.cynos}}</span></span>
+            <span>Cynomolgus <span class="badge">{{population.cynomolgus}}</span></span>
         </span>
     </div>
 </div>
@@ -39,10 +39,10 @@
                 <a href="#rhesus-tab" role="tab" data-toggle="tab">Rhesus</a>
             </li>
             <li role="presentation">
-                <a href="#marm-tab"   role="tab" data-toggle="tab">Marmoset</a>
+                <a href="#marmoset-tab"   role="tab" data-toggle="tab">Marmoset</a>
             </li>
             <li role="presentation">
-                <a href="#cynos-tab"  role="tab" data-toggle="tab">Cynos</a>
+                <a href="#cynomolgus-tab"  role="tab" data-toggle="tab">Cynomolgus</a>
             </li>
         </ul>
 
@@ -50,10 +50,10 @@
             <div role="tabpanel" class="tab-pane active" id="rhesus-tab">
                 <species-tab params="species: 'Rhesus'"></species-tab>
             </div>
-            <div role="tabpanel" class="tab-pane" id="marm-tab">
+            <div role="tabpanel" class="tab-pane" id="marmoset-tab">
                 <species-tab params="species: 'Marmoset'"></species-tab>
             </div>
-            <div role="tabpanel" class="tab-pane" id="cynos-tab">
+            <div role="tabpanel" class="tab-pane" id="cynomolgus-tab">
                 <species-tab params="species: 'Cynomolgus'"></species-tab>
             </div>
         </div>
@@ -85,10 +85,10 @@
                 <a href="#rhesus-details-tab" role="tab" data-toggle="tab">Rhesus</a>
             </li>
             <li role="presentation">
-                <a href="#marm-details-tab"   role="tab" data-toggle="tab">Marmoset</a>
+                <a href="#marmoset-details-tab"   role="tab" data-toggle="tab">Marmoset</a>
             </li>
             <li role="presentation">
-                <a href="#cynos-details-tab"  role="tab" data-toggle="tab">Cynos</a>
+                <a href="#cynomolgus-details-tab"  role="tab" data-toggle="tab">Cynomolgus</a>
             </li>
         </ul>
 
@@ -98,10 +98,10 @@
             <div role="tabpanel" class="tab-pane active" id="rhesus-details-tab">
                 <species-details-tab params="species: 'Rhesus'"></species-details-tab>
             </div>
-            <div role="tabpanel" class="tab-pane" id="marm-details-tab">
+            <div role="tabpanel" class="tab-pane" id="marmoset-details-tab">
                 <species-details-tab params="species: 'Marmoset'"></species-details-tab>
             </div>
-            <div role="tabpanel" class="tab-pane" id="cynos-details-tab">
+            <div role="tabpanel" class="tab-pane" id="cynomolgus-details-tab">
                 <species-details-tab params="species: 'Cynomolgus'"></species-details-tab>
             </div>
         </div>
@@ -508,8 +508,8 @@
 
         WebUtils.VM.population = {
             rhesus: getPopulationObject('Rhesus').pops.pop(),
-            marm:   getPopulationObject('Marmoset').pops.pop(),
-            cynos:  getPopulationObject('Cynomolgus').pops.pop()
+            marmoset:   getPopulationObject('Marmoset').pops.pop(),
+            cynomolgus:  getPopulationObject('Cynomolgus').pops.pop()
         }
     })();
 </script>

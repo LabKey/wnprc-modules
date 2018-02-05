@@ -47,7 +47,7 @@
             <index type="unique">
                 <column>objectid</column>
             </index>
-            <index type="nonunique">
+            <index type="non-unique">
                 <column>taskid</column>
             </index>
         </indices>

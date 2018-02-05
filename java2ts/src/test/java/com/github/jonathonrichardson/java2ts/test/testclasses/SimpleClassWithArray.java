@@ -10,5 +10,5 @@ import java.util.List;
  */
 @SerializeToTS
 public class SimpleClassWithArray {
-    public List<String> texts = new ArrayList();
+    public List<String> texts = new ArrayList<>();
 }

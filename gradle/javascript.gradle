@@ -17,10 +17,13 @@ if (file("${project.projectDir}/src/java").exists())
 }
 
 if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) {
+    def cmd = "../node_modules/.bin/webpack"
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows'))
+        cmd += ".exe"
     task("webpack", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
         workingDir "$projectDir"
-        commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
+        commandLine cmd, "--env.BUILD_DIR=$buildDir"
 
         if (project.tasks.findByName('java2ts')) {
             dependsOn('java2ts')
@@ -29,10 +32,13 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
             project.tasks.module.dependsOn 'webpack'
     }
 } else if (file("$projectDir/tsconfig.json").exists()) {
+    def cmd = "../node_modules/.bin/tsc"
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows'))
+        cmd += ".exe"
     task("tsc", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the TypeScript for the module using the tsconfig.json') {
         workingDir "$projectDir"
-        commandLine "../node_modules/.bin/tsc", "--outDir", "$buildDir/explodedModule/web/${project.name.toLowerCase()}"
+        commandLine cmd, "--outDir", "$buildDir/explodedModule/web/${project.name.toLowerCase()}"
 
         if (project.tasks.findByName('java2ts')){
             dependsOn('java2ts')
@@ -46,9 +52,12 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
     task("lessc", group: 'JavaScript', dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the less styles for the module') { Task t ->
         doLast {
+            def cmd = "../node_modules/.bin/lessc"
+            if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows'))
+                cmd += ".exe"
             def stdout = new ByteArrayOutputStream()
             t.project.exec {
-                commandLine "../node_modules/.bin/lessc", "src/less/${project.name.toLowerCase()}.less"
+                commandLine cmd, "src/less/${project.name.toLowerCase()}.less"
                 standardOutput stdout
                 workingDir "$projectDir"
             }

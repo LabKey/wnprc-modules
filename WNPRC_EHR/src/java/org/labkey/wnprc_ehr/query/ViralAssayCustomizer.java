@@ -10,82 +10,25 @@ import org.labkey.api.data.TableCustomizer;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.laboratory.LaboratoryService;
 import org.labkey.api.ldk.LDKService;
-import org.labkey.api.ldk.table.ButtonConfigFactory;
-import org.labkey.api.query.UserSchema;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayProvider;
-
-import java.util.List;
 
 public class ViralAssayCustomizer implements TableCustomizer {
-
-    public void customize(TableInfo ti)
-    {
-        //apply defaults
+    public void customize(TableInfo ti) {
         TableCustomizer tc = LDKService.get().getBuiltInColumnsCustomizer(true);
         tc.customize(ti);
 
-        if (ti instanceof AbstractTableInfo)
-        {
-            AbstractTableInfo ati = (AbstractTableInfo)ti;
+        if (ti instanceof AbstractTableInfo) {
+            AbstractTableInfo ati = (AbstractTableInfo) ti;
             customizeAssayTable(ati);
         }
     }
 
-    public void customizeAssayTable(AbstractTableInfo ti)
-    {
-        customizeSharedColumns(ti);
-
-        if (ti.getName().equalsIgnoreCase("Run"))
-        {
-            customizeRunsTable(ti);
-        }
-        else if (ti.getName().equalsIgnoreCase("Batch"))
-        {
+    public void customizeAssayTable(AbstractTableInfo ti) {
+        if (ti.getName().equalsIgnoreCase("Batch")) {
             customizeBatchTable(ti);
         }
-        else if (ti.getName().equalsIgnoreCase("Data"))
-        {
+        else if (ti.getName().equalsIgnoreCase("Data")) {
             customizeDataTable(ti);
         }
-
-        LDKService.get().getColumnsOrderCustomizer().customize(ti);
-    }
-
-    public void customizeSharedColumns(AbstractTableInfo ti)
-    {
-        ColumnInfo hypothesis = ti.getColumn("hypothesis");
-        if (hypothesis != null)
-        {
-            hypothesis.setShownInInsertView(false);
-        }
-    }
-
-    private AssayProvider getAssayProvider(AbstractTableInfo ti)
-    {
-        if (ti.getUserSchema() instanceof AssayProtocolSchema)
-        {
-            AssayProtocolSchema schema = (AssayProtocolSchema)ti.getUserSchema();
-            return schema.getProvider();
-        }
-
-        return null;
-    }
-
-    private void customizeButtonBar(AbstractTableInfo ti, String domain)
-    {
-        UserSchema us = ti.getUserSchema();
-        if (us == null)
-            return;
-
-        AssayProvider ap = getAssayProvider(ti);
-        if (ap == null)
-            return;
-
-        String providerName = ap.getName();
-
-        List<ButtonConfigFactory> buttons = LaboratoryService.get().getAssayButtons(ti, providerName, domain);
-        LDKService.get().customizeButtonBar(ti, buttons);
     }
 
     public void customizeDataTable(AbstractTableInfo ti) {
@@ -129,24 +72,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
             requestId.setLabel("Request Id");
         }
 
-        ColumnInfo qcFlags = ti.getColumn("qcflags");
-        if (qcFlags != null)
-        {
-            qcFlags.setLabel("QC Flags");
-            qcFlags.setShownInInsertView(false);
-            qcFlags.setMeasure(false);
-            qcFlags.setDimension(false);
-        }
-
-        ColumnInfo statusFlags = ti.getColumn("statusflag");
-        if (statusFlags != null)
-        {
-            statusFlags.setLabel("Status Flag");
-            statusFlags.setShownInInsertView(false);
-            statusFlags.setMeasure(false);
-            statusFlags.setDimension(false);
-        }
-
         ColumnInfo sourceMaterialColumn = ti.getColumn("sourceMaterial");
         if (sourceMaterialColumn != null) {
             TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo();
@@ -161,13 +86,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
                 });
             }
         }
-
-        customizeButtonBar(ti, AssayProtocolSchema.DATA_TABLE_NAME);
-    }
-
-    public void customizeRunsTable(AbstractTableInfo ti)
-    {
-        customizeButtonBar(ti, AssayProtocolSchema.RUNS_TABLE_NAME);
     }
 
     public void customizeBatchTable(AbstractTableInfo ti) {
@@ -188,8 +106,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
             importMethod.setLabel("Import Method");
             importMethod.setDescription("The import method, which usually corresponds to the format of the data.  Most commonly, this corresponds to a particular instrument's output.");
         }
-
-        customizeButtonBar(ti, AssayProtocolSchema.BATCHES_TABLE_NAME);
     }
 
     public static class ViralLoadUnitsColumn extends DataColumn {

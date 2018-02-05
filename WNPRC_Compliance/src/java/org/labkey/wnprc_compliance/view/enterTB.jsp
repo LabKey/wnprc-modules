@@ -133,6 +133,11 @@
                                                 This person is an employee
                                             </label>
                                         </div>
+                                        <div class="form-group col-sm-4">
+                                            <label class="col-sm-5 control-label">DOB </label>
+                                                <input type="text" class="form-control" data-bind="dateTimePicker: dateOfBirth, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
+                                            </label>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
@@ -350,6 +355,7 @@
             firstName:  ko.observable(''),
             middleName: ko.observable(''),
             lastName:   ko.observable(''),
+            dateOfBirth: ko.observable(''),
             notes:      ko.observable(''),
             isEmployee: ko.observable(false),
             userMatches: ko.observableArray([]),
@@ -449,6 +455,7 @@
             VM.newUserForm.firstName('');
             VM.newUserForm.middleName('');
             VM.newUserForm.lastName('');
+            VM.newUserForm.dateOfBirth('');
             VM.newUserForm.notes('');
             VM.newUserForm.isEmployee(false);
             VM.newUserForm.userMatches([]);
@@ -475,6 +482,7 @@
                     firstName:   form.firstName,
                     middleName:  form.middleName,
                     lastName:    form.lastName,
+                    dateOfBirth: form.dateOfBirth,
                     description: form.notes,
                     cardNumbers: _.map(form.selectedCards, function(card) { return card.id }),
                     userIds:     _.map(form.selectedUsers, function(user) { return user.id })

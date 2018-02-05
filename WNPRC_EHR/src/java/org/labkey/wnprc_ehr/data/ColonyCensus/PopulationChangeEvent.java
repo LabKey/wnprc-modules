@@ -88,7 +88,7 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
                 case "death":     eventType = EventType.Death;     break;
                 case "departure": eventType = EventType.Departure; break;
                 default:
-                    throw new Exception("ParseError");
+                    throw new IllegalArgumentException(eventTypeString + " is not a valid event type.");
             }
 
             Species species;
@@ -97,10 +97,8 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
                 case "rhesus":     species = Species.Rhesus;     break;
                 case "marmoset":   species = Species.Marmoset;   break;
                 default:
-                    throw new Exception("ParseError");
+                    throw new IllegalArgumentException(speciesString + " is not a valid species.");
             }
-
-            DateTime dateTime = new DateTime(date);
 
             return new PopulationChangeEvent(Id, new DateTime(date), new DateTime(timestamp), eventType, species, description);
         }

@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Created by jon on 1/17/16.
@@ -130,7 +131,7 @@ public class ColonyCensus {
         return eventsInRange;
     }
 
-    public Map<LocalDate, PopulationInstant> getPopulationOverTimeForSpecies(PopulationChangeEvent.Species species) {
+    public TreeMap<LocalDate, PopulationInstant> getPopulationOverTimeForSpecies(PopulationChangeEvent.Species species) {
         Map<LocalDate, Integer> deltasPerDate = new HashMap<>();
         Integer animalsAtStart = 0;
 
@@ -168,7 +169,7 @@ public class ColonyCensus {
         }
 
         Integer rollingTotal = animalsAtStart;
-        Map<LocalDate, PopulationInstant> populationPerDate = new HashMap<>();
+        TreeMap<LocalDate, PopulationInstant> populationPerDate = new TreeMap<>();
         List<LocalDate> datesInOrder = new ArrayList<>(deltasPerDate.keySet());
         Collections.sort(datesInOrder);
         for(LocalDate date: datesInOrder) {
@@ -180,10 +181,10 @@ public class ColonyCensus {
     }
 
     public Map<LocalDate, PopulationInstant> getPopulationPerMonthForSpecies(PopulationChangeEvent.Species species) {
-        Map<LocalDate, PopulationInstant> populationPerDay = getPopulationOverTimeForSpecies(species);
+        TreeMap<LocalDate, PopulationInstant> populationPerDay = getPopulationOverTimeForSpecies(species);
         Map<LocalDate, PopulationInstant> populationPerMonth = new HashMap<>();
 
-        for( LocalDate date : populationPerDay.keySet() ) {
+        for( LocalDate date : populationPerDay.descendingKeySet()) {
             // Map each date to the last of the month.
             LocalDate monthOnly = new LocalDate(date.getYear(), date.getMonthOfYear(), date.dayOfMonth().getMaximumValue());
 
@@ -193,10 +194,6 @@ public class ColonyCensus {
             if (populationForMonth == null) {
                 populationForMonth = new PopulationInstant(monthOnly, populationPerDay.get(date).getPopulation());
                 populationPerMonth.put(monthOnly, populationForMonth);
-            }
-            // Otherwise, if this population date is closer to the end of the month, use it instead.
-            else if ( populationForMonth.getDate().compareTo(date) < 1 ) {
-                populationPerMonth.put(monthOnly, populationPerDay.get(date) );
             }
         }
 

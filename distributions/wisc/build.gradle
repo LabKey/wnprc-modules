@@ -13,11 +13,16 @@ BuildUtils.addModuleDistributionDependencies(project, [
         ,":externalModules:labModules:LDK"
         ,":externalModules:labModules:SequenceAnalysis"
         ,":externalModules:labModules:Viral_Load_Assay"
-        ,":externalModules:wnprc-modules:WNPRC_EHR"
         ,":server:customModules:ehr"
         ,":server:customModules:EHR_ComplianceDB"
         ,":server:customModules:genotyping"
 ])
+
+BuildUtils.addModuleDistributionDependencies(project, file("../../").listFiles().findAll { d ->
+    d.isDirectory() && (d.getName() != 'docker') && (d.getName() != 'java2ts') && (new File(d.getAbsolutePath(), 'build.gradle')).exists()
+}.collect { d ->
+    ":externalModules:wnprc-modules:${d.getName()}"
+})
 
 project.task("distribution", group: GroupNames.DISTRIBUTION, type: ModuleDistribution) { ModuleDistribution dist ->
     dist.subDirName='wisc'

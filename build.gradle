@@ -9,13 +9,14 @@
  *     -> externalModules
  *       -> wnprc-modules (this folder)
  *         -> docker
- *         -> lib
+ *         -> gradle
+ *         -> java2ts
  *         -> [module]
  *         -> [module]
  *         ...
  *
- * To include all the subprojects (including docker, which does get some special treatment later), add the following to
- * the top-level (LabKey root) settings.gradle file or to a "module set" in [labkey root]/gradle/settings:
+ * To include all the subprojects (including docker and java2ts, which get some special treatment later), add the
+ * following to the top-level (LabKey root) settings.gradle file or to a "module set" in [labkey root]/gradle/settings:
  *
  *   include 'externalModules:wnprc-modules'
  *   file('externalModules/wnprc-modules').listFiles().findAll { d ->
@@ -27,16 +28,29 @@
  * In case it is not immediately obvious, that code will add every subfolder containing a build.gradle file as a
  * subproject to the gradle build under the ":externalModules:wnprc-modules" project.
  *
- * Each module subproject (i.e., not docker) will automatically get the 'java' plugin (and corresponding sourceSets)
- * and a few module-specific tasks:
+ * Each module subproject (i.e., not docker or java2ts) will get a few module-specific tasks, largely modelled off the
+ * LabKey gradle plugin:
  *
+ *   - cleanModule
+ *   - copyModuleResources
  *   - createModuleXml
  *   - createModule
  *   - deployModule
  *   - undeployModule
  *
+ * The subprojects will also selectively gain some Java- and/or JavaScript-related, depending on the files that exist
+ * within the folder. These tasks are defined in the files in the ./gradle directory and are generally applied in the
+ * following way:
+ *
+ *   - api:         Added to modules with a ./api-src directory. Applies the "java-base" plugin and creates a source set
+ *                      called "api".
+ *   - java:        Added to modules with a ./src/java directory. Applies the "java" plugin and configured it.
+ *   - javascript:  Selectively adds tasks based on ./webpack.config.[jt]s, ./tsconfig.json, and/or ./src/less/**.
+ *   - jsp:         Added to modules with a ./src/java directory. Configures source sets for JSP compilation.
+ *
  * The "main" wnprc-modules build also has some tasks to manage all the modules:
  *
+ *   - cleanModules
  *   - createModules
  *   - deployModules
  *   - undeployModules
@@ -75,11 +89,11 @@ configure(modules) {
     apply from: "${wnprcDir}/gradle/javascript.gradle"
 }
 
+task ("cleanModules",    group: "Build",  dependsOn: modules.collect { "${it.path}:cleanModule" },
+        description: "Cleans/unstages all child modules")
 task ("createModules",   group: "Build",  dependsOn: modules.collect { "${it.path}:module" },
         description: "Builds and jars the .module file for each subproject")
 task ("deployModules",   group: "Deploy", dependsOn: modules.collect { "${it.path}:deployModule" },
         description: "Deploys all child modules")
 task ("undeployModules", group: "Deploy", dependsOn: modules.collect { "${it.path}:undeployModule" },
         description: "Undeploys all child modules")
-task ("cleanModules",    group: "Build",  dependsOn: modules.collect { "${it.path}:cleanModule" },
-        description: "Cleans/unstages all child modules")

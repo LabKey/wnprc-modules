@@ -1,0 +1,39 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Viral_Load_Summary" tableDbType="TABLE">
+                <tableTitle>Viral Load Summary</tableTitle>
+                <columns>
+                    <column columnName="qcflags">
+                        <columnTitle>QC Flags</columnTitle>
+                    </column>
+                    <column columnName="viralLoad">
+                        <columnTitle>Mean Viral Load</columnTitle>
+                        <formatString>0.#E00</formatString>
+                    </column>
+                    <column columnName="stdDeviation">
+                        <formatString>0.#E00</formatString>
+                    </column>
+                    <column columnName="lowestWell">
+                        <columnTitle>Lowest Well For This Group</columnTitle>
+                    </column>
+                    <column columnName="well96" wrappedColumnName="lowestWell">
+                        <isUnselectable>true</isUnselectable>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <columnTitle>Well Position in 96-well Plate</columnTitle>
+                        <fk>
+                            <fkDbSchema>laboratory</fkDbSchema>
+                            <fkTable>96well_plate</fkTable>
+                            <fkColumnName>well</fkColumnName>
+                            <fkDisplayColumnName>well</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="folder">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

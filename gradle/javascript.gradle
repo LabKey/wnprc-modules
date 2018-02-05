@@ -1,54 +1,55 @@
+apply plugin: 'com.moowork.node'
+
 if (file("${project.projectDir}/src/java").exists())
 {
-    task("java2ts", group: 'JavaScript', type: JavaExec,
+    task('java2ts', group: 'JavaScript', type: JavaExec,
             description: 'Generates TypeScript files for certain annotated classes in the Java source') {
-
         doFirst {
             mkdir "$projectDir/build/generated-ts"
         }
-
         main = 'com.github.jonathonrichardson.java2ts.Compiler'
         classpath = sourceSets.main.runtimeClasspath
         args = ["$projectDir/build/generated-ts/GeneratedFromJava.ts"]
-
         inputs.dir("$projectDir/src/java")
         outputs.dir("$projectDir/build/generated-ts")
     }
 }
 
-if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) {
-    task("webpack", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
+if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) 
+{
+    task('webpack', group: 'JavaScript', type: NodeTask, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
         workingDir "$projectDir"
-        commandLine "../node_modules/.bin/webpack", "--env.BUILD_DIR=$buildDir"
-
-        if (project.tasks.findByName('java2ts')) {
+        script = file('../node_modules/webpack/bin/webpack.js')
+        args   = ['--env.BUILD_DIR', "$buildDir"]
+        if (project.tasks.findByName('java2ts'))
             dependsOn('java2ts')
-        }
-        if (project.tasks.findByName("module") != null)
-            project.tasks.module.dependsOn 'webpack'
     }
-} else if (file("$projectDir/tsconfig.json").exists()) {
-    task("tsc", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
+    if (project.tasks.findByName('module') != null)
+        project.tasks.module.dependsOn 'webpack'
+} 
+else if (file("$projectDir/tsconfig.json").exists()) 
+{
+    task('tsc', group: 'JavaScript', NodeTask: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the TypeScript for the module using the tsconfig.json') {
         workingDir "$projectDir"
-        commandLine "../node_modules/.bin/tsc", "--outDir", "$buildDir/explodedModule/web/${project.name.toLowerCase()}"
-
-        if (project.tasks.findByName('java2ts')){
+        script = file('../node_modules/typescript/bin/tsc')
+        args   = ['--outDir', "$buildDir/explodedModule/web/${project.name.toLowerCase()}"]
+        if (project.tasks.findByName('java2ts'))
             dependsOn('java2ts')
-        }
     }
-    if (project.tasks.findByName("module") != null)
+    if (project.tasks.findByName('module') != null)
         project.tasks.module.dependsOn 'tsc'
 }
 
-if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
-    task("lessc", group: 'JavaScript', dependsOn: ["${project.parent.path}:npmInstall"],
+if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) 
+{
+    task('lessc', group: 'JavaScript', dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the less styles for the module') { Task t ->
         doLast {
             def stdout = new ByteArrayOutputStream()
             t.project.exec {
-                commandLine "../node_modules/.bin/lessc", "src/less/${project.name.toLowerCase()}.less"
+                commandLine 'node', '../node_modules/less/bin/lessc', "src/less/${project.name.toLowerCase()}.less"
                 standardOutput stdout
                 workingDir "$projectDir"
             }
@@ -57,11 +58,10 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
             // the file - clay, 13 Nov 2017
             def output = file("$buildDir/explodedModule/web/${project.name.toLowerCase()}/css/${project.name.toLowerCase()}.css")
             output.getParentFile().mkdirs()
-
             def reader = new InputStreamReader(new ByteArrayInputStream(stdout.toByteArray()))
             def writer = new BufferedWriter(new FileWriter(output))
             reader.readLines().each {
-                writer.write(it.replaceAll("(#\\S+ )+", "\$1"))
+                writer.write(it.replaceAll('(#\\S+ )+', '\$1'))
                 writer.newLine()
             }
             stdout.close()
@@ -70,20 +70,18 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
         }
     }
 
-    task("fonts", group: 'JavaScript', type: Copy, dependsOn: [ "${project.parent.path}:npmInstall" ],
+    task('fonts', group: 'JavaScript', type: Copy, dependsOn: [ "${project.parent.path}:npmInstall" ],
             description: 'Copies all the fonts for the module') {
         from("${project.parent.projectDir}/node_modules") {
             include '*/fonts/*'
         }
         into "$buildDir/explodedModule/web/${project.name.toLowerCase()}/fonts"
-
         // flatten the hierarchy so that the files go directly
         // in fonts/ instead of (e.g.) fonts/bootstrap/fonts/
         eachFile { path = name }
         includeEmptyDirs = false
     }
-
-    if (project.tasks.findByName("module") != null)
+    if (project.tasks.findByName('module') != null)
         project.tasks.module.dependsOn 'fonts', 'lessc'
 }
 

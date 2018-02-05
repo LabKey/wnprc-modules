@@ -35,6 +35,7 @@ public class PersonService {
         newPerson.put("first_name", form.firstName);
         newPerson.put("middle_name", form.middleName);
         newPerson.put("last_name", form.lastName);
+        newPerson.put("date_of_birth", form.dateOfBirth);
         newPerson.put("notes", form.description);
         newPerson.put("container", container.getId());
 

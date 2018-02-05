@@ -19,6 +19,7 @@
                             <fkTable>nucleic_acid</fkTable>
                             <fkColumnName>type</fkColumnName>
                         </fk>
+                        <defaultValue>Plasma</defaultValue>
                         <measure>false</measure>
                         <dimension>true</dimension>
                     </column>
@@ -56,8 +57,8 @@
                         <dimension>true</dimension>
                     </column>
                     <column columnName="sampleVol">
-                        <columnTitle>Volume of NA (ul)</columnTitle>
-                        <description>This is the input volume of the nucleic acid</description>
+                        <columnTitle>Source Material Size (ml or mg)</columnTitle>
+                        <description>This is the volume or mass of the source material</description>
                         <measure>false</measure>
                         <dimension>false</dimension>
                     </column>
@@ -124,9 +125,9 @@
                     <column columnName="comment">
                         <columnTitle>Comment</columnTitle>
                     </column>
-                    <column columnName="plasmaVol">
-                        <columnTitle>Source Material Size (ml or mg)</columnTitle>
-                        <description>This is the volume or mass of the source material</description>
+                    <column columnName="nucleicAcidVol">
+                        <columnTitle>Volume of NA (ul)</columnTitle>
+                        <description>This is the input volume of the nucleic acid</description>
                         <measure>false</measure>
                         <dimension>false</dimension>
                     </column>

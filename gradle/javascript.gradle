@@ -19,7 +19,7 @@ if (file("${project.projectDir}/src/java").exists())
 if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.config.ts").exists()) {
     def cmd = "../node_modules/.bin/webpack"
     if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows'))
-        cmd += ".exe"
+        cmd += ".cmd"
     task("webpack", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
         workingDir "$projectDir"
@@ -34,7 +34,7 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
 } else if (file("$projectDir/tsconfig.json").exists()) {
     def cmd = "../node_modules/.bin/tsc"
     if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows'))
-        cmd += ".exe"
+        cmd += ".cmd"
     task("tsc", group: 'JavaScript', type: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the TypeScript for the module using the tsconfig.json') {
         workingDir "$projectDir"
@@ -54,7 +54,7 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) {
         doLast {
             def cmd = "../node_modules/.bin/lessc"
             if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows'))
-                cmd += ".exe"
+                cmd += ".cmd"
             def stdout = new ByteArrayOutputStream()
             t.project.exec {
                 commandLine cmd, "src/less/${project.name.toLowerCase()}.less"

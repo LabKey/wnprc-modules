@@ -6,7 +6,7 @@ sourceSets {
         output.classesDir = "${project.buildDir}/api-classes"
     }
     main {
-        java { srcDirs = ['src/java'] }
+        java { srcDirs = ['src/java', 'src/test'] }
     }
 }
 
@@ -30,8 +30,16 @@ dependencies {
     apiCompile project(":externalModules:wnprc-modules:java2ts")
 
     compile 'org.jetbrains:annotations:15.0'
+    compile "junit:junit:${junitVersion}"
     compile project(":server:api")
     compile project(":server:internal")
     compile project(":externalModules:labModules:LDK")
     compile project(":externalModules:wnprc-modules:java2ts")
 }
+
+tasks.jar {
+    manifest {
+        attributes 'Sealed': 'true'
+    }
+}
+

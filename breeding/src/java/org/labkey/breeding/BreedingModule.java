@@ -2,6 +2,8 @@ package org.labkey.breeding;
 
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlException;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.labkey.api.admin.ImportException;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -19,6 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Module class for the WNPRC breeding/pregnancy tracking module.
@@ -50,6 +55,22 @@ public final class BreedingModule extends ExtendedSimpleModule
             LOG.error("failed during import of breeding dataset metadata", e);
         }
         super.beforeUpdate(moduleContext);
+    }
+
+    @Override
+    public @NotNull Set<Class> getIntegrationTests()
+    {
+        return new Reflections("org.labkey.breeding").getSubTypesOf(Assert.class).stream()
+                .filter(c -> c.getSimpleName().endsWith("IntegrationTest"))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public @NotNull Set<Class> getUnitTests()
+    {
+        return new Reflections("org.labkey.breeding").getSubTypesOf(Assert.class).stream()
+                .filter(c -> c.getSimpleName().endsWith("UnitTest"))
+                .collect(Collectors.toSet());
     }
 
     @Override

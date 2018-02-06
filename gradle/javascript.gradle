@@ -46,6 +46,7 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists())
 {
     task('lessc', group: 'JavaScript', dependsOn: ["${project.parent.path}:npmInstall"],
             description: 'Compiles the less styles for the module') { Task t ->
+        def moduleName = project.name.toLowerCase()
         doLast {
             def stdout = new ByteArrayOutputStream()
             t.project.exec {
@@ -56,7 +57,7 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists())
             // we can't have duplicate id selectors (i.e., "#bootstrap-box #bootstrap-box"), but less
             // sometimes creates them. this task will remove them from the input before writing it to
             // the file - clay, 13 Nov 2017
-            def output = file("$buildDir/explodedModule/web/${project.name.toLowerCase()}/css/${project.name.toLowerCase()}.css")
+            def output = file("$buildDir/explodedModule/web/${moduleName}/css/${moduleName}.css")
             output.getParentFile().mkdirs()
             def reader = new InputStreamReader(new ByteArrayInputStream(stdout.toByteArray()))
             def writer = new BufferedWriter(new FileWriter(output))

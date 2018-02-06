@@ -16,7 +16,6 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -1214,9 +1213,9 @@ public class WNPRC_EHRController extends SpringActionController
             Map<String, String[]> params = oldUrl.getParameterMap();
             // just to be safe, make sure we're reading the form type regardless of the capitalization
             // (it _should_ be all lowercase, but we should check anyway)
-            String formType = MoreObjects.firstNonNull(
-                    oldUrl.getParameter(LOWERCASE_FORMTYPE),
-                    oldUrl.getParameter(CAMELCASE_FORMTYPE));
+            String formType = oldUrl.getParameter(LOWERCASE_FORMTYPE);
+            if (formType == null)
+                formType = oldUrl.getParameter(CAMELCASE_FORMTYPE);
             switch (formType)
             {
                 // this is the list of things that need redirected to the dataEntryForm.view in the EHR

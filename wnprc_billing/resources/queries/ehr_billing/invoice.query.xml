@@ -1,0 +1,36 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="invoice" tableDbType="TABLE">
+                <tableTitle>Invoice</tableTitle>
+                <columns>
+                    <column columnName="rowId"/>
+                    <column columnName="invoiceNumber"/>
+                    <column columnName="invoiceRunId">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>invoiceRuns</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="accountNumber">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="invoiceSentOn"/>
+                    <column columnName="invoiceAmount">
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                    <column columnName="invoiceSentComment"/>
+                    <column columnName="paymentAmountReceived"/>
+                    <column columnName="fullPaymentReceived"/>
+                    <column columnName="paymentReceivedOn"/>
+                    <column columnName="paymentReceivedComment"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

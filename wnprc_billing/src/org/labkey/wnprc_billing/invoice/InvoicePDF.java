@@ -1,4 +1,4 @@
-package org.labkey.ehr.pdf;
+package org.labkey.wnprc_billing.invoice;
 
 import com.koadweb.javafpdf.Alignment;
 import com.koadweb.javafpdf.Borders;

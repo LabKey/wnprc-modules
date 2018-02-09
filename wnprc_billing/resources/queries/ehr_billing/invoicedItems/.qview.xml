@@ -7,6 +7,11 @@
         <column name="unitCost"/>
         <column name="totalcost"/>
         <column name="item"/>
+        <column name="chargeId/departmentCode">
+            <properties>
+                <property name="columnTitle" value="Group Name"/>
+            </properties>
+        </column>
         <column name="category"/>
         <column name="comment">
             <properties>

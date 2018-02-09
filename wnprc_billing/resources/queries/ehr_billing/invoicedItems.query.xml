@@ -26,6 +26,14 @@
                     <column columnName="po_amount">
                         <formatString>$###,##0.00</formatString>
                     </column>
+                    <column columnName="chargeId">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeableItems</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>rowid</fkDisplayColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

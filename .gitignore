@@ -5,4 +5,4 @@ docker/.env
 **/node_modules/
 **/build/
 
-**/resources/credits
+**/resources/credits/dependencies.txt

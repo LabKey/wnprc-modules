@@ -20,6 +20,7 @@
                         <fkDbSchema>wnprc_billing</fkDbSchema>
                         <fkTable>tierRates</fkTable>
                         <fkColumnName>tierRateType</fkColumnName>
+                        <fkDisplayColumnName>tierRate</fkDisplayColumnName>
                     </fk>
                 </column>
                 <column columnName="type"/>

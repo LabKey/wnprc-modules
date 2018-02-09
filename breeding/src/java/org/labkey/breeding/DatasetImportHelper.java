@@ -39,8 +39,8 @@ final class DatasetImportHelper
     static void importDatasetMetadata(@NotNull User user, @NotNull Container container, @NotNull File studyXmlFile)
             throws IOException, SQLException, DatasetImportUtils.DatasetLockExistsException, XmlException, ImportException
     {
-        assert container.hasActiveModuleByName("study");
-        assert studyXmlFile.exists();
+        assert container.hasActiveModuleByName("study") : "Study module is not active in the container.";
+        assert studyXmlFile.exists() : "Study reference data XML file does not exist: " + studyXmlFile.getAbsolutePath();
 
         LOG.debug(String.format("[import] loading dataset metadata... [from=%s,to=%s]",
                 studyXmlFile.getAbsolutePath(), container.getName()));

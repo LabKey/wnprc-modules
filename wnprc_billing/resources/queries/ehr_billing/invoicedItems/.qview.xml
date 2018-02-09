@@ -7,6 +7,7 @@
         <column name="unitCost"/>
         <column name="totalcost"/>
         <column name="item"/>
+        <column name="chargeId/serviceCode"/>
         <column name="chargeId/departmentCode">
             <properties>
                 <property name="columnTitle" value="Group Name"/>

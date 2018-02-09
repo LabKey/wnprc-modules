@@ -1,0 +1,89 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="foodDeprives" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=foodDeprives&amp;lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                  <column columnName="reason">
+                    <columnTitle>Reason for Deprive</columnTitle>
+                    <description>Reason for Food deprive</description>
+                      <displayWidth>200</displayWidth>
+                  </column>
+                    <column columnName="assignedTo">
+                        <columnTitle>Assigned To</columnTitle>
+                        <description>Assigned To</description>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_assigned</fkTable>
+                            <fkColumnName>title</fkColumnName>
+                        </fk>
+                    </column>
+                  <column columnName="date">
+                    <formatString>yyyy-MM-dd</formatString>
+                    <columnTitle>Date</columnTitle>
+                    <nullable>false</nullable>
+                    <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                  </column>
+                <column columnName="schedule">
+                    <columnTitle>Start Time Range</columnTitle>
+                    <description>Time range to start food deprives</description>
+                    <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>schedule_deprive</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                        <fkDisplayColumnName>title</fkDisplayColumnName>
+
+                    </fk>
+                </column>
+                <column columnName="depriveStartTime">
+                    <formatString>yyyy-MM-dd HH:mm</formatString>
+                    <columnTitle>Deprive Start Time</columnTitle>
+                    <nullable>true</nullable>
+                    <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                </column>
+                <column columnName="restoredTime">
+                    <formatString>yyyy-MM-dd HH:mm</formatString>
+                    <columnTitle>Restored Time</columnTitle>
+                    <nullable>true</nullable>
+                    <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                </column>
+
+                  <column columnName="account">
+                    <!--<nullable>false</nullable>-->
+                      <isHidden>true</isHidden>
+                    <columnTitle>Account</columnTitle>
+                    <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+                  </column>
+                    <column columnName="Status">
+
+                    </column>
+                    <column columnName="protocolContact">
+                        <columnTitle>Protocol Contact</columnTitle>
+                      <!--  <displayColumnFactory>
+                            <className>org.labkey.api.data.JavaScriptDisplayColumnFactory</className>
+                            &lt;!&ndash;<properties>
+                                <property name="dependency">ehr/window/ManageRecordWindow.js</property>
+                                <property name="javaScriptEvents">onclick="EHR.window.ManageRecordWindow.buttonHandler(${Id:jsString}, ${objectid:jsString}, ${queryName:jsString}, '${dataRegionName}');"</property>
+                            </properties>&ndash;&gt;
+                        </displayColumnFactory>-->
+                        <nullable>true</nullable>
+                        <!--<fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>PrincipalsWithoutAdmin</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>-->
+                    </column>
+                    <column columnName="remarks">
+                        <columnTitle>Remarks</columnTitle>
+                    </column>
+                </columns>
+                <tableTitle>Food Deprives</tableTitle>
+                <description>Food Deprives Data</description>
+            </table>
+        </tables>
+    </metadata>
+</query>

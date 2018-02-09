@@ -8,6 +8,7 @@ import org.labkey.api.ehr.dataentry.TaskFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
+import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.FormSections.TreatmentOrdersSection;
 
 import java.util.Arrays;
 
@@ -17,7 +18,8 @@ public class TreatmentOrdersForm extends TaskForm {
     public TreatmentOrdersForm(DataEntryFormContext ctx, Module owner) {
         super(ctx, owner, NAME, "Enter Treatment Orders", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
                 new TaskFormSection(),
-                new AnimalDetailsFormSection()
+                new AnimalDetailsFormSection(),
+                new TreatmentOrdersSection()
         ));
 
         for(FormSection section: this.getFormSections()) {

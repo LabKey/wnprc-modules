@@ -19,6 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.ehr.buttons.ChangeQCStateButton;
+import org.labkey.api.ehr.buttons.CreateTaskFromIdsButton;
+import org.labkey.api.ehr.buttons.CreateTaskFromRecordsButton;
 import org.labkey.api.ehr.buttons.MarkCompletedButton;
 import org.labkey.api.ehr.dataentry.DefaultDataEntryFormFactory;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
@@ -38,8 +41,11 @@ import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
+import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDeprivesStartForm;
+import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprivesRequest.FoodDeprivesRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
 import org.labkey.wnprc_ehr.demographics.MedicalFieldDemographicsProvider;
 import org.labkey.wnprc_ehr.demographics.MostRecentObsDemographicsProvider;
@@ -166,6 +172,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "Tasks_DataEntry");
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "my_tasks");
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
+        EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "blood");
+        EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "foodDeprives");
+        EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Food Deprives", FoodDeprivesStartForm.NAME), "study", "foodDeprives");
+        EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Blood Draws", BloodDrawsForm.NAME), "study", "blood");
+        EHRService.get().registerMoreActionsButton(new CreateTaskFromIdsButton(this, "Schedule Blood Draw For Selected", "Blood Draws", BloodDrawsForm.NAME, new String[]{"Blood Draws"}), "study", "demographics");
 
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
@@ -300,6 +311,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 WeightForm.class,
                 VVCRequestForm.class,
                 VVCForm.class,
+                WeightForm.class,
+                FoodDeprivesStartForm.class,
+                FoodDepriveCompleteForm.class,
+                FoodDeprivesRequestForm.class,
                 ProtocolForm.class
         );
 

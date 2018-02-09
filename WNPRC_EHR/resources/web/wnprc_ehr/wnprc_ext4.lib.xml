@@ -16,5 +16,12 @@
     <dependencies>
         <dependency path="/wnprc_ehr/wnprc_ext4_core"/>
         <dependency path="/webutils/lib/webutils"/>
+        <!--<dependency path="LDK.context"/>-->
+
+        <!--These are Ext4-->
+        <dependency path="ux/BoxSelect/BoxSelect.css"/>
+        <dependency path="ux/BoxSelect/BoxSelect.js"/>
+        
+
     </dependencies>
 </libraries>

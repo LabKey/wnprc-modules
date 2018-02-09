@@ -16,28 +16,22 @@ To build the WNPRC EHR modules for development:
           ```bash
           git clone https://github.com/WNPRC-EHR-Services/wnprc-modules.git externalModules/wnprc-modules
           ```
-      1. Add the following to **settings.gradle**, somewhere around line 70:
+      1. Add the following to **~/.gradle/gradle.properties**:
           ```gradle
-          BuildUtils.includeModules(this.settings, [
-                   ":externalModules:labModules:laboratory"
-                  ,":externalModules:labModules:LDK"
-                  ,":externalModules:labModules:Viral_Load_Assay"
-                  ,":server:customModules:ehr"
-                  ,":server:customModules:EHR_ComplianceDB"
-          ])
-          
-          include 'externalModules:wnprc-modules'
-          file('externalModules/wnprc-modules').listFiles().findAll { d ->
-              d.isDirectory() && (new File(d.getAbsolutePath(), 'build.gradle')).exists()
-          }.each { d ->
-              include "externalModules:wnprc-modules:${d.getName()}"
-          }
-          ```
-      1. Build LabKey proper, with the lab modules included:
+          moduleSet=../../externalModules/wnprc-modules/gradle/settings/wnprc
+      1. Build LabKey, which includes all of our modules, too:
           ```bash
           ./gradlew deployApp
           ```
-      1. Build our modules:
-          ```bash
-          ./gradlew :externalModules:wnprc-modules:deployModules
-          ```
+From there, all standard Gradle rules apply; you can build individual modules or even individual steps. For example:
+```bash
+# deploy our modules only
+./gradlew :externalModules:wnprc-modules:deployModules
+
+# build just the WNPRC_EHR module
+./gradlew :ext:wnp:WNPRC_EHR:build
+
+# re-run webpack for the breeding module
+./gradlew :ext:wnp:bre:webpack
+
+```

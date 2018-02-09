@@ -3,6 +3,7 @@ SELECT
   inv.invoiceRunId.rowId AS invoiceRunId,
   inv.invoiceRunId.billingPeriodStart,
   inv.invoiceRunId.billingPeriodEnd,
+  inv.invoiceRunId.runDate AS BillingRunDate,
   inv.accountNumber,
   inv.accountNumber.type,
   inv.accountNumber.po_number,
@@ -13,3 +14,4 @@ FROM ehr_billing.invoice inv
 RIGHT JOIN ehr_billing.invoiceRuns ir
 ON inv.invoiceRunId = ir.objectid
 WHERE ir.rowid = (SELECT max(x.rowId) FROM ehr_billing.invoiceRuns x)
+AND inv.accountNumber.type LIKE '%external%'

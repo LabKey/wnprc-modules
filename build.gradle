@@ -81,8 +81,9 @@ configure(modules) {
     idea.module { excludeDirs += file('build') }
 
     if (file("${project.projectDir}/src").exists()) {
-        apply from: "${wnprcDir}/gradle/java.gradle"
+        apply plugin: 'java'
         apply plugin: 'org.labkey.module'
+        apply from: "${wnprcDir}/gradle/java.gradle"
     } else {
         apply plugin: 'org.labkey.fileModule'
     }

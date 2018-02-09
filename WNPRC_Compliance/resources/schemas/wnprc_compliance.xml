@@ -1,3 +1,168 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-</ns:tables>
+<tables xmlns="http://labkey.org/data/xml">
+  <table tableName="tb_clearances" tableDbType="TABLE">
+    <columns>
+      <column columnName="id"/>
+      <column columnName="date"/>
+      <column columnName="comment"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="cards" tableDbType="TABLE">
+    <columns>
+      <column columnName="card_id"/>
+      <column columnName="exempt"/>
+      <column columnName="exempt_reason"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="persons_pending_tb_clearances" tableDbType="TABLE">
+    <columns>
+      <column columnName="person_id"/>
+      <column columnName="clearance_id"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="access_reports" tableDbType="TABLE">
+    <columns>
+      <column columnName="report_id"/>
+      <column columnName="date"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="persons_to_cards" tableDbType="TABLE">
+    <columns>
+      <column columnName="personid"/>
+      <column columnName="cardid"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="persons_to_users" tableDbType="TABLE">
+    <columns>
+      <column columnName="personid"/>
+      <column columnName="userid"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="persons_tb_clearances" tableDbType="TABLE">
+    <columns>
+      <column columnName="person_id"/>
+      <column columnName="clearance_id"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="pending_tb_clearances" tableDbType="TABLE">
+    <columns>
+      <column columnName="id"/>
+      <column columnName="date"/>
+      <column columnName="comment"/>
+      <column columnName="tbclearance_id"/>
+      <column columnName="archived"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="persons" tableDbType="TABLE">
+    <columns>
+      <column columnName="personid"/>
+      <column columnName="first_name"/>
+      <column columnName="middle_name"/>
+      <column columnName="last_name"/>
+      <column columnName="notes"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+      <column columnName="archived_for_access_purposes"/>
+      <column columnName="date_of_birth"/>
+    </columns>
+  </table>
+  <table tableName="measles_clearances" tableDbType="TABLE">
+    <columns>
+      <column columnName="id"/>
+      <column columnName="date"/>
+      <column columnName="comment"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="persons_measles_clearances" tableDbType="TABLE">
+    <columns>
+      <column columnName="person_id"/>
+      <column columnName="clearance_id"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="access_report_data" tableDbType="TABLE">
+    <columns>
+      <column columnName="report_id"/>
+      <column columnName="area"/>
+      <column columnName="card_id"/>
+      <column columnName="schedule_pt"/>
+      <column columnName="enabled"/>
+      <column columnName="last_entered"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="card_info" tableDbType="TABLE">
+    <columns>
+      <column columnName="report_id"/>
+      <column columnName="card_id"/>
+      <column columnName="first_name"/>
+      <column columnName="last_name"/>
+      <column columnName="middle_name"/>
+      <column columnName="department"/>
+      <column columnName="employee_number"/>
+      <column columnName="info2"/>
+      <column columnName="info3"/>
+      <column columnName="info5"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+</tables>

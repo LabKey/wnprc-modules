@@ -17,4 +17,43 @@
 
  -->
 <ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ns:table tableName="device" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="public_key"/>
+            <ns:column columnName="name"/>
+            <ns:column columnName="description"/>
+        </ns:columns>
+    </ns:table>
+    <ns:table tableName="lease" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="public_key"/>
+            <ns:column columnName="start_time"/>
+            <ns:column columnName="createdBy"/>
+            <ns:column columnName="end_time"/>
+            <ns:column columnName="endedBy"/>
+            <ns:column columnName="endedOn"/>
+        </ns:columns>
+    </ns:table>
+    <ns:table tableName="auth_method" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="public_key"/>
+            <ns:column columnName="start_time"/>
+            <ns:column columnName="auth_method"/>
+        </ns:columns>
+    </ns:table>
+    <ns:table tableName="allowed_service" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="public_key"/>
+            <ns:column columnName="start_time"/>
+            <ns:column columnName="module_name"/>
+            <ns:column columnName="service_name"/>
+        </ns:columns>
+    </ns:table>
+    <ns:table tableName="users" tableDbType="TABLE">
+        <ns:columns>
+            <ns:column columnName="userid"/>
+            <ns:column columnName="card_number"/>
+            <ns:column columnName="pin_hash"/>
+        </ns:columns>
+    </ns:table>
 </ns:tables>

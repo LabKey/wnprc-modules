@@ -4,6 +4,7 @@
         <column name="invoiceRunId/rowid"/>
         <column name="invoiceRunId/billingPeriodStart"/>
         <column name="invoiceRunId/billingPeriodEnd"/>
+        <column name="invoiceRunId/runDate"/>
         <column name="accountNumber"/>
         <column name="accountNumber/type"/>
         <column name="accountNumber/po_number"/>

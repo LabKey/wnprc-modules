@@ -1,4 +1,5 @@
 SELECT
+  inv.rowId,
   inv.invoiceNumber,
   inv.invoiceRunId.rowId AS invoiceRunId,
   inv.invoiceRunId.billingPeriodStart,

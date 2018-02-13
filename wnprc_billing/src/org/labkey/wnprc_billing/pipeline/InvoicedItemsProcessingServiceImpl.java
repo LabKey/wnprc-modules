@@ -3,6 +3,9 @@ package org.labkey.wnprc_billing.pipeline;
 import org.labkey.api.ehr_billing.pipeline.InvoicedItemsProcessingService;
 import org.labkey.wnprc_billing.WNPRC_BillingSchema;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Implements methods to get queries and columns to be processed during a Billing Run.
  */
@@ -140,5 +143,13 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
     public String[] getLeaseFeeProcessingColumnNames()
     {
         return null;
+    }
+
+    @Override
+    public String getInvoiceNum(String debitedAcct, Date billingPeriodDate)
+    {
+        SimpleDateFormat f = new SimpleDateFormat("MMYY");
+        String dateStr = f.format(billingPeriodDate);
+        return dateStr + debitedAcct.toUpperCase();
     }
 }

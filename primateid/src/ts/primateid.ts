@@ -1,0 +1,1 @@
+export { Sync } from '@wnprc/primate-id';

@@ -21,7 +21,7 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
         workingDir "$projectDir"
         script = file('../node_modules/webpack/bin/webpack.js')
-        args   = ['--env.BUILD_DIR', "$buildDir"]
+        args   = ['--env.BUILD_DIR', "$buildDir", '--env.PROJECT_DIR', "$projectDir"]
         if (project.tasks.findByName('java2ts'))
             dependsOn('java2ts')
     }

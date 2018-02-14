@@ -464,7 +464,7 @@ public class WNPRC_BillingController extends SpringActionController
             String contentType = "text/plain";
             JetCSV csv = getJetCsv(invoiceRunForm.getRunId());
             response.setContentType(contentType);
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + csv.getFileName() + "\"");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + csv.getFileName() + ".csv" + "\"");
             response.setContentLength(csv.getCsvData().length());
             response.getOutputStream().write(csv.getCsvData().getBytes(StringUtilsLabKey.DEFAULT_CHARSET));
         }
@@ -477,7 +477,7 @@ public class WNPRC_BillingController extends SpringActionController
         StringWriter writer = new StringWriter();
         CSVWriter csvWriter = new CSVWriter(writer,CSVWriter.DEFAULT_SEPARATOR,CSVWriter.NO_QUOTE_CHARACTER);
         csvWriter.writeNext(new String[]{"NSCT"});
-        String[] emptyLine = {"", "", "", "", "", "", "", "", "", "", "", ""};
+        String[] emptyLine = {""};
         csvWriter.writeNext(emptyLine);
         csvWriter.writeNext(new String[]{"Department","Fund","Program","Project","Activity ID","Account","Class",
                 "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
@@ -495,15 +495,15 @@ public class WNPRC_BillingController extends SpringActionController
                     invoiceItem.Fund,
                     invoiceItem.Program,
                     invoiceItem.Project,
+                    invoiceItem.ActivityID,
                     String.valueOf(invoiceItem.Account != null ?invoiceItem.Account.intValue():0),
+                    invoiceItem.Class,
                     String.valueOf(invoiceItem.Amount != null ?invoiceItem.Amount.doubleValue():0),
                     description,
                     date + invoiceItem.Project,
-                    invoiceItem.Class,
                     invoiceItem.PurchRefNo,
                     invoiceItem.VoucherNo,
-                    invoiceItem.InvoiceNo,
-                    invoiceItem.ActivityID
+                    invoiceItem.InvoiceNo
             });
         }
         csvWriter.close();

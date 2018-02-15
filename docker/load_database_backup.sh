@@ -34,7 +34,7 @@ set -- "${args[@]}"
 #-------------------------------------------------------------------------------
 # Create a temporary folder just for this particular run (to clean up later)
 #-------------------------------------------------------------------------------
-tmpdir=$(mktemp -d -t 'pg_restore')
+tmpdir=$(mktemp -d /tmp/pg_restore.XXXXXXXX)
 trap 'rm -rf $tmpdir' EXIT
 
 #-------------------------------------------------------------------------------

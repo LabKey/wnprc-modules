@@ -483,7 +483,7 @@ public class WNPRC_BillingController extends SpringActionController
                 "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
 
         SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MMM");
-        String description = "Primate Center " + dateFormatMonth.format(invoiceRun.getRunDate()).toUpperCase();
+        String description = "Primate Center " + dateFormatMonth.format(invoiceRun.getBillingPeriodStart()).toUpperCase();
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMyy");
         String date = dateFormat.format(invoiceRun.getRunDate());
 

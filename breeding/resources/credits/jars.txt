@@ -1,0 +1,4 @@
+{table}
+Filename|Component|Version|Source|License|LabKey Dev|Purpose
+reflections-0.9.10.jar|Reflections|0.9.10|{link:From GitHub|https://github.com/ronmamo/reflections}|{link:WTFPL|http://www.wtfpl.net/about/}|cstevens|Runtime analysis of Java classes and packages
+{table}

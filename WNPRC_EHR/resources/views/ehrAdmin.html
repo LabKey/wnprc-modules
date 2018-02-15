@@ -24,7 +24,8 @@ if (LABKEY.Security.currentUser.isAdmin){
                     {name: 'Junit Tests', url: '<%=contextPath%>/junit/begin.view?'},
                     {name: 'Manage EHR Study', url: '<%=contextPath%>/study<%=containerPath%>/manageStudy.view?'},
                     {name: 'Populate Initial Data', url: '<%=contextPath%>/EHR<%=containerPath%>/populateInitialData.view?'},
-                    {name: 'Set EHR Properties', url: '<%=contextPath%>/core<%=containerPath%>/modulePropertyAdmin.view?moduleName=EHR'}
+                    {name: 'Set EHR Properties', url: '<%=contextPath%>/core<%=containerPath%>/modulePropertyAdmin.view?moduleName=EHR'},
+                    {name: 'Set QCState', url: '<%=contextPath%>/ehr<%=containerPath%>/ensureQCStates.view'}
                     //{name: 'Reload Study', url: '<%=contextPath%>/pipeline<%=containerPath%>/begin.view?'},
                     //{name: 'Generate Schema XML', url: '<%=contextPath%>/admin/getSchemaXmlDoc.view?full=true&dbSchema=core'},
                     //{name: 'View Site Errors', url: '<%=contextPath%>/query/Shared/executeQuery.view?schemaName=auditlog&query.queryName=Client%20API%20Actions'}

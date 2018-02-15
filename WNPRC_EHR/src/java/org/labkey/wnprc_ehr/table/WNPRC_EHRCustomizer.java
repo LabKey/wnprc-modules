@@ -15,17 +15,31 @@
  */
 package org.labkey.wnprc_ehr.table;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.util.StringExpressionFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 
 /**
  * User: bimber
@@ -213,6 +227,18 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 col2.setFk(new QueryForeignKey(us, null, "protocolTotalProjects", "protocol", "protocol"));
             }
         }
+                //TODO: Make this work with an Ext UI that  does not over write the values
+               /* ColumnInfo contactsColumn = table.getColumn("contacts");
+                contactsColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    @Override
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                        return new ContactsColumn(colInfo);
+                    }
+                });*/
+
+
     }
 
     private ColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
@@ -245,4 +271,63 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         return null;
     }
+
+    //TODO: Look how to use another UI to allow for better support for virtual columns
+   /* public static  class ContactsColumn extends DataColumn
+    {
+        public ContactsColumn(ColumnInfo colInfo)
+        {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx)
+        {
+            Object value =  super.getValue(ctx);
+            StringBuffer readableContacts = new StringBuffer();
+            if(value != null)
+            {
+                //TODO:parse the value into integers to display users
+                String contacts = value.toString();
+
+                if (contacts.contains(","))
+                {
+
+                    List<String> contactList = new ArrayList<>(Arrays.asList(contacts.split(",")));
+                    Iterator<String> contactsIterator = contactList.iterator();
+                    while (contactsIterator.hasNext())
+                    {
+                        User singleContact = UserManager.getUser(Integer.parseInt(contactsIterator.next()));
+                        readableContacts.append(singleContact.getDisplayName(singleContact));
+                        readableContacts.append(" ");
+                        System.out.println("readable contact "+readableContacts);
+                    }
+                    return readableContacts;
+                }
+
+                if (NumberUtils.isNumber(contacts)){
+                    User singleContact = UserManager.getUser(Integer.parseInt(contacts));
+                    readableContacts.append(singleContact.getDisplayName(singleContact));
+                    return readableContacts;
+
+                }
+
+            }
+            return readableContacts;
+
+        }
+
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            return getValue(ctx);
+        }
+
+
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            return h(getValue(ctx));
+        }
+    }*/
 }

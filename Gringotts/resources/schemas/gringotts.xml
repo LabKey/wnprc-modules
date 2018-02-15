@@ -16,5 +16,90 @@
  * limitations under the License.
 
  -->
-<ns:tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns:ns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-</ns:tables>
+<tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\schemas\tableInfo.xsd" xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <table tableName="vaults" tableDbType="TABLE">
+        <columns>
+            <column columnName="vaultId"/>
+            <column columnName="vaultClassName"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+        </columns>
+    </table>
+    <table tableName="transactions" tableDbType="TABLE">
+        <columns>
+            <column columnName="createdOn"/>
+            <column columnName="transactionId"/>
+            <column columnName="user"/>
+            <column columnName="effectiveOn"/>
+            <column columnName="comment"/>
+        </columns>
+    </table>
+    <table tableName="vault_columns" tableDbType="TABLE">
+        <columns>
+            <column columnName="vaultId"/>
+            <column columnName="version"/>
+            <column columnName="columnName"/>
+            <column columnName="type"/>
+            <column columnName="columnId"/>
+        </columns>
+    </table>
+    <table tableName="records" tableDbType="TABLE">
+        <columns>
+            <column columnName="vaultId"/>
+            <column columnName="recordId"/>
+            <column columnName="container"/>
+            <column columnName="version"/>
+            <column columnName="transactionId"/>
+        </columns>
+    </table>
+    <table tableName="vault_text_values" tableDbType="TABLE">
+        <columns>
+            <column columnName="vaultId"/>
+            <column columnName="recordId"/>
+            <column columnName="columnId"/>
+            <column columnName="transactionId"/>
+            <column columnName="value"/>
+            <column columnName="effectiveDate"/>
+        </columns>
+    </table>
+    <table tableName="vault_datetime_values" tableDbType="TABLE">
+        <columns>
+            <column columnName="vaultId"/>
+            <column columnName="recordId"/>
+            <column columnName="columnId"/>
+            <column columnName="transactionId"/>
+            <column columnName="value"/>
+            <column columnName="effectiveDate"/>
+        </columns>
+    </table>
+    <table tableName="vault_int_values" tableDbType="TABLE">
+        <columns>
+            <column columnName="vaultId"/>
+            <column columnName="recordId"/>
+            <column columnName="columnId"/>
+            <column columnName="transactionId"/>
+            <column columnName="value"/>
+            <column columnName="effectiveDate"/>
+        </columns>
+    </table>
+    <table tableName="vault_parent_records" tableDbType="TABLE">
+        <columns>
+            <column columnName="childVaultId"/>
+            <column columnName="childRecordId"/>
+            <column columnName="parentVaultId"/>
+            <column columnName="parentRecordId"/>
+        </columns>
+    </table>
+    <table tableName="vault_links" tableDbType="TABLE">
+        <columns>
+            <column columnName="vaultId1"/>
+            <column columnName="columnId"/>
+            <column columnName="vaultId2"/>
+            <column columnName="record1"/>
+            <column columnName="record2"/>
+            <column columnName="transactionId"/>
+            <column columnName="isLinked"/>
+            <column columnName="order"/>
+        </columns>
+    </table>
+</tables>

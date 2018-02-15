@@ -5,9 +5,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.labkey.api.action.NullSafeBindException;
 import org.labkey.api.admin.ImportException;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.study.Dataset;
@@ -54,6 +56,8 @@ public class DatasetImportHelperIntegrationTest extends Assert
             throws XmlException, SQLException, ImportException, DatasetImportUtils.DatasetLockExistsException, IOException
     {
         // ARRANGE: create the study in the breeding test container
+        ContainerManager.setFolderType(_container, FolderTypeManager.get().getFolderType("Study"), _user,
+                new NullSafeBindException(_container, "test-import"));
         StudyImpl s = new StudyImpl(_container, "Breeding Test Study");
         s.setTimepointType(TimepointType.DATE); // must be set to avoid NullPointerException
         s.setSubjectColumnName("SubjectID");    // must be set due to non-null constraint

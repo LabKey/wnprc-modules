@@ -4,16 +4,17 @@ services:
   postgres:
     image: postgres:9.4
     volumes:
-      - "${PG_CONF_FILE}:/var/lib/postgresql/data/postgresql.conf"
+      - "${PG_CONF_FILE}:/conf/postgresql.conf"
       - "${PG_DATA_DIR}:/var/lib/postgresql/data"
-      - "${PG_HBA_FILE}:/var/lib/postgresql/data/pg_hba.conf"
-      - "${PG_LOG_DIR}:/var/lib/postgresql/data/pg_log"
+      - "${PG_HBA_FILE}:/conf/pg_hba.conf"
+      - "${PG_LOG_DIR}:/logs"
     ports:
-      - "9081:5432"
+      - "${PG_PORT}:5432"
     expose:
       - "5432"
     environment:
       TZ: America/Chicago
+    command: postgres -c log_directory=/logs -c config_file=/conf/postgresql.conf -c hba_file=/conf/pg_hba.conf
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -62,9 +63,9 @@ services:
       - "${NGINX_SERVER_KEY_FILE}:/usr/local/ssl/key.pem"
       - "${NGINX_WELL_KNOWN_DIR}:/usr/share/nginx/html"
     ports:
-      - "80:80"
-      - "443:443"
-      - "1080:1080"
+      - "${LABKEY_DANGER_PORT}:80"
+      - "${LABKEY_SECURE_PORT}:443"
+      - "${MAIL_CATCHER_PORT}:1080"
     environment:
       TZ: America/Chicago
 

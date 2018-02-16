@@ -58,7 +58,7 @@ public class WNPRC_BillingController extends SpringActionController
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICED_ITEMS);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("invoiceNumber"), invoiceNumber);
-        TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort( "date,category"));
+        TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort( "date,serviceCenter,id"));
         return tableSelector.getArrayList(InvoicedItem.class);
     }
 
@@ -106,6 +106,7 @@ public class WNPRC_BillingController extends SpringActionController
 
     private Alias getInvoiceAccount(String accountNumber)
     {
+        //todo is accountNumber always not null
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("alias"), accountNumber.trim());
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_ALIASES);
         TableSelector tableSelector = new TableSelector(tableInfo, filter,null);
@@ -143,6 +144,7 @@ public class WNPRC_BillingController extends SpringActionController
     {
         Date _runDate;
         Date _billingPeriodStart;
+        Date _billingPeriodEnd;
         public Date getRunDate()
         {
             return _runDate;
@@ -161,6 +163,16 @@ public class WNPRC_BillingController extends SpringActionController
         public void setBillingPeriodStart(Date billingPeriodStart)
         {
             _billingPeriodStart = billingPeriodStart;
+        }
+
+        public Date getBillingPeriodEnd()
+        {
+            return _billingPeriodEnd;
+        }
+
+        public void setBillingPeriodEnd(Date billingPeriodEnd)
+        {
+            _billingPeriodEnd = billingPeriodEnd;
         }
     }
     public static class TierRate
@@ -227,6 +239,7 @@ public class WNPRC_BillingController extends SpringActionController
     public static class InvoicedItem
     {
         int _rowId;
+        String _id;
         String _transactionNumber;
         String _item;
         String _comment;
@@ -236,6 +249,7 @@ public class WNPRC_BillingController extends SpringActionController
         Date   _date;
         TimeStamp _invoiceDate;
         private String _category;
+        private String _servicecenter;
 
 
         public int getRowId()
@@ -246,6 +260,16 @@ public class WNPRC_BillingController extends SpringActionController
         public void setRowId(int rowId)
         {
             _rowId = rowId;
+        }
+
+        public String getId()
+        {
+            return _id;
+        }
+
+        public void setId(String id)
+        {
+            _id = id;
         }
 
         public String getTransactionNumber()
@@ -336,6 +360,16 @@ public class WNPRC_BillingController extends SpringActionController
         public void setCategory(String category)
         {
             _category = category;
+        }
+
+        public String getServicecenter()
+        {
+            return _servicecenter;
+        }
+
+        public void setServicecenter(String servicecenter)
+        {
+            _servicecenter = servicecenter;
         }
     }
 
@@ -482,11 +516,6 @@ public class WNPRC_BillingController extends SpringActionController
         csvWriter.writeNext(new String[]{"Department","Fund","Program","Project","Activity ID","Account","Class",
                 "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
 
-        SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MMM");
-        String description = "Primate Center " + dateFormatMonth.format(invoiceRun.getBillingPeriodStart()).toUpperCase();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMyy");
-        String date = dateFormat.format(invoiceRun.getRunDate());
-
         for (JetInvoiceItem invoiceItem : invoiceItems)
         {
             csvWriter.writeNext(emptyLine);
@@ -499,15 +528,22 @@ public class WNPRC_BillingController extends SpringActionController
                     String.valueOf(invoiceItem.Account != null ?invoiceItem.Account.intValue():0),
                     invoiceItem.Class,
                     String.valueOf(invoiceItem.Amount != null ?invoiceItem.Amount.doubleValue():0),
-                    description,
-                    date + invoiceItem.Project,
+                    invoiceItem.Description,
+                    invoiceItem.Jnl_Ln_Ref,
                     invoiceItem.PurchRefNo,
                     invoiceItem.VoucherNo,
                     invoiceItem.InvoiceNo
             });
         }
         csvWriter.close();
-        return new JetCSV("JET_" + date,writer.toString());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yy");
+        String date = dateFormat.format(invoiceRun.getRunDate());
+
+
+        String fileName = "JET_" + dateFormat.format(invoiceRun.getBillingPeriodStart()) + "_" +
+                dateFormat.format(invoiceRun.getBillingPeriodEnd());
+        return new JetCSV(fileName,writer.toString());
     }
 
     private class JetCSV{

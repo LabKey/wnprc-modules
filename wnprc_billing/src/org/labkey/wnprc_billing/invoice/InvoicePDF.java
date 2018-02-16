@@ -37,7 +37,7 @@ public class InvoicePDF extends FPDF
     private WNPRC_BillingController.Alias alias;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yy");
-    SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM-yyyy");
+    SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM-dd-yyyy");
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
 
     public InvoicePDF(WNPRC_BillingController.Invoice invoice, WNPRC_BillingController.Alias alias, WNPRC_BillingController.InvoiceRun invoiceRun, double tierRate)
@@ -46,6 +46,7 @@ public class InvoicePDF extends FPDF
         this.alias = alias;
         billing_date = invoiceRun.getRunDate();
         billing_period_start_date = invoiceRun.getBillingPeriodStart();
+        billing_period_end_date = invoiceRun.getBillingPeriodEnd();
         grant_address = alias.getAddress();
         po_number = alias.getPo_number();
         account_title = alias.getUw_account();
@@ -68,28 +69,81 @@ public class InvoicePDF extends FPDF
         Calendar calendarCurrent = Calendar.getInstance();
         Calendar calendarItem = Calendar.getInstance();
         boolean isFirstItem =true;
-        String currentCategory=null;
+        String currentServiceCenter=null;
         for (WNPRC_BillingController.InvoicedItem invoicedItem : invoicedItems)
         {
             calendarItem.setTime(invoicedItem.getDate());
             boolean isDateChange = isFirstItem || calendarCurrent.get(Calendar.DAY_OF_MONTH) != calendarItem.get(Calendar.DAY_OF_MONTH);
+            boolean isServiceCenterChange = false;
+            if(invoicedItem.getServicecenter()== null){
+                isServiceCenterChange = currentServiceCenter != null;
+            }
+            else {
+                isServiceCenterChange = !invoicedItem.getServicecenter().equals(currentServiceCenter);
+            }
+
+
+
             if (isDateChange)
             {
-                items.add(new FormattedLineItem(invoicedItem.getDate(), invoicedItem.getCategory(), null, null));
-                currentCategory = invoicedItem.getCategory();
+                items.add(new FormattedLineItem(invoicedItem.getDate(), invoicedItem.getServicecenter(), null, null, true));
+                currentServiceCenter = invoicedItem.getServicecenter();
                 calendarCurrent.setTime(invoicedItem.getDate());
                 isFirstItem = false;
             }
-            if (!isDateChange && !invoicedItem.getCategory().equals(currentCategory))
+            if (!isDateChange && isServiceCenterChange)
             {
-                items.add(new FormattedLineItem(null, invoicedItem.getCategory(), null, null));
-                currentCategory = invoicedItem.getCategory();
+                items.add(new FormattedLineItem(null, invoicedItem.getServicecenter(), null, null, true));
+                currentServiceCenter = invoicedItem.getServicecenter();
             }
-            items.add(new FormattedLineItem(null,
-                    invoicedItem.getItem() != null? invoicedItem.getItem(): invoicedItem.getComment(), invoicedItem.getQuantity(), invoicedItem.getUnitCost().floatValue()));
+
+            items.addAll(getLineItemsFromInvoicedItem(invoicedItem));
 
         }
         addLines(items);
+    }
+
+    private List<FormattedLineItem> getLineItemsFromInvoicedItem(WNPRC_BillingController.InvoicedItem invoicedItem){
+        String indent = "  ";
+        List<FormattedLineItem> formattedLineItems = new ArrayList<>();
+        boolean showDetailsWithItem = invoicedItem.getComment() == null;
+        String participantId = invoicedItem.getId() == null? "": " - " + invoicedItem.getId();
+
+        FormattedLineItem itemLine = null;
+        FormattedLineItem commentLine = null;
+
+        if(invoicedItem.getItem() != null || showDetailsWithItem){
+            itemLine = new FormattedLineItem();
+            itemLine._description = indent + invoicedItem.getItem() + participantId;
+            participantId = "";//don't duplicate on the comment line
+            indent += "  ";
+        }
+
+        if(invoicedItem.getComment() != null){
+            commentLine = new FormattedLineItem();
+            commentLine._description = indent + invoicedItem.getComment() + participantId;
+        }
+
+
+        if(showDetailsWithItem){
+            addDetailsToLineItem(itemLine, invoicedItem);
+        }
+        else{
+            addDetailsToLineItem(commentLine,invoicedItem);
+        }
+        if(itemLine != null){
+            formattedLineItems.add(itemLine);
+        }
+
+        if(commentLine != null){
+            formattedLineItems.add(commentLine);
+        }
+        return formattedLineItems;
+    }
+
+    private void addDetailsToLineItem(FormattedLineItem formattedLineItem, WNPRC_BillingController.InvoicedItem invoicedItem ){
+        formattedLineItem._quantity = invoicedItem.getQuantity();
+        formattedLineItem._unitPrice = invoicedItem.getUnitCost().floatValue();
     }
 
     @Override
@@ -120,6 +174,7 @@ public class InvoicePDF extends FPDF
     String tier_rate;
     Date billing_date;
     Date billing_period_start_date;
+    Date billing_period_end_date;
 
     int angle = 0;
 
@@ -164,7 +219,7 @@ public class InvoicePDF extends FPDF
                     return lineItem._chargeDate == null? "--" : dateFormat.format(lineItem._chargeDate);
                 }
             },
-            new Column("Description", 111, Alignment.CENTER)
+            new Column("Description", 111, Alignment.LEFT)
             {
                 @Override
                 public String getValue(FormattedLineItem lineItem)
@@ -201,17 +256,27 @@ public class InvoicePDF extends FPDF
 
     public static class FormattedLineItem
     {
-        private final Date _chargeDate;
-        private final String _description;
-        private final Double _quantity;
-        private final Float _unitPrice;
+        private String _description;
+        private Date _chargeDate;
+        private Double _quantity;
+        private Float _unitPrice;
+        private boolean _isBold;
 
-        public FormattedLineItem(Date chargeDate, String description, Double quantity, Float unitPrice)
+        public FormattedLineItem(Date chargeDate, String description, Double quantity, Float unitPrice, boolean isBold)
         {
             _chargeDate = chargeDate;
             _description = description;
             _quantity = quantity;
             _unitPrice = unitPrice;
+            _isBold = isBold;
+        }
+
+        public FormattedLineItem()
+        {
+            _chargeDate = null;
+            _description = null;
+            _quantity = null;
+            _unitPrice = null;
         }
     }
 
@@ -240,7 +305,7 @@ public class InvoicePDF extends FPDF
             addPaymentInfo();
             if (comments != null && !comments.trim().isEmpty())
                 addComments();
-            addBillingDate(billing_period_start_date);
+            addBillingDate(billing_period_start_date, billing_period_end_date);
             addCols(headers);
 
             setY(75);
@@ -418,7 +483,7 @@ public class InvoicePDF extends FPDF
         x = right_x;
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
-        MultiCell(60, 4, po_number);
+        MultiCell(60, 4, po_number == null? "": po_number);
         x = left_x;
         y = getY();
         setXY(x, y);
@@ -488,7 +553,7 @@ public class InvoicePDF extends FPDF
     }
 
     // billing date
-    private void addBillingDate(Date billing_date) throws IOException
+    private void addBillingDate(Date billing_period_start_date, Date billing_period_end_date) throws IOException
     {
         float x = 10;
         float y = 60;
@@ -496,7 +561,7 @@ public class InvoicePDF extends FPDF
         setXY(x, y);
         setFont("Arial", Collections.singleton(FontStyle.BOLD), 12);
 
-        MultiCell(0, 4, dateFormatBillingFor.format(billing_date), null, Alignment.CENTER, false);
+        MultiCell(0, 4, dateFormatBillingFor.format(billing_period_start_date) + " to " + dateFormatBillingFor.format(billing_period_end_date), null, Alignment.CENTER, false);
     }
 
     // comments
@@ -669,7 +734,7 @@ public class InvoicePDF extends FPDF
                 newPage = false;
             }
 //            $bold = ($line["Charge Date"] == ' ') ? false : true;
-            float size = addLine(getY(), lineItem, false);
+            float size = addLine(getY(), lineItem, lineItem._isBold);
             setY(size + 1);
             if (getY() >= 225)
                 newPage = true;
@@ -679,7 +744,12 @@ public class InvoicePDF extends FPDF
     public float addLine (float line, FormattedLineItem lineItem, boolean bold) throws IOException
     {
         int xLocation = 10;
+        if(bold){
+            line+=2;
+        }
+
         float maxSize      = line;
+
 
         if (bold)
             setFont("Helvetica", Collections.singleton(FontStyle.BOLD), 9);

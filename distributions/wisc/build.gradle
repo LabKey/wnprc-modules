@@ -17,6 +17,7 @@ BuildUtils.addModuleDistributionDependencies(project, [
         ,":server:customModules:EHR_ComplianceDB"
         ,":server:customModules:fcsexpress"
         ,":server:customModules:genotyping"
+        ,":server:customModules:specimencheck"
         ,":server:customModules:targetedms"
 ])
 

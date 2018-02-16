@@ -3,8 +3,6 @@
  * after that to make it work with development boxes.
  */
 
-DROP SCHEMA oconnor CASCADE;
-
 UPDATE exp.propertydescriptor SET scale = 64 WHERE name IN ('FirstName', 'LastName', 'Phone', 'Mobile', 'Pager', 'IM') AND propertyuri LIKE '%:ExtensibleTable-core-Users.Folder-%' AND scale = 0;
 UPDATE exp.propertydescriptor SET scale = 255 WHERE name IN ('Description') AND propertyuri LIKE '%:ExtensibleTable-core-Users.Folder-%' AND scale = 0;
 

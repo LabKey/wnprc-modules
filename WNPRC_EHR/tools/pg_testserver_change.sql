@@ -165,16 +165,5 @@ WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'LD
 	      AND p.Name = 'Servers'
 ;
 
--- Since the O'Connor lab has their own server now, we no longer need this 28+G schema in test.
-DROP SCHEMA genotyping CASCADE;
-
--- Delete the big portions of the audit log.
-TRUNCATE audit.c3d2165_datasetauditdomain;
-TRUNCATE audit.auditlog;
-TRUNCATE audit.c3d2181_userauditdomain;
-
--- This is just pre 11/1/2014 audit log, so it can go, too.
-DROP TABLE audit.keep_audit_dataset;
-
 -- We've left a bit of a mess, so it's best to vacuum before guests arrive.  (Deleting doesn't reclaim the space on it's own, and we just deleted 40-50GB)
 --VACUUM FULL;

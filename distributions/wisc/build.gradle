@@ -15,7 +15,9 @@ BuildUtils.addModuleDistributionDependencies(project, [
         ,":externalModules:labModules:Viral_Load_Assay"
         ,":server:customModules:ehr"
         ,":server:customModules:EHR_ComplianceDB"
+        ,":server:customModules:fcsexpress"
         ,":server:customModules:genotyping"
+        ,":server:customModules:targetedms"
 ])
 
 BuildUtils.addModuleDistributionDependencies(project, file("../../").listFiles().findAll { d ->

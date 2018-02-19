@@ -33,7 +33,7 @@ public class FoodDeprivesStartForm extends TaskForm
         }
         setStoreCollectionClass("EHR.data.FoodDepriveStore");
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/foodDepriveStore.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.fromPath("ehr/buttons/husbandryButtons.js"));
         //addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/BoxSelect.js"));
 
     }

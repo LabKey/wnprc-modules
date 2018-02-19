@@ -40,7 +40,7 @@ public class InvoicePDF extends FPDF
     SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM-dd-yyyy");
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
 
-    public InvoicePDF(WNPRC_BillingController.Invoice invoice, WNPRC_BillingController.Alias alias, WNPRC_BillingController.InvoiceRun invoiceRun, double tierRate)
+    public InvoicePDF(WNPRC_BillingController.Invoice invoice, WNPRC_BillingController.Alias alias, WNPRC_BillingController.InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddess, String creditToAccount)
     {
         super(Format.LETTER);
         this.alias = alias;
@@ -53,11 +53,13 @@ public class InvoicePDF extends FPDF
         invoice_no = invoice.getInvoiceNumber();
         charges_total_month = moneyFormat.format(invoice.getInvoiceAmount());
         grant_number = alias.getGrantNumber();
+        companyAddress += billingAddess;
+        _creditToAccount = creditToAccount;
         double overheadAssessment = invoice.getInvoiceAmount() * tierRate;
         tier_rate = moneyFormat.format(tierRate);
         overheadCharges_total_month = moneyFormat.format(overheadAssessment);
         charges_total_balance_month = moneyFormat.format(invoice.getInvoiceAmount() + overheadAssessment);
-//        footer_text += alias.getContact_email();//todo this is likely not the correct contact.  Is it dynamic or static as initialized?
+        footer_text += contactEmail;
 
 
     }
@@ -161,16 +163,16 @@ public class InvoicePDF extends FPDF
     }
 
     String companyName = "Wisconsin National Primate Research Center";
-    String companyAddress = "University of Wisconsin - Madison\n" +
-								"1220 Capitol Court, Madison, WI 53715";
+    String companyAddress = "University of Wisconsin - Madison\n";
     String comments = null;
     String po_number;
     String type = "Totally fake";
     String grant_address;
     int page_number = 1;
-    String footer_text = "For questions regarding this invoice contact bussvc@primate.wisc.edu";
+    String footer_text = "For questions regarding this invoice contact ";
     String account_title;
     String grant_number;
+    private String _creditToAccount;
     String tier_rate;
     Date billing_date;
     Date billing_period_start_date;
@@ -602,11 +604,7 @@ public class InvoicePDF extends FPDF
         String font = "Courier";//: "Arial";
         setFont(font, Collections.singleton(FontStyle.BOLD), 11);
         String charge = "CHARGE:";
-        charge += addItem(alias.getUw_fund());
-        charge += addItem(alias.getUw_account());
-        charge += addItem(alias.getUw_udds());
-        charge += " 4";
-        charge += addItem(alias.getUw_class_code());
+        charge += _creditToAccount;
         MultiCell(0, 4, charge, null, Alignment.LEFT, false);
 
     }

@@ -25,6 +25,8 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
@@ -42,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class WNPRC_BillingController extends SpringActionController
 {
@@ -760,11 +763,16 @@ public class WNPRC_BillingController extends SpringActionController
             Invoice invoice = getInvoice(invoicePdfForm.getInvoiceNumber());
             Alias alias = getInvoiceAccount(invoice.getAccountNumber());
             InvoiceRun invoiceRun = getInvoiceRunByObjectId(invoice.getInvoiceRunId());
-            TierRate tierRate = getTierRate(alias.getTier_rate());
+            TierRate accountTierRate = getTierRate(alias.getTier_rate());
             List<InvoicedItem> invoicedItems = getInvoicedItems(invoicePdfForm.getInvoiceNumber());
 
+            Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
+            String contactEmail = moduleProperties.get(WNPRC_BillingModule.BillingContactEmail).getEffectiveValue(getContainer());
+            String billingAddess = moduleProperties.get(WNPRC_BillingModule.BillingAddress).getEffectiveValue(getContainer());
+            String creditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
 
-            InvoicePDF pdf = new InvoicePDF(invoice, alias, invoiceRun, tierRate!=null? tierRate.getTierRate():0 );
+            double tierRate = accountTierRate != null ? accountTierRate.getTierRate() : 0;
+            InvoicePDF pdf = new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount);
 
             pdf.addPage();
             pdf.createLineItems(invoicedItems);

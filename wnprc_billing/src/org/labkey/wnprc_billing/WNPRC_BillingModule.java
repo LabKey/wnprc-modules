@@ -43,6 +43,9 @@ import java.util.Set;
 public class WNPRC_BillingModule extends ExtendedSimpleModule
 {
     public static final String NAME = "WNPRC_Billing";
+    public static final String CreditToAccount = "CreditToAccount";
+    public static final String BillingAddress = "BillingAddress";
+    public static final String BillingContactEmail = "BillingContactEmail";
 
     @Override
     public String getName()

@@ -59,7 +59,7 @@ EHR.model.DataModelManager.registerMetadata('WNPRC_Request', {
             },
             protocolContact: {
                 //xtype: 'ehr-projectentryfield',
-                xtype: 'ehr-protocolStaffField',
+                xtype: 'wnprcehr-protocolStaffField',
 
                 shownInGrid: true,
                 useNull: true,

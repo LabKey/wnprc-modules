@@ -12,6 +12,7 @@
         <script path="/wnprc_ehr/ext4/panel/AnimalDetailsPanel.js"/>
         <script path="/wnprc_ehr/ext4/panel/TaskDataEntryPanel.js"/>
         <script path="/wnprc_ehr/ext4/utils/DataEntryButtons.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/protocolStaffField.js"/>
     </library>
     <dependencies>
         <dependency path="/wnprc_ehr/wnprc_ext4_core"/>

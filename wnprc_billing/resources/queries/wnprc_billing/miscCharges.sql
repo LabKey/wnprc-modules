@@ -5,7 +5,7 @@ SELECT DISTINCT
   misc.date,
   misc.billingDate,
   misc.project,
-  misc.debitedaccount,
+  coalesce(misc.debitedaccount, misc.project.account) AS debitedAccount,
   misc.chargetype,
   misc.chargeId,
   misc.chargeCategory, --adjustment or reversal

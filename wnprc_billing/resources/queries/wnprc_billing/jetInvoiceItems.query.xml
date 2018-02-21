@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="jetInvoiceItems" tableDbType="NOT_IN_DB">
+                <tableTitle>CSV to JET Preview</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

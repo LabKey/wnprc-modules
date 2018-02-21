@@ -18,12 +18,11 @@ package org.labkey.wnprc_billing;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.UrlColumn;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.view.ActionURL;
 
-public class WNPRC_RecentBillingInvoiceRunCustomizer extends AbstractTableCustomizer
+public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
 {
     @Override
     public void customize(TableInfo tableInfo)

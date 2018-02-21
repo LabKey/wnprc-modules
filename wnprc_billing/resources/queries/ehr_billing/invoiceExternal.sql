@@ -12,7 +12,6 @@ SELECT
   inv.accountNumber.address,
   inv.invoiceAmount
 FROM ehr_billing.invoice inv
-RIGHT JOIN ehr_billing.invoiceRuns ir
-ON inv.invoiceRunId = ir.objectid
-WHERE ir.rowid = (SELECT max(x.rowId) FROM ehr_billing.invoiceRuns x)
-AND inv.accountNumber.type LIKE '%external%'
+  RIGHT JOIN ehr_billing.invoiceRuns ir
+  ON inv.invoiceRunId = ir.objectid
+  AND inv.accountNumber.type LIKE '%external%'

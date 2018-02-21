@@ -71,3 +71,23 @@ docker-compose stop postgres
 ```
 All other Docker Compose commands (`logs`, `ps`, etc.) work also.
 
+## Loading a Database Backup Using the Script
+
+Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder.
+
+The script has very few options, as shown in these examples:
+```bash
+# download the latest backup into the default docker-compose project. this
+# assumes 'produser' is a user on the production server with access to the backups,
+# and will request the password for produser (unless you have other authentication 
+# set up for the production server)
+./load_database_backup.sh -u produser
+
+
+# restore the specified local dump into the 'test' docker-compose project
+./load_database_backup.sh -f /path/to/dumpfile.pg -p test
+```
+The use of the `-p` flag allows us to use this script to manage multiple instances of the LabKey PostgreSQL container on the same server, provided that each instance is run from its own folder with its own .env file (to specify ports, data file locations, etc.)
+
+
+

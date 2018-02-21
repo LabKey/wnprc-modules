@@ -107,14 +107,16 @@ echo -e '\033[0;32mdone\033[0m'
 #-------------------------------------------------------------------------------
 echo -n "Restoring database from $filepath ...  0%"
 pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
-total=$(egrep -c '^\d+;.*' $tmpdir/pg_restore.list)
+total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
 pg_restore -h localhost -p "${pgport#*:}" -U postgres -d labkey -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
 pg_restore_pid=$!
 while kill -0 "$pg_restore_pid" &>/dev/null; do
-    count=$(egrep -c '(processing|finished) item' $tmpdir/pg_restore.log)
-    perct=$(printf "%2d" $(( 100 * count / total )))
-    echo -e -n "\b\b\b\033[0;33m${perct}%\033[0m"
+    if [[ $total -ne 0 ]]; then
+        count=$(egrep -c '(processing|finished) item' $tmpdir/pg_restore.log)
+        perct=$(printf "%2d" $(( 100 * count / total )))
+        echo -e -n "\b\b\b\033[0;33m${perct}%\033[0m"
+    fi
     sleep 0.5
 done
 trap - TERM INT

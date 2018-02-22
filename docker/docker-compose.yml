@@ -2,7 +2,7 @@ version: "3"
 services:
 
   postgres:
-    image: postgres:9.2
+    image: postgres:9.4
     volumes:
       - "${PG_CONF_FILE}:/conf/postgresql.conf"
       - "${PG_DATA_DIR}:/var/lib/postgresql/data"
@@ -22,7 +22,7 @@ services:
       TZ: America/Chicago
     
   mailserver:
-    image: wnprcehr/postfix:latest
+    image: wnprcehr/postfix:v0.1.0
     depends_on:
       - "mailcatcher"
     environment:
@@ -32,7 +32,7 @@ services:
       - "1025"
 
   labkey:
-    image: wnprcehr/labkey:15.2a1
+    image: wnprcehr/labkey:15.2
     depends_on:
       - "mailserver"
       - "postgres"

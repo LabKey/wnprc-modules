@@ -33,7 +33,7 @@ public class InvoicePDF extends FPDF
     private String charges_total_month;
     private String overheadCharges_total_month;
     private String charges_total_balance_month;
-    private Date grant_period_end = new Date();
+    private Date grant_period_end;
     private WNPRC_BillingController.Alias alias;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yy");
@@ -60,8 +60,8 @@ public class InvoicePDF extends FPDF
         overheadCharges_total_month = moneyFormat.format(overheadAssessment);
         charges_total_balance_month = moneyFormat.format(invoice.getInvoiceAmount() + overheadAssessment);
         footer_text += contactEmail;
-
-
+        grant_period_end = alias.getBudgetEndDate();
+        comments = alias.getComments() != null? alias.getComments():alias.getContact_email();
     }
 
 
@@ -72,6 +72,7 @@ public class InvoicePDF extends FPDF
         Calendar calendarItem = Calendar.getInstance();
         boolean isFirstItem =true;
         String currentServiceCenter=null;
+        float subTotal = 0;
         for (WNPRC_BillingController.InvoicedItem invoicedItem : invoicedItems)
         {
             calendarItem.setTime(invoicedItem.getDate());
@@ -85,23 +86,28 @@ public class InvoicePDF extends FPDF
             }
 
 
+            if((isDateChange || isServiceCenterChange) && !isFirstItem ){
+                items.add(new FormattedLineItem(null,"Sub total:", null,   null, subTotal, true));
+                subTotal = 0;
+            }
 
-            if (isDateChange)
-            {
-                items.add(new FormattedLineItem(invoicedItem.getDate(), invoicedItem.getServicecenter(), null, null, true));
+            if (isDateChange){
+                items.add(new FormattedLineItem(invoicedItem.getDate(), invoicedItem.getServicecenter(), null, null, null, true));
                 currentServiceCenter = invoicedItem.getServicecenter();
                 calendarCurrent.setTime(invoicedItem.getDate());
                 isFirstItem = false;
             }
-            if (!isDateChange && isServiceCenterChange)
-            {
-                items.add(new FormattedLineItem(null, invoicedItem.getServicecenter(), null, null, true));
+
+            if (!isDateChange && isServiceCenterChange){
+                items.add(new FormattedLineItem(null, invoicedItem.getServicecenter(), null, null, null, true));
                 currentServiceCenter = invoicedItem.getServicecenter();
             }
 
-            items.addAll(getLineItemsFromInvoicedItem(invoicedItem));
+            subTotal += invoicedItem.getTotalCost();
 
+            items.addAll(getLineItemsFromInvoicedItem(invoicedItem));
         }
+        items.add(new FormattedLineItem(null,"Sub total:", null,   null, subTotal, true));
         addLines(items);
     }
 
@@ -146,6 +152,7 @@ public class InvoicePDF extends FPDF
     private void addDetailsToLineItem(FormattedLineItem formattedLineItem, WNPRC_BillingController.InvoicedItem invoicedItem ){
         formattedLineItem._quantity = invoicedItem.getQuantity();
         formattedLineItem._unitPrice = invoicedItem.getUnitCost().floatValue();
+        formattedLineItem._linePrice = invoicedItem.getTotalCost().floatValue();
     }
 
     @Override
@@ -251,8 +258,7 @@ public class InvoicePDF extends FPDF
                 public String getValue(FormattedLineItem lineItem)
                 {
 
-                    return lineItem._unitPrice == null || lineItem._quantity == null ?
-                            "":moneyFormat.format(lineItem._unitPrice.floatValue() * lineItem._quantity);
+                    return lineItem._linePrice == null ?"":moneyFormat.format(lineItem._linePrice);
                 }
             });
 
@@ -263,13 +269,15 @@ public class InvoicePDF extends FPDF
         private Double _quantity;
         private Float _unitPrice;
         private boolean _isBold;
+        public Float _linePrice;
 
-        public FormattedLineItem(Date chargeDate, String description, Double quantity, Float unitPrice, boolean isBold)
+        public FormattedLineItem(Date chargeDate, String description, Double quantity, Float unitPrice, Float linePrice, boolean isBold)
         {
             _chargeDate = chargeDate;
             _description = description;
             _quantity = quantity;
             _unitPrice = unitPrice;
+            _linePrice = linePrice;
             _isBold = isBold;
         }
 
@@ -522,7 +530,7 @@ public class InvoicePDF extends FPDF
 
     private void addGrant() throws IOException
     {
-        float r1 = w - 41;
+        float r1 = w - 40;
         float r2 = r1 + 31;
         float y1 = 19;
         float y2 = y1 - 2;
@@ -603,7 +611,7 @@ public class InvoicePDF extends FPDF
         setXY(x, y);
         String font = "Courier";//: "Arial";
         setFont(font, Collections.singleton(FontStyle.BOLD), 11);
-        String charge = "CHARGE:";
+        String charge = "CREDIT: ";
         charge += _creditToAccount;
         MultiCell(0, 4, charge, null, Alignment.LEFT, false);
 

@@ -388,6 +388,8 @@ public class WNPRC_BillingController extends SpringActionController
         private String _uw_udds;
         private String _uw_class_code;
         private String _tier_rate;
+        public Date _budgetEndDate;
+        public String _comments;
 
 
         public String getAlias()
@@ -488,6 +490,26 @@ public class WNPRC_BillingController extends SpringActionController
         public void setTier_rate(String tier_rate)
         {
             _tier_rate = tier_rate;
+        }
+
+        public Date getBudgetEndDate()
+        {
+            return _budgetEndDate;
+        }
+
+        public void setBudgetEndDate(Date budgetEndDate)
+        {
+            _budgetEndDate = budgetEndDate;
+        }
+
+        public String getComments()
+        {
+            return _comments;
+        }
+
+        public void setComments(String comments)
+        {
+            _comments = comments;
         }
     }
 

@@ -2,7 +2,7 @@
     <properties>
         <propertyDescriptor name="BillingContactEmail">
             <canSetPerContainer>true</canSetPerContainer>
-            <description>The is the email that will appear in the invoice footer.</description>
+            <description>The is the email address that will appear in the invoice footer.</description>
             <editPermissions>
                 <permission>ADMIN</permission>
             </editPermissions>

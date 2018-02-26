@@ -20,7 +20,7 @@ public class ChargesFormSection extends SimpleFormSection
     {
         super("ehr_billing", "miscCharges", "Misc. Charges", "ehr-gridpanel", location);
         setConfigSources(Collections.singletonList("Task"));
-        setClientStoreClass("EHR_Billing.data.MiscChargesClientStore");
-        addClientDependency(ClientDependency.fromPath("ehr_billing/data/MiscChargesClientStore.js"));
+//        setClientStoreClass("EHR_Billing.data.MiscChargesClientStore");
+//        addClientDependency(ClientDependency.fromPath("ehr_billing/data/MiscChargesClientStore.js"));
     }
 }

@@ -45,10 +45,10 @@
                     <column columnName="chargeId">
                         <columnTitle>Charge Item</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
                             <fkTable>chargeableItems</fkTable>
-                            <fkColumnName>chargeId</fkColumnName>
-                            <fkDisplayColumnName useRawValue="true"/>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="objectid">

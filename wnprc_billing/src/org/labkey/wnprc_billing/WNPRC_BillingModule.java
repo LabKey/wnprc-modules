@@ -35,6 +35,7 @@ import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
 import org.labkey.api.ehr_billing.pipeline.InvoicedItemsProcessingService;
 import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
+import org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,7 +57,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     @Override
     public double getVersion()
     {
-        return 17.36;
+        return 17.37;
     }
 
     @Override
@@ -82,6 +83,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     @Override
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)    {
 
+        EHRService.get().registerTableCustomizer(this, WNPRC_BillingCustomizer.class);
         EHRService.get().registerFormType(new DefaultDataEntryFormFactory(ChargesFormType.class, this));
 
         // add a container listener so we'll know when our container is deleted:

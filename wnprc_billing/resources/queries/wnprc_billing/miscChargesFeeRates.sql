@@ -54,15 +54,15 @@ FROM
 
 FROM wnprc_billing.miscChargesWithTierRates wmisc
 
-  LEFT JOIN ehr_billing.aliases acct ON (
+  LEFT JOIN ehr_billing_public.aliases acct ON (
     acct.alias = COALESCE (wmisc.debitedAccount, wmisc.creditedaccount)
     )
 
-  LEFT JOIN ehr_billing.chargeableItems ci
+  LEFT JOIN ehr_billing_public.chargeableItems ci
   ON wmisc.chargeId = ci.rowid
 
   LEFT JOIN
-  ehr_billing.chargeRates cr
+  ehr_billing_public.chargeRates cr
   ON
   (CAST(wmisc.date AS DATE) >= CAST(cr.startDate AS DATE) AND
    (CAST(wmisc.date AS DATE) <= cr.enddate OR cr.enddate IS NULL) AND

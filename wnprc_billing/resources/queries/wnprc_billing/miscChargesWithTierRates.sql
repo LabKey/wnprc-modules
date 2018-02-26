@@ -26,8 +26,8 @@ SELECT * FROM
       wmisc.quantity,
       COALESCE(a.tier_rate.tierRate, 0) AS tierRate,
       a.tier_rate.isActive AS isTierRateActive
-    FROM wnprc_billing.miscCharges wmisc
-      INNER JOIN ehr_billing.aliases a ON a.alias = wmisc.debitedaccount
+    FROM wnprc_billing.miscChargesData wmisc
+      INNER JOIN ehr_billing_public.aliases a ON a.alias = wmisc.debitedaccount
   ) accountsInAliases WHERE accountsInAliases.isTierRateActive IS NULL OR accountsInAliases.isTierRateActive = true
 
 UNION ALL --union is necessary/cleaner since not all the accounts are in ehr_billing.aliases to be able to get the tierRates
@@ -58,6 +58,6 @@ SELECT
   wmisc.quantity,
   0 AS tierRate,
   true AS isTierRateActive
-FROM wnprc_billing.miscCharges wmisc
-  LEFT JOIN ehr_billing.aliases a ON a.alias = wmisc.debitedaccount
+FROM wnprc_billing.miscChargesData wmisc
+  LEFT JOIN ehr_billing_public.aliases a ON a.alias = wmisc.debitedaccount
 WHERE a.alias IS NULL

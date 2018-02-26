@@ -18,6 +18,7 @@ package org.labkey.wnprc_billing;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 
 public class WNPRC_BillingSchema
@@ -53,5 +54,10 @@ public class WNPRC_BillingSchema
     public SqlDialect getSqlDialect()
     {
         return getSchema().getSqlDialect();
+    }
+
+    public TableInfo getTierRates()
+    {
+        return getSchema().getTable(TABLE_TIER_RATES);
     }
 }

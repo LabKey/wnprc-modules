@@ -33,7 +33,7 @@ SELECT
   max(bloodSch.objectid) AS sourceRecord,
   max(bloodSch.taskid) AS taskid,
   sum(bloodSch.num_tubes) AS tubes
-FROM study.BloodSchedule bloodSch
+FROM studyLinked.BloodSchedule bloodSch
 WHERE CAST(bloodSch.dateonly AS date) >= CAST(StartDate AS date) AND CAST(bloodSch.dateonly AS date) <= CAST(EndDate AS date)
 AND bloodSch.qcstate.publicdata = true
 AND bloodSch.billedby.value = 'a'

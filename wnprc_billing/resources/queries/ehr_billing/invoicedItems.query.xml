@@ -31,7 +31,7 @@
                             <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>chargeableItems</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>rowid</fkDisplayColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
                 </columns>

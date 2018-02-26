@@ -2,6 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="miscCharges" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer</javaCustomizer>
                 <columns>
                     <column columnName="Id">
                         <fk>
@@ -47,8 +48,8 @@
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>chargeableItems</fkTable>
-                            <fkColumnName>chargeId</fkColumnName>
-                            <fkDisplayColumnName useRawValue="true"/>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="objectid">

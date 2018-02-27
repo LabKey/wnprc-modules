@@ -130,8 +130,11 @@ echo
 #-------------------------------------------------------------------------------
 # Run the scripts to clean up the instance for development purposes
 #-------------------------------------------------------------------------------
+echo -n "Preparing database for deployment ... "
+psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
+    update prop.properties p set value = 'https://$(hostname -f)' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
+XXX
 if [[ -z $prod ]]; then
-    echo -n "Preparing database for development ... "
     psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
         update prop.properties p set value = 'http://localhost:8080' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
         update prop.properties p set value = FALSE where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'sslRequired';

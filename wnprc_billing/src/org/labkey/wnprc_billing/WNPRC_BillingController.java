@@ -17,7 +17,6 @@
 package org.labkey.wnprc_billing;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import org.apache.commons.net.ntp.TimeStamp;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
@@ -34,6 +33,11 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.wnprc_billing.domain.Alias;
+import org.labkey.wnprc_billing.domain.Invoice;
+import org.labkey.wnprc_billing.domain.InvoiceRun;
+import org.labkey.wnprc_billing.domain.InvoicedItem;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
 import org.springframework.validation.BindException;
 
@@ -42,7 +46,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -109,7 +112,6 @@ public class WNPRC_BillingController extends SpringActionController
 
     private Alias getInvoiceAccount(String accountNumber)
     {
-        //todo is accountNumber always not null
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("alias"), accountNumber.trim());
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_ALIASES);
         TableSelector tableSelector = new TableSelector(tableInfo, filter,null);
@@ -118,9 +120,9 @@ public class WNPRC_BillingController extends SpringActionController
 
     public static class InvoicePdfForm
     {
-
         String _invoiceNumber;
         int _rowId;
+        boolean _asAttachment;
 
         public String getInvoiceNumber()
         {
@@ -141,43 +143,18 @@ public class WNPRC_BillingController extends SpringActionController
         {
             _rowId = rowId;
         }
-    }
 
-    public static class InvoiceRun
-    {
-        Date _runDate;
-        Date _billingPeriodStart;
-        Date _billingPeriodEnd;
-        public Date getRunDate()
+        public boolean isAsAttachment()
         {
-            return _runDate;
+            return _asAttachment;
         }
 
-        public void setRunDate(Date runDate)
+        public void setAsAttachment(boolean asAttachment)
         {
-            _runDate = runDate;
-        }
-
-        public Date getBillingPeriodStart()
-        {
-            return _billingPeriodStart;
-        }
-
-        public void setBillingPeriodStart(Date billingPeriodStart)
-        {
-            _billingPeriodStart = billingPeriodStart;
-        }
-
-        public Date getBillingPeriodEnd()
-        {
-            return _billingPeriodEnd;
-        }
-
-        public void setBillingPeriodEnd(Date billingPeriodEnd)
-        {
-            _billingPeriodEnd = billingPeriodEnd;
+            this._asAttachment = asAttachment;
         }
     }
+
     public static class TierRate
     {
         double _tierRate;
@@ -192,326 +169,6 @@ public class WNPRC_BillingController extends SpringActionController
             _tierRate = tierRate;
         }
     }
-    public static class Invoice
-    {
-        String _invoiceNumber;
-        Double _invoiceAmount;
-        public String _accountNumber;
-        private String _invoiceRunId;
-
-        public String getInvoiceNumber()
-        {
-            return _invoiceNumber;
-        }
-
-        public void setInvoiceNumber(String invoiceNumber)
-        {
-            _invoiceNumber = invoiceNumber;
-        }
-
-        public Double getInvoiceAmount()
-        {
-            return _invoiceAmount;
-        }
-
-        public void setInvoiceAmount(Double invoiceAmount)
-        {
-            _invoiceAmount = invoiceAmount;
-        }
-
-        public String getAccountNumber()
-        {
-            return _accountNumber;
-        }
-
-        public void setAccountNumber(String accountNumber)
-        {
-            _accountNumber = accountNumber;
-        }
-
-        public String getInvoiceRunId()
-        {
-            return _invoiceRunId;
-        }
-
-        public void setInvoiceRunId(String invoiceRunId)
-        {
-            _invoiceRunId = invoiceRunId;
-        }
-    }
-    public static class InvoicedItem
-    {
-        int _rowId;
-        String _id;
-        String _transactionNumber;
-        String _item;
-        String _comment;
-        Double _quantity;
-        Double _unitCost;
-        Double _totalCost;
-        Date   _date;
-        TimeStamp _invoiceDate;
-        private String _category;
-        private String _servicecenter;
-
-
-        public int getRowId()
-        {
-            return _rowId;
-        }
-
-        public void setRowId(int rowId)
-        {
-            _rowId = rowId;
-        }
-
-        public String getId()
-        {
-            return _id;
-        }
-
-        public void setId(String id)
-        {
-            _id = id;
-        }
-
-        public String getTransactionNumber()
-        {
-            return _transactionNumber;
-        }
-
-        public void setTransactionNumber(String transactionNumber)
-        {
-            _transactionNumber = transactionNumber;
-        }
-
-        public String getItem()
-        {
-            return _item;
-        }
-
-        public void setItem(String item)
-        {
-            _item = item;
-        }
-
-        public String getComment()
-        {
-            return _comment;
-        }
-
-        public void setComment(String comment)
-        {
-            _comment = comment;
-        }
-
-        public Double getQuantity()
-        {
-            return _quantity;
-        }
-
-        public void setQuantity(Double quantity)
-        {
-            _quantity = quantity;
-        }
-
-        public Double getUnitCost()
-        {
-            return _unitCost;
-        }
-
-        public void setUnitCost(Double unitCost)
-        {
-            _unitCost = unitCost;
-        }
-
-        public Double getTotalCost()
-        {
-            return _totalCost;
-        }
-
-        public void setTotalCost(Double totalCost)
-        {
-            _totalCost = totalCost;
-        }
-
-        public Date getDate()
-        {
-            return _date;
-        }
-
-        public void setDate(Date date)
-        {
-            _date = date;
-        }
-
-        public TimeStamp getInvoiceDate()
-        {
-            return _invoiceDate;
-        }
-
-        public void setInvoiceDate(TimeStamp invoiceDate)
-        {
-            _invoiceDate = invoiceDate;
-        }
-
-        public String getCategory()
-        {
-            return _category;
-        }
-
-        public void setCategory(String category)
-        {
-            _category = category;
-        }
-
-        public String getServicecenter()
-        {
-            return _servicecenter;
-        }
-
-        public void setServicecenter(String servicecenter)
-        {
-            _servicecenter = servicecenter;
-        }
-    }
-
-    public static class Alias
-    {
-        String _alias;
-        String _po_number;
-        String _address;
-        String _contact_email;
-        private String _grantNumber;
-        private String _uw_account;
-        private String _uw_fund;
-        private String _uw_udds;
-        private String _uw_class_code;
-        private String _tier_rate;
-        public Date _budgetEndDate;
-        public String _comments;
-
-
-        public String getAlias()
-        {
-            return _alias;
-        }
-
-        public void setAlias(String alias)
-        {
-            _alias = alias;
-        }
-
-        public String getPo_number()
-        {
-            return _po_number;
-        }
-
-        public void setPo_number(String po_number)
-        {
-            _po_number = po_number;
-        }
-
-        public String getAddress()
-        {
-            return _address;
-        }
-
-        public void setAddress(String address)
-        {
-            _address = address;
-        }
-
-        public String getContact_email()
-        {
-            return _contact_email;
-        }
-
-        public void setContact_email(String contact_email)
-        {
-            _contact_email = contact_email;
-        }
-
-        public String getUw_account()
-        {
-            return _uw_account;
-        }
-
-        public void setUw_account(String uw_account)
-        {
-            _uw_account = uw_account;
-        }
-
-        public String getGrantNumber()
-        {
-            return _grantNumber;
-        }
-
-        public void setGrantNumber(String grantNumber)
-        {
-            _grantNumber = grantNumber;
-        }
-
-        public String getUw_fund()
-        {
-            return _uw_fund;
-        }
-
-        public void setUw_fund(String uw_fund)
-        {
-            _uw_fund = uw_fund;
-        }
-
-        public String getUw_udds()
-        {
-            return _uw_udds;
-        }
-
-        public void setUw_udds(String uw_udds)
-        {
-            _uw_udds = uw_udds;
-        }
-
-        public String getUw_class_code()
-        {
-            return _uw_class_code;
-        }
-
-        public void setUw_class_code(String uw_class_code)
-        {
-            _uw_class_code = uw_class_code;
-        }
-
-        public String getTier_rate()
-        {
-            return _tier_rate;
-        }
-
-        public void setTier_rate(String tier_rate)
-        {
-            _tier_rate = tier_rate;
-        }
-
-        public Date getBudgetEndDate()
-        {
-            return _budgetEndDate;
-        }
-
-        public void setBudgetEndDate(Date budgetEndDate)
-        {
-            _budgetEndDate = budgetEndDate;
-        }
-
-        public String getComments()
-        {
-            return _comments;
-        }
-
-        public void setComments(String comments)
-        {
-            _comments = comments;
-        }
-    }
 
     @RequiresPermission(ReadPermission.class)
     public class GetJetInvoiceCSVAction extends ExportAction<InvoiceRunForm>
@@ -519,12 +176,11 @@ public class WNPRC_BillingController extends SpringActionController
         @Override
         public void export(InvoiceRunForm invoiceRunForm, HttpServletResponse response, BindException errors) throws Exception
         {
-
             String contentType = "text/plain";
             JetCSV csv = getJetCsv(invoiceRunForm.getRunId());
             response.setContentType(contentType);
             response.setHeader("Content-Disposition", "attachment; filename=\"" + csv.getFileName() + ".csv" + "\"");
-            response.setContentLength(csv.getCsvData().length());
+            response.setContentLength(csv.getCsvData().getBytes(StringUtilsLabKey.DEFAULT_CHARSET).length);
             response.getOutputStream().write(csv.getCsvData().getBytes(StringUtilsLabKey.DEFAULT_CHARSET));
         }
     }
@@ -541,8 +197,7 @@ public class WNPRC_BillingController extends SpringActionController
         csvWriter.writeNext(new String[]{"Department","Fund","Program","Project","Activity ID","Account","Class",
                 "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
 
-        for (JetInvoiceItem invoiceItem : invoiceItems)
-        {
+        for (JetInvoiceItem invoiceItem : invoiceItems){
             csvWriter.writeNext(emptyLine);
             csvWriter.writeNext(new String[]{
                     invoiceItem.Department,
@@ -563,9 +218,6 @@ public class WNPRC_BillingController extends SpringActionController
         csvWriter.close();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yy");
-        String date = dateFormat.format(invoiceRun.getRunDate());
-
-
         String fileName = "JET_" + dateFormat.format(invoiceRun.getBillingPeriodStart()) + "_" +
                 dateFormat.format(invoiceRun.getBillingPeriodEnd());
         return new JetCSV(fileName,writer.toString());
@@ -577,7 +229,6 @@ public class WNPRC_BillingController extends SpringActionController
 
         public JetCSV(String fileName, String csvData)
         {
-
             _fileName = fileName;
             _csvData = csvData;
         }
@@ -604,7 +255,6 @@ public class WNPRC_BillingController extends SpringActionController
 
     public static class InvoiceRunForm
     {
-
         int _runId;
 
         public int getRunId()
@@ -783,6 +433,9 @@ public class WNPRC_BillingController extends SpringActionController
         public void export(InvoicePdfForm invoicePdfForm, HttpServletResponse response, BindException errors) throws Exception
         {
             Invoice invoice = getInvoice(invoicePdfForm.getInvoiceNumber());
+            if(invoice == null){
+                throw new NotFoundException("The selected invoice could not be found.");
+            }
             Alias alias = getInvoiceAccount(invoice.getAccountNumber());
             InvoiceRun invoiceRun = getInvoiceRunByObjectId(invoice.getInvoiceRunId());
             TierRate accountTierRate = getTierRate(alias.getTier_rate());
@@ -800,10 +453,8 @@ public class WNPRC_BillingController extends SpringActionController
             pdf.createLineItems(invoicedItems);
             SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM_yyyy");
             String filename = alias.getGrantNumber() + "_" + dateFormatBillingFor.format(invoiceRun.getBillingPeriodStart()) + "_Invoice.pdf";
-            PageFlowUtil.prepareResponseForFile(getViewContext().getResponse(), Collections.emptyMap(), filename, false);
+            PageFlowUtil.prepareResponseForFile(getViewContext().getResponse(), Collections.emptyMap(), filename, invoicePdfForm.isAsAttachment());
             pdf.output(getViewContext().getResponse().getOutputStream());
         }
     }
-
-
 }

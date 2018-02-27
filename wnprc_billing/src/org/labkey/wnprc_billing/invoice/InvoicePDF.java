@@ -10,7 +10,10 @@ import com.koadweb.javafpdf.ImageType;
 import com.koadweb.javafpdf.Position;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.wnprc_billing.WNPRC_BillingController;
+import org.labkey.wnprc_billing.domain.Alias;
+import org.labkey.wnprc_billing.domain.Invoice;
+import org.labkey.wnprc_billing.domain.InvoiceRun;
+import org.labkey.wnprc_billing.domain.InvoicedItem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,26 +36,21 @@ public class InvoicePDF extends FPDF
     private String charges_total_month;
     private String overheadCharges_total_month;
     private String charges_total_balance_month;
-    private Date grant_period_end;
-    private WNPRC_BillingController.Alias alias;
+    private final Invoice invoice;
+    private Alias alias;
+    private InvoiceRun invoiceRun;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yy");
     SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM-dd-yyyy");
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
 
-    public InvoicePDF(WNPRC_BillingController.Invoice invoice, WNPRC_BillingController.Alias alias, WNPRC_BillingController.InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddess, String creditToAccount)
+    public InvoicePDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddess, String creditToAccount)
     {
         super(Format.LETTER);
         this.alias = alias;
-        billing_date = invoiceRun.getRunDate();
-        billing_period_start_date = invoiceRun.getBillingPeriodStart();
-        billing_period_end_date = invoiceRun.getBillingPeriodEnd();
-        grant_address = alias.getAddress();
-        po_number = alias.getPo_number();
-        account_title = alias.getUw_account();
-        invoice_no = invoice.getInvoiceNumber();
-        charges_total_month = moneyFormat.format(invoice.getInvoiceAmount());
-        grant_number = alias.getGrantNumber();
+        this.invoiceRun = invoiceRun;
+        this.invoice = invoice;
+
         companyAddress += billingAddess;
         _creditToAccount = creditToAccount;
         double overheadAssessment = invoice.getInvoiceAmount() * tierRate;
@@ -60,12 +58,10 @@ public class InvoicePDF extends FPDF
         overheadCharges_total_month = moneyFormat.format(overheadAssessment);
         charges_total_balance_month = moneyFormat.format(invoice.getInvoiceAmount() + overheadAssessment);
         footer_text += contactEmail;
-        grant_period_end = alias.getBudgetEndDate();
-        comments = alias.getComments() != null? alias.getComments():alias.getContact_email();
     }
 
 
-    public void createLineItems(List<WNPRC_BillingController.InvoicedItem> invoicedItems) throws IOException
+    public void createLineItems(List<InvoicedItem> invoicedItems) throws IOException
     {
         List<FormattedLineItem> items = new ArrayList<>();
         Calendar calendarCurrent = Calendar.getInstance();
@@ -73,7 +69,7 @@ public class InvoicePDF extends FPDF
         boolean isFirstItem =true;
         String currentServiceCenter=null;
         float subTotal = 0;
-        for (WNPRC_BillingController.InvoicedItem invoicedItem : invoicedItems)
+        for (InvoicedItem invoicedItem : invoicedItems)
         {
             calendarItem.setTime(invoicedItem.getDate());
             boolean isDateChange = isFirstItem || calendarCurrent.get(Calendar.DAY_OF_MONTH) != calendarItem.get(Calendar.DAY_OF_MONTH);
@@ -111,7 +107,7 @@ public class InvoicePDF extends FPDF
         addLines(items);
     }
 
-    private List<FormattedLineItem> getLineItemsFromInvoicedItem(WNPRC_BillingController.InvoicedItem invoicedItem){
+    private List<FormattedLineItem> getLineItemsFromInvoicedItem(InvoicedItem invoicedItem){
         String indent = "  ";
         List<FormattedLineItem> formattedLineItems = new ArrayList<>();
         boolean showDetailsWithItem = invoicedItem.getComment() == null;
@@ -149,7 +145,7 @@ public class InvoicePDF extends FPDF
         return formattedLineItems;
     }
 
-    private void addDetailsToLineItem(FormattedLineItem formattedLineItem, WNPRC_BillingController.InvoicedItem invoicedItem ){
+    private void addDetailsToLineItem(FormattedLineItem formattedLineItem, InvoicedItem invoicedItem ){
         formattedLineItem._quantity = invoicedItem.getQuantity();
         formattedLineItem._unitPrice = invoicedItem.getUnitCost().floatValue();
         formattedLineItem._linePrice = invoicedItem.getTotalCost().floatValue();
@@ -171,19 +167,11 @@ public class InvoicePDF extends FPDF
 
     String companyName = "Wisconsin National Primate Research Center";
     String companyAddress = "University of Wisconsin - Madison\n";
-    String comments = null;
-    String po_number;
     String type = "Totally fake";
-    String grant_address;
     int page_number = 1;
     String footer_text = "For questions regarding this invoice contact ";
-    String account_title;
-    String grant_number;
     private String _creditToAccount;
     String tier_rate;
-    Date billing_date;
-    Date billing_period_start_date;
-    Date billing_period_end_date;
 
     int angle = 0;
 
@@ -305,7 +293,7 @@ public class InvoicePDF extends FPDF
 
             addCompany(companyName);
             addAddress(companyAddress);
-            addDate(billing_date);
+            addDate(invoiceRun.getRunDate());
             addGrant();
             addPageNumber(page_number);
             page_number++;
@@ -313,22 +301,19 @@ public class InvoicePDF extends FPDF
             addInvoiceNo();
             addCharge();
             addPaymentInfo();
+            String comments = alias.getComments() != null? alias.getComments():alias.getContact_email();
             if (comments != null && !comments.trim().isEmpty())
                 addComments();
-            addBillingDate(billing_period_start_date, billing_period_end_date);
+            addBillingDate(invoiceRun.getBillingPeriodStart(), invoiceRun.getBillingPeriodEnd());
             addCols(headers);
 
             setY(75);
-
-//            addLineFormat(lineformat);
-
         }
         catch (IOException e)
         {
             throw new UnexpectedException(e);
         }
     }
-
 
     // private functions
     private void RoundedRect(double x, double y, double w, double h, double r, String style)
@@ -462,7 +447,7 @@ public class InvoicePDF extends FPDF
         x = right_x;
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
-        MultiCell(76, 4, grant_address);
+        MultiCell(76, 4, alias.getAddress());
 
         String req_text;
 
@@ -493,7 +478,7 @@ public class InvoicePDF extends FPDF
         x = right_x;
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
-        MultiCell(60, 4, po_number == null? "": po_number);
+        MultiCell(60, 4, alias.getPo_number() == null? "": alias.getPo_number());
         x = left_x;
         y = getY();
         setXY(x, y);
@@ -503,7 +488,7 @@ public class InvoicePDF extends FPDF
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
 
-        MultiCell(60, 4, dateFormat.format(grant_period_end));
+        MultiCell(60, 4, dateFormat.format(alias.getBudgetEndDate()));
     }
 
     private void addDate(Date date) throws IOException
@@ -525,7 +510,6 @@ public class InvoicePDF extends FPDF
         setXY(r1 + (r2 - r1) / 2 - 5, y1 + 11);
         setFont("Helvetica", Collections.emptySet(), 10);
         Cell(10f, 2f, formattedDate, Alignment.CENTER);
-//        Cell (10,2, billing_date, Alignment.CENTER);
     }
 
     private void addGrant() throws IOException
@@ -542,7 +526,7 @@ public class InvoicePDF extends FPDF
         Cell(10, 2, "FUND-ACCOUNT", Alignment.CENTER);
         setXY(r1 + (r2 - r1) / 2 - 5, y1 + 11);
         setFont("Helvetica", Collections.emptySet(), 10);
-        Cell(10, 2,   addItem(alias.getUw_fund()) + grant_number, Alignment.CENTER);
+        Cell(10, 2,   addItem(alias.getUw_fund()) + alias.getGrantNumber(), Alignment.CENTER);
     }
 
     private void addPageNumber(int page) throws IOException
@@ -583,7 +567,7 @@ public class InvoicePDF extends FPDF
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 8);
         setFillColor(230, 230, 230);
-        MultiCell(w - 20, 3, comments, null, Alignment.LEFT, false);
+        MultiCell(w - 20, 3, alias.getComments() != null? alias.getComments():alias.getContact_email(), null, Alignment.LEFT, false);
     }
 
     // payment info
@@ -596,10 +580,7 @@ public class InvoicePDF extends FPDF
         String font = "Courier";//: "Arial";
         setFont(font, Collections.singleton(FontStyle.BOLD), 11);
         String invoiceNo = "INVOICE NO. ";
-        //invoiceNo .= str_replace("-", "", billing_date);
-        //invoiceNo .= grant_number;
-        invoiceNo += invoice_no;
-        //echo "<br>invoice=" . invoiceNo;
+        invoiceNo += invoice.getInvoiceNumber();
         MultiCell(0, 4, invoiceNo, null, Alignment.LEFT, false);
     }
 
@@ -681,7 +662,7 @@ public class InvoicePDF extends FPDF
         setXY(r3, y1 + 2);
 //		Cell( 17,4, String.format("%0.2f", req_amount), '', '', 'R');
 //		setXY( r3, y1+7 );
-        Cell(17, 4, charges_total_month, Alignment.RIGHT);
+        Cell(17, 4, moneyFormat.format(invoice.getInvoiceAmount()), Alignment.RIGHT);
         setXY(r3, y1 + 8);
         Cell(17, 4, tier_rate, Alignment.RIGHT);
         setXY(r3, y1 + 14);

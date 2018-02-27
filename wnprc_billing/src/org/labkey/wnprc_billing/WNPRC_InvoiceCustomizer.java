@@ -27,7 +27,8 @@ public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
     @Override
     public void customize(TableInfo tableInfo)
     {
-        addViewPdf(tableInfo);
+        addLinkColumn(tableInfo, false,"View PDF","viewPdf");
+        addLinkColumn(tableInfo, true,"Download PDF","downloadPDF");
     }
 
     private void addViewPdf(TableInfo ti)
@@ -46,6 +47,32 @@ public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
                 simpleDisplayColumn.setDisplayHtml("View PDF");
                 ActionURL url = new ActionURL(WNPRC_BillingController.PDFExportAction.class, ti.getUserSchema().getContainer());
                 url.addParameter("invoiceNumber", "${invoiceNumber}");
+                simpleDisplayColumn.setURL(url.toString());
+
+                return simpleDisplayColumn;
+            });
+
+            ((AbstractTableInfo) ti).addColumn(wrappedColumnPDF);
+        }
+    }
+
+    private void addLinkColumn(TableInfo ti, boolean asAttachment, String label, String colName)
+    {
+
+
+        if (ti.getColumn(colName) == null)
+        {
+            WrappedColumn wrappedColumnPDF = new WrappedColumn(ti.getColumn("invoiceNumber"),colName);
+            wrappedColumnPDF.setHidden(false);
+            wrappedColumnPDF.setLabel(label);
+
+            wrappedColumnPDF.setDisplayColumnFactory(colInfo -> {
+                SimpleDisplayColumn simpleDisplayColumn = new SimpleDisplayColumn();
+                simpleDisplayColumn.setName(colName);
+                simpleDisplayColumn.setDisplayHtml(label);
+                ActionURL url = new ActionURL(WNPRC_BillingController.PDFExportAction.class, ti.getUserSchema().getContainer());
+                url.addParameter("invoiceNumber", "${invoiceNumber}");
+                url.addParameter("asAttachment", asAttachment);
                 simpleDisplayColumn.setURL(url.toString());
 
                 return simpleDisplayColumn;

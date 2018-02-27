@@ -32,7 +32,7 @@ public class DefaultTBDataSource extends AbstractDataSource
 {
     public DefaultTBDataSource(Module module)
     {
-        super("study", "TB Tests", "TB Test", module);
+        super("study", "TB Tests", "TB Tests", module);
     }
 
     @Override

@@ -178,6 +178,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Blood Draws", BloodDrawsForm.NAME), "study", "blood");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromIdsButton(this, "Schedule Blood Draw For Selected", "Blood Draws", BloodDrawsForm.NAME, new String[]{"Blood Draws"}), "study", "demographics");
 
+        EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultTBDataSource(this));

@@ -51,7 +51,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
 
     //test if statement remove once in production. Only allow request for animal in WMIR or A2
-    if (row.id && row.QCStateLabel == 'Scheduled' && internalTest){
+    if (row.id && row.QCStateLabel == 'Scheduled'){
 
 
         EHR.Server.Utils.findDemographics({

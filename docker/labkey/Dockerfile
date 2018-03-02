@@ -3,6 +3,8 @@
 
 FROM store/oracle/serverjre:8
 
+ARG LABKEY_TEAMCITY_BUILD=
+
 ENV LANG en_US.utf8
 
 # copy in some additional yum repositories
@@ -39,8 +41,8 @@ ENV LABKEY_HOME /usr/local/labkey
 ENV LABKEY_TEAMCITY_CONFIG LabkeyModules152_Installers
 ENV LABKEY_VERSION 15.2
 RUN mkdir -p $LABKEY_HOME \
- && LABKEY_TEAMCITY_BUILD="`wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
- && wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/builds/number:${LABKEY_TEAMCITY_BUILD}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD}-UWisc-bin.tar.gz \
+ && LABKEY_TEAMCITY_LATEST_BUILD="`wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
+ && wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/builds/number:${LABKEY_TEAMCITY_BUILD:-$LABKEY_TEAMCITY_LATEST_BUILD}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD:-$LABKEY_TEAMCITY_LATEST_BUILD}-UWisc-bin.tar.gz \
   | tar -xz -C $LABKEY_HOME --strip-components=1 \
  && cp $LABKEY_HOME/tomcat-lib/*.jar lib
 

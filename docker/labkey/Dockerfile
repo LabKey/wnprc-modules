@@ -11,9 +11,12 @@ ENV LABKEY_VERSION 17.2
 
 WORKDIR /tmp/labkey
 
+ARG LABKEY_TEAMCITY_BUILD=
+
 RUN apk add --no-cache wget tar ca-certificates && update-ca-certificates
 RUN X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
- && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/builds/number:${X}/artifacts/content/wisc/Labkey${LABKEY_VERSION}-${X%%\.[[:digit:]]*}-UWisc-bin.tar.gz \
+ && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
+ && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/builds/number:${Y}/artifacts/content/wisc/Labkey${LABKEY_VERSION}-${Y%%\.[[:digit:]]*}-UWisc-bin.tar.gz \
   | tar -xz --strip-components=1
 
 # -----------------------------------------------------------------------------

@@ -19,10 +19,10 @@ public class FoodDeprivesFormSections extends SimpleGridSection
 
         super("study", "foodDeprives", "Food Deprives", EHRService.FORM_SECTION_LOCATION.Body);
         this.addConfigSource("Task");
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduledFoodDeprivesWindow.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddStartedFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.fromPath("ehr/window/AddScheduledFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.fromPath("ehr/window/AddStartedFoodDeprivesWindow.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.fromPath("ehr/buttons/husbandryButtons.js"));
         _showLocation = true;
         formName  = parentFormName;
     }
@@ -30,10 +30,10 @@ public class FoodDeprivesFormSections extends SimpleGridSection
     public FoodDeprivesFormSections(boolean isRequest, EHRService.FORM_SECTION_LOCATION location)
     {
         super("study", "foodDeprives", "Food Deprives", location);
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduledFoodDeprivesWindow.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddStartedFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.fromPath("ehr/window/AddScheduledFoodDeprivesWindow.js"));
+        addClientDependency(ClientDependency.fromPath("ehr/window/AddStartedFoodDeprivesWindow.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.fromPath("ehr/buttons/husbandryButtons.js"));
 
         _isRequest = isRequest;
     }

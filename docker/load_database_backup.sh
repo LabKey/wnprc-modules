@@ -23,6 +23,10 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --production)  ## flag indicating to run in "production" mode
+            prod="true"
+            shift
+            ;;
         *) ## positional arguments
             args+=("$1")
             shift
@@ -107,14 +111,16 @@ echo -e '\033[0;32mdone\033[0m'
 #-------------------------------------------------------------------------------
 echo -n "Restoring database from $filepath ...  0%"
 pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
-total=$(egrep -c '^\d+;.*' $tmpdir/pg_restore.list)
+total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
 pg_restore -h localhost -p "${pgport#*:}" -U postgres -d labkey -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
 pg_restore_pid=$!
 while kill -0 "$pg_restore_pid" &>/dev/null; do
-    count=$(egrep -c '(processing|finished) item' $tmpdir/pg_restore.log)
-    perct=$(printf "%2d" $(( 100 * count / total )))
-    echo -e -n "\b\b\b\033[0;33m${perct}%\033[0m"
+    if [[ $total -ne 0 ]]; then
+        count=$(egrep -c '(processing|finished) item' $tmpdir/pg_restore.log)
+        perct=$(printf "%2d" $(( 100 * count / total )))
+        echo -e -n "\b\b\b\033[0;33m${perct}%\033[0m"
+    fi
     sleep 0.5
 done
 trap - TERM INT
@@ -124,24 +130,29 @@ echo
 #-------------------------------------------------------------------------------
 # Run the scripts to clean up the instance for development purposes
 #-------------------------------------------------------------------------------
-echo -n "Preparing database for development ... "
+echo -n "Preparing database for deployment ... "
 psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
-    update prop.properties p set value = 'http://localhost:8080' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
-    update prop.properties p set value = FALSE where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'sslRequired';
-    update prop.properties p set value = 'DevelopmentServer' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemShortName';
-    update prop.properties p set value = 'EHR Development Server' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemDescription';
-    update prop.properties p set value = 'Blue' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'themeName';
-    update prop.properties p set value = 'UA-12818769-2' where (select s.category from prop.propertysets s where s.set = p.set) = 'analytics' and p.name = 'accountId';
-    update prop.properties p set value = replace(Value, 'saimiri', 'colony-test') where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'jdbcUrl';
-    update prop.properties p set value = 0 where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'runIntervalInMinutes';
-    update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'UserPreferencesMap' and p.name = 'RReport.RExe';
-    update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
-    update prop.properties p set value = 'ldap://ldap.primate.wisc.edu' where (select s.category from prop.propertysets s where s.set = p.set) = 'LDAPAuthentication' and p.name = 'Servers';
-    update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';
-    update exp.propertydescriptor set scale = 64 where name in ('FirstName', 'LastName', 'Phone', 'Mobile', 'Pager', 'IM') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
-    update exp.propertydescriptor set scale = 255 where name in ('Description') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
-    delete from ehr.notificationrecipients;
+    update prop.properties p set value = 'https://$(hostname -f)' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
 XXX
+if [[ -z $prod ]]; then
+    psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
+        update prop.properties p set value = 'http://localhost:8080' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
+        update prop.properties p set value = FALSE where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'sslRequired';
+        update prop.properties p set value = 'DevelopmentServer' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemShortName';
+        update prop.properties p set value = 'EHR Development Server' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemDescription';
+        update prop.properties p set value = 'Blue' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'themeName';
+        update prop.properties p set value = 'UA-12818769-2' where (select s.category from prop.propertysets s where s.set = p.set) = 'analytics' and p.name = 'accountId';
+        update prop.properties p set value = replace(Value, 'saimiri', 'colony-test') where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'jdbcUrl';
+        update prop.properties p set value = 0 where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'runIntervalInMinutes';
+        update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'UserPreferencesMap' and p.name = 'RReport.RExe';
+        update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
+        update prop.properties p set value = 'ldap://ldap.primate.wisc.edu' where (select s.category from prop.propertysets s where s.set = p.set) = 'LDAPAuthentication' and p.name = 'Servers';
+        update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';
+        update exp.propertydescriptor set scale = 64 where name in ('FirstName', 'LastName', 'Phone', 'Mobile', 'Pager', 'IM') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
+        update exp.propertydescriptor set scale = 255 where name in ('Description') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
+        delete from ehr.notificationrecipients;
+XXX
+fi
 
 #-------------------------------------------------------------------------------
 # Tear down and re-start the docker-compose environment using the 'regular'

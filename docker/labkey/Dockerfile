@@ -42,7 +42,9 @@ ENV LABKEY_TEAMCITY_CONFIG LabkeyModules152_Installers
 ENV LABKEY_VERSION 15.2
 RUN mkdir -p $LABKEY_HOME \
  && LABKEY_TEAMCITY_LATEST_BUILD="`wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
- && wget -qO- https://teamcity.labkey.org/guestAuth/app/rest/builds/number:${LABKEY_TEAMCITY_BUILD:-$LABKEY_TEAMCITY_LATEST_BUILD}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD:-$LABKEY_TEAMCITY_LATEST_BUILD}-UWisc-bin.tar.gz \
+ && LABKEY_DOWNLOAD_URI="https://teamcity.labkey.org/guestAuth/app/rest/builds/number:${LABKEY_TEAMCITY_BUILD:-$LABKEY_TEAMCITY_LATEST_BUILD}/artifacts/content/wisc/LabKey${LABKEY_VERSION}-${LABKEY_TEAMCITY_BUILD:-$LABKEY_TEAMCITY_LATEST_BUILD}-UWisc-bin.tar.gz" \
+ && echo -e "Downloading LabKey build from \033[1;33m${LABKEY_DOWNLOAD_URI}\033[0m" \
+ && wget -qO- $LABKEY_DOWNLOAD_URI \
   | tar -xz -C $LABKEY_HOME --strip-components=1 \
  && cp $LABKEY_HOME/tomcat-lib/*.jar lib
 
@@ -70,7 +72,8 @@ RUN mkdir -p /usr/share/doc/R-3.2.0/html \
  && Rscript -e "install.packages('Matrix',   repos='http://cran.us.r-project.org')" \
  && Rscript -e "install.packages('RCurl',    repos='http://cran.us.r-project.org')" \
  && Rscript -e "install.packages('Rlabkey',  repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('kinship2', repos='http://cran.us.r-project.org')"
+ && Rscript -e "install.packages('kinship2', repos='http://cran.us.r-project.org')" \
+ && Rscript -e "install.packages('getopt',   repos='http://cran.us.r-project.org')"
 
 # copy the script to wait for the postgres instance (and chmod it for execution)
 COPY wait-for-postgres.sh /etc/

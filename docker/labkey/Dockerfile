@@ -42,7 +42,8 @@ RUN yum -y -q install \
     make \
     libcurl-devel \
     libxml2-devel \
-    # for checking when the database is up
+    openssl-devel \
+    # for checking for when the database is up
     postgresql \
  # to make the image smaller
  && yum clean all

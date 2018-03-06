@@ -22,6 +22,7 @@ RUN rpm -i https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rp
     make \
     libcurl-devel \
     libxml2-devel \
+    openssl-devel \
     # for checking for when the database is up
     postgresql \
  # to make the image smaller

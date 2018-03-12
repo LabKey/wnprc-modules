@@ -1,0 +1,11 @@
+<view xmlns="http://labkey.org/data/xml/view" frame="portal" title="PrimateID Administration">
+    <permissions>
+        <permission name="admin"/>
+    </permissions>
+    <dependencies>
+        <dependency path="https://cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"/>
+        <dependency path="/internal/jQuery"/>
+        <dependency path="/primateid/primateid.js"/>
+        <dependency path="/primateid/begin.js"/>
+    </dependencies>
+</view>

@@ -1,1 +1,1 @@
-export { Sync } from '@wnprc/primate-id';
+export { Async, Sync } from '@wnprc/primate-id';

@@ -24,7 +24,6 @@ COPY netrc /root/netrc.template
 COPY scripts/ /usr/local/labkey/
 
 RUN chmod u+x /usr/local/labkey/*/* \
- && echo "\n\nMAILTO=ehrservices@g-groups.wisc.edu\n\n" >> /etc/crontab \
  && cat /usr/local/labkey/*/*.cron >> /etc/crontab \
  && touch ~/.netrc
 

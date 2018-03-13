@@ -24,7 +24,7 @@ module.exports = function wp(env: { BUILD_DIR: string, PROJECT_DIR: string }): C
             ],
         },
         output: {
-            filename: 'primateid.js',
+            filename: 'primateid.webpack.js',
             library: 'PrimateID',
         },
         plugins: [

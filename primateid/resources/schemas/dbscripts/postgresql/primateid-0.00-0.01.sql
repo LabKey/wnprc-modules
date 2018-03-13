@@ -7,6 +7,6 @@ CREATE TABLE  primateid.unique_ids (
   participantid VARCHAR(32) NOT NULL,
   primateid     VARCHAR(10) NOT NULL,
 
-  CONSTRAINT pk_unique_ids    PRIMARY KEY (container, participantid),
-  CONSTRAINT primateid_unique UNIQUE      (container, primateid)
+  CONSTRAINT pk_unique_ids           PRIMARY KEY (container, participantid),
+  CONSTRAINT uq_unique_ids_primateid UNIQUE      (container, primateid)
 );

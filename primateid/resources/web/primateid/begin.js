@@ -4,27 +4,20 @@ const PrimateIDModule = (function () {
         return new Promise(function (resolve, reject) {
             const schema = "study";
             const query = "select a.participantid"
-                        +  " from ("
-                        +         "select d0.participantid participantid"
+                        +  " from (select d0.participantid participantid"
                         +          " from demographics d0"
-                        +         " where d0.status = 'alive'"
-                        +         " union "
-                        +         "select d1.dam participantid"
-                        +          " from demographics d1"
-                        +         " where d1.status = 'alive'"
-                        +           " and d1.dam is not null"
-                        +         " union "
-                        +         "select d2.sire participantid"
-                        +          " from demographics d2"
-                        +         " where d2.status = 'alive'"
-                        +           " and d2.sire is not null"
-                        +   ") a"
+                        +         " where (d0.calculated_status = 'alive'"
+                        +            " or exists(select null"
+                        +                        " from demographics d1"
+                        +                       " where d1.dam = d0.participantid)"
+                        +            " or exists(select null"
+                        +                        " from demographics d2"
+                        +                       " where d2.sire = d0.participantid))) a"
                         +  " left outer join primateid.unique_ids b"
                         +    " on a.participantid = b.participantid"
                         + " where b.participantid is null"
             ;
             notify("Counting study participants for id generation...");
-            // get the count from the query
             LABKEY.Query.executeSql({
                 schemaName: schema, sql: "select count(*) rowcount from (" + query + ")",
                 success: function (count_data) {

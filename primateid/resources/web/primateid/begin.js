@@ -3,6 +3,7 @@ const PrimateIDModule = (function () {
         // noinspection JSUnresolvedFunction
         return new Promise(function (resolve, reject) {
             const schema = "study";
+            // @formatter:off
             const query = "select a.participantid"
                         +  " from (select d0.participantid participantid"
                         +          " from demographics d0"
@@ -17,6 +18,7 @@ const PrimateIDModule = (function () {
                         +    " on a.participantid = b.participantid"
                         + " where b.participantid is null"
             ;
+            // @formatter:on
             notify("Counting study participants for id generation...");
             LABKEY.Query.executeSql({
                 schemaName: schema, sql: "select count(*) rowcount from (" + query + ")",

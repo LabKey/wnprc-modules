@@ -20,6 +20,6 @@ LK_BASE_URL=http://labkey:8080/
 #---------------------------------------------------------------------------------------
 #Min   Hour     Day   Month   Weekday   User   Command
 #---------------------------------------------------------------------------------------
-0      1        *     *       *         root   $BACKUP_SCRIPT_DIR/lkServerBackup.pl;
+0      1        *     *       *         root   $BACKUP_SCRIPT_DIR/lkServerBackup.pl > /dev/null
 
 

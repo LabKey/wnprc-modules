@@ -1,0 +1,15 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <properties>
+        <propertyDescriptor name="PrimateIdPrefix">
+            <canSetPerContainer>false</canSetPerContainer>
+            <description>Prefix to use when generating PrimateId values for new study participants.</description>
+            <showDescriptionInline>true</showDescriptionInline>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+            <inputType>text</inputType>
+            <inputFieldWidth>2</inputFieldWidth>
+            <label>Prefix (2 chars max)</label>
+        </propertyDescriptor>
+    </properties>
+</module>

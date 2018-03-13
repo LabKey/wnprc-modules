@@ -1,0 +1,19 @@
+<script type="application/javascript">
+    function onGenerateClick(btn) {
+        jQuery(btn).attr('disabled', true);
+        PrimateIDModule.generate(function(msg) {
+            jQuery('#output').text(msg);
+        }).then(function() {
+            jQuery('#output').text('Successfully generated PrimateIDs.')
+        }).catch(function(e) {
+            jQuery('#output').text('Error while generating PrimateIDs. Check browser console.');
+            console.error(e);
+        }).finally(function() {
+            jQuery(btn).attr('disabled', false);
+        });
+    }
+</script>
+<div>
+    <button onclick="onGenerateClick(this)">Generate PrimateIDs</button>
+    <span id="output"/>
+</div>

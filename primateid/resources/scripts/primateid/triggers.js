@@ -4,7 +4,7 @@ exports.init = function (EHR) {
 
     const console = require('console');
     const LABKEY = require('labkey');
-    const PrimateID = new (require('primateid/primateid')).PrimateID.Sync();
+    const PrimateID = new (require('primateid/primateid.webpack')).PrimateID.Sync();
 
     //endregion
 
@@ -48,10 +48,7 @@ exports.init = function (EHR) {
 
     //endregion
 
-    //region -- study.demographics triggers --
-
-    // noinspection JSUnresolvedFunction, JSUnresolvedVariable
-    TM.registerHandlerForQuery(TM.Events.AFTER_INSERT, 'study', 'demographics', function (helper, errors, row) {
+    const afterInsertTrigger = function (_, __, row) {
         // noinspection JSUnresolvedFunction, JSUnresolvedVariable
         LABKEY.Query.selectRows({
             schemaName: 'primateid',
@@ -63,11 +60,16 @@ exports.init = function (EHR) {
                 // noinspection JSUnresolvedFunction
                 if (data.getRowCount() === 0)
                     createAndInsertPrimateId(row['participantid']);
+                else
+                    _log("PrimateID present for subject: " + row['participantid'])
             },
             failure: EHR.Server.Utils.onFailure
         });
-    });
+    }
 
-    //endregion
+    // noinspection JSUnresolvedFunction, JSUnresolvedVariable
+    TM.registerHandlerForQuery(TM.Events.AFTER_INSERT, 'study', 'arrival', afterInsertTrigger);
+    // noinspection JSUnresolvedFunction, JSUnresolvedVariable
+    TM.registerHandlerForQuery(TM.Events.AFTER_INSERT, 'study', 'birth', afterInsertTrigger);
 
 };

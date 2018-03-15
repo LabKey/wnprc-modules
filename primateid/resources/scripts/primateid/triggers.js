@@ -24,23 +24,25 @@ exports.init = function (EHR) {
         // noinspection JSUnresolvedFunction
         const prefix = LABKEY.getModuleProperty('primateid', 'PrimateIdPrefix');
         if (prefix === null)
-            _log("WARNING: PrimateId prefix is not set. Please set the value of the PrimateIdPrefix property via the LabKey Module Properties")
+            _log("WARNING: PrimateId prefix is not set. " +
+                    "Please set the value of the PrimateIdPrefix property via the LabKey Module Properties");
         return prefix;
     };
 
     // helper function to create and insert a PrimateId for a given participant
     const createAndInsertPrimateId = function (participantId) {
-        _log("generating primate id for " + participantId);
+        const primateid = PrimateID.Generate(getPrimateIdPrefix());
         // noinspection JSUnresolvedFunction
         LABKEY.Query.insertRows({
             schemaName: 'primateid',
             queryName: 'unique_ids',
             rows: [{
                 'participantid': participantId,
-                'primateid': PrimateID.Generate(getPrimateIdPrefix())
+                'primateid': primateid
             }],
             success: function () {
-                _log("inserted new primateid successfully")
+                _log("inserted new primateid successfully: " +
+                        "participant = " + participantId + ", primateid = " + primateid);
             },
             failure: EHR.Server.Utils.onFailure
         })
@@ -65,11 +67,10 @@ exports.init = function (EHR) {
             },
             failure: EHR.Server.Utils.onFailure
         });
-    }
+    };
 
     // noinspection JSUnresolvedFunction, JSUnresolvedVariable
-    TM.registerHandlerForQuery(TM.Events.AFTER_INSERT, 'study', 'arrival', afterInsertTrigger);
+    TM.registerHandlerForQuery(TM.Events.AFTER_INSERT, 'study', 'Arrival', afterInsertTrigger);
     // noinspection JSUnresolvedFunction, JSUnresolvedVariable
-    TM.registerHandlerForQuery(TM.Events.AFTER_INSERT, 'study', 'birth', afterInsertTrigger);
-
+    TM.registerHandlerForQuery(TM.Events.AFTER_INSERT, 'study', 'Birth', afterInsertTrigger);
 };

@@ -20,5 +20,5 @@ LK_BASE_URL=http://labkey:8080/
 #---------------------------------------------------------------------------------------
 #Min   Hour     Day   Month   Weekday   User   Command
 #---------------------------------------------------------------------------------------
-*/15   *        *     *       *         root   $DELETE_DIR/deleteStudyRecords.pl;
+*/15   *        *     *       *         root   $DELETE_DIR/deleteStudyRecords.pl > /dev/null
 

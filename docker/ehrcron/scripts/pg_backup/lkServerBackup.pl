@@ -491,11 +491,10 @@ sub lk_log {
     Labkey::Query::insertRows(
         -baseUrl       => $lk_config{'baseURL'},
         -containerPath => $lk_config{'containerPath'} || "shared",
-        -schemaName    => "auditlog",
-        -queryName     => "audit",
+        -schemaName    => "auditLog",
+        -queryName     => "Client API Actions",
         -rows          =>
         [ {
-            "EventType" => "Client API Actions",
             "Key1"      => "LabKey Server Backup",
             "Comment"   => $status,
             "Date"      => $date

@@ -8,7 +8,7 @@ use Labkey::Query;
 use Time::localtime;
 use Net::SMTP;
 use MIME::Lite;
-
+use List::MoreUtils qw(uniq);
 
 # Create string for currentDate
 my $tm = localtime;

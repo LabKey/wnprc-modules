@@ -10,6 +10,10 @@ RUN cpanm LabKey::Query         \
           Config::Abstract::Ini \
           Log::Rolling
 
+# Add the apt repo for PostgreSQL so we can install the client package
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+ && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
 # The gettext package contains the envsubst command needed for the run command of this image.
 RUN apt-get update                 \
  && apt-get -qq install -y vim     \
@@ -17,6 +21,7 @@ RUN apt-get update                 \
                            ssmtp   \
                            cron    \
                            gettext \
+                           postgresql-client-9.4 \
  && apt-get clean
 
 COPY ssmtp.conf /etc/ssmtp/ssmtp.conf

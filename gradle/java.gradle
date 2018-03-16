@@ -41,3 +41,17 @@ tasks.jar {
     }
 }
 
+if (project.tasks.findByName('jsp2Java') != null)
+{
+    Task t = project.task('moveJspOutOfJavaFolder', group: 'jsp', type: Copy,
+            description: "Copy WNPRC jsp files to the ACTUAL jsp compile directory", dependsOn: ['copyJsp'])
+        { CopySpec copy ->
+            copy.from "${project.buildDir}/${project.jspCompile.tempDir}/webapp/java"
+            copy.into "${project.buildDir}/${project.jspCompile.tempDir}/webapp"
+            copy.include '**/*.jsp'
+        }
+    t.doFirst{ project.delete "${project.buildDir}/${project.jspCompile.tempDir}/webapp/org"  }
+    t.doLast { project.delete "${project.buildDir}/${project.jspCompile.tempDir}/webapp/java" }
+    project.tasks.findByName('jsp2Java').dependsOn('moveJspOutOfJavaFolder')
+}
+

@@ -18,10 +18,12 @@ public class PrimateIdTest extends AbstractEHRTest
 {
     private static final String PROJECT_NAME = "PrimateId_Test_Project_" + UUID.randomUUID();
 
+    //region --Function overrides from parent class--
+
     @Override
-    protected @Nullable String getProjectName()
+    public List<String> getAssociatedModules()
     {
-        return PROJECT_NAME;
+        return Collections.singletonList("PrimateId");
     }
 
     @Override
@@ -31,9 +33,9 @@ public class PrimateIdTest extends AbstractEHRTest
     }
 
     @Override
-    public List<String> getAssociatedModules()
+    protected @Nullable String getProjectName()
     {
-        return Collections.singletonList("PrimateId");
+        return PROJECT_NAME;
     }
 
     @Override
@@ -43,15 +45,21 @@ public class PrimateIdTest extends AbstractEHRTest
         importStudyFromZip(STUDY_ZIP);
     }
 
+    //endregion
+
     /**
      * Test setup method. Creates a new project for the test and enables all associated modules.
      */
     @Before
     public void setup() throws Exception
     {
+        // only execute the setup once. doing the check this way rather than in
+        // a @BeforeClass method because many of the helper functions are instance
+        // methods rather than static methods - clay, 20 Mar 2018
         if (_containerHelper.getCreatedProjects().contains(getProjectName()))
             return;
 
+        // set up the project, module, and properties in the EHR folder
         initProject("EHR");
         goToEHRFolder();
         getAssociatedModules().forEach(m -> _containerHelper.enableModule(m));
@@ -64,20 +72,20 @@ public class PrimateIdTest extends AbstractEHRTest
      * is visible to the test user.
      */
     @Test
-    public void smoke()
+    public void testSmoke()
     {
         beginAt("/primateid/" + getContainerPath() + "/begin.view");
         assertNoLabKeyErrors();
     }
 
+    /**
+     * Test to make sure clicking the "Generate" button results in the expected success message.
+     */
     @Test
     public void testGeneratePrimateIds()
     {
-        // navigate to the admin page
         beginAt("/primateid/" + getContainerPath() + "/begin.view");
         assertNoLabKeyErrors();
-
-        // click the "Generate PrimateIDs" button
         clickButton("Generate PrimateIDs", "Successfully generated PrimateIDs.");
     }
 }

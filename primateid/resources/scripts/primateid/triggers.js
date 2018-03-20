@@ -19,33 +19,42 @@ exports.init = function (EHR) {
     // noinspection JSUnresolvedVariable
     const TM = EHR.Server.TriggerManager;
 
-    // helper function to retrieve the site-specific prefix for the PrimateId
-    const getPrimateIdPrefix = function () {
+    // helper function to retrieve the container-specific prefix for the PrimateId.
+    // uses an AJAX request to core.getModuleProperties because the JavaScript
+    // helper method in not available to server-side trigger scripts
+    const getPrimateIdPrefix = function (callback) {
         // noinspection JSUnresolvedFunction
-        const prefix = LABKEY.getModuleProperty('primateid', 'PrimateIdPrefix');
-        if (prefix === null)
-            _log("WARNING: PrimateId prefix is not set. " +
-                    "Please set the value of the PrimateIdPrefix property via the LabKey Module Properties");
-        return prefix;
+        LABKEY.Ajax.request({
+            url: LABKEY.ActionURL.buildURL('core', 'getModuleProperties', null), method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            jsonData: {moduleName: 'PrimateId', includePropertyValues: true},
+            success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                // noinspection JSUnresolvedVariable
+                callback(response.values['PrimateIdPrefix'].effectiveValue);
+            }, this),
+            failure: EHR.Server.Utils.onFailure
+        });
     };
 
     // helper function to create and insert a PrimateId for a given participant
     const createAndInsertPrimateId = function (participantId) {
-        const primateid = PrimateID.Generate(getPrimateIdPrefix());
-        // noinspection JSUnresolvedFunction
-        LABKEY.Query.insertRows({
-            schemaName: 'primateid',
-            queryName: 'unique_ids',
-            rows: [{
-                'participantid': participantId,
-                'primateid': primateid
-            }],
-            success: function () {
-                _log("inserted new primateid successfully: " +
-                        "participant = " + participantId + ", primateid = " + primateid);
-            },
-            failure: EHR.Server.Utils.onFailure
-        })
+        getPrimateIdPrefix(function(prefix) {
+            const primateid = PrimateID.Generate(prefix);
+            // noinspection JSUnresolvedFunction
+            LABKEY.Query.insertRows({
+                schemaName: 'primateid',
+                queryName: 'unique_ids',
+                rows: [{
+                    'participantid': participantId,
+                    'primateid': primateid
+                }],
+                success: function () {
+                    _log("inserted new primateid successfully: " +
+                            "participant = " + participantId + ", primateid = " + primateid);
+                },
+                failure: EHR.Server.Utils.onFailure
+            });
+        });
     };
 
     //endregion

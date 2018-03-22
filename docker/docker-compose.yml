@@ -37,7 +37,7 @@ services:
       - "mailserver"
       - "postgres"
     volumes:
-      - "${LABKEY_FILES_DIR}:/usr/local/labkey/files"
+      - "${LABKEY_FILES_DIR}:/backups/new_files_dir"
       - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"
       - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"
@@ -63,6 +63,7 @@ services:
       - "${NGINX_SERVER_PASS_FILE}:/usr/local/ssl/key.pass"
       - "${NGINX_SERVER_KEY_FILE}:/usr/local/ssl/key.pem"
       - "${NGINX_WELL_KNOWN_DIR}:/usr/share/nginx/html"
+      - "${MAIL_CATCHER_HTPASSWD_FILE}:/etc/nginx/.htpasswd"
     ports:
       - "${LABKEY_DANGER_PORT}:80"
       - "${LABKEY_SECURE_PORT}:443"

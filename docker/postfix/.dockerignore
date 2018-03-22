@@ -6,3 +6,4 @@
 !relays
 !supervisord.conf
 !transport
+!header_checks

@@ -22,6 +22,7 @@ RUN apt-get update                 \
                            cron    \
                            gettext \
                            postgresql-client-9.4 \
+                           tzdata \
  && apt-get clean
 
 COPY ssmtp.conf /etc/ssmtp/ssmtp.conf
@@ -33,4 +34,4 @@ RUN chmod u+x /usr/local/labkey/*/* \
  && cat /usr/local/labkey/*/*.cron >> /etc/crontab \
  && touch ~/.netrc
 
-CMD /bin/bash -c "envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && touch /etc/crontab /etc/cron.*/* && /usr/sbin/rsyslogd && cron && touch /var/log/cron.log && tail -f /var/log/syslog"
+CMD /bin/bash -c "echo $TZ > /etc/timezone && rm /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && touch /etc/crontab /etc/cron.*/* && /usr/sbin/rsyslogd && cron && touch /var/log/cron.log && tail -f /var/log/syslog"

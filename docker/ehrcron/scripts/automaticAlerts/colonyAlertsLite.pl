@@ -103,7 +103,7 @@ if(@{$results->{rows}}){
     $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ValidateHousingSnapshot"."'>Click here to view the report again</a></p>\n";
     $email_html .= '<hr>';
     
-    system("/usr/local/labkey/tools/updateSnapshot.pl");
+    system("/usr/local/labkey/automaticAlerts/updateSnapshot.pl");
 }
 
 

@@ -62,7 +62,8 @@ RUN mkdir -p conf/Catalina/localhost \
         -e 's/@@smtpUser@@//' \
         -e 's/@@smtpPort@@/1025/' \
         -e 's/@@masterEncryptionKey@@/defaultKey/' \
-            $LABKEY_HOME/labkey.xml > conf/Catalina/localhost/ROOT.xml
+            $LABKEY_HOME/labkey.xml > conf/Catalina/localhost/ROOT.xml \
+ && sed -i -e 's/<session-timeout>[0-9]*<\/session-timeout>/<session-timeout>120<\/session-timeout>/' conf/web.xml
 
 EXPOSE 8080
 

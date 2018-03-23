@@ -15,7 +15,7 @@
 #---------------------------------------------------------------------------------------
 DELETE_DIR=/usr/local/labkey/deleteStudyRecords/
 MAIL_SERVER=mailserver
-LK_BASE_URL=http://labkey:8080/
+LK_BASE_URL=https://ehr.primate.wisc.edu/
 #
 #---------------------------------------------------------------------------------------
 #Min   Hour     Day   Month   Weekday   User   Command

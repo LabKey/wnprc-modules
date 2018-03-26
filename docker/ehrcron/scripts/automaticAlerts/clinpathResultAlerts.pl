@@ -112,7 +112,8 @@ if(@{$results->{rows}}){
 		foreach my $room (sort(keys %$rooms)){
 			$email_html .= "$room:<br>\n";
 			$email_html .= "<table border=1><tr><td>Id</td><td>Collect Date</td><td>Service Requested</td><td>Requestor</td><td>Date Reviewed</td><td>Reviewed By</td></tr>";
-			foreach my $rec (@{$$rooms{$room}}){		
+			foreach my $rec (@{$$rooms{$room}}){
+				no warnings 'uninitialized'; # some of these values appear to be empty occasionally... - clay, 26 Mar 2018
 				$email_html .= "<tr><td><a href='".$baseUrl."ehr/".$studyContainer."animalHistory.view?#_inputType:renderSingleSubject&_showReport:1&subject:".$$rec{Id}."&combineSubj:true&activeReport:clinPathRuns'>".$$rec{Id}."</a></td><td>".$$rec{date}."</td><td>".$$rec{'serviceRequested'}."</td><td>".($$rec{'requestid/description'} ? $$rec{'requestid/description'} : '')."</td><td>".($$rec{'dateReviewed'} ? $$rec{'dateReviewed'} : '')."</td><td".($$rec{'reviewedBy'} ? '' : ' style=background:red;').">".($$rec{'reviewedBy'} ? $$rec{'reviewedBy'} : '')."</td></tr>";
 			}
 						

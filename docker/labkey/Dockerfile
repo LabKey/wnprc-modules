@@ -54,16 +54,12 @@ RUN sed -i "s/<Manager pathname=\"\" *\/>/<Manager pathname=\"${LABKEY_HOME//\//
 
 # configure LabKey for tomcat
 RUN mkdir -p conf/Catalina/localhost \
- && sed -e "s/@@appDocBase@@/${LABKEY_HOME//\//\\/}\/labkeywebapp/" \
-        -e 's/jdbc:postgresql:\/\/localhost\/labkey/${jdbc.url}/' \
-        -e 's/@@jdbcUser@@/${jdbc.user}/' \
-        -e 's/@@jdbcPassword@@/${jdbc.pass}/' \
-        -e 's/@@smtpHost@@/mailserver/' \
-        -e 's/@@smtpUser@@//' \
-        -e 's/@@smtpPort@@/1025/' \
-        -e 's/@@masterEncryptionKey@@/defaultKey/' \
-            $LABKEY_HOME/labkey.xml > conf/Catalina/localhost/ROOT.xml \
  && sed -i -e 's/<session-timeout>[0-9]*<\/session-timeout>/<session-timeout>120<\/session-timeout>/' conf/web.xml
+
+COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
+
+RUN mkdir -p /usr/local/labkey/config/config-server
+COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml
 
 EXPOSE 8080
 

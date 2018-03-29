@@ -171,16 +171,16 @@ Ext.onReady(function(){
                         title: 'Enter Weights',
                         queries: ['Weight']
                     },
-                    {
-                        url: makeExt4DataEntryURL("Food Deprive Start"),
-                        title: 'Enter Start Food Deprives',
-                        queries: ['foodDeprives']
-                    },
-                    {
-                        url: makeExt4DataEntryURL("Food Deprive Complete"),
-                        title: 'Enter Complete Food Deprives',
-                        queries: ['foodDeprives']
-                    }
+                    // {
+                    //     url: makeExt4DataEntryURL("Food Deprive Start"),
+                    //     title: 'Enter Start Food Deprives',
+                    //     queries: ['foodDeprives']
+                    // },
+                    // {
+                    //     url: makeExt4DataEntryURL("Food Deprive Complete"),
+                    //     title: 'Enter Complete Food Deprives',
+                    //     queries: ['foodDeprives']
+                    // }
                 ]
             },
             {
@@ -268,11 +268,6 @@ Ext.onReady(function(){
                         qcstate: 'Completed',
                         permission: 'admin',
                         queries: ['Demographics']
-                    },
-                    {
-                        url: makeExt4DataEntryURL("VVC"),
-                        title: 'Enter Veterinary Verification and Consultation',
-                        queries: ['vvc']
                     }
                 ]
             },
@@ -366,11 +361,11 @@ Ext.onReady(function(){
                         title:   'Schedule Necropsy',
                         queries: ['Necropsies']
                     },
-                    {
-                        url:  makeRequestDataEntryURL("Food Deprive Request"),
-                        title: 'Request Food Deprives',
-                        queries: ['foodDeprives']
-                    }
+                    // {
+                    //     url:  makeRequestDataEntryURL("Food Deprive Request"),
+                    //     title: 'Request Food Deprives',
+                    //     queries: ['foodDeprives']
+                    // }
                 ],
                 requests: true
             }
@@ -666,21 +661,21 @@ Ext.onReady(function(){
                                                     ]*/
                                                 }
                                             },
-                                            {
-                                                title: 'Schedule Food Deprives',
-                                                ref: 'FoodDepriveRequests',
-                                                itemId: 'FoodDepriveRequests',
-                                                xtype: 'ehr-qwppanel',
-                                                queryConfig:  {
-                                                    schemaName: 'study',
-                                                    queryName: 'foodDeprives',
-                                                    viewName: 'Requests',
-                                                    scope: this,
-                                                    filters: [
-                                                        LABKEY.Filter.create('QCState/Label', 'Schedule', LABKEY.Filter.Types.STARTS_WITH)
-                                                    ]
-                                                }
-                                            }
+                                            // {
+                                            //     title: 'Schedule Food Deprives',
+                                            //     ref: 'FoodDepriveRequests',
+                                            //     itemId: 'FoodDepriveRequests',
+                                            //     xtype: 'ehr-qwppanel',
+                                            //     queryConfig:  {
+                                            //         schemaName: 'study',
+                                            //         queryName: 'foodDeprives',
+                                            //         viewName: 'Requests',
+                                            //         scope: this,
+                                            //         filters: [
+                                            //             LABKEY.Filter.create('QCState/Label', 'Schedule', LABKEY.Filter.Types.STARTS_WITH)
+                                            //         ]
+                                            //     }
+                                            // }
                                         ]
                                     }
                                 ]

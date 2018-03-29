@@ -27,6 +27,15 @@ while [[ $# -gt 0 ]]; do
             prod="true"
             shift
             ;;
+        --postgres)    ## path to the postgres bin directory
+            pgpath="$2"
+            shift
+            shift
+            ;;
+        --debug)       ## flag indicating we are debugging and shouldn't delete the tmpdir
+            debug="true"
+            shift
+            ;;
         *) ## positional arguments
             args+=("$1")
             shift
@@ -39,7 +48,9 @@ set -- "${args[@]}"
 # Create a temporary folder just for this particular run (to clean up later)
 #-------------------------------------------------------------------------------
 tmpdir=$(mktemp -d /tmp/pg_restore.XXXXXXXX)
-trap 'rm -rf $tmpdir' EXIT
+if [[ -z $debug ]]; then
+    trap 'rm -rf $tmpdir' EXIT
+fi
 
 #-------------------------------------------------------------------------------
 # If the user did not provide a path to an existing dump file, secure copy the
@@ -47,7 +58,7 @@ trap 'rm -rf $tmpdir' EXIT
 #-------------------------------------------------------------------------------
 if [[ -z $filepath ]]; then
     filename="labkey_$(date +'%Y%m%d')_0100.pg"
-    scp ${username}ehr.primate.wisc.edu:/backups/labkey_backup/database/daily/${filename} $tmpdir || exit 1
+    scp ${username}ehr.primate.wisc.edu:/backups/labkey/labkey_backup/database/daily/${filename} $tmpdir || exit 1
     filepath="$tmpdir/$filename"
 fi
 
@@ -110,10 +121,10 @@ echo -e '\033[0;32mdone\033[0m'
 # Actually restore the database, using a background proc so we can track progress
 #-------------------------------------------------------------------------------
 echo -n "Restoring database from $filepath ...  0%"
-pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
+${pgpath}pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
-pg_restore -h localhost -p "${pgport#*:}" -U postgres -d labkey -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
+${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d labkey -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
 pg_restore_pid=$!
 while kill -0 "$pg_restore_pid" &>/dev/null; do
     if [[ $total -ne 0 ]]; then
@@ -124,18 +135,18 @@ while kill -0 "$pg_restore_pid" &>/dev/null; do
     sleep 0.5
 done
 trap - TERM INT
-echo -e -n "\b\b\b\033[0;32mdone\033[0m"
+echo -e -n "\b\b\b\b\033[0;32mdone\033[0m"
 echo
 
 #-------------------------------------------------------------------------------
 # Run the scripts to clean up the instance for development purposes
 #-------------------------------------------------------------------------------
 echo -n "Preparing database for deployment ... "
-psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
+${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
     update prop.properties p set value = 'https://$(hostname -f)' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
 XXX
 if [[ -z $prod ]]; then
-    psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
+    ${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
         update prop.properties p set value = 'http://localhost:8080' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
         update prop.properties p set value = FALSE where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'sslRequired';
         update prop.properties p set value = 'DevelopmentServer' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemShortName';

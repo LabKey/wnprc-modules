@@ -83,9 +83,12 @@ The script has very few options, as shown in these examples:
 # set up for the production server)
 ./load_database_backup.sh -u produser
 
-
 # restore the specified local dump into the 'test' docker-compose project
 ./load_database_backup.sh -f /path/to/dumpfile.pg -p test
+
+# restore using a specific version of postgres--pass the bin folder, not the executable--and
+# do not delete the tmp folder after the restore finishes (for debugging)
+./load_database_backup.sh --postgres /usr/etc/postgresql94/bin/ --debug
 ```
 The use of the `-p` flag allows us to use this script to manage multiple instances of the LabKey PostgreSQL container on the same server, provided that each instance is run from its own folder with its own .env file (to specify ports, data file locations, etc.)
 

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Context docBase="/usr/local/labkey/labkeywebapp" debug="0" reloadable="true" crossContext="true">
+
+    <Loader loaderClass="org.labkey.bootstrap.LabkeyServerBootstrapClassLoader" useSystemClassLoaderAsParent="false"/>
+
+    <Parameter name="org.labkey.api.pipeline.config" value="/usr/local/labkey/config/config-server"/>
+    <Parameter name="MasterEncryptionKey" value="defaultKey"/>
+
+    <Resource name="jdbc/labkeyDataSource" auth="Container"
+              type="javax.sql.DataSource"
+              username="${jdbc.user}"
+              password="${jdbc.pass}"
+              driverClassName="org.postgresql.Driver"
+              url="${jdbc.url}"
+              maxActive="40"
+              maxIdle="10"
+              accessToUnderlyingConnectionAllowed="true"
+              validationQuery="SELECT 1"
+    />
+    <Resource name="mail/Session" auth="Container"
+              type="javax.mail.Session"
+              mail.smtp.host="mailserver"
+              mail.smtp.user=""
+              mail.smtp.port="1025"
+    />
+
+    <!-- ActiveMQ configuration. Previously (and perhaps in the future) used for pipeline jobs.
+    <Resource name="jms/ConnectionFactory" auth="Container"
+              type="org.apache.activemq.ActiveMQConnectionFactory"
+              factory="org.apache.activemq.jndi.JNDIReferenceFactory"
+              description="JMS Connection Factory"
+              brokerURL="tcp://activemq:61616"
+              brokerName="LocalActiveMQBroker"
+    />
+    -->
+
+</Context>

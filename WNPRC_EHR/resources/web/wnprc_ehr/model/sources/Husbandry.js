@@ -20,6 +20,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             project: {
                 xtype: 'ehr-projectentryfield',
+                disable: true,
                 editorConfig: {
 
                 },

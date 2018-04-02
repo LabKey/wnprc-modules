@@ -130,7 +130,7 @@ foreach my $area (sort(keys %$summary)){
 			if($$rec{'ref_range_min'} && $$rec{'result'} < $$rec{'ref_range_min'}){
 				$color = '#FBEC5D';
 			}
-			elsif ($$rec{'result'} > $$rec{'ref_range_max'}) {
+			elsif ($$rec{'ref_range_max'} && $$rec{'result'} > $$rec{'ref_range_max'}) {
 				$color = '#E3170D';	
 			}
 			

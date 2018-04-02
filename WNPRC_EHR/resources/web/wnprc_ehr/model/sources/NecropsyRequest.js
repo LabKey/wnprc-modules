@@ -4,7 +4,7 @@ EHR.model.DataModelManager.registerMetadata('NecropsyRequest', {
             sendemail: {
                 //NOTE: Ext doesnt seem to respect value=true, so resort to checked.
                 editorConfig: {
-                    checked: false
+                    checked: true
                 }
             }
         },

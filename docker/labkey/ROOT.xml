@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Context docBase="/usr/local/labkey/labkeywebapp" debug="0" reloadable="true" crossContext="true">
 
-    <Loader loaderClass="org.labkey.bootstrap.LabKeyBootstrapClassLoader" useSystemClassLoaderAsParent="false"/>
+    <Loader loaderClass="org.labkey.bootstrap.LabkeyServerBootstrapClassLoader" useSystemClassLoaderAsParent="false"/>
 
     <Parameter name="org.labkey.api.pipeline.config" value="/usr/local/labkey/config/config-server"/>
     <Parameter name="MasterEncryptionKey" value="defaultKey"/>

@@ -1,0 +1,20 @@
+<tables xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://labkey.org/data/xml ../../../../../schemas/tableInfo.xsd">
+    <table tableName="unique_ids" tableDbType="TABLE">
+        <tableTitle>Unique PrimateIDs</tableTitle>
+        <pkColumnName>participantid</pkColumnName>
+        <columns>
+            <column columnName="participantid">
+                <nullable>false</nullable>
+                <isKeyField>true</isKeyField>
+                <isUserEditable>false</isUserEditable>
+                <columnTitle>Participant</columnTitle>
+                <url>/ehr/participantView.view?participantId=${sireid}</url>
+            </column>
+            <column columnName="primateid">
+                <nullable>false</nullable>
+                <columnTitle>PrimateId</columnTitle>
+            </column>
+        </columns>
+    </table>
+</tables>

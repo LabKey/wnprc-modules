@@ -2,13 +2,19 @@ apply plugin: 'com.moowork.node'
 
 if (file("${project.projectDir}/src/java").exists())
 {
+    configurations {
+        java2ts
+    }
+    dependencies {
+        java2ts project(':externalModules:wnprc-modules:java2ts')
+    }
     task('java2ts', group: 'JavaScript', type: JavaExec,
             description: 'Generates TypeScript files for certain annotated classes in the Java source') {
         doFirst {
             mkdir "$projectDir/build/generated-ts"
         }
         main = 'com.github.jonathonrichardson.java2ts.Compiler'
-        classpath = sourceSets.main.runtimeClasspath
+        classpath = configurations.java2ts
         args = ["$projectDir/build/generated-ts/GeneratedFromJava.ts"]
         inputs.dir("$projectDir/src/java")
         outputs.dir("$projectDir/build/generated-ts")
@@ -21,12 +27,12 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
             description: 'Executes webpack to compile the TypeScript and create a self-contained JavaScript bundle') {
         workingDir "$projectDir"
         script = file('../node_modules/webpack/bin/webpack.js')
-        args   = ['--env.BUILD_DIR', "$buildDir"]
+        args   = ['--env.BUILD_DIR', "$buildDir", '--env.PROJECT_DIR', "$projectDir"]
         if (project.tasks.findByName('java2ts'))
             dependsOn('java2ts')
     }
-    if (project.tasks.findByName('module') != null)
-        project.tasks.module.dependsOn 'webpack'
+    if (project.tasks.findByName('processModuleResources') != null)
+        project.tasks.processModuleResources.dependsOn 'webpack'
 } 
 else if (file("$projectDir/tsconfig.json").exists()) 
 {
@@ -38,8 +44,8 @@ else if (file("$projectDir/tsconfig.json").exists())
         if (project.tasks.findByName('java2ts'))
             dependsOn('java2ts')
     }
-    if (project.tasks.findByName('module') != null)
-        project.tasks.module.dependsOn 'tsc'
+    if (project.tasks.findByName('processModuleResources') != null)
+        project.tasks.processModuleResources.dependsOn 'tsc'
 }
 
 if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) 
@@ -82,7 +88,7 @@ if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists())
         eachFile { path = name }
         includeEmptyDirs = false
     }
-    if (project.tasks.findByName('module') != null)
-        project.tasks.module.dependsOn 'fonts', 'lessc'
+    if (project.tasks.findByName('processModuleResources') != null)
+        project.tasks.processModuleResources.dependsOn 'fonts', 'lessc'
 }
 

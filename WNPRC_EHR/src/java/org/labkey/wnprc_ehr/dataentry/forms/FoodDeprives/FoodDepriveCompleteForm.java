@@ -8,6 +8,7 @@ import org.labkey.api.ehr.dataentry.TaskFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
+import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FormSections.FoodDeprivesFormSections;
 
 import java.util.Arrays;
@@ -27,6 +28,11 @@ public class FoodDepriveCompleteForm extends TaskForm
         for(FormSection section: this.getFormSections()) {
             section.addConfigSource("Husbandry");
         }
+
+        for(ClientDependency dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
+            this.addClientDependency(dependency);
+        }
+
         setStoreCollectionClass("EHR.data.FoodDepriveStore");
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/foodDepriveStore.js"));
         addClientDependency(ClientDependency.fromPath("ehr/buttons/husbandryButtons.js"));

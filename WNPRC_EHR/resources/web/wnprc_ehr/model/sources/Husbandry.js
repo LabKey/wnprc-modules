@@ -20,10 +20,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             project: {
                 xtype: 'ehr-projectentryfield',
+                editable : false,
                 disable: true,
-                editorConfig: {
-
-                },
                 shownInGrid: true,
                 useNull: true,
                 lookup: {
@@ -46,25 +44,17 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
 
             },
-            /*date:{
+            date:{
                 xtype: 'datefield',
                 extFormat: 'Y-m-d',
-                minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 4),
-                editorConfig: {
-                    dateConfig: {
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 4)
-                    }
-
-                },
-                allowBlank:true,
+                allowBlank: false,
+                editable: false,
                 columnConfig: {
-                    width:140
+                    width:110
                 }
-            },*/
+            },
             protocolContact: {
-                //xtype: 'ehr-projectentryfield',
-                xtype: 'ehr-protocolStaffField',
-
+                xtype: 'wnprcehr-protocolStaffField',
                 shownInGrid: true,
                 useNull: true,
                 columnConfig: {
@@ -95,7 +85,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 columnConfig:{
                     width:200
                 },
-                hidden :true,
+                hidden :false,
                 shownInGrid: false
             },
             remarks:{

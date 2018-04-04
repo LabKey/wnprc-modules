@@ -5,18 +5,16 @@ require("wnprc_ehr/WNPRC");
 
 function onInit(event, helper){
     helper.setScriptOptions({
-        allowFutureDates:true,
-        errorSeverityForImproperAssignment: 'WARN'
+        allowFutureDates:true
+
 
     });
-    //helper.setProperty('quickValidation',true);
-
-
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
 
-    var internalTest=false;
+    //TODO:  add check permissions for allow admins to modify food deprives
+    //var dataAdminPermission=EHR.Server.Security.verifyPermissions('update',row,oldRow);
 
     //setting the value for the next date and removing time
     var nextDate = new Date();
@@ -27,31 +25,49 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     var rowDate = new Date(row.date);
     rowDate.setHours(0,0,0,0);
 
-
-    if (!(rowDate.getTime()>=nextDate.getTime()) && (row.QCStateLabel == "Scheduled" ||row.QCStateLabel == "Request: Pending" )){
+    //Check permission when requesting food deprive, cannot be schedule for the same day.
+    if (!(rowDate.getTime()>=nextDate.getTime()) && (row.QCStateLabel == "Request: Pending")){
         var errorQC;
 
-        if ((EHR.Server.Security.getQCStateByLabel(row.QCStateLabel)['isRequest'] || row.QCStateLabel == "Scheduled") && !row.taskid){
+
+        if ( row.QCStateLabel == "In Progress" && !oldRow.taskid ){
             errorQC = 'INFO';
         }
         else
             errorQC = 'ERROR';
 
-        EHR.Server.Utils.addError(scriptErrors, 'date', 'Cannot request same day food deprives.', errorQC);
+        EHR.Server.Utils.addError(scriptErrors, 'date', 'Cannot request same day food deprives 1.', errorQC);
     }
 
-    if (row.schedule == "noon" && !row.remarks){
-        EHR.Server.Utils.addError(scriptErrors, 'remarks', 'Must enter remarks with special arrangements for NOON food deprives', 'ERROR');
+
+    //Checking permission when adding schedule food deprives, we want to allow for data admins to make changes to the row when is scheduled.
+    if (oldRow && !(rowDate.getTime()>=nextDate.getTime()) && (oldRow.QCStateLabel == "Scheduled") ){
+
+        if ((row.QCStateLabel == "In Progress" || row.QCStateLabel == "Scheduled") && !row.taskid ){
+            EHR.Server.Utils.addError(scriptErrors, 'date', 'Cannot request same day food deprives 2.', 'INFO');
+        }
+
+        else if (row.QCStateLabel == "Started" && !row.depriveStartTime){
+            EHR.Server.Utils.addError(scriptErrors, 'depriveStartTime', 'Need to enter a start time to start food deprive', 'ERROR');
+
+        }
+
     }
 
-    console.log("This is the label of qcstate "+ row.QCStateLabel);
-    if (row.QCStateLabel == 'Completed' && !row.restoredTime){
-        EHR.Server.Utils.addError(scriptErrors,'restoredTime','Need to enter a restore time to submit food deprive','ERROR');
+    if ((row.schedule == "noon" || row.schedule == "night") && !row.remarks){
+        EHR.Server.Utils.addError(scriptErrors, 'remarks', 'Must enter remarks with special arrangements for NOON or NIGHT food deprives', 'ERROR');
+    }
+    if (oldRow && oldRow.QCStateLabel == 'Started' )
+    {
+        if ((row.QCStateLabel == 'In Progress' || row.QCStateLabel == 'Completed') && !row.restoredTime)
+        {
+            EHR.Server.Utils.addError(scriptErrors, 'restoredTime', 'Need to enter a restore time to submit completed food deprive', 'ERROR');
 
+        }
     }
 
     //test if statement remove once in production. Only allow request for animal in WMIR or A2
-    if (row.id && row.QCStateLabel == 'Scheduled'){
+    if (row.id && row.QCStateLabel == 'Scheduled' ){
 
 
         EHR.Server.Utils.findDemographics({
@@ -92,7 +108,7 @@ function afterInsert(row, errors){
 }
 
 function setDescription(row, helper){
-    //we need to set description for every field
+    //TODO: need to set description for every field
     console.log ("call setDescription");
     var description = new Array();
 
@@ -101,6 +117,15 @@ function setDescription(row, helper){
 
     if(row.amount)
         description.push('Amount: ' + EHR.Server.Utils.nullToString(row.amount));
+
+    if (row.protocolContact)
+        description.push('Protocol Contact');
+
+    if (row.id)
+        description.push('Id: ' + EHR.Server.Utils.nullToString(row.id));
+
+    if (row.date)
+        description.push('Date: ' + EHR.Server.Utils.nullToString(row.date));
 
     return description;
 }

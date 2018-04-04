@@ -1,8 +1,8 @@
 .x-boxselect-item-text {
 	font-size : 20px;
-	line-height: 16px;
-	padding-top: 2px;
-	padding-bottom: 2px;
+	line-height: 19px;
+	padding-top: 1px;
+	padding-bottom: 1px;
 	padding-right: 5px !important;
 }
 .x-boundlist-item {

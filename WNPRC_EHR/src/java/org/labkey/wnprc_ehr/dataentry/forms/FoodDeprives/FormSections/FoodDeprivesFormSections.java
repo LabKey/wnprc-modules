@@ -53,6 +53,7 @@ public class FoodDeprivesFormSections extends SimpleGridSection
         if (formName.contains("Start")){
             defaultButtons.add(0,"ADDDEPRIVES");
             defaultButtons.add(1,"ADDSTARTTIME");
+
         }
         if (formName.contains("Complete")){
             defaultButtons.add(0,"ADDSTARTEDDEPRIVES");
@@ -61,9 +62,10 @@ public class FoodDeprivesFormSections extends SimpleGridSection
         }
 
 
-
+        defaultButtons.add(3,"REMOVERECORD");
         defaultButtons.remove("COPYFROMSECTION");
         defaultButtons.remove("TEMPLATES");
+        defaultButtons.remove("DELETERECORD");
 
         return defaultButtons;
     }

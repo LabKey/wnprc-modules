@@ -18,11 +18,13 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 
-docker/data
-docker/logs
-docker/.env
+docker/**/data
+docker/**/logs
+docker/**/.env
 
 **/bower_components/
 **/node_modules/
 **/build/
 **/out/
+
+.DS_Store

@@ -66,14 +66,8 @@ COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xm
 EXPOSE 8080
 
 # install the necessary R scripts
-RUN mkdir -p /usr/share/doc/R-3.2.0/html \
- && Rscript -e "install.packages('quadprog', repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('pedigree', repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('Matrix',   repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('RCurl',    repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('Rlabkey',  repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('kinship2', repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('getopt',   repos='http://cran.us.r-project.org')"
+COPY install.r /tmp/install.r
+RUN mkdir -p /usr/share/doc/R-3.2.0/html && Rscript /tmp/install.r
 
 # copy over the .netrc template file
 COPY netrc /root/netrc.template

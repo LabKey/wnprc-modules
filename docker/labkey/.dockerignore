@@ -2,6 +2,7 @@
 *
 
 # whitelist the following files:
+!netrc
 !pipelineConfig.xml
 !public-yum-ol7.repo
 !ROOT.xml

@@ -38,7 +38,7 @@ To build using Docker directly, you will need to pass those same credentials as 
 docker build \
     --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
     --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
-    -t wnprcehr/labkeyXX.X labkey
+    -t wnprcehr/labkey:XX.X labkey
 ```
 
 The LabKey build also requires the official Oracle Java Server JRE image, which is only available via Docker Hub if you accept the terms and conditions of use from Oracle directly. In order to get the image, you will need:

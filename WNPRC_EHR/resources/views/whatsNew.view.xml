@@ -1,5 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" title="What's New" frame="none">
-    <dependencies>
-        <dependency path="/webutils/lib/webutils.lib.xml"/>
-    </dependencies>
-</view>

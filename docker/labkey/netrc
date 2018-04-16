@@ -1,0 +1,7 @@
+machine localhost
+login $LK_BACKGROUND_USER
+password $LK_BACKGROUND_USER_PASSWORD
+
+machine $LK_BASE_URL
+login $LK_BACKGROUND_USER
+password $LK_BACKGROUND_USER_PASSWORD

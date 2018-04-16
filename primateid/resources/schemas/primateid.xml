@@ -4,6 +4,7 @@
         <tableTitle>Unique PrimateIDs</tableTitle>
         <pkColumnName>participantid</pkColumnName>
         <columns>
+            <column columnName="container"/>
             <column columnName="participantid">
                 <nullable>false</nullable>
                 <isKeyField>true</isKeyField>

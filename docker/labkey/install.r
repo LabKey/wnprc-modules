@@ -8,5 +8,5 @@ install.packages('getopt',   repos='http://cran.us.r-project.org')
 install.packages('rjson',    repos='http://cran.us.r-project.org')
 
 require('devtools')
-install_version('Rlabkey', version='2.1.127', repos='http://cran.us.r-project.org')
+install_version('Rlabkey', version='2.1.136', repos='http://cran.us.r-project.org')
 

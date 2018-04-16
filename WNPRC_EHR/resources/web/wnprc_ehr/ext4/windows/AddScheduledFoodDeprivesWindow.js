@@ -82,6 +82,10 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
                 fieldLabel: 'Performed By',
                 value: LABKEY.Security.currentUser.displayName,
                 itemId: 'performedBy'
+            },{
+                xtype: 'textfield',
+                fieldLabel: 'Initials',
+                itemId: 'initials'
             }],
             buttons: [{
                 text:'Submit',
@@ -176,6 +180,7 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
 
         var records = [];
         var performedby = this.down('#performedBy').getValue();
+        var initials = this.down('#initials').getValue();
 
         Ext4.Array.each(results.rows, function(sr){
             var row = new LDK.SelectRowsRow(sr);
@@ -191,6 +196,7 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
                 assignedTo:         row.getValue('assignedTo'),
                 protocolContact:    row.getValue('protocolContact'),
                 depriveStartedBy:   performedby,
+                performedBy:        initials,
                 objectid:           row.getValue('objectid'),
                 taskId:             this.targetStore.storeCollection.getTaskId(),
                 requestid:          row.getValue('requestid'),

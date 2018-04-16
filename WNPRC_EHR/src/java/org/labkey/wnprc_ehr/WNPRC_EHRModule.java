@@ -24,6 +24,10 @@ import org.labkey.api.ehr.buttons.CreateTaskFromIdsButton;
 import org.labkey.api.ehr.buttons.CreateTaskFromRecordsButton;
 import org.labkey.api.ehr.buttons.MarkCompletedButton;
 import org.labkey.api.ehr.dataentry.DefaultDataEntryFormFactory;
+import org.labkey.api.ehr.security.EHRStartedAdminPermission;
+import org.labkey.api.ehr.security.EHRStartedDeletePermission;
+import org.labkey.api.ehr.security.EHRStartedInsertPermission;
+import org.labkey.api.ehr.security.EHRStartedUpdatePermission;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.ldk.notification.Notification;
@@ -212,6 +216,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     private void registerPermissions() {
         RoleManager.registerPermission(new BehaviorAssignmentsPermission());
+        RoleManager.registerPermission(new EHRStartedAdminPermission());
+        RoleManager.registerPermission(new EHRStartedUpdatePermission());
+        RoleManager.registerPermission(new EHRStartedDeletePermission());
+        RoleManager.registerPermission(new EHRStartedInsertPermission());
     }
 
     private void registerServices() {

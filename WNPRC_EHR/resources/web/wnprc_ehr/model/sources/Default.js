@@ -10,8 +10,11 @@ EHR.model.DataModelManager.registerMetadata('Default', {
             xtype: 'wnprc-projectentryfield'
         }
     },
-    byQuery :{
+    byQuery: {
         'ehr.protocol' :{
+            protocol: {
+                hidden: false
+            },
             contacts:{
                 xtype: 'wnprc-multiselectfield',
                 displayField: 'DisplayName',

@@ -75,11 +75,8 @@ EHR.model.DataModelManager.registerMetadata('WNPRC_Request', {
             date: {
                 xtype: 'datefield',
                 label: 'Requested Dated',
-                //xtype: 'xdatetime',
-
                 format:'Y-m-d',
                 allowBlank: false,
-
                 editorConfig: {
                     minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                 },

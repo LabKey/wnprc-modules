@@ -20,7 +20,10 @@ Other than using Gradle, the images can each be built directly using Docker by e
 ```
 docker build -t wnprcehr/ehrcron:vX.X.X ehrcron
 ```
-
+If  changes are only committed to TeamCity or a new based LabKey build needs to be create, use --no-cache option.
+```
+docker build --no-cache -t wnprcehr/labkey:vX.X.X labkey
+```
 #### Special Instructions for the LabKey Image
 
 The LabKey Docker image requires some extra information in order to download the latest build of LabKey from LabKey's TeamCity server--specifically *your* TeamCity credentials.
@@ -35,7 +38,7 @@ To build using Docker directly, you will need to pass those same credentials as 
 docker build \
     --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
     --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
-    -t wnprcehr/labkeyXX.X labkey
+    -t wnprcehr/labkey:XX.X labkey
 ```
 
 The LabKey build also requires the official Oracle Java Server JRE image, which is only available via Docker Hub if you accept the terms and conditions of use from Oracle directly. In order to get the image, you will need:
@@ -79,7 +82,7 @@ The script has very few options, as shown in these examples:
 ```bash
 # download the latest backup into the default docker-compose project. this
 # assumes 'produser' is a user on the production server with access to the backups,
-# and will request the password for produser (unless you have other authentication 
+# and will request the password for produser (unless you have other authentication
 # set up for the production server)
 ./load_database_backup.sh -u produser
 
@@ -91,6 +94,3 @@ The script has very few options, as shown in these examples:
 ./load_database_backup.sh --postgres /usr/etc/postgresql94/bin/ --debug
 ```
 The use of the `-p` flag allows us to use this script to manage multiple instances of the LabKey PostgreSQL container on the same server, provided that each instance is run from its own folder with its own .env file (to specify ports, data file locations, etc.)
-
-
-

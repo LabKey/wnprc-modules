@@ -6,9 +6,9 @@ Any service-specific configuration needs to be defined in a `.env` file in this 
 
 ## Building the Custom Images
 
-To build the custom images from a stand-alone clone, navigate to the parent folder (the repository root) and execute the following command:
+To build the custom images from a stand-alone clone, navigate to the **docker** folder (**not** the repository root) and execute the following command:
 ```
-./gradlew :docker:build
+./gradlew build
 ```
 From a clone embedded inside a LabKey SVN checkout, you will need to execute the command from the LabKey root, with the appropriate adjustments to the project path:
 ```

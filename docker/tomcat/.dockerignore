@@ -1,0 +1,10 @@
+# ignore everything unless otherwise specified
+*
+
+# whitelist the following files:
+!install.r
+!netrc
+!pipelineConfig.xml
+!public-yum-ol7.repo
+!ROOT.xml
+!wait-for-postgres.sh

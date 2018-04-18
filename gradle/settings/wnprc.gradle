@@ -32,6 +32,9 @@ file("../../").listFiles().findAll { d ->
 include ":server:distributions:test"
 include ":server:distributions:base"
 include ":server:distributions:community"
+include ":server:distributions:pro"
+include ":server:distributions:pro_plus"
 
 // include our WNPRC-specific community distribution
+include ":externalModules:wnprc-modules:distributions:wisc"
 include ":externalModules:wnprc-modules:distributions:wisc_community"

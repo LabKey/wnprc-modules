@@ -49,6 +49,7 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
@@ -87,6 +88,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -1249,6 +1251,43 @@ public class WNPRC_EHRController extends SpringActionController
         public boolean doAction(Void aVoid, BindException errors)
         {
             return true;
+        }
+    }
+
+    /**
+     * Action definition to import historical/test data for the breeding datasets. Called from the web application,
+     * not from Java.
+     */
+    @SuppressWarnings("unused")
+    @RequiresPermission(AdminPermission.class)
+    public static class ImportDatasetDataAction extends ApiAction<Void>
+    {
+        @Override
+        public Object execute(Void aVoid, BindException errors)
+        {
+            // TODO: create, parse, and load some test data
+            return new ApiSimpleResponse("success", true);
+        }
+    }
+
+    /**
+     * Action definition for the import dataset test API action. Executes the import based on a pre-defined study
+     * definition. Called from the web application, not from Java.
+     */
+    @SuppressWarnings("unused")
+    @RequiresPermission(AdminPermission.class)
+    public static class ImportDatasetMetadataAction extends ApiAction<Void>
+    {
+        @Override
+        public Object execute(Void aVoid, BindException errors) throws Exception
+        {
+            Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+            assert module != null;
+
+            File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(),
+                    "study.xml");
+            DatasetImportHelper.importDatasetMetadata(getUser(), getContainer(), file);
+            return new ApiSimpleResponse("success", true);
         }
     }
 }

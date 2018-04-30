@@ -15,7 +15,9 @@
  */
 package org.labkey.wnprc_ehr;
 
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
@@ -45,6 +47,7 @@ import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Breeding.BreedingEncounterForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
@@ -96,13 +99,17 @@ import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.api.ldk.notification.NotificationService;
+import org.reflections.Reflections;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * User: bbimber
@@ -114,12 +121,28 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public static final String CONTROLLER_NAME = "wnprc_ehr";
     public static final String WNPRC_Category_Name = NAME;
 
+    /**
+     * Logger for logging the logs
+     */
+    private static final Logger LOG = Logger.getLogger(WNPRC_EHRModule.class);
+
+    /**
+     * Flag (from the JVM) to indicate we should force the module to re-run all updates
+     * regardless of the actual module version
+     */
+    private boolean forceUpdate = Boolean.getBoolean("labkey.module.forceupdate");
+
+    /**
+     * Flag indicating we should load the study metadata on module startup
+     */
+    private boolean loadOnStart = false;
+
     public String getName() {
         return NAME;
     }
 
     public double getVersion() {
-        return 15.13;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 15.15;
     }
 
     public boolean hasScripts() {
@@ -212,6 +235,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
             }
 
         }
+
+        EHRService es = EHRService.get();
+        if (loadOnStart) loadLatestDatasetMetadata(es);
     }
 
     private void registerPermissions() {
@@ -324,7 +350,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 FoodDeprivesStartForm.class,
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
-                ProtocolForm.class
+                ProtocolForm.class,
+                BreedingEncounterForm.class
         );
 
         for(Class form : forms) {
@@ -385,5 +412,42 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         }
 
         return ehrContainer;
+    }
+
+    @Override
+    public void versionUpdate(ModuleContext moduleContext) throws Exception
+    {
+        LOG.debug("deferring import of study metadata until module startup (after Spring config)");
+        forceUpdate = false; // let the version report correctly from now on
+        loadOnStart = true;  // indicate that we should load the study metadata on startup
+        super.versionUpdate(moduleContext);
+    }
+
+    @Override
+    @NotNull
+    public Set<Class> getIntegrationTests()
+    {
+        return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
+                .filter(c -> c.getSimpleName().endsWith("IntegrationTest"))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    @NotNull
+    public Set<Class> getUnitTests()
+    {
+        return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
+                .filter(c -> c.getSimpleName().endsWith("UnitTest"))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Executes the import of the dataset metadata into every container that has the module enabled
+     */
+    private void loadLatestDatasetMetadata(EHRService es)
+    {
+        LOG.debug("importing study metadata from reference study to all study containers");
+        File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
+        getWNPRCStudyContainers().forEach(c -> DatasetImportHelper.safeImportDatasetMetadata(es.getEHRUser(c), c, file));
     }
 }

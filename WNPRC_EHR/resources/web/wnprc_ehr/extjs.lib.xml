@@ -1,0 +1,11 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="/wnprc_ehr/ext4/panel/ChildRecordsPanel.js"/>
+    </library>
+    <dependencies>
+        <dependency path="https://cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"/>
+        <dependency path="clientapi/ext4.lib.xml"/>
+        <dependency path="ldk/LDKApi.lib.xml"/>
+        <dependency path="ehr/ehr_ext4_dataEntry.lib.xml" />
+    </dependencies>
+</libraries>

@@ -1,16 +1,14 @@
-var console = require("console");
-var LABKEY = require("labkey");
 var Ext = require("Ext4").Ext;
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 var moment = require("dbutils/lib/moment");
 
-
-exports.registerTriggers = function(EHR, registerGenericHandler, Events) {
-    var registerHandler = function(event, callback) {
-        registerGenericHandler(event, "study", "Necropsies", callback);
+// noinspection JSUnresolvedVariable
+exports.registerTriggers = function (EHR, registerGenericHandler, Events) {
+    var registerHandler = function (event, callback) {
+        registerGenericHandler(event, "study", "necropsy", callback);
     };
 
-    registerHandler(Events.BEFORE_UPSERT, function(helper, scriptErrors, row, oldRow) {
+    registerHandler(Events.BEFORE_UPSERT, function (helper, scriptErrors, row) {
         var validator = WNPRC.Validator.new(EHR, row, scriptErrors);
 
         var pdRegex = /^pd/i;
@@ -24,8 +22,8 @@ exports.registerTriggers = function(EHR, registerGenericHandler, Events) {
 
         if ('dam' in row && row.dam) {
             validator.checkAnimalInCol("dam", {
-                exists:   WNPRC.Validator.Severity.WARN,
-                isAlive:  WNPRC.Validator.Severity.WARN,
+                exists: WNPRC.Validator.Severity.WARN,
+                isAlive: WNPRC.Validator.Severity.WARN,
                 isFemale: WNPRC.Validator.Severity.ERROR
             });
         }
@@ -37,19 +35,19 @@ exports.registerTriggers = function(EHR, registerGenericHandler, Events) {
             if (row.date && moment(row.date.getTime()).isAfter(moment('2013-01-01'))) {
                 validator.ensureUserExists("performedby", undefined, WNPRC.Validator.Severity.ERROR, true);
             }
-            validator.ensureUserIsPathologist("performedby", undefined, WNPRC.Validator.Severity.WARN,  true);
+            validator.ensureUserIsPathologist("performedby", undefined, WNPRC.Validator.Severity.WARN, true);
         }
 
         // For each assistant (comma-delimited), warn if they are not a pathlogist and throw an error
         // if they are not a user.
         if (row.assistant) {
-            Ext.each(row.assistant.split(","), function(user) {
+            Ext.each(row.assistant.split(","), function (user) {
                 // Only check that the user exists for records after 2013, because there are some older records
                 // that need to reference users that don't exist.
                 if (row.date && moment(row.date.getTime()).isAfter(moment('2013-01-01'))) {
                     validator.ensureUserExists("assistant", user, WNPRC.Validator.Severity.ERROR, true);
                 }
-                validator.ensureUserIsPathologist("assistant", user, WNPRC.Validator.Severity.WARN,  true);
+                validator.ensureUserIsPathologist("assistant", user, WNPRC.Validator.Severity.WARN, true);
             });
         }
 
@@ -59,7 +57,7 @@ exports.registerTriggers = function(EHR, registerGenericHandler, Events) {
             var today = moment();
 
             if (requestedTime.isBefore(today.add(10, 'days'), 'day')) {
-                EHR.Server.Utils.addError(scriptErrors, "date", "Please contact pathology directly if you need to schedule a necropsy in less than 10 days");
+                EHR.Server.Utils.addError(scriptErrors, "date", "Please contact pathology directly if you need to schedule a necropsy in less than 10 days", 'ERROR');
             }
         }
     });

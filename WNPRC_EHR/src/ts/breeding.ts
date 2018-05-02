@@ -155,11 +155,13 @@ export class Breeding {
      * history management using the popstate event
      * @param {string} gridElementId
      * @param {string} detailElementId
+     * @param {string} subjects
      */
-    public render(gridElementId: string, detailElementId: string) {
+    public render(gridElementId: string, detailElementId: string, subjects?: string) {
         window.onpopstate = this.onPopState.bind(this, window.onpopstate);
         this.detailElementId = detailElementId;
         this.gridElementId = gridElementId;
+        Breeding.updateBrowserState('subjects', subjects);
         this.renderGrid(URI(document.location).query(true) as PregnancyState);
     }
 
@@ -251,8 +253,7 @@ export class Breeding {
      * @param {PopStateEvent} evt
      */
     private onPopState(oldHandler: (PopStateEvent) => void, evt: PopStateEvent) {
-        this.renderGrid(evt.state);
-        this.renderWebpart(null);
+        this.renderGrid(evt.state||({} as PregnancyState));
         if (oldHandler) {
             oldHandler(evt);
         }
@@ -263,6 +264,9 @@ export class Breeding {
      * @param {PregnancyState} state
      */
     private renderGrid(state: PregnancyState) {
+        const filters = (state.subjects && state.subjects != '')
+            ? [LABKEY.Filter.create('Id', state.subjects, LABKEY.Filter.Types.IN)]
+            : [];
         // noinspection JSUnusedGlobalSymbols, TypeScriptUnresolvedFunction, TypeScriptUnresolvedVariable
         const x = new LABKEY.QueryWebPart({
             buttonBar: {
@@ -283,6 +287,7 @@ export class Breeding {
             },
             detailsURL: `/wnprc_ehr/${Breeding.DETAIL_PLACEHOLDER}\${taskid}`,
             failure: LABKEY.Utils.onError,
+            filterArray: filters,
             maxRows: 20,
             queryName: 'PregnancyInfo',
             schemaName: 'study',
@@ -349,6 +354,7 @@ interface DataSetRecord {
 interface PregnancyState {
     taskId: string | null;
     viewName: string | null;
+    subjects: string | null;
 }
 
 /**

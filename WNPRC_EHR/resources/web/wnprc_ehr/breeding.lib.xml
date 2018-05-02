@@ -1,0 +1,10 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library>
+        <script path="/wnprc_ehr/breeding.css"/>
+        <script path="/wnprc_ehr/breeding.js"/>
+    </library>
+    <dependencies>
+        <dependency path="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.0/URI.min.js"/>
+        <dependency path="/wnprc_ehr/extjs.lib.xml"/>
+    </dependencies>
+</libraries>

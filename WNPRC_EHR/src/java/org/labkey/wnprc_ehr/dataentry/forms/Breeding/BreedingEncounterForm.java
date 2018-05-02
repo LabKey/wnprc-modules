@@ -21,10 +21,10 @@ public final class BreedingEncounterForm extends TaskForm
         super(ctx, owner, NAME, NAME, "Colony Records", Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
-                new SimpleFormPanelSection("study", "breeding_encounters", NAME),
-                new SimpleGridSection("study", "breeding_remarks", "Breeding Remarks"),
-                new SimpleGridSection("study", "ultrasounds", "Ultrasounds"),
-                new SimpleGridSection("study", "pregnancy_outcomes", "Outcomes")));
+                new BreedingEncounterFormSection(),
+                new BreedingChildFormSection("study", "breeding_remarks", "Breeding Remarks"),
+                new BreedingChildFormSection("study", "ultrasounds", "Ultrasounds"),
+                new BreedingChildFormSection("study", "pregnancy_outcomes", "Outcomes")));
 
         // add the dependencies from the module, including the breeding-specific store collection (which
         // overrides some of the defaults to set the participant id on the child records based on the parent)
@@ -35,6 +35,23 @@ public final class BreedingEncounterForm extends TaskForm
 
         // load the metadata configuration for the dependent records sections (to hide the id)
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Breeding.js"));
-        getFormSections().stream().skip(3).forEach(fs -> fs.addConfigSource("BreedingChildRecord"));
+    }
+
+    private static final class BreedingEncounterFormSection extends SimpleFormPanelSection
+    {
+        public BreedingEncounterFormSection()
+        {
+            super("study", "breeding_encounters", NAME);
+            addConfigSource("BreedingParentRecord");
+        }
+    }
+
+    private static final class BreedingChildFormSection extends SimpleGridSection
+    {
+        public BreedingChildFormSection(String schemaName, String queryName, String label)
+        {
+            super(schemaName, queryName, label);
+            addConfigSource("BreedingChildRecord");
+        }
     }
 }

@@ -4,8 +4,8 @@ declare const LABKEY: any;
 import * as $ from 'jquery';
 import * as URI from 'urijs';
 
-export class Breeding {
-
+export class Breeding
+{
     // <editor-fold desc="--Static Members--">
 
     /**
@@ -19,7 +19,6 @@ export class Breeding {
      */
     private static readonly DETAIL_PLACEHOLDER: string = '__DETAIL__.view?id=';
 
-    // noinspection TypeScriptUnresolvedVariable
     /**
      * Configuration for all the child records to display in the parent-child detail panel
      * @type ChildRecordConfiguration[]
@@ -65,9 +64,9 @@ export class Breeding {
      * @param {HTMLButtonElement} target
      * @param action
      */
-    private static callSimpleApiButtonAction(target: HTMLButtonElement, action: string) {
+    private static callSimpleApiButtonAction(target: HTMLButtonElement, action: string)
+    {
         $(target).prop('disabled', true);
-        // noinspection TypeScriptUnresolvedFunction
         LABKEY.Ajax.request({
             failure: (error) => {
                 LABKEY.Utils.onError(error);
@@ -86,7 +85,8 @@ export class Breeding {
      * @param {DataSetRecord} record
      * @returns {{PARENT_RECORD_ID: any}}
      */
-    private static createQueryParams(record: DataSetRecord) {
+    private static createQueryParams(record: DataSetRecord)
+    {
         return {TASK_ID: record.get('taskid')};
     }
 
@@ -95,17 +95,21 @@ export class Breeding {
      * @param {string} key
      * @param {string | null} value
      */
-    private static updateBrowserState(key: keyof PregnancyState, value: string | null) {
-        if (window.history && window.history.pushState) {
+    private static updateBrowserState(key: keyof PregnancyState, value: string | null)
+    {
+        if (window.history && window.history.pushState)
+        {
             const state = window.history.state || {};
-            if (state[key] !== value) {
+            if (state[key] !== value)
+            {
                 state[key] = value;
                 const uri = URI(document.location);
-                if (value === null) {
-                    // noinspection TypeScriptUnresolvedFunction
+                if (value === null)
+                {
                     uri.removeQuery(key);
-                } else {
-                    // noinspection TypeScriptUnresolvedFunction
+                }
+                else
+                {
                     uri.setQuery(key, value);
                 }
                 window.history.pushState(state, document.title, uri.href());
@@ -131,25 +135,27 @@ export class Breeding {
 
     // <editor-fold desc="--Public Functions (called from HTML)--">
 
-    // noinspection JSUnusedGlobalSymbols, JSMethodCanBeStatic: called from HTML
+    // noinspection JSMethodCanBeStatic,JSUnusedGlobalSymbols
     /**
      * Initiates the dataset data import by invoking the importDatasetData method in the BreedingController
      * @param {HTMLButtonElement} target
      */
-    public importDatasetData(target: HTMLButtonElement) {
+    public importDatasetData(target: HTMLButtonElement)
+    {
         Breeding.callSimpleApiButtonAction(target, 'importDatasetData');
     }
 
-    // noinspection JSUnusedGlobalSymbols, JSMethodCanBeStatic: called from HTML
+    // noinspection JSMethodCanBeStatic,JSUnusedGlobalSymbols
     /**
      * Initiates the dataset metadata import by invoking the importDatasetMetadata method in the BreedingController
      * @param {HTMLButtonElement} target
      */
-    public importDatasetMetadata(target: HTMLButtonElement) {
+    public importDatasetMetadata(target: HTMLButtonElement)
+    {
         Breeding.callSimpleApiButtonAction(target, 'importDatasetMetadata');
     }
 
-    // noinspection JSUnusedGlobalSymbols: called from HTML
+    // noinspection JSMethodCanBeStatic,JSUnusedGlobalSymbols
     /**
      * Entry point for the main polyfill. Renders the pregnancy grid (and possibly the details) and hooks up the browser
      * history management using the popstate event
@@ -157,7 +163,8 @@ export class Breeding {
      * @param {string} detailElementId
      * @param {string} subjects
      */
-    public render(gridElementId: string, detailElementId: string, subjects?: string) {
+    public render(gridElementId: string, detailElementId: string, subjects?: string)
+    {
         window.onpopstate = this.onPopState.bind(this, window.onpopstate);
         this.detailElementId = detailElementId;
         this.gridElementId = gridElementId;
@@ -165,15 +172,16 @@ export class Breeding {
         this.renderGrid(URI(document.location).query(true) as PregnancyState);
     }
 
-    // noinspection JSUnusedGlobalSymbols, JSMethodCanBeStatic: called from HTML
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Entry point for the LabKey webpart. Renders the detail webpart, including the details panel and the child
      * record grids
      * @param {WebPartConfig} webpart
      */
-    public renderDetail(webpart: WebPartConfig) {
-        if (webpart.taskId) {
-            // noinspection TypeScriptUnresolvedVariable, TypeScriptUnresolvedFunction
+    public renderDetail(webpart: WebPartConfig)
+    {
+        if (webpart.taskId)
+        {
             const defaultButtonBarConfig = {
                 buttonBar: {
                     items: [
@@ -190,7 +198,6 @@ export class Breeding {
                     ],
                 },
             };
-            // noinspection JSUnusedGlobalSymbols, TypeScriptUnresolvedVariable
             const detailPanel = Ext4.create('WNPRC.ext4.ChildRecordsPanel', {
                 childRecords: Breeding.CHILD_RECORDS.map((c) => Ext4.apply(Ext4.apply({}, defaultButtonBarConfig), c)),
                 renderTo: webpart.wrapperDivId,
@@ -204,7 +211,9 @@ export class Breeding {
             });
             detailPanel.on('childLoad', this.attachDetailClickHandler, this, {single: true});
             detailPanel.on('childLoad', this.colorizePregnancyRows, this, {single: true});
-        } else {
+        }
+        else
+        {
             $(`#${webpart.wrapperDivId}`).empty();
         }
     }
@@ -216,7 +225,8 @@ export class Breeding {
     /**
      * Overwrites the placeholder detail URI with a javascript:void(0) and attaches the detail click handler
      */
-    private attachDetailClickHandler() {
+    private attachDetailClickHandler()
+    {
         $(`a[href*='${Breeding.DETAIL_PLACEHOLDER}']`).each((i, e) => {
             const id = (URI($(e).attr('href')).query(true) as any).id;
             $(e).attr('href', 'javascript:void(0)')
@@ -229,9 +239,9 @@ export class Breeding {
      * rather than breeding encounters (based on a value being present in the estimated conception date
      * and/or the outcome date)
      */
-    private colorizePregnancyRows(panel: any) {
+    private colorizePregnancyRows(panel: any)
+    {
         const crp = panel.getEl(`.${Breeding.BREEDING_HISTORY_GRID_CLASS}`);
-        // noinspection TypeScriptUnresolvedFunction
         const idx = $(Ext4.dom.Query.selectNode('td[column-name$="conceptiondate"]', crp.dom)).prevAll().length;
         Ext4.dom.Query.select('tr.labkey-alternate-row, tr.labkey-row', crp.dom)
             .filter(e => e.children[idx] && e.children[idx].children && (e.children[idx].children.length > 0))
@@ -242,7 +252,8 @@ export class Breeding {
      * Handler for clicking the detail links in the pregnancy grid
      * @param {string | null} taskId
      */
-    private onDetailClick(taskId: string | null) {
+    private onDetailClick(taskId: string | null)
+    {
         Breeding.updateBrowserState('taskId', taskId);
         this.renderWebpart(taskId);
     }
@@ -252,9 +263,11 @@ export class Breeding {
      * @param {(PopStateEvent) => void} oldHandler
      * @param {PopStateEvent} evt
      */
-    private onPopState(oldHandler: (PopStateEvent) => void, evt: PopStateEvent) {
-        this.renderGrid(evt.state||({} as PregnancyState));
-        if (oldHandler) {
+    private onPopState(oldHandler: (PopStateEvent) => void, evt: PopStateEvent)
+    {
+        this.renderGrid(evt.state || ({} as PregnancyState));
+        if (oldHandler)
+        {
             oldHandler(evt);
         }
     }
@@ -263,11 +276,19 @@ export class Breeding {
      * Renders the pregnancy grid view based on the passed state (viewName/breedingId)
      * @param {PregnancyState} state
      */
-    private renderGrid(state: PregnancyState) {
-        const filters = (state.subjects && state.subjects != '')
-            ? [LABKEY.Filter.create('Id', state.subjects, LABKEY.Filter.Types.IN)]
-            : [];
-        // noinspection JSUnusedGlobalSymbols, TypeScriptUnresolvedFunction, TypeScriptUnresolvedVariable
+    private renderGrid(state: PregnancyState)
+    {
+        // set up the filters. if there are subjects passed in from the animal history report (or elsewhere)
+        // use those, otherwise leave it empty
+        const filters = [];
+        if (state.subjects != null && state.subjects !== '')
+            filters.push(LABKEY.Filter.create('Id', state.subjects, LABKEY.Filter.Types.IN));
+
+        // set up the view. if a view had been specified as part of the state, use that, otherwise check the
+        // subject filters. if there are subject filters, we probably want the full pregnancy history for those
+        // animals, otherwise leave it blank to get the current pregnancies
+        const view = state.viewName || ((state.subjects != null && state.subjects !== '') ? 'pregnancies_all' : '');
+
         const x = new LABKEY.QueryWebPart({
             buttonBar: {
                 items: [
@@ -298,7 +319,7 @@ export class Breeding {
                 this.renderWebpart(state.taskId);
             },
             title: 'Pregnancies',
-            viewName: state.viewName || '',
+            viewName: view,
         });
         x.render(this.gridElementId);
     }
@@ -307,8 +328,8 @@ export class Breeding {
      * Renders the detail webpart for the passed breeding encounter id (or clears it)
      * @param {string | null} taskId
      */
-    private renderWebpart(taskId: string | null) {
-        // noinspection TypeScriptUnresolvedFunction
+    private renderWebpart(taskId: string | null)
+    {
         const x = new LABKEY.WebPart({
             partConfig: {taskId},
             partName: 'Pregnancy Detail',
@@ -320,7 +341,7 @@ export class Breeding {
     // </editor-fold>
 }
 
-// noinspection JSUnusedGlobalSymbols: invoked in the browser
+// noinspection JSUnusedGlobalSymbols
 export default new Breeding();
 
 // <editor-fold desc="--Helper Interface Definitions--">
@@ -328,7 +349,8 @@ export default new Breeding();
 /**
  * Child record configuration to pass to the child records panel
  */
-interface ChildRecordConfiguration {
+interface ChildRecordConfiguration
+{
     buttonBar?: { items: any[] };
     cls?: string;
     detailsURL?: string;
@@ -344,14 +366,16 @@ interface ChildRecordConfiguration {
 /**
  * Single record returned from a data store
  */
-interface DataSetRecord {
+interface DataSetRecord
+{
     get: (key: string) => any;
 }
 
 /**
  * Browser state/get query parameters for loading the pregnancy grid/detail
  */
-interface PregnancyState {
+interface PregnancyState
+{
     taskId: string | null;
     viewName: string | null;
     subjects: string | null;
@@ -360,7 +384,8 @@ interface PregnancyState {
 /**
  * Configuration object passed from the webpart config for the pregnancy detail webpart
  */
-interface WebPartConfig {
+interface WebPartConfig
+{
     taskId: string | null;
     wrapperDivId: string;
 }

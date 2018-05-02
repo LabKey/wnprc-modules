@@ -1,8 +1,8 @@
 Ext4.namespace('EHR.reports');
 EHR.reports.PregnancyReport = function(panel, tab) {
-    var target = tab.add({xtype: 'ldk-contentresizingpanel'});
+    const target = tab.add({xtype: 'ldk-contentresizingpanel'});
 
-    var observer = new MutationObserver(target.fireEvent.bind(target, 'contentsizechange'));
+    const observer = new MutationObserver(target.fireEvent.bind(target, 'contentsizechange'));
     observer.observe(target.getEl().dom, {childList: true, subtree: true});
 
     const wp = new LABKEY.WebPart({

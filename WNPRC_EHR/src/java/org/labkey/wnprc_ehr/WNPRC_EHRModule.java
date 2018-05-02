@@ -25,6 +25,7 @@ import org.labkey.api.ehr.buttons.ChangeQCStateButton;
 import org.labkey.api.ehr.buttons.CreateTaskFromIdsButton;
 import org.labkey.api.ehr.buttons.CreateTaskFromRecordsButton;
 import org.labkey.api.ehr.buttons.MarkCompletedButton;
+import org.labkey.api.ehr.dataentry.DataEntryForm;
 import org.labkey.api.ehr.dataentry.DefaultDataEntryFormFactory;
 import org.labkey.api.ehr.security.EHRStartedAdminPermission;
 import org.labkey.api.ehr.security.EHRStartedDeletePermission;
@@ -47,7 +48,7 @@ import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
-import org.labkey.wnprc_ehr.dataentry.forms.Breeding.BreedingEncounterForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Breeding;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
@@ -351,9 +352,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 FoodDeprivesStartForm.class,
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
-                ProtocolForm.class,
-                BreedingEncounterForm.class
+                ProtocolForm.class
         );
+        // load all the breeding forms (which are embedded in the Breeding class)
+        forms.addAll(Arrays.asList(Breeding.class.getClasses()));
 
         for(Class form : forms) {
             EHRService.get().registerFormType(new DefaultDataEntryFormFactory(form, this));

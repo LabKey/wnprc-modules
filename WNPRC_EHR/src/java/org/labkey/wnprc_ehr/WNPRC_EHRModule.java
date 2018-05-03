@@ -15,7 +15,6 @@
  */
 package org.labkey.wnprc_ehr;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.labkey.api.data.Container;
@@ -100,10 +99,9 @@ import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
+import org.labkey.wnprc_ehr.updates.ModuleUpdate;
 import org.reflections.Reflections;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -122,20 +120,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String NAME = "WNPRC_EHR";
     public static final String CONTROLLER_NAME = "wnprc_ehr";
 
-    /**
-     * Logger for logging the logs
-     */
-    private static final Logger LOG = Logger.getLogger(WNPRC_EHRModule.class);
     public static String BC_GOOGLE_DRIVE_PROPERTY_NAME = "BCGoogleDriveAccount";
-    /**
-     * Flag (from the JVM) to indicate we should force the module to re-run all updates
-     * regardless of the actual module version
-     */
-    private boolean forceUpdate = Boolean.getBoolean("labkey.module.forceupdate");
-    /**
-     * Flag indicating we should load the study metadata on module startup
-     */
-    private boolean loadOnStart = false;
 
     static public LinkedHashSet<ClientDependency> getDataEntryClientDependencies()
     {
@@ -197,7 +182,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public double getVersion()
     {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 15.15;
+        return 15.15;
     }
 
     public boolean hasScripts()
@@ -214,6 +199,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     @Override
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
     {
+        ModuleUpdate.onStartup(moduleContext, this);
+
         EHRService.get().registerModule(this);
         EHRService.get().registerTableCustomizer(this, WNPRC_EHRCustomizer.class);
         Resource r = getModuleResource("/scripts/wnprc_ehr/wnprc_triggers.js");
@@ -298,7 +285,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         }
 
-        if (loadOnStart) loadLatestDatasetMetadata(EHRService.get());
+        //if (loadOnStart) loadLatestDatasetMetadata(EHRService.get());
     }
 
     private void registerPermissions()
@@ -441,12 +428,24 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     }
 
     @Override
+    public void afterUpdate(ModuleContext moduleContext)
+    {
+        super.afterUpdate(moduleContext);
+        ModuleUpdate.doAfterUpdate(moduleContext);
+    }
+
+    @Override
+    public void beforeUpdate(ModuleContext moduleContext)
+    {
+        super.beforeUpdate(moduleContext);
+        ModuleUpdate.doBeforeUpdate(moduleContext);
+    }
+
+    @Override
     public void versionUpdate(ModuleContext moduleContext) throws Exception
     {
-        LOG.debug("deferring import of study metadata until module startup (after Spring config)");
-        forceUpdate = false; // let the version report correctly from now on
-        loadOnStart = true;  // indicate that we should load the study metadata on startup
         super.versionUpdate(moduleContext);
+        ModuleUpdate.doVersionUpdate(moduleContext);
     }
 
     @Override
@@ -465,15 +464,5 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
                 .filter(c -> c.getSimpleName().endsWith("UnitTest"))
                 .collect(Collectors.toSet());
-    }
-
-    /**
-     * Executes the import of the dataset metadata into every container that has the module enabled
-     */
-    private void loadLatestDatasetMetadata(EHRService es)
-    {
-        LOG.debug("importing study metadata from reference study to all study containers");
-        File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
-        getWNPRCStudyContainers().forEach(c -> DatasetImportHelper.safeImportDatasetMetadata(es.getEHRUser(c), c, file));
     }
 }

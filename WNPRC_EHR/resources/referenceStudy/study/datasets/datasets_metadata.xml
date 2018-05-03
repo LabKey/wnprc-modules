@@ -41,14 +41,6 @@
         <tableTitle>Breeding Encounters</tableTitle>
         <description>Contains one row for each breeding pairing/assignment for a dam at the center.</description>
         <columns>
-            <column columnName="date_in">
-                <columnTitle>Date In</columnTitle>
-                <datatype>date</datatype>
-            </column>
-            <column columnName="date_out">
-                <columnTitle>Date Out</columnTitle>
-                <datatype>date</datatype>
-            </column>
             <column columnName="sireid">
                 <columnTitle>Sire</columnTitle>
                 <datatype>varchar</datatype>
@@ -64,6 +56,14 @@
                 <datatype>varchar</datatype>
             </column>
         </columns>
+        <indices>
+            <index type="non-unique">
+                <column>sireid</column>
+            </index>
+            <index type="non-unique">
+                <column>ejaculation</column>
+            </index>
+        </indices>
     </table>
     <table tableName="pregnancies" tableDbType="TABLE">
         <tableTitle>Pregnancies</tableTitle>
@@ -88,6 +88,17 @@
                 </fk>
             </column>
         </columns>
+        <indices>
+            <index type="non-unique">
+                <column>sireid</column>
+            </index>
+            <index type="non-unique">
+                <column>date_conception</column>
+            </index>
+            <index type="non-unique">
+                <column>date_due</column>
+            </index>
+        </indices>
     </table>
     <table tableName="pregnancy_outcomes" tableDbType="TABLE">
         <tableTitle>Pregnancy Outcomes</tableTitle>
@@ -121,6 +132,17 @@
                 <datatype>varchar</datatype>
             </column>
         </columns>
+        <indices>
+            <index type="non-unique">
+                <column>pregnancyid</column>
+            </index>
+            <index type="non-unique">
+                <column>outcome</column>
+            </index>
+            <index type="non-unique">
+                <column>offered_to</column>
+            </index>
+        </indices>
     </table>
     <table tableName="ultrasounds" tableDbType="TABLE">
         <tableTitle>Ultrasounds</tableTitle>
@@ -135,5 +157,10 @@
                 </fk>
             </column>
         </columns>
+        <indices>
+            <index type="non-unique">
+                <column>pregnancyid</column>
+            </index>
+        </indices>
     </table>
 </tables>

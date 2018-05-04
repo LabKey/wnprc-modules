@@ -17,6 +17,8 @@ RUN rpm -i https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rp
     wget \
     tar \
     gzip \
+    # for creating the netrc file from the template (envsubst)
+    gettext \ 
     # for installing R and the various additional packages
     R-3.2.0 \
     make \
@@ -64,17 +66,14 @@ COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xm
 EXPOSE 8080
 
 # install the necessary R scripts
-RUN mkdir -p /usr/share/doc/R-3.2.0/html \
- && Rscript -e "install.packages('quadprog', repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('pedigree', repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('Matrix',   repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('RCurl',    repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('Rlabkey',  repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('kinship2', repos='http://cran.us.r-project.org')" \
- && Rscript -e "install.packages('getopt',   repos='http://cran.us.r-project.org')"
+COPY install.r /tmp/install.r
+RUN mkdir -p /usr/share/doc/R-3.2.0/html && Rscript /tmp/install.r
+
+# copy over the .netrc template file
+COPY netrc /root/netrc.template
 
 # copy the script to wait for the postgres instance (and chmod it for execution)
 COPY wait-for-postgres.sh /etc/
 RUN chmod +x /etc/wait-for-postgres.sh
-CMD ["sh", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/wait-for-postgres.sh postgres bin/catalina.sh run ; }"]
+CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/wait-for-postgres.sh postgres bin/catalina.sh run ; }"]
 

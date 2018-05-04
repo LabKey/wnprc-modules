@@ -59,6 +59,9 @@ services:
     environment:
       CATALINA_OPTS:
       JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME}"
+      LK_BACKGROUND_USER: 
+      LK_BACKGROUND_USER_PASSWORD:
+      LK_BASE_URL:
       PG_NAME:
       PG_PASS:
       PG_USER:

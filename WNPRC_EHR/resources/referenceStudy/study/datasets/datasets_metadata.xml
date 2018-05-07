@@ -105,11 +105,13 @@
         <description>Contains one row for the outcome of each pregnancy completed/terminated at the center.</description>
         <columns>
             <column columnName="pregnancyid">
+                <columnTitle>Pregnancy (Conc. Date)</columnTitle>
                 <datatype>entityid</datatype>
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>pregnancies</fkTable>
-                    <fkColumnName>objectid</fkColumnName>
+                    <fkColumnName>lsid</fkColumnName>
+                    <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                 </fk>
             </column>
             <column columnName="outcome">
@@ -149,11 +151,13 @@
         <description>Contains one row for each ultrasound performed at the center.</description>
         <columns>
             <column columnName="pregnancyid">
+                <columnTitle>Pregnancy (Conc. Date)</columnTitle>
                 <datatype>entityid</datatype>
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>pregnancies</fkTable>
-                    <fkColumnName>objectid</fkColumnName>
+                    <fkColumnName>lsid</fkColumnName>
+                    <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                 </fk>
             </column>
         </columns>

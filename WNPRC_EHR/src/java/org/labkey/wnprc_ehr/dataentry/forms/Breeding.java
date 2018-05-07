@@ -91,7 +91,9 @@ public final class Breeding
         {
             super(ctx, owner, formName, formName, "Colony Records", Arrays.asList(sections));
             addClientDependency(ClientDependency.fromPath("/wnprc_ehr/model/sources/Breeding.js"));
+            addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/data/BreedingStoreCollection.js"));
             getFormSections().forEach(s -> s.addConfigSource("Breeding"));
+            setStoreCollectionClass("WNPRC.ext.data.BreedingStoreCollection");
         }
 
         private static BreedingForm bulk(DataEntryFormContext ctx, Module owner, String formName, String queryName)

@@ -70,20 +70,21 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
     }
 
     /**
-     * Returns a new JavaScript animal history report row built from the passed name, title, query, and description as a
+     * Returns a new animal history report row built from the passed name, title, query, and description as a
      * {@link CaseInsensitiveMapWrapper} (which is required by LabKey). The category will default to "Colony Management"
      *
+     * @param reportType  Type of the report (e.g., "js", "query")
      * @param reportName  Name of the report
      * @param reportTitle Title to show on the animal history tab
      * @param queryName   Name of the JavaScript report to load
      * @param description Description of the report
      * @return Case-insensitive map of fields to data to insert into the database
      */
-    private CaseInsensitiveMapWrapper<Object> createJavaScriptReportRow(String reportName, String reportTitle, String queryName, String description)
+    private CaseInsensitiveMapWrapper<Object> createReportRow(String reportType, String reportName, String reportTitle, String queryName, String description)
     {
         return new CaseInsensitiveMapWrapper<>(Stream.of(new AbstractMap.SimpleEntry<>("reportname", reportName)
                 , new AbstractMap.SimpleEntry<>("category", "Colony Management")
-                , new AbstractMap.SimpleEntry<>("reporttype", "js")
+                , new AbstractMap.SimpleEntry<>("reporttype", reportType)
                 , new AbstractMap.SimpleEntry<>("reporttitle", reportTitle)
                 , new AbstractMap.SimpleEntry<>("schemaname", "study")
                 , new AbstractMap.SimpleEntry<>("queryname", queryName)
@@ -122,7 +123,7 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
     }
 
     /**
-     * Replaces the old "pregnancies" report in animal history with three new JavaScript reports for pregnancies,
+     * Replaces the old "pregnancies" report in animal history with three new reports for pregnancies,
      * ultrasounds, and breeding encounters
      *
      * @param user      User executing the update
@@ -157,9 +158,9 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
             LOG.debug("inserting new pregnancies, breeding_encounters, and ultrasounds reports to animal history");
             BatchValidationException bve = new BatchValidationException();
             qus.insertRows(user, container, Arrays.asList(
-                    createJavaScriptReportRow("pregnancies", "Pregnancies", "PregnancyReport", "This report contains a list of known pregnancies, including conception dates and sire (where available)"),
-                    createJavaScriptReportRow("breeding_encounters", "Breeding Encounters", "BreedingReport", "This report contains a list of encounters between a breeding dam and a possible sire"),
-                    createJavaScriptReportRow("ultrasounds", "Ultrasounds", "UltrasoundReport", "This report details the ultrasounds performed on breeding dams")),
+                    createReportRow("js", "pregnancies", "Pregnancies", "PregnancyReport", "This report contains a list of known pregnancies, including conception dates and sire (where available)"),
+                    createReportRow("query", "breeding_encounters", "Breeding Encounters", "breeding_encounters", "This report contains a list of encounters between a breeding dam and a possible sire"),
+                    createReportRow("query", "ultrasounds", "Ultrasounds", "ultrasounds", "This report details the ultrasounds performed on breeding dams")),
                     bve, null, null);
 
             if (bve.hasErrors())

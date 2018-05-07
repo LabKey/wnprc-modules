@@ -8,33 +8,65 @@ import org.reflections.Reflections;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+/**
+ * Utility class for executing non-schema-related updates to the WNPRC module
+ */
 public class ModuleUpdate
 {
+    /**
+     * Logger for logging the logs
+     */
     private static Logger LOG = Logger.getLogger(ModuleUpdate.class);
 
+    /**
+     * Executes the after update step of each applicable updater in the package
+     *
+     * @param ctx Module update context from LabKey
+     */
     public static void doAfterUpdate(ModuleContext ctx)
     {
         getApplicableUpdaters(ctx).forEach(x -> x.doAfterUpdate(ctx));
     }
 
+    /**
+     * Executes the before update step of each applicable updater in the package
+     *
+     * @param ctx Module update context from LabKey
+     */
     public static void doBeforeUpdate(ModuleContext ctx)
     {
         getApplicableUpdaters(ctx).forEach(x -> x.doBeforeUpdate(ctx));
     }
 
+    /**
+     * Executes the version update step of each applicable updater in the package
+     *
+     * @param ctx Module update context from LabKey
+     */
     public static void doVersionUpdate(ModuleContext ctx)
     {
         getApplicableUpdaters(ctx).forEach(x -> x.doVersionUpdate(ctx));
     }
 
+    /**
+     * Executes any deferred update action that needs to wait until the module has started
+     *
+     * @param ctx Module update context from LabKey
+     */
     public static void onStartup(ModuleContext ctx, Module module)
     {
         getApplicableUpdaters(ctx).forEach(x -> x.onStartup(ctx, module));
     }
 
+    /**
+     * Returns a stream of all applicable updaters from the current Java module based on the passed context
+     *
+     * @param ctx Module update context from LabKey
+     * @return Stream of {@link Updater} objects to execute
+     */
     private static Stream<? extends Updater> getApplicableUpdaters(ModuleContext ctx)
     {
-        return new Reflections("org.labkey.wnprc_ehr.updates")
+        return new Reflections(ModuleUpdate.class.getPackage().getName())
                 .getSubTypesOf(Updater.class).stream()
                 .map(c -> {
                     try
@@ -51,16 +83,45 @@ public class ModuleUpdate
                 .filter(x -> x.applies(ctx));
     }
 
+    /**
+     * Utility interface for applying individual, non-schema-related module updates
+     */
     interface Updater
     {
+        /**
+         * Indicates whether a particular update applies given the passed context
+         *
+         * @param ctx Module context from LabKey
+         * @return True if this updater should be executed, false otherwise
+         */
         boolean applies(ModuleContext ctx);
 
+        /**
+         * Executes the after update step of this update
+         *
+         * @param ctx Module context from LabKey
+         */
         void doAfterUpdate(ModuleContext ctx);
 
+        /**
+         * Executes the before update step of this update
+         *
+         * @param ctx Module context from LabKey
+         */
         void doBeforeUpdate(ModuleContext ctx);
 
+        /**
+         * Executes the version update step of this update
+         *
+         * @param ctx Module context from LabKey
+         */
         void doVersionUpdate(ModuleContext ctx);
 
+        /**
+         * Executes any deferred actions that need to be done after startup
+         *
+         * @param ctx Module context from LabKey
+         */
         void onStartup(ModuleContext ctx, Module module);
     }
 }

@@ -32,6 +32,9 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused") // reflection
 public class UpdateTo15_15 implements ModuleUpdate.Updater
 {
+    /**
+     * Logger for logging the logs
+     */
     private static Logger LOG = Logger.getLogger(UpdateTo15_15.class);
 
     @Override
@@ -66,7 +69,17 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
         getEHRContainers(module, es).forEach(c -> updateContainer(es.getEHRUser(c), c, file));
     }
 
-    private CaseInsensitiveMapWrapper<Object> createReportRow(String reportName, String reportTitle, String queryName, String description)
+    /**
+     * Returns a new JavaScript animal history report row built from the passed name, title, query, and description as a
+     * {@link CaseInsensitiveMapWrapper} (which is required by LabKey). The category will default to "Colony Management"
+     *
+     * @param reportName  Name of the report
+     * @param reportTitle Title to show on the animal history tab
+     * @param queryName   Name of the JavaScript report to load
+     * @param description Description of the report
+     * @return Case-insensitive map of fields to data to insert into the database
+     */
+    private CaseInsensitiveMapWrapper<Object> createJavaScriptReportRow(String reportName, String reportTitle, String queryName, String description)
     {
         return new CaseInsensitiveMapWrapper<>(Stream.of(new AbstractMap.SimpleEntry<>("reportname", reportName)
                 , new AbstractMap.SimpleEntry<>("category", "Colony Management")
@@ -81,12 +94,26 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
         ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
     }
 
+    /**
+     * Returns all EHR module containers
+     *
+     * @param module Module being updated
+     * @param es     EHR service used to get the EHR containers
+     * @return Stream of all containers with EHR and the passed module enabled
+     */
     private Stream<Container> getEHRContainers(Module module, EHRService es)
     {
         return ContainerManager.getAllChildrenWithModule(ContainerManager.getRoot(), module).stream()
                 .map(es::getEHRStudyContainer).distinct();
     }
 
+    /**
+     * Executes the update on the passed container as the passed user, using the passed file to retrieve the metdata
+     *
+     * @param u User executing the update
+     * @param c Container to update
+     * @param f File containing the dataset metdata to import
+     */
     private void updateContainer(User u, Container c, File f)
     {
         LOG.debug(String.format("importing WNPRC 15.15 study metadata and updating EHR reports in container: %s", c.getName()));
@@ -94,6 +121,13 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
         updateReports(u, c);
     }
 
+    /**
+     * Replaces the old "pregnancies" report in animal history with three new JavaScript reports for pregnancies,
+     * ultrasounds, and breeding encounters
+     *
+     * @param user      User executing the update
+     * @param container Container to update
+     */
     private void updateReports(User user, Container container)
     {
         UserSchema schema = QueryService.get().getUserSchema(user, container, "ehr");
@@ -114,14 +148,18 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
                 results.iterator().forEachRemaining(toDelete::add);
 
                 if (toDelete.size() > 0)
+                {
+                    LOG.debug("deleting old pregnancies report, replacing with new one");
                     qus.deleteRows(user, container, toDelete, null, null);
+                }
             }
 
+            LOG.debug("inserting new pregnancies, breeding_encounters, and ultrasounds reports to animal history");
             BatchValidationException bve = new BatchValidationException();
             qus.insertRows(user, container, Arrays.asList(
-                    createReportRow("pregnancies", "Pregnancies", "PregnancyReport", "This report contains a list of known pregnancies, including conception dates and sire (where available)"),
-                    createReportRow("breeding_encounters", "Breeding Encounters", "BreedingReport", "This report contains a list of encounters between a breeding dam and a possible sire"),
-                    createReportRow("ultrasounds", "Ultrasounds", "UltrasoundReport", "This report details the ultrasounds performed on breeding dams")),
+                    createJavaScriptReportRow("pregnancies", "Pregnancies", "PregnancyReport", "This report contains a list of known pregnancies, including conception dates and sire (where available)"),
+                    createJavaScriptReportRow("breeding_encounters", "Breeding Encounters", "BreedingReport", "This report contains a list of encounters between a breeding dam and a possible sire"),
+                    createJavaScriptReportRow("ultrasounds", "Ultrasounds", "UltrasoundReport", "This report details the ultrasounds performed on breeding dams")),
                     bve, null, null);
 
             if (bve.hasErrors())

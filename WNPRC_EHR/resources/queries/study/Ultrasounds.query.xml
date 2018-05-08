@@ -7,6 +7,7 @@
                 <columns>
                     <column columnName="Id"/>
                     <column columnName="date"/>
+                    <column columnName="perfomedby"/>
                     <column columnName="pregnancyid">
                         <columnTitle>Pregnancy (Conc. Date)</columnTitle>
                         <fk>
@@ -16,7 +17,6 @@
                             <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="perfomedby"/>
                     <column columnName="remark"/>
                     <column columnName="qcstate">
                         <isHidden>true</isHidden>

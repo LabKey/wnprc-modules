@@ -6,12 +6,16 @@ import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.DataEntryFormFactory;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;
+import org.labkey.api.ehr.dataentry.SimpleFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -39,10 +43,13 @@ public final class Breeding
         // register the generic bulk entry forms
         Stream.of(new AbstractMap.SimpleEntry<>("Breeding Encounters", "breeding_encounters")
                 , new AbstractMap.SimpleEntry<>("Pregnancies", "pregnancies")
-                , new AbstractMap.SimpleEntry<>("Pregnancy Outcomes", "pregnancy_outcomes")
-                , new AbstractMap.SimpleEntry<>("Ultrasounds", "ultrasounds")
         ).map(e -> Breeding.bulkFactory(module, e.getKey(), e.getValue()))
                 .forEach(es::registerFormType);
+
+        es.registerFormType(ctx -> new BreedingForm(ctx, module, "Ultrasounds",
+                new PregnancyGridSection("ultrasounds", "Ultrasounds")));
+        es.registerFormType(ctx -> new BreedingForm(ctx, module, "Pregnancy Outcomes",
+                new PregnancyGridSection("pregnancy_outcomes", "Pregnancy Outcomes")));
     }
 
     /**
@@ -77,7 +84,7 @@ public final class Breeding
      * Breeding-specific data entry form class. Sets the category to "Colony Records" and adds the
      * "Breeding" metadata configuration to each of the form sections.
      */
-    private static class BreedingForm extends AbstractDataEntryForm
+    private static final class BreedingForm extends AbstractDataEntryForm
     {
         /**
          * Creates a breeding form with the passed form sections
@@ -87,11 +94,10 @@ public final class Breeding
          * @param formName Name to display on the form
          * @param sections Form sections to add to the form
          */
-        private BreedingForm(DataEntryFormContext ctx, Module owner, String formName, FormSection... sections)
+        public BreedingForm(DataEntryFormContext ctx, Module owner, String formName, FormSection... sections)
         {
             super(ctx, owner, formName, formName, "Colony Records", Arrays.asList(sections));
-            addClientDependency(ClientDependency.fromPath("/wnprc_ehr/model/sources/Breeding.js"));
-            addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/data/BreedingStoreCollection.js"));
+            addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
             getFormSections().forEach(s -> s.addConfigSource("Breeding"));
             setStoreCollectionClass("WNPRC.ext.data.BreedingStoreCollection");
         }
@@ -106,6 +112,23 @@ public final class Breeding
         {
             return new BreedingForm(ctx, owner, formName,
                     new SimpleFormPanelSection("study", queryName, formName, false));
+        }
+    }
+
+    private static final class PregnancyGridSection extends SimpleFormSection
+    {
+        public PregnancyGridSection(String queryName, String label)
+        {
+            super("study", queryName, label, "wnprc-pregnancygridpanel");
+        }
+
+        @Override
+        public List<String> getTbarButtons()
+        {
+            List<String> buttons =  super.getTbarButtons();
+            buttons.remove("ADDRECORD");
+            buttons.add(0, "APPENDRECORD");
+            return buttons;
         }
     }
 }

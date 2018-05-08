@@ -76,6 +76,7 @@
             <column columnName="date_due">
                 <columnTitle>Est. Due Date</columnTitle>
                 <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
             </column>
             <column columnName="sireid">
                 <columnTitle>Sire</columnTitle>

@@ -9,21 +9,25 @@ Ext4.define('WNPRC.grid.AppendRecordGridPanel', {
     initComponent: function () {
         this.callParent(arguments);
 
-        const plugin = Ext4.create('WNPRC.plugin.ButtonHotKeyPlugin', {
-            buttonId: 'appendRecordBtn',
-            keyCode: 187,
+        const plugin = Ext4.create('WNPRC.plugin.ButtonHotKeyPlugin', { // from ButtonHotKeyPlugin.js
+            buttonId: 'appendRecordBtn',                                // from AppendRecordButton.js
+            keyCode: 187, // the '=' key, next to delete/backspace
             shift: true
         });
 
         this.plugins = this.plugins || [];
         this.plugins.push(plugin);
 
+        // the plugin needs to execute after a slight delay in order to allow for the store collection
+        // to set the default values for the model that would be created. for some reason, if it races
+        // into this handler, that function does not properly fill the "perfomed by" field
+        //   - clay, 09 May 2018
         this.mon(this, 'afterrender', plugin.execute, plugin, {single: true, delay: 500});
 
-        this.mon(this, 'beforeedit', this._flush, this);
-        this.mon(this, 'edit', this._flush, this);
-        this.mon(this, 'validateedit', this._flush, this);
-        this.mon(this, 'canceledit', this._flush, this);
+        this.mon(this, 'beforeedit',    this._flush, this);
+        this.mon(this, 'edit',          this._flush, this);
+        this.mon(this, 'validateedit',  this._flush, this);
+        this.mon(this, 'canceledit',    this._flush, this);
     },
 
     /**

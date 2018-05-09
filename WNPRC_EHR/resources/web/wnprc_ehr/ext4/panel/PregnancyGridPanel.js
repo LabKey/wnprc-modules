@@ -1,5 +1,5 @@
 (function () {
-    // pseudo-parameterized SQL
+    // pseudo-parameterized SQL for retreiving the "current" pregnancy lsid given a participant id
     const GET_ACTIVE_PREGNANCY_LSID_BY_ID_SQL =
             'select lsid \
                from (select p.lsid \
@@ -16,8 +16,19 @@
         extend: 'EHR.grid.Panel',
         alias: 'widget.wnprc-pregnancygridpanel',
 
+        /**
+         * Queue of changes (lambdas) to apply on the next edit event to prevent UI weirdness.
+         *
+         * @type {[function]}
+         * @private
+         */
         _changes: [],
 
+        /**
+         * Initializes the panel.
+         *
+         * @override
+         */
         initComponent: function () {
             Ext4.apply(this, {
                 listeners: {
@@ -32,6 +43,25 @@
             this.mon(this, 'edit', this._onEdit, this);
             this.mon(this, 'edit', this._applyQueuedChanges, this);
         },
+
+        /**
+         * Executes the lambdas in the change queue and empties it for the next event.
+         *
+         * @private
+         */
+        _applyQueuedChanges: function () {
+            // execute any queued model changes. this is helpful to avoid a strange UI situation where
+            // the next field we tab into is somehow rendered in the center of the screen
+            while (this._changes.length)
+                this._changes.shift()();
+        },
+
+        /**
+         * After render event handler. Attaches the KeyMap on the '+' key to append a new record. Also appends a
+         * new record to the grid immediately.
+         *
+         * @private
+         */
         _onAfterRender: function () {
             Ext4.util.KeyMap.create({
                 defaultEventAction: 'stopEvent',
@@ -47,15 +77,23 @@
             // do it that way instead - clay, 08 May 2018
             setTimeout(this._onAppendKeypress.bind(this), 500);
         },
+
+        /**
+         * Key handler for the KeyMap. Finds the "Append Record" button and clicks it.
+         *
+         * @private
+         */
         _onAppendKeypress: function () {
             this.down('button[itemId=appendRecordBtn]').getEl().dom.click()
         },
-        _applyQueuedChanges: function () {
-            // execute any queued model changes. this is helpful to avoid a strange UI situation where
-            // the next field we tab into is somehow rendered in the center of the screen
-            while (this._changes.length)
-                this._changes.shift()();
-        },
+
+        /**
+         * Edit event handler. Updates the pregnancy id of the passed row based on any changes to the participant id.
+         *
+         * @param sender
+         * @param args
+         * @private
+         */
         _onEdit: function (sender, args) {
             // only worry about changes to the id field
             if (args.field !== 'Id') return;
@@ -67,16 +105,25 @@
             const model = this.getSelectionModel().getSelection()[0];
             if (model) this._updatePregnancy(model, args.value);
         },
-        _updatePregnancy: function (model, value) {
+
+        /**
+         * Updates the pregnancy id of the passed model based on the passed participant id, clearing it on change
+         * and setting it to the "active" pregnancy for the participant id, if there is one.
+         *
+         * @param model
+         * @param participantId
+         * @private
+         */
+        _updatePregnancy: function (model, participantId) {
             model.set('pregnancyid', null);
             LABKEY.Query.executeSql({
                 failure: function (error) {
-                    console.error('unable to retrieve default pregnancy: id=' + value);
+                    console.error('unable to retrieve default pregnancy: id=' + participantId);
                     console.error(error.exception);
                 },
                 schemaName: 'study',
                 scope: this,
-                sql: Ext4.String.format(GET_ACTIVE_PREGNANCY_LSID_BY_ID_SQL, LABKEY.Query.sqlStringLiteral(value)),
+                sql: Ext4.String.format(GET_ACTIVE_PREGNANCY_LSID_BY_ID_SQL, LABKEY.Query.sqlStringLiteral(participantId)),
                 success: function (data) {
                     if (data.rowCount)
                         this._changes.push(model.set.bind(model, 'pregnancyid', data.rows[0].lsid));

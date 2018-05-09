@@ -5,6 +5,7 @@
         <script path="/wnprc_ehr/ext4/components/buttons/AppendRecordButton.js"/>
         <script path="/wnprc_ehr/ext4/components/fields/PregnancyField.js"/>
         <script path="/wnprc_ehr/ext4/components/plugins/ButtonHotKeyPlugin.js"/>
+        <script path="/wnprc_ehr/ext4/panel/AppendRecordGridPanel.js"/>
         <script path="/wnprc_ehr/ext4/panel/PregnancyGridPanel.js"/>
     </library>
     <dependencies>

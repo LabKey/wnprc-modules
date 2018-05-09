@@ -9,13 +9,9 @@ import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;
 import org.labkey.api.ehr.dataentry.SimpleFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
-import org.labkey.wnprc_ehr.WNPRC_EHRModule;
-import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -25,6 +21,15 @@ import java.util.stream.Stream;
 public final class Breeding
 {
     /**
+     * Panel xtype for the "master" data that is not linked to a parent pregnancy.
+     */
+    private static final String MASTER_PANEL_XTYPE = "wnprc-appendrecordgridpanel";
+    /**
+     * Panel xtype for the "linked" data that is linked to a particular, "parent" pregnancy record.
+     */
+    private static final String LINKED_PANEL_XTYPE = "wnprc-pregnancygridpanel";
+
+    /**
      * Registers the breeding data entry forms in the passed EHR service for the passed module.
      *
      * @param es     EHR service instance to register in
@@ -33,23 +38,20 @@ public final class Breeding
     public static void registerDataEntryForms(EHRService es, Module module)
     {
         // register the generic singular, edit forms
-        Stream.of(new AbstractMap.SimpleEntry<>("Breeding Encounter", "breeding_encounters")
-                , new AbstractMap.SimpleEntry<>("Pregnancy", "pregnancies")
-                , new AbstractMap.SimpleEntry<>("Pregnancy Outcome", "pregnancy_outcomes")
-                , new AbstractMap.SimpleEntry<>("Ultrasound", "ultrasounds")
-        ).map(e -> Breeding.editFactory(module, e.getKey(), e.getValue()))
+        Stream.of(Arrays.asList("Breeding Encounter", "breeding_encounters")
+                , Arrays.asList("Pregnancy", "pregnancies")
+                , Arrays.asList("Pregnancy Outcome", "pregnancy_outcomes")
+                , Arrays.asList("Ultrasound", "ultrasounds")
+        ).map(e -> Breeding.editFactory(module, e.get(0), e.get(1)))
                 .forEach(es::registerFormType);
 
         // register the generic bulk entry forms
-        Stream.of(new AbstractMap.SimpleEntry<>("Breeding Encounters", "breeding_encounters")
-                , new AbstractMap.SimpleEntry<>("Pregnancies", "pregnancies")
-        ).map(e -> Breeding.bulkFactory(module, e.getKey(), e.getValue()))
+        Stream.of(Arrays.asList("Breeding Encounters", "breeding_encounters", MASTER_PANEL_XTYPE)
+                , Arrays.asList("Pregnancies", "pregnancies", MASTER_PANEL_XTYPE)
+                , Arrays.asList("Pregnancy Outcomes", "pregnancy_outcomes", LINKED_PANEL_XTYPE)
+                , Arrays.asList("Ultrasounds", "ultrasounds", LINKED_PANEL_XTYPE)
+        ).map(e -> Breeding.bulkFactory(module, e.get(0), e.get(1), e.get(2)))
                 .forEach(es::registerFormType);
-
-        es.registerFormType(ctx -> new BreedingForm(ctx, module, "Ultrasounds",
-                new PregnancyGridSection("ultrasounds", "Ultrasounds")));
-        es.registerFormType(ctx -> new BreedingForm(ctx, module, "Pregnancy Outcomes",
-                new PregnancyGridSection("pregnancy_outcomes", "Pregnancy Outcomes")));
     }
 
     /**
@@ -59,11 +61,12 @@ public final class Breeding
      * @param module    Parent module instance for the forms
      * @param formName  Name of the form
      * @param queryName Query to execute (in the study schema)
+     * @param xtype     ExtJS xtype for the section's grid panel
      * @return Factory method to generate new form instances
      */
-    private static DataEntryFormFactory bulkFactory(Module module, String formName, String queryName)
+    private static DataEntryFormFactory bulkFactory(Module module, String formName, String queryName, String xtype)
     {
-        return (ctx) -> BreedingForm.bulk(ctx, module, formName, queryName);
+        return (ctx) -> BreedingForm.bulk(ctx, module, formName, queryName, xtype);
     }
 
     /**
@@ -102,33 +105,26 @@ public final class Breeding
             setStoreCollectionClass("WNPRC.ext.data.BreedingStoreCollection");
         }
 
-        private static BreedingForm bulk(DataEntryFormContext ctx, Module owner, String formName, String queryName)
+        private static BreedingForm bulk(DataEntryFormContext ctx, Module owner, String formName, String queryName, String xtype)
         {
             return new BreedingForm(ctx, owner, formName,
-                    new SimpleGridSection("study", queryName, formName));
+                    new SimpleFormSection("study", queryName, formName, xtype)
+                    {
+                        @Override
+                        public List<String> getTbarButtons()
+                        {
+                            List<String> buttons = super.getTbarButtons();
+                            buttons.remove("ADDRECORD");
+                            buttons.add(0, "APPENDRECORD");
+                            return buttons;
+                        }
+                    });
         }
 
         private static BreedingForm edit(DataEntryFormContext ctx, Module owner, String formName, String queryName)
         {
             return new BreedingForm(ctx, owner, formName,
                     new SimpleFormPanelSection("study", queryName, formName, false));
-        }
-    }
-
-    private static final class PregnancyGridSection extends SimpleFormSection
-    {
-        public PregnancyGridSection(String queryName, String label)
-        {
-            super("study", queryName, label, "wnprc-pregnancygridpanel");
-        }
-
-        @Override
-        public List<String> getTbarButtons()
-        {
-            List<String> buttons =  super.getTbarButtons();
-            buttons.remove("ADDRECORD");
-            buttons.add(0, "APPENDRECORD");
-            return buttons;
         }
     }
 }

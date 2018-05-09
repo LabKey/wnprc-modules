@@ -40,6 +40,12 @@
                 }
             });
             this.callParent(arguments);
+            this.plugins = this.plugins || [];
+            this.plugins.push(Ext4.create('WNPRC.plugin.ButtonHotKeyPlugin', {
+                buttonId: 'appendRecordBtn',
+                keyCode: 187,
+                shift: true
+            }));
             this.mon(this, 'edit', this._onEdit, this);
             this.mon(this, 'edit', this._applyQueuedChanges, this);
         },
@@ -63,28 +69,11 @@
          * @private
          */
         _onAfterRender: function () {
-            Ext4.util.KeyMap.create({
-                defaultEventAction: 'stopEvent',
-                fn: this._onAppendKeypress,
-                ignoreInputFields: true,
-                key: 187, // =
-                scope: this,
-                shift: true,
-                target: this.getEl()
-            });
             // for whatever reason, we need to wait for a half second in order for the "perfomed by" column
             // to populate to its default. if there's a more sure-fire way to do this, by all means, let's
             // do it that way instead - clay, 08 May 2018
-            setTimeout(this._onAppendKeypress.bind(this), 500);
-        },
-
-        /**
-         * Key handler for the KeyMap. Finds the "Append Record" button and clicks it.
-         *
-         * @private
-         */
-        _onAppendKeypress: function () {
-            this.down('button[itemId=appendRecordBtn]').getEl().dom.click()
+            const plugin = this.getPlugin('buttonHotKeyPlugin');
+            setTimeout(plugin.execute.bind(plugin), 500);
         },
 
         /**

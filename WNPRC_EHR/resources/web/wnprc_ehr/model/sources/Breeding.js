@@ -1,8 +1,8 @@
-// noinspection JSUnresolvedVariable, JSUnresolvedFunction
 /**
- * Metadata for the WNPRC EHR breeding parent records (i.e., breeding encounters).
+ * @typedef {Object} EHR.model.DataModelManager
+ * @prop registerMetadata
  */
-EHR.model.DataModelManager.registerMetadata('Breeding', {
+EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
     byQuery: {
         'study.breeding_encounters': {
             Id:                     { columnConfig: { columnIndex: 1 } },
@@ -50,3 +50,5 @@ EHR.model.DataModelManager.registerMetadata('Breeding', {
         }
     }
 });
+
+EHR.model.DataModelManager.registerMetadata('Breeding.Editors', {});

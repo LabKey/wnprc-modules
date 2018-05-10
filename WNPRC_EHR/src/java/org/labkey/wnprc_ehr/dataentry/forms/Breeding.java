@@ -101,7 +101,10 @@ public final class Breeding
         {
             super(ctx, owner, formName, formName, "Colony Records", Arrays.asList(sections));
             addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
-            getFormSections().forEach(s -> s.addConfigSource("Breeding"));
+            getFormSections().forEach(s -> {
+                s.addConfigSource("Breeding.Columns");
+                s.addConfigSource("Breeding.Editors");
+            });
             setStoreCollectionClass("WNPRC.ext.data.BreedingStoreCollection");
         }
 

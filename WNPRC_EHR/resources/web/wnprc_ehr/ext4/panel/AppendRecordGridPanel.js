@@ -36,10 +36,10 @@
             //   - clay, 09 May 2018
             this.mon(this, 'afterrender', plugin.execute, plugin, {single: true, delay: 500});
 
-            this.mon(this, 'beforeedit',    this._flush, this);
-            this.mon(this, 'edit',          this._flush, this);
-            this.mon(this, 'validateedit',  this._flush, this);
-            this.mon(this, 'canceledit',    this._flush, this);
+            this.mon(this, 'beforeedit',    _flush, this);
+            this.mon(this, 'edit',          _flush, this);
+            this.mon(this, 'validateedit',  _flush, this);
+            this.mon(this, 'canceledit',    _flush, this);
         },
 
         /**

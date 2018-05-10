@@ -30,18 +30,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused") // reflection
-public class UpdateTo15_15 implements ModuleUpdate.Updater
+public class UpdateTo15_15 extends ModuleUpdate.ComparableUpdater
 {
     /**
      * Logger for logging the logs
      */
     private static Logger LOG = Logger.getLogger(UpdateTo15_15.class);
-
-    @Override
-    public boolean applies(ModuleContext ctx)
-    {
-        return ctx.getOriginalVersion() < 15.15;
-    }
 
     @Override
     public void doAfterUpdate(ModuleContext ctx)
@@ -59,6 +53,12 @@ public class UpdateTo15_15 implements ModuleUpdate.Updater
     public void doVersionUpdate(ModuleContext ctx)
     {
         // no-op
+    }
+
+    @Override
+    public double getTargetVersion()
+    {
+        return 15.15;
     }
 
     @Override

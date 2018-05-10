@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.updates;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.reflections.Reflections;
@@ -80,13 +81,14 @@ public class ModuleUpdate
                     }
                 })
                 .filter(Objects::nonNull)
-                .filter(x -> x.applies(ctx));
+                .filter(x -> x.applies(ctx))
+                .sorted();
     }
 
     /**
      * Utility interface for applying individual, non-schema-related module updates
      */
-    interface Updater
+    interface Updater extends Comparable<Updater>
     {
         /**
          * Indicates whether a particular update applies given the passed context
@@ -118,10 +120,37 @@ public class ModuleUpdate
         void doVersionUpdate(ModuleContext ctx);
 
         /**
+         * Returns the "target" version to which this updater is intended to update.
+         *
+         * @return Target version number (e.g., 15.15)
+         */
+        double getTargetVersion();
+
+        /**
          * Executes any deferred actions that need to be done after startup
          *
          * @param ctx Module context from LabKey
          */
         void onStartup(ModuleContext ctx, Module module);
+    }
+
+    /**
+     * Base implementation of the {@link Updater} interface that defines the sort order based on the
+     * target version and defaults the check for applying the module to a comparison of the target
+     * version and the module context's original version.
+     */
+    static abstract class ComparableUpdater implements Updater
+    {
+        @Override
+        public boolean applies(ModuleContext ctx)
+        {
+            return ctx.getOriginalVersion() < this.getTargetVersion();
+        }
+
+        @Override
+        public int compareTo(@NotNull ModuleUpdate.Updater o)
+        {
+            return Double.compare(this.getTargetVersion(), o.getTargetVersion());
+        }
     }
 }

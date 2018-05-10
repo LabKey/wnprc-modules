@@ -1,9 +1,10 @@
-<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="All Ultrasounds">
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
-        <column name="id"/>
         <column name="date"/>
-        <column name="performedby"/>
+        <column name="Id"/>
+        <column name="pregnancyid"/>
         <column name="remark"/>
+        <column name="performedby"/>
     </columns>
     <sorts>
         <sort column="date" descending="true"/>

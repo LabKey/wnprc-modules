@@ -18,11 +18,10 @@
                         </fk>
                     </column>
                     <column columnName="infantid"/>
-                    <column columnName="offered_to"/>
-                    <column columnName="remark"/>
-                    <column columnName="qcstate">
-                        <isHidden>true</isHidden>
+                    <column columnName="project">
+                        <columnTitle>Offered To</columnTitle>
                     </column>
+                    <column columnName="remark"/>
                 </columns>
             </table>
         </tables>

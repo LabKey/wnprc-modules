@@ -17,10 +17,15 @@
                             <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="project"/>
+                    <column columnName="restraint"/>
+                    <column columnName="fetal_heartbeat"/>
+                    <column columnName="beats_per_minute"/>
+                    <column columnName="crown_rump_cm"/>
+                    <column columnName="head_circumference_cm"/>
+                    <column columnName="femur_length_cm"/>
+                    <column columnName="biparietal_diameter_cm"/>
                     <column columnName="remark"/>
-                    <column columnName="qcstate">
-                        <isHidden>true</isHidden>
-                    </column>
                 </columns>
             </table>
         </tables>

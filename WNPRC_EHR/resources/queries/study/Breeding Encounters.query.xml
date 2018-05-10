@@ -6,13 +6,12 @@
             <table tableName="breeding_encounters" tableDbType="TABLE">
                 <columns>
                     <column columnName="date"/>
-                    <column columnName="Id">
-                        <columnTitle>Dam</columnTitle>
+                    <column columnName="id">
+                        <columnTitle>Female</columnTitle>
                     </column>
                     <column columnName="sireid"/>
-                    <column columnName="ejaculation">
-                        <columnTitle>Ejaculation?</columnTitle>
-                    </column>
+                    <column columnName="ejaculation"/>
+                    <column columnName="project"/>
                     <column columnName="remark"/>
                     <column columnName="perfomedby"/>
                 </columns>

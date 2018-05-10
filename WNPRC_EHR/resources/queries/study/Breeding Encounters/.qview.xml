@@ -4,8 +4,9 @@
         <column name="Id" />
         <column name="sireid"/>
         <column name="ejaculation"/>
-        <column name="remark" />
-        <column name="performedby" />
+        <column name="project"/>
+        <column name="performedby"/>
+        <column name="remark"/>
     </columns>
     <sorts>
         <sort column="date" descending="true"/>

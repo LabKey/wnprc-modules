@@ -41,8 +41,19 @@
         <tableTitle>Breeding Encounters</tableTitle>
         <description>Contains one row for each breeding pairing/assignment for a dam at the center.</description>
         <columns>
+            <column columnName="id">
+                <columnTitle>Female</columnTitle>
+                <datatype>varchar</datatype>
+                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+                <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>id</fkColumnName>
+                </fk>
+            </column>
             <column columnName="sireid">
-                <columnTitle>Sire</columnTitle>
+                <columnTitle>Male</columnTitle>
                 <datatype>varchar</datatype>
                 <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${sire_id}</url>
                 <fk>
@@ -52,8 +63,18 @@
                 </fk>
             </column>
             <column columnName="ejaculation">
-                <columnTitle>Ejaculation Confirmed</columnTitle>
-                <datatype>varchar</datatype>
+                <columnTitle>Ejaculation?</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
+            <column columnName="project">
+                <columnTitle>Project</columnTitle>
+                <datatype>integer</datatype>
+                <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>project</fkTable>
+                    <fkColumnName>project</fkColumnName>
+                </fk>
             </column>
         </columns>
         <indices>
@@ -62,6 +83,9 @@
             </index>
             <index type="non-unique">
                 <column>ejaculation</column>
+            </index>
+            <index type="non-unique">
+                <column>project</column>
             </index>
         </indices>
     </table>
@@ -130,9 +154,15 @@
                     <fkColumnName>id</fkColumnName>
                 </fk>
             </column>
-            <column columnName="offered_to">
+            <column columnName="project">
                 <columnTitle>Offered To</columnTitle>
-                <datatype>varchar</datatype>
+                <datatype>integer</datatype>
+                <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>project</fkTable>
+                    <fkColumnName>project</fkColumnName>
+                </fk>
             </column>
         </columns>
         <indices>
@@ -143,7 +173,7 @@
                 <column>outcome</column>
             </index>
             <index type="non-unique">
-                <column>offered_to</column>
+                <column>project</column>
             </index>
         </indices>
     </table>
@@ -161,10 +191,60 @@
                     <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                 </fk>
             </column>
+            <column columnName="project">
+                <columnTitle>Project</columnTitle>
+                <datatype>integer</datatype>
+                <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>project</fkTable>
+                    <fkColumnName>project</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="code">
+                <columnTitle>Code</columnTitle>
+                <datatype>varchar</datatype>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>snomed</fkTable>
+                    <fkColumnName>code</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="restraint">
+                <columnTitle>Restraint</columnTitle>
+                <datatype>varchar</datatype>
+            </column>
+            <column columnName="fetal_heartbeat">
+                <columnTitle>+ Fetal HB</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
+            <column columnName="beats_per_minute">
+                <columnTitle>BPM</columnTitle>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="crown_rump_cm">
+                <columnTitle>Crown Rump</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="head_circumference_cm">
+                <columnTitle>HC</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="femur_length_cm">
+                <columnTitle>Femur Length</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="biparietal_diameter_cm">
+                <columnTitle>BPD</columnTitle>
+                <datatype>float</datatype>
+            </column>
         </columns>
         <indices>
             <index type="non-unique">
                 <column>pregnancyid</column>
+            </index>
+            <index type="non-unique">
+                <column>project</column>
             </index>
         </indices>
     </table>

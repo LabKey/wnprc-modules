@@ -3,8 +3,16 @@
         <column name="date"/>
         <column name="Id"/>
         <column name="pregnancyid"/>
-        <column name="remark"/>
+        <column name="fetal_heartbeat"/>
+        <column name="beats_per_minute"/>
+        <column name="crown_rump_cm"/>
+        <column name="head_circumference_cm"/>
+        <column name="femur_length_cm"/>
+        <column name="biparietal_diameter_cm"/>
+        <column name="project"/>
+        <column name="restraint"/>
         <column name="performedby"/>
+        <column name="remark"/>
     </columns>
     <sorts>
         <sort column="date" descending="true"/>

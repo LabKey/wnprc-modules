@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr;
 
+import com.google.common.base.Throwables;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.SpringActionController;
@@ -10,7 +11,6 @@ import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.wnprc_ehr.data.breeding.PregnancyHistoryCreator;
-import org.labkey.wnprc_ehr.updates.UpdateTo15_15;
 import org.springframework.validation.BindException;
 
 /**
@@ -76,8 +76,15 @@ public class WNPRC_EHRTestController extends SpringActionController
         @Override
         public Object execute(Void aVoid, BindException errors)
         {
-            PregnancyHistoryCreator.createPregnanciesAndOutcomes(getUser(), getContainer());
-            return new ApiSimpleResponse("success", true);
+            try
+            {
+                PregnancyHistoryCreator.createPregnanciesAndOutcomes(getUser(), getContainer());
+                return new ApiSimpleResponse("success", true);
+            }
+            catch (Exception e)
+            {
+                return new ApiSimpleResponse("error", Throwables.getStackTraceAsString(e));
+            }
         }
     }
 }

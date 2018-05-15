@@ -92,7 +92,14 @@ public class UpdateTo15_15 extends ModuleUpdate.ComparableUpdater
         LOG.debug(String.format("importing WNPRC 15.15 study metadata and updating EHR reports in container: %s", c.getName()));
         DatasetImportHelper.safeImportDatasetMetadata(u, c, f);
         updateReports(u, c);
-        PregnancyHistoryCreator.createPregnanciesAndOutcomes(u, c);
+        try
+        {
+            PregnancyHistoryCreator.createPregnanciesAndOutcomes(u, c);
+        }
+        catch (Exception e)
+        {
+            LOG.error("unable to generate pregnancy history for existing data, will need done manually", e);
+        }
     }
 
     /**

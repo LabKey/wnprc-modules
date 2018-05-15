@@ -7,6 +7,7 @@ import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.dataiterator.ListofMapsDataIterator;
@@ -62,11 +63,9 @@ public final class PregnancyHistoryCreator
             "         p.date     date,                " +
             "         p.id       infantid,            " +
             "         'prenatal' outcome,             " +
-            "         pj.project project,             " +
+            "         p.project  project,             " +
             "         p.remark   remark               " +
             "       FROM study.prenatal p             " +
-            "         LEFT OUTER JOIN ehr.project pj  " +
-            "           ON p.account = pj.account     " +
             "      ) y                                " +
             " INNER JOIN study.pregnancies pg         " +
             "   ON y.dam = pg.id                      " +
@@ -97,9 +96,9 @@ public final class PregnancyHistoryCreator
             "         p.dam                                       dam,        "+
             "         p.date                                      date,       "+
             "         CASE                                                    "+
-            "           WHEN b.conception IS NULL                             "+
+            "           WHEN p.conception IS NULL                             "+
             "             THEN timestampadd('SQL_TSI_DAY', -165, p.date)      "+
-            "           ELSE b.conception                                     "+
+            "           ELSE p.conception                                     "+
             "         END                                         conception, "+
             "         'pg'                                        medical,    "+
             "         p.sire                                      sire        "+
@@ -108,7 +107,7 @@ public final class PregnancyHistoryCreator
             "       SELECT                                                    "+
             "         d.id                                        dam,        "+
             "         curdate()                                   date,       "+
-            "         timestampadd('SQL_TSI_DAY', -30, curdate()) conception, "+
+            "         NULL                                        conception, "+
             "         d.medical                                   medical,    "+
             "         NULL                                        sire        "+
             "       FROM study.demographics d                                 "+
@@ -127,6 +126,7 @@ public final class PregnancyHistoryCreator
      * @param container Container to query/create in
      */
     public static void createPregnanciesAndOutcomes(User user, Container container)
+            throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException
     {
         UserSchema schema = QueryService.get().getUserSchema(user, container, "study");
         assert schema != null;
@@ -136,10 +136,6 @@ public final class PregnancyHistoryCreator
             createAndInsertRecords(user, container, schema, PREGNANCY_SQL, "pregnancies", PregnancyHistoryCreator::generatePregnancyRecord);
             createAndInsertRecords(user, container, schema, OUTCOME_SQL, "pregnancy_outcomes", PregnancyHistoryCreator::generateOutcomeRecord);
             tx.commit();
-        }
-        catch (Exception e)
-        {
-            LOG.warn("unable to create generate pregnancy records from the current database, will need to be addressed manually", e);
         }
     }
 
@@ -157,6 +153,15 @@ public final class PregnancyHistoryCreator
     private static void createAndInsertRecords(User user, Container container, UserSchema schema, String sql, String dataset, Function<ResultSet, Map<String, Object>> generator)
             throws SQLException, DuplicateKeyException, BatchValidationException, QueryUpdateServiceException
     {
+        DatasetTableImpl table = (DatasetTableImpl) schema.getTable(dataset);
+        assert table != null;
+
+        if ((new TableSelector(table)).getRowCount() > 0)
+        {
+            LOG.warn(String.format("pregnancy history will only be created for empty datasets, skipping dataset with data: dataset=%s", dataset));
+            return;
+        }
+
         ArrayList<Map<String, Object>> records = new ArrayList<>();
         try (ResultSet rs = QueryService.get().select(schema, sql))
         {
@@ -168,9 +173,6 @@ public final class PregnancyHistoryCreator
         }
         if (records.size() > 0)
         {
-            DatasetTableImpl table = (DatasetTableImpl) schema.getTable(dataset);
-            assert table != null;
-
             QueryUpdateService qus = new UpdateService(table);
             qus.setBulkLoad(true);
 

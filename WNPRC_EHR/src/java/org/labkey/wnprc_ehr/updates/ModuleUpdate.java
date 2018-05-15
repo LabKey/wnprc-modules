@@ -6,7 +6,10 @@ import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.reflections.Reflections;
 
+import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -17,7 +20,9 @@ public class ModuleUpdate
     /**
      * Logger for logging the logs
      */
-    private static Logger LOG = Logger.getLogger(ModuleUpdate.class);
+    private static final Logger LOG = Logger.getLogger(ModuleUpdate.class);
+
+    private static Set<Updater> UPDATERS;
 
     /**
      * Executes the after update step of each applicable updater in the package
@@ -60,6 +65,46 @@ public class ModuleUpdate
     }
 
     /**
+     * Uses reflection to retrieve the set of all the updaters currently in the module classpath (thread-safe).
+     *
+     * @return Set of instances of all updater implementations in the classpath
+     */
+    private static Set<? extends Updater> getAllUpdaters()
+    {
+        if (UPDATERS == null)
+        {
+            synchronized (ModuleUpdate.class)
+            {
+                // double null check for thread safety. one thread might create the object while
+                // another is in the lock wait
+                if (UPDATERS == null)
+                {
+                    LOG.debug("caching list of available Updater implementations");
+                    UPDATERS = new Reflections(ModuleUpdate.class.getPackage().getName())
+                            .getSubTypesOf(Updater.class).stream()
+                            .filter(c -> !Modifier.isAbstract(c.getModifiers()))
+                            .map(c -> {
+                                try
+                                {
+                                    return c.getConstructor().newInstance();
+                                }
+                                catch (Exception e)
+                                {
+                                    LOG.warn(String.format("unable to create module updater from class: class=%s", c.getCanonicalName()), e);
+                                    return null;
+                                }
+                            })
+                            .filter(Objects::nonNull)
+                            .sorted()
+                            .collect(Collectors.toSet());
+                    LOG.debug(String.format("found %d Updater implementations for the cache", UPDATERS.size()));
+                }
+            }
+        }
+        return UPDATERS;
+    }
+
+    /**
      * Returns a stream of all applicable updaters from the current Java module based on the passed context
      *
      * @param ctx Module update context from LabKey
@@ -67,22 +112,7 @@ public class ModuleUpdate
      */
     private static Stream<? extends Updater> getApplicableUpdaters(ModuleContext ctx)
     {
-        return new Reflections(ModuleUpdate.class.getPackage().getName())
-                .getSubTypesOf(Updater.class).stream()
-                .map(c -> {
-                    try
-                    {
-                        return c.getConstructor().newInstance();
-                    }
-                    catch (Exception e)
-                    {
-                        LOG.warn(String.format("unable to create module updater from class: class=%s", c.getCanonicalName()), e);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .filter(x -> x.applies(ctx))
-                .sorted();
+        return getAllUpdaters().stream().filter(x -> x.applies(ctx));
     }
 
     /**

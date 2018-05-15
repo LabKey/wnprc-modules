@@ -1,8 +1,8 @@
 package org.labkey.wnprc_ehr.data.breeding;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -34,6 +34,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * Generates records in study.pregnancies and study.pregnancy_outcomes based on historical data already stored in the
+ * database--specifically from study.birth and study.prenatal for already "completed" pregnancies and from
+ * study.demographics for "ongoing" pregnancies (based on a "pg" in the medical field).
+ */
 public final class PregnancyHistoryCreator
 {
     /**
@@ -158,7 +163,7 @@ public final class PregnancyHistoryCreator
 
         if ((new TableSelector(table)).getRowCount() > 0)
         {
-            LOG.warn(String.format("pregnancy history will only be created for empty datasets, skipping dataset with data: dataset=%s", dataset));
+            LOG.warn(String.format("Pregnancy history will only be created for empty datasets, skipping dataset with data: dataset=%s", dataset));
             return;
         }
 
@@ -173,10 +178,30 @@ public final class PregnancyHistoryCreator
         }
         if (records.size() > 0)
         {
-            QueryUpdateService qus = new UpdateService(table);
-            qus.setBulkLoad(true);
-
             BatchValidationException bve = new BatchValidationException();
+            QueryUpdateService qus = new DatasetUpdateService(table)
+            {
+                @Override
+                public List<Map<String, Object>> insertRows(@NotNull User user, @NotNull Container container, @NotNull List<Map<String, Object>> rows, @NotNull BatchValidationException errors,
+                                                            @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
+                {
+                    if (!hasPermission(user, InsertPermission.class))
+                        throw new UnauthorizedException("You do not have permission to insert data into this table.");
+
+                    DataIteratorContext context = getDataIteratorContext(errors, InsertOption.INSERT, configParameters);
+                    DataIteratorBuilder builder = createImportDIB(user, container,
+                            new DataIteratorBuilder.Wrapper(LoggingDataIterator.wrap(
+                                    new ListofMapsDataIterator(rows.get(0).keySet(), rows))), context);
+
+                    ArrayList<Map<String, Object>> output = new ArrayList<>();
+                    int count = _pump(builder, output, context);
+                    LOG.debug(String.format("Fast inserted pregnancy-related records: table=%s, count=%d",
+                            getQueryTable().getName(), count));
+
+                    return output;
+                }
+            };
+            qus.setBulkLoad(true);
             qus.insertRows(user, container, records, bve, null, null);
             if (bve.hasErrors())
                 throw bve;
@@ -240,48 +265,6 @@ public final class PregnancyHistoryCreator
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
-        }
-    }
-
-    /**
-     * Private helper class used to speed up the initial insert of the pregnancy dataset information during update. Because
-     * the initial dataset import is of already extant, sanitized data, the trigger scripts (and auditing) are both skipped
-     * to keep the insert fast.
-     */
-    private static final class UpdateService extends DatasetUpdateService
-    {
-        public UpdateService(DatasetTableImpl table)
-        {
-            super(table);
-        }
-
-        @Override
-        public List<Map<String, Object>> insertRows(User user, Container container, List<Map<String, Object>> rows, BatchValidationException errors,
-                                                    @Nullable Map<Enum, Object> configParameters, @Nullable Map<String, Object> extraScriptContext)
-        {
-            if (!hasPermission(user, InsertPermission.class))
-                throw new UnauthorizedException("You do not have permission to insert data into this table.");
-
-            DataIteratorContext context = getDataIteratorContext(errors, InsertOption.INSERT, configParameters);
-
-            ListofMapsDataIterator maps = new ListofMapsDataIterator(rows.size() > 0 ? rows.get(0).keySet() : new CaseInsensitiveHashSet(), rows);
-            maps.setDebugName(getClass().getSimpleName() + ".insertRows()");
-
-            DataIteratorBuilder builder = createImportDIB(user, container, new DataIteratorBuilder.Wrapper(LoggingDataIterator.wrap(maps)), context);
-            ArrayList<Map<String, Object>> output = new ArrayList<>();
-
-            int count = _pump(builder, output, context);
-            LOG.debug(String.format("fast inserted pregnancy-related records: table=%s, count=%d", getQueryTable().getName(), count));
-
-            if (errors.hasErrors())
-            {
-                LOG.warn("fast inserted pregnancy-related records: encountered some batch validation errors", errors);
-                return null;
-            }
-            else
-            {
-                return output;
-            }
         }
     }
 }

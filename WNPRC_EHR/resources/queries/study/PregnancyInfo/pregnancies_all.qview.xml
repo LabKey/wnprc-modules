@@ -20,7 +20,4 @@
     <sorts>
         <sort column="date_conception" descending="true"/>
     </sorts>
-    <filters>
-        <filter column="date_conception" operator="isnonblank"/>
-    </filters>
 </customView>

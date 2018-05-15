@@ -19,6 +19,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.wnprc_ehr.DatasetImportHelper;
+import org.labkey.wnprc_ehr.data.breeding.PregnancyHistoryCreator;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -91,6 +92,7 @@ public class UpdateTo15_15 extends ModuleUpdate.ComparableUpdater
         LOG.debug(String.format("importing WNPRC 15.15 study metadata and updating EHR reports in container: %s", c.getName()));
         DatasetImportHelper.safeImportDatasetMetadata(u, c, f);
         updateReports(u, c);
+        PregnancyHistoryCreator.createPregnanciesAndOutcomes(u, c);
     }
 
     /**

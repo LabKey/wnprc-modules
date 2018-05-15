@@ -119,6 +119,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 {
     public static final String NAME = "WNPRC_EHR";
     public static final String CONTROLLER_NAME = "wnprc_ehr";
+    public static final String TEST_CONTROLLER_NAME = "wnprc_test";
 
     public static String BC_GOOGLE_DRIVE_PROPERTY_NAME = "BCGoogleDriveAccount";
 
@@ -194,6 +195,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     {
         TissueSampleTable.registerProperties();
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
+        addController(TEST_CONTROLLER_NAME, WNPRC_EHRTestController.class);
     }
 
     @Override

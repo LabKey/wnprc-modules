@@ -4,10 +4,16 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="_UltrasoundsByPregnancyId" tableDbType="NOT_IN_DB">
                 <columns>
-                    <column columnName="date">
-                        <formatString>MM/dd/yyyy hh:mm</formatString>
-                    </column>
-                    <column columnName="performedby"/>
+                    <column columnName="date"/>
+                    <column columnName="perfomedby"/>
+                    <column columnName="project"/>
+                    <column columnName="restraint"/>
+                    <column columnName="fetal_heartbeat"/>
+                    <column columnName="beats_per_minute"/>
+                    <column columnName="crown_rump_cm"/>
+                    <column columnName="head_circumference_cm"/>
+                    <column columnName="femur_length_cm"/>
+                    <column columnName="biparietal_diameter_cm"/>
                     <column columnName="remark"/>
                 </columns>
             </table>

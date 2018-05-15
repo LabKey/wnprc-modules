@@ -35,8 +35,7 @@ public class NecropsyForm extends SimpleTaskForm {
                 new AlopeciaSection(),
                 new TissueSamplesSection(),
                 new OrganWeightsSection(),
-                new MorphologicDiagnosisSection(),
-                new HistologySection()
+                new MorphologicDiagnosisSection()
         ));
 
         for(FormSection section: this.getFormSections()) {
@@ -44,8 +43,11 @@ public class NecropsyForm extends SimpleTaskForm {
             section.addConfigSource("NecropsyTask");
         }
 
+        setStoreCollectionClass("WNPRC.ext.data.NecropsyStoreCollection");
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Necropsy.js"));
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Pathology.js"));
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyServerStore.js"));
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyStoreCollection.js"));
     }
 
     @Override

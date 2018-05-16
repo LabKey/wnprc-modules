@@ -15,7 +15,7 @@ public class DeathForm extends TaskForm {
     public static final String NAME = "Death";
 
     public DeathForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Death Record", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Death Record", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new DeathsSection()

@@ -15,7 +15,7 @@ public class BirthFormType extends TaskForm {
     public static final String NAME = "Birth";
 
     public BirthFormType(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new BirthFormSection()

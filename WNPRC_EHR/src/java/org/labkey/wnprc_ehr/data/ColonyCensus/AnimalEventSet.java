@@ -183,10 +183,7 @@ public class AnimalEventSet {
                 return false;
             }
 
-            if( (eventPair[0].getType() == firstType) && (eventPair[1].getType() == secondType) ) {
-                return true;
-            }
-            return false;
+            return (eventPair[0].getType() == firstType) && (eventPair[1].getType() == secondType);
         }
 
         public Status getStatus() {

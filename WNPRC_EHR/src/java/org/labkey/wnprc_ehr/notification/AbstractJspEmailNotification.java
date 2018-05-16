@@ -58,11 +58,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
             return false;
         }
 
-        if (StudyService.get().getStudy(c) == null) {
-            return false;
-        }
-
-        return true;
+        return StudyService.get().getStudy(c) != null;
     }
 
     abstract String getPathToJsp();

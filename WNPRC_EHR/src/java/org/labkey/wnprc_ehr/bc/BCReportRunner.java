@@ -39,10 +39,11 @@ public class BCReportRunner implements Job {
     public static String TRIGGER_ID = "bc_report_trigger";
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext)
+    {
         _log.info("Starting Job");
 
-        WNPRC_EHRModule module = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        WNPRC_EHRModule module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
         Set<Container> studyContainers = module.getWNPRCStudyContainers();
 
         for (Container studyContainer : studyContainers) {

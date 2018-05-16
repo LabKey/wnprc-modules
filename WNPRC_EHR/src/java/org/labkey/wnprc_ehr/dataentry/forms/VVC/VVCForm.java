@@ -15,7 +15,7 @@ public class VVCForm extends SimpleTaskForm{
     public static final String NAME ="VVC";
 
     public VVCForm(DataEntryFormContext ctx, Module owner){
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new VVCInfoSection()
         ));

@@ -25,7 +25,7 @@ public class NecropsyForm extends SimpleTaskForm {
     public static final String NAME = "Necropsy";
 
     public NecropsyForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.asList(
                 new TaskFormSection(),
                 new NecropsyInfoSection(),
                 new AnimalDetailsPanel(),

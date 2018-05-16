@@ -36,7 +36,7 @@ public class WNPRC_EHREmail<Model> {
         }
 
         @Override
-        public PrintWriter getWriter() throws IOException
+        public PrintWriter getWriter()
         {
             return new PrintWriter(charArray);
         }
@@ -72,7 +72,8 @@ public class WNPRC_EHREmail<Model> {
         /**
          * Hecho por Grekz, http://grekz.wordpress.com
          */
-        public String inlineCSS(String html) throws IOException {
+        public String inlineCSS(String html)
+        {
             final String style = "style";
             // Document doc = Jsoup.connect("http://mypage.com/inlineme.php").get();
             Document doc = Jsoup.parse(html);

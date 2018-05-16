@@ -16,7 +16,7 @@ public class BloodDrawRequestForm extends RequestForm {
     public static final String NAME = "Blood Draw Request";
 
     public BloodDrawRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Request Blood Draws", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Request Blood Draws", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList(
                 new RequestFormSection(),
                 new AnimalDetailsFormSection(),
                 new BloodDrawRequestFormSection()

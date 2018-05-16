@@ -26,7 +26,7 @@ public class ProtocolForm extends AbstractDataEntryForm
 
     public ProtocolForm(DataEntryFormContext ctx, Module owner)
     {
-        super(ctx, owner, NAME, "New Enter/Manage Protocols", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList());
+        super(ctx, owner, NAME, "New Enter/Manage Protocols", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList());
         updateProtocol protocolSection = new updateProtocol();
         this.addSection(protocolSection);
 

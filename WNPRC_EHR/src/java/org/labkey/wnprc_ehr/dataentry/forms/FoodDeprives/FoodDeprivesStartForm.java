@@ -22,7 +22,7 @@ public class FoodDeprivesStartForm extends TaskForm
     public static final String NAME = "Food Deprive Start";
 
     public FoodDeprivesStartForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter " + NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter " + NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new FoodDeprivesFormSections(NAME)

@@ -15,7 +15,7 @@ public class WeightForm extends TaskForm {
     public static final String NAME = "Weight";
 
     public WeightForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Weights", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Weights", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new WeightSection()

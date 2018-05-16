@@ -312,7 +312,7 @@ public class WNPRC_EHRController extends SpringActionController
         private String _date;
         private String _fromList;
 
-        public String getSubject() throws Exception
+        public String getSubject()
         {
             if (_subject == null)
             {
@@ -346,7 +346,7 @@ public class WNPRC_EHRController extends SpringActionController
             _fromList = fromList;
         }
 
-        public Date getSentDate() throws Exception
+        public Date getSentDate()
         {
             DateFormat df = new SimpleDateFormat("yyyy/MM/dd kk:mm:ss", Locale.ENGLISH);
             Date result;
@@ -373,7 +373,7 @@ public class WNPRC_EHRController extends SpringActionController
             }
         }
 
-        public MessageIdentifier getMessageIdentifier() throws Exception
+        public MessageIdentifier getMessageIdentifier()
         {
             return new MessageIdentifier(getSubject(), getFromListAsArray(), getSentDate());
         }
@@ -663,7 +663,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("getColonyPopulationPerMonth")
     public class GetPopulationPerMonth extends ApiAction<Void>
     {
-        public ApiResponse execute(Void form, BindException errors) throws Exception
+        public ApiResponse execute(Void form, BindException errors)
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
             Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
@@ -679,7 +679,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("getPopulationChangeEventsOverPeriod")
     public class GetPopulationEventsOverPeriod extends ApiAction<PopulationEventsOverPeriodForm>
     {
-        public ApiResponse execute(PopulationEventsOverPeriodForm form, BindException errors) throws Exception
+        public ApiResponse execute(PopulationEventsOverPeriodForm form, BindException errors)
         {
             DateTime start = new DateTime(form.getStartdate());
             DateTime end = new DateTime(form.getEnddate());
@@ -698,7 +698,7 @@ public class WNPRC_EHRController extends SpringActionController
     @CSRF
     public class GetAnimalDemographicsForRoomAction extends ApiAction<GetAnimalDemographicsForRoomForm>
     {
-        public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors) throws Exception
+        public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors)
         {
             Map<String, Object> props = new HashMap<>();
 
@@ -768,7 +768,7 @@ public class WNPRC_EHRController extends SpringActionController
     public class BillablePerDiemsAction extends ApiAction<BillablePerDiemsForm>
     {
         @Override
-        public Object execute(BillablePerDiemsForm form, BindException errors) throws Exception
+        public Object execute(BillablePerDiemsForm form, BindException errors)
         {
             AssignmentPerDiems assignmentPerDiems = new AssignmentPerDiems(getContainer(), getUser(), form.getStartDate(), form.getEndDate());
 
@@ -1136,7 +1136,7 @@ public class WNPRC_EHRController extends SpringActionController
     public class uploadBCReportAction extends ApiAction<Void>
     {
         @Override
-        public Object execute(Void form, BindException errors) throws NotFoundException, GeneralSecurityException, IOException
+        public Object execute(Void form, BindException errors) throws NotFoundException
         {
             BCReportManager manager = new BCReportManager(getUser(), getContainer());
             manager.uploadReports();
@@ -1152,7 +1152,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(UserForm form, BindException errors) throws Exception
         {
-            WNPRC_EHRModule wnprc = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+            WNPRC_EHRModule wnprc = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
             String id = wnprc.getGoogleDriveAccountId(getContainer());
 
             DriveWrapper drive = GoogleDriveService.get().getDrive(id, getUser());

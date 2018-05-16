@@ -16,7 +16,7 @@ public class HousingRequestForm extends TaskForm {
     public static final String NAME = "Housing Request";
 
     public HousingRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.REQUESTS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.REQUESTS, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new HousingSection()

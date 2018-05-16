@@ -19,7 +19,7 @@ public class ArrivalFormType extends TaskForm {
     public static final String NAME = "Arrival";
 
     public ArrivalFormType(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Arrivals", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Arrivals", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new ArrivalFormSection(),

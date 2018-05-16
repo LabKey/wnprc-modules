@@ -181,7 +181,8 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
             ts.forEach(new Selector.ForEachBlock<ResultSet>(){
 
                            @Override
-                           public void exec (ResultSet rs) throws SQLException{
+                           public void exec (ResultSet rs)
+                           {
                                Calendar cal = Calendar.getInstance();
                                cal.setTime(new Date());
 

@@ -277,7 +277,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public void registerSchemas() {
         DefaultSchema.registerProvider(WNPRC_Schema.NAME, new DefaultSchema.SchemaProvider(this) {
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
-                return (QuerySchema) new WNPRC_Schema(schema.getUser(), schema.getContainer());
+                return new WNPRC_Schema(schema.getUser(), schema.getContainer());
             }
         });
     }
@@ -317,7 +317,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     public void registerDataEntryForms() {
         // Register all of the data entry forms.
-        List<Class> forms = Arrays.<Class>asList(
+        List<Class> forms = Arrays.asList(
                 ArrivalFormType.class,
                 AssignmentForm.class,
                 BehaviorAbstractForm.class,
@@ -367,7 +367,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     public Set<Container> getWNPRCStudyContainers() {
         Set<Container> studyContainers = new HashSet<>();
-        WNPRC_EHRModule module = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        WNPRC_EHRModule module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
 
         for (Container container : getAllContainers()) {
             if (container.getActiveModules().contains(module)) {

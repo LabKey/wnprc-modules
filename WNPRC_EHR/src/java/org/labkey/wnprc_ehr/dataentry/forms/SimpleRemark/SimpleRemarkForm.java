@@ -16,7 +16,7 @@ public class SimpleRemarkForm extends TaskForm {
     public static final String NAME = "Simple Remark";
 
     public SimpleRemarkForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Simple Remark", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Simple Remark", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new RemarksSection()

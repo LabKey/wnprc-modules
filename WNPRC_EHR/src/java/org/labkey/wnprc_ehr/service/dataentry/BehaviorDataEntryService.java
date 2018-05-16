@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.ehr.EHRService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
@@ -12,10 +13,14 @@ import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
+import org.labkey.dbutils.api.security.SecurityEscalator;
+import org.labkey.dbutils.api.security.StudySecurityEscalator;
+import org.labkey.dbutils.api.service.SecurityEscalatedService;
 import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
+import org.labkey.wnprc_ehr.security.EHRSecurityEscalator;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 
 import java.util.ArrayList;
@@ -30,7 +35,7 @@ import java.util.Set;
 /**
  * Created by jon on 10/28/16.
  */
-public class BehaviorDataEntryService extends DataEntryService
+public class BehaviorDataEntryService extends SecurityEscalatedService
 {
     public static Set<String> BEHAVIOR_PROJECT_CODES = new HashSet<>(Arrays.asList(
             "a1",
@@ -129,5 +134,22 @@ public class BehaviorDataEntryService extends DataEntryService
                 .exists()
                 .isBehaviorProject()
                 .animalIsNotAssignedOn(animalId, assignDate);
+    }
+
+    @Override
+    public User getEscalationUser()
+    {
+        return EHRService.get().getEHRUser(container);
+    }
+
+    @Override
+    public Set<SecurityEscalator> getEscalators(User user, Container container, String escalationComment)
+    {
+        Set<SecurityEscalator> escalators = new HashSet<>();
+
+        escalators.add(EHRSecurityEscalator.beginEscalation(user, container, escalationComment));
+        escalators.add(StudySecurityEscalator.beginEscalation(user, container, escalationComment));
+
+        return escalators;
     }
 }

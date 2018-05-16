@@ -21,7 +21,7 @@ public class FoodDeprivesRequestForm extends SimpleRequestForm
     public static final String NAME = "Food Deprive Request";
 
     public FoodDeprivesRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Requests Food Deprives" , "Requests", Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Requests Food Deprives" , "Requests", Arrays.asList(
                 new RequestFormSection(),
                 new AnimalDetailsFormSection(),
                 new FoodDeprivesRequestFormSections()

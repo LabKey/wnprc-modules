@@ -1,7 +1,5 @@
 package org.labkey.wnprc_ehr.schemas;
 
-import org.labkey.api.exp.property.SystemProperty;
-
 /**
  * Created by jon on 2/14/17.
  */

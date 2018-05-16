@@ -1,5 +1,5 @@
 <libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library>
+    <library compileInProductionMode="false">
         <script path="/wnprc_ehr/breeding.css"/>
         <script path="/wnprc_ehr/breeding.js"/>
     </library>

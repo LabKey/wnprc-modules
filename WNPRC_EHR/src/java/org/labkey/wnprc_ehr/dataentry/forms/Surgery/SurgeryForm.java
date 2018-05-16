@@ -21,7 +21,7 @@ public class SurgeryForm extends TaskForm {
     public static final String NAME = "Surgery";
 
     public SurgeryForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Surgery", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Surgery", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new EncounterDetailsSection(),
                 new AnimalDetailsFormSection(),

@@ -96,8 +96,9 @@ import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
+import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
+import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
-import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.wnprc_ehr.updates.ModuleUpdate;
 import org.reflections.Reflections;
@@ -268,8 +269,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         this.registerRoles();
         this.registerPermissions();
 
-        this.registerServices();
-
         BCReportRunner.schedule();
 
         for (Container studyContainer : getWNPRCStudyContainers())
@@ -297,11 +296,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerPermission(new EHRStartedUpdatePermission());
         RoleManager.registerPermission(new EHRStartedDeletePermission());
         RoleManager.registerPermission(new EHRStartedInsertPermission());
-    }
-
-    private void registerServices()
-    {
-        WNPRC_EHRService.set(new WNPRC_EHRService());
     }
 
     @Override
@@ -410,6 +404,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     {
         RoleManager.registerRole(new WNPRCFullSubmitterWithReviewerRole());
         RoleManager.registerRole(new BehaviorServiceWorker());
+        RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
+        RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
     }
 
     public Set<Container> getWNPRCStudyContainers()

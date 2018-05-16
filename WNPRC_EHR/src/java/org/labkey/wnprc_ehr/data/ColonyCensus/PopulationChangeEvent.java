@@ -39,10 +39,10 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
             return _eventTypeCode;
         }
 
-        public boolean isArrival()   { return this._eventTypeCode == this.Arrival.getEventCode(); }
-        public boolean isBirth()     { return this._eventTypeCode == this.Birth.getEventCode();   }
-        public boolean isDeath()     { return this._eventTypeCode == this.Death.getEventCode();   }
-        public boolean isDeparture() { return this._eventTypeCode == this.Departure.getEventCode();   }
+        public boolean isArrival()   { return this._eventTypeCode == Arrival.getEventCode(); }
+        public boolean isBirth()     { return this._eventTypeCode == Birth.getEventCode();   }
+        public boolean isDeath()     { return this._eventTypeCode == Death.getEventCode();   }
+        public boolean isDeparture() { return this._eventTypeCode == Departure.getEventCode();   }
 
         public boolean isIncrease()  { return this.isArrival()   || this.isBirth(); }
         public boolean isDecrease()  { return this.isDeparture() || this.isDeath(); }

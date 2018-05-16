@@ -1,8 +1,6 @@
 package org.labkey.wnprc_ehr.dataentry.forms.VVC;
 
-import org.labkey.api.ehr.dataentry.DataEntryForm;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
-import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.module.Module;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.FormSections.VVCInfoSection;
@@ -15,7 +13,7 @@ public class VVCForm extends SimpleTaskForm{
     public static final String NAME ="VVC";
 
     public VVCForm(DataEntryFormContext ctx, Module owner){
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new VVCInfoSection()
         ));

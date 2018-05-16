@@ -16,8 +16,6 @@ import org.labkey.wnprc_ehr.notification.VvcNotification;
 
 import java.util.List;
 
-import static org.labkey.api.data.DbSchemaType.Module;
-
 /**
  * Created by jon on 7/13/16.
  */

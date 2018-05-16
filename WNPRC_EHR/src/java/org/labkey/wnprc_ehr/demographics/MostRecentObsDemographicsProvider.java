@@ -2,9 +2,7 @@ package org.labkey.wnprc_ehr.demographics;
 
 import org.labkey.api.ehr.demographics.AbstractDemographicsProvider;
 import org.labkey.api.module.Module;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
-import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
 import java.util.HashSet;
 import java.util.Set;

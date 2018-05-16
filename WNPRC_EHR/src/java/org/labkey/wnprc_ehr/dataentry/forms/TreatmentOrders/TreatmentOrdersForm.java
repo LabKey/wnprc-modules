@@ -16,7 +16,7 @@ public class TreatmentOrdersForm extends TaskForm {
     public static final String NAME = "Treatment Orders";
 
     public TreatmentOrdersForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Treatment Orders", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Treatment Orders", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new TreatmentOrdersSection()

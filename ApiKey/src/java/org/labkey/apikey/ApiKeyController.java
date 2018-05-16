@@ -20,7 +20,6 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
 
 public class ApiKeyController extends SpringActionController {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ApiKeyController.class);
@@ -43,12 +42,10 @@ public class ApiKeyController extends SpringActionController {
         }
     }
 
-    public static class NullForm {}
-
     @RequiresNoPermission
-    public class ExecuteServiceAction extends ApiAction<NullForm> {
+    public class ExecuteServiceAction extends ApiAction<Void> {
         @Override
-        public Object execute(NullForm nullForm, BindException errors) throws Exception {
+        public Object execute(Void v, BindException errors) throws Exception {
             HttpServletRequest req = getViewContext().getRequest();
 
             String moduleName   = req.getHeader("ModuleName");
@@ -75,9 +72,9 @@ public class ApiKeyController extends SpringActionController {
     }
 
     @RequiresNoPermission
-    public class GetKeyInfoAction extends ApiAction<NullForm> {
+    public class GetKeyInfoAction extends ApiAction<Void> {
         @Override
-        public Object execute(NullForm nullForm, BindException errors) throws Exception {
+        public Object execute(Void v, BindException errors) throws Exception {
             HttpServletRequest req = getViewContext().getRequest();
 
             String apiKeyString = req.getHeader("API-Key");

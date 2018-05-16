@@ -19,7 +19,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.ehr.history.AbstractDataSource;
 import org.labkey.api.module.Module;
-import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
 import java.sql.SQLException;
 

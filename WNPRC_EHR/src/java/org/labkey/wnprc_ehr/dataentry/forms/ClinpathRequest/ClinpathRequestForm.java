@@ -16,7 +16,7 @@ public class ClinpathRequestForm extends RequestForm {
     public static final String NAME = "Clinpath Request";
 
     public ClinpathRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Request Clinpath Services", WNPRCConstants.DataEntrySections.REQUESTS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Request Clinpath Services", WNPRCConstants.DataEntrySections.REQUESTS, Arrays.asList(
                 new RequestFormSection(),
                 new ClinpathRunsSection(),
                 new AnimalDetailsFormSection()

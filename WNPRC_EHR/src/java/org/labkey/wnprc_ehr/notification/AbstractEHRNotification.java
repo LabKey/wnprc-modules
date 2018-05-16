@@ -61,10 +61,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
         if (!super.isAvailable(c))
             return false;
 
-        if (StudyService.get().getStudy(c) == null)
-            return false;
-
-        return true;
+        return StudyService.get().getStudy(c) != null;
     }
 
     protected UserSchema getStudySchema(Container c, User u)

@@ -230,8 +230,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
-    public static class NullForm {}
-
     @ActionNames("uploadAccessReport")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class UploadAccessReportAPI extends AbstractFileUploadAction {

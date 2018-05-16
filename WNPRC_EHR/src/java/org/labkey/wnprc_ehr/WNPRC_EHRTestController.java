@@ -13,6 +13,9 @@ import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.wnprc_ehr.data.breeding.PregnancyHistoryCreator;
 import org.springframework.validation.BindException;
 
+import java.io.File;
+import java.nio.file.Paths;
+
 /**
  * Controller to hold testing and diagnostic utilities.
  * <p>
@@ -25,6 +28,26 @@ public class WNPRC_EHRTestController extends SpringActionController
     public WNPRC_EHRTestController()
     {
         setActionResolver(_actionResolver);
+    }
+
+    /**
+     * Action definition for the import dataset test API action. Executes the import based on a pre-defined study
+     * definition.
+     */
+    @RequiresSiteAdmin
+    public static class ImportDatasetMetadataAction extends ApiAction<Void>
+    {
+        @Override
+        public Object execute(Void aVoid, BindException errors) throws Exception
+        {
+            Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+            assert module != null;
+
+            File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(),
+                    "study.xml");
+            DatasetImportHelper.importDatasetMetadata(getUser(), getContainer(), file);
+            return new ApiSimpleResponse("success", true);
+        }
     }
 
     public abstract class WNPRCTestJspPageAction extends SimpleJspPageAction
@@ -70,6 +93,10 @@ public class WNPRC_EHRTestController extends SpringActionController
         }
     }
 
+    /**
+     * Test action for generating pregnancy history from the existing data in the birth, prenatal, and
+     * demographic datasets.
+     */
     @RequiresSiteAdmin
     public class CreatePregnanciesAction extends ApiAction<Void>
     {

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -47,83 +48,6 @@ public final class PregnancyHistoryCreator
     private static final Logger LOG = Logger.getLogger(PregnancyHistoryCreator.class);
 
     /**
-     * SQL string to fetch the source records for generating pregnancy outcomes
-     */
-    private static final String OUTCOME_SQL =
-            // @formatter:off
-            " SELECT                                  " +
-            "   y.*,                                  " +
-            "   pg.lsid pregnancyid                   " +
-            " FROM (SELECT                            " +
-            "         b.dam      dam,                 " +
-            "         b.date     date,                " +
-            "         b.id       infantid,            " +
-            "         'birth'    outcome,             " +
-            "         NULL       project,             " +
-            "         b.remark   remark,              " +
-            "       FROM study.birth b                " +
-            "       UNION                             " +
-            "       SELECT                            " +
-            "         p.dam      dam,                 " +
-            "         p.date     date,                " +
-            "         p.id       infantid,            " +
-            "         'prenatal' outcome,             " +
-            "         p.project  project,             " +
-            "         p.remark   remark               " +
-            "       FROM study.prenatal p             " +
-            "      ) y                                " +
-            " INNER JOIN study.pregnancies pg         " +
-            "   ON y.dam = pg.id                      " +
-            "     AND y.date = pg.date                " +
-            " WHERE y.dam is not null                 " +
-            "   AND y.dam <> 'unknown'                ";
-            // @formatter:on
-
-    /**
-     * SQL string to fetch the source records for generating pregnancies
-     */
-    private static final String PREGNANCY_SQL =
-            // @formatter:off
-            " SELECT x.*                                                      "+
-            " FROM (SELECT                                                    "+
-            "         b.dam                                       dam,        "+
-            "         b.date                                      date,       "+
-            "         CASE                                                    "+
-            "           WHEN b.conception IS NULL                             "+
-            "             THEN timestampadd('SQL_TSI_DAY', -165, b.date)      "+
-            "           ELSE b.conception                                     "+
-            "         END                                         conception, "+
-            "         'pg'                                        medical,    "+
-            "         b.sire                                      sire        "+
-            "       FROM study.birth b                                        "+
-            "       UNION                                                     "+
-            "       SELECT                                                    "+
-            "         p.dam                                       dam,        "+
-            "         p.date                                      date,       "+
-            "         CASE                                                    "+
-            "           WHEN p.conception IS NULL                             "+
-            "             THEN timestampadd('SQL_TSI_DAY', -165, p.date)      "+
-            "           ELSE p.conception                                     "+
-            "         END                                         conception, "+
-            "         'pg'                                        medical,    "+
-            "         p.sire                                      sire        "+
-            "       FROM study.prenatal p                                     "+
-            "       UNION                                                     "+
-            "       SELECT                                                    "+
-            "         d.id                                        dam,        "+
-            "         curdate()                                   date,       "+
-            "         NULL                                        conception, "+
-            "         d.medical                                   medical,    "+
-            "         NULL                                        sire        "+
-            "       FROM study.demographics d                                 "+
-            "       WHERE lower(medical) LIKE '%pg%'                          "+
-            "         AND calculated_status = 'Alive'                         "+
-            "      ) x                                                        "+
-            " WHERE x.dam IS NOT NULL                                         "+
-            "   AND x.dam <> 'unknown'                                        ";
-            // @formatter:on
-
-    /**
      * Creates new pregnancy and outcome records in the new datasets based on the existing records in the birth,
      * prenatal, and demographics tables
      *
@@ -138,8 +62,8 @@ public final class PregnancyHistoryCreator
 
         try (DbScope.Transaction tx = schema.getDbSchema().getScope().ensureTransaction())
         {
-            createAndInsertRecords(user, container, schema, PREGNANCY_SQL, "pregnancies", PregnancyHistoryCreator::generatePregnancyRecord);
-            createAndInsertRecords(user, container, schema, OUTCOME_SQL, "pregnancy_outcomes", PregnancyHistoryCreator::generateOutcomeRecord);
+            createAndInsertRecords(user, container, schema, getSql("PregnancyHistory.sql"), "pregnancies", PregnancyHistoryCreator::generatePregnancyRecord);
+            createAndInsertRecords(user, container, schema, getSql("OutcomeHistory.sql"), "pregnancy_outcomes", PregnancyHistoryCreator::generateOutcomeRecord);
             tx.commit();
         }
     }
@@ -265,6 +189,22 @@ public final class PregnancyHistoryCreator
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
+        }
+    }
+
+    /**
+     * Returns the passed resource name as a (SQL) String
+     *
+     * @param resource Name of the SQL file to read
+     * @return Contents of the file
+     */
+    private static String getSql(String resource)
+    {
+        try (Scanner s = new Scanner(PregnancyHistoryCreator.class.getResourceAsStream(resource)))
+        {
+            // "\A" is the regex escape for "beginning of string", so this will read the
+            // whole InputStream as a String
+            return s.useDelimiter("\\A").next();
         }
     }
 }

@@ -5,6 +5,11 @@ sourceSets {
     }
     main {
         java { srcDirs = ['src/java', 'src/test'] }
+        resources {
+            srcDirs = ['src/java', 'src/test'] // includes some sql scripts
+            exclude '**/*.java'
+            exclude '**/*.jsp'
+        }
     }
 }
 

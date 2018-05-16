@@ -98,7 +98,6 @@ import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
-import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.reflections.Reflections;
@@ -222,8 +221,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         this.registerRoles();
         this.registerPermissions();
 
-        this.registerServices();
-
         BCReportRunner.schedule();
 
         for (Container studyContainer : getWNPRCStudyContainers()) {
@@ -248,10 +245,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         RoleManager.registerPermission(new EHRStartedUpdatePermission());
         RoleManager.registerPermission(new EHRStartedDeletePermission());
         RoleManager.registerPermission(new EHRStartedInsertPermission());
-    }
-
-    private void registerServices() {
-        WNPRC_EHRService.set(new WNPRC_EHRService());
     }
 
     @Override

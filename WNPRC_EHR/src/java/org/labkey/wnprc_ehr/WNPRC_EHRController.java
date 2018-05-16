@@ -78,7 +78,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectExcepti
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
-import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
+import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
 
 import javax.servlet.ServletOutputStream;
@@ -462,7 +462,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(ReleaseAnimalFromBehaviorAssignmentForm form, BindException errors) throws Exception
         {
-            WNPRC_EHRService.get().getBehaviorDataEntryService(getUser(), getContainer()).releaseAnimalFromBehaviorProject(
+            BehaviorDataEntryService.get(getUser(), getContainer()).releaseAnimalFromBehaviorProject(
                     form.getAnimalId(),
                     form.getProject(),
                     form.getReleaseDate()
@@ -1117,7 +1117,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(AddBehaviorAssignmentForm form, BindException errors) throws Exception
         {
-            WNPRC_EHRService.get().getBehaviorDataEntryService(getUser(), getContainer()).addBehaviorAssignment(
+            BehaviorDataEntryService.get(getUser(), getContainer()).addBehaviorAssignment(
                     form.getAnimalId(),
                     form.getProject(),
                     form.getAssignDate(),

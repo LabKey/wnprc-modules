@@ -75,7 +75,7 @@ services:
       TZ: America/Chicago
 
   perlscripts:
-    image: wnprcehr/ehrcron:v1.0.0
+    image: wnprcehr/ehrcron:latest
     depends_on:
       - "labkey"
     volumes:

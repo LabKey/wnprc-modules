@@ -1,5 +1,0 @@
-dependencies {
-    compile project(":server:modules:study")
-    compile project(":server:customModules:ehr")
-    external "org.reflections:reflections:0.9.10"
-}

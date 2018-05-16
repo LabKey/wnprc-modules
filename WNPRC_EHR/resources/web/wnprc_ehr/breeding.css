@@ -1,0 +1,58 @@
+.wnprc-child-records-panel .x4-panel-header-text {
+    font-family: sans-serif;
+    font-size: 2em;
+    font-weight: bolder;
+}
+
+.wnprc-child-records-panel {
+    border-top:  2px solid lightgray;
+    padding-top: 10px;
+}
+
+tr.labkey-success-row.labkey-row > td,
+tr.labkey-success-row.labkey-row > th
+{
+    background: #dff0d8;
+}
+
+tr.labkey-success-row.labkey-alternate-row > td,
+tr.labkey-success-row.labkey-alternate-row > th
+{
+    background: #c1e2b3;
+}
+
+tr.labkey-info-row.labkey-row > td,
+tr.labkey-info-row.labkey-row > th
+{
+    background: #d9edf7;
+}
+
+tr.labkey-info-row.labkey-alternate-row > td,
+tr.labkey-info-row.labkey-alternate-row > th
+{
+    background: #afd9ee;
+}
+
+tr.labkey-warning-row.labkey-row > td,
+tr.labkey-warning-row.labkey-row > th
+{
+    background: #fcf8e3;
+}
+
+tr.labkey-warning-row.labkey-alternate-row > td,
+tr.labkey-warning-row.labkey-alternate-row > th
+{
+    background: #f7ecb5;
+}
+
+tr.labkey-danger-row.labkey-row > td,
+tr.labkey-danger-row.labkey-row > th
+{
+    background: #f2dede;
+}
+
+tr.labkey-danger-row.labkey-alternate-row > td,
+tr.labkey-danger-row.labkey-alternate-row > th
+{
+    background: #e4b9b9;
+}

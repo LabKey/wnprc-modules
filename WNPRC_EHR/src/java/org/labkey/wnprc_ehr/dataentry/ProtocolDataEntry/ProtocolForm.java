@@ -11,11 +11,8 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 //import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleFormSection;
-import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
-import org.labkey.wnprc_ehr.dataentry.generics.sections.TaskFormSection;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by fdnicolalde on 7/25/16.
@@ -26,7 +23,7 @@ public class ProtocolForm extends AbstractDataEntryForm
 
     public ProtocolForm(DataEntryFormContext ctx, Module owner)
     {
-        super(ctx, owner, NAME, "New Enter/Manage Protocols", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList());
+        super(ctx, owner, NAME, "New Enter/Manage Protocols", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList());
         updateProtocol protocolSection = new updateProtocol();
         this.addSection(protocolSection);
 

@@ -27,7 +27,7 @@ public class BCReportManager {
     }
 
     public void uploadReports() {
-        WNPRC_EHRModule wnprc = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        WNPRC_EHRModule wnprc = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
         String id = wnprc.getGoogleDriveAccountId(studyContainer);
 
         try {

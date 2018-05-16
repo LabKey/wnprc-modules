@@ -98,7 +98,6 @@ import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
-import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.reflections.Reflections;
@@ -222,8 +221,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         this.registerRoles();
         this.registerPermissions();
 
-        this.registerServices();
-
         BCReportRunner.schedule();
 
         for (Container studyContainer : getWNPRCStudyContainers()) {
@@ -248,10 +245,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         RoleManager.registerPermission(new EHRStartedUpdatePermission());
         RoleManager.registerPermission(new EHRStartedDeletePermission());
         RoleManager.registerPermission(new EHRStartedInsertPermission());
-    }
-
-    private void registerServices() {
-        WNPRC_EHRService.set(new WNPRC_EHRService());
     }
 
     @Override
@@ -279,7 +272,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public void registerSchemas() {
         DefaultSchema.registerProvider(WNPRC_Schema.NAME, new DefaultSchema.SchemaProvider(this) {
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
-                return (QuerySchema) new WNPRC_Schema(schema.getUser(), schema.getContainer());
+                return new WNPRC_Schema(schema.getUser(), schema.getContainer());
             }
         });
     }
@@ -319,7 +312,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     public void registerDataEntryForms() {
         // Register all of the data entry forms.
-        List<Class> forms = Arrays.<Class>asList(
+        List<Class> forms = Arrays.asList(
                 ArrivalFormType.class,
                 AssignmentForm.class,
                 BehaviorAbstractForm.class,
@@ -371,7 +364,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     public Set<Container> getWNPRCStudyContainers() {
         Set<Container> studyContainers = new HashSet<>();
-        WNPRC_EHRModule module = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        WNPRC_EHRModule module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
 
         for (Container container : getAllContainers()) {
             if (container.getActiveModules().contains(module)) {

@@ -15,7 +15,7 @@ public class BehaviorAbstractForm extends TaskForm {
     public static final String NAME = "Behavior Abstract";
 
     public BehaviorAbstractForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Behavior Abstract", WNPRCConstants.DataEntrySections.BEHAVIOR_COLONY_MGMT, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Behavior Abstract", WNPRCConstants.DataEntrySections.BEHAVIOR_COLONY_MGMT, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new BehaviorAbstractSection()

@@ -15,7 +15,6 @@
  */
 package org.labkey.wnprc_ehr.notification;
 
-import org.apache.batik.dom.util.HashTable;
 import org.apache.commons.lang3.time.DateUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -41,16 +40,13 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 
 /**

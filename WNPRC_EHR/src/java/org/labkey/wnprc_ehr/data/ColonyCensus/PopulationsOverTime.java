@@ -124,7 +124,7 @@ public class PopulationsOverTime implements ConvertibleToJSON {
 
         Duration totalDuration = new Duration(_start, _end);
 
-        return ((float) weightedSum) / totalDuration.getMillis();
+        return weightedSum / totalDuration.getMillis();
     }
 
 
@@ -148,7 +148,7 @@ public class PopulationsOverTime implements ConvertibleToJSON {
 
         Duration totalDuration = new Duration(_start, _end);
 
-        Float normalizedVariance = (float) weightedSum / (float) totalDuration.getMillis();
+        Float normalizedVariance = weightedSum / (float) totalDuration.getMillis();
 
         return (float) Math.sqrt( normalizedVariance );
     }

@@ -142,10 +142,6 @@ public class WNPRC_EHRController extends SpringActionController
         return new EnhancedJsonResponse();
     }
 
-    public static class NullFORM
-    {
-    }
-
     public static class PopulationEventsOverPeriodForm
     {
         private Date _startdate;
@@ -621,9 +617,9 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @ActionNames("getChanges")
     @CSRF
-    public class GetChangeLists extends ApiAction<NullFORM>
+    public class GetChangeLists extends ApiAction<Void>
     {
-        public ApiResponse execute(NullFORM form, BindException errors) throws Exception
+        public ApiResponse execute(Void form, BindException errors) throws Exception
         {
             Map<String, Object> props = new HashMap<>();
 
@@ -665,9 +661,9 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @RequiresLogin
     @ActionNames("getColonyPopulationPerMonth")
-    public class GetPopulationPerMonth extends ApiAction<NullFORM>
+    public class GetPopulationPerMonth extends ApiAction<Void>
     {
-        public ApiResponse execute(NullFORM form, BindException errors) throws Exception
+        public ApiResponse execute(Void form, BindException errors) throws Exception
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
             Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
@@ -843,7 +839,6 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    //public static class NullForm {}
     public class EmailModel
     {
         public HashMap<String, Map<String, String>> data = new HashMap<>();
@@ -853,7 +848,7 @@ public class WNPRC_EHRController extends SpringActionController
             return "Jon";
         }
 
-        public Void add(String area, String room, String ob)
+        public java.lang.Void add(String area, String room, String ob)
         {
             Map areaMap = data.get(area);
             if (areaMap == null)
@@ -866,7 +861,7 @@ public class WNPRC_EHRController extends SpringActionController
             return null;
         }
 
-        public Void populateData()
+        public java.lang.Void populateData()
         {
             this.add("a", "a142", "r12900");
             this.add("a", "a142", "r12905");
@@ -1138,10 +1133,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UploadBCReports")
-    public class uploadBCReportAction extends ApiAction<NullFORM>
+    public class uploadBCReportAction extends ApiAction<Void>
     {
         @Override
-        public Object execute(NullFORM form, BindException errors) throws NotFoundException, GeneralSecurityException, IOException
+        public Object execute(Void form, BindException errors) throws NotFoundException, GeneralSecurityException, IOException
         {
             BCReportManager manager = new BCReportManager(getUser(), getContainer());
             manager.uploadReports();
@@ -1171,10 +1166,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("ScheduleBCReports")
-    public class ScheduleBCReportsAction extends ApiAction<NullFORM>
+    public class ScheduleBCReportsAction extends ApiAction<Void>
     {
         @Override
-        public Object execute(NullFORM form, BindException errors)
+        public Object execute(Void form, BindException errors)
         {
             BCReportRunner.schedule();
             return new JSONObject();
@@ -1183,10 +1178,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UnscheduleBCReports")
-    public class UnscheduleBCReportsAction extends ApiAction<NullFORM>
+    public class UnscheduleBCReportsAction extends ApiAction<Void>
     {
         @Override
-        public Object execute(NullFORM form, BindException errors)
+        public Object execute(Void form, BindException errors)
         {
             BCReportRunner.unschedule();
             return new JSONObject();
@@ -1200,7 +1195,7 @@ public class WNPRC_EHRController extends SpringActionController
     @SuppressWarnings("unused")
     @RequiresLogin
     @ActionNames("manageWnprcTask")
-    public class ManageWnprcTaskAction extends RedirectAction<Void>
+    public class ManageWnprcTaskAction extends RedirectAction<java.lang.Void>
     {
         // these constants are here to hopefully prevent us from mistyping the capitalization
         // later in the method. also, they should be different enough to avoid one-off typos
@@ -1209,7 +1204,7 @@ public class WNPRC_EHRController extends SpringActionController
         private static final String LOWERCASE_FORMTYPE = "formtype";
 
         @Override
-        public URLHelper getSuccessURL(Void aVoid)
+        public URLHelper getSuccessURL(java.lang.Void aVoid)
         {
             ActionURL oldUrl = getViewContext().getActionURL();
             ActionURL newUrl;
@@ -1248,7 +1243,7 @@ public class WNPRC_EHRController extends SpringActionController
         }
 
         @Override
-        public boolean doAction(Void aVoid, BindException errors)
+        public boolean doAction(java.lang.Void aVoid, BindException errors)
         {
             return true;
         }
@@ -1260,10 +1255,10 @@ public class WNPRC_EHRController extends SpringActionController
      */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetDataAction extends ApiAction<Void>
+    public static class ImportDatasetDataAction extends ApiAction<java.lang.Void>
     {
         @Override
-        public Object execute(Void aVoid, BindException errors)
+        public Object execute(java.lang.Void aVoid, BindException errors)
         {
             // TODO: create, parse, and load some test data
             return new ApiSimpleResponse("success", true);
@@ -1276,10 +1271,10 @@ public class WNPRC_EHRController extends SpringActionController
      */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetMetadataAction extends ApiAction<Void>
+    public static class ImportDatasetMetadataAction extends ApiAction<java.lang.Void>
     {
         @Override
-        public Object execute(Void aVoid, BindException errors) throws Exception
+        public Object execute(java.lang.Void aVoid, BindException errors) throws Exception
         {
             Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
             assert module != null;

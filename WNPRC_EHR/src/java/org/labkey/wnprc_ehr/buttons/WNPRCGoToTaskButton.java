@@ -15,16 +15,10 @@
  */
 package org.labkey.wnprc_ehr.buttons;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.ehr.EHRService;
-import org.labkey.api.ehr.dataentry.DataEntryForm;
 import org.labkey.api.ehr.security.EHRInProgressInsertPermission;
 import org.labkey.api.ldk.table.SimpleButtonConfigFactory;
 import org.labkey.api.module.Module;
-import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.view.template.ClientDependency;
 
 /**
  * User: bimber

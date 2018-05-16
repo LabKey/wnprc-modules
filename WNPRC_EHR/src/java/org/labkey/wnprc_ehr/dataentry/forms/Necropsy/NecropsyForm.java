@@ -7,7 +7,6 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.AlopeciaSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.BodyConditionSection;
-import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.HistologySection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.MorphologicDiagnosisSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.NecropsyInfoSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.OrganWeightsSection;

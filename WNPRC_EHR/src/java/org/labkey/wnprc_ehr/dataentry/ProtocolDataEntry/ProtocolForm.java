@@ -11,11 +11,8 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 //import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleFormSection;
-import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
-import org.labkey.wnprc_ehr.dataentry.generics.sections.TaskFormSection;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by fdnicolalde on 7/25/16.

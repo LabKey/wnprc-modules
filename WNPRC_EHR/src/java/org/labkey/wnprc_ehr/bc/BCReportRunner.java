@@ -2,7 +2,6 @@ package org.labkey.wnprc_ehr.bc;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
@@ -10,7 +9,6 @@ import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -18,7 +16,6 @@ import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.quartz.JobBuilder.newJob;

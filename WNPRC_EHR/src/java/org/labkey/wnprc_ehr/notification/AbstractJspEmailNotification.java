@@ -12,8 +12,8 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.util.MailHelper;
+import org.labkey.wnprc_ehr.WNPRC_EHREmail;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
-import org.labkey.wnprc_ehr.email.JspEmail;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -39,7 +39,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
     }
 
     public String getMessageBodyHTML(Container c, User u) {
-        JspEmail email = new JspEmail(getPathToJsp());
+        WNPRC_EHREmail email = new WNPRC_EHREmail(getPathToJsp());
 
         String emailContents;
         try {

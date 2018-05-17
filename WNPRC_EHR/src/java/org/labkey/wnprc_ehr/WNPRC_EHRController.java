@@ -77,7 +77,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectExcepti
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
-import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
+import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
 
 import javax.servlet.ServletOutputStream;
@@ -85,10 +85,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -139,10 +137,6 @@ public class WNPRC_EHRController extends SpringActionController
     EnhancedJsonResponse getEnhancedJsonResponse()
     {
         return new EnhancedJsonResponse();
-    }
-
-    public static class NullFORM
-    {
     }
 
     public static class PopulationEventsOverPeriodForm
@@ -315,7 +309,7 @@ public class WNPRC_EHRController extends SpringActionController
         private String _date;
         private String _fromList;
 
-        public String getSubject() throws Exception
+        public String getSubject()
         {
             if (_subject == null)
             {
@@ -349,7 +343,7 @@ public class WNPRC_EHRController extends SpringActionController
             _fromList = fromList;
         }
 
-        public Date getSentDate() throws Exception
+        public Date getSentDate()
         {
             DateFormat df = new SimpleDateFormat("yyyy/MM/dd kk:mm:ss", Locale.ENGLISH);
             Date result;
@@ -376,7 +370,7 @@ public class WNPRC_EHRController extends SpringActionController
             }
         }
 
-        public MessageIdentifier getMessageIdentifier() throws Exception
+        public MessageIdentifier getMessageIdentifier()
         {
             return new MessageIdentifier(getSubject(), getFromListAsArray(), getSentDate());
         }
@@ -467,7 +461,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(ReleaseAnimalFromBehaviorAssignmentForm form, BindException errors) throws Exception
         {
-            WNPRC_EHRService.get().getBehaviorDataEntryService(getUser(), getContainer()).releaseAnimalFromBehaviorProject(
+            BehaviorDataEntryService.get(getUser(), getContainer()).releaseAnimalFromBehaviorProject(
                     form.getAnimalId(),
                     form.getProject(),
                     form.getReleaseDate()
@@ -620,9 +614,9 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @ActionNames("getChanges")
     @CSRF
-    public class GetChangeLists extends ApiAction<NullFORM>
+    public class GetChangeLists extends ApiAction<Void>
     {
-        public ApiResponse execute(NullFORM form, BindException errors) throws Exception
+        public ApiResponse execute(Void form, BindException errors) throws Exception
         {
             Map<String, Object> props = new HashMap<>();
 
@@ -664,9 +658,9 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @RequiresLogin
     @ActionNames("getColonyPopulationPerMonth")
-    public class GetPopulationPerMonth extends ApiAction<NullFORM>
+    public class GetPopulationPerMonth extends ApiAction<Void>
     {
-        public ApiResponse execute(NullFORM form, BindException errors) throws Exception
+        public ApiResponse execute(Void form, BindException errors)
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
             Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
@@ -682,7 +676,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("getPopulationChangeEventsOverPeriod")
     public class GetPopulationEventsOverPeriod extends ApiAction<PopulationEventsOverPeriodForm>
     {
-        public ApiResponse execute(PopulationEventsOverPeriodForm form, BindException errors) throws Exception
+        public ApiResponse execute(PopulationEventsOverPeriodForm form, BindException errors)
         {
             DateTime start = new DateTime(form.getStartdate());
             DateTime end = new DateTime(form.getEnddate());
@@ -701,7 +695,7 @@ public class WNPRC_EHRController extends SpringActionController
     @CSRF
     public class GetAnimalDemographicsForRoomAction extends ApiAction<GetAnimalDemographicsForRoomForm>
     {
-        public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors) throws Exception
+        public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors)
         {
             Map<String, Object> props = new HashMap<>();
 
@@ -771,7 +765,7 @@ public class WNPRC_EHRController extends SpringActionController
     public class BillablePerDiemsAction extends ApiAction<BillablePerDiemsForm>
     {
         @Override
-        public Object execute(BillablePerDiemsForm form, BindException errors) throws Exception
+        public Object execute(BillablePerDiemsForm form, BindException errors)
         {
             AssignmentPerDiems assignmentPerDiems = new AssignmentPerDiems(getContainer(), getUser(), form.getStartDate(), form.getEndDate());
 
@@ -842,7 +836,6 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    //public static class NullForm {}
     public class EmailModel
     {
         public HashMap<String, Map<String, String>> data = new HashMap<>();
@@ -852,7 +845,7 @@ public class WNPRC_EHRController extends SpringActionController
             return "Jon";
         }
 
-        public Void add(String area, String room, String ob)
+        public java.lang.Void add(String area, String room, String ob)
         {
             Map areaMap = data.get(area);
             if (areaMap == null)
@@ -865,7 +858,7 @@ public class WNPRC_EHRController extends SpringActionController
             return null;
         }
 
-        public Void populateData()
+        public java.lang.Void populateData()
         {
             this.add("a", "a142", "r12900");
             this.add("a", "a142", "r12905");
@@ -1123,7 +1116,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(AddBehaviorAssignmentForm form, BindException errors) throws Exception
         {
-            WNPRC_EHRService.get().getBehaviorDataEntryService(getUser(), getContainer()).addBehaviorAssignment(
+            BehaviorDataEntryService.get(getUser(), getContainer()).addBehaviorAssignment(
                     form.getAnimalId(),
                     form.getProject(),
                     form.getAssignDate(),
@@ -1137,10 +1130,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UploadBCReports")
-    public class uploadBCReportAction extends ApiAction<NullFORM>
+    public class uploadBCReportAction extends ApiAction<Void>
     {
         @Override
-        public Object execute(NullFORM form, BindException errors) throws NotFoundException, GeneralSecurityException, IOException
+        public Object execute(Void form, BindException errors) throws NotFoundException
         {
             BCReportManager manager = new BCReportManager(getUser(), getContainer());
             manager.uploadReports();
@@ -1156,7 +1149,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(UserForm form, BindException errors) throws Exception
         {
-            WNPRC_EHRModule wnprc = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+            WNPRC_EHRModule wnprc = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
             String id = wnprc.getGoogleDriveAccountId(getContainer());
 
             DriveWrapper drive = GoogleDriveService.get().getDrive(id, getUser());
@@ -1170,10 +1163,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("ScheduleBCReports")
-    public class ScheduleBCReportsAction extends ApiAction<NullFORM>
+    public class ScheduleBCReportsAction extends ApiAction<Void>
     {
         @Override
-        public Object execute(NullFORM form, BindException errors)
+        public Object execute(Void form, BindException errors)
         {
             BCReportRunner.schedule();
             return new JSONObject();
@@ -1182,10 +1175,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UnscheduleBCReports")
-    public class UnscheduleBCReportsAction extends ApiAction<NullFORM>
+    public class UnscheduleBCReportsAction extends ApiAction<Void>
     {
         @Override
-        public Object execute(NullFORM form, BindException errors)
+        public Object execute(Void form, BindException errors)
         {
             BCReportRunner.unschedule();
             return new JSONObject();
@@ -1199,7 +1192,7 @@ public class WNPRC_EHRController extends SpringActionController
     @SuppressWarnings("unused")
     @RequiresLogin
     @ActionNames("manageWnprcTask")
-    public class ManageWnprcTaskAction extends RedirectAction<Void>
+    public class ManageWnprcTaskAction extends RedirectAction<java.lang.Void>
     {
         // these constants are here to hopefully prevent us from mistyping the capitalization
         // later in the method. also, they should be different enough to avoid one-off typos
@@ -1208,7 +1201,7 @@ public class WNPRC_EHRController extends SpringActionController
         private static final String LOWERCASE_FORMTYPE = "formtype";
 
         @Override
-        public URLHelper getSuccessURL(Void aVoid)
+        public URLHelper getSuccessURL(java.lang.Void aVoid)
         {
             ActionURL oldUrl = getViewContext().getActionURL();
             ActionURL newUrl;
@@ -1247,7 +1240,7 @@ public class WNPRC_EHRController extends SpringActionController
         }
 
         @Override
-        public boolean doAction(Void aVoid, BindException errors)
+        public boolean doAction(java.lang.Void aVoid, BindException errors)
         {
             return true;
         }
@@ -1259,10 +1252,10 @@ public class WNPRC_EHRController extends SpringActionController
      */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetDataAction extends ApiAction<Void>
+    public static class ImportDatasetDataAction extends ApiAction<java.lang.Void>
     {
         @Override
-        public Object execute(Void aVoid, BindException errors)
+        public Object execute(java.lang.Void aVoid, BindException errors)
         {
             // TODO: create, parse, and load some test data
             return new ApiSimpleResponse("success", true);
@@ -1275,10 +1268,10 @@ public class WNPRC_EHRController extends SpringActionController
      */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetMetadataAction extends ApiAction<Void>
+    public static class ImportDatasetMetadataAction extends ApiAction<java.lang.Void>
     {
         @Override
-        public Object execute(Void aVoid, BindException errors) throws Exception
+        public Object execute(java.lang.Void aVoid, BindException errors) throws Exception
         {
             Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
             assert module != null;

@@ -2,7 +2,6 @@ package org.labkey.wnprc_ehr.dataentry.forms.Arrival;
 
 import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
-import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.TaskForm;
 import org.labkey.api.ehr.dataentry.TaskFormSection;
 import org.labkey.api.module.Module;
@@ -19,7 +18,7 @@ public class ArrivalFormType extends TaskForm {
     public static final String NAME = "Arrival";
 
     public ArrivalFormType(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Arrivals", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Arrivals", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new ArrivalFormSection(),

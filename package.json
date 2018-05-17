@@ -53,7 +53,6 @@
     "@wnprc/primate-id": "^1.1.7",
     "blockui": "^1.0.0",
     "bootstrap": "^3.0.0",
-    "fsevents": "^1.2.4",
     "fullcalendar": "^3.0.0",
     "jquery": "^3.0.0",
     "knockout": "3.4.0",
@@ -77,5 +76,8 @@
     "urijs": "^1.0.0",
     "uuid": "^3.0.0",
     "whatwg-fetch": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "^1.2.4"
   }
 }

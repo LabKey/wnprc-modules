@@ -2,7 +2,6 @@ package org.labkey.wnprc_ehr.dataentry.forms.Clinpath;
 
 import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
-import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.TaskForm;
 import org.labkey.api.ehr.dataentry.TaskFormSection;
 import org.labkey.api.module.Module;
@@ -26,7 +25,7 @@ public class ClinpathForm extends TaskForm {
     public static final String NAME = "Clinpath";
 
     public ClinpathForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter " + NAME + " Results", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter " + NAME + " Results", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.asList(
                 new TaskFormSection(),
                 new ClinpathRunsFormSection(),
                 new AnimalDetailsFormSection(),

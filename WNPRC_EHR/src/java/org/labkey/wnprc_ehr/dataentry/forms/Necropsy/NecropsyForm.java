@@ -7,7 +7,6 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.AlopeciaSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.BodyConditionSection;
-import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.HistologySection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.MorphologicDiagnosisSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.NecropsyInfoSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.OrganWeightsSection;
@@ -25,7 +24,7 @@ public class NecropsyForm extends SimpleTaskForm {
     public static final String NAME = "Necropsy";
 
     public NecropsyForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.asList(
                 new TaskFormSection(),
                 new NecropsyInfoSection(),
                 new AnimalDetailsPanel(),

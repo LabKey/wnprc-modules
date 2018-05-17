@@ -1,9 +1,7 @@
 package org.labkey.wnprc_ehr.dataentry.forms.VVC.FormSections;
 
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleFormSection;
-import org.labkey.api.ehr.EHRService;
 //import org.labkey.api.ehr.dataentry.SimpleFormSection;
-import org.labkey.api.view.template.ClientDependency;
 
 import java.util.Arrays;
 

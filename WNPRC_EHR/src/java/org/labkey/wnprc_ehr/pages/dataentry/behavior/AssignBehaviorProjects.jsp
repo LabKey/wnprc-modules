@@ -11,7 +11,6 @@
 <%@ page import="org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService" %>
-<%@ page import="org.labkey.wnprc_ehr.service.WNPRC_EHRService" %>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.dbutils.api.exception.MissingPermissionsException" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -25,7 +24,7 @@
     // use that service.
     boolean hasPermission = false;
     try {
-        WNPRC_EHRService.get().getBehaviorDataEntryService(getUser(), getContainer());
+        BehaviorDataEntryService.get(getUser(), getContainer());
         hasPermission = true;
     }
     catch (MissingPermissionsException e) {

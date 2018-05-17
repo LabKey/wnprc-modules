@@ -15,7 +15,7 @@ public class AssignmentForm extends TaskForm {
     public static final String NAME = "Assignment";
 
     public AssignmentForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter/Manage Assignments", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter/Manage Assignments", WNPRCConstants.DataEntrySections.COLONY_RECORDS, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new AssignmentSection()

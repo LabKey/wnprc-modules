@@ -57,12 +57,10 @@ public class GringottsTestController extends SpringActionController {
         }
     }
 
-    public static class NullForm {}
-
     @RequiresNoPermission
-    public class TestAction extends ApiAction<NullForm> {
+    public class TestAction extends ApiAction<Void> {
         @Override
-        public Object execute(NullForm nullForm, BindException errors) throws Exception {
+        public Object execute(Void v, BindException errors) throws Exception {
             AbstractTestSuite suite = new BasicFunctionality(getUser(), getContainer());
 
             return suite.runTests();

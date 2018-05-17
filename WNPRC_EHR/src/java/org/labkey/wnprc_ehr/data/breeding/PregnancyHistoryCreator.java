@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.data.breeding;
 
+import com.google.common.collect.Iterators;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,6 +104,14 @@ public final class PregnancyHistoryCreator
         if (records.size() > 0)
         {
             BatchValidationException bve = new BatchValidationException();
+            // create a new, custom implementation of the dataset update service that skips over the auditing
+            // and the trigger scripts to insert data directly into the new pregnancy and outcome datasets. be
+            // advised that this requires all the data being inserted to be properly sanitized (with respect to
+            // the triggers) BEFORE it gets passed to the update service, because the triggers will not run.
+            // because the data is being pulled directly from the extant data in the database, this SHOULD be
+            // safe enough (i.e., there will be no additional sanitizing necessary, since we're using known valid
+            // data as inputs) but if anything changes in our handling of related data, be sure to update this, too.
+            //   - clay, 17 May 2018
             QueryUpdateService qus = new DatasetUpdateService(table)
             {
                 @Override
@@ -119,7 +128,7 @@ public final class PregnancyHistoryCreator
 
                     ArrayList<Map<String, Object>> output = new ArrayList<>();
                     int count = _pump(builder, output, context);
-                    LOG.debug(String.format("Fast inserted pregnancy-related records: table=%s, count=%d",
+                    LOG.debug(String.format("Fast inserted pregnancy-related records (no triggers): table=%s, count=%d",
                             getQueryTable().getName(), count));
 
                     return output;

@@ -8,16 +8,22 @@ idea.module {
 task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the ehrcron docker image") {
     workingDir "$projectDir/ehrcron"
     executable "docker"
-    args "build", ".", "-t", "wnprcehr/ehrcron:v1.0.0"
+    args "build", ".", "-t", "wnprcehr/ehrcron:latest"
 }
 
-task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image") { Task t ->
+task("buildTomcat", group: "Docker", type: Exec, description: "Generates the Tomcat docker image (with R)") {
+    workingDir "$projectDir/tomcat"
+    executable "docker"
+    args "build", ".", "-t", "wnprcehr/tomcat:latest"
+}
+
+task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrcron", "buildPostfix"]) { Task t ->
     doLast {
         if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
             t.project.exec {
                 workingDir "$projectDir/labkey"
                 executable "docker"
-                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2"
+                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2", "--no-cache"
             }
         } else {
             logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
@@ -26,12 +32,12 @@ task("buildLabkey", group: "Docker", description: "Generates the LabKey docker i
 }
 
 task("buildPostfix", group: "Docker", type: Exec, description: "Generates the postfix docker image") {
-    workingDir "${project.rootDir}/docker/postfix"
+    workingDir "$projectDir/postfix"
     executable "docker"
     args "build", ".", "-t", "wnprcehr/postfix:latest"
 }
 
-task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildEhrcron", "buildLabkey", "buildPostfix" ] )
+task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" ] )
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
     workingDir "$projectDir"

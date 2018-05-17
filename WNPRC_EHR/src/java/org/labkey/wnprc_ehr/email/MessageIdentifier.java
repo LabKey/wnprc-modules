@@ -40,12 +40,7 @@ public class MessageIdentifier {
                     if (message.getSubject().equals(subject) && message.getSentDate().equals(sent)) {
                         String[] curMessageFrom = EmailMessageUtils.convertAddressArrayToStringArray(message.getFrom());
 
-                        if (EmailMessageUtils.fromListsAreIdentical(from, curMessageFrom).booleanValue()) {
-                            isMatch = true;
-                        }
-                        else {
-                            isMatch = false;
-                        }
+                        isMatch = EmailMessageUtils.fromListsAreIdentical(from, curMessageFrom).booleanValue();
                     }
                     else {
                         isMatch = false;

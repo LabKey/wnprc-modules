@@ -28,7 +28,7 @@ public class NecropsyRequestForm extends SimpleRequestForm {
     public static final String NAME = "NecropsyRequest";
 
     public NecropsyRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Request Necropsy", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Request Necropsy", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.asList(
                 new NoticeSection(),
                 new ShortenedRequestFormSection(),
                 new Instructions(),

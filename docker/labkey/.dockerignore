@@ -2,7 +2,3 @@
 *
 
 # whitelist the following files:
-!pipelineConfig.xml
-!public-yum-ol7.repo
-!ROOT.xml
-!wait-for-postgres.sh

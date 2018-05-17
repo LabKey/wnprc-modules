@@ -171,16 +171,21 @@ Ext.onReady(function(){
                         title: 'Enter Weights',
                         queries: ['Weight']
                     },
-                    // {
-                    //     url: makeExt4DataEntryURL("Food Deprive Start"),
-                    //     title: 'Enter Start Food Deprives',
-                    //     queries: ['foodDeprives']
-                    // },
-                    // {
-                    //     url: makeExt4DataEntryURL("Food Deprive Complete"),
-                    //     title: 'Enter Complete Food Deprives',
-                    //     queries: ['foodDeprives']
-                    // }
+                    {
+                        url: makeExt4DataEntryURL("Food Deprive Start"),
+                        title: 'Enter Start Food Deprives',
+                        queries: ['foodDeprives']
+                    },
+                    {
+                        url: makeExt4DataEntryURL("Food Deprive Complete"),
+                        title: 'Enter Complete Food Deprives',
+                        queries: ['foodDeprives']
+                    },
+                    {
+                        url: makeExt4DataEntryURL("Breeding Encounter"),
+                        title: 'Enter Breeding/Pregnancy',
+                        queries: ['Breeding Encounters']
+                    }
                 ]
             },
             {
@@ -366,11 +371,6 @@ Ext.onReady(function(){
                         title:   'Schedule Necropsy',
                         queries: ['Necropsies']
                     },
-                    // {
-                    //     url:  makeRequestDataEntryURL("Food Deprive Request"),
-                    //     title: 'Request Food Deprives',
-                    //     queries: ['foodDeprives']
-                    // }
                     {
                         url:     makeExt4DataEntryURL("SurgeryRequest"),
                         title:   'Request Surgery',
@@ -381,6 +381,11 @@ Ext.onReady(function(){
                         title:   'Schedule Surgery',
                         queries: ['surgery']
                     },
+                    {
+                        url:  makeRequestDataEntryURL("Food Deprive Request"),
+                        title: 'Request Food Deprives',
+                        queries: ['foodDeprives']
+                    }
                 ],
                 requests: true
             }

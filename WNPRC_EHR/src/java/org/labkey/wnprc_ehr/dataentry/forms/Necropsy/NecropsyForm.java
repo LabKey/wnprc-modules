@@ -7,7 +7,6 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.AlopeciaSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.BodyConditionSection;
-import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.HistologySection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.MorphologicDiagnosisSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.NecropsyInfoSection;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.FormSections.OrganWeightsSection;
@@ -25,7 +24,7 @@ public class NecropsyForm extends SimpleTaskForm {
     public static final String NAME = "Necropsy";
 
     public NecropsyForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.asList(
                 new TaskFormSection(),
                 new NecropsyInfoSection(),
                 new AnimalDetailsPanel(),
@@ -35,8 +34,7 @@ public class NecropsyForm extends SimpleTaskForm {
                 new AlopeciaSection(),
                 new TissueSamplesSection(),
                 new OrganWeightsSection(),
-                new MorphologicDiagnosisSection(),
-                new HistologySection()
+                new MorphologicDiagnosisSection()
         ));
 
         for(FormSection section: this.getFormSections()) {
@@ -44,8 +42,11 @@ public class NecropsyForm extends SimpleTaskForm {
             section.addConfigSource("NecropsyTask");
         }
 
+        setStoreCollectionClass("WNPRC.ext.data.NecropsyStoreCollection");
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Necropsy.js"));
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Pathology.js"));
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyServerStore.js"));
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyStoreCollection.js"));
     }
 
     @Override

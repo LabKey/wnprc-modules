@@ -1,19 +1,8 @@
 package org.labkey.wnprc_ehr.dataentry.generics.sections;
 
 import org.json.JSONObject;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.ehr.dataentry.AbstractFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
-import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.NonStoreFormSection;
-import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.util.Pair;
-import org.labkey.api.view.template.ClientDependency;
-
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created by jon on 3/4/16.

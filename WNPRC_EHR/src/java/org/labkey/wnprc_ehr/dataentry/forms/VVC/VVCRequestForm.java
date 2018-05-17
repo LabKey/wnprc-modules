@@ -16,7 +16,7 @@ public class VVCRequestForm extends SimpleRequestForm
     public static final String NAME = "VVCRequest";
 
     public VVCRequestForm (DataEntryFormContext ctx, Module owner){
-        super (ctx,owner,NAME,"Request VVC", "Requests", Arrays.<FormSection>asList(
+        super (ctx,owner,NAME,"Request VVC", "Requests", Arrays.asList(
                 new RequestFormSection(),
                 new VVCInfoSection()
         ));

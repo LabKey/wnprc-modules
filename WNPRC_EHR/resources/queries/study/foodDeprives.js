@@ -108,24 +108,20 @@ function afterInsert(row, errors){
 }
 
 function setDescription(row, helper){
-    //TODO: need to set description for every field
-    console.log ("call setDescription");
     var description = new Array();
 
-    if(row.type)
-        description.push('Type: ' + EHR.Server.Utils.nullToString(row.type));
-
-    if(row.amount)
-        description.push('Amount: ' + EHR.Server.Utils.nullToString(row.amount));
-
+    if(row.reason)
+        description.push('Reason: ' + EHR.Server.Utils.nullToString(row.reason));
     if (row.protocolContact)
-        description.push('Protocol Contact');
-
-    if (row.id)
-        description.push('Id: ' + EHR.Server.Utils.nullToString(row.id));
-
-    if (row.date)
-        description.push('Date: ' + EHR.Server.Utils.nullToString(row.date));
+        description.push('Protocol Contact: ' + EHR.Server.Utils.nullToString(row.protocolContact));
+    if(row.depriveStartedBy)
+        description.push('Started by: ' + EHR.Server.Utils.nullToString(row.depriveStartedBy));
+    if (row.depriveStartTime)
+        description.push('Start Time: ' + EHR.Server.Utils.nullToString(row.depriveStartTime));
+    if (row.foodRestoredBy)
+        description.push('Restore by: ' + EHR.Server.Utils.nullToString(row.depriveRestoredBy));
+    if (row.restoredTime)
+        description.push('Restore Time: ' + EHR.Server.Utils.nullToString(row.restoredTime));
 
     return description;
 }

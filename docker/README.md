@@ -6,9 +6,9 @@ Any service-specific configuration needs to be defined in a `.env` file in this 
 
 ## Building the Custom Images
 
-To build the custom images from a stand-alone clone, navigate to the parent folder (the repository root) and execute the following command:
+To build the custom images from a stand-alone clone, navigate to the **docker** folder (**not** the repository root) and execute the following command:
 ```
-./gradlew :docker:build
+./gradlew build
 ```
 From a clone embedded inside a LabKey SVN checkout, you will need to execute the command from the LabKey root, with the appropriate adjustments to the project path:
 ```
@@ -38,7 +38,7 @@ To build using Docker directly, you will need to pass those same credentials as 
 docker build \
     --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
     --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
-    -t wnprcehr/labkeyXX.X labkey
+    -t wnprcehr/labkey:XX.X labkey
 ```
 
 The LabKey build also requires the official Oracle Java Server JRE image, which is only available via Docker Hub if you accept the terms and conditions of use from Oracle directly. In order to get the image, you will need:

@@ -19,7 +19,7 @@ public class BiopsyForm extends TaskForm {
     public static final String NAME = "Biopsy";
 
     public BiopsyForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter Biopsy", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter Biopsy", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new BiopsyInfoSection(),

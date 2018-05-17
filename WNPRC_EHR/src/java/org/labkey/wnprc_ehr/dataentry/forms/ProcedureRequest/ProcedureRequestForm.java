@@ -17,7 +17,7 @@ public class ProcedureRequestForm extends TaskForm {
     public static final String NAME = "Procedure Request";
 
     public ProcedureRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.REQUESTS, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, NAME, WNPRCConstants.DataEntrySections.REQUESTS, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new ProceduresRequestedSection(),

@@ -64,13 +64,11 @@ public class WebUtilsController extends SpringActionController
         }
     }
 
-    public static class NullForm {}
-
     @RequiresNoPermission
     @ActionNames("loginStatus")
-    public class getLoginStatus extends ApiAction<NullForm> {
+    public class getLoginStatus extends ApiAction<Void> {
         @Override
-        public Object execute(NullForm nullForm, BindException errors) throws Exception {
+        public Object execute(Void v, BindException errors) throws Exception {
             Map<String, Object> json = new HashMap<>();
 
             // Check to see if we're logged in as a guest.

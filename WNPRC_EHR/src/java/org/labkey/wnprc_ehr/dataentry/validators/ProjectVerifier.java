@@ -3,19 +3,15 @@ package org.labkey.wnprc_ehr.dataentry.validators;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.Project;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
-import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by jon on 12/6/16.

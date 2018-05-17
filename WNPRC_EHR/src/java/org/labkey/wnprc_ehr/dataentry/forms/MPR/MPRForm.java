@@ -19,7 +19,7 @@ public class MPRForm extends TaskForm {
     public static final String NAME = "MPR";
 
     public MPRForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter MPR", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter MPR", WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new EncounterDetailsSection(),
                 new AnimalDetailsFormSection(),

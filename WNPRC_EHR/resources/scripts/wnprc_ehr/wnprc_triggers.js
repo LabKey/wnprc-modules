@@ -8,14 +8,11 @@ var LABKEY = require("labkey");
 var Ext = require("Ext4").Ext;
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
-var moment = require("dbutils/lib/moment");
-
-
 // Some shortcuts to imported modules
 var logger = WNPRC.Logger;
 
-
-exports.init = function(EHR) {
+// noinspection JSUnresolvedVariable
+exports.init = function (EHR) {
     // Here is the list of trigger scripts to execute:
     var scriptsToLoad = [
         "study/Deaths.js",
@@ -26,12 +23,12 @@ exports.init = function(EHR) {
     ];
 
     // Set up a shorthand function.
-    var registerHandler = function(event, schema, query, callback) {
+    var registerHandler = function (event, schema, query, callback) {
         return EHR.Server.TriggerManager.registerHandlerForQuery(event, schema, query, callback);
     };
 
     // Loop over each of the above-mentioned scripts and execute their registerTriggers call.
-    Ext.each(scriptsToLoad, function(scriptName) {
+    Ext.each(scriptsToLoad, function (scriptName) {
         scriptName = scriptName.replace(/\.js$/, '');
         var trigger = {};
 
@@ -39,7 +36,7 @@ exports.init = function(EHR) {
             trigger = require("wnprc_ehr/queries/" + scriptName);
             logger.debug("Successfully loaded script: " + scriptName);
         }
-        catch(e) {
+        catch (e) {
             logger.error("Failed to load trigger: " + scriptName);
         }
 
@@ -52,21 +49,21 @@ exports.init = function(EHR) {
     });
 
     //NOTE: this is getting passed the LK errors object, rather than the EHR wrapper
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr', 'cage', function(helper, scriptErrors, row, oldRow){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr', 'cage', function (helper, scriptErrors, row) {
         //pad cage to 4 digits if numeric
-        if(row.cage && !isNaN(row.cage)){
+        if (row.cage && !isNaN(row.cage)) {
             row.cage = EHR.Server.Utils.padDigits(row.cage, 4);
         }
 
-        if(row.room)
+        if (row.room)
             row.room = row.room.toLowerCase();
 
         row.location = row.room;
-        if(row.cage)
+        if (row.cage)
             row.location += '-' + row.cage;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'Treatment Orders', function(event, helper){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'treatment_order', function (event, helper) {
         helper.setScriptOptions({
             removeTimeFromDate: true,
             removeTimeFromEndDate: true
@@ -75,7 +72,7 @@ exports.init = function(EHR) {
 
     // This allows the client to signal that it is saving a scheduled record, and so it is unnecessary to check
     // the dates for future dates, since they're supposed to be in the future.
-    var allowFutureDatesForScheduledRecords = function(helper) {
+    var allowFutureDatesForScheduledRecords = function (helper) {
         if (helper.getExtraContext().isScheduledTask) {
             helper.setScriptOptions({
                 allowFutureDates: true
@@ -84,27 +81,33 @@ exports.init = function(EHR) {
     };
 
     // Allow future records for the Necropsy sections that care, so that we can edit Scheduled Necropsies.
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'Weight',         function(event, helper){ allowFutureDatesForScheduledRecords(helper); });
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'Body Condition', function(event, helper){ allowFutureDatesForScheduledRecords(helper); });
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'Alopecia',       function(event, helper){ allowFutureDatesForScheduledRecords(helper); });
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'weight', function (event, helper) {
+        allowFutureDatesForScheduledRecords(helper);
+    });
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'bcs', function (event, helper) {
+        allowFutureDatesForScheduledRecords(helper);
+    });
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.INIT, 'study', 'alopecia', function (event, helper) {
+        allowFutureDatesForScheduledRecords(helper);
+    });
 
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'Treatment Orders', function(helper, scriptErrors, row, oldRow){
-        if (row.date && row.enddate){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'treatment_order', function (helper, scriptErrors, row) {
+        if (row.date && row.enddate) {
             var startDate = EHR.Server.Utils.normalizeDate(row.date);
             var endDate = EHR.Server.Utils.normalizeDate(row.enddate);
 
-            if (startDate - endDate == 0 ){
+            if (startDate - endDate === 0) {
                 EHR.Server.Utils.addError(scriptErrors, 'enddate', 'Single Day Treatment', 'INFO');
             }
         }
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'Drug Administration', function(helper, scriptErrors, row, oldRow){
-        if (row.volume && row.concentration){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'drug', function (helper, scriptErrors, row) {
+        if (row.volume && row.concentration) {
             var expected = Math.round(row.volume * row.concentration * 1000) / 1000;
-            if (Math.abs(row.amount - expected) > 0.2){ //allow for rounding
-                EHR.Server.Utils.addError(scriptErrors, 'amount', 'Amount does not match volume for this concentration. Expected: '+expected, 'INFO');
+            if (Math.abs(row.amount - expected) > 0.2) { //allow for rounding
+                EHR.Server.Utils.addError(scriptErrors, 'amount', 'Amount does not match volume for this concentration. Expected: ' + expected, 'INFO');
                 //EHR.Server.Utils.addError(scriptErrors, 'volume', 'Volume does not match amount for this concentration. Expected: '+expected, 'WARN');
             }
         }
@@ -117,13 +120,12 @@ exports.init = function(EHR) {
      * @param row The row object, provided by LabKey
      * @param errors The errors object, provided by LabKey
      */
-    EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, function(helper, scriptErrors, row, oldRow){
+    EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, function (helper, scriptErrors, row) {
         var species;
-        if (row.Id && !helper.isQuickValidation() && !helper.isETL())
-        {
+        if (row.Id && !helper.isQuickValidation() && !helper.isETL()) {
             if (row.Id.match(/(^rh([0-9]{4})$)|(^r([0-9]{5})$)|(^rh-([0-9]{3})$)|(^rh[a-z]{2}([0-9]{2})$)/))
                 species = 'Rhesus';
-            else if (row.Id.match(/^cy([0-9]{4})$/))
+            else if (row.Id.match(/^cy?([0-9]{4,5})$/))
                 species = 'Cynomolgus';
             else if (row.Id.match(/^ag([0-9]{4})$/))
                 species = 'Vervet';
@@ -133,17 +135,17 @@ exports.init = function(EHR) {
                 species = 'Cotton-top Tamarin';
             else if (row.Id.match(/^pt([0-9]{4})$/))
                 species = 'Pigtail';
-            else if (row.Id.match(/^pd([0-9]{4})$/)){
+            else if (row.Id.match(/^pd([0-9]{4})$/)) {
                 if (row.species)
-                species = row.species;
+                    species = row.species;
                 else
-                species = 'Infant';
+                    species = 'Infant';
             }
 
             //these are to handle legacy data:
-            else if (row.Id.match(/(^rha([a-z]{1})([0-9]{2}))$/))
+            else if (row.Id.match(/(^rha([a-z])([0-9]{2}))$/))
                 species = 'Rhesus';
-            else if (row.Id.match(/(^rh-([a-z]{1})([0-9]{2}))$/))
+            else if (row.Id.match(/(^rh-([a-z])([0-9]{2}))$/))
                 species = 'Rhesus';
             else if (row.Id.match(/^cja([0-9]{3})$/))
                 species = 'Marmoset';
@@ -160,20 +162,20 @@ exports.init = function(EHR) {
         row.species = species;
 
         //check Id format
-        if(!helper.isETL() && !helper.isSkipIdFormatCheck()){
-            if(row.Id && species){
-                if(species == 'Unknown'){
+        if (!helper.isETL() && !helper.isSkipIdFormatCheck()) {
+            if (row.Id && species) {
+                if (species === 'Unknown') {
                     EHR.Server.Utils.addError(scriptErrors, 'Id', 'Invalid Id Format', 'INFO');
                 }
-                else if (species == 'Infant') {
+                else if (species === 'Infant') {
                     species = null;
                 }
             }
         }
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Arrival', function(row){
-        var description = new Array();
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'arrival', function (row) {
+        var description = [];
 
         if (row.source)
             description.push('Source: ' + row.source);
@@ -181,9 +183,9 @@ exports.init = function(EHR) {
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Assignment', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'assignment', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
         description.push('Start Date: ' + EHR.Server.Utils.dateToString(row.Date));
         description.push('Removal Date: ' + (row.enddate ? EHR.Server.Utils.dateToString(row.enddate) : ''));
@@ -191,356 +193,356 @@ exports.init = function(EHR) {
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Birth', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'birth', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.conception)
-            description.push('Conception: '+ row.conception);
+        if (row.conception)
+            description.push('Conception: ' + row.conception);
 
-        if(row.gender)
-            description.push('Gender: '+ EHR.Server.Utils.nullToString(row.gender));
-        if(row.dam)
-            description.push('Dam: '+ EHR.Server.Utils.nullToString(row.dam));
-        if(row.sire)
-            description.push('Sire: '+ EHR.Server.Utils.nullToString(row.sire));
-        if(row.room)
-            description.push('Room: '+ EHR.Server.Utils.nullToString(row.room));
-        if(row.cage)
-            description.push('Cage: '+ EHR.Server.Utils.nullToString(row.cage));
-        if(row.cond)
-            description.push('Cond: '+ EHR.Server.Utils.nullToString(row.cond));
-        if(row.weight)
-            description.push('Weight: '+ EHR.Server.Utils.nullToString(row.weight));
-        if(row.wdate)
-            description.push('Weigh Date: '+ EHR.Server.Utils.nullToString(row.wdate));
-        if(row.origin)
-            description.push('Origin: '+ row.origin);
-        if(row.type)
-            description.push('Type: '+ row.type);
-
-        return description;
-    });
-
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Chemistry Results', function(row){
-        //we need to set description for every field
-        var description = new Array();
-
-        if(row.testid)
-            description.push('Test: '+EHR.Server.Utils.nullToString(row.testid));
-        if (row.method)
-            description.push('Method: '+row.method);
-
-        if(row.result)
-            description.push('Result: '+EHR.Server.Utils.nullToString(row.result)+' '+EHR.Server.Utils.nullToString(row.units));
-        if(row.qualResult)
-            description.push('Qual Result: '+EHR.Server.Utils.nullToString(row.qualResult));
-
-        return description;
-    });
-
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Clinical Encounters', function(row){
-        //we need to set description for every field
-        var description = new Array();
-
-        if(row.type)
+        if (row.gender)
+            description.push('Gender: ' + EHR.Server.Utils.nullToString(row.gender));
+        if (row.dam)
+            description.push('Dam: ' + EHR.Server.Utils.nullToString(row.dam));
+        if (row.sire)
+            description.push('Sire: ' + EHR.Server.Utils.nullToString(row.sire));
+        if (row.room)
+            description.push('Room: ' + EHR.Server.Utils.nullToString(row.room));
+        if (row.cage)
+            description.push('Cage: ' + EHR.Server.Utils.nullToString(row.cage));
+        if (row.cond)
+            description.push('Cond: ' + EHR.Server.Utils.nullToString(row.cond));
+        if (row.weight)
+            description.push('Weight: ' + EHR.Server.Utils.nullToString(row.weight));
+        if (row.wdate)
+            description.push('Weigh Date: ' + EHR.Server.Utils.nullToString(row.wdate));
+        if (row.origin)
+            description.push('Origin: ' + row.origin);
+        if (row.type)
             description.push('Type: ' + row.type);
-        if(row.title)
+
+        return description;
+    });
+
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'chemistryresults', function (row) {
+        //we need to set description for every field
+        var description = [];
+
+        if (row.testid)
+            description.push('Test: ' + EHR.Server.Utils.nullToString(row.testid));
+        if (row.method)
+            description.push('Method: ' + row.method);
+
+        if (row.result)
+            description.push('Result: ' + EHR.Server.Utils.nullToString(row.result) + ' ' + EHR.Server.Utils.nullToString(row.units));
+        if (row.qualResult)
+            description.push('Qual Result: ' + EHR.Server.Utils.nullToString(row.qualResult));
+
+        return description;
+    });
+
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'encounters', function (row) {
+        //we need to set description for every field
+        var description = [];
+
+        if (row.type)
+            description.push('Type: ' + row.type);
+        if (row.title)
             description.push('Title: ' + row.title);
-        if(row.caseno)
+        if (row.caseno)
             description.push('CaseNo: ' + row.caseno);
-        if(row.major)
-            description.push('Is Major?: '+row.major);
-        if(row.performedby)
+        if (row.major)
+            description.push('Is Major?: ' + row.major);
+        if (row.performedby)
             description.push('Performed By: ' + row.performedby);
-        if(row.enddate)
+        if (row.enddate)
             description.push('Completed: ' + EHR.Server.Utils.datetimeToString(row.enddate));
 
         //NOTE: only show this for non-final data
-        if(row.servicerequested && row.QCStateLabel && EHR.Server.Security.getQCStateByLabel(row.QCStateLabel).PublicData === false)
+        if (row.servicerequested && row.QCStateLabel && EHR.Server.Security.getQCStateByLabel(row.QCStateLabel).PublicData === false)
             description.push('Service Requested: ' + row.servicerequested);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Clinical Observations', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'clinical_observations', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.category)
+        if (row.category)
             description.push('Category: ' + row.category);
-        if(row.area)
+        if (row.area)
             description.push('Area: ' + row.area);
-        if(row.observation)
+        if (row.observation)
             description.push('Observation: ' + row.observation);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Clinpath Runs', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'clinpathruns', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
         if (row.type)
-            description.push('Type: '+row.type);
+            description.push('Type: ' + row.type);
 
         if (row.serviceRequested)
-            description.push('Service Requested: '+row.servicerequested);
+            description.push('Service Requested: ' + row.servicerequested);
 
         if (row.sampleType)
-            description.push('Sample Type: '+row.sampleType);
+            description.push('Sample Type: ' + row.sampleType);
 
         if (row.sampleId)
-            description.push('Sample Id: '+row.sampleId);
+            description.push('Sample Id: ' + row.sampleId);
 
         if (row.collectedBy)
-            description.push('Collected By: '+row.collectedBy);
+            description.push('Collected By: ' + row.collectedBy);
 
         if (row.collectionMethod)
-            description.push('Collection Method: '+row.collectionMethod);
+            description.push('Collection Method: ' + row.collectionMethod);
 
         if (row.clinremark)
-            description.push('Clinical Remark: '+row.clinremark);
+            description.push('Clinical Remark: ' + row.clinremark);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Deaths', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'deaths', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.cause)
-            description.push('Cause: '+row.cause);
-        if(row.manner)
-            description.push('Manner: '+row.manner);
-        if(row.necropsy)
-            description.push('Necropsy #: '+row.necropsy);
+        if (row.cause)
+            description.push('Cause: ' + row.cause);
+        if (row.manner)
+            description.push('Manner: ' + row.manner);
+        if (row.necropsy)
+            description.push('Necropsy #: ' + row.necropsy);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Departure', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'departure', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
         if (row.authorize)
-            description.push('Authorized By: '+ row.authorize);
+            description.push('Authorized By: ' + row.authorize);
 
         if (row.destination)
-            description.push('Destination: '+ row.destination);
+            description.push('Destination: ' + row.destination);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Drug Administration', function(row, helper){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'drug', function (row, helper) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.code)
-            description.push('Code: '+EHR.Server.Utils.snomedToString(row.code, row.meaning, helper));
-        if(row.route)
-            description.push('Route: '+row.route);
-        if(row.volume)
-            description.push('Volume: '+ row.volume+' '+EHR.Server.Utils.nullToString(row.vol_units));
-        if(row.amount)
-            description.push('Amount: '+ row.amount+' '+EHR.Server.Utils.nullToString(row.amount_units));
+        if (row.code)
+            description.push('Code: ' + EHR.Server.Utils.snomedToString(row.code, row.meaning, helper));
+        if (row.route)
+            description.push('Route: ' + row.route);
+        if (row.volume)
+            description.push('Volume: ' + row.volume + ' ' + EHR.Server.Utils.nullToString(row.vol_units));
+        if (row.amount)
+            description.push('Amount: ' + row.amount + ' ' + EHR.Server.Utils.nullToString(row.amount_units));
 
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Hematology Results', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'hematologyresults', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.testid)
-            description.push('Test: '+EHR.Server.Utils.nullToString(row.testid));
+        if (row.testid)
+            description.push('Test: ' + EHR.Server.Utils.nullToString(row.testid));
         if (row.method)
-            description.push('Method: '+row.method);
+            description.push('Method: ' + row.method);
 
-        if(row.result)
-            description.push('Result: '+EHR.Server.Utils.nullToString(row.result));
+        if (row.result)
+            description.push('Result: ' + EHR.Server.Utils.nullToString(row.result));
 
-        if(row.qualResult)
-            description.push('Qualitative Result: '+EHR.Server.Utils.nullToString(row.qualResult));
+        if (row.qualResult)
+            description.push('Qualitative Result: ' + EHR.Server.Utils.nullToString(row.qualResult));
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Histology', function(row, helper){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'histology', function (row, helper) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.slideNum)
+        if (row.slideNum)
             description.push('Slide No: ' + row.slideNum);
-        if(row.tissue)
+        if (row.tissue)
             description.push('Tissue: ' + EHR.Server.Utils.snomedToString(row.tissue, null, helper));
-        if(row.diagnosis)
+        if (row.diagnosis)
             description.push('Diagnosis: ' + row.diagnosis);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Housing', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'housing', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
         if (row.room)
-            description.push('Room: '+ row.room);
+            description.push('Room: ' + row.room);
         if (row.cage)
-            description.push('Cage: '+ row.cage);
+            description.push('Cage: ' + row.cage);
         if (row.cond)
-            description.push('Condition: '+ row.cond);
+            description.push('Condition: ' + row.cond);
 
-        description.push('In Time: '+ row.Date);
-        description.push('Out Time: '+ EHR.Server.Utils.nullToString(row.enddate));
+        description.push('In Time: ' + row.Date);
+        description.push('Out Time: ' + EHR.Server.Utils.nullToString(row.enddate));
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Notes', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'notes', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
         description.push('Start Date: ' + (row.Date ? EHR.Server.Utils.datetimeToString(row.Date) : ''));
         description.push('End Date: ' + (row.EndDate ? EHR.Server.Utils.datetimeToString(row.EndDate) : ''));
 
-        if(row.category)
+        if (row.category)
             description.push('Category: ' + row.category);
-        if(row.value)
+        if (row.value)
             description.push('Value: ' + row.value);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Organ Weights', function(row, helper){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'organ_weights', function (row, helper) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.tissue)
+        if (row.tissue)
             description.push('Organ/Tissue: ' + EHR.Server.Utils.snomedToString(row.tissue, row.tissueMeaning, helper));
-        if(row.weight)
+        if (row.weight)
             description.push('Weight: ' + row.weight);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Parasitology Results', function(row, helper){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'parasitologyresults', function (row, helper) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.organism || row.meaning)
-            description.push('Organism: '+EHR.Server.Utils.snomedToString(row.organism, row.meaning, helper));
+        if (row.organism || row.meaning)
+            description.push('Organism: ' + EHR.Server.Utils.snomedToString(row.organism, row.meaning, helper));
         if (row.method)
-            description.push('Method: '+row.method);
+            description.push('Method: ' + row.method);
 
-        if(row.result)
-            description.push('Result: '+EHR.Server.Utils.nullToString(row.result)+' '+EHR.Server.Utils.nullToString(row.units));
-        if(row.qualResult)
-            description.push('Qual Result: '+EHR.Server.Utils.nullToString(row.qualResult));
-
-        return description;
-    });
-
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Problem List', function(row){
-        //we need to set description for every field
-        var description = new Array();
-
-        if(row.category)
-            description.push('Category: '+row.problem_no);
-
-        if(row.problem_no)
-            description.push('Problem No: '+row.problem_no);
-
-        description.push('Date Observed: '+EHR.Server.Utils.datetimeToString(row.date));
-        description.push('Date Resolved: '+EHR.Server.Utils.datetimeToString(row.enddate));
+        if (row.result)
+            description.push('Result: ' + EHR.Server.Utils.nullToString(row.result) + ' ' + EHR.Server.Utils.nullToString(row.units));
+        if (row.qualResult)
+            description.push('Qual Result: ' + EHR.Server.Utils.nullToString(row.qualResult));
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Tissue Samples', function(row, helper){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'problem', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.tissue)
+        if (row.category)
+            description.push('Category: ' + row.problem_no);
+
+        if (row.problem_no)
+            description.push('Problem No: ' + row.problem_no);
+
+        description.push('Date Observed: ' + EHR.Server.Utils.datetimeToString(row.date));
+        description.push('Date Resolved: ' + EHR.Server.Utils.datetimeToString(row.enddate));
+
+        return description;
+    });
+
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'tissue_samples', function (row, helper) {
+        //we need to set description for every field
+        var description = [];
+
+        if (row.tissue)
             description.push('Tissue: ' + EHR.Server.Utils.snomedToString(row.tissue, helper));
-        if(row.qualifier)
+        if (row.qualifier)
             description.push('Qualifier: ' + row.qualifier);
-        if(row.diagnosis)
+        if (row.diagnosis)
             description.push('Diagnosis: ' + row.diagnosis);
-        if(row.recipient)
+        if (row.recipient)
             description.push('Recipient: ' + row.recipient);
-        if(row.container_type)
+        if (row.container_type)
             description.push('Container: ' + row.container_type);
-        if(row.accountToCharge)
+        if (row.accountToCharge)
             description.push('Account to Charge: ' + row.accountToCharge);
-        if(row.ship_to)
+        if (row.ship_to)
             description.push('Ship To: ' + row.ship_to);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Treatment Orders', function(row, helper){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'treatment_order', function (row, helper) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.meaning)
-            description.push('Meaning: '+ row.meaning);
-        if(row.code || row.snomedMeaning)
-            description.push('Code: '+EHR.Server.Utils.snomedToString(row.code, row.snomedMeaning, helper));
-        if(row.route)
-            description.push('Route: '+ row.route);
-        if(row.concentration)
-            description.push('Conc: '+ row.concentration+ ' '+ EHR.Server.Utils.nullToString(row.conc_units));
-        if(row.dosage)
-            description.push('Dosage: '+ row.dosage+ ' '+ EHR.Server.Utils.nullToString(row.dosage_units));
-        if(row.volume)
-            description.push('Volume: '+ row.volume+ ' '+ EHR.Server.Utils.nullToString(row.vol_units));
-        if(row.amount)
-            description.push('Amount: '+ row.amount+ ' '+ EHR.Server.Utils.nullToString(row.amount_units));
+        if (row.meaning)
+            description.push('Meaning: ' + row.meaning);
+        if (row.code || row.snomedMeaning)
+            description.push('Code: ' + EHR.Server.Utils.snomedToString(row.code, row.snomedMeaning, helper));
+        if (row.route)
+            description.push('Route: ' + row.route);
+        if (row.concentration)
+            description.push('Conc: ' + row.concentration + ' ' + EHR.Server.Utils.nullToString(row.conc_units));
+        if (row.dosage)
+            description.push('Dosage: ' + row.dosage + ' ' + EHR.Server.Utils.nullToString(row.dosage_units));
+        if (row.volume)
+            description.push('Volume: ' + row.volume + ' ' + EHR.Server.Utils.nullToString(row.vol_units));
+        if (row.amount)
+            description.push('Amount: ' + row.amount + ' ' + EHR.Server.Utils.nullToString(row.amount_units));
 
-        description.push('EndDate: '+ (row.enddate ? row.enddate : 'none'));
+        description.push('EndDate: ' + (row.enddate ? row.enddate : 'none'));
 
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Urinalysis Results', function(row){
-        var description = new Array();
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'urinalysisresults', function (row) {
+        var description = [];
 
-        if(row.testid)
-            description.push('Test: '+EHR.Server.Utils.nullToString(row.testid));
+        if (row.testid)
+            description.push('Test: ' + EHR.Server.Utils.nullToString(row.testid));
         if (row.method)
-            description.push('Method: '+row.method);
+            description.push('Method: ' + row.method);
 
-        if(row.result)
-            description.push('Result: '+EHR.Server.Utils.nullToString(row.result)+' '+EHR.Server.Utils.nullToString(row.units));
-        if(row.qualResult)
-            description.push('Qual Result: '+EHR.Server.Utils.nullToString(row.qualResult));
+        if (row.result)
+            description.push('Result: ' + EHR.Server.Utils.nullToString(row.result) + ' ' + EHR.Server.Utils.nullToString(row.units));
+        if (row.qualResult)
+            description.push('Qual Result: ' + EHR.Server.Utils.nullToString(row.qualResult));
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Weight', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'weight', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
-        if(row.weight)
-            description.push('Weight: '+row.weight);
+        if (row.weight)
+            description.push('Weight: ' + row.weight);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_INSERT, 'study', 'Problem List', function(helper, scriptErrors, row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_INSERT, 'study', 'problem', function (helper, scriptErrors, row) {
         //autocalculate problem #
         //TODO: testing needed
-        if (!helper.isETL() && row.Id){
+        if (!helper.isETL() && row.Id) {
             LABKEY.Query.executeSql({
                 schemaName: 'study',
-                sql: "SELECT MAX(problem_no)+1 as problem_no FROM study.problem WHERE id='"+row.Id+"'",
+                sql: "SELECT MAX(problem_no)+1 as problem_no FROM study.problem WHERE id='" + row.Id + "'",
                 //NOTE: remove QC filter because of potential conflicts: +" AND qcstate.publicdata = TRUE",
-                success: function(data){
-                    if (data && data.rows && data.rows.length==1){
+                success: function (data) {
+                    if (data && data.rows && data.rows.length === 1) {
                         //console.log('problemno: '+data.rows[0].problem_no);
                         row.problem_no = data.rows[0].problem_no || 1;
                     }
@@ -553,138 +555,76 @@ exports.init = function(EHR) {
         }
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'Blood Draws', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'blood', function (row) {
         //we need to set description for every field
-        var description = new Array();
+        var description = [];
 
         if (row.quantity)
-            description.push('Total Quantity: '+ row.quantity);
+            description.push('Total Quantity: ' + row.quantity);
         if (row.performedby)
-            description.push('Performed By: '+ row.performedby);
-    //    if (row.requestor)
-    //        description.push('Requestor: '+ row.requestor);
+            description.push('Performed By: ' + row.performedby);
         if (row.billedby)
-            description.push('Billed By: '+ row.billedby);
+            description.push('Billed By: ' + row.billedby);
         if (row.assayCode)
             description.push('Assay Code', row.assayCode);
         if (row.tube_type)
-            description.push('Tube Type: '+ row.tube_type);
+            description.push('Tube Type: ' + row.tube_type);
         if (row.num_tubes)
-            description.push('# of Tubes: '+ row.num_tubes);
+            description.push('# of Tubes: ' + row.num_tubes);
         if (row.additionalServices)
-            description.push('Additional Services: '+ row.additionalServices);
+            description.push('Additional Services: ' + row.additionalServices);
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'Housing', function(helper, scriptErrors, row, oldRow){
-        if (row.cage){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'housing', function (helper, scriptErrors, row) {
+        if (row.cage) {
             row.cage = row.cage.toLowerCase();
         }
-        if (!helper.isETL()){
-            if (row.cond && row.cond.match(/x/) && !row.remark){
-                EHR.Server.Utils.addError(scriptErrors, 'cond', 'If you pick a special housing condition (x), you need to enter a remark stating the type');
+        if (!helper.isETL()) {
+            if (row.cond && row.cond.match(/x/) && !row.remark) {
+                EHR.Server.Utils.addError(scriptErrors, 'cond', 'If you pick a special housing condition (x), you need to enter a remark stating the type', 'ERROR');
             }
         }
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'Irregular Observations', function(helper, scriptErrors, row, oldRow) {
-        //
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'obs', function (helper, scriptErrors, row) {
         //  Enforce that a trauma location must always be supplied when "Trauma" is selected as an "other observation".
-        //
-        if ( row.other ) {
+        if (row.other) {
             var other = row.other.split(",");
-            if ( (other.length > 0) && (other.indexOf("T") >= 0) ) {
-                if ( (row.tlocation === null) || !(row.tlocation) ) {
-                    EHR.Server.Utils.addError(scriptErrors, 'tlocation', "You must specify a location when indicating trauma to an animal.");
+            if ((other.length > 0) && (other.indexOf("T") >= 0)) {
+                if ((row.tlocation === null) || !(row.tlocation)) {
+                    EHR.Server.Utils.addError(scriptErrors, 'tlocation', "You must specify a location when indicating trauma to an animal.", 'ERROR');
                 }
             }
         }
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr', 'protocol', function(helper, scriptErrors, row, oldRow){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr', 'protocol', function (helper, scriptErrors, row) {
         if (row.protocol)
             row.protocol = row.protocol.toLowerCase();
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'Blood Draws', function(helper, scriptErrors, row, oldRow){
-        if (row.additionalServices){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'study', 'blood', function (helper, scriptErrors, row) {
+        if (row.additionalServices) {
             // We do not permit requests of 6mL in EDTA with CBC
-            if (row.tube_type == 'EDTA' && row.tube_vol === 6 && row.additionalServices.indexOf('CBC') >= 0) {
+            if (row.tube_type === 'EDTA' && row.tube_vol === 6 && row.additionalServices.indexOf('CBC') >= 0) {
                 EHR.Server.Utils.addError(scriptErrors, 'tube_type', 'May not request draw of 6mL in EDTA with CBC', 'ERROR');
             }
         }
 
         // WNPRC#4350 - Require restraints for blood draws, but not for requests
         if (row.QCStateLabel === 'Completed') {
-            if ( !row.restraintDuration ) {
+            if (!row.restraintDuration) {
                 EHR.Server.Utils.addError(scriptErrors, 'restraintDuration', 'You must indicate the restraint time for blood draws.', 'ERROR');
             }
-            if ( !row.restraint ) {
+            if (!row.restraint) {
                 EHR.Server.Utils.addError(scriptErrors, 'restraint', 'You must indicate the restraint used for blood draws.', 'ERROR');
             }
         }
     });
 
-    function checkBehavior(row, errors, scriptContext, targetField){
-        if (row.behatype=='SIB'){
-            switch(row.category){
-                case 'SDR': return true;
-                case 'SDU': return true;
-                case 'SD': return true;
-                case 'SIB1': return true;
-                case 'SIB2': return true;
-                case 'SIB3': return true;
-                case 'SDR': return true;
-                case 'SIBR': return true;
-                default: EHR.Server.Utils.addError(errors, (targetField || 'Id'), 'This category does not match the type selected', 'ERROR');
-                    return false;
-
-            }
-            /*if (row.category =='SDR' || row.category== 'SDU' || row.category=='SD'){
-            console.log ('correct conbination of SIB and SDU');
-            return true;
-            }
-            else{
-                EHR.Server.Utils.addError(errors, (targetField || 'Id'), 'This category does not match the type selected', 'ERROR');
-                return false
-            }*/
-        }
-        if (row.behatype=='Abnormal'){
-            switch(row.category){
-                case 'Stereotypy': return true;
-                case 'Alopecia': return true;
-                case 'Digit/Appendage stuck': return true;
-                case 'Other': return true;
-                default: EHR.Server.Utils.addError(errors, (targetField || 'Id'), 'This category does not match the type selected', 'ERROR');
-                    return false;
-            }
-        }
-        if (row.behatype=='Socialization'){
-            switch(row.category){
-                case 'T1': return true;
-                case 'T2': return true;
-                case 'T3': return true;
-                case 'PC': return true;
-                case 'V': return true;
-                case 'Repair': return true;
-                case 'Other': return true;
-                default: EHR.Server.Utils.addError(errors, (targetField || 'Id'), 'This category does not match the type selected', 'ERROR');
-                    return false;
-            }
-        }if (row.behatreatment=='Modify Caging'){
-            if(row.behatype=='Abnormal' && row.category){
-                return true
-            }else{
-                EHR.Server.Utils.addError(errors, (targetField || 'Id'), 'This category does not match the type selected', 'ERROR');
-                return false;
-
-            }
-        }
-    }
-
-    function getHousingSQL(row)
-    {
+    function getHousingSQL(row) {
         var date = row.Date;
         date = EHR.Server.Utils.normalizeDate(date);
         var sqlDate = LABKEY.Query.sqlDateTimeLiteral(date);
@@ -700,27 +640,27 @@ exports.init = function(EHR) {
         return sql;
     }
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr', 'cage_observations', function(helper, scriptErrors, row, oldRow){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr', 'cage_observations', function (helper, scriptErrors, row) {
         row.performedby = row.performedby || row.userid || null;
 
-        if(row.cage && !isNaN(row.cage)) {
+        if (row.cage && !isNaN(row.cage)) {
             row.cage = EHR.Server.Utils.padDigits(row.cage, 4);
         }
 
         // Do not allow someone to mark a cage as okay with observations.
-        if(row.no_observations && row.feces) {
-            EHR.Server.Utils.addError(scriptErrors, 'no_observations', 'You cannot mark a cage as "OK" if there is an abnormal feces observation.')
+        if (row.no_observations && row.feces) {
+            EHR.Server.Utils.addError(scriptErrors, 'no_observations', 'You cannot mark a cage as "OK" if there is an abnormal feces observation.', 'ERROR');
         }
 
         //verify an animal is housed here
-        if(row.Date && row.room) {
+        if (row.Date && row.room) {
             var sql = getHousingSQL(row);
             LABKEY.Query.executeSql({
                 schemaName: 'study',
                 sql: sql,
-                success: function(data) {
-                    if(!data || !data.rows || !data.rows.length) {
-                        if(!row.cage)
+                success: function (data) {
+                    if (!data || !data.rows || !data.rows.length) {
+                        if (!row.cage)
                             EHR.Server.Utils.addError(scriptErrors, 'room', 'No animals are housed in this room on this date', 'WARN');
                         else
                             EHR.Server.Utils.addError(scriptErrors, 'cage', 'No animals are housed in this cage on this date', 'WARN');
@@ -731,11 +671,11 @@ exports.init = function(EHR) {
         }
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'ehr', 'cage_observations', function(row){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'ehr', 'cage_observations', function (row) {
         var description = [];
 
         if (row.no_observations === true) {
-            if ( row.cage ) {
+            if (row.cage) {
                 description = ["Cage Okay"]
             }
             else {
@@ -743,23 +683,21 @@ exports.init = function(EHR) {
             }
         }
         else {
-            var description = ['Cage Observation'];
+            description = ['Cage Observation'];
 
-            if(row.feces) {
-                description.push('Feces: '+row.feces);
+            if (row.feces) {
+                description.push('Feces: ' + row.feces);
             }
         }
 
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPDATE, 'wnprc', 'vvc', function(helper, scriptErrors, row, oldRow){
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPDATE, 'wnprc', 'vvc', function (helper, scriptErrors, row, oldRow) {
         console.log("wnprc_trigger gets called");
-        if (row.QCStateLabel=="Request: Approved" && oldRow.QCStateLabel == "Request: Pending")
-        {
+        if (row.QCStateLabel === "Request: Approved" && oldRow.QCStateLabel === "Request: Pending") {
             row.dateapproved = new Date();
         }
-
     });
 
     /*EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_INSERT, 'wnprc', 'vvc', function(helper, scriptErrors, row){

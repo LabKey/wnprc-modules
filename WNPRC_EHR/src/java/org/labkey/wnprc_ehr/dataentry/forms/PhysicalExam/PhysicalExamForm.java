@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 public abstract class PhysicalExamForm extends TaskForm {
     public PhysicalExamForm(DataEntryFormContext ctx, Module owner, String name) {
-        super(ctx, owner, name, name, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, name, name, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new HeaderSection(),
                 new AnimalDetailsFormSection(),

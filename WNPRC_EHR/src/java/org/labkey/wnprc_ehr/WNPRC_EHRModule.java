@@ -15,7 +15,9 @@
  */
 package org.labkey.wnprc_ehr;
 
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
@@ -45,6 +47,7 @@ import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Breeding.BreedingEncounterForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
@@ -93,17 +96,22 @@ import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
+import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
+import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
-import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.api.ldk.notification.NotificationService;
+import org.reflections.Reflections;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * User: bbimber
@@ -115,12 +123,28 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public static final String CONTROLLER_NAME = "wnprc_ehr";
     public static final String WNPRC_Category_Name = NAME;
 
+    /**
+     * Logger for logging the logs
+     */
+    private static final Logger LOG = Logger.getLogger(WNPRC_EHRModule.class);
+
+    /**
+     * Flag (from the JVM) to indicate we should force the module to re-run all updates
+     * regardless of the actual module version
+     */
+    private boolean forceUpdate = Boolean.getBoolean("labkey.module.forceupdate");
+
+    /**
+     * Flag indicating we should load the study metadata on module startup
+     */
+    private boolean loadOnStart = false;
+
     public String getName() {
         return NAME;
     }
 
     public double getVersion() {
-        return 15.14;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 15.15;
     }
 
     public boolean hasScripts() {
@@ -198,8 +222,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         this.registerRoles();
         this.registerPermissions();
 
-        this.registerServices();
-
         BCReportRunner.schedule();
 
         for (Container studyContainer : getWNPRCStudyContainers()) {
@@ -213,6 +235,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
             }
 
         }
+
+        EHRService es = EHRService.get();
+        if (loadOnStart) loadLatestDatasetMetadata(es);
     }
 
     private void registerPermissions() {
@@ -221,10 +246,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         RoleManager.registerPermission(new EHRStartedUpdatePermission());
         RoleManager.registerPermission(new EHRStartedDeletePermission());
         RoleManager.registerPermission(new EHRStartedInsertPermission());
-    }
-
-    private void registerServices() {
-        WNPRC_EHRService.set(new WNPRC_EHRService());
     }
 
     @Override
@@ -252,7 +273,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public void registerSchemas() {
         DefaultSchema.registerProvider(WNPRC_Schema.NAME, new DefaultSchema.SchemaProvider(this) {
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
-                return (QuerySchema) new WNPRC_Schema(schema.getUser(), schema.getContainer());
+                return new WNPRC_Schema(schema.getUser(), schema.getContainer());
             }
         });
     }
@@ -292,7 +313,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     public void registerDataEntryForms() {
         // Register all of the data entry forms.
-        List<Class> forms = Arrays.<Class>asList(
+        List<Class> forms = Arrays.asList(
                 ArrivalFormType.class,
                 AssignmentForm.class,
                 BehaviorAbstractForm.class,
@@ -326,7 +347,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 FoodDeprivesStartForm.class,
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
-                ProtocolForm.class
+                ProtocolForm.class,
+                BreedingEncounterForm.class
         );
 
         for(Class form : forms) {
@@ -337,12 +359,14 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     public void registerRoles() {
         RoleManager.registerRole(new WNPRCFullSubmitterWithReviewerRole());
         RoleManager.registerRole(new BehaviorServiceWorker());
+        RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
+        RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
     }
 
 
     public Set<Container> getWNPRCStudyContainers() {
         Set<Container> studyContainers = new HashSet<>();
-        WNPRC_EHRModule module = (WNPRC_EHRModule) ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+        WNPRC_EHRModule module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
 
         for (Container container : getAllContainers()) {
             if (container.getActiveModules().contains(module)) {
@@ -387,5 +411,42 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         }
 
         return ehrContainer;
+    }
+
+    @Override
+    public void versionUpdate(ModuleContext moduleContext) throws Exception
+    {
+        LOG.debug("deferring import of study metadata until module startup (after Spring config)");
+        forceUpdate = false; // let the version report correctly from now on
+        loadOnStart = true;  // indicate that we should load the study metadata on startup
+        super.versionUpdate(moduleContext);
+    }
+
+    @Override
+    @NotNull
+    public Set<Class> getIntegrationTests()
+    {
+        return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
+                .filter(c -> c.getSimpleName().endsWith("IntegrationTest"))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    @NotNull
+    public Set<Class> getUnitTests()
+    {
+        return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
+                .filter(c -> c.getSimpleName().endsWith("UnitTest"))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Executes the import of the dataset metadata into every container that has the module enabled
+     */
+    private void loadLatestDatasetMetadata(EHRService es)
+    {
+        LOG.debug("importing study metadata from reference study to all study containers");
+        File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
+        getWNPRCStudyContainers().forEach(c -> DatasetImportHelper.safeImportDatasetMetadata(es.getEHRUser(c), c, file));
     }
 }

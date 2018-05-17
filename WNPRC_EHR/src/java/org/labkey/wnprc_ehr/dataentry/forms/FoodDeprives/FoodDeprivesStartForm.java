@@ -22,7 +22,7 @@ public class FoodDeprivesStartForm extends TaskForm
     public static final String NAME = "Food Deprive Start";
 
     public FoodDeprivesStartForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Enter " + NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Enter " + NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
                 new FoodDeprivesFormSections(NAME)
@@ -39,7 +39,7 @@ public class FoodDeprivesStartForm extends TaskForm
 
         setStoreCollectionClass("EHR.data.FoodDepriveStore");
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/foodDepriveStore.js"));
-        addClientDependency(ClientDependency.fromPath("ehr/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
         //addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/BoxSelect.js"));
 
     }

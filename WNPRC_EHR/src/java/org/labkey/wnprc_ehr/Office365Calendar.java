@@ -26,12 +26,19 @@ import microsoft.exchange.webservices.data.search.CalendarView;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
+import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.JsonUtils;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,13 +47,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OutlookCalendarTest
+public class Office365Calendar
 {
     public static final ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    //private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private User user;
     private Container container;
-
 
     public void setUser(User u)
     {
@@ -60,18 +66,24 @@ public class OutlookCalendarTest
 
     public void authenticate()
     {
+        String emailAddress = null;
         try
         {
-            ExchangeCredentials credentials = new WebCredentials("gottfredsen@wisc.edu", "p0K#bpyC");
+            SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "0ddbf045-1cfc-4cc5-8571-4028a92a5011");
+            DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("service_accounts");
+            TableSelector ts = new TableSelector(ti, filter, null);
+            Map map = ts.getMap();
+            emailAddress = (String)map.get("private_key_id");
+            ExchangeCredentials credentials = new WebCredentials(emailAddress, (String)map.get("private_key"));
             service.setCredentials(credentials);
-            service.autodiscoverUrl("gottfredsen@wisc.edu");
-
+            //service.autodiscoverUrl(emailAddress);
+            service.autodiscoverUrl(emailAddress, new RedirectionUrlCallback());
         }
         catch (AutodiscoverLocalException ale)
         {
             try
             {
-                service.autodiscoverUrl("gottfredsen@wisc.edu", new RedirectionUrlCallback());
             }
             catch (Exception e)
             {
@@ -85,108 +97,25 @@ public class OutlookCalendarTest
         }
     }
 
-    private void addEvents()
+    public boolean addEvent(Date start, Date end, String subject, String body, List categories)
     {
+        boolean success = false;
         try
         {
-            List<Appointment> appts = getAppointments(formatter.parse("2018-05-01 00:00:00"), formatter.parse("2018-05-31 23:59:59"));
-            if (appts.size() == 0)
-            {
-                ArrayList<String> cats = new ArrayList<>();
-                cats.add("Orange category");
-
-                Appointment appt = new Appointment(service);
-                appt.setStart(formatter.parse("2018-05-09 09:30:00"));
-                appt.setEnd(formatter.parse("2018-05-09 10:30:00"));
-                appt.setSubject("TestSave1");
-                appt.setCategories(new StringList(cats));
-                appt.setBody(new MessageBody(BodyType.Text, "3D493F0F-35CA-1036-9FC5-E3C4AAA55B3A"));
-                appt.save();
-
-                appt = new Appointment(service);
-                appt.setStart(formatter.parse("2018-05-08 04:30:00"));
-                appt.setEnd(formatter.parse("2018-05-08 15:45:00"));
-                appt.setSubject("TestSave2");
-                appt.setCategories(new StringList(cats));
-                appt.setBody(new MessageBody(BodyType.Text, "3D493B9E-35CA-1036-9FC5-E3C4AAA55B3A"));
-                appt.save();
-            }
+            Appointment appt = new Appointment(service);
+            appt.setStart(start);
+            appt.setEnd(end);
+            appt.setSubject(subject);
+            appt.setBody(new MessageBody(BodyType.Text, body));
+            appt.setCategories(new StringList(categories));
+            appt.save();
+            success = true;
         }
         catch (Exception e)
         {
-            int x = 3;
-            //FYI FIX!
+            //DO NOTHING
         }
-    }
-
-    private void getAvailability()
-    {
-        try
-        {
-            // Create a list of attendees for which to request availability
-            // information and meeting time suggestions.
-
-            List<AttendeeInfo> attendees = new ArrayList<AttendeeInfo>();
-            attendees.add(new AttendeeInfo("gottfredsen@wisc.edu"));
-            attendees.add(new AttendeeInfo("cstevens@primate.wisc.edu"));
-
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-
-            //minimum time frame allowed by API is 24 hours
-            Date start = formatter.parse("2018/05/08");
-            Date end = formatter.parse("2018/05/09");
-
-            // Call the availability service.
-            GetUserAvailabilityResults results = service.getUserAvailability(
-                    attendees,
-                    new TimeWindow(start, end),
-                    AvailabilityData.FreeBusyAndSuggestions);
-
-            // Output attendee availability information.
-            int attendeeIndex = 0;
-
-            for (AttendeeAvailability attendeeAvailability : results.getAttendeesAvailability())
-            {
-                System.out.println("Availability for " + attendees.get(attendeeIndex));
-                if (attendeeAvailability.getErrorCode() == ServiceError.NoError)
-                {
-                    for (CalendarEvent calendarEvent : attendeeAvailability.getCalendarEvents())
-                    {
-                        System.out.println("Calendar event");
-                        System.out.println("  Start time: " + calendarEvent.getStartTime().toString());
-                        System.out.println("  End time: " + calendarEvent.getEndTime().toString());
-
-                        if (calendarEvent.getDetails() != null)
-                        {
-                            System.out.println("  Subject: " + calendarEvent.getDetails().getSubject());
-                            // Output additional properties.
-                        }
-                    }
-                }
-
-                attendeeIndex++;
-            }
-
-
-            // Output suggested meeting times.
-            for (Suggestion suggestion : results.getSuggestions())
-            {
-                System.out.println("Suggested day: " + suggestion.getDate().toString());
-                System.out.println("Overall quality of the suggested day: " + suggestion.getQuality().toString());
-
-                for (TimeSuggestion timeSuggestion : suggestion.getTimeSuggestions())
-                {
-                    System.out.println("  Suggested time: " + timeSuggestion.getMeetingTime().toString());
-                    System.out.println("  Suggested time quality: " + timeSuggestion.getQuality().toString());
-                    // Output additonal properties.
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //FYI FIX THIS!
-        }
+        return success;
     }
 
     private JSONArray getJsonEventList(List<Appointment> events)
@@ -223,6 +152,7 @@ public class OutlookCalendarTest
                 {
                     rawRowData.put("lsid", surgeryInfo.get("lsid"));
                     rawRowData.put("taskid", surgeryInfo.get("taskid"));
+                    rawRowData.put("objectid", surgeryInfo.get("objectid"));
                     rawRowData.put("procedure", surgeryInfo.get("procedure"));
 
                     rawRowData.put("age", surgeryInfo.get("age"));
@@ -238,6 +168,9 @@ public class OutlookCalendarTest
                     rawRowData.put("protocol", surgeryInfo.get("protocol"));
                     rawRowData.put("sex", surgeryInfo.get("sex"));
                     rawRowData.put("weight", surgeryInfo.get("weight"));
+                    rawRowData.put("surgerystart", surgeryInfo.get("surgerystart"));
+                    rawRowData.put("surgeryend", surgeryInfo.get("surgeryend"));
+                    rawRowData.put("comments", surgeryInfo.get("comments"));
                     jsonEvent.put("rawRowData", rawRowData);
                 }
 
@@ -289,8 +222,6 @@ public class OutlookCalendarTest
         try
         {
             authenticate();
-            addEvents();
-
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.MONTH, -2);
             Date startDate = cal.getTime();

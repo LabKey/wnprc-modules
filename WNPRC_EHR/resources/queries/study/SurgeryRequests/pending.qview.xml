@@ -1,6 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <filters>
         <!-- filter for "Request: Pending" (5) -->
-        <filter column="qcstate" operator="eq" value="5" />
+        <filter column="state" operator="eq" value="5" />
     </filters>
 </customView>

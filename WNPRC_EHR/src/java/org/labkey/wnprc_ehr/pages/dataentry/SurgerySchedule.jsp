@@ -1,9 +1,10 @@
-<%@ page import="org.labkey.wnprc_ehr.CalendarTest" %>
+<%@ page import="org.labkey.wnprc_ehr.GoogleCalendar" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.wnprc_ehr.Office365Calendar" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
@@ -20,15 +21,20 @@
 
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
-    SimpleQuery requests = queryFactory.makeQuery("study", "surgery", "pending");
-    String testString = requests.toString();
-    List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
+    SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryRequests", "pending");
+//    String testString = requests.toString();
+//    List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
 
-    //List<Event> items = CalendarTest.testMethod();
-    CalendarTest ct = new CalendarTest();
+    //List<Event> items = GoogleCalendarTest.testMethod();
+    GoogleCalendar ct = new GoogleCalendar();
     ct.setUser(getUser());
     ct.setContainer(getContainer());
     String eventsString = ct.getCalendarEventsAsJson();
+
+    Office365Calendar oct = new Office365Calendar();
+    oct.setUser(getUser());
+    oct.setContainer(getContainer());
+    String outlookEventsString = oct.getCalendarEventsAsJson();
 %>
 
 <div class="col-xs-12 col-xl-8">
@@ -42,6 +48,7 @@
                 <%--<!-- ko if: taskid() != '' -->--%>
                 <dl class="dl-horizontal">
                     <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
+                    <dt>Procedure:          </dt> <dd>{{procedure}}</dd>
                     <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalid}}</a></dd>
                     <dt>Sex:                </dt> <dd>{{sex}}</dd>
                     <dt>Age:                </dt> <dd>{{age}}</dd>
@@ -49,6 +56,8 @@
                     <dt>Medical:            </dt> <dd>{{medical}}</dd>
                     <dt>Project (Account):  </dt> <dd>{{project}} ({{account}})</dd>
                     <dt>Protocol:           </dt> <dd>{{protocol}}</dd>
+                    <dt>Surgery Start:      </dt> <dd>{{surgerystart}}</dd>
+                    <dt>Comments:           </dt> <dd>{{comments}}</dd>
 
                     <%--<!-- ko if: !_.isBlank(cur_room()) && !_.isBlank(cur_cage()) -->--%>
                     <dt>Current Room:       </dt> <dd>{{cur_room}}</dd>
@@ -83,7 +92,7 @@
                     are highlighted in <span class="bg-warning">yellow</span>.
                 </p>
                 <!-- ko if: pendingRequestTable.rows().length == 0 -->
-                <p><em>There are no pending Necropsy requests.</em></p>
+                <p><em>There are no pending Surgery requests.</em></p>
                 <!-- /ko -->
             </div>
 
@@ -164,8 +173,8 @@
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Pathologist</label>
                         <div class="col-xs-8">
-                            <select data-bind="value: pathologist" class="form-control">
-                                <option value=""></option>
+                            <%--<select data-bind="value: pathologist" class="form-control">--%>
+                                <%--<option value=""></option>--%>
                                 <%--<%--%>
                                     <%--for(JSONObject pathologist : pathologistList) {--%>
                                         <%--String userid = pathologist.getString("userid");--%>
@@ -175,15 +184,15 @@
                                 <%--<%--%>
                                     <%--}--%>
                                 <%--%>--%>
-                            </select>
+                            <%--</select>--%>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Prosector</label>
                         <div class="col-xs-8">
-                            <select data-bind="value: assistant" class="form-control">
-                                <option value=""></option>
+                            <%--<select data-bind="value: assistant" class="form-control">--%>
+                                <%--<option value=""></option>--%>
                                 <%--<%--%>
                                     <%--for(JSONObject pathologist : pathologistList) {--%>
                                         <%--String userid = pathologist.getString("userid");--%>
@@ -193,21 +202,21 @@
                                 <%--<%--%>
                                     <%--}--%>
                                 <%--%>--%>
-                            </select>
+                            <%--</select>--%>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Assigned To</label>
                         <div class="col-xs-8">
-                            <input type="hidden" class="hidden-assignedTo-field" data-bind="value: assignedTo">
-                            <input type="text" class="form-control assignedTo-field">
+                            <%--<input type="hidden" class="hidden-assignedTo-field" data-bind="value: assignedTo">--%>
+                            <%--<input type="text" class="form-control assignedTo-field">--%>
                         </div>
                     </div>
 
                     <div style="text-align: right;">
                         <button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>
-                        <button class="btn btn-primary" data-bind="click: $root.submitForm">Schedule Necropsy</button>
+                        <button class="btn btn-primary" data-bind="click: $root.submitForm">Schedule Surgery</button>
                     </div>
                 </form>
 
@@ -216,17 +225,17 @@
     </div>
 </div>
 
-<div class="col-xs-12 col-xl-8">
-    <div class="col-xs-12 col-md-8">
-        <div class="panel panel-primary">
-            <div class="panel-heading"><span>Test</span></div>
-            <div class="panel-body">
-                <div id="test"></div>
-                <%=requestList.toString()%>
-            </div>
-        </div>
-    </div>
-</div>
+<%--<div class="col-xs-12 col-xl-8">--%>
+    <%--<div class="col-xs-12 col-md-8">--%>
+        <%--<div class="panel panel-primary">--%>
+            <%--<div class="panel-heading"><span>Test</span></div>--%>
+            <%--<div class="panel-body">--%>
+                <%--<div id="test"></div>--%>
+                <%--<%=requestList.toString()%>--%>
+            <%--</div>--%>
+        <%--</div>--%>
+    <%--</div>--%>
+<%--</div>--%>
 
 <script>
     //debugger
@@ -244,6 +253,12 @@
                     {
                         events: <%=eventsString%>,
                         color: 'red',
+                        eventTextColor: 'black',
+                        className: 'testClass'
+                    },
+                    {
+                        events: <%=outlookEventsString%>,
+                        color: 'orange',
                         eventTextColor: 'black',
                         className: 'testClass'
                     },
@@ -291,6 +306,12 @@
             })
         };
 
+        var displayDateTime = function(dateString) {
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").calendar(null, {
+                sameElse: 'MMM D[,] YYYY [at] h:mm a'
+            })
+        };
+
         var triggerChange = function($el) {
             $el.change();
         };
@@ -306,7 +327,9 @@
             },
             taskDetails: {
                 lsid:                 ko.observable(),
+                objectid:             ko.observable(),
                 taskid:               ko.observable(''),
+                procedure:            ko.observable(),
                 age:                  ko.observable(),
                 animalid:             ko.observable(),
                 date:                 ko.observable(),
@@ -320,13 +343,30 @@
                 protocol:             ko.observable(),
                 sex:                  ko.observable(),
                 weight:               ko.observable(),
+                surgerystart:         ko.observable(),
+                surgeryend:           ko.observable(),
+                comments:             ko.observable()
             },
             form: ko.mapping.fromJS({
-                lsid:        '',
-                animalid:    '',
-                date:        new Date(),
-                location:    '',
-                priority:    ''
+                lsid:           '',
+                objectid:       '',
+                animalid:       '',
+                date:           new Date(),
+                location:       '',
+                priority:       '',
+                surgerystart:   '',
+                surgeryend:     '',
+                procedure:      '',
+                comments:       ''
+            }),
+            PriorityLookup: new WebUtils.utils.Lookup({
+                schemaName: 'ehr',
+                queryName:  'requests',
+                columns:    ['requestid', 'priority'],
+                keyColumn:  'requestid',
+                valueAccessor: function(obj) {
+                    return obj.priority;
+                }
             }),
             RequestIdLookup: new WebUtils.utils.Lookup({
                 schemaName: 'ehr',
@@ -338,7 +378,7 @@
                 }
             }),
             pendingRequestTable: new WebUtils.Models.Table({
-                rowHeaders: ["Request ID", "Priority", "Animal ID", "Requested By", "Requested On", "Requested For"],
+                rowHeaders: ["Request ID", "Priority", "Animal ID", "Requested By", "Requested On", "Requested Start", "Requested End"],
                 rows: pendingRequests.map(function(row) {
                     return new WebUtils.Models.TableRow({
                         data: [
@@ -347,7 +387,8 @@
                             row.animalid,
                             row.requestor,
                             displayDate(row.created),
-                            displayDate(row.date)
+                            displayDateTime(row.surgerystart),
+                            displayDateTime(row.surgeryend)
                         ],
                         otherData: row,
                         warn: (row.priority == 'ASAP'),
@@ -426,10 +467,32 @@
                 var date = form.date.format("Y-m-d H:i:s");
                 var taskInsertSuccess = false;
 
+                console.log('START: ' + form.surgerystart);
+                console.log('END: ' + form.surgeryend);
+
                 var filterConfig = {
                     'requestid~eq': form.lsid,
                     columns: ['lsid', 'requestid', 'taskid']
                 };
+
+                console.log('before AJAX request');
+
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "AddSurgeryToCalendar", null, {
+                        start: form.surgerystart,
+                        end: form.surgeryend,
+                        subject: form.animalid + ' ' + form.procedure,
+                        body: form.objectid,
+                        categories: 'Surgeries'
+                    }),
+                    success: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        if (response.success)
+                            console.log('it worked!?');
+                    }, this)
+                });
+
+                console.log('after AJAX request');
 
                 WebUtils.API.insertRows('ehr','tasks', [{
                     taskid:     taskid,
@@ -442,8 +505,8 @@
                 }]).then(function(data) {
                     taskInsertSuccess = true;
                     return Promise.all([
-                        WebUtils.API.selectRows('study', 'surgery',     filterConfig),
-                        WebUtils.API.selectRows('ehr',   'requests',       filterConfig)
+                        WebUtils.API.selectRows('study', 'surgery',       filterConfig),
+                        WebUtils.API.selectRows('ehr',   'requests',        filterConfig)
                     ]);
                 }).then(function(dataArray) {
                     // Update the regular study rows.
@@ -464,10 +527,12 @@
                         return row;
                     }));
 
+                    console.log('before updateRows');
                     return Promise.all([
-                        (rowsToUpdate[0].length > 0) ? WebUtils.API.updateRows('study', 'surgery',     rowsToUpdate[0]) : Promise.resolve(),
-                        (rowsToUpdate[1].length > 0) ? WebUtils.API.updateRows('ehr',   'requests',       rowsToUpdate[1]) : Promise.resolve()
+                        (rowsToUpdate[0].length > 0) ? WebUtils.API.updateRows('study', 'surgery',  rowsToUpdate[0]) : Promise.resolve(),
+                        (rowsToUpdate[1].length > 0) ? WebUtils.API.updateRows('ehr',   'requests', rowsToUpdate[1]) : Promise.resolve()
                     ]);
+                    console.log('after updateRows');
                 }).then(function() {
                     // Refresh the calendar view.
                     $calendar.fullCalendar('refetchEvents');

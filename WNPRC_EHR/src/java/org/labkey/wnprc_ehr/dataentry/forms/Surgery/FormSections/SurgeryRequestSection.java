@@ -7,7 +7,7 @@ public class SurgeryRequestSection extends SimpleFormSection
 {
     public SurgeryRequestSection() {
         super("study", "surgery", "Surgery");
-        setTemplateMode(TEMPLATE_MODE.ENCOUNTER);
+        setTemplateMode(TEMPLATE_MODE.NONE);
 
         this.maxItemsPerColumn = 12;
 

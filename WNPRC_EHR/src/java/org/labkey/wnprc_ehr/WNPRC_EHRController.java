@@ -30,6 +30,7 @@ import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
@@ -77,6 +78,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectExcepti
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
+import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.WNPRC_EHRService;
 import org.springframework.validation.BindException;
 
@@ -88,6 +90,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -1010,6 +1013,96 @@ public class WNPRC_EHRController extends SpringActionController
         public String getTitle()
         {
             return "Surgery Schedule";
+        }
+    }
+
+    public static class Office365Event
+    {
+        private Date start;
+        private Date end;
+        private String subject;
+        private String body;
+        private List categories;
+
+        public Date getStart()
+        {
+            return start;
+        }
+
+        public Date getEnd()
+        {
+            return end;
+        }
+
+        public String getSubject()
+        {
+            return subject;
+        }
+
+        public String getBody()
+        {
+            return body;
+        }
+
+        public List getCategories() {
+            return categories;
+        }
+
+        public void setStart(Date start)
+        {
+            this.start = start;
+        }
+
+        public void setEnd(Date end)
+        {
+            this.end = end;
+        }
+
+        public void setSubject(String title)
+        {
+            this.subject = title;
+        }
+
+        public void setBody(String body)
+        {
+            this.body = body;
+        }
+
+        public void setCategories(List categories)
+        {
+            this.categories = categories;
+        }
+    }
+
+    @ActionNames("AddSurgeryToCalendar")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class AddSurgeryToCalendarAction extends ApiAction<Office365Event>
+    {
+        @Override
+        public Object execute(Office365Event event, BindException errors) throws Exception
+        {
+            System.out.println("Start: " + event.getStart());
+            System.out.println("End: " + event.getEnd());
+            Office365Calendar oct = new Office365Calendar();
+            oct.addEvent(event.getStart(), event.getEnd(), event.getSubject(), event.getBody(), event.getCategories());
+
+//            DbScope scope = WNPRC_Schema.getWnprcDbSchema().getScope();
+//            //Connection conn = scope.getConnection();
+//            //connn
+//
+//            try (DbScope.Transaction transaction = scope.ensureTransaction()) {
+//
+//                //transaction.getConnection();
+//
+//                transaction.commit();
+//            } catch (Exception e) {
+//
+//            } finally {
+//
+//            }
+
+            return null;
         }
     }
 

@@ -8,9 +8,9 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
                     checked: true
                 }
             },
-            priority: {
-                hidden: true
-            },
+            // priority: {
+            //     hidden: true
+            // },
             // notify2: {
             //     hidden: true
             // },
@@ -36,14 +36,14 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
             surgeryStart: {
                 editorConfig: {
                     dateConfig: {
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 30)
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                     }
                 }
             },
             surgeryEnd: {
                 editorConfig: {
                     dateConfig: {
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 30)
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                     }
                 }
             },

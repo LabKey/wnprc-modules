@@ -1,7 +1,7 @@
 /* This query feeds the Surgery Schedule JSP page/calendar. */
 SELECT lsid
   ,objectid
-  ,a.taskid
+  ,a.taskid                        AS taskid
   ,animalid
   ,animalid.Demographics.gender    AS sex
   ,animalid.age.ageFriendly        AS age

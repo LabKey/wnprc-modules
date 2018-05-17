@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GoogleCalendarTest
+public class GoogleCalendar
 {
     private User user;
     private Container container;

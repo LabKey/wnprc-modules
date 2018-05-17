@@ -269,6 +269,11 @@ Ext.onReady(function(){
                         permission: 'admin',
                         queries: ['Demographics']
                     }
+//                    {
+//                        url: makeExt4DataEntryURL("VVC"),
+//                        title: 'Enter Veterinary Verification and Consultation',
+//                        queries: ['vvc']
+//                    }
                 ]
             },
             {
@@ -351,11 +356,11 @@ Ext.onReady(function(){
                         title:   'Request Necropsy',
                         queries: ['Necropsies']
                     },
-                    {
-                        url: makeExt4DataEntryURL("VVCRequest"),
-                        title: 'Request VVC',
-                        queries: ['blood']
-                    },
+//                    {
+//                        url: makeExt4DataEntryURL("VVCRequest"),
+//                        title: 'Request VVC',
+//                        queries: ['blood']
+//                    },
                     {
                         url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'NecropsySchedule', ctx['EHRStudyContainer']),
                         title:   'Schedule Necropsy',
@@ -366,6 +371,16 @@ Ext.onReady(function(){
                     //     title: 'Request Food Deprives',
                     //     queries: ['foodDeprives']
                     // }
+                    {
+                        url:     makeExt4DataEntryURL("SurgeryRequest"),
+                        title:   'Request Surgery',
+                        queries: ['surgery']
+                    },
+                    {
+                        url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'SurgerySchedule', ctx['EHRStudyContainer']),
+                        title:   'Schedule Surgery',
+                        queries: ['surgery']
+                    },
                 ],
                 requests: true
             }
@@ -419,13 +434,13 @@ Ext.onReady(function(){
                 bloodDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Blood Draws';
             }
 
-            var VVCUpdateURL = '';
-            var VVCDeleteURL = '';
-
-            if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
-                VVCUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
-                VVCDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
-            }
+//            var VVCUpdateURL = '';
+//            var VVCDeleteURL = '';
+//
+//            if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
+//                VVCUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
+//                VVCDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
+//            }
 
             function onSuccess(dr){
                 var width1 = Ext.get('dataregion_'+dr.id).getSize().width + 50;

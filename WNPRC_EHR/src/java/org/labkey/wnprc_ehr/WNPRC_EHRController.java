@@ -996,6 +996,23 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+    @ActionNames("SurgerySchedule")
+    @RequiresLogin()
+    public class SurgeryScheduleAction extends WNPRCJspPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/dataentry/SurgerySchedule.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Surgery Schedule";
+        }
+    }
+
     @ActionNames("PathologyCaseList")
     @RequiresLogin()
     public class PathologyCaseListAction extends WNPRCJspPageAction

@@ -11,6 +11,7 @@
         <script path="/wnprc_ehr/model/sources/MPR.js"/>
         <script path="/wnprc_ehr/model/sources/Necropsy.js"/>
         <script path="/wnprc_ehr/model/sources/NecropsyRequest.js"/>
+        <script path="/wnprc_ehr/model/sources/SurgeryRequest.js"/>
         <script path="/wnprc_ehr/model/sources/NecropsyTask.js"/>
         <script path="/wnprc_ehr/model/sources/NewAnimal.js"/>
         <script path="/wnprc_ehr/model/sources/Pathology.js"/>

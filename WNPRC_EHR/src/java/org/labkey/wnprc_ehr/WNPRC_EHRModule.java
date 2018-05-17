@@ -48,6 +48,7 @@ import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDeprivesStartForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprivesRequest.FoodDeprivesRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
@@ -119,7 +120,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     }
 
     public double getVersion() {
-        return 15.13;
+        return 15.14;
     }
 
     public boolean hasScripts() {
@@ -309,6 +310,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 MPRForm.class,
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
+                SurgeryRequestForm.class,
                 PhysicalExamNWMForm.class,
                 PhysicalExamOWMForm.class,
                 ProblemListForm.class,

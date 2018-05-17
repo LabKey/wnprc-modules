@@ -1,3 +1,7 @@
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile project(":server:modules:study")
     compile project(path: ":server:customModules:ehr", configuration: "apiCompile")
@@ -10,4 +14,8 @@ dependencies {
     jspCompile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
     jspCompile project("${project.parent.path}:WebUtils")
     jspCompile "joda-time:joda-time:2.9.3"
+    external 'com.google.api-client:google-api-client:1.23.0'
+    external 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
+    external 'com.google.apis:google-api-services-calendar:v3-rev296-1.23.0'
+    external 'com.google.api-client:google-api-client-gson:1.23.0'
 }

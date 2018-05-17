@@ -1,0 +1,89 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <tableTitle>Surgeries</tableTitle>
+            <table tableName="surgery" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <!--<tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>-->
+                <insertUrl/>
+                <importUrl/>
+                <updateUrl/>
+                <deleteUrl/>
+                <!--<titleColumn>rowid</titleColumn>-->
+                <columns>
+                    <column columnName="procedure">
+                        <columnTitle>Procedure</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>surgery_procedure</fkTable>
+                            <fkColumnName>procedure</fkColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="surgeryStart">
+                        <columnTitle>Surgery Start Time</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="surgeryEnd">
+                        <columnTitle>Surgery End Time</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="location">
+                        <columnTitle>Procedure Location</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>areas</fkTable>
+                            <fkColumnName>area</fkColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="pi">
+                        <columnTitle>Principal Investigator</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>uniqueProtocolInvestigator</fkTable>
+                            <fkColumnName>inves</fkColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="protocol">
+                        <columnTitle>Protocol</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>protocol</fkTable>
+                            <fkColumnName>protocol</fkColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="project">
+                        <columnTitle>Project</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="account">
+                        <columnTitle>Grant</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="surgeon">
+                        <columnTitle>Surgeon</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="surgeryTechNeeded">
+                        <columnTitle>Surgery Tech Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="vetNeeded">
+                        <columnTitle>Vet Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

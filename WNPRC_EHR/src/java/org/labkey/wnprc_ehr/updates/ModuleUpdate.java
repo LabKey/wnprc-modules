@@ -22,7 +22,10 @@ public class ModuleUpdate
      */
     private static final Logger LOG = Logger.getLogger(ModuleUpdate.class);
 
-    private static Set<Updater> UPDATERS;
+    /**
+     * Cached set of {@link Updater} instances reflected from the package
+     */
+    private static Set<Updater> updaters;
 
     /**
      * Executes the after update step of each applicable updater in the package
@@ -71,16 +74,16 @@ public class ModuleUpdate
      */
     private static Set<? extends Updater> getAllUpdaters()
     {
-        if (UPDATERS == null)
+        if (updaters == null)
         {
             synchronized (ModuleUpdate.class)
             {
                 // double null check for thread safety. one thread might create the object while
                 // another is in the lock wait
-                if (UPDATERS == null)
+                if (updaters == null)
                 {
                     LOG.debug("caching list of available Updater implementations");
-                    UPDATERS = new Reflections(ModuleUpdate.class.getPackage().getName())
+                    updaters = new Reflections(ModuleUpdate.class.getPackage().getName())
                             .getSubTypesOf(Updater.class).stream()
                             .filter(c -> !Modifier.isAbstract(c.getModifiers()))
                             .map(c -> {
@@ -97,11 +100,11 @@ public class ModuleUpdate
                             .filter(Objects::nonNull)
                             .sorted()
                             .collect(Collectors.toSet());
-                    LOG.debug(String.format("found %d Updater implementations for the cache", UPDATERS.size()));
+                    LOG.debug(String.format("found %d Updater implementations for the cache", updaters.size()));
                 }
             }
         }
-        return UPDATERS;
+        return updaters;
     }
 
     /**

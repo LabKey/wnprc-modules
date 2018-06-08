@@ -30,7 +30,6 @@ function onBeforeInsert(row, errors){
 
 function onAfterInsert(row, errors) {
     console.log('afterInsert');
-    WNPRC.U
 }
 
 function onBeforeUpdate(row, errors) {
@@ -42,6 +41,8 @@ function onAfterUpdate(row, errors) {
 }
 
 function onInsert(row, errors) {
+    console.log('row: ' + JSON.stringify(row));
+    console.log('error: ' + JSON.stringify(errors));
     console.log('insert');
 }
 

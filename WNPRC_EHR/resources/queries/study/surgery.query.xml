@@ -15,8 +15,8 @@
                         <columnTitle>Procedure</columnTitle>
                         <fk>
                             <fkDbSchema>wnprc</fkDbSchema>
-                            <fkTable>surgery_procedure</fkTable>
-                            <fkColumnName>procedure</fkColumnName>
+                            <fkTable>surgery_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
                         </fk>
                         <nullable>false</nullable>
                     </column>
@@ -33,9 +33,9 @@
                     <column columnName="location">
                         <columnTitle>Procedure Location</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>areas</fkTable>
-                            <fkColumnName>area</fkColumnName>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>surgery_rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
                         </fk>
                         <nullable>false</nullable>
                     </column>
@@ -46,7 +46,7 @@
                             <fkTable>uniqueProtocolInvestigator</fkTable>
                             <fkColumnName>inves</fkColumnName>
                         </fk>
-                        <nullable>false</nullable>
+                        <nullable>true</nullable>
                     </column>
                     <column columnName="protocol">
                         <columnTitle>Protocol</columnTitle>
@@ -55,7 +55,7 @@
                             <fkTable>protocol</fkTable>
                             <fkColumnName>protocol</fkColumnName>
                         </fk>
-                        <nullable>false</nullable>
+                        <nullable>true</nullable>
                     </column>
                     <column columnName="project">
                         <columnTitle>Project</columnTitle>

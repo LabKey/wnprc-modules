@@ -1,6 +1,8 @@
-DROP TABLE IF EXISTS wnprc.surgery_type;
-CREATE TABLE wnprc.surgery_type(
+DROP TABLE IF EXISTS wnprc.surgery_rooms;
+CREATE TABLE wnprc.surgery_rooms(
+  room VARCHAR(50),
   type VARCHAR(50),
+  email VARCHAR(50),
   -- Default fields for LabKey.
   container  entityid NOT NULL,
   createdby  userid,
@@ -8,7 +10,7 @@ CREATE TABLE wnprc.surgery_type(
   modifiedby userid,
   modified   TIMESTAMP,
 
-  CONSTRAINT pk_surgery_type PRIMARY KEY (type)
+  CONSTRAINT pk_surgery_rooms PRIMARY KEY (room)
 );
 
 DROP TABLE IF EXISTS wnprc.surgery_procedure;

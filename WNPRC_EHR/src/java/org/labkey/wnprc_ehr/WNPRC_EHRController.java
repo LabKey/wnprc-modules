@@ -57,6 +57,7 @@ import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
@@ -67,6 +68,7 @@ import org.labkey.webutils.api.json.EnhancedJsonResponse;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
+import org.labkey.wnprc_ehr.calendar.Office365Calendar;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -89,9 +91,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.security.GeneralSecurityException;
-import java.sql.Connection;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -1016,6 +1017,7 @@ public class WNPRC_EHRController extends SpringActionController
     {
         private Date start;
         private Date end;
+        private String room;
         private String subject;
         private String body;
         private List categories;
@@ -1028,6 +1030,11 @@ public class WNPRC_EHRController extends SpringActionController
         public Date getEnd()
         {
             return end;
+        }
+
+        public String getRoom()
+        {
+            return room;
         }
 
         public String getSubject()
@@ -1054,6 +1061,11 @@ public class WNPRC_EHRController extends SpringActionController
             this.end = end;
         }
 
+        public void setRoom(String room)
+        {
+            this.room = room;
+        }
+
         public void setSubject(String title)
         {
             this.subject = title;
@@ -1078,10 +1090,26 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(Office365Event event, BindException errors) throws Exception
         {
-            System.out.println("Start: " + event.getStart());
-            System.out.println("End: " + event.getEnd());
-            Office365Calendar oct = new Office365Calendar();
-            oct.addEvent(event.getStart(), event.getEnd(), event.getSubject(), event.getBody(), event.getCategories());
+            JSONObject response = new JSONObject();
+            Office365Calendar calendar = new Office365Calendar();
+            boolean success = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getBody(), event.getCategories());
+
+            response.put("success", success);
+
+            //SimpleQueryUpdater
+
+
+            /*********
+            WebUtils.API.insertRows('ehr','tasks', [{
+                    taskid:     taskid,
+                title:      'Surgery',
+                category:   'task',
+                assignedto: form.assignedTo,
+                QCState:    10, // Scheduled
+                duedate:    moment(date).hour(17).minute(0).format('YYYY-MM-DD HH:mm:ss'), // 5pm
+                formtype:   "Surgery"
+                }]).then(function(data) {
+                **************/
 
 //            DbScope scope = WNPRC_Schema.getWnprcDbSchema().getScope();
 //            //Connection conn = scope.getConnection();
@@ -1089,7 +1117,9 @@ public class WNPRC_EHRController extends SpringActionController
 //
 //            try (DbScope.Transaction transaction = scope.ensureTransaction()) {
 //
-//                //transaction.getConnection();
+//                //Connection conn = transaction.getConnection();
+//                //conn.commit();
+//                //conn.rollback();
 //
 //                transaction.commit();
 //            } catch (Exception e) {
@@ -1098,7 +1128,7 @@ public class WNPRC_EHRController extends SpringActionController
 //
 //            }
 
-            return null;
+            return response;
         }
     }
 

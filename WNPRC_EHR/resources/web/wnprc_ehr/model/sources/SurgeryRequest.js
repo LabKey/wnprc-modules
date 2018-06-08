@@ -49,6 +49,7 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
             },
 
             pi: {
+                hidden: true,
                 editorConfig: {
                     listeners: {
                         change: function (combo, rec) {
@@ -58,6 +59,7 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
                 }
             },
             protocol: {
+                hidden: true
                 // lookup: {
                 //     filterArray: [
                 //         LABKEY.Filter.create('inves', 'Evans, David T', LABKEY.Filter.Types.EQUAL)
@@ -83,6 +85,10 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
                 width: 400
             },
             drugsSurgery: {
+                height: 100,
+                width: 400
+            },
+            comments: {
                 height: 100,
                 width: 400
             }

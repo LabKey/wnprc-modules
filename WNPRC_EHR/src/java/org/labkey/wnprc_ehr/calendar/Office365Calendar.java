@@ -1,4 +1,4 @@
-package org.labkey.wnprc_ehr;
+package org.labkey.wnprc_ehr.calendar;
 
 import microsoft.exchange.webservices.data.autodiscover.IAutodiscoverRedirectionUrl;
 import microsoft.exchange.webservices.data.autodiscover.exception.AutodiscoverLocalException;
@@ -10,6 +10,7 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.error.ServiceEr
 import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import microsoft.exchange.webservices.data.core.response.AttendeeAvailability;
+import microsoft.exchange.webservices.data.core.response.ServiceResponseCollection;
 import microsoft.exchange.webservices.data.core.service.folder.CalendarFolder;
 import microsoft.exchange.webservices.data.core.service.item.Appointment;
 import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
@@ -17,6 +18,7 @@ import microsoft.exchange.webservices.data.credential.WebCredentials;
 import microsoft.exchange.webservices.data.misc.availability.AttendeeInfo;
 import microsoft.exchange.webservices.data.misc.availability.GetUserAvailabilityResults;
 import microsoft.exchange.webservices.data.misc.availability.TimeWindow;
+import microsoft.exchange.webservices.data.property.complex.Attendee;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.complex.StringList;
 import microsoft.exchange.webservices.data.property.complex.availability.CalendarEvent;
@@ -37,9 +39,22 @@ import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.JsonUtils;
+import org.labkey.wnprc_ehr.encryption.AES;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -74,22 +89,16 @@ public class Office365Calendar
             TableInfo ti = schema.getTable("service_accounts");
             TableSelector ts = new TableSelector(ti, filter, null);
             Map map = ts.getMap();
-            emailAddress = (String)map.get("private_key_id");
-            ExchangeCredentials credentials = new WebCredentials(emailAddress, (String)map.get("private_key"));
+            emailAddress = (String) map.get("private_key_id");
+
+            String[] bytes = ((String) map.get("private_key")).split(",");
+            byte[] decrypted = AES.decrypt(bytes);
+
+            ExchangeCredentials credentials = new WebCredentials(emailAddress, new String(decrypted, StandardCharsets.UTF_8));
             service.setCredentials(credentials);
-            //service.autodiscoverUrl(emailAddress);
-            service.autodiscoverUrl(emailAddress, new RedirectionUrlCallback());
-        }
-        catch (AutodiscoverLocalException ale)
-        {
-            try
-            {
-            }
-            catch (Exception e)
-            {
-                int x = 3;
-                //TODO WHAT?
-            }
+            URI uri = new URI("https://outlook.office365.com/EWS/Exchange.asmx");
+            service.setUrl(uri);
+            //service.autodiscoverUrl(emailAddress, new RedirectionUrlCallback());
         }
         catch (Exception e)
         {
@@ -97,23 +106,100 @@ public class Office365Calendar
         }
     }
 
-    public boolean addEvent(Date start, Date end, String subject, String body, List categories)
+    public boolean isRoomAvailable(String roomEmailAddress, Date start, Date end)
+    {
+        boolean isAvailable = true;
+        try
+        {
+            // Create a list of attendees for which to request availability
+            // information and meeting time suggestions.
+
+            List<AttendeeInfo> attendees = new ArrayList<>();
+            attendees.add(new AttendeeInfo(roomEmailAddress));
+
+            TimeWindow surgeryTimeWindow = new TimeWindow(start, end);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(start);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            Date d1 = new Date(cal.getTimeInMillis());
+            cal.setTime(end);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            cal.set(Calendar.MILLISECOND, 999);
+            Date d2 = new Date(cal.getTimeInMillis());
+
+            // Call the availability service.
+            GetUserAvailabilityResults results = service.getUserAvailability(
+                    attendees,
+                    new TimeWindow(d1, d2),
+                    AvailabilityData.FreeBusy);
+
+            for (AttendeeAvailability attendeeAvailability : results.getAttendeesAvailability())
+            {
+                if (attendeeAvailability.getErrorCode() == ServiceError.NoError)
+                {
+                    for (CalendarEvent calendarEvent : attendeeAvailability.getCalendarEvents())
+                    {
+                        TimeWindow eventTimeWindow = new TimeWindow(calendarEvent.getStartTime(), calendarEvent.getEndTime());
+                        if (isOverlapping(surgeryTimeWindow, eventTimeWindow))
+                        {
+                            isAvailable = false;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    isAvailable = false;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            int x = 3;
+            //TODO fix this!
+        }
+        return isAvailable;
+    }
+
+    private boolean isOverlapping(TimeWindow t1, TimeWindow t2)
+    {
+        return t1.getStartTime().before(t2.getEndTime()) && t2.getStartTime().before(t1.getEndTime());
+    }
+
+    public boolean addEvent(Date start, Date end, String room, String subject, String body, List categories)
     {
         boolean success = false;
         try
         {
-            Appointment appt = new Appointment(service);
-            appt.setStart(start);
-            appt.setEnd(end);
-            appt.setSubject(subject);
-            appt.setBody(new MessageBody(BodyType.Text, body));
-            appt.setCategories(new StringList(categories));
-            appt.save();
-            success = true;
+            SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
+            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("surgery_rooms");
+            TableSelector ts = new TableSelector(ti, filter, null);
+            Map map = ts.getMap();
+            String roomEmailAddress = (String) map.get("email");
+            if (isRoomAvailable(roomEmailAddress, start, end))
+            {
+                Appointment appt = new Appointment(service);
+                appt.setStart(start);
+                appt.setEnd(end);
+                appt.setSubject(subject);
+                appt.setBody(new MessageBody(BodyType.Text, body));
+                appt.setCategories(new StringList(categories));
+                appt.getRequiredAttendees().add(roomEmailAddress);
+                appt.save();
+
+                success = true;
+            }
         }
         catch (Exception e)
         {
-            //DO NOTHING
+            int x = 3;
+            //TODO DO NOTHING
         }
         return success;
     }
@@ -202,14 +288,17 @@ public class Office365Calendar
         return eventsString;
     }
 
-    private List<Appointment> getAppointments(Date startDate, Date endDate) {
+    private List<Appointment> getAppointments(Date startDate, Date endDate)
+    {
         List<Appointment> appts = new ArrayList<>();
         try
         {
             CalendarFolder cf = CalendarFolder.bind(service, WellKnownFolderName.Calendar);
             FindItemsResults<Appointment> findResults = cf.findAppointments(new CalendarView(startDate, endDate));
             appts = findResults.getItems();
-        } catch(Exception e) {
+        }
+        catch (Exception e)
+        {
             int x = 3;
             //FIXME fix!
         }

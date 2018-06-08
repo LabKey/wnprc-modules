@@ -1,10 +1,13 @@
-<%@ page import="org.labkey.wnprc_ehr.GoogleCalendar" %>
+<%@ page import="org.labkey.wnprc_ehr.calendar.GoogleCalendar" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.wnprc_ehr.Office365Calendar" %>
+<%@ page import="org.labkey.wnprc_ehr.calendar.Office365Calendar" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Date" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
@@ -25,6 +28,8 @@
 //    String testString = requests.toString();
 //    List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
 
+    List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "surgery_rooms"));
+
     //List<Event> items = GoogleCalendarTest.testMethod();
     GoogleCalendar ct = new GoogleCalendar();
     ct.setUser(getUser());
@@ -35,6 +40,13 @@
     oct.setUser(getUser());
     oct.setContainer(getContainer());
     String outlookEventsString = oct.getCalendarEventsAsJson();
+    //SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    //Date start = formatter.parse("2018-06-05 14:00:00");
+    //Date end = formatter.parse("2018-06-05 16:00:00");
+    //List<String> categories = new ArrayList<>();
+    //categories.add("Surgeries");
+    //oct.addEvent(start, end, "a154@primate.wisc.edu", "some surgery", "198279-2358235-34583485-234987239", categories);
+    //oct.isRoomAvailable("ggottfredsen@primate.wisc.edu", start, end);
 %>
 
 <div class="col-xs-12 col-xl-8">
@@ -57,6 +69,8 @@
                     <dt>Project (Account):  </dt> <dd>{{project}} ({{account}})</dd>
                     <dt>Protocol:           </dt> <dd>{{protocol}}</dd>
                     <dt>Surgery Start:      </dt> <dd>{{surgerystart}}</dd>
+                    <dt>Surgery End:        </dt> <dd>{{surgeryend}}</dd>
+                    <dt>Surgery Location:   </dt> <dd>{{location}}</dd>
                     <dt>Comments:           </dt> <dd>{{comments}}</dd>
 
                     <%--<!-- ko if: !_.isBlank(cur_room()) && !_.isBlank(cur_cage()) -->--%>
@@ -145,7 +159,7 @@
                         <label class="col-xs-4 control-label">Date</label>
                         <div class="col-xs-8">
                             <div class='input-group date' id='datetimepicker1'>
-                                <input type='text' class="form-control" data-bind="dateTimePicker: date"/>
+                                <input type='text' class="form-control" data-bind="dateTimePicker: surgerystart"/>
                                 <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </span>
@@ -158,53 +172,53 @@
                         <div class="col-xs-8">
                             <select data-bind="value: location" class="form-control">
                                 <option value=""></option>
-                                <%--<%--%>
-                                    <%--for(JSONObject necropsySuite : necropsySuites) {--%>
-                                        <%--String suiteName = necropsySuite.getString("room");--%>
-                                <%--%>--%>
-                                <%--<option value="<%=suiteName%>"><%=h(suiteName)%></option>--%>
-                                <%--<%--%>
-                                    <%--}--%>
-                                <%--%>--%>
+                                <%
+                                    for(JSONObject surgeryRoom : surgeryRooms) {
+                                        String roomName = surgeryRoom.getString("room");
+                                %>
+                                <option value="<%=roomName%>"><%=h(roomName)%></option>
+                                <%
+                                    }
+                                %>
                             </select>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Pathologist</label>
-                        <div class="col-xs-8">
-                            <%--<select data-bind="value: pathologist" class="form-control">--%>
-                                <%--<option value=""></option>--%>
-                                <%--<%--%>
-                                    <%--for(JSONObject pathologist : pathologistList) {--%>
-                                        <%--String userid = pathologist.getString("userid");--%>
-                                        <%--String internaluserid = pathologist.getString("internaluserid");--%>
-                                <%--%>--%>
-                                <%--<option value="<%=internaluserid%>"><%=h(userid)%></option>--%>
-                                <%--<%--%>
-                                    <%--}--%>
-                                <%--%>--%>
-                            <%--</select>--%>
-                        </div>
-                    </div>
+                    <%--<div class="form-group">--%>
+                        <%--<label class="col-xs-4 control-label">Pathologist</label>--%>
+                        <%--<div class="col-xs-8">--%>
+                            <%--&lt;%&ndash;<select data-bind="value: pathologist" class="form-control">&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
+                                        <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
+                                        <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                            <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
+                        <%--</div>--%>
+                    <%--</div>--%>
 
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Prosector</label>
-                        <div class="col-xs-8">
-                            <%--<select data-bind="value: assistant" class="form-control">--%>
-                                <%--<option value=""></option>--%>
-                                <%--<%--%>
-                                    <%--for(JSONObject pathologist : pathologistList) {--%>
-                                        <%--String userid = pathologist.getString("userid");--%>
-                                        <%--String internaluserid = pathologist.getString("internaluserid");--%>
-                                <%--%>--%>
-                                <%--<option value="<%=internaluserid%>"><%=h(userid)%></option>--%>
-                                <%--<%--%>
-                                    <%--}--%>
-                                <%--%>--%>
-                            <%--</select>--%>
-                        </div>
-                    </div>
+                    <%--<div class="form-group">--%>
+                        <%--<label class="col-xs-4 control-label">Prosector</label>--%>
+                        <%--<div class="col-xs-8">--%>
+                            <%--&lt;%&ndash;<select data-bind="value: assistant" class="form-control">&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
+                                        <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
+                                        <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
+                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                            <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
+                        <%--</div>--%>
+                    <%--</div>--%>
 
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Assigned To</label>
@@ -281,7 +295,7 @@
                 eventClick: function(calEvent, jsEvent, view) {
                     jQuery.each(calEvent.rawRowData, function(key, value) {
                         if (key in WebUtils.VM.taskDetails) {
-                            if (key == "date") {
+                            if (key == "date" || key == "surgerystart" || key == "surgeryend") {
                                 value = displayDate(value);
                             }
                             WebUtils.VM.taskDetails[key](value);
@@ -356,6 +370,7 @@
                 priority:       '',
                 surgerystart:   '',
                 surgeryend:     '',
+                location:       '',
                 procedure:      '',
                 comments:       ''
             }),
@@ -441,7 +456,7 @@
 
                 jQuery.each(request, function(key, value) {
                     if (key in WebUtils.VM.form) {
-                        if (key == "date") {
+                        if (key == "date" || key =="surgerystart" || key == "surgeryend") {
                             value = new Date(value);
                         }
                         WebUtils.VM.form[key](value);
@@ -465,6 +480,8 @@
                 var taskid = LABKEY.Utils.generateUUID();
                 var form = ko.mapping.toJS(WebUtils.VM.form);
                 var date = form.date.format("Y-m-d H:i:s");
+                var surgerystart = form.surgerystart.format("Y-m-d H:i:s");
+                var surgeryend = form.surgeryend.format("Y-m-d H:i:s");
                 var taskInsertSuccess = false;
 
                 console.log('START: ' + form.surgerystart);
@@ -481,6 +498,7 @@
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "AddSurgeryToCalendar", null, {
                         start: form.surgerystart,
                         end: form.surgeryend,
+                        room: form.location,
                         subject: form.animalid + ' ' + form.procedure,
                         body: form.objectid,
                         categories: 'Surgeries'
@@ -517,6 +535,8 @@
                             row.taskid = taskid;
                             row.QCState = 10; // Scheduled
                             row.date = date;
+                            row.surgerystart = surgerystart;
+                            row.surgeryend = surgeryend;
                             return row;
                         });
                     });

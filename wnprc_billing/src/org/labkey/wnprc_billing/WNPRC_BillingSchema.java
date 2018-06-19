@@ -18,21 +18,12 @@ package org.labkey.wnprc_billing;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 
 public class WNPRC_BillingSchema
 {
     private static final WNPRC_BillingSchema _instance = new WNPRC_BillingSchema();
     public static final String NAME = "wnprc_billing";
-
-    //Tables
-    public static final String TABLE_INVOICED_ITEMS = "InvoicedItems";
-    public static final String TABLE_INVOICE = "Invoice";
-    public static final String TABLE_INVOICE_RUNS = "InvoiceRuns";
-    public static final String TABLE_TIER_RATES = "tierrates";
-    public static final String TABLE_JET_INVOICE_ITEMS = "JetInvoiceItems";
-    public static final String TABLE_ALIASES = "Aliases";
 
     public static WNPRC_BillingSchema getInstance()
     {
@@ -46,7 +37,7 @@ public class WNPRC_BillingSchema
         // accessed via org.labkey.wnprc_billing.WNPRC_BillingSchema.getInstance()
     }
 
-    public static DbSchema getSchema()
+    public DbSchema getSchema()
     {
         return DbSchema.get(NAME, DbSchemaType.Module);
     }
@@ -54,10 +45,5 @@ public class WNPRC_BillingSchema
     public SqlDialect getSqlDialect()
     {
         return getSchema().getSqlDialect();
-    }
-
-    public TableInfo getTierRates()
-    {
-        return getSchema().getTable(TABLE_TIER_RATES);
     }
 }

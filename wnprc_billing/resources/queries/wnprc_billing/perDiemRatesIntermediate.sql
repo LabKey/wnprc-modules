@@ -14,44 +14,27 @@
  * limitations under the License.
  */
 SELECT
-  x.Id,
-  x.adate,
-  x.edate,
-  x.totalAccountsPerAnimal,
-  split_part(x.accountProject, ',', 1) account,
-  split_part(x.accountProject, ',', 2) project,
-  x.totalDaysPerAccount,
-  x.comment
-  FROM (
-SELECT
   pd.Id,
   pd.adate,
   pd.edate,
-  unnest(string_to_array(pd.accountsProjects, ';')) AS accountProject,
-  pd.totalAccounts AS totalAccountsPerAnimal,
+--   pd.project,
+  pd.totalAccounts,
   pd.totalDaysPerAccount,
-  'Location(s): ' || group_concat(pd.location, ', ') AS comment
+  pds2.account
   FROM
   (
     SELECT
       pds.Id,
       pds.adate,
       pds.edate,
-      group_concat((pds.account || ',' || pds.project), '; ') AS accountsProjects,
+--       pds.project,
       count(pds.account)                                                            AS totalAccounts,
-      (TIMESTAMPDIFF('SQL_TSI_DAY', pds.adate, pds.edate) + 1) / count(pds.account) AS totalDaysPerAccount,
-      pds.location
+      (TIMESTAMPDIFF('SQL_TSI_DAY', pds.adate, pds.edate) + 1) / count(pds.account) AS totalDaysPerAccount
     FROM wnprc_billing.perDiems pds
     GROUP BY
       pds.Id,
       pds.adate,
-      pds.edate,
-      pds.location
+      pds.edate
+--       pds.project
   ) pd
-  GROUP BY
-    pd.Id,
-    pd.adate,
-    pd.edate,
-    pd.accountsProjects,
-    pd.totalAccounts,
-    pd.totalDaysPerAccount) x
+  LEFT JOIN wnprc_billing.perDiems pds2 ON pds2.Id = pd.Id AND pds2.adate = pd.adate AND pds2.edate = pd.edate

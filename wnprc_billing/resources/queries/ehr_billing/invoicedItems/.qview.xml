@@ -7,12 +7,6 @@
         <column name="unitCost"/>
         <column name="totalcost"/>
         <column name="item"/>
-        <column name="chargeId/serviceCode"/>
-        <column name="chargeId/departmentCode">
-            <properties>
-                <property name="columnTitle" value="Group Name"/>
-            </properties>
-        </column>
         <column name="category"/>
         <column name="comment">
             <properties>
@@ -49,7 +43,6 @@
         </column>
         <column name="debitedAccount/charge_grant_accounts_id"/>
         <column name="chargeId"/>
-        <column name="invoiceNumber"/>
     </columns>
     <sorts>
         <sort column="date" descending="true" />

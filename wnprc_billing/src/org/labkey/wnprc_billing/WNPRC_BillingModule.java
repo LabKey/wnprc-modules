@@ -20,22 +20,18 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
-import org.labkey.api.ehr.dataentry.DefaultDataEntryFormFactory;
 import org.labkey.api.ldk.ExtendedSimpleModule;
+import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
-import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.security.User;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
-import org.labkey.wnprc_billing.dataentry.ChargesFormType;
 import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
-import org.labkey.api.ehr_billing.pipeline.InvoicedItemsProcessingService;
-import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
-import org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,9 +40,6 @@ import java.util.Set;
 public class WNPRC_BillingModule extends ExtendedSimpleModule
 {
     public static final String NAME = "WNPRC_Billing";
-    public static final String CreditToAccount = "CreditToAccount";
-    public static final String BillingAddress = "BillingAddress";
-    public static final String BillingContactEmail = "BillingContactEmail";
 
     @Override
     public String getName()
@@ -57,7 +50,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     @Override
     public double getVersion()
     {
-        return 17.37;
+        return 18.10;
     }
 
     @Override
@@ -77,15 +70,10 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     protected void init()
     {
         addController(WNPRC_BillingController.NAME, WNPRC_BillingController.class);
-        ServiceRegistry.get().registerService(InvoicedItemsProcessingService.class, InvoicedItemsProcessingServiceImpl.INSTANCE);
     }
 
     @Override
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)    {
-
-        EHRService.get().registerTableCustomizer(this, WNPRC_BillingCustomizer.class);
-        EHRService.get().registerFormType(new DefaultDataEntryFormFactory(ChargesFormType.class, this));
-
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_BillingContainerListener());
         PipelineService.get().registerPipelineProvider(new BillingPipelineProvider(this));
@@ -106,7 +94,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
 
     @Override
     @NotNull
-    public Collection<String> getSummary(Container c)
+    public Collection<String> getSummary(Container c, User user)
     {
         return Collections.emptyList();
     }

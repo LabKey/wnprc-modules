@@ -1,1 +1,0 @@
-ALTER TABLE wnprc_billing.tierrates DROP COLUMN CONTAINER;

@@ -8,7 +8,9 @@ import microsoft.exchange.webservices.data.core.enumeration.availability.Availab
 import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
 import microsoft.exchange.webservices.data.core.enumeration.misc.error.ServiceError;
 import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
+import microsoft.exchange.webservices.data.core.enumeration.property.LegacyFreeBusyStatus;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.enumeration.service.DeleteMode;
 import microsoft.exchange.webservices.data.core.response.AttendeeAvailability;
 import microsoft.exchange.webservices.data.core.response.ServiceResponseCollection;
 import microsoft.exchange.webservices.data.core.service.folder.CalendarFolder;
@@ -19,6 +21,8 @@ import microsoft.exchange.webservices.data.misc.availability.AttendeeInfo;
 import microsoft.exchange.webservices.data.misc.availability.GetUserAvailabilityResults;
 import microsoft.exchange.webservices.data.misc.availability.TimeWindow;
 import microsoft.exchange.webservices.data.property.complex.Attendee;
+import microsoft.exchange.webservices.data.property.complex.AttendeeCollection;
+import microsoft.exchange.webservices.data.property.complex.ItemId;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.complex.StringList;
 import microsoft.exchange.webservices.data.property.complex.availability.CalendarEvent;
@@ -145,7 +149,8 @@ public class Office365Calendar
                     for (CalendarEvent calendarEvent : attendeeAvailability.getCalendarEvents())
                     {
                         TimeWindow eventTimeWindow = new TimeWindow(calendarEvent.getStartTime(), calendarEvent.getEndTime());
-                        if (isOverlapping(surgeryTimeWindow, eventTimeWindow))
+                        calendarEvent.getFreeBusyStatus();
+                        if (isOverlapping(surgeryTimeWindow, eventTimeWindow) && isBusy(calendarEvent))
                         {
                             isAvailable = false;
                             break;
@@ -171,14 +176,21 @@ public class Office365Calendar
         return t1.getStartTime().before(t2.getEndTime()) && t2.getStartTime().before(t1.getEndTime());
     }
 
-    public boolean addEvent(Date start, Date end, String room, String subject, String body, List categories)
+    private boolean isBusy(CalendarEvent calendarEvent)
     {
-        boolean success = false;
+        LegacyFreeBusyStatus status = calendarEvent.getFreeBusyStatus();
+        boolean cancelled = calendarEvent.getDetails().getSubject().startsWith("Canceled:");
+        return status != LegacyFreeBusyStatus.Free || !cancelled;
+    }
+
+    public String addEvent(Date start, Date end, String room, String subject, String surgeryId, List categories)
+    {
+        String apptId = null;
         try
         {
             SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
             DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
-            TableInfo ti = schema.getTable("surgery_rooms");
+            TableInfo ti = schema.getTable("surgery_procedure_rooms");
             TableSelector ts = new TableSelector(ti, filter, null);
             Map map = ts.getMap();
             String roomEmailAddress = (String) map.get("email");
@@ -188,12 +200,11 @@ public class Office365Calendar
                 appt.setStart(start);
                 appt.setEnd(end);
                 appt.setSubject(subject);
-                appt.setBody(new MessageBody(BodyType.Text, body));
+                appt.setBody(new MessageBody(BodyType.Text, surgeryId));
                 appt.setCategories(new StringList(categories));
                 appt.getRequiredAttendees().add(roomEmailAddress);
                 appt.save();
-
-                success = true;
+                apptId = appt.getId().getUniqueId();
             }
         }
         catch (Exception e)
@@ -201,7 +212,22 @@ public class Office365Calendar
             int x = 3;
             //TODO DO NOTHING
         }
-        return success;
+        return apptId;
+    }
+
+    public boolean cancelEvent(String apptId)
+    {
+        try
+        {
+            Appointment appt = Appointment.bind(service, new ItemId(apptId));
+            appt.cancelMeeting();
+        }
+        catch (Exception e)
+        {
+            int x = 3;
+            //TODO error handling
+        }
+        return true;
     }
 
     private JSONArray getJsonEventList(List<Appointment> events)
@@ -209,7 +235,7 @@ public class Office365Calendar
         JSONArray jsonEvents = new JSONArray();
 
         SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
-        SimpleQuery requests = sqf.makeQuery("study", "SurgerySchedule");
+        SimpleQuery requests = sqf.makeQuery("study", "SurgeryProcedureSchedule");
         //JSONObject bar = requests.getResults();
         List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
 
@@ -254,8 +280,8 @@ public class Office365Calendar
                     rawRowData.put("protocol", surgeryInfo.get("protocol"));
                     rawRowData.put("sex", surgeryInfo.get("sex"));
                     rawRowData.put("weight", surgeryInfo.get("weight"));
-                    rawRowData.put("surgerystart", surgeryInfo.get("surgerystart"));
-                    rawRowData.put("surgeryend", surgeryInfo.get("surgeryend"));
+                    rawRowData.put("date", surgeryInfo.get("date"));
+                    rawRowData.put("enddate", surgeryInfo.get("enddate"));
                     rawRowData.put("comments", surgeryInfo.get("comments"));
                     jsonEvent.put("rawRowData", rawRowData);
                 }

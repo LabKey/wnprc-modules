@@ -2,6 +2,8 @@
     <library>
         <script path="/wnprc_ehr/ext4/components/MultiSelectField.js"/>
         <script path="/wnprc_ehr/ext4/components/Participant.js"/>
+        <script path="/wnprc_ehr/ext4/components/Procedure.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/SurgeryProcedureRoomField.js"/>
         <script path="/wnprc_ehr/ext4/components/ProjectField.js"/>
         <script path="/wnprc_ehr/ext4/data/RequestStoreCollection.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/MasterSectionClientStore.js"/>

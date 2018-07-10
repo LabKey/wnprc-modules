@@ -372,14 +372,14 @@ Ext.onReady(function(){
                         queries: ['Necropsies']
                     },
                     {
-                        url:     makeExt4DataEntryURL("SurgeryRequest"),
-                        title:   'Request Surgery',
-                        queries: ['surgery']
+                        url:     makeExt4DataEntryURL("SurgeryProcedureRequest"),
+                        title:   'Request Surgery/Procedure',
+                        queries: ['surgery_procedure']
                     },
                     {
-                        url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'SurgerySchedule', ctx['EHRStudyContainer']),
-                        title:   'Schedule Surgery',
-                        queries: ['surgery']
+                        url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'SurgeryProcedureSchedule', ctx['EHRStudyContainer']),
+                        title:   'Schedule Surgery/Procedure',
+                        queries: ['surgery_procedure']
                     },
                     {
                         url:  makeRequestDataEntryURL("Food Deprive Request"),

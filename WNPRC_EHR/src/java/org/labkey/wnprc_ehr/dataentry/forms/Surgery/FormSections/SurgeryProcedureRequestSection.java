@@ -3,14 +3,14 @@ package org.labkey.wnprc_ehr.dataentry.forms.Surgery.FormSections;
 import org.labkey.api.ehr.dataentry.AbstractFormSection;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleFormSection;
 
-public class SurgeryRequestSection extends SimpleFormSection
+public class SurgeryProcedureRequestSection extends SimpleFormSection
 {
-    public SurgeryRequestSection() {
-        super("study", "surgery", "Surgery");
+    public SurgeryProcedureRequestSection() {
+        super("study", "surgery_procedure", "Surgery/Procedure");
         setTemplateMode(TEMPLATE_MODE.NONE);
 
         this.maxItemsPerColumn = 12;
 
-        //setClientStoreClass("WNPRC.ext.data.SingleAnimal.SurgeryClientStore");
+        //setClientStoreClass("WNPRC.ext.data.SingleAnimal.SurgeryProcedureClientStore");
     }
 }

@@ -3,15 +3,15 @@
  */
 
 SELECT
-  requestid as lsid,
-  requestid.rowid as requestid,
+  lsid,
+  requestid,
+  requestid.rowid as rowid,
   objectid,
   procedure,
   taskid,
   Id as animalid,
-  surgerystart,
-  surgeryend,
-  "date",
+  date,
+  enddate,
   created,
 --   caseno,
   project,
@@ -24,5 +24,5 @@ SELECT
   requestid.priority as priority,
   comments
 
-FROM study.surgery
+FROM study.surgery_procedure
 WHERE requestid IS NOT NULL

@@ -5,9 +5,6 @@
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.wnprc_ehr.calendar.Office365Calendar" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="java.util.Date" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
@@ -24,13 +21,10 @@
 
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
-    SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryRequests", "pending");
-//    String testString = requests.toString();
-//    List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
+    SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryProcedureRequests", "pending");
 
-    List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "surgery_rooms"));
+    List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "surgery_procedure_rooms"));
 
-    //List<Event> items = GoogleCalendarTest.testMethod();
     GoogleCalendar ct = new GoogleCalendar();
     ct.setUser(getUser());
     ct.setContainer(getContainer());
@@ -40,13 +34,6 @@
     oct.setUser(getUser());
     oct.setContainer(getContainer());
     String outlookEventsString = oct.getCalendarEventsAsJson();
-    //SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    //Date start = formatter.parse("2018-06-05 14:00:00");
-    //Date end = formatter.parse("2018-06-05 16:00:00");
-    //List<String> categories = new ArrayList<>();
-    //categories.add("Surgeries");
-    //oct.addEvent(start, end, "a154@primate.wisc.edu", "some surgery", "198279-2358235-34583485-234987239", categories);
-    //oct.isRoomAvailable("ggottfredsen@primate.wisc.edu", start, end);
 %>
 
 <div class="col-xs-12 col-xl-8">
@@ -68,8 +55,8 @@
                     <dt>Medical:            </dt> <dd>{{medical}}</dd>
                     <dt>Project (Account):  </dt> <dd>{{project}} ({{account}})</dd>
                     <dt>Protocol:           </dt> <dd>{{protocol}}</dd>
-                    <dt>Surgery Start:      </dt> <dd>{{surgerystart}}</dd>
-                    <dt>Surgery End:        </dt> <dd>{{surgeryend}}</dd>
+                    <dt>Surgery Start:      </dt> <dd>{{date}}</dd>
+                    <dt>Surgery End:        </dt> <dd>{{enddate}}</dd>
                     <dt>Surgery Location:   </dt> <dd>{{location}}</dd>
                     <dt>Comments:           </dt> <dd>{{comments}}</dd>
 
@@ -120,22 +107,22 @@
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Schedule Request</span></div>
             <div class="panel-body" id="scheduleRequestForm" data-bind="with: form">
-                <!-- ko if: lsid() == '' -->
+                <!-- ko if: requestid() == '' -->
                 <p style="text-align: center">
                     <em>Please click on a pending request to schedule it.</em>
                 </p>
                 <!-- /ko -->
 
                 <form class="form-horizontal scheduleForm">
-                    <!-- ko if: lsid() != '' -->
+                    <!-- ko if: requestid() != '' -->
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Request ID</label>
                         <div class="col-xs-8">
                             <p class="form-control-static">
                                 <a href="{{href}}">
-                                    {{ lsid | lookup:$root.RequestIdLookup }}
+                                    {{ requestid | lookup:$root.RequestIdLookup }}
                                 </a>
-                                <span> ({{ lsid | lookup:$root.PriorityLookup }})</span>
+                                <span> ({{ requestid | lookup:$root.PriorityLookup }})</span>
                             </p>
                         </div>
                     </div>
@@ -159,7 +146,7 @@
                         <label class="col-xs-4 control-label">Date</label>
                         <div class="col-xs-8">
                             <div class='input-group date' id='datetimepicker1'>
-                                <input type='text' class="form-control" data-bind="dateTimePicker: surgerystart"/>
+                                <input type='text' class="form-control" data-bind="dateTimePicker: date"/>
                                 <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </span>
@@ -295,7 +282,7 @@
                 eventClick: function(calEvent, jsEvent, view) {
                     jQuery.each(calEvent.rawRowData, function(key, value) {
                         if (key in WebUtils.VM.taskDetails) {
-                            if (key == "date" || key == "surgerystart" || key == "surgeryend") {
+                            if (key == "date" || key == "enddate") { //TODO modified???
                                 value = displayDate(value);
                             }
                             WebUtils.VM.taskDetails[key](value);
@@ -311,7 +298,7 @@
         var pendingRequests = <%= requests.getResults().getJSONArray("rows") %>;
         var pendingRequestsIndex = {};
         jQuery.each(pendingRequests, function(i, request) {
-            pendingRequestsIndex[request.lsid] = request;
+            pendingRequestsIndex[request.requestid] = request;
         });
 
         var displayDate = function(dateString) {
@@ -326,10 +313,6 @@
             })
         };
 
-        var triggerChange = function($el) {
-            $el.change();
-        };
-
         var $scheduleForm = $('.scheduleForm');
 
         _.extend(WebUtils.VM, {
@@ -342,11 +325,11 @@
             taskDetails: {
                 lsid:                 ko.observable(),
                 objectid:             ko.observable(),
+                requestid:            ko.observable(),
                 taskid:               ko.observable(''),
                 procedure:            ko.observable(),
                 age:                  ko.observable(),
                 animalid:             ko.observable(),
-                date:                 ko.observable(),
                 account:              ko.observable(),
                 cur_room:             ko.observable(),
                 cur_cage:             ko.observable(),
@@ -357,19 +340,19 @@
                 protocol:             ko.observable(),
                 sex:                  ko.observable(),
                 weight:               ko.observable(),
-                surgerystart:         ko.observable(),
-                surgeryend:           ko.observable(),
+                date:                 ko.observable(),
+                enddate:              ko.observable(),
                 comments:             ko.observable()
             },
             form: ko.mapping.fromJS({
                 lsid:           '',
                 objectid:       '',
+                requestid:      '',
                 animalid:       '',
-                date:           new Date(),
                 location:       '',
                 priority:       '',
-                surgerystart:   '',
-                surgeryend:     '',
+                date:           '',
+                enddate:        '',
                 location:       '',
                 procedure:      '',
                 comments:       ''
@@ -397,13 +380,13 @@
                 rows: pendingRequests.map(function(row) {
                     return new WebUtils.Models.TableRow({
                         data: [
-                            row.requestid,
+                            row.rowid,
                             row.priority,
                             row.animalid,
                             row.requestor,
                             displayDate(row.created),
-                            displayDateTime(row.surgerystart),
-                            displayDateTime(row.surgeryend)
+                            displayDateTime(row.date),
+                            displayDateTime(row.enddate)
                         ],
                         otherData: row,
                         warn: (row.priority == 'ASAP'),
@@ -413,7 +396,7 @@
             }),
             requestTableClickAction: function(row) {
                 WebUtils.VM.requestRowInForm = row;
-                WebUtils.VM.updateForm(row.otherData.lsid);
+                WebUtils.VM.updateForm(row.otherData.requestid);
             }
         });
 
@@ -426,16 +409,16 @@
         });
 
         WebUtils.VM.form.href = ko.computed(function() {
-            var lsid = WebUtils.VM.form.lsid();
+            var requestid = WebUtils.VM.form.requestid();
 
-            if (lsid == '') {
+            if (requestid == '') {
                 return '#';
             }
 
             return LABKEY.ActionURL.buildURL('ehr', 'dataEntryFormDetails', null, {
-                formType: 'SurgeryRequest',
+                formType: 'SurgeryProcedureRequest',
                 returnURL: window.location,
-                requestId: lsid
+                requestId: requestid
             });
         });
 
@@ -447,8 +430,8 @@
                     }
                 });
             },
-            updateForm: function(lsid) {
-                var request = pendingRequestsIndex[lsid];
+            updateForm: function(requestid) {
+                var request = pendingRequestsIndex[requestid];
 
                 if (!_.isObject(request)) {
                     return;
@@ -456,7 +439,7 @@
 
                 jQuery.each(request, function(key, value) {
                     if (key in WebUtils.VM.form) {
-                        if (key == "date" || key =="surgerystart" || key == "surgeryend") {
+                        if (key == "date" || key == "enddate") { //TODO modified???
                             value = new Date(value);
                         }
                         WebUtils.VM.form[key](value);
@@ -477,125 +460,42 @@
                     }
                 });
 
-                var taskid = LABKEY.Utils.generateUUID();
                 var form = ko.mapping.toJS(WebUtils.VM.form);
-                var date = form.date.format("Y-m-d H:i:s");
-                var surgerystart = form.surgerystart.format("Y-m-d H:i:s");
-                var surgeryend = form.surgeryend.format("Y-m-d H:i:s");
-                var taskInsertSuccess = false;
-
-                console.log('START: ' + form.surgerystart);
-                console.log('END: ' + form.surgeryend);
-
-                var filterConfig = {
-                    'requestid~eq': form.lsid,
-                    columns: ['lsid', 'requestid', 'taskid']
-                };
-
-                console.log('before AJAX request');
 
                 LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "AddSurgeryToCalendar", null, {
-                        start: form.surgerystart,
-                        end: form.surgeryend,
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ScheduleSurgeryProcedure", null, {
+                        lsid: form.lsid,
+                        surgeryprocedureid: form.objectid,
+                        requestid: form.requestid,
+                        start: form.date,
+                        end: form.enddate,
                         room: form.location,
                         subject: form.animalid + ' ' + form.procedure,
-                        body: form.objectid,
-                        categories: 'Surgeries'
+                        categories: 'Surgeries',
+                        assignedto: form.assignedto
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {
-                        if (response.success)
-                            console.log('it worked!?');
+                        if (response.success) {
+                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
+                            location.reload(true);
+                        } else {
+                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
+                        }
+                        // Clear the form
+                        WebUtils.VM.clearForm();
+                        $('#scheduleRequestForm').unblock();
+                    }, this),
+                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        $('#scheduleRequestForm').unblock();
                     }, this)
-                });
-
-                console.log('after AJAX request');
-
-                WebUtils.API.insertRows('ehr','tasks', [{
-                    taskid:     taskid,
-                    title:      'Surgery',
-                    category:   'task',
-                    assignedto: form.assignedTo,
-                    QCState:    10, // Scheduled
-                    duedate:    moment(date).hour(17).minute(0).format('YYYY-MM-DD HH:mm:ss'), // 5pm
-                    formtype:   "Surgery"
-                }]).then(function(data) {
-                    taskInsertSuccess = true;
-                    return Promise.all([
-                        WebUtils.API.selectRows('study', 'surgery',       filterConfig),
-                        WebUtils.API.selectRows('ehr',   'requests',        filterConfig)
-                    ]);
-                }).then(function(dataArray) {
-                    // Update the regular study rows.
-                    var rowsToUpdate = dataArray.slice(0,1).map(function(returnData) {
-                        var rows = returnData.rows;
-
-                        return rows.map(function(row) {
-                            row.taskid = taskid;
-                            row.QCState = 10; // Scheduled
-                            row.date = date;
-                            row.surgerystart = surgerystart;
-                            row.surgeryend = surgeryend;
-                            return row;
-                        });
-                    });
-
-                    // Handle the requests rows.
-                    rowsToUpdate.push(dataArray[1].rows.map(function(row) {
-                        row.QCState = 8; // Request: Approved
-                        return row;
-                    }));
-
-                    console.log('before updateRows');
-                    return Promise.all([
-                        (rowsToUpdate[0].length > 0) ? WebUtils.API.updateRows('study', 'surgery',  rowsToUpdate[0]) : Promise.resolve(),
-                        (rowsToUpdate[1].length > 0) ? WebUtils.API.updateRows('ehr',   'requests', rowsToUpdate[1]) : Promise.resolve()
-                    ]);
-                    console.log('after updateRows');
-                }).then(function() {
-                    // Refresh the calendar view.
-                    $calendar.fullCalendar('refetchEvents');
-
-                    WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
-
-                    // Clear the form
-                    WebUtils.VM.clearForm();
-                }).catch(function(e) {
-                    if (taskInsertSuccess) {
-                        alert("Failed to assign necropsy to newly created task.");
-                    }
-                    else {
-                        alert("Failed to create new task.");
-                    }
-                    return WebUtils.API.selectRows('ehr', 'tasks', {
-                        'taskid~eq': taskid
-                    }).then(function(data) {
-                        return WebUtils.API.deleteRows('ehr', 'tasks', data.rows);
-                    }).catch(function() {
-                        alert("Unable to remove created task after failing to assign necropsy to it.  You may need to manually delete" +
-                                "the empty task.");
-                    }).then(function() {
-                        return WebUtils.API.selectRows('ehr', 'requests', filterConfig);
-                    }).then(function(data) {
-                        if ('rows' in data && data.rows.length === 0) {
-                            data.rows[0].QCState = 5;
-                            return WebUtils.API.updateRows('ehr', 'requests', data.rows)
-                        }
-                        else {
-                            throw new Error("Expected exactly one row")
-                        }
-                    }).catch(function() {
-                        alert("Unable to revert the request to Pending status.  Please contact your administrator to fix this.")
-                    });
-                }).finally(function() {
-                    $('#scheduleRequestForm').unblock();
                 });
             }
         });
 
         WebUtils.VM.disableForm();
-        WebUtils.VM.form.lsid.subscribe(function(val) {
+        WebUtils.VM.form.requestid.subscribe(function(val) {
             if (val == '') {
                 WebUtils.VM.disableForm();
             }

@@ -1,8 +1,8 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <tableTitle>Surgeries</tableTitle>
-            <table tableName="surgery" tableDbType="TABLE">
+            <tableTitle>Surgery/Procedure</tableTitle>
+            <table tableName="surgery_procedure" tableDbType="TABLE">
                 <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
                 <!--<tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>-->
                 <insertUrl/>
@@ -15,17 +15,17 @@
                         <columnTitle>Procedure</columnTitle>
                         <fk>
                             <fkDbSchema>wnprc</fkDbSchema>
-                            <fkTable>surgery_type</fkTable>
+                            <fkTable>surgery_procedure_type</fkTable>
                             <fkColumnName>type</fkColumnName>
                         </fk>
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="surgeryStart">
+                    <column columnName="date">
                         <columnTitle>Surgery Start Time</columnTitle>
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="surgeryEnd">
+                    <column columnName="enddate">
                         <columnTitle>Surgery End Time</columnTitle>
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                         <nullable>false</nullable>
@@ -34,7 +34,7 @@
                         <columnTitle>Procedure Location</columnTitle>
                         <fk>
                             <fkDbSchema>wnprc</fkDbSchema>
-                            <fkTable>surgery_rooms</fkTable>
+                            <fkTable>surgery_procedure_rooms</fkTable>
                             <fkColumnName>room</fkColumnName>
                         </fk>
                         <nullable>false</nullable>

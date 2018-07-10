@@ -1,14 +1,12 @@
 package org.labkey.wnprc_ehr.dataentry.forms.Surgery;
 
-import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.RequestFormSection;
-import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
-import org.labkey.wnprc_ehr.dataentry.forms.Surgery.FormSections.SurgeryRequestSection;
+import org.labkey.wnprc_ehr.dataentry.forms.Surgery.FormSections.SurgeryProcedureRequestSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleRequestForm;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.AnimalDetailsPanel;
 
@@ -16,24 +14,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SurgeryRequestForm extends SimpleRequestForm
+public class SurgeryProcedureRequestForm extends SimpleRequestForm
 {
 
-    public static final String NAME = "SurgeryRequest";
+    public static final String NAME = "SurgeryProcedureRequest";
 
-    public SurgeryRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Request Surgery", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+    public SurgeryProcedureRequestForm(DataEntryFormContext ctx, Module owner) {
+        super(ctx, owner, NAME, "Request Surgery/Procedure", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
                 new RequestFormSection(),
-                new SurgeryRequestSection(),
+                new SurgeryProcedureRequestSection(),
                 //new SimpleFormPanelSection("wnprc", "surgeries", "Surgery Request"),
                 new AnimalDetailsPanel()
         ));
 
         for(FormSection section: this.getFormSections()) {
-            section.addConfigSource("SurgeryRequest");
+            section.addConfigSource("SurgeryProcedureRequest");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/SurgeryRequest.js"));
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/SurgeryProcedureRequest.js"));
     }
 
     @Override

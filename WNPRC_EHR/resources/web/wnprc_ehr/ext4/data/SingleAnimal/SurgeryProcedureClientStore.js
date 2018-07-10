@@ -3,7 +3,7 @@
  * and updates those values.
  */
 
-Ext4.define('WNPRC.ext.data.SingleAnimal.SurgeryClientStore', {
+Ext4.define('WNPRC.ext.data.SingleAnimal.SurgeryProcedureClientStore', {
     extend: 'WNPRC.ext.data.SingleAnimal.MasterSectionClientStore',
 
     getExtraContext: function() {

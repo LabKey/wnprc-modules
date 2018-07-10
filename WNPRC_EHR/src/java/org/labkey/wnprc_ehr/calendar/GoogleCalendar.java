@@ -79,50 +79,13 @@ public class GoogleCalendar
     private JSONArray getJsonEventList(List<Event> events) {
         JSONArray jsonEvents = new JSONArray();
 
-//        SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
-//        SimpleQuery requests = sqf.makeQuery("study", "SurgerySchedule");
-//        //JSONObject bar = requests.getResults();
-//        List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
-//
-//        Map<String, JSONObject> queryResults = new HashMap<>();
-//        for (JSONObject o : requestList) {
-//            queryResults.put(o.getString("objectid"), o);
-//        }
 
         for(Event event : events) {
-//            String objectid = event.getDescription();
-//            JSONObject surgeryInfo = queryResults.get(objectid);
-
             JSONObject jsonEvent = new JSONObject();
             jsonEvent.put("title", event.getSummary());
             jsonEvent.put("start", event.getStart() != null ? event.getStart().getDate() : null);
             jsonEvent.put("end", event.getEnd() != null ? event.getEnd().getDate() : null);
             jsonEvent.put("htmlLink", event.getHtmlLink());
-
-
-//            JSONArray surgeryDetails = sqf.selectRows("study", "SurgerySchedule");
-           // String foo = surgeryDetails.toString();
-
-            //Add data for details panel on Surgery Schedule page
-//            JSONObject rawRowData = new JSONObject();
-//            rawRowData.put("lsid", surgeryInfo.get("lsid"));
-//            rawRowData.put("taskid", surgeryInfo.get("taskid"));
-//            rawRowData.put("procedure", surgeryInfo.get("procedure"));
-//
-//            rawRowData.put("age", surgeryInfo.get("age"));
-//            rawRowData.put("animalid", surgeryInfo.get("animalid"));
-//            rawRowData.put("date", surgeryInfo.get("date"));
-//            rawRowData.put("account", surgeryInfo.get("account"));
-//            rawRowData.put("cur_room", surgeryInfo.get("cur_room"));
-//            rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
-//            rawRowData.put("cur_cond", surgeryInfo.get("cur_cond"));
-//            rawRowData.put("location", surgeryInfo.get("location"));
-//            rawRowData.put("medical", surgeryInfo.get("medical"));
-//            rawRowData.put("project", surgeryInfo.get("project"));
-//            rawRowData.put("protocol", surgeryInfo.get("protocol"));
-//            rawRowData.put("sex", surgeryInfo.get("sex"));
-//            rawRowData.put("weight", surgeryInfo.get("weight"));
-//            jsonEvent.put("rawRowData", rawRowData);
 
             jsonEvents.put(jsonEvent);
         }

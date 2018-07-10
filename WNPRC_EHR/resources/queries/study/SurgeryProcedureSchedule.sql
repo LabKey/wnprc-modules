@@ -1,6 +1,7 @@
 /* This query feeds the Surgery Schedule JSP page/calendar. */
 SELECT lsid
   ,objectid
+  ,requestid
   ,a.taskid                        AS taskid
   ,animalid
   ,animalid.Demographics.gender    AS sex
@@ -10,9 +11,8 @@ SELECT lsid
   ,animalid.curLocation.room       AS cur_room
   ,animalid.curLocation.cage       AS cur_cage
   ,animalid.curLocation.cond.title AS cur_cond
-  ,surgerystart
-  ,surgeryend
   ,date
+  ,enddate
   ,procedure
   ,created
   ,project
@@ -22,11 +22,11 @@ SELECT lsid
   ,state
 FROM (SELECT lsid
         ,objectid
+        ,requestid
         ,taskid.rowid     AS taskid
         ,Id               AS animalid
-        ,surgerystart
-        ,surgeryend
-        ,"date"
+        ,date
+        ,enddate
         ,procedure
         ,created
         ,project
@@ -34,5 +34,5 @@ FROM (SELECT lsid
         ,account
         ,location
         ,taskid.qcstate   AS state
-      FROM study.surgery
+      FROM study.surgery_procedure
       WHERE taskid IS NOT NULL) a

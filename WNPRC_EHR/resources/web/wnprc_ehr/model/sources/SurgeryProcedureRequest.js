@@ -1,4 +1,4 @@
-EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
+EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
 
     byQuery: {
         'ehr.requests': {
@@ -18,36 +18,34 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
             //     hidden: true
             // }
         },
-        'study.surgery': {
+        'study.surgery_procedure': {
             Id: {
                 editorConfig: {
                     plugins: ['wnprc-animalfield']
                 }
             },
+            procedure: {
+                editorConfig: {
+                    plugins: ['wnprc-procedurefield']
+                }
+            },
             date: {
-                hidden: true,
-                editorConfig: {
-                    readOnly: true,
-                },
-                getInitialValue: function(v, rec){
-                    return v ? v : new Date()
-                }
-            },
-            surgeryStart: {
                 editorConfig: {
                     dateConfig: {
                         minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                     }
                 }
             },
-            surgeryEnd: {
+            enddate: {
                 editorConfig: {
                     dateConfig: {
                         minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                     }
                 }
             },
-
+            location: {
+                xtype: 'wnprc-surgeryprocedureroomfield'
+            },
             pi: {
                 hidden: true,
                 editorConfig: {
@@ -73,7 +71,7 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
                 // },
             },
             vetNeededReason: {
-                height: 50,
+                height: 100,
                 width: 400
             },
             equipment: {
@@ -91,6 +89,33 @@ EHR.model.DataModelManager.registerMetadata('SurgeryRequest', {
             comments: {
                 height: 100,
                 width: 400
+            },
+            shareWithExisting: {
+                editorConfig: {
+                    listeners: {
+                        change: function(field, val){
+                            var theForm = this.ownerCt.ownerCt.ownerCt.getForm();
+                            if (theForm) {
+                                var existing = theForm.findField('existing');
+                                if (val) {
+                                    existing.show();
+                                } else {
+                                    existing.setValue("");
+                                    existing.hide();
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            existing: {
+                editorConfig: {
+                    listeners: {
+                        beforerender: function(field, val){
+                            field.hide();
+                        }
+                    }
+                }
             }
         }
     }

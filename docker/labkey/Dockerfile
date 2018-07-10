@@ -13,7 +13,8 @@ WORKDIR /tmp/labkey
 
 ARG LABKEY_TEAMCITY_BUILD=
 
-RUN apk add --no-cache wget tar ca-certificates && update-ca-certificates
+RUN apk update \
+    && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 RUN W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
@@ -38,4 +39,3 @@ RUN sed -i "s/<Manager pathname=\"\" *\/>/<Manager pathname=\"${LABKEY_HOME//\//
 EXPOSE 8080
 
 CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/wait-for-postgres.sh postgres bin/catalina.sh run ; }"]
-

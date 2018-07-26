@@ -18,7 +18,7 @@ RUN rpm -i https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rp
     tar \
     gzip \
     # for creating the netrc file from the template (envsubst)
-    gettext \ 
+    gettext \
     # for installing R and the various additional packages
     R-3.2.0 \
     make \
@@ -34,7 +34,7 @@ ENV CATALINA_HOME /usr/local/tomcat
 WORKDIR $CATALINA_HOME
 
 # download and untar tomcat
-ENV TOMCAT_VERSION 7.0.82
+ENV TOMCAT_VERSION 7.0.90
 RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
   | tar -xz --strip-components=1 \
  && chmod -R 755 .
@@ -76,4 +76,3 @@ COPY netrc /root/netrc.template
 COPY wait-for-postgres.sh /etc/
 RUN chmod +x /etc/wait-for-postgres.sh
 CMD ["/bin/bash", "-c", "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && { \\cp -f /usr/local/modules/*.module /usr/local/labkey/modules/ &>/dev/null ; /etc/wait-for-postgres.sh postgres bin/catalina.sh run ; }"]
-

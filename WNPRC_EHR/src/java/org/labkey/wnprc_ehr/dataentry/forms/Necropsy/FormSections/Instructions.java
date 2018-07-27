@@ -13,6 +13,8 @@ public class Instructions extends HTMLSection {
 
     @Override
     public String getHTML() {
+
+
         String pathToJsp = "/org/labkey/wnprc_ehr/dataentry/forms/Necropsy/FormSections/Instructions.jsp";
 
         WNPRC_EHREmail<NoticeSection.NullModel> email = new WNPRC_EHREmail(pathToJsp);
@@ -24,6 +26,9 @@ public class Instructions extends HTMLSection {
         catch (Exception e) {
             text = "An error occurred";
         }
-        return text;
+        return "<p style=\"padding: 10px\">\n" +
+                "    In the form below, select a preferred time for the necropsy.  If you have any other preferences regarding the\n" +
+                "    scheduling of the necropsy, such as a date range, AM vs PM, etc., please put these in the comments section.\n" +
+                "</p>";
     }
 }

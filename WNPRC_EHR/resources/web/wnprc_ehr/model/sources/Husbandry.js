@@ -20,8 +20,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             project: {
                 xtype: 'ehr-projectentryfield',
-                editable : false,
-                disable: true,
+                editable : true,
+                disable: false,
                 shownInGrid: true,
                 useNull: true,
                 lookup: {
@@ -48,7 +48,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 xtype: 'datefield',
                 extFormat: 'Y-m-d',
                 allowBlank: false,
-                editable: false,
+                editable: true,
                 columnConfig: {
                     width:110
                 }
@@ -92,13 +92,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 width: 500
             },
             depriveStartedBy:{
-                hidden: true,
-                shownInGrid: false,
+                hidden: false,
+                shownInGrid: true,
                 allowBlank: true
             },
             foodRestoredBy:{
-                hidden: true,
-                shownInGrid: false,
+                hidden: false,
+                shownInGrid: true,
                 allowBlank: true
             },
             startedTaskId:{

@@ -12,6 +12,7 @@ import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FormSections.FoodDeprivesFormSections;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class FoodDepriveCompleteForm extends TaskForm
 {
@@ -39,4 +40,13 @@ public class FoodDepriveCompleteForm extends TaskForm
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
 
     }
+    @Override
+    protected List<String> getButtonConfigs()
+    {
+        List<String> ret = super.getButtonConfigs();
+        ret.remove("SAVEDRAFT");
+        ret.remove("CLOSE");
+        return ret;
+    }
+
 }

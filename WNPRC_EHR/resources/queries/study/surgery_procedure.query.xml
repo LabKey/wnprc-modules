@@ -11,8 +11,30 @@
                 <deleteUrl/>
                 <!--<titleColumn>rowid</titleColumn>-->
                 <columns>
-                    <column columnName="procedure">
-                        <columnTitle>Procedure</columnTitle>
+                    <column columnName="Id">
+                        <columnTitle>Animal ID</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="linkToExisting">
+                        <columnTitle>Link To Existing Request</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="linkedRequest">
+                        <columnTitle>Request To Link To</columnTitle>
+                        <nullable>true</nullable>
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Start Table Time</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="enddate">
+                        <columnTitle>End Time</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="procedureType">
+                        <columnTitle>Procedure Type</columnTitle>
                         <fk>
                             <fkDbSchema>wnprc</fkDbSchema>
                             <fkTable>surgery_procedure_type</fkTable>
@@ -20,42 +42,23 @@
                         </fk>
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="date">
-                        <columnTitle>Surgery Start Time</columnTitle>
-                        <formatString>yyyy-MM-dd HH:mm</formatString>
-                        <nullable>false</nullable>
-                    </column>
-                    <column columnName="enddate">
-                        <columnTitle>Surgery End Time</columnTitle>
-                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    <column columnName="procedureName">
+                        <columnTitle>Procedure Name</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>surgery_procedure_name</fkTable>
+                            <fkColumnName>name</fkColumnName>
+                        </fk>
                         <nullable>false</nullable>
                     </column>
                     <column columnName="location">
-                        <columnTitle>Procedure Location</columnTitle>
+                        <columnTitle>Location</columnTitle>
                         <fk>
                             <fkDbSchema>wnprc</fkDbSchema>
                             <fkTable>surgery_procedure_rooms</fkTable>
                             <fkColumnName>room</fkColumnName>
                         </fk>
                         <nullable>false</nullable>
-                    </column>
-                    <column columnName="pi">
-                        <columnTitle>Principal Investigator</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr</fkDbSchema>
-                            <fkTable>uniqueProtocolInvestigator</fkTable>
-                            <fkColumnName>inves</fkColumnName>
-                        </fk>
-                        <nullable>true</nullable>
-                    </column>
-                    <column columnName="protocol">
-                        <columnTitle>Protocol</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr</fkDbSchema>
-                            <fkTable>protocol</fkTable>
-                            <fkColumnName>protocol</fkColumnName>
-                        </fk>
-                        <nullable>true</nullable>
                     </column>
                     <column columnName="project">
                         <columnTitle>Project</columnTitle>
@@ -78,9 +81,33 @@
                         <columnTitle>Surgery Tech Needed</columnTitle>
                         <nullable>false</nullable>
                     </column>
+                    <column columnName="spiNeeded">
+                        <columnTitle>SPI Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
                     <column columnName="vetNeeded">
                         <columnTitle>Vet Needed</columnTitle>
                         <nullable>false</nullable>
+                    </column>
+                    <column columnName="vetNeededReason">
+                        <columnTitle>Reason Vet is Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="equipment">
+                        <columnTitle>Special Equipment/Supplies Requested</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="drugsLab">
+                        <columnTitle>Drugs Lab Will Provide</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="drugsSurgery">
+                        <columnTitle>Drugs Surgery Staff Requested to Provide</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="comments">
+                        <columnTitle>Comments</columnTitle>
+                        <nullable>true</nullable>
                     </column>
                 </columns>
             </table>

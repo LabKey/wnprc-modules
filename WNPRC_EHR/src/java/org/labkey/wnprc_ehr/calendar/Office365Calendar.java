@@ -183,7 +183,7 @@ public class Office365Calendar
         return status != LegacyFreeBusyStatus.Free || !cancelled;
     }
 
-    public String addEvent(Date start, Date end, String room, String subject, String surgeryId, List categories)
+    public String addEvent(Date start, Date end, String room, String subject, String requestId, List categories)
     {
         String apptId = null;
         try
@@ -200,7 +200,7 @@ public class Office365Calendar
                 appt.setStart(start);
                 appt.setEnd(end);
                 appt.setSubject(subject);
-                appt.setBody(new MessageBody(BodyType.Text, surgeryId));
+                appt.setBody(new MessageBody(BodyType.Text, requestId));
                 appt.setCategories(new StringList(categories));
                 appt.getRequiredAttendees().add(roomEmailAddress);
                 appt.save();
@@ -242,7 +242,7 @@ public class Office365Calendar
         Map<String, JSONObject> queryResults = new HashMap<>();
         for (JSONObject o : requestList)
         {
-            queryResults.put(o.getString("objectid"), o);
+            queryResults.put(o.getString("requestid"), o);
         }
 
         try
@@ -250,8 +250,8 @@ public class Office365Calendar
             for (Appointment event : events)
             {
                 event.load(PropertySet.FirstClassProperties);
-                String objectid = event.getBody().toString();
-                JSONObject surgeryInfo = queryResults.get(objectid);
+                String requestId = event.getBody().toString();
+                JSONObject surgeryInfo = queryResults.get(requestId);
 
                 JSONObject jsonEvent = new JSONObject();
                 jsonEvent.put("title", event.getSubject());
@@ -265,6 +265,7 @@ public class Office365Calendar
                     rawRowData.put("lsid", surgeryInfo.get("lsid"));
                     rawRowData.put("taskid", surgeryInfo.get("taskid"));
                     rawRowData.put("objectid", surgeryInfo.get("objectid"));
+                    rawRowData.put("requestid", surgeryInfo.get("requestid"));
                     rawRowData.put("procedure", surgeryInfo.get("procedure"));
 
                     rawRowData.put("age", surgeryInfo.get("age"));

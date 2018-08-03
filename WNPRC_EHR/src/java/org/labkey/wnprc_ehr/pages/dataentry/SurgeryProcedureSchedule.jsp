@@ -5,6 +5,12 @@
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.wnprc_ehr.calendar.Office365Calendar" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="java.util.UUID" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Comparator" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.text.ParseException" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
@@ -22,6 +28,91 @@
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
     SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryProcedureRequests", "pending");
+    System.out.println("Requests: " + requests);
+    JSONArray jsonRequests = requests.getResults().getJSONArray("rows");
+    ArrayList<Integer> positionsToRemove = new ArrayList<>();
+    System.out.println("JSON Requests: " + jsonRequests);
+
+    for(int i = 0; i < jsonRequests.length(); i++) {
+        JSONObject row1 = jsonRequests.getJSONObject(i);
+        for(int j = i + 1; j < jsonRequests.length(); j++) {
+            JSONObject row2 = jsonRequests.getJSONObject(j);
+            UUID row1id = UUID.fromString(row1.getString("requestid"));
+            UUID row2id = UUID.fromString(row2.getString("requestid"));
+            if(row1id.equals(row2id)) {
+                positionsToRemove.add(j);
+                row1.put("animalid", row1.get("animalid") + "," + row2.get("animalid"));
+            }
+        }
+    }
+
+//    for(int i = 0; i < jsonRequests.length(); i++) {
+//        JSONObject row1 = jsonRequests.getJSONObject(i);
+//        //Find all linked requests
+//        if (row1.getBoolean("linktoexisting")) {
+//            for(int j = i + 1; j < jsonRequests.length(); j++) {
+//                JSONObject row2 = jsonRequests.getJSONObject(j);
+//                UUID row1id = UUID.fromString(row1.getString("linkedrequest"));
+//                UUID row2id = UUID.fromString(row2.getString("objectid"));
+//                if (row1id.equals(row2id)) {
+//                    positionsToRemove.add(j);
+//                    row1.put("animalid", row1.get("animalid") + "," + row2.get("animalid"));
+//                }
+//            }
+//        }
+//        System.out.println("row: " + row1);
+//    }
+
+    List<JSONObject> statRequests = new ArrayList<>();
+    List<JSONObject> asapRequests = new ArrayList<>();
+    List<JSONObject> routineRequests = new ArrayList<>();
+
+    //Remove linked requests and separate by request priority
+    for(int i = 0; i < jsonRequests.length(); i++) {
+        if (!positionsToRemove.contains(i)) {
+            String priority = (jsonRequests.getJSONObject(i)).getString("priority");
+            switch (priority) {
+                case "Stat": statRequests.add(jsonRequests.getJSONObject(i));
+                    break;
+                case "ASAP": asapRequests.add(jsonRequests.getJSONObject(i));
+                    break;
+                case "Routine": routineRequests.add(jsonRequests.getJSONObject(i));
+                    break;
+            }
+        }
+    }
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    Comparator<JSONObject> dateComparator = new Comparator<JSONObject>() {
+        @Override
+        public int compare(JSONObject o1, JSONObject o2) {
+            int result = 0;
+            try {
+                result = formatter.parse(o1.getString("date")).compareTo(formatter.parse(o2.getString("date")));
+            } catch (ParseException pe) {
+                System.out.println("ERROR: " + pe.getStackTrace());
+                //Silently fail.... (not a big deal, they just won't be sorted)
+            }
+            return result;
+        }
+    };
+
+    statRequests.sort(dateComparator);
+    asapRequests.sort(dateComparator);
+    routineRequests.sort(dateComparator);
+
+    //Add all requests back into one list that's now ordered by priority followed by start time
+    JSONArray pendingRequests = new JSONArray();
+    for(JSONObject statRequest : statRequests) {
+        pendingRequests.put(statRequest);
+    }
+    for(JSONObject asapRequest : asapRequests) {
+        pendingRequests.put(asapRequest);
+    }
+    for(JSONObject routineRequest : routineRequests) {
+        pendingRequests.put(routineRequest);
+    }
 
     List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "surgery_procedure_rooms"));
 
@@ -128,7 +219,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-xs-4 control-label">Animal ID</label>
+                        <label class="col-xs-4 control-label">Animal ID(s)</label>
                         <div class="col-xs-8">
                             <p class="form-control-static">{{animalid}}</p>
                         </div>
@@ -208,16 +299,26 @@
                     <%--</div>--%>
 
                     <div class="form-group">
-                        <label class="col-xs-4 control-label">Assigned To</label>
+                        <label class="col-xs-4 control-label">Hold/Deny Reason</label>
                         <div class="col-xs-8">
-                            <%--<input type="hidden" class="hidden-assignedTo-field" data-bind="value: assignedTo">--%>
-                            <%--<input type="text" class="form-control assignedTo-field">--%>
+                            <div class='input-group' id='holddenyreason'>
+                                <input type='text' class="form-control" data-bind="value: statuschangereason">
+                            </div>
                         </div>
+
+
+                        <%--<div class="col-xs-8">--%>
+                            <%--<p class="form-control">{{statuschangereason}}</p>--%>
+                            <%--&lt;%&ndash;<input type="hidden" class="hidden-assignedTo-field" data-bind="value: assignedTo">&ndash;%&gt;--%>
+                            <%--&lt;%&ndash;<input type="text" class="form-control assignedTo-field">&ndash;%&gt;--%>
+                        <%--</div>--%>
                     </div>
 
                     <div style="text-align: right;">
                         <button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>
-                        <button class="btn btn-primary" data-bind="click: $root.submitForm">Schedule Surgery</button>
+                        <button class="btn btn-danger" data-bind="click: $root.denyForm">Deny</button>
+                        <button class="btn btn-warning" data-bind="click: $root.holdForm">Hold</button>
+                        <button class="btn btn-success" data-bind="click: $root.submitForm">Schedule</button>
                     </div>
                 </form>
 
@@ -295,22 +396,19 @@
         //debugger
 
         // Build a lookup index of requests.
-        var pendingRequests = <%= requests.getResults().getJSONArray("rows") %>;
         var pendingRequestsIndex = {};
+
+        var pendingRequests = <%= pendingRequests %>;
         jQuery.each(pendingRequests, function(i, request) {
             pendingRequestsIndex[request.requestid] = request;
         });
 
         var displayDate = function(dateString) {
-            return moment(dateString, "YYYY/MM/DD HH:mm:ss").calendar(null, {
-                sameElse: 'MMM D[,] YYYY'
-            })
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
         };
 
         var displayDateTime = function(dateString) {
-            return moment(dateString, "YYYY/MM/DD HH:mm:ss").calendar(null, {
-                sameElse: 'MMM D[,] YYYY [at] h:mm a'
-            })
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY [at] h:mm a');
         };
 
         var $scheduleForm = $('.scheduleForm');
@@ -345,17 +443,18 @@
                 comments:             ko.observable()
             },
             form: ko.mapping.fromJS({
-                lsid:           '',
-                objectid:       '',
-                requestid:      '',
-                animalid:       '',
-                location:       '',
-                priority:       '',
-                date:           '',
-                enddate:        '',
-                location:       '',
-                procedure:      '',
-                comments:       ''
+                lsid:               '',
+                objectid:           '',
+                requestid:          '',
+                animalid:           '',
+                location:           '',
+                priority:           '',
+                date:               '',
+                enddate:            '',
+                location:           '',
+                procedure:          '',
+                comments:           '',
+                statuschangereason: ''
             }),
             PriorityLookup: new WebUtils.utils.Lookup({
                 schemaName: 'ehr',
@@ -376,7 +475,7 @@
                 }
             }),
             pendingRequestTable: new WebUtils.Models.Table({
-                rowHeaders: ["Request ID", "Priority", "Animal ID", "Requested By", "Requested On", "Requested Start", "Requested End"],
+                rowHeaders: ["Request ID", "Priority", "Animal ID(s)", "Requested By", "Requested On", "Requested Start", "Requested End"],
                 rows: pendingRequests.map(function(row) {
                     return new WebUtils.Models.TableRow({
                         data: [
@@ -390,7 +489,8 @@
                         ],
                         otherData: row,
                         warn: (row.priority == 'ASAP'),
-                        err:  (row.priority == 'Stat')
+                        err:  (row.priority == 'Stat'),
+                        success: (row.priority == 'Routine')
                     });
                 })
             }),
@@ -446,6 +546,90 @@
                     }
                 });
             },
+            holdForm: function() {
+                $('#scheduleRequestForm').block({
+                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Scheduling...',
+                    css: {
+                        border: 'none',
+                        padding: '15px',
+                        backgroundColor: '#000',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .5,
+                        color: '#fff'
+                    }
+                });
+
+                var form = ko.mapping.toJS(WebUtils.VM.form);
+
+                alert('change reason: ' + form.statuschangereason);
+
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ChangeSurgeryProcedureStatus", null, {
+                        requestId: form.requestid,
+                        QCState: 12,
+                        statusChangeReason: form.statuschangereason
+                    }),
+                    success: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        if (response.success) {
+                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
+                            location.reload(true);
+                        } else {
+                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
+                        }
+                        // Clear the form
+                        WebUtils.VM.clearForm();
+                        $('#scheduleRequestForm').unblock();
+                    }, this),
+                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        $('#scheduleRequestForm').unblock();
+                    }, this)
+                });
+            },
+            denyForm: function() {
+                $('#scheduleRequestForm').block({
+                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Scheduling...',
+                    css: {
+                        border: 'none',
+                        padding: '15px',
+                        backgroundColor: '#000',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .5,
+                        color: '#fff'
+                    }
+                });
+
+                var form = ko.mapping.toJS(WebUtils.VM.form);
+
+                alert('change reason: ' + form.statuschangereason);
+
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ChangeSurgeryProcedureStatus", null, {
+                        requestId: form.requestid,
+                        QCState: 7,
+                        statusChangeReason: form.statuschangereason
+                    }),
+                    success: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        if (response.success) {
+                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
+                            location.reload(true);
+                        } else {
+                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
+                        }
+                        // Clear the form
+                        WebUtils.VM.clearForm();
+                        $('#scheduleRequestForm').unblock();
+                    }, this),
+                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        $('#scheduleRequestForm').unblock();
+                    }, this)
+                });
+            },
             submitForm: function() {
                 $('#scheduleRequestForm').block({
                     message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Scheduling...',
@@ -462,17 +646,17 @@
 
                 var form = ko.mapping.toJS(WebUtils.VM.form);
 
+                // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
+                // update the study.surgery_procedure, ehr.request, and ehr.task tables
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ScheduleSurgeryProcedure", null, {
-                        lsid: form.lsid,
-                        surgeryprocedureid: form.objectid,
-                        requestid: form.requestid,
+                        requestId: form.requestid,
                         start: form.date,
                         end: form.enddate,
                         room: form.location,
                         subject: form.animalid + ' ' + form.procedure,
                         categories: 'Surgeries',
-                        assignedto: form.assignedto
+                        assignedTo: form.assignedto
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {

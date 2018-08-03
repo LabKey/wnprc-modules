@@ -1,33 +1,63 @@
 EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
-
     byQuery: {
         'ehr.requests': {
             sendemail: {
-                //NOTE: Ext doesnt seem to respect value=true, so resort to checked.
                 editorConfig: {
                     checked: true
                 }
             },
-            // priority: {
-            //     hidden: true
-            // },
-            // notify2: {
-            //     hidden: true
-            // },
-            // notify3: {
-            //     hidden: true
-            // }
         },
         'study.surgery_procedure': {
+            QCState: {
+                hidden: true
+            },
             Id: {
                 editorConfig: {
                     plugins: ['wnprc-animalfield']
                 }
             },
-            procedure: {
+            linktoexisting: {
+                editorConfig: {
+                    listeners: {
+                        change: function(field, val){
+                            var theForm = this.ownerCt.ownerCt.ownerCt.getForm();
+                            if (theForm) {
+                                var existing = theForm.findField('linkedRequest');
+                                //var existing = Ext4.getCmp('linkedRequestField');
+                                if (val) {
+                                    existing.show();
+                                } else {
+                                    existing.setValue("");
+                                    existing.hide();
+                                }
+                            }
+                            // var panel = field.up('ehr-formpanel');
+                            // if (panel) {
+                            //     panel.add({
+                            //         xtype: "wnprc-linkedsurgeryprocedurefield",
+                            //         fieldLabel: "Request to link to"
+                            //     });
+                            // }
+                            //var model = Ext4.ClassManager.get('app.model.SurgeryProcedureRequest');
+                            //var formPanel = Ext4.ComponentQuery.query('[name=Surgery/Procedure]');
+                            //alert(panel.name);
+                        }
+                    }
+                }
+            },
+            linkedrequest: {
+                xtype: 'wnprc-linkedsurgeryprocedurefield'
+            },
+            proceduretype: {
                 editorConfig: {
                     plugins: ['wnprc-procedurefield']
                 }
+            },
+            procedurename: {
+                xtype: 'wnprc-surgeryprocedurenamefield'
+            },
+            location: {
+                xtype: 'wnprc-surgeryprocedureroomfield'
             },
             date: {
                 editorConfig: {
@@ -43,34 +73,22 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                     }
                 }
             },
-            location: {
-                xtype: 'wnprc-surgeryprocedureroomfield'
-            },
-            pi: {
-                hidden: true,
-                editorConfig: {
-                    listeners: {
-                        change: function (combo, rec) {
-
-                        }
-                    }
-                }
-            },
-            protocol: {
-                hidden: true
-                // lookup: {
-                //     filterArray: [
-                //         LABKEY.Filter.create('inves', 'Evans, David T', LABKEY.Filter.Types.EQUAL)
-                //     ]
-                // }
-            },
             project: {
                 xtype: 'wnprc-projectentryfield',
-                // lookup: {
-                //     columns: 'project,name,displayName,protocol'
-                // },
             },
-            vetNeededReason: {
+            account: {
+                //nothing
+            },
+            surgerytechneeded: {
+                //nothing
+            },
+            spineeded: {
+                //nothing
+            },
+            vetneeded: {
+                //nothing
+            },
+            vetneededreason: {
                 height: 100,
                 width: 400
             },
@@ -78,11 +96,11 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 height: 100,
                 width: 400
             },
-            drugsLab: {
+            drugslab: {
                 height: 100,
                 width: 400
             },
-            drugsSurgery: {
+            drugssurgery: {
                 height: 100,
                 width: 400
             },
@@ -90,32 +108,8 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 height: 100,
                 width: 400
             },
-            shareWithExisting: {
-                editorConfig: {
-                    listeners: {
-                        change: function(field, val){
-                            var theForm = this.ownerCt.ownerCt.ownerCt.getForm();
-                            if (theForm) {
-                                var existing = theForm.findField('existing');
-                                if (val) {
-                                    existing.show();
-                                } else {
-                                    existing.setValue("");
-                                    existing.hide();
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            existing: {
-                editorConfig: {
-                    listeners: {
-                        beforerender: function(field, val){
-                            field.hide();
-                        }
-                    }
-                }
+            statuschangereason: {
+                hidden: true
             }
         }
     }

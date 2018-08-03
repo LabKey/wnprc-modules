@@ -1,11 +1,12 @@
-Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
+Ext4.define('WNPRC.ext.components.LinkedSurgeryProcedureField', {
     extend: 'Ext.form.field.ComboBox',
-    alias: 'widget.wnprc-surgeryprocedureroomfield',
+    alias: 'widget.wnprc-linkedsurgeryprocedurefield',
 
     initComponent: function () {
         Ext4.apply(this, {
-            displayField: 'displayname',
-            valueField: 'room',
+            itemId: 'linkedRequestField',
+            displayField: 'displayName',
+            valueField: 'requestid',
             queryMode: 'local',
             forceSelection: true,
             matchFieldWidth: true,
@@ -25,12 +26,12 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
 
                     LDK.Assert.assertNotEmpty('Unable to find form or grid', target);
                     if (target) {
-                        field.mon(target, 'procedurechange', field.updateDropdown, field);
-                        //field.mon(target, 'linkexistingchange', field.updateDropdown, field); //TODO figure this out
+                        field.mon(target, 'animalchange', field.updateDropdown, field);
                     }
                     else {
                         console.error('Unable to find target');
                     }
+                    field.hide();
                 }
             },
             anyMatch: true,
@@ -40,20 +41,15 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
         this.callParent(arguments);
     },
 
-    updateDropdown: function (room_type) {
-        var sql = this.makeSql(room_type);
+    updateDropdown: function (animalId) {
+        var sql = this.makeSql(animalId);
         this.store.sql = sql;
         this.store.removeAll();
         this.store.load();
     },
 
-    makeSql(room_type) {
-        var sql = 'select room,displayname from wnprc.surgery_procedure_rooms';
-        if (room_type && room_type.length > 0) {
-            if (room_type === 'Surgery') {
-                sql += ' where type = \'' + room_type.toLowerCase() + '\'';
-            }
-        }
-        return sql;
+    makeSql(animalId) {
+        return 'select a.procedurename || \' at \' || a.date || \' (\' || a.Id || \')\' as displayName, a.requestid from study.surgery_procedure a where a.qcstate = 5 and a.project in (select b.project from study.assignment b where b.Id = \'' + animalId + '\')';
+        //return 'select concat(concat(a.Id,\' at \'),a.date) as displayName, a.objectid from study.surgery_procedure a where a.qcstate = 5 and a.project in (select b.project from study.assignment b where b.Id = \'' + animalId + '\')';
     }
 });

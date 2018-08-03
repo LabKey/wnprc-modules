@@ -676,6 +676,24 @@ Ext.onReady(function(){
                                                     ]*/
                                                 }
                                             },
+                                            {
+                                                title: 'Surgery/Procedure Requests',
+                                                ref: 'SurgeryProcedureRequests',
+                                                itemId: 'SurgeryProcedureRequests',
+                                                xtype: 'ehr-qwppanel',
+                                                queryConfig: {
+                                                    schemaName: 'study',
+                                                    queryName: 'SurgeryProcedureIndividualRequests',
+                                                    //viewName: 'VVC Request',
+                                                    //updateURL: VVCUpdateURL,
+                                                    //deleteURL: VVCDeleteURL,
+                                                    scope: this,
+                                                    success: onSuccess
+                                                    /*filters: [
+                                                        LABKEY.Filter.create('QCState/Label', 'In', LABKEY.Filter.Types.STARTS_WITH)
+                                                    ]*/
+                                                }
+                                            },
                                             // {
                                             //     title: 'Schedule Food Deprives',
                                             //     ref: 'FoodDepriveRequests',

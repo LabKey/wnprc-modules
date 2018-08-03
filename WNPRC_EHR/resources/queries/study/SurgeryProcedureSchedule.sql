@@ -13,13 +13,14 @@ SELECT lsid
   ,animalid.curLocation.cond.title AS cur_cond
   ,date
   ,enddate
-  ,procedure
+  ,proceduretype
   ,created
   ,project
   ,protocol
   ,account
   ,location
   ,state
+  ,statuschangereason
 FROM (SELECT lsid
         ,objectid
         ,requestid
@@ -27,12 +28,13 @@ FROM (SELECT lsid
         ,Id               AS animalid
         ,date
         ,enddate
-        ,procedure
+        ,proceduretype
         ,created
         ,project
         ,project.protocol AS protocol
         ,account
         ,location
         ,taskid.qcstate   AS state
+        ,statuschangereason
       FROM study.surgery_procedure
       WHERE taskid IS NOT NULL) a

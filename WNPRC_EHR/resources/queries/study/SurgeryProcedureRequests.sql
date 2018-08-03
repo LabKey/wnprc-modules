@@ -7,22 +7,23 @@ SELECT
   requestid,
   requestid.rowid as rowid,
   objectid,
-  procedure,
+  proceduretype,
+  procedurename,
   taskid,
   Id as animalid,
   date,
   enddate,
   created,
---   caseno,
   project,
   account,
   location,
---   performedby as pathologist,
   requestid.qcstate as state,
---   comments as comments,
   createdby.displayname as requestor,
   requestid.priority as priority,
-  comments
+  linktoexisting,
+  linkedrequest,
+  comments,
+  statuschangereason
 
 FROM study.surgery_procedure
 WHERE requestid IS NOT NULL

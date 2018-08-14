@@ -26,7 +26,6 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
                     LDK.Assert.assertNotEmpty('Unable to find form or grid', target);
                     if (target) {
                         field.mon(target, 'procedurechange', field.updateDropdown, field);
-                        //field.mon(target, 'linkexistingchange', field.updateDropdown, field); //TODO figure this out
                     }
                     else {
                         console.error('Unable to find target');
@@ -49,8 +48,9 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
 
     makeSql(room_type) {
         var sql = 'select room,displayname from wnprc.surgery_procedure_rooms';
+        console.log('room_type: ' + room_type);
         if (room_type && room_type.length > 0) {
-            if (room_type === 'Surgery') {
+            if (room_type === 'surgery') {
                 sql += ' where type = \'' + room_type.toLowerCase() + '\'';
             }
         }

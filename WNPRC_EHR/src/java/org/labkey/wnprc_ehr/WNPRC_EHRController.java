@@ -1206,7 +1206,7 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    public static class SurgeryProcedureStatusChangeEvent
+    public static class SurgeryProcedureChangeStatusEvent
     {
         private String requestid;
         private String qcstate;
@@ -1243,13 +1243,13 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    @ActionNames("ChangeSurgeryProcedureStatus")
+    @ActionNames("SurgeryProcedureChangeStatus")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
-    public class ChangeSurgeryProcedureStatusAction extends ApiAction<SurgeryProcedureStatusChangeEvent>
+    public class SurgeryProcedureChangeStatusAction extends ApiAction<SurgeryProcedureChangeStatusEvent>
     {
         @Override
-        public Object execute(SurgeryProcedureStatusChangeEvent event, BindException errors) throws Exception
+        public Object execute(SurgeryProcedureChangeStatusEvent event, BindException errors) throws Exception
         {
             List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
 

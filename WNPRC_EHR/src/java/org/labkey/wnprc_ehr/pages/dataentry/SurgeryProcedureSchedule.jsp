@@ -565,7 +565,7 @@
                 alert('change reason: ' + form.statuschangereason);
 
                 LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ChangeSurgeryProcedureStatus", null, {
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
                         QCState: 12,
                         statusChangeReason: form.statuschangereason
@@ -607,7 +607,7 @@
                 alert('change reason: ' + form.statuschangereason);
 
                 LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ChangeSurgeryProcedureStatus", null, {
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
                         QCState: 7,
                         statusChangeReason: form.statuschangereason

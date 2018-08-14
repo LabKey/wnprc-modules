@@ -48,7 +48,7 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
 
     makeSql(room_type) {
         var sql = 'select name,displayname from wnprc.surgery_procedure_name';
-        console.log('room type: ' + room_type);
+        console.log('room_type: ' + room_type);
         if (room_type && room_type.length > 0) {
             sql += ' where type = \'' + room_type.toLowerCase() + '\'';
         } else {

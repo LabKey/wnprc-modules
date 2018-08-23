@@ -64,7 +64,7 @@ fi
 #-------------------------------------------------------------------------------
 # Create a temporary folder just for this particular run (to clean up later)
 #-------------------------------------------------------------------------------
-tmpdir="$(mktemp -d "$tmppath"/pg_restore.XXXXXXXX)"
+tmpdir="$(mktemp -d "$tmppath"pg_restore.XXXXXXXX)"
 echo $tmpdir
 if [[ -z $debug ]]; then
     trap 'rm -rf $tmpdir' EXIT

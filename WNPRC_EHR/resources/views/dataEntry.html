@@ -372,6 +372,11 @@ Ext.onReady(function(){
                         queries: ['surgery_procedure']
                     },
                     {
+                        url:     makeExt4DataEntryURL("SurgeryProcedureMultipleRequest"),
+                        title:   'Request Multiple Surgery/Procedure',
+                        queries: ['surgery_procedure']
+                    },
+                    {
                         url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'SurgeryProcedureSchedule', ctx['EHRStudyContainer']),
                         title:   'Schedule Surgery/Procedure',
                         queries: ['surgery_procedure']
@@ -441,6 +446,12 @@ Ext.onReady(function(){
                 VVCUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
                 VVCDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
             }
+
+            var SurgeryProcedureUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=surgery_procedure&keyField=lsid&key=${lsid}&update=1';
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
+                SurgeryProcedureUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=surgery_procedure&keyField=lsid&key=${lsid}&update=1';
+            }
+
 
             function onSuccess(dr){
                 var width1 = Ext.get('dataregion_'+dr.id).getSize().width + 50;
@@ -684,31 +695,31 @@ Ext.onReady(function(){
                                                 queryConfig: {
                                                     schemaName: 'study',
                                                     queryName: 'SurgeryProcedureIndividualRequests',
-                                                    //viewName: 'VVC Request',
-                                                    //updateURL: VVCUpdateURL,
-                                                    //deleteURL: VVCDeleteURL,
+                                                    //viewName: 'Surgery/Procedure Requests',
+                                                    updateURL: SurgeryProcedureUpdateURL,
+                                                    deleteURL: '',
                                                     scope: this,
                                                     success: onSuccess
                                                     /*filters: [
-                                                        LABKEY.Filter.create('QCState/Label', 'In', LABKEY.Filter.Types.STARTS_WITH)
+                                                        LABKEY.Filter.create('qcstate', 7, LABKEY.Filter.Types.EQUAL)
                                                     ]*/
                                                 }
                                             },
-                                            // {
-                                            //     title: 'Schedule Food Deprives',
-                                            //     ref: 'FoodDepriveRequests',
-                                            //     itemId: 'FoodDepriveRequests',
-                                            //     xtype: 'ehr-qwppanel',
-                                            //     queryConfig:  {
-                                            //         schemaName: 'study',
-                                            //         queryName: 'foodDeprives',
-                                            //         viewName: 'Requests',
-                                            //         scope: this,
-                                            //         filters: [
-                                            //             LABKEY.Filter.create('QCState/Label', 'Schedule', LABKEY.Filter.Types.STARTS_WITH)
-                                            //         ]
-                                            //     }
-                                            // }
+                                            {
+                                                title: 'Schedule Food Deprives',
+                                                ref: 'FoodDepriveRequests',
+                                                itemId: 'FoodDepriveRequests',
+                                                xtype: 'ehr-qwppanel',
+                                                queryConfig:  {
+                                                    schemaName: 'study',
+                                                    queryName: 'foodDeprives',
+                                                    viewName: 'Requests',
+                                                    scope: this,
+                                                    filters: [
+                                                        LABKEY.Filter.create('QCState/Label', 'Schedule', LABKEY.Filter.Types.STARTS_WITH)
+                                                    ]
+                                                }
+                                            }
                                         ]
                                     }
                                 ]

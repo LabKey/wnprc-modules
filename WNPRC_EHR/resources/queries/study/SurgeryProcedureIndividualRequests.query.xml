@@ -5,23 +5,20 @@
             <table tableName="surgery_procedure" tableDbType="TABLE">
                 <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
                 <!--<tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>-->
-                <!--<insertUrl/>-->
+                <updateUrl>/ehr/manageRecord.view?schemaName=study&amp;queryName=surgery_procedure&amp;keyField=lsid&amp;key=${lsid}&amp;update=1</updateUrl>
                 <!--<importUrl/>-->
                 <!--<updateUrl/>-->
                 <!--<deleteUrl/>-->
                 <!--<titleColumn>rowid</titleColumn>-->
                 <columns>
+                    <column columnName="editLink">
+                        <columnTitle></columnTitle>
+                        <!--<url>/ehr/manageRecord.view?schemaName=study&amp;queryName=surgery_procedure&amp;keyField=lsid&amp;key=${lsid}&amp;update=1</url>-->
+                        <url>/EHR/taskDetails.view?formtype=SurgeryProcedureRequest&taskid=9b7e6b40-56d0-441b-96a0-60f010a28623</url>
+                    </column>
                     <column columnName="Id">
                         <columnTitle>Animal ID</columnTitle>
                         <nullable>false</nullable>
-                    </column>
-                    <column columnName="linkToExisting">
-                        <columnTitle>Link To Existing Request</columnTitle>
-                        <nullable>false</nullable>
-                    </column>
-                    <column columnName="linkedRequest">
-                        <columnTitle>Request To Link To</columnTitle>
-                        <nullable>true</nullable>
                     </column>
                     <column columnName="date">
                         <columnTitle>Start Table Time</columnTitle>
@@ -93,20 +90,8 @@
                         <columnTitle>Reason Vet is Needed</columnTitle>
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="equipment">
-                        <columnTitle>Special Equipment/Supplies Requested</columnTitle>
-                        <nullable>false</nullable>
-                    </column>
-                    <column columnName="drugsLab">
-                        <columnTitle>Drugs Lab Will Provide</columnTitle>
-                        <nullable>false</nullable>
-                    </column>
-                    <column columnName="drugsSurgery">
-                        <columnTitle>Drugs Surgery Staff Requested to Provide</columnTitle>
-                        <nullable>false</nullable>
-                    </column>
-                    <column columnName="comments">
-                        <columnTitle>Comments</columnTitle>
+                    <column columnName="statusChangeReason">
+                        <columnTitle>Hold/Deny Reason</columnTitle>
                         <nullable>true</nullable>
                     </column>
                 </columns>

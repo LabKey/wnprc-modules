@@ -20,9 +20,12 @@ Ext4.define('WNPRC.ext.components.LinkedSurgeryProcedureField', {
             },
             listeners: {
                 beforerender: function (field) {
+                    var isForm = true;
                     var target = field.up('form');
-                    if (!target)
+                    if (!target) {
                         target = field.up('grid');
+                        isForm = false;
+                    }
 
                     LDK.Assert.assertNotEmpty('Unable to find form or grid', target);
                     if (target) {
@@ -31,7 +34,9 @@ Ext4.define('WNPRC.ext.components.LinkedSurgeryProcedureField', {
                     else {
                         console.error('Unable to find target');
                     }
-                    field.hide();
+                    if (isForm) {
+                        field.hide();
+                    }
                 }
             },
             anyMatch: true,

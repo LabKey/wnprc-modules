@@ -562,8 +562,6 @@
 
                 var form = ko.mapping.toJS(WebUtils.VM.form);
 
-                alert('change reason: ' + form.statuschangereason);
-
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
@@ -576,7 +574,7 @@
                             WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
                             location.reload(true);
                         } else {
-                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
+                            alert('There was an error putting a hold on the request.');
                         }
                         // Clear the form
                         WebUtils.VM.clearForm();
@@ -604,8 +602,6 @@
 
                 var form = ko.mapping.toJS(WebUtils.VM.form);
 
-                alert('change reason: ' + form.statuschangereason);
-
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
@@ -618,7 +614,7 @@
                             WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
                             location.reload(true);
                         } else {
-                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
+                            alert('There was an error denying the request.');
                         }
                         // Clear the form
                         WebUtils.VM.clearForm();

@@ -52,6 +52,7 @@ import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryProcedureRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryProcedureMultipleRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDeprivesStartForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprivesRequest.FoodDeprivesRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
@@ -332,6 +333,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
                 SurgeryProcedureRequestForm.class,
+                SurgeryProcedureMultipleRequestForm.class,
                 PhysicalExamNWMForm.class,
                 PhysicalExamOWMForm.class,
                 ProblemListForm.class,

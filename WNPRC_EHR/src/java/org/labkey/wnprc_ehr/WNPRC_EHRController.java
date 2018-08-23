@@ -1261,28 +1261,28 @@ public class WNPRC_EHRController extends SpringActionController
             List<Map<String, Object>> rowsToUpdate = null;
 
             try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
-//                /**
-//                 * Update surgery records
-//                 */
-//                for(Map<String, Object> spRow : spRows)
-//                {
-//                    //Initialize data to be updated and convert it to the necessary format
-//                    JSONObject surgeryRecord = new JSONObject();
-//                    surgeryRecord.put("objectid", spRow.get("objectid"));
-//                    surgeryRecord.put("qcstate", event.getQCState());
-//                    surgeryRecord.put("statuschangereason", event.getStatusChangeReason());
-//                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
-//
-//                    //Get the service object based on schema/table
-//                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
-//                    service = ti.getUpdateService();
-//
-//                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-//                    if (updatedRows.size() != rowsToUpdate.size())
-//                    {
-//                        throw new QueryUpdateServiceException("Not all rows updated properly");
-//                    }
-//                }
+                /**
+                 * Update surgery records
+                 */
+                for(Map<String, Object> spRow : spRows)
+                {
+                    //Initialize data to be updated and convert it to the necessary format
+                    JSONObject surgeryRecord = new JSONObject();
+                    surgeryRecord.put("objectid", spRow.get("objectid"));
+                    surgeryRecord.put("qcstate", event.getQCState());
+                    surgeryRecord.put("statuschangereason", event.getStatusChangeReason());
+                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
+
+                    //Get the service object based on schema/table
+                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
+                    service = ti.getUpdateService();
+
+                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+                    if (updatedRows.size() != rowsToUpdate.size())
+                    {
+                        throw new QueryUpdateServiceException("Not all rows updated properly");
+                    }
+                }
 
                 /**
                  * Update request record
@@ -1316,9 +1316,12 @@ public class WNPRC_EHRController extends SpringActionController
 
     private List<Map<String, Object>> getSurgeryProcedureRecords(String requestId) throws java.sql.SQLException
     {
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("objectid"));
+
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
-        Results rs = spQuery.select(filter);
+        Results rs = spQuery.select(columns, filter);
 
         List<Map<String, Object>> spRows = new ArrayList<>();
         while (rs.next())

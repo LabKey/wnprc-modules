@@ -14,14 +14,24 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
                 schemaName: 'wnprc',
                 sql: this.makeSql(),
                 sort: 'name',
-                autoLoad: true
+                autoLoad: false,
+                loading: true,
+                listeners: {
+                    scope: this,
+                    delay: 50,
+                    load: function(store){
+                        this.resolveProcedureNameFromStore();
+                        this.getPicker().refresh();
+                    }
+                }
 
             },
             listeners: {
                 beforerender: function (field) {
                     var target = field.up('form');
-                    if (!target)
+                    if (!target) {
                         target = field.up('grid');
+                    }
 
                     LDK.Assert.assertNotEmpty('Unable to find form or grid', target);
                     if (target) {
@@ -30,6 +40,7 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
                     else {
                         console.error('Unable to find target');
                     }
+                    this.updateDropdown();
                 }
             },
             anyMatch: true,
@@ -39,21 +50,85 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
         this.callParent(arguments);
     },
 
-    updateDropdown: function (room_type) {
-        var sql = this.makeSql(room_type);
+    // trigger1Cls: 'x4-form-search-trigger',
+    //
+    // onTrigger1Click: function(){
+    //     var boundRecord = EHR.DataEntryUtils.getBoundRecord(this);
+    //     if (!boundRecord){
+    //         Ext4.Msg.alert('Error', 'Unable to locate associated animal Id');
+    //         return;
+    //     }
+    //
+    //     var procedure_type = boundRecord.get('procedureType');
+    //     if (!procedure_type){
+    //         Ext4.Msg.alert('Error', 'No Procedure Type Selected');
+    //         return;
+    //     }
+    //
+    //     this.updateDropdown(procedure_type);
+    // },
+
+    updateDropdown: function (procedure_type) {
+        var boundRecord = EHR.DataEntryUtils.getBoundRecord(this);
+        if (!boundRecord){
+            console.warn('no bound record found');
+        }
+
+        if (boundRecord && boundRecord.store){
+            LDK.Assert.assertNotEmpty('SurgeryProcedureNameField is being used on a store that lacks an Id field: ' + boundRecord.store.storeId, boundRecord.fields.get('Id'));
+        }
+
+        if (!procedure_type && boundRecord)
+            procedure_type = boundRecord.get('procedureType');
+
+        this.emptyText = 'Select procedure...';
+
+        var sql = this.makeSql(procedure_type);
         this.store.sql = sql;
         this.store.removeAll();
         this.store.load();
     },
 
-    makeSql(room_type) {
+    makeSql(procedure_type) {
         var sql = 'select name,displayname from wnprc.surgery_procedure_name';
-        console.log('room_type: ' + room_type);
-        if (room_type && room_type.length > 0) {
-            sql += ' where type = \'' + room_type.toLowerCase() + '\'';
+        console.log('procedure_type: ' + procedure_type);
+        if (procedure_type && procedure_type.length > 0) {
+            sql += ' where type = \'' + procedure_type.toLowerCase() + '\'';
         } else {
             sql += ' where type = \'\'';
         }
         return sql;
+    },
+
+    resolveProcedureNameFromStore: function(){
+        var val = this.getValue();
+        if (!val || this.isDestroyed)
+            return;
+
+        LDK.Assert.assertNotEmpty('Unable to find store in SurgeryProcedureNameField', this.store);
+        var rec = this.store ? this.store.findRecord('procedureName', val) : null;
+        if (rec){
+            return;
+        }
+
+        rec = this.allProjectStore.findRecord('procedureName', val);
+        if (rec){
+            var newRec = this.store.createModel({});
+            newRec.set({
+                project: rec.data.project,
+                account: rec.data.account,
+                displayName: rec.data.displayName,
+                protocolDisplayName: rec.data['protocol/displayName'],
+                protocol: rec.data.protocol,
+                title: rec.data.title,
+                //      investigator: rec.data['investigatorId/lastName'],
+                isAssigned: 0,
+                fromClient: true
+            });
+
+            this.store.insert(0, newRec);
+
+            return newRec;
+        }
     }
 });

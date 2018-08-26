@@ -1,0 +1,14 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+<columns>
+    <column name="billingPeriodStart"/>
+    <column name="billingPeriodEnd"/>
+    <column name="Animal Per Diem::total"/>
+    <column name="Blood Draws::total"/>
+    <column name="Misc. Fees::total"/>
+    <column name="Animal Replacement::total"/>
+    <column name="Clinical Lab Test::total"/>
+</columns>
+<sorts>
+    <sort column="billingPeriodEnd" descending="true" />
+</sorts>
+</customView>

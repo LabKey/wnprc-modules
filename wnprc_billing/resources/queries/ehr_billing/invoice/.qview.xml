@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="invoiceNumber"/>
+        <column name="invoiceRunId/rowid"/>
+        <column name="invoiceRunId/billingPeriodStart"/>
+        <column name="invoiceRunId/billingPeriodEnd"/>
+        <column name="invoiceRunId/runDate"/>
+        <column name="accountNumber"/>
+        <column name="accountNumber/type"/>
+        <column name="accountNumber/po_number"/>
+        <column name="accountNumber/contact_name"/>
+        <column name="accountNumber/address"/>
+        <column name="invoiceAmount"/>
+    </columns>
+    <filters></filters>
+</customView>

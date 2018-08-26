@@ -17,42 +17,8 @@
 
  -->
 <tables xmlns="http://labkey.org/data/xml">
-    <table tableName="chargeRateExemptions" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
-        <auditLogging>DETAILED</auditLogging>
-        <tableTitle>Exemptions to Default Rates</tableTitle>
-        <columns>
-            <column columnName="rowId"/>
-            <column columnName="project">
-                <nullable>false</nullable>
-            </column>
-            <column columnName="chargeId">
-                <nullable>false</nullable>
-            </column>
-            <column columnName="unitCost">
-                <columnTitle>Unit Cost</columnTitle>
-            </column>
-            <column columnName="remark">
-                <columnTitle>Remark</columnTitle>
-            </column>
-            <column columnName="startDate">
-                <columnTitle>Start Date</columnTitle>
-                <nullable>false</nullable>
-            </column>
-            <column columnName="endDate">
-                <columnTitle>End Date</columnTitle>
-                <nullable>false</nullable>
-                <formatString>yyyy-MM-dd</formatString>
-            </column>
-            <column columnName="container"/>
-            <column columnName="createdBy"/>
-            <column columnName="created"/>
-            <column columnName="modifiedBy"/>
-            <column columnName="modified"/>
-        </columns>
-    </table>
     <table tableName="creditAccount" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableTitle>Aliases Receiving Credits For Each Charge</tableTitle>
         <columns>
@@ -84,7 +50,7 @@
     </table>
     <table tableName="perDiemFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>NHP Per Diem Fee Structure</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowId">
@@ -141,7 +107,7 @@
         </columns>
     </table>
     <table tableName="leaseFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableTitle>Replacement Fee Definition</tableTitle>
         <columns>
@@ -200,7 +166,7 @@
     </table>
     <table tableName="fiscalAuthorities" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Financial Analysts</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -260,7 +226,7 @@
     </table>
     <table tableName="grants" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Grants</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableUrl>/query/recordDetails.view?schemaName=wnprc_billing&amp;query.queryName=grants&amp;keyField=rowid&amp;key=${rowid}</tableUrl>
         <columns>
@@ -335,7 +301,7 @@
     </table>
     <table tableName="procedureFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Procedure Fee Structure</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -390,7 +356,7 @@
     </table>
     <table tableName="medicationFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Medication Fee Structure</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -442,7 +408,7 @@
     </table>
     <table tableName="projectAccountHistory" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Project Alias History</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -477,7 +443,7 @@
     </table>
     <table tableName="grantProjects" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Grant Projects</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableUrl>/query/recordDetails.view?schemaName=wnprc_billing&amp;query.queryName=grantProjects&amp;keyField=rowid&amp;key=${rowid}</tableUrl>
         <columns>
@@ -547,7 +513,7 @@
     <table tableName="iacucFundingSources" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Approved IACUC Funding Sources</tableTitle>
         <auditLogging>DETAILED</auditLogging>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <columns>
             <column columnName="rowid"/>
             <column columnName="protocol">
@@ -575,7 +541,7 @@
     </table>
     <table tableName="labworkFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Labwork Fee Structure</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -627,7 +593,7 @@
     </table>
     <table tableName="dataAccess" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Billing Data Read Access</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <pkColumnName>rowid</pkColumnName>
         <columns>
@@ -713,7 +679,7 @@
     </table>
     <table tableName="aliasTypes" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Alias Types &amp; Rate Modifiers</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="aliasType">
@@ -736,7 +702,7 @@
     </table>
     <table tableName="projectMultipliers" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Alias Multipliers</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowId"/>
@@ -763,48 +729,14 @@
     </table>
     <table tableName="miscChargesType" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Misc Charges Type</tableTitle>
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="category"/>
         </columns>
     </table>
-    <table tableName="chargeUnits" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
-        <auditLogging>DETAILED</auditLogging>
-        <tableTitle>Charge Units</tableTitle>
-        <columns>
-            <column columnName="chargetype">
-                <columnTitle>Name</columnTitle>
-            </column>
-            <column columnName="servicecenter">
-                <columnTitle>Service Center</columnTitle>
-            </column>
-            <column columnName="shownInBlood">
-                <columnTitle>Shown In Blood Form?</columnTitle>
-            </column>
-            <column columnName="shownInLabwork">
-                <columnTitle>Shown In Labwork Form?</columnTitle>
-            </column>
-            <column columnName="shownInMedications">
-                <columnTitle>Shown In Medications Form?</columnTitle>
-            </column>
-            <column columnName="shownInProcedures">
-                <columnTitle>Shown In Procedures Form?</columnTitle>
-            </column>
-            <column columnName="active">
-                <columnTitle>Is Active?</columnTitle>
-                <defaultValue>true</defaultValue>
-            </column>
-            <column columnName="container"/>
-            <column columnName="createdBy"/>
-            <column columnName="created"/>
-            <column columnName="modifiedBy"/>
-            <column columnName="modified"/>
-        </columns>
-    </table>
     <table tableName="chargeUnitAccounts" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableTitle>Aliases Per Charge Unit</tableTitle>
         <columns>
@@ -879,7 +811,6 @@
             <column columnName="startDate"/>
             <column columnName="endDate"/>
             <column columnName="isActive"/>
-            <column columnName="container"/>
             <column columnName="createdBy"/>
             <column columnName="created"/>
             <column columnName="modifiedBy"/>

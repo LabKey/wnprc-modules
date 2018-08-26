@@ -1,0 +1,26 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="BloodSchedule" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehrLinked</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="billedby">
+                        <columnTitle>Assigned To</columnTitle>
+                        <fk>
+                            <!--Linked Schema 'ehr_lookupsLinked' is expected -->
+                            <fkDbSchema>ehr_lookupsLinked</fkDbSchema>
+                            <fkTable>blood_billed_by</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

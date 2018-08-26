@@ -15,30 +15,30 @@
  */
 
 SELECT *,
-(procFees.quantity * procFees.unitCost) as totalCost
+round((CAST((procFees.quantity * procFees.unitCost) AS DOUBLE)), 2) AS totalCost
 FROM
 (SELECT
   pFees1.id,
   pFees1.date,
   pFees1.project,
-  pFees1.account as debitedAccount,
+  pFees1.account AS debitedAccount,
   pFees1.sourceRecord,
-  (case when pFees1.tubes >= 1 then cr1.unitCost end) as unitCost,
-  (case when pFees1.tubes >= 1 then ('Blood Draws ' || pFees1.id) end) as comment,
-  (case when pFees1.tubes >= 1 then 1 end) as quantity,
+  (CASE WHEN pFees1.tubes >= 1 THEN (cr1.unitCost + (pFees1.tierRate*cr1.unitCost)) end) AS unitCost,
+  (CASE WHEN pFees1.tubes >= 1 THEN ('Blood Draws ' || pFees1.id) end) AS comment,
+  (CASE WHEN pFees1.tubes >= 1 THEN 1 end) AS quantity,
   pFees1.taskid,
-  cr1.chargeId as chargeId,
-  ci1.name as item,
-  ci1.category as category,
-  cr1.serviceCode as serviceCenter,
-  NULL AS isMiscCharge
- FROM wnprc_billing.procedureFees pFees1
+  cr1.chargeId AS chargeId,
+  ci1.name AS item,
+  ci1.category AS category,
+  ci1.serviceCode AS serviceCenter,
+  NULL AS isMiscCharge,
+  pFees1.tierRate
+ FROM wnprc_billing.procedureFeesWithTierRates pFees1
  LEFT JOIN ehr_billing.chargeRates cr1 ON (
    CAST(pFees1.date AS DATE) >= CAST(cr1.startDate AS DATE) AND
-   (CAST(pFees1.date AS DATE) <= cr1.enddate OR cr1.enddate IS NULL) AND
-   cr1.description = 'Blood draws'
- )
- LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.name = cr1.description
+   (CAST(pFees1.date AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
+ LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId
+ WHERE ci1.name = 'Blood draws'
 
 UNION ALL
 
@@ -46,24 +46,22 @@ SELECT
   pFees2.id,
   pFees2.date,
   pFees2.project,
-  pFees2.account as debitedAccount,
+  pFees2.account AS debitedAccount,
   pFees2.sourceRecord,
-  (case when pFees2.tubes > 1 then cr2.unitCost end) as unitCost,
-  null as comment,
-  (case when pFees2.tubes > 1 then (pFees2.tubes - 1) else 0 end) as quantity,
+  (CASE WHEN pFees2.tubes > 1 THEN (cr2.unitCost + (pFees2.tierRate*cr2.unitCost)) END) AS unitCost,
+  null AS comment,
+  (CASE WHEN pFees2.tubes > 1 THEN (pFees2.tubes - 1) ELSE 0 END) AS quantity,
   pFees2.taskid,
-  cr2.chargeId as chargeId,
-  ci2.name as item,
-  ci2.category as category,
-  cr2.serviceCode as serviceCenter,
-  NULL AS isMiscCharge
-FROM wnprc_billing.procedureFees pFees2
+  cr2.chargeId AS chargeId,
+  ci2.name AS item,
+  ci2.category AS category,
+  ci2.serviceCode AS serviceCenter,
+  NULL AS isMiscCharge,
+  pFees2.tierRate
+FROM wnprc_billing.procedureFeesWithTierRates pFees2
   LEFT JOIN ehr_billing.chargeRates cr2 ON (
     CAST(pFees2.date AS DATE) >= CAST(cr2.startDate AS DATE) AND
-    (CAST(pFees2.date AS DATE) <= cr2.enddate OR cr2.enddate IS NULL) AND
-    cr2.description = 'Blood draws - Additional Tubes'
-    )
-  LEFT JOIN ehr_billing.chargeableItems ci2 ON ci2.name = cr2.description
-
-) procFees
-where procFees.quantity > 0
+    (CAST(pFees2.date AS DATE) <= cr2.enddate OR cr2.enddate IS NULL))
+  LEFT JOIN ehr_billing.chargeableItems ci2 ON ci2.rowid = cr2.chargeId
+  WHERE ci2.name = 'Blood draws - Additional Tubes') procFees
+WHERE procFees.quantity > 0

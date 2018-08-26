@@ -2,7 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="perDiemRates" tableDbType="NOT_IN_DB">
-                <tableTitle>Per Diem Rates</tableTitle>
+                <tableTitle>Per Diem with Tier Rates</tableTitle>
                 <columns>
                     <column columnName="account">
                         <fk>

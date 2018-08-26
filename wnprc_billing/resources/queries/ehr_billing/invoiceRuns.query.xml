@@ -1,0 +1,10 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="invoiceRuns" tableDbType="TABLE">
+                <tableTitle>Invoice Runs</tableTitle>
+                <javaCustomizer>org.labkey.wnprc_billing.WNPRC_InvoiceRunCustomizer</javaCustomizer>
+            </table>
+        </tables>
+    </metadata>
+</query>

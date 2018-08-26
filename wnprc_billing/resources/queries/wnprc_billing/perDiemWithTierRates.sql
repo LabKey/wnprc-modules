@@ -21,14 +21,14 @@ SELECT * FROM
       pdi.Id,
       pdi.adate,
       pdi.edate,
-      pdi.totalAccounts,
       pdi.totalDaysPerAccount AS quantity,
       pdi.account,
---       pdi.project,
-      a.tier_rate.tierRate,
+      pdi.project,
+      pdi.comment,
+      COALESCE(a.tier_rate.tierRate, 0) AS tierRate,
       a.tier_rate.isActive AS isTierRateActive
     FROM wnprc_billing.perDiemRatesIntermediate pdi
-    INNER JOIN ehr_billing.aliases a ON a.alias = pdi.account --AND a.tier_rate IS NOT NULL
+    INNER JOIN ehr_billing.aliases a ON a.alias = pdi.account
   ) accountsInAliases WHERE accountsInAliases.isTierRateActive IS NULL OR accountsInAliases.isTierRateActive = true
 
 UNION ALL --union is necessary/cleaner since not all the accounts are in ehr_billing.aliases to be able to get the tierRates
@@ -38,11 +38,11 @@ SELECT
   pdi.Id,
   pdi.adate,
   pdi.edate,
-  pdi.totalAccounts,
   pdi.totalDaysPerAccount AS quantity,
   pdi.account,
---   pdi.project,
-  1 as TierRate,
+  pdi.project,
+  pdi.comment,
+  0 as TierRate,
   true AS isTierRateActive
 FROM wnprc_billing.perDiemRatesIntermediate pdi
 LEFT JOIN ehr_billing.aliases a ON a.alias = pdi.account WHERE a.alias IS NULL

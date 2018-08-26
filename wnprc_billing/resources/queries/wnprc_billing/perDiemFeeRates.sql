@@ -15,21 +15,26 @@
  */
 
   SELECT
+    *,
+    round(CAST(pdr.quantity * pdr.unitCost AS DOUBLE), 2) AS totalCost
+  FROM
+    (SELECT
     pdt.id,
     pdt.adate as date,
---       pdt.project,
+    pdt.project,
     pdt.account as debitedAccount,
-    cr1.unitCost,
+    (cr1.unitCost + (cr1.unitCost * pdt.tierRate)) AS unitCost,
     pdt.quantity,
     cr1.chargeId as chargeId,
     ci1.name as item,
     ci1.category as category,
-    pdt.quantity * cr1.unitCost AS totalCost,
-    cr1.serviceCode AS serviceCenter,
+    pdt.comment,
+    ci1.serviceCode AS serviceCenter,
+    pdt.tierRate AS tierRate,
     NULL AS isMiscCharge
   FROM wnprc_billing.perDiemWithTierRates pdt
   LEFT JOIN ehr_billing.chargeRates cr1 ON (
     CAST(pdt.adate AS DATE) >= CAST(cr1.startDate AS DATE) AND
-    (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL) AND
-    cr1.description = 'Per diems')
-  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.name = cr1.description
+    (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
+  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId) pdr
+  WHERE pdr.item = 'Per diems'

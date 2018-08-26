@@ -45,7 +45,7 @@ SELECT * FROM
     (
         SELECT
             assgn.Id AS id,
---             project,
+            project,
             project.account AS account,
             hous.area AS location,
             CASE
@@ -58,7 +58,7 @@ SELECT * FROM
                 ELSE CAST(assgn.enddate AS DATE)
             END AS edate,
             project.research AS research
-        FROM study.assignment assgn
+        FROM studyLinked.assignment assgn
         JOIN
         (SELECT h.id AS id, h.room AS room, h.date, h.enddate,
                 CASE
@@ -78,7 +78,7 @@ SELECT * FROM
                     WHEN h.room LIKE 'mr%' THEN 'WIMR'
                     ELSE NULL
                 END AS area
-         FROM study.housing h
+         FROM studyLinked.housing h
          WHERE
              (CAST(h.date AS DATE) <= EndDate AND h.enddate IS NULL)  OR
              (CAST(h.date AS DATE) <= EndDate AND CAST(h.enddate AS DATE) >= StartDate)
@@ -91,7 +91,7 @@ SELECT * FROM
     WHERE pd.research = TRUE -- only get research accounts
     GROUP BY -- group by to avoid duplicates rows when an animal is moved around in different rooms in a same day. For ex. animal id cj1363, for month of May 2016
         pd.id,
---         pd.project,
+        pd.project,
         pd.account,
         pd.location,
         pd.adate,

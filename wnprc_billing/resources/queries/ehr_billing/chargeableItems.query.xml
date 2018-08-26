@@ -1,0 +1,27 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="chargeableItems" tableDbType="TABLE">
+                <tableTitle>Chargeable Items</tableTitle>
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <auditLogging>DETAILED</auditLogging>
+                <columns>
+                    <column columnName="oldPk">
+                        <columnTitle>Old Charge Id</columnTitle>
+                        <description>PK from the WNPRC's current finance system (from table charges.rate_schedule.Id)</description>
+                    </column>
+                    <column columnName="departmentCode">
+                        <columnTitle>Group Name</columnTitle>
+                    </column>
+                    <column columnName="category">
+                        <fk>
+                            <fkDbSchema>wnprc_billing</fkDbSchema>
+                            <fkTable>chargeableItemCategories</fkTable>
+                            <fkColumnName>category</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

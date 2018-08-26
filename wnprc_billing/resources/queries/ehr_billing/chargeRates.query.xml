@@ -3,17 +3,26 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="chargeRates" tableDbType="TABLE">
                 <tableTitle>Standard Rates</tableTitle>
-                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
                 <auditLogging>DETAILED</auditLogging>
                 <columns>
-                    <column columnName="serviceCode"/>
+
                     <column columnName="descriptions"/>
                     <column columnName="genCredits"/>
                     <column columnName="groupName">
                         <fk>
-                            <fkDbSchema>wnprc_billing</fkDbSchema>
-                            <fkTable>groups</fkTable>
-                            <fkColumnName>name</fkColumnName>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeUnits</fkTable>
+                            <fkColumnName>chargetype</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="chargeId">
+                        <columnTitle>Charge Item</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeableItems</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>
                 </columns>

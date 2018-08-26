@@ -3,7 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="aliases" tableDbType="TABLE" useColumnOrder="true">
             <tableTitle>Grant Accounts</tableTitle>
-            <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+            <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
             <auditLogging>DETAILED</auditLogging>
             <columns>
                 <column columnName="alias">
@@ -20,6 +20,7 @@
                         <fkDbSchema>wnprc_billing</fkDbSchema>
                         <fkTable>tierRates</fkTable>
                         <fkColumnName>tierRateType</fkColumnName>
+                        <fkDisplayColumnName>tierRate</fkDisplayColumnName>
                     </fk>
                 </column>
                 <column columnName="type"/>

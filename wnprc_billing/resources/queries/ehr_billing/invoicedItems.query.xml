@@ -3,7 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="invoicedItems" tableDbType="TABLE">
                 <tableTitle>Invoiced Items</tableTitle>
-                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
+                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
                 <auditLogging>DETAILED</auditLogging>
                 <columns>
                     <column columnName="debitedAccount">
@@ -13,8 +13,26 @@
                             <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="creditedAccount">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="quantity">
+                        <formatString>##,##0.00</formatString>
+                    </column>
                     <column columnName="po_amount">
                         <formatString>$###,##0.00</formatString>
+                    </column>
+                    <column columnName="chargeId">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeableItems</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
+                        </fk>
                     </column>
                 </columns>
             </table>

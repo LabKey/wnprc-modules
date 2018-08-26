@@ -6,29 +6,23 @@
     <template xsi:type="EHRBillingTemplateType">
         <table tableName="chargeRates" tableDbType="NOT_IN_DB">
             <dat:columns>
-                <dat:column columnName="serviceCode">
-                    <dat:rangeURI>int</dat:rangeURI>
-                </dat:column>
-                <dat:column columnName="description">
-                    <dat:rangeURI>string</dat:rangeURI>
-                    <dat:scale>255</dat:scale>
-                </dat:column>
                 <dat:column columnName="genCredits">
                     <dat:rangeURI>boolean</dat:rangeURI>
-                </dat:column>
-                <dat:column columnName="groupName">
-                    <dat:rangeURI>string</dat:rangeURI>
-                    <dat:scale>50</dat:scale>
                 </dat:column>
             </dat:columns>
         </table>
     </template>
     <template xsi:type="EHRBillingTemplateType">
-    <table tableName="aliases" tableDbType="NOT_IN_DB">
+        <table tableName="aliases" tableDbType="NOT_IN_DB">
             <dat:columns>
                 <dat:column columnName="tier_rate">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
+                    <dat:fk>
+                        <dat:fkDbSchema>wnprc_billing</dat:fkDbSchema>
+                        <dat:fkTable>tierRates</dat:fkTable>
+                        <dat:fkColumnName>tierRateType</dat:fkColumnName>
+                    </dat:fk>
                 </dat:column>
                 <dat:column columnName="type">
                     <dat:rangeURI>string</dat:rangeURI>
@@ -115,6 +109,18 @@
                 <dat:column columnName="mds_number">
                     <dat:rangeURI>string</dat:rangeURI>
                     <dat:scale>12</dat:scale>
+                </dat:column>
+            </dat:columns>
+        </table>
+    </template>
+    <template xsi:type="EHRBillingTemplateType">
+        <table tableName="chargeableItems" tableDbType="NOT_IN_DB">
+            <dat:columns>
+                <dat:column columnName="oldPk">
+                    <dat:rangeURI>int</dat:rangeURI>
+                </dat:column>
+                <dat:column columnName="serviceCode">
+                    <dat:rangeURI>int</dat:rangeURI>
                 </dat:column>
             </dat:columns>
         </table>

@@ -94,3 +94,13 @@ The script has very few options, as shown in these examples:
 ./load_database_backup.sh --postgres /usr/etc/postgresql94/bin/ --debug
 ```
 The use of the `-p` flag allows us to use this script to manage multiple instances of the LabKey PostgreSQL container on the same server, provided that each instance is run from its own folder with its own .env file (to specify ports, data file locations, etc.)
+
+## Additional Configurations
+
+In some instance, the shared memory and effective cache size should be modified for dev machines. In the docker/postgres/postgresql.cong file modify line shared_buffers and effective_cache_size to 1024MB and 2048MB respectively.
+
+```
+shared_buffers = 1024MB			# min 128kB
+
+effective_cache_size = 2048MB
+```

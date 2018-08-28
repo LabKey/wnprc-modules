@@ -32,8 +32,18 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+<<<<<<< HEAD
         --dbname)
             dbname="labkey"
+=======
+        --dbname)     ## name of the target database
+            dbname="$2"
+            shift
+            shift
+            ;;
+        --tmppath)
+            tmppath="$2"
+>>>>>>> sharedNetwork
             shift
             shift
             ;;
@@ -50,12 +60,35 @@ done
 set -- "${args[@]}"
 
 #-------------------------------------------------------------------------------
+# Determining location for temporary folder
+#-------------------------------------------------------------------------------
+if [[ -z $tmppath ]]; then
+    tmppath="/tmp"
+fi
+
+#-------------------------------------------------------------------------------
 # Create a temporary folder just for this particular run (to clean up later)
 #-------------------------------------------------------------------------------
+<<<<<<< HEAD
 tmpdir=$(mktemp -d /tmp/pg_restore.XXXXXXXX)
 if [[ -z $debug ]]; then
     trap 'rm -rf $tmpdir' EXIT
 fi
+=======
+tmpdir="$(mktemp -d "$tmppath"pg_restore.XXXXXXXX)"
+echo $tmpdir
+if [[ -z $debug ]]; then
+    trap 'rm -rf $tmpdir' EXIT
+fi
+
+#-------------------------------------------------------------------------------
+# Default database name to labkey, is dbname is not passed it will used
+# labkey as the target database to restore
+#-------------------------------------------------------------------------------
+if [[ -z $dbname ]]; then
+    dbname="labkey"
+fi
+>>>>>>> sharedNetwork
 
 #-------------------------------------------------------------------------------
 # If the user did not provide a path to an existing dump file, secure copy the
@@ -116,10 +149,17 @@ echo -e '\033[0;32mdone\033[0m'
 #-------------------------------------------------------------------------------
 # Drop and recreate the labkey database and the various roles that we use
 #-------------------------------------------------------------------------------
+<<<<<<< HEAD
 echo -n 'Preparing database and roles ... '
 docker-compose exec postgres psql -U postgres -c 'drop database if exists' $dbname ';' &>/dev/null
 docker-compose exec postgres psql -U postgres -c 'create database ' $dbname ';' &>/dev/null
 docker-compose exec postgres psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
+=======
+echo -n "Preparing database and roles for $dbname ..."
+docker-compose exec postgres psql -U postgres -c 'drop database if exists '$dbname';' &>/dev/null
+docker-compose exec postgres psql -U postgres -c 'create database '$dbname';' &>/dev/null
+docker-compose exec postgres psql -U postgres -c 'drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
+>>>>>>> sharedNetwork
 echo -e '\033[0;32mdone\033[0m'
 
 #-------------------------------------------------------------------------------
@@ -129,7 +169,11 @@ echo -n "Restoring database from $filepath ...  0%"
 ${pgpath}pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
+<<<<<<< HEAD
 ${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
+=======
+${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j 8 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
+>>>>>>> sharedNetwork
 pg_restore_pid=$!
 while kill -0 "$pg_restore_pid" &>/dev/null; do
     if [[ $total -ne 0 ]]; then

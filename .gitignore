@@ -1,9 +1,8 @@
 **/.DS_Store
 
-docker/data
-docker/logs
-docker/.env
-docker/.gradle
+docker/**/data
+docker/**/logs
+docker/**/.env
 
 **/node_modules/
 **/build/

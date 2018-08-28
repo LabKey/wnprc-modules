@@ -76,7 +76,7 @@ All other Docker Compose commands (`logs`, `ps`, etc.) work also.
 
 ## Loading a Database Backup Using the Script
 
-Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder.
+Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder. Depending on resource on local machine or server, it is possible to increase the number of processors for the restore process. Change the number in line 132 right after -j option, by default is set to 4 processes.
 
 The script has very few options, as shown in these examples:
 ```bash

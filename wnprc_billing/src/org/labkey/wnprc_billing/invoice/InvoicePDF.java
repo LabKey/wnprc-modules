@@ -285,7 +285,7 @@ public class InvoicePDF extends FPDF
         try
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            try (InputStream in = getClass().getResourceAsStream("/org/labkey/wnprc_billing/invoice/UWMadisonSeal.PNG"))
+            try (InputStream in = getClass().getResourceAsStream("/images/UWMadisonSeal.PNG"))
             {
                 FileUtil.copyData(in, out);
             }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.wnprc_billingpublic;
+package org.labkey.wnprc_billingpublictemp;
 
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;

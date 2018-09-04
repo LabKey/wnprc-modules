@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.wnprc_billingpublic;
+package org.labkey.wnprc_billingpublictemp;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;

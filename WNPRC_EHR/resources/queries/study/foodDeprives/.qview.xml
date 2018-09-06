@@ -6,15 +6,15 @@
         <column name="account"/>
         <column name="protocolContact"/>
         <column name="reason"/>
+        <column name="remarks"/>
         <column name="depriveStartTime"/>
+        <column name="depriveStartedBy"/>
         <column name="separated"/>
         <column name="restoredTime"/>
+        <column name="foodRestoredBy"/>
         <column name="qcstate"/>
         <column name="taskid"/>
         <column name="requestid"/>
-
-
-
     </columns>
     <sorts>
         <sort column="date" descending="true"/>

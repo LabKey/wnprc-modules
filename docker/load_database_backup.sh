@@ -32,8 +32,13 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
-        --dbname)
-            dbname="labkey"
+        --dbname)     ## name of the target database
+            dbname="$2"
+            shift
+            shift
+            ;;
+        --tmppath)
+            tmppath="$2"
             shift
             shift
             ;;
@@ -50,11 +55,28 @@ done
 set -- "${args[@]}"
 
 #-------------------------------------------------------------------------------
+# Determining location for temporary folder
+#-------------------------------------------------------------------------------
+if [[ -z $tmppath ]]; then
+    tmppath="/tmp"
+fi
+
+#-------------------------------------------------------------------------------
 # Create a temporary folder just for this particular run (to clean up later)
 #-------------------------------------------------------------------------------
-tmpdir=$(mktemp -d /tmp/pg_restore.XXXXXXXX)
+
+tmpdir="$(mktemp -d "$tmppath"pg_restore.XXXXXXXX)"
+echo $tmpdir
 if [[ -z $debug ]]; then
     trap 'rm -rf $tmpdir' EXIT
+fi
+
+#-------------------------------------------------------------------------------
+# Default database name to labkey, is dbname is not passed it will used
+# labkey as the target database to restore
+#-------------------------------------------------------------------------------
+if [[ -z $dbname ]]; then
+    dbname="labkey"
 fi
 
 #-------------------------------------------------------------------------------

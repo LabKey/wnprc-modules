@@ -76,7 +76,7 @@ All other Docker Compose commands (`logs`, `ps`, etc.) work also.
 
 ## Loading a Database Backup Using the Script
 
-Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder.
+Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder. Depending on resource on local machine or server, it is possible to increase the number of processors for the restore process. Change the number in line 132 right after -j option, by default is set to 4 processes.
 
 The script has very few options, as shown in these examples:
 ```bash
@@ -94,3 +94,13 @@ The script has very few options, as shown in these examples:
 ./load_database_backup.sh --postgres /usr/etc/postgresql94/bin/ --debug
 ```
 The use of the `-p` flag allows us to use this script to manage multiple instances of the LabKey PostgreSQL container on the same server, provided that each instance is run from its own folder with its own .env file (to specify ports, data file locations, etc.)
+
+## Additional Configurations
+
+In some instance, the shared memory and effective cache size should be modified for dev machines. In the docker/postgres/postgresql.cong file modify line shared_buffers and effective_cache_size to 1024MB and 2048MB respectively.
+
+```
+shared_buffers = 1024MB			# min 128kB
+
+effective_cache_size = 2048MB
+```

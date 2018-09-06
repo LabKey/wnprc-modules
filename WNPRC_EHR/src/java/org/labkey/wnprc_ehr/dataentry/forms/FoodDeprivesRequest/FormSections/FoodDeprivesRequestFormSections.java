@@ -14,7 +14,6 @@ public class FoodDeprivesRequestFormSections extends SimpleFormSection
     {
         super ("study", "foodDeprives", "Food Deprives", "ehr-gridpanel");
         this.addConfigSource("WNPRC_Request");
-       // this.addConfigSource("WNPRC_Request");
         this.addConfigSource("Husbandry");
     }
 

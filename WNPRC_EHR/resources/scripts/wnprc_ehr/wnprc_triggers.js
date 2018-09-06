@@ -183,12 +183,12 @@ exports.init = function (EHR) {
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'assignment', function (row) {
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'assignment', function (row, helper) {
         //we need to set description for every field
         var description = [];
 
-        description.push('Start Date: ' + EHR.Server.Utils.dateToString(row.Date));
-        description.push('Removal Date: ' + (row.enddate ? EHR.Server.Utils.dateToString(row.enddate) : ''));
+        description.push('Start Date: ' + helper.getJavaHelper().formatDate(row.Date, null, true));
+        description.push('Removal Date: ' + (row.enddate ? helper.getJavaHelper().formatDate(row.enddate, null, true): ''));
 
         return description;
     });

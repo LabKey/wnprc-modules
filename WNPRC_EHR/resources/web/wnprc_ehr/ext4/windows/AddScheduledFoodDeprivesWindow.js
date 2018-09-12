@@ -49,6 +49,25 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
                 xtype: 'checkcombo',
                 forceSelection: true,
                 multiSelect: true,
+                fieldLabel: 'Animal Id',
+                itemId: 'animalId',
+                displayField: 'Id',
+                valueField: 'Id',
+                defaultListConfig: {loadingHeight: 70, minHeight: 95, maxHeight: 600, shadow: 'sides'},
+                store: {
+                    type: 'labkey-store',
+                    schemaName: 'study',
+                    queryName: 'foodDeprives',
+                    schemaView: 'Scheduled Food Deprives',
+                    filterArray: [LABKEY.Filter.create('date',(new Date()).format('Y-m-d'), LABKEY.Filter.Types.EQUAL)],
+                    autoLoad: true
+
+                }
+
+            },{
+                xtype: 'checkcombo',
+                forceSelection: true,
+                multiSelect: true,
                 fieldLabel: 'Assigned To',
                 itemId: 'assignedto',
                 displayField: 'title',
@@ -102,6 +121,7 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
     getFilterArray: function(){
         var area = EHR.DataEntryUtils.ensureArray(this.down('#areaField').getValue()) || [];
         var rooms = EHR.DataEntryUtils.ensureArray(this.down('#roomField').getValue()) || [];
+        var animalIds = EHR.DataEntryUtils.ensureArray(this.down('#animalId').getValue()) || [];
         var assignedto = EHR.DataEntryUtils.ensureArray(this.down('#assignedto').getValue()) || [];
         var schedule = EHR.DataEntryUtils.ensureArray(this.down('#schedule').getValue()) || [];
         var performedBy = this.down('#performedBy') ? this.down('#performedBy').getValue() : null;
@@ -110,8 +130,8 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
 
         var date = (this.down('#dateField') ? this.down('#dateField').getValue() : new Date());
 
-        if (area.length==0 && rooms.length==0){
-            alert('Must provide at least one room or an area');
+        if (area.length==0 && rooms.length==0 && animalIds.length==0){
+            alert('Must provide at least an id, one room or an area');
             return;
         }
 
@@ -128,11 +148,14 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
         filterArray.push(LABKEY.Filter.create('QCState/label', 'Scheduled', LABKEY.Filter.Types.STARTS_WITH));
         //filterArray.push(LABKEY.Filter.create('treatmentStatus', null, LABKEY.Filter.Types.ISBLANK));
 
-        if (area)
+        if (area.length)
             filterArray.push(LABKEY.Filter.create('Id/curLocation/area', area.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
 
         if (rooms.length)
             filterArray.push(LABKEY.Filter.create('Id/curLocation/room', rooms.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
+
+        if (animalIds.length)
+            filterArray.push(LABKEY.Filter.create('Id', animalIds.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
 
         if (assignedto.length)
             filterArray.push(LABKEY.Filter.create('assignedTo', assignedto.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));

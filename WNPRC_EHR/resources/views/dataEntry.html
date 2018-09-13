@@ -433,7 +433,7 @@ Ext.onReady(function(){
             }
 
             function onSuccess(dr){
-                var width1 = Ext.get('dataregion_'+dr.id).getSize().width + 50;
+                var width1 = Ext.get(dr.domId).getSize().width + 50;
                 var width2 = Ext.get(taskpanel.id).getSize().width;
 
                 if(width1 > width2){
@@ -661,26 +661,9 @@ Ext.onReady(function(){
                                                     deleteURL: VVCDeleteURL,
                                                     scope: this,
                                                     success: onSuccess
-                                                    /*filters: [
-                                                        LABKEY.Filter.create('QCState/Label', 'In', LABKEY.Filter.Types.STARTS_WITH)
-                                                    ]*/
                                                 }
                                             },
-                                            // {
-                                            //     title: 'Schedule Food Deprives',
-                                            //     ref: 'FoodDepriveRequests',
-                                            //     itemId: 'FoodDepriveRequests',
-                                            //     xtype: 'ehr-qwppanel',
-                                            //     queryConfig:  {
-                                            //         schemaName: 'study',
-                                            //         queryName: 'foodDeprives',
-                                            //         viewName: 'Requests',
-                                            //         scope: this,
-                                            //         filters: [
-                                            //             LABKEY.Filter.create('QCState/Label', 'Schedule', LABKEY.Filter.Types.STARTS_WITH)
-                                            //         ]
-                                            //     }
-                                            // }
+
                                         ]
                                     }
                                 ]

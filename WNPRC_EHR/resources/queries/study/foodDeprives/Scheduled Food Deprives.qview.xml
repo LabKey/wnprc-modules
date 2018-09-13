@@ -3,6 +3,7 @@
         <column name="Id" />
         <column name="date" />
         <column name="id/curlocation/location"/>
+        <column name="id/curlocation/cond"/>
         <column name="project"/>
         <column name="protocolContact"/>
         <column name="remarks"/>
@@ -13,11 +14,10 @@
 
     </columns>
     <sorts>
-        <sort column="date"/>
+        <sort column="date" descending="true"/>
     </sorts>
     <filters>
         <filter column="QCState/Label" operator="eq" value="Scheduled"/>
         <filter column="Id/dataset/demographics/calculated_status" operator="eq" value="Alive"/>
-        <filter column="date" operator="dategte" value="+0d"/>
     </filters>
 </customView>

@@ -65,7 +65,7 @@ Ext4.define('EHR.window.AddStartedFoodDeprivesWindow', {
                     autoLoad: true,
                     schemaName: 'study',
                     queryName: 'foodDeprives',
-                    viewName: 'Started Food Deprive',
+                    viewName: 'Started Food Deprives',
                     sort: 'id'
 
                 },

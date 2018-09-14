@@ -2,6 +2,9 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="chargeRates" tableDbType="TABLE">
+                <importTemplates>
+                    <template label="Download Template for Chargeable Items with Rates" url="/query/exportExcelTemplate.view?schemaName=ehr_billing&amp;query.queryName=chargeableItemsWithRates&amp;captionType=Label&amp;filenamePrefix=chargeRatesWithItemsTemplate" />
+                </importTemplates>
                 <tableTitle>Standard Rates</tableTitle>
                 <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
                 <auditLogging>DETAILED</auditLogging>

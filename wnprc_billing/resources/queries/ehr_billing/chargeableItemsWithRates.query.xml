@@ -4,6 +4,9 @@
             <table tableName="chargeableItemsWithRates" tableDbType="NOT_IN_DB">
                 <description>Template columns for Chargeable Items and Charge Rates</description>
                 <columns>
+                    <column columnName="oldPk">
+                        <columnTitle>oldPk</columnTitle>
+                    </column>
                     <column columnName="name">
                         <columnTitle>name</columnTitle>
                     </column>
@@ -16,17 +19,26 @@
                     <column columnName="departmentCode">
                         <columnTitle>departmentCode</columnTitle>
                     </column>
-                    <column columnName="startDate">
-                        <columnTitle>startDate</columnTitle>
+                    <column columnName="chargeableItemStartDate">
+                        <columnTitle>chargeableItemStartDate</columnTitle>
                     </column>
-                    <column columnName="endDate">
-                        <columnTitle>endDate</columnTitle>
+                    <column columnName="chargeableItemEndDate">
+                        <columnTitle>chargeableItemEndDate</columnTitle>
+                    </column>
+                    <column columnName="comment">
+                        <columnTitle>comment</columnTitle>
                     </column>
                     <column columnName="unitCost">
                         <columnTitle>unitCost</columnTitle>
                     </column>
                     <column columnName="genCredits">
                         <columnTitle>genCredits</columnTitle>
+                    </column>
+                    <column columnName="chargeRateStartDate">
+                        <columnTitle>chargeRateStartDate</columnTitle>
+                    </column>
+                    <column columnName="chargeRateEndDate">
+                        <columnTitle>chargeRateEndDate</columnTitle>
                     </column>
                 </columns>
             </table>

@@ -33,9 +33,6 @@ RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[
   | tar -xz --strip-components=1 \
  && chmod -R 755 .
 
-# update the length of the default web session
-RUN sed -i "s/<session-timeout>[0-9]+<\/session-timeout>/<session-timeout>240<\/session-timeout>/" conf/web.xml
-
 # configure LabKey for tomcat
 RUN mkdir -p conf/Catalina/localhost
 COPY ROOT.xml conf/Catalina/localhost/ROOT.xml

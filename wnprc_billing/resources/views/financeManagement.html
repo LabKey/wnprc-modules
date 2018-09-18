@@ -60,7 +60,7 @@
                     header: 'Rates and Fee Structure',
                     items: [
 //                        {name: 'Explanation of Rates', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'rateCalculation')},
-                        {name: 'Chargeable Items', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeableItems', showImport: true})},
+                        {name: 'Chargeable Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeableItems', showImport: true})},
                         {name: 'Standard Rates', url: LABKEY.ActionURL.buildURL("query", "executeQuery", null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeRates', showImport: true})},
                         //note: exemptions uses ehr controller so we can apply metadata for the project field.
 //                        {name: 'Alias-Level Multipliers', url: LABKEY.ActionURL.buildURL(ehrQueryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'projectMultipliers', 'query.viewName': 'Active Items', showImport: true})},

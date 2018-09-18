@@ -88,8 +88,8 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
 
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_BillingContainerListener());
+
         PipelineService.get().registerPipelineProvider(new BillingPipelineProvider(this));
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_billing/panel/WNPRCBillingSettingsPanel.js"), this);
     }
 
     @Override

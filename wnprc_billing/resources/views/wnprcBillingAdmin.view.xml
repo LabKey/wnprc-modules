@@ -1,6 +1,6 @@
 <view xmlns="http://labkey.org/data/xml/view" title="WNPRC Finance Settings">
     <dependencies>
         <dependency path="ehr.context" />
-        <dependency path="wnprc_billing/panel/WNPRCBillingSettingsPanel.js" />
+        <dependency path="ehr_billing/panel/DomainSettingsPanel.js" />
     </dependencies>
 </view>

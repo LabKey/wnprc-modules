@@ -2,7 +2,9 @@
 
     Ext4.onReady(function(){
         var webpart = <%=webpartContext%>;
-        Ext4.create('wnprc_billing.panel.WNPRCBillingSettingsPanel', {}).render(webpart.wrapperDivId);
+        Ext4.create('EHR_Billing.panel.DomainSettingsPanel', {
+            moduleName: 'wnprc_billing'
+        }).render(webpart.wrapperDivId);
     });
 
 </script>

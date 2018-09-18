@@ -49,17 +49,22 @@ function onInit(event, helper){
     });
 }
 
-function onUpsert(helper, scriptErrors, row, oldRow) {
+function onInsert(helper, scriptErrors, row, oldRow) {
     var format = "E MMM dd yyyy";
 
-    if (row.chargeRateEndDate < row.chargeRateStartDate) {
-        EHR.Server.Utils.addError(scriptErrors, 'chargeRateEndDate', "For charge Item " + row.name + ": Charge rate start date (" + row.chargeRateStartDate + ") is after charge rate end date (" + row.chargeRateEndDate + ").", 'ERROR');
-        return;
+    var rowChargeRateStartDate = EHR.Server.Utils.normalizeDate(row.chargeRateStartDate);
+    var rowChargeRateEndDate = EHR.Server.Utils.normalizeDate(row.chargeRateEndDate);
+    var rowChargeableItemStartDate = EHR.Server.Utils.normalizeDate(row.chargeableItemStartDate);
+    var rowChargeableItemEndDate = EHR.Server.Utils.normalizeDate(row.chargeableItemEndDate);
+
+    if (helper.getJavaHelper().dateCompare(rowChargeRateStartDate, rowChargeRateEndDate, format) > 0) {
+        EHR.Server.Utils.addError(scriptErrors, 'chargeRateEndDate', "For charge Item " + row.name + ": Charge rate start date (" + helper.getJavaHelper().formatDate(rowChargeRateStartDate, format, false) + ") is after charge rate end date (" + helper.getJavaHelper().formatDate(rowChargeRateEndDate, format, false) + ").", 'ERROR');
+        return false;
     }
 
-    if (row.chargeableItemEndDate < row.chargeableItemStartDate) {
-        EHR.Server.Utils.addError(scriptErrors, 'chargeableItemEndDate', "For charge Item " + row.name + ": Charge item start date (" + row.chargeableItemStartDate + ") is after charge item end date (" + row.chargeableItemEndDate + ").", 'ERROR');
-        return;
+    if (helper.getJavaHelper().dateCompare(rowChargeableItemStartDate, rowChargeableItemEndDate, format) > 0) {
+        EHR.Server.Utils.addError(scriptErrors, 'chargeableItemEndDate', "For charge Item " + row.name + ": Charge item start date (" + helper.getJavaHelper().formatDate(rowChargeableItemStartDate, format, false) + ") is after charge item end date (" + helper.getJavaHelper().formatDate(rowChargeableItemEndDate, format, false) + ").", 'ERROR');
+        return false;
     }
 
     var isItemUpdate = false;
@@ -72,8 +77,6 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     }
 
     if (isItemUpdate) {
-        var rowStartDate = EHR.Server.Utils.normalizeDate(row.chargeRateStartDate);
-        var rowEndDate = EHR.Server.Utils.normalizeDate(row.chargeRateEndDate);
         var savedStartDate, savedEndDate;
         for (var r = 0; r < validRates[row.chargeId].length; r++) {
 
@@ -81,20 +84,20 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             savedStartDate = EHR.Server.Utils.normalizeDate(validRates[row.chargeId][r].startDate);
             savedEndDate = EHR.Server.Utils.normalizeDate(validRates[row.chargeId][r].endDate);
 
-            if (helper.getJavaHelper().dateCompare(rowStartDate, savedStartDate, format) >= 0 && helper.getJavaHelper().dateCompare(rowStartDate, savedEndDate, format) < 0
-                    || helper.getJavaHelper().dateCompare(savedStartDate, rowStartDate, format) >= 0 && helper.getJavaHelper().dateCompare(savedStartDate,rowEndDate, format) < 0) {
+            if (helper.getJavaHelper().dateCompare(rowChargeRateStartDate, savedStartDate, format) >= 0 && helper.getJavaHelper().dateCompare(rowChargeRateStartDate, savedEndDate, format) < 0
+                    || helper.getJavaHelper().dateCompare(savedStartDate, rowChargeRateStartDate, format) >= 0 && helper.getJavaHelper().dateCompare(savedStartDate,rowChargeRateEndDate, format) < 0) {
                 EHR.Server.Utils.addError(scriptErrors, 'chargeRateStartDate', "For charge Item " + row.name + ": Charge rate ("
-                        + helper.getJavaHelper().formatDate(rowStartDate, format, false) + " to " + helper.getJavaHelper().formatDate(rowEndDate, format, false) +
+                        + helper.getJavaHelper().formatDate(rowChargeRateStartDate, format, false) + " to " + helper.getJavaHelper().formatDate(rowChargeRateEndDate, format, false) +
                         ") overlaps a previous charge rate (" + helper.getJavaHelper().formatDate(savedStartDate, format, false) + " to " + helper.getJavaHelper().formatDate(savedEndDate, format, false) + ").", 'ERROR');
-                return;
+                return false;
             }
 
             // Verify end date not within another range
-            if (helper.getJavaHelper().dateCompare(rowEndDate, savedStartDate, format) >= 0 && helper.getJavaHelper().dateCompare(rowEndDate, savedEndDate, format) < 0) {
+            if (helper.getJavaHelper().dateCompare(rowChargeRateEndDate, savedStartDate, format) >= 0 && helper.getJavaHelper().dateCompare(rowChargeRateEndDate, savedEndDate, format) < 0) {
                 EHR.Server.Utils.addError(scriptErrors, 'chargeRateEndDate', "For charge Item " + row.name + ": Charge rate ("
-                        + helper.getJavaHelper().formatDate(rowStartDate, format, false) + " to " + helper.getJavaHelper().formatDate(rowEndDate, format, false) +
+                        + helper.getJavaHelper().formatDate(rowChargeRateStartDate, format, false) + " to " + helper.getJavaHelper().formatDate(rowChargeRateEndDate, format, false) +
                         ") overlaps a previous charge rate (" + helper.getJavaHelper().formatDate(savedStartDate, format, false) + " to " + helper.getJavaHelper().formatDate(savedEndDate, format, false) + ").", 'ERROR');
-                return;
+                return false;
             }
         }
     }

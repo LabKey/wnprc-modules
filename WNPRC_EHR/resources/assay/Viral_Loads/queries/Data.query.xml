@@ -1,0 +1,177 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Data" tableDbType="TABLE">
+                <javaCustomizer>org.labkey.wnprc_ehr.query.ViralAssayCustomizer</javaCustomizer>
+                <columns>
+                    <column columnName="subjectId">
+                        <columnTitle>Subject Id</columnTitle>
+                        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+                    </column>
+                    <column columnName="date">
+                        <description>The date this samle was collected</description>
+                    </column>
+                    <column columnName="sampleType">
+                        <columnTitle>Nucleic Acid Type</columnTitle>
+                        <description>The type of sample, ie. DNA, RNA, etc.</description>
+                        <fk>
+                            <fkDbSchema>viral_load_assay</fkDbSchema>
+                            <fkTable>nucleic_acid</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                        <defaultValue>Plasma</defaultValue>
+                        <measure>false</measure>
+                        <dimension>true</dimension>
+                    </column>
+                    <column columnName="sourceMaterial">
+                        <columnTitle>Source Material</columnTitle>
+                        <description>This is the source of the genomic material.  It is usually plasma, but could also be supernatant or other sources</description>
+                        <fk>
+                            <fkDbSchema>viral_load_assay</fkDbSchema>
+                            <fkTable>source_material</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                        <measure>false</measure>
+                        <dimension>true</dimension>
+                    </column>
+                    <column columnName="category">
+                        <description>The result category, which is primarily used to differentiate experimental controls from other results</description>
+                        <fk>
+                            <fkDbSchema>laboratory</fkDbSchema>
+                            <fkTable>samplecategory</fkTable>
+                            <fkColumnName>category</fkColumnName>
+                        </fk>
+                        <defaultValue>Unknown</defaultValue>
+                        <measure>false</measure>
+                        <dimension>true</dimension>
+                    </column>
+                    <column columnName="assayId">
+                        <columnTitle>Assay Name</columnTitle>
+                        <description>The name of the assay performed</description>
+                        <fk>
+                            <fkDbSchema>Viral_Load_Assay</fkDbSchema>
+                            <fkTable>assays</fkTable>
+                            <fkColumnName>assayName</fkColumnName>
+                        </fk>
+                        <measure>false</measure>
+                        <dimension>true</dimension>
+                    </column>
+                    <column columnName="sampleVol">
+                        <columnTitle>Source Material Size (ml or mg)</columnTitle>
+                        <description>This is the volume or mass of the source material</description>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="dilutionFactor">
+                        <columnTitle>Dilution Factor</columnTitle>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="volPerRxn">
+                        <description>The volume of sample added per reaction.</description>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="cp">
+                        <columnTitle>CT</columnTitle>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="eluateVol">
+                        <columnTitle>Eluate Volume</columnTitle>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="copiesPerRxn">
+                        <columnTitle>Copies Per Rxn</columnTitle>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="viralLoad">
+                        <columnTitle>Viral Load</columnTitle>
+                        <conceptURI>http://cpas.labkey.com/laboratory#assayResult</conceptURI>
+                        <measure>true</measure>
+                        <formatString>0.##</formatString>
+                    </column>
+                    <column columnName="viralLoadScientific" wrappedColumnName="viralLoad">
+                        <columnTitle>Viral Load</columnTitle>
+                        <conceptURI>http://cpas.labkey.com/laboratory#assayResult</conceptURI>
+                        <description>This column shows the viral load, formatted in scientific notation</description>
+                        <measure>true</measure>
+                        <formatString>0.#E00</formatString>
+                    </column>
+                    <column columnName="sampleId">
+                        <columnTitle>Sample Id</columnTitle>
+                        <description>The unique ID of this sample, which corresponds to a row in the samples table</description>
+                        <fk>
+                            <fkDbSchema>laboratory</fkDbSchema>
+                            <fkTable>samples</fkTable>
+                            <fkColumnName>freezerid</fkColumnName>
+                        </fk>
+                        <inputType>text</inputType>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="requestid">
+                        <inputType>RequestId</inputType>
+                        <!--<fk>-->
+                        <!--<fkDbSchema>laboratory</fkDbSchema>-->
+                        <!--<fkTable>assay_requests</fkTable>-->
+                        <!--<fkColumnName>rowid</fkColumnName>-->
+                        <!--</fk>-->
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="comment">
+                        <columnTitle>Comment</columnTitle>
+                    </column>
+                    <column columnName="nucleicAcidVol">
+                        <columnTitle>Volume of NA (ul)</columnTitle>
+                        <description>This is the input volume of the nucleic acid</description>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="qcflag">
+                        <columnTitle>QC Flags</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="isnonblank" value=""/>
+                                </filters>
+                                <backgroundColor>FFFF00</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                        <measure>false</measure>
+                        <dimension>false</dimension>
+                    </column>
+                    <column columnName="well96" wrappedColumnName="well">
+                        <isUnselectable>true</isUnselectable>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <columnTitle>Well Position in 96-well Plate</columnTitle>
+                        <fk>
+                            <fkDbSchema>laboratory</fkDbSchema>
+                            <fkTable>96well_plate</fkTable>
+                            <fkColumnName>well</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+                <buttonBarOptions position="both" includeStandardButtons="true">
+                    <includeScript>/laboratory/assayButtons.js</includeScript>
+                    <!--<onRender>Laboratory.onAssayLoad</onRender>-->
+                    <item text="More Actions" insertAfter="last">
+                        <item text="View Batches">
+                            <onClick>Laboratory.Assay.viewBatchesBtn(dataRegion, 'Data')</onClick>
+                        </item>
+                        <item text="View Runs">
+                            <onClick>Laboratory.Assay.viewRunsBtn(dataRegion, 'Data')</onClick>
+                        </item>
+                        <item text="Manage Assay">
+                            <onClick>Laboratory.Assay.manageAssayBtn(dataRegion, 'Data')</onClick>
+                        </item>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>

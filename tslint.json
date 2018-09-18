@@ -1,0 +1,12 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:latest", "tslint-react"],
+  "rules": {
+    "interface-name": [true, "never-prefix"],
+    "jsx-no-multiline-js": [false],
+    "max-classes-per-file": [true, 5],
+    "no-console": [false],
+    "no-unbound-method": true,
+    "quotemark": [true, "single", "jsx-double"]
+  }
+}

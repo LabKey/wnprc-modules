@@ -1,13 +1,10 @@
 dependencies {
-
-    apiExternal "xerces:xercesImpl:2.11.0"
-    apiExternal "org.apache.commons:commons-collections4:4.1"
+    apiExternal "xerces:xercesImpl:${xercesImplVersion}"
+    apiExternal "org.apache.commons:commons-collections4:${commonsCollections4Version}"
     apiExternal "joda-time:joda-time:2.9.3"
-
     compile "javax.servlet:jsp-api:2.0"
     compile files(apiJar)
-
     external "org.jooq:jooq:3.8.4"
-    external "org.apache.commons:commons-collections4:4.1"
+    external "org.apache.commons:commons-collections4:${commonsCollections4Version}"
     external "joda-time:joda-time:2.9.3"
 }

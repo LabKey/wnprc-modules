@@ -1,0 +1,23 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="date" />
+        <column name="schedule"/>
+        <column name="id/curlocation/location"/>
+        <column name="id/curlocation/cond"/>
+        <column name="project"/>
+        <column name="protocolContact"/>
+        <column name="remarks"/>
+        <column name="reason"/>
+        <column name="qcstate"/>
+        <column name="requestid"/>
+
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="QCState/Label" operator="eq" value="Scheduled"/>
+        <filter column="Id/dataset/demographics/calculated_status" operator="eq" value="Alive"/>
+    </filters>
+</customView>

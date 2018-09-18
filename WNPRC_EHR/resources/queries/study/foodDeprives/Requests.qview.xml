@@ -1,0 +1,26 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="date" />
+        <column name="project"/>
+        <column name="schedule"/>
+        <column name="assignedTo"/>
+        <column name="remarks"/>
+        <column name="reason"/>
+        <column name="protocolContact"/>
+        <column name="qcstate"/>
+        <column name="requestid/createdby/DisplayName">
+            <properties>
+                <property name="columnTitle" value="Requestor"/>
+            </properties>
+        </column>
+        <column name="requestid"/>
+
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+    <!--<filters>-->
+    <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

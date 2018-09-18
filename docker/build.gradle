@@ -6,40 +6,48 @@ idea.module {
 }
 
 task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the ehrcron docker image") {
-    workingDir "${project.rootDir}/docker/ehrcron"
+    workingDir "$projectDir/ehrcron"
     executable "docker"
-    args "build", ".", "-t", "wnprcehr/ehrcron:v1.0.0"
+    args "build", ".", "-t", "wnprcehr/ehrcron:latest"
 }
 
-task("buildLabkey", group: "Docker", type: Exec, description: "Generates the LabKey docker image") {
-    workingDir "${project.rootDir}/docker/labkey"
+task("buildTomcat", group: "Docker", type: Exec, description: "Generates the Tomcat docker image (with R)") {
+    workingDir "$projectDir/tomcat"
     executable "docker"
-    args "build", ".", "-t", "wnprcehr/labkey:15.2"
+    args "build", ".", "-t", "wnprcehr/tomcat:latest"
 }
 
-task("buildMonit", group: "Docker", type: Exec, description: "Generates the Monit docker image") {
-    workingDir "${project.rootDir}/docker/monit"
-    executable "docker"
-    args "build", ".", "-t", "wnprcehr/monit:latest"
+task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrcron", "buildPostfix"]) { Task t ->
+    doLast {
+        if (project.hasProperty('labkeyTeamcityUsername') && project.hasProperty('labkeyTeamcityPassword')) {
+            t.project.exec {
+                workingDir "$projectDir/labkey"
+                executable "docker"
+                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2", "--no-cache"
+            }
+        } else {
+            logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'
+        }
+    }
 }
 
-task("buildPgbadger", group: "Docker", type: Exec, description: "Generates the pgbadger docker image") {
-    workingDir "${project.rootDir}/docker/pgbadger"
+task("buildPostfix", group: "Docker", type: Exec, description: "Generates the postfix docker image") {
+    workingDir "$projectDir/postfix"
     executable "docker"
-    args "build", ".", "-t", "wnprcehr/pgbadger:latest"
+    args "build", ".", "-t", "wnprcehr/postfix:latest"
 }
 
-task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildEhrcron", "buildLabkey", "buildMonit", "buildPgbadger" ] )
+task("build", group: "Docker", description: "Generates all the docker images in the subfolders", dependsOn: [ "buildTomcat", "buildEhrcron", "buildLabkey", "buildPostfix" ] )
 
 task("up", group: "Docker", type: Exec, description: "Starts the docker-compose environment (labkey + postgres)") {
-    workingDir "${project.rootDir}/docker"
+    workingDir "$projectDir"
     executable "docker-compose"
     args "up", "-d"
     environment CATALINA_OPTS: "-ea -Ddevmode=true"
 }
 
 task("down", group: "Docker", type: Exec, description: "Shuts down the docker-compose environment (labkey + postgres)") {
-    workingDir "${project.rootDir}/docker"
+    workingDir "$projectDir"
     executable "docker-compose"
     args "down"
 }

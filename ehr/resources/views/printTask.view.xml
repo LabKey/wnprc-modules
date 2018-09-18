@@ -1,5 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" title="Print Task" frame="none" template="print">
-    <dependencies>
-        <dependency path="ehr.context" />
-    </dependencies>
-</view>

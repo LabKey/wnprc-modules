@@ -1,0 +1,6 @@
+<view xmlns="http://labkey.org/data/xml/view"
+      title="D3 Test">
+      <dependencies>
+            <dependency path="/webutils/lib/webutils"></dependency>
+      </dependencies>
+</view>

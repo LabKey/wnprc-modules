@@ -1,0 +1,14 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library>
+        <script path="/webutils/lib/webutils_core/api.js"/>
+    </library>
+    <dependencies>
+        <dependency path="/webutils/lib/webutils_core/utilities/utilities"/>
+
+        <!--
+            This isn't so much of a true dependency, but it is needed for WebUtils.API to handle CSRF, as well
+            as the custom LabKey component loader for templates.
+        -->
+        <dependency path="clientapi"/>
+    </dependencies>
+</libraries>

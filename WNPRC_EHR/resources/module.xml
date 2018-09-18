@@ -1,0 +1,17 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <clientDependencies>
+        <dependency path="webutils/lib/webutils"/>
+        <dependency path="webutils/models/models"/>
+        <dependency path="ehr/ehr_api"/>
+        <dependency path="ehr/ehr_ext3_api"/>
+    </clientDependencies>
+    <properties>
+        <propertyDescriptor name="BCGoogleDriveAccount">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>Id for the Google Drive Account that EHR should save BC reports to.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+    </properties>
+</module>

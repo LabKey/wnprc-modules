@@ -1,0 +1,63 @@
+<tables xmlns="http://labkey.org/data/xml">
+  <table tableName="vvc" tableDbType="TABLE">
+    <columns>
+      <column columnName="rowid"/>
+      <column columnName="date"/>
+      <column columnName="dateapproved"/>
+      <column columnName="pi"/>
+      <column columnName="protocol"/>
+      <column columnName="description"/>
+      <column columnName="rationale"/>
+      <column columnName="veterinarian"/>
+      <column columnName="requestid"/>
+      <column columnName="taskid"/>
+      <column columnName="qcstate"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="necropsy_suite" tableDbType="TABLE">
+    <columns>
+      <column columnName="room"/>
+      <column columnName="disabled_on"/>
+      <column columnName="display_color"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+      <column columnName="displayname"/>
+    </columns>
+  </table>
+  <table tableName="email_server" tableDbType="TABLE">
+    <columns>
+      <column columnName="id"/>
+      <column columnName="hostname"/>
+      <column columnName="protocol"/>
+      <column columnName="port"/>
+      <column columnName="display_name"/>
+      <column columnName="use_ssl"/>
+      <column columnName="disabled_on"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+  <table tableName="external_labs" tableDbType="TABLE">
+    <columns>
+      <column columnName="code"/>
+      <column columnName="lab_name"/>
+      <column columnName="disabled_on"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
+</tables>

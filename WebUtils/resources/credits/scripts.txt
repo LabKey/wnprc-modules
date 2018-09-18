@@ -1,24 +1,17 @@
 {table}
 Library|Version|Source|License|LabKey Dev|Purpose
-Awesome Bootstrap Checkbox|0.3.7|{link:GitHub|https://github.com/flatlogic/awesome-bootstrap-checkbox}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Enhanced Checkbox Styling
 Bootstrap|3.3.6|{link:Bootstrap|http://getbootstrap.com}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|UI
 C3|0.4.10|{link:C3|http://c3js.org}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Charts/Visualizations
 Classify|0.0.42|{link:ClassifyJS|https://github.com/JonathonRichardson/ClassifyJS}|{link:Apache 2.0|https://github.com/JonathonRichardson/ClassifyJS/blob/master/LICENSE}|jrichardson|Class Structures
 D3|3.5.9|{link:D3|http://d3js.org/}|{link:BSD|http://opensource.org/licenses/BSD-3-Clause}|jrichardson|Graphing/Visualizations
-Fetch|2.0.2|{link:Fetch|https://github.com/github/fetch}|{link:GitHub|https://github.com/github/fetch/blob/master/LICENSE}|jrichardson|Simpler Ajax with Promisess
-Font Awesome|4.7.0|{link:Font Awesome|http://fontawesome.io/}|{link:SIL OFL 1.1/CC/MIT|http://fontawesome.io/license/}|jrichardson|Icons
 jQuery BlockUI|2.7|{link:BlockUI|http://malsup.com/jquery/block/#overview}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|UI
 Knockout|3.3.0|{link:Knockout.js|http://knockoutjs.com}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Lightweight, Responsive Components and Observables
 Knockout-Mapping|2.4.1|{link:Knockout.js/Mapping Plugin|http://knockoutjs.com/documentation/plugins-mapping.html}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Mapping Plugin for Mapping Objects to Observables
 Knockout-Punches|0.5.1|{link:Knockout.js/Punches Plugin|https://mbest.github.io/knockout.punches/}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Enhanced Binding Syntaxes for Knockout
 Markdown-JS|0.6.0|{link:Markdown-JS|https://github.com/evilstreak/markdown-js}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Parsing of Markdown syntax.
-Moment.js|2.17.1|{link:Moment.js|https://momentjs.com/}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Date and Time manipulation
-Quill|1.2.2|{link:Quill|https://quilljs.com/}|{link:BSD-3-Clause|https://github.com/quilljs/quill/blob/develop/LICENSE}|jrichardson|Text Editing (C) Jason Chen, 2014 and (C) salesforce.com, 2013
-QUnit|2.1.1|{link:QUnit|https://qunitjs.com/}|{link:JS Foundation|https://github.com/qunitjs/qunit/blob/master/LICENSE.txt}|jrichardson|Client side unit testing
 RSVP|3.1.0|{link:RSVP.js|https://github.com/tildeio/rsvp.js/}|{link:MIT|https://raw.githubusercontent.com/tildeio/rsvp.js/master/LICENSE}|jrichardson|Javascript Promises
 SuperSQLStore|0.0.7|{link:SuperSQLStore|https://github.com/JonathonRichardson/SuperSQLStoreJS}|{link:Apache 2.0|https://github.com/JonathonRichardson/SuperSQLStoreJS/blob/master/LICENSE}|jrichardson|Observable Tables to Bind to Knockout
 toastr|2.1.3|{link:toastr|https://github.com/CodeSeven/toastr}|{link:MIT|https://raw.githubusercontent.com/tildeio/rsvp.js/master/LICENSE}|jrichardson|UI
 Underscore|1.8.3|{link:Underscore.js|http://underscorejs.org/}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Lightweight Object/Array Utilities
 Underscore-String|3.2.2|{link:Underscore.String.js|https://github.com/epeli/underscore.string}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Lightweight String Utilities
-URI.js|1.18.8|{link:URI.js|https://medialize.github.io/URI.js/}|{link:MIT|http://opensource.org/licenses/mit-license.php}|jrichardson|Client side URI scripting
 {table}

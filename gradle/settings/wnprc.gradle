@@ -1,0 +1,40 @@
+import org.labkey.gradle.util.BuildUtils
+
+// include all the modules in server/modules
+BuildUtils.includeModules(this.settings, rootDir, [BuildUtils.SERVER_MODULES_DIR], [])
+
+// include the modules required for base EHR
+BuildUtils.includeModules(this.settings, [
+         ":externalModules:labModules:GenotypeAssays"
+        ,":externalModules:labModules:laboratory"
+        ,":externalModules:labModules:LDK"
+        ,":externalModules:labModules:SequenceAnalysis"
+        ,":externalModules:labModules:Viral_Load_Assay"
+        ,":server:customModules:ehr"
+        ,":server:customModules:EHR_ComplianceDB"
+        ,":server:customModules:fcsexpress"
+        ,":server:customModules:genotyping"
+        ,":server:customModules:specimencheck"
+        ,":server:customModules:targetedms"
+])
+
+// include the WNPRC modules from the git clone
+include 'externalModules:wnprc-modules:docker'
+include 'externalModules:wnprc-modules:java2ts'
+include 'externalModules:wnprc-modules'
+file("../../").listFiles().findAll { d ->
+    d.isDirectory() && (new File(d.getAbsolutePath(), 'build.gradle')).exists()
+}.each { d ->
+    include "externalModules:wnprc-modules:${d.getName()}"
+}
+
+// include the main distributions (necessary for TeamCity)
+include ":server:distributions:test"
+include ":server:distributions:base"
+include ":server:distributions:community"
+include ":server:distributions:pro"
+include ":server:distributions:pro_plus"
+
+// include our WNPRC-specific community distribution
+include ":externalModules:wnprc-modules:distributions:wisc"
+include ":externalModules:wnprc-modules:distributions:wisc_community"

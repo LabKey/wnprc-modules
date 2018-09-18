@@ -11,8 +11,8 @@ h.cond,
 h.id.numRoommates.numRoommates as numRoommates,
 CASE
   WHEN (h.cond = 's' or h.cond = 'pc') AND h.id.numRoommates.numRoommates != 0 THEN 'ERROR'
-  WHEN (h.cond = 'p' or h.cond = 'm' or h.cond = 'f') AND h.id.numRoommates.numRoommates != 1 THEN 'ERROR'
-  WHEN (h.cond = 'g' or h.cond = 'gam' or h.cond = 'gf' or h.cond = 'gm' or h.cond = 'gmf' or h.cond = 'vc' or h.cond = 'b') AND h.id.numRoommates.numRoommates < 2 THEN 'ERROR'
+  WHEN (h.cond = 'p' or h.cond = 'm' or h.cond = 'f' or h.cond = 'b') AND h.id.numRoommates.numRoommates != 1 THEN 'ERROR'
+  WHEN (h.cond = 'g' or h.cond = 'gam' or h.cond = 'gf' or h.cond = 'gm' or h.cond = 'gmf' ) AND h.id.numRoommates.numRoommates < 2 THEN 'ERROR'
   ELSE null
 END as conditionStatus
 

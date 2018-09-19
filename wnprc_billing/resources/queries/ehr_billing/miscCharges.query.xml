@@ -2,7 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="miscCharges" tableDbType="TABLE">
-                <javaCustomizer>org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer</javaCustomizer>
+                <javaCustomizer class = "org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer" />
                 <columns>
                     <column columnName="Id">
                         <fk>
@@ -37,7 +37,7 @@
                     <column columnName="chargetype">
                         <columnTitle>Charge Unit</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
                             <fkTable>chargeUnits</fkTable>
                             <fkColumnName>chargetype</fkColumnName>
                             <fkDisplayColumnName useRawValue="true"/>
@@ -46,10 +46,19 @@
                     <column columnName="chargeId">
                         <columnTitle>Charge Item</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
                             <fkTable>chargeableItems</fkTable>
                             <fkColumnName>rowid</fkColumnName>
                             <fkDisplayColumnName>name</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="invoiceId">
+                        <columnTitle>Invoice Run Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
+                            <fkTable>invoiceRuns</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>rowid</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="objectid">
@@ -61,7 +70,14 @@
                     <column columnName="modified">
                         <isHidden>true</isHidden>
                     </column>
-                    <column columnName="debitedaccount"/>
+                    <column columnName="debitedaccount">
+                        <columnTitle>Debit Account</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="creditedaccount"/>
                 </columns>
             </table>

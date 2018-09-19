@@ -6,7 +6,6 @@
                     <template label="Download Template for Chargeable Items with Rates" url="/query/exportExcelTemplate.view?schemaName=ehr_billing&amp;query.queryName=chargeableItemsWithRates&amp;captionType=Label&amp;filenamePrefix=chargeableItemsWithRatesTemplate" />
                 </importTemplates>
                 <tableTitle>Chargeable Items</tableTitle>
-                <javaCustomizer class ="org.labkey.ehr.table.DefaultEHRCustomizer"/>
                 <auditLogging>DETAILED</auditLogging>
                 <columns>
                     <column columnName="oldPk">

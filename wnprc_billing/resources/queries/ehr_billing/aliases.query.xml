@@ -3,7 +3,6 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="aliases" tableDbType="TABLE" useColumnOrder="true">
             <tableTitle>Grant Accounts</tableTitle>
-            <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
             <auditLogging>DETAILED</auditLogging>
             <columns>
                 <column columnName="alias">

@@ -18,7 +18,6 @@
  -->
 <tables xmlns="http://labkey.org/data/xml">
     <table tableName="creditAccount" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableTitle>Aliases Receiving Credits For Each Charge</tableTitle>
         <columns>
@@ -50,7 +49,6 @@
     </table>
     <table tableName="perDiemFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>NHP Per Diem Fee Structure</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowId">
@@ -107,7 +105,6 @@
         </columns>
     </table>
     <table tableName="leaseFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableTitle>Replacement Fee Definition</tableTitle>
         <columns>
@@ -166,7 +163,6 @@
     </table>
     <table tableName="fiscalAuthorities" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Financial Analysts</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -226,7 +222,6 @@
     </table>
     <table tableName="grants" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Grants</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableUrl>/query/recordDetails.view?schemaName=wnprc_billing&amp;query.queryName=grants&amp;keyField=rowid&amp;key=${rowid}</tableUrl>
         <columns>
@@ -301,7 +296,6 @@
     </table>
     <table tableName="procedureFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Procedure Fee Structure</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -356,7 +350,6 @@
     </table>
     <table tableName="medicationFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Medication Fee Structure</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -408,7 +401,6 @@
     </table>
     <table tableName="projectAccountHistory" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Project Alias History</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -443,7 +435,6 @@
     </table>
     <table tableName="grantProjects" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Grant Projects</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableUrl>/query/recordDetails.view?schemaName=wnprc_billing&amp;query.queryName=grantProjects&amp;keyField=rowid&amp;key=${rowid}</tableUrl>
         <columns>
@@ -513,7 +504,6 @@
     <table tableName="iacucFundingSources" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Approved IACUC Funding Sources</tableTitle>
         <auditLogging>DETAILED</auditLogging>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <columns>
             <column columnName="rowid"/>
             <column columnName="protocol">
@@ -541,7 +531,6 @@
     </table>
     <table tableName="labworkFeeDefinition" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Labwork Fee Structure</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowid">
@@ -593,7 +582,6 @@
     </table>
     <table tableName="dataAccess" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Billing Data Read Access</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <pkColumnName>rowid</pkColumnName>
         <columns>
@@ -679,7 +667,6 @@
     </table>
     <table tableName="aliasTypes" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Alias Types &amp; Rate Modifiers</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="aliasType">
@@ -702,7 +689,6 @@
     </table>
     <table tableName="projectMultipliers" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Alias Multipliers</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="rowId"/>
@@ -729,14 +715,12 @@
     </table>
     <table tableName="miscChargesType" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Misc Charges Type</tableTitle>
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <columns>
             <column columnName="category"/>
         </columns>
     </table>
     <table tableName="chargeUnitAccounts" tableDbType="TABLE" useColumnOrder="true">
-        <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
         <auditLogging>DETAILED</auditLogging>
         <tableTitle>Aliases Per Charge Unit</tableTitle>
         <columns>

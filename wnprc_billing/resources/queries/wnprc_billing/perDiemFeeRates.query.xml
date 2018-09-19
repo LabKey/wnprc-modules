@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="perDiemsRates" tableDbType="NOT_IN_DB">
+            <table tableName="perDiemsFeeRates" tableDbType="NOT_IN_DB">
                 <tableTitle>Per Diem Rates</tableTitle>
                 <columns>
                     <column columnName="unitCost">

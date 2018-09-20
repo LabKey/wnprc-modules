@@ -28,6 +28,12 @@
                     <column columnName="comment">
                         <columnTitle>comment</columnTitle>
                     </column>
+                    <column columnName="active">
+                        <columnTitle>active</columnTitle>
+                    </column>
+                    <column columnName="allowBlankId">
+                        <columnTitle>allowBlankId</columnTitle>
+                    </column>
                     <column columnName="unitCost">
                         <columnTitle>unitCost</columnTitle>
                     </column>

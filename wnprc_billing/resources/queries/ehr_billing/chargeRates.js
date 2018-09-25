@@ -112,7 +112,8 @@ function onInsert(helper, scriptErrors, row, oldRow) {
         "active": row.active,
         "container": row.container,
         "startDate": row.chargeableItemStartDate,
-        "endDate": row.chargeableItemEndDate
+        "endDate": row.chargeableItemEndDate,
+        "allowBlankId": row.allowBlankId
     };
 
     row.startDate = row.chargeRateStartDate;

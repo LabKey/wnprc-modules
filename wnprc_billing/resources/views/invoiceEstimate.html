@@ -142,6 +142,7 @@
 //                        containerPath: billingContainer,
                         schemaName: 'wnprc_billing',
                         queryName: 'perDiemFeeRates',
+                        dataRegionName: 'perDiemFeeRatesQueryRegion',
                         filterArray: [
                             LABKEY.Filter.create('project', project, LABKEY.Filter.Types.EQUAL)
                         ],
@@ -164,6 +165,7 @@
 //                        containerPath: billingContainer,
                         schemaName: 'wnprc_billing',
                         queryName: 'procedureFeeRates',
+                        dataRegionName: 'procedureFeeRatesQueryRegion',
                         filterArray: [
                             LABKEY.Filter.create('project', project, LABKEY.Filter.Types.EQUAL)
                         ],
@@ -185,6 +187,7 @@
                         containerPath: ctx.EHRStudyContainer,
                         schemaName: 'wnprc_billing',
                         queryName: 'miscChargesFeeRates',
+                        dataRegionName: 'miscChargesFeeRatesQueryRegion',
                         filterArray: [
                             LABKEY.Filter.create('project', project, LABKEY.Filter.Types.EQUAL)
                         ],

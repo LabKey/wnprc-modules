@@ -1,0 +1,23 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+<columns>
+    <column name="rowId"/>
+    <column name="runDate"/>
+    <column name="billingPeriodStart"/>
+    <column name="billingPeriodEnd"/>
+    <column name="comment"/>
+    <column name="status"/>
+    <column name="viewJETInvoice">
+        <properties>
+            <property name="columnTitle" value="CSV Preview"/>
+        </properties>
+    </column>
+    <column name="downloadJetCsv">
+        <properties>
+            <property name="columnTitle" value="CSV Download"/>
+        </properties>
+    </column>
+</columns>
+<sorts>
+    <sort column="billingPeriodEnd" descending="true" />
+</sorts>
+</customView>

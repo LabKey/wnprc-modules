@@ -2,7 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="invoiceExternal" tableDbType="NOT_IN_DB">
-                <javaCustomizer>org.labkey.wnprc_billing.WNPRC_InvoiceCustomizer</javaCustomizer>
+                <javaCustomizer class = "org.labkey.wnprc_billing.WNPRC_InvoiceCustomizer"/>
                 <tableTitle>External Invoices for All Billing Runs</tableTitle>
                 <columns>
                     <column columnName="rowId"/>

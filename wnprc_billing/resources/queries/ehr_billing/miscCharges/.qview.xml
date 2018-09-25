@@ -11,5 +11,6 @@
         <column name="quantity"/>
         <column name="unitCost"/>
         <column name="comment"/>
+        <column name="invoiceId"/>
     </columns>
 </customView>

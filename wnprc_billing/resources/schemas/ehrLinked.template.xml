@@ -1,0 +1,8 @@
+<templateSchema xmlns="http://labkey.org/data/xml/externalSchema"
+                xmlns:dat="http://labkey.org/data/xml"
+                xmlns:cv="http://labkey.org/data/xml/queryCustomView"
+                sourceSchemaName="ehr">
+    <tables>
+        <tableName>project</tableName>
+    </tables>
+</templateSchema>

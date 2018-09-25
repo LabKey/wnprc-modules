@@ -3,6 +3,10 @@
     Ext4.onReady(function(){
         var webpart = <%=webpartContext%>;
         var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+
+        var billingCtx = LABKEY.getModuleContext('wnprc_billing');
+        var billingContainer = billingCtx ? billingCtx.BillingContainer : null;
+
         if(!ctx)
             return;
 
@@ -79,15 +83,18 @@
                         style: 'padding-bottom: 20px;'
                     },{
                         xtype: 'ehr-projectfield',
-                        itemId: 'projectField'
+                        itemId: 'projectField',
+                        fieldLabel: 'Center Project'
                     },{
                         xtype: 'datefield',
                         itemId: 'startDate',
+                        name: 'startDate',
                         fieldLabel: 'Start Date',
                         value: ctx.startDate
                     },{
                         xtype: 'datefield',
                         itemId: 'endDate',
+                        name: 'endDate',
                         fieldLabel: 'End Date',
                         value: ctx.endDate
                     }],
@@ -126,15 +133,13 @@
                     interval = endDate.getTime() - startDate.getTime();
                     interval = Math.floor(1 + (interval / (1000 * 60 * 60 * 24)));
                 }
-                var slaCtx = LABKEY.getModuleContext('sla');
-                var slaContainer = slaCtx ? slaCtx.SLAContainer : null;
 
                 var toAdd = [{
                     xtype: 'ldk-querypanel',
                     style: 'margin-bottom: 20px;',
                     queryConfig: {
                         title: 'Per Diems: ' + projectName,
-//                        containerPath: ctx.EHRStudyContainer,
+//                        containerPath: billingContainer,
                         schemaName: 'wnprc_billing',
                         queryName: 'perDiemFeeRates',
                         filterArray: [
@@ -156,7 +161,7 @@
                     style: 'margin-bottom: 20px;',
                     queryConfig: {
                         title: 'Procedure Fees: ' + projectName,
-//                        containerPath: ctx.EHRStudyContainer,
+//                        containerPath: billingContainer,
                         schemaName: 'wnprc_billing',
                         queryName: 'procedureFeeRates',
                         filterArray: [

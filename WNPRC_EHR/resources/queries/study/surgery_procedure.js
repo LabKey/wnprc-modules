@@ -47,32 +47,32 @@ function onInit(event, helper){
 // }
 
 function onInsert(helper, scriptErrors, row, oldRow) {
-    if (row.linkToExisting && row.linkedRequest) {
-        LABKEY.Query.selectRows({
-            schemaName: 'study',
-            queryName: 'surgery_procedure',
-            filterArray: [LABKEY.Filter.create('objectid', row.linkedRequest, LABKEY.Filter.Types.EQUAL)],
-            success: function (data) {
-                if (data.rows && data.rows.length > 0) {
-                    var updateRow = data.rows[0];
-                    updateRow.linkToExisting = true;
-                    updateRow.linkedRequest = row.objectid;
-                    //updateRow.lsid = 'asdfasdfadsf';
-                }
-                LABKEY.Query.updateRows({
-                    schemaName: 'study',
-                    queryName: 'surgery_procedure',
-                    rows: [updateRow],
-                    success: function () {
-                        console.log('success');
-                    },
-                    failure: function(){
-                        console.log('failure');
-                    }
-                });
-            }
-        });
-    }
+    // if (row.linkToExisting && row.linkedRequest) {
+    //     LABKEY.Query.selectRows({
+    //         schemaName: 'study',
+    //         queryName: 'surgery_procedure',
+    //         filterArray: [LABKEY.Filter.create('objectid', row.linkedRequest, LABKEY.Filter.Types.EQUAL)],
+    //         success: function (data) {
+    //             if (data.rows && data.rows.length > 0) {
+    //                 var updateRow = data.rows[0];
+    //                 updateRow.linkToExisting = true;
+    //                 updateRow.linkedRequest = row.objectid;
+    //                 //updateRow.lsid = 'asdfasdfadsf';
+    //             }
+    //             LABKEY.Query.updateRows({
+    //                 schemaName: 'study',
+    //                 queryName: 'surgery_procedure',
+    //                 rows: [updateRow],
+    //                 success: function () {
+    //                     console.log('success');
+    //                 },
+    //                 failure: function(){
+    //                     console.log('failure');
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
 
     // if (row.project) {
     //     LABKEY.Query.selectRows({

@@ -16,41 +16,41 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureMultipleRequest', {
                     plugins: ['wnprc-animalfield']
                 }
             },
-            linktoexisting: {
-                editorConfig: {
-                    listeners: {
-                        change: function(field, val){
-                            var foo = this.findField('linkedRequest');
-                            foo.setValue("");
-                            foo.hide();
-                //             var theForm = this.getForm();
-                //             if (theForm) {
-                //                 var existing = theForm.findField('linkedRequest');
-                //                 //var existing = Ext4.getCmp('linkedRequestField');
-                //                 if (val) {
-                //                     existing.show();
-                //                 } else {
-                //                     existing.setValue("");
-                //                     existing.hide();
-                //                 }
-                //             }
-                //             // var panel = field.up('ehr-formpanel');
-                //             // if (panel) {
-                //             //     panel.add({
-                //             //         xtype: "wnprc-linkedsurgeryprocedurefield",
-                //             //         fieldLabel: "Request to link to"
-                //             //     });
-                //             // }
-                //             //var model = Ext4.ClassManager.get('app.model.SurgeryProcedureRequest');
-                //             //var formPanel = Ext4.ComponentQuery.query('[name=Surgery/Procedure]');
-                //             //alert(panel.name);
-                        }
-                    }
-                }
-            },
-            linkedrequest: {
-                xtype: 'wnprc-linkedsurgeryprocedurefield'
-            },
+            // linktoexisting: {
+            //     editorConfig: {
+            //         listeners: {
+            //             change: function(field, val){
+            //                 var foo = this.findField('linkedRequest');
+            //                 foo.setValue("");
+            //                 foo.hide();
+            //     //             var theForm = this.getForm();
+            //     //             if (theForm) {
+            //     //                 var existing = theForm.findField('linkedRequest');
+            //     //                 //var existing = Ext4.getCmp('linkedRequestField');
+            //     //                 if (val) {
+            //     //                     existing.show();
+            //     //                 } else {
+            //     //                     existing.setValue("");
+            //     //                     existing.hide();
+            //     //                 }
+            //     //             }
+            //     //             // var panel = field.up('ehr-formpanel');
+            //     //             // if (panel) {
+            //     //             //     panel.add({
+            //     //             //         xtype: "wnprc-linkedsurgeryprocedurefield",
+            //     //             //         fieldLabel: "Request to link to"
+            //     //             //     });
+            //     //             // }
+            //     //             //var model = Ext4.ClassManager.get('app.model.SurgeryProcedureRequest');
+            //     //             //var formPanel = Ext4.ComponentQuery.query('[name=Surgery/Procedure]');
+            //     //             //alert(panel.name);
+            //             }
+            //         }
+            //     }
+            // },
+            // linkedrequest: {
+            //     xtype: 'wnprc-linkedsurgeryprocedurefield'
+            // },
             proceduretype: {
                 editorConfig: {
                     plugins: ['wnprc-procedurefield']

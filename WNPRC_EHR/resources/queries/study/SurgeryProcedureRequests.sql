@@ -20,8 +20,8 @@ SELECT
   requestid.qcstate as state,
   createdby.displayname as requestor,
   requestid.priority as priority,
-  linktoexisting,
-  linkedrequest,
+--   linktoexisting,
+--   linkedrequest,
   comments,
   statuschangereason
 

@@ -1,7 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="Id"/>
-        <column name="linkToExisting"/>
         <column name="linkedRequest"/>
         <column name="date"/>
         <column name="enddate"/>

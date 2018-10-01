@@ -20,8 +20,8 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
     protected List<String> getFieldNames() {
         return Arrays.asList(
                 "Id",
-                "linktoexisting",
-                "linkedrequest",
+//                "linktoexisting",
+//                "linkedrequest",
                 "date",
                 "enddate",
                 "proceduretype",

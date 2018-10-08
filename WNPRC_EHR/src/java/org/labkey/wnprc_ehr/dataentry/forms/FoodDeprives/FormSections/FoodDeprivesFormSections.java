@@ -19,6 +19,10 @@ public class FoodDeprivesFormSections extends SimpleGridSection
 
         super("study", "foodDeprives", "Food Deprives", EHRService.FORM_SECTION_LOCATION.Body);
         this.addConfigSource("Task");
+        setClientStoreClass("EHR.data.FoodDepriveClientStore");
+        addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/FoodDepriveClientStore.js"));
+
+        this.addConfigSource("Husbandry");
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduledFoodDeprivesWindow.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddStartedFoodDeprivesWindow.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));

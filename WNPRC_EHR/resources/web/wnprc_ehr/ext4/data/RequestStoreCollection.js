@@ -5,7 +5,6 @@
  */
 Ext4.define('WNPRC.ext.data.RequestStoreCollection', (function() {
     var QCStateFieldName = "QCState";
-    var requestIdFieldName = 'requestid';
 
     return  {
         extend: 'EHR.data.RequestStoreCollection',
@@ -68,44 +67,6 @@ Ext4.define('WNPRC.ext.data.RequestStoreCollection', (function() {
                                 record.endEdit(true);
                             }
                         });
-                    }
-                });
-            }
-
-            var linkedRequestField = Ext4.ComponentQuery.query('field[itemId=linkedRequestField]')[0];
-            if (linkedRequestField && linkedRequestField.value) {
-                var linkedRequestId = linkedRequestField.value;
-                self.clientStores.each(function(store) {
-                    if (hasField(store, requestIdFieldName)) {
-                        if (store.keyFieldName == requestIdFieldName) {
-                            store.removeAll();
-                            store.sync();
-                        } else {
-                            store.each(function (record) {
-                                if (linkedRequestId != record.get(requestIdFieldName)) {
-                                    record.beginEdit();
-                                    record.set(requestIdFieldName, linkedRequestId);
-                                    record.endEdit(true);
-                                }
-                            });
-                        }
-                    }
-                });
-
-                self.serverStores.each(function(store) {
-                    if (hasField(store, requestIdFieldName)) {
-                        if (store.queryName == 'requests') {
-                            store.removeAll();
-                            store.sync();
-                        } else {
-                            store.each(function (record) {
-                                if (linkedRequestId != record.get(requestIdFieldName)) {
-                                    record.beginEdit();
-                                    record.set(requestIdFieldName, linkedRequestId);
-                                    record.endEdit(true);
-                                }
-                            });
-                        }
                     }
                 });
             }

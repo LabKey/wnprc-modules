@@ -6,8 +6,8 @@ FROM alpine:latest as download
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 
-ENV LABKEY_TEAMCITY_CONFIG LabKey_Trunk_Premium_Installers
-ENV LABKEY_VERSION 18.3
+ENV LABKEY_TEAMCITY_CONFIG LabKey_172wnprc_Community_Installers
+ENV LABKEY_VERSION 17.2
 
 WORKDIR /tmp/labkey
 
@@ -18,7 +18,7 @@ RUN apk update \
 RUN W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
- && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/wisc_community/LabKey${LABKEY_VERSION}-SNAPSHOT-${Y}-UWisc-bin.tar.gz" \
+ && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/wisc_community/LabKey${LABKEY_VERSION}-${Y}-UWisc-Community-bin.tar.gz" \
  && echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
  && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" ${Z} \
   | tar -xz --strip-components=1

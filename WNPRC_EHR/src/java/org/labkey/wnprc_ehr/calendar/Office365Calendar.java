@@ -246,7 +246,7 @@ public class Office365Calendar
         return apptId;
     }
 
-    public boolean verifyEvent(String apptId, String requestId) {
+    public boolean confirmEvent(String apptId, String requestId) {
         boolean updated = false;
         try
         {

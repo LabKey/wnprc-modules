@@ -11,6 +11,8 @@
 <%@ page import="java.util.Comparator" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.text.ParseException" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
@@ -110,7 +112,8 @@
     Office365Calendar oct = new Office365Calendar();
     oct.setUser(getUser());
     oct.setContainer(getContainer());
-    String outlookEventsString = oct.getCalendarEventsAsJson();
+    String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
+    String outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
 %>
 
 <div class="col-xs-12 col-xl-8">
@@ -145,6 +148,10 @@
 
                 </dl>
                 <%--<!-- /ko -->--%>
+                <a class="btn btn-default" href="{{$parent.cancelHeldURL}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>
+                <a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>
+                <a class="btn btn-default" href="{{$parent.viewNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">View Record</a>
+                <a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>
             </div>
         </div>
     </div>
@@ -328,12 +335,18 @@
                 eventSources: [
                     {
                         events: <%=eventsString%>,
-                        color: 'red',
+                        color: 'blue',
                         eventTextColor: 'black',
                         className: 'testClass'
                     },
                     {
-                        events: <%=outlookEventsString%>,
+                        events: <%=outlookScheduledEventsString%>,
+                        color: 'lightgreen',
+                        eventTextColor: 'black',
+                        className: 'testClass'
+                    },
+                    {
+                        events: <%=outlookHeldEventsString%>,
                         color: 'orange',
                         eventTextColor: 'black',
                         className: 'testClass'
@@ -532,11 +545,18 @@
 
                 var form = ko.mapping.toJS(WebUtils.VM.form);
 
+                // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
+                // update the study.surgery_procedure, ehr.request, and ehr.task tables
                 LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ScheduleSurgeryProcedure", null, {
                         requestId: form.requestid,
-                        QCState: 12,
-                        statusChangeReason: form.statuschangereason
+                        start: form.date,
+                        end: form.enddate,
+                        room: form.location,
+                        subject: form.animalid + ' ' + form.procedure,
+                        categories: 'Surgeries',
+                        assignedTo: form.assignedto,
+                        hold: true
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {
@@ -544,7 +564,7 @@
                             WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
                             location.reload(true);
                         } else {
-                            alert('There was an error putting a hold on the request.');
+                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
                         }
                         // Clear the form
                         WebUtils.VM.clearForm();
@@ -596,6 +616,35 @@
                     }, this)
                 });
             },
+            cancelHeldURL: ko.pureComputed(function() {
+                <% ActionURL cancelHeldURL = new ActionURL(WNPRC_EHRController.SurgeryProcedureChangeStatusAction.class, getContainer()); %>
+
+                return LABKEY.ActionURL.buildURL('<%= cancelHeldURL.getController() %>', '<%= cancelHeldURL.getAction() %>', null, {
+                    requestId: WebUtils.VM.taskDetails.requestid,
+                    QCState: "5",
+                    statusChangeReason: "cancel hold"
+                });
+            }),
+            viewNecropsyReportURL: ko.pureComputed(function() {
+                <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>
+
+                return LABKEY.ActionURL.buildURL('<%= necropsyReportURL.getController() %>', '<%= necropsyReportURL.getAction() %>', null, {
+                    reportMode: true,
+                    taskid: WebUtils.VM.taskDetails.lsid()
+                });
+            }),
+            editNecropsyURL: ko.pureComputed(function() {
+                return LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', null, {
+                    formType: 'Necropsy',
+                    taskid: WebUtils.VM.taskDetails.lsid()
+                });
+            }),
+            viewNecropsyURL: ko.pureComputed(function() {
+                return LABKEY.ActionURL.buildURL('ehr', 'dataEntryFormDetails', null, {
+                    formType: 'Necropsy',
+                    taskid: WebUtils.VM.taskDetails.lsid()
+                });
+            }),
             submitForm: function() {
                 $('#scheduleRequestForm').block({
                     message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Scheduling...',
@@ -622,7 +671,8 @@
                         room: form.location,
                         subject: form.animalid + ' ' + form.procedure,
                         categories: 'Surgeries',
-                        assignedTo: form.assignedto
+                        assignedTo: form.assignedto,
+                        hold: false
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {

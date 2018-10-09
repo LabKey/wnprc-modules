@@ -183,7 +183,7 @@ public class Office365Calendar
         return status != LegacyFreeBusyStatus.Free || !cancelled;
     }
 
-    public String addEvent(Date start, Date end, String room, String subject, String requestId, List categories)
+    public String addEvent(Date start, Date end, String room, String subject, String requestId, List categories, boolean hold)
     {
         String apptId = null;
         try
@@ -200,38 +200,11 @@ public class Office365Calendar
                 appt.setStart(start);
                 appt.setEnd(end);
                 appt.setSubject(subject);
-                appt.setBody(new MessageBody(BodyType.Text, requestId));
-                appt.setCategories(new StringList(categories));
-                appt.getRequiredAttendees().add(roomEmailAddress);
-                appt.save();
-                apptId = appt.getId().getUniqueId();
-            }
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //TODO DO NOTHING
-        }
-        return apptId;
-    }
-
-    public String holdEvent(Date start, Date end, String room, String subject, String requestId, List categories) {
-        String apptId = null;
-        try
-        {
-            SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
-            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
-            TableInfo ti = schema.getTable("surgery_procedure_rooms");
-            TableSelector ts = new TableSelector(ti, filter, null);
-            Map map = ts.getMap();
-            String roomEmailAddress = (String) map.get("email");
-            if (isRoomAvailable(roomEmailAddress, start, end))
-            {
-                Appointment appt = new Appointment(service);
-                appt.setStart(start);
-                appt.setEnd(end);
-                appt.setSubject(subject);
-                appt.setBody(new MessageBody(BodyType.Text, "Hold:" + requestId));
+                if (hold) {
+                    appt.setBody(new MessageBody(BodyType.Text, "Hold:" + requestId));
+                } else {
+                    appt.setBody(new MessageBody(BodyType.Text, requestId));
+                }
                 appt.setCategories(new StringList(categories));
                 appt.getRequiredAttendees().add(roomEmailAddress);
                 appt.save();
@@ -262,19 +235,10 @@ public class Office365Calendar
         return updated;
     }
 
-    public boolean cancelEvent(String apptId)
+    public void cancelEvent(String apptId) throws Exception
     {
-        try
-        {
-            Appointment appt = Appointment.bind(service, new ItemId(apptId));
-            appt.cancelMeeting();
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //TODO error handling
-        }
-        return true;
+        Appointment appt = Appointment.bind(service, new ItemId(apptId));
+        appt.cancelMeeting();
     }
 
     private JSONArray getJsonEventList(List<Appointment> events)
@@ -345,13 +309,13 @@ public class Office365Calendar
         return jsonEvents;
     }
 
-    private String getCalendarEvents(Date startDate, Date endDate)
+    private String getCalendarEvents(Date startDate, Date endDate, boolean held)
     {
         String eventsString = null;
 
         try
         {
-            JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate));
+            JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, held));
             eventsString = jsonEvents.toString();
         }
         catch (Exception e)
@@ -362,14 +326,23 @@ public class Office365Calendar
         return eventsString;
     }
 
-    private List<Appointment> getAppointments(Date startDate, Date endDate)
+    private List<Appointment> getAppointments(Date startDate, Date endDate, boolean held)
     {
+        List<Appointment> allAppts = new ArrayList<>();
         List<Appointment> appts = new ArrayList<>();
         try
         {
             CalendarFolder cf = CalendarFolder.bind(service, WellKnownFolderName.Calendar);
             FindItemsResults<Appointment> findResults = cf.findAppointments(new CalendarView(startDate, endDate));
-            appts = findResults.getItems();
+            allAppts = findResults.getItems();
+            for (Appointment appt : allAppts) {
+                appt.load(PropertySet.FirstClassProperties);
+                if (held && appt.getBody() != null && appt.getBody().toString().startsWith("Hold")) {
+                    appts.add(appt);
+                } else if (!held && appt.getBody() != null && !appt.getBody().toString().startsWith("Hold")) {
+                    appts.add(appt);
+                }
+            }
         }
         catch (Exception e)
         {
@@ -379,7 +352,7 @@ public class Office365Calendar
         return appts;
     }
 
-    public String getCalendarEventsAsJson()
+    public String getCalendarEventsAsJson(boolean held)
     {
         String events = "";
         try
@@ -390,7 +363,7 @@ public class Office365Calendar
             Date startDate = cal.getTime();
             cal.add(Calendar.MONTH, 23);
             Date endDate = cal.getTime();
-            events = getCalendarEvents(startDate, endDate);
+            events = getCalendarEvents(startDate, endDate, held);
         }
         catch (Exception e)
         {

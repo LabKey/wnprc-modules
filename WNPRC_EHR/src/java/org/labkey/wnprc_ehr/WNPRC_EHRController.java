@@ -1027,6 +1027,7 @@ public class WNPRC_EHRController extends SpringActionController
         private String subject;
         private List categories;
         private String assignedto;
+        private boolean hold;
 
         public String getRequestId()
         {
@@ -1060,6 +1061,10 @@ public class WNPRC_EHRController extends SpringActionController
         public String getAssignedTo()
         {
             return assignedto;
+        }
+
+        public boolean getHold() {
+            return hold;
         }
 
         public void setRequestId(String requestid)
@@ -1096,6 +1101,10 @@ public class WNPRC_EHRController extends SpringActionController
         {
             this.assignedto = assignedto;
         }
+
+        public void setHold(boolean hold) {
+            this.hold = hold;
+        }
     }
 
     @ActionNames("ScheduleSurgeryProcedure")
@@ -1111,7 +1120,7 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
             Office365Calendar calendar = new Office365Calendar();
-            String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories());
+            String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories(), event.hold);
 
             if (apptId != null)
             {
@@ -1158,7 +1167,7 @@ public class WNPRC_EHRController extends SpringActionController
                         //Initialize data to be updated and convert it to the necessary format
                         JSONObject surgeryRecord = new JSONObject();
                         surgeryRecord.put("objectid", spRow.get("objectid"));
-                        surgeryRecord.put("appointmentid", apptId);
+                        surgeryRecord.put("apptid", apptId);
                         surgeryRecord.put("qcstate", 10);
                         surgeryRecord.put("taskid", spRow.get("taskid"));
                         surgeryRecord.put("date", event.getStart());
@@ -1300,6 +1309,13 @@ public class WNPRC_EHRController extends SpringActionController
                 List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
                 if (updatedRows.size() != rowsToUpdate.size()) {
                     throw new QueryUpdateServiceException("Not all rows updated properly");
+                }
+
+                if (event.getQCState() == "5")
+                {
+                    String apptid = "AAMkAGQ5ZmYzNzkxLTU1MzYtNDYzMy1iMWRhLTJhNDhiMTY3YTQ5MgBGAAAAAABgNltItURlR7cWdQMaZ6DUBwBrKiSMTH+HSJ4PCFQl0+DUAAAAAAENAABrKiSMTH+HSJ4PCFQl0+DUAABYxkdTAAA=";
+                    Office365Calendar calendar = new Office365Calendar();
+                    calendar.cancelEvent(apptid);
                 }
 
                 transaction.commit();

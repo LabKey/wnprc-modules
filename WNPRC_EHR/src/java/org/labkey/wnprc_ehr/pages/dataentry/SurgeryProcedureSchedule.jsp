@@ -350,10 +350,6 @@
                         eventTextColor: 'red'
                     }
                 ],
-//                eventClick: function(event) {
-//                    window.open(event.htmlLink, 'gcalevent', 'width=900,height=600');
-//                    return false;
-//                }
                 eventClick: function(calEvent, jsEvent, view) {
                     jQuery.each(calEvent.rawRowData, function(key, value) {
                         if (key in WebUtils.VM.taskDetails) {

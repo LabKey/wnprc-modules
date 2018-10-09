@@ -148,7 +148,9 @@
 
                 </dl>
                 <%--<!-- /ko -->--%>
+                <%--<!-- ko if: hold() -->--%>
                 <a class="btn btn-default" href="{{$parent.cancelHeldURL}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>
+                <%--<!-- /ko -->--%>
                 <a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>
                 <a class="btn btn-default" href="{{$parent.viewNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">View Record</a>
                 <a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>
@@ -423,7 +425,8 @@
                 weight:               ko.observable(),
                 date:                 ko.observable(),
                 enddate:              ko.observable(),
-                comments:             ko.observable()
+                comments:             ko.observable(),
+                hold:                 ko.observable()
             },
             form: ko.mapping.fromJS({
                 lsid:               '',
@@ -620,7 +623,7 @@
                 <% ActionURL cancelHeldURL = new ActionURL(WNPRC_EHRController.SurgeryProcedureChangeStatusAction.class, getContainer()); %>
 
                 return LABKEY.ActionURL.buildURL('<%= cancelHeldURL.getController() %>', '<%= cancelHeldURL.getAction() %>', null, {
-                    requestId: WebUtils.VM.taskDetails.requestid,
+                    requestId: WebUtils.VM.taskDetails.requestid(),
                     QCState: "5",
                     statusChangeReason: "cancel hold"
                 });

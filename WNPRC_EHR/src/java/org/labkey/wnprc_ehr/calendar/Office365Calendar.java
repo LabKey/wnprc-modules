@@ -260,8 +260,13 @@ public class Office365Calendar
         {
             for (Appointment event : events)
             {
+                boolean hold = false;
                 event.load(PropertySet.FirstClassProperties);
                 String requestId = event.getBody().toString();
+                if(requestId != null && requestId.startsWith("Hold")) {
+                    requestId = requestId.substring(5);
+                    hold = true;
+                }
                 JSONObject surgeryInfo = queryResults.get(requestId);
 
                 JSONObject jsonEvent = new JSONObject();
@@ -295,6 +300,7 @@ public class Office365Calendar
                     rawRowData.put("date", surgeryInfo.get("date"));
                     rawRowData.put("enddate", surgeryInfo.get("enddate"));
                     rawRowData.put("comments", surgeryInfo.get("comments"));
+                    rawRowData.put("hold", hold);
                     jsonEvent.put("rawRowData", rawRowData);
                 }
 

@@ -1311,7 +1311,7 @@ public class WNPRC_EHRController extends SpringActionController
                     throw new QueryUpdateServiceException("Not all rows updated properly");
                 }
 
-                if (event.getQCState() == "5")
+                if ("5".equals(event.getQCState()))
                 {
                     String apptid = "AAMkAGQ5ZmYzNzkxLTU1MzYtNDYzMy1iMWRhLTJhNDhiMTY3YTQ5MgBGAAAAAABgNltItURlR7cWdQMaZ6DUBwBrKiSMTH+HSJ4PCFQl0+DUAAAAAAENAABrKiSMTH+HSJ4PCFQl0+DUAABYxkdTAAA=";
                     Office365Calendar calendar = new Office365Calendar();

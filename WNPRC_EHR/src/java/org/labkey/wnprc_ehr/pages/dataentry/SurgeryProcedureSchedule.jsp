@@ -33,35 +33,21 @@
     ArrayList<Integer> positionsToRemove = new ArrayList<>();
     System.out.println("JSON Requests: " + jsonRequests);
 
-    for(int i = 0; i < jsonRequests.length(); i++) {
+    for(int i = 0; i < jsonRequests.length(); i++)
+    {
         JSONObject row1 = jsonRequests.getJSONObject(i);
-        for(int j = i + 1; j < jsonRequests.length(); j++) {
+        for (int j = i + 1; j < jsonRequests.length(); j++)
+        {
             JSONObject row2 = jsonRequests.getJSONObject(j);
             UUID row1id = UUID.fromString(row1.getString("requestid"));
             UUID row2id = UUID.fromString(row2.getString("requestid"));
-            if(row1id.equals(row2id)) {
+            if (row1id.equals(row2id))
+            {
                 positionsToRemove.add(j);
                 row1.put("animalid", row1.get("animalid") + "," + row2.get("animalid"));
             }
         }
     }
-
-//    for(int i = 0; i < jsonRequests.length(); i++) {
-//        JSONObject row1 = jsonRequests.getJSONObject(i);
-//        //Find all linked requests
-//        if (row1.getBoolean("linktoexisting")) {
-//            for(int j = i + 1; j < jsonRequests.length(); j++) {
-//                JSONObject row2 = jsonRequests.getJSONObject(j);
-//                UUID row1id = UUID.fromString(row1.getString("linkedrequest"));
-//                UUID row2id = UUID.fromString(row2.getString("objectid"));
-//                if (row1id.equals(row2id)) {
-//                    positionsToRemove.add(j);
-//                    row1.put("animalid", row1.get("animalid") + "," + row2.get("animalid"));
-//                }
-//            }
-//        }
-//        System.out.println("row: " + row1);
-//    }
 
     List<JSONObject> statRequests = new ArrayList<>();
     List<JSONObject> asapRequests = new ArrayList<>();
@@ -326,18 +312,6 @@
         </div>
     </div>
 </div>
-
-<%--<div class="col-xs-12 col-xl-8">--%>
-    <%--<div class="col-xs-12 col-md-8">--%>
-        <%--<div class="panel panel-primary">--%>
-            <%--<div class="panel-heading"><span>Test</span></div>--%>
-            <%--<div class="panel-body">--%>
-                <%--<div id="test"></div>--%>
-                <%--<%=requestList.toString()%>--%>
-            <%--</div>--%>
-        <%--</div>--%>
-    <%--</div>--%>
-<%--</div>--%>
 
 <script>
     //debugger

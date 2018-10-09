@@ -1331,23 +1331,6 @@ public class WNPRC_EHRController extends SpringActionController
         return spRows;
     }
 
-    private List<Map<String, Object>> setSurgeryProcedureRecords(String requestId) throws java.sql.SQLException
-    {
-        List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("objectid"));
-
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
-        QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
-        Results rs = spQuery.select(columns, filter);
-
-        List<Map<String, Object>> spRows = new ArrayList<>();
-        while (rs.next())
-        {
-            spRows.add(rs.getRowMap());
-        }
-        return spRows;
-    }
-
     @ActionNames("PathologyCaseList")
     @RequiresLogin()
     public class PathologyCaseListAction extends WNPRCJspPageAction

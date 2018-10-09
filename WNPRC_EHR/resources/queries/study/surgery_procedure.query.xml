@@ -15,14 +15,6 @@
                         <columnTitle>Animal ID</columnTitle>
                         <nullable>false</nullable>
                     </column>
-                    <!--<column columnName="linkToExisting">-->
-                        <!--<columnTitle>Link To Existing Request</columnTitle>-->
-                        <!--<nullable>false</nullable>-->
-                    <!--</column>-->
-                    <!--<column columnName="linkedRequest">-->
-                        <!--<columnTitle>Request To Link To</columnTitle>-->
-                        <!--<nullable>true</nullable>-->
-                    <!--</column>-->
                     <column columnName="date">
                         <columnTitle>Start Table Time</columnTitle>
                         <formatString>yyyy-MM-dd HH:mm</formatString>

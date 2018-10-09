@@ -215,6 +215,53 @@ public class Office365Calendar
         return apptId;
     }
 
+    public String holdEvent(Date start, Date end, String room, String subject, String requestId, List categories) {
+        String apptId = null;
+        try
+        {
+            SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
+            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("surgery_procedure_rooms");
+            TableSelector ts = new TableSelector(ti, filter, null);
+            Map map = ts.getMap();
+            String roomEmailAddress = (String) map.get("email");
+            if (isRoomAvailable(roomEmailAddress, start, end))
+            {
+                Appointment appt = new Appointment(service);
+                appt.setStart(start);
+                appt.setEnd(end);
+                appt.setSubject(subject);
+                appt.setBody(new MessageBody(BodyType.Text, "Hold:" + requestId));
+                appt.setCategories(new StringList(categories));
+                appt.getRequiredAttendees().add(roomEmailAddress);
+                appt.save();
+                apptId = appt.getId().getUniqueId();
+            }
+        }
+        catch (Exception e)
+        {
+            int x = 3;
+            //TODO DO NOTHING
+        }
+        return apptId;
+    }
+
+    public boolean verifyEvent(String apptId, String requestId) {
+        boolean updated = false;
+        try
+        {
+            Appointment appt = Appointment.bind(service, new ItemId(apptId));
+            appt.setBody(new MessageBody(BodyType.Text, requestId));
+            updated = true;
+        }
+        catch (Exception e)
+        {
+            int x = 3;
+            //TODO error handling
+        }
+        return updated;
+    }
+
     public boolean cancelEvent(String apptId)
     {
         try

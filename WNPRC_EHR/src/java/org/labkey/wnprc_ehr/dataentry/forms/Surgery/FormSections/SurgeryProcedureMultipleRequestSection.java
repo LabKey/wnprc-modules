@@ -20,8 +20,6 @@ public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
     protected List<String> getFieldNames() {
         return Arrays.asList(
                 "Id",
-//                "linktoexisting",
-//                "linkedrequest",
                 "date",
                 "enddate",
                 "proceduretype",

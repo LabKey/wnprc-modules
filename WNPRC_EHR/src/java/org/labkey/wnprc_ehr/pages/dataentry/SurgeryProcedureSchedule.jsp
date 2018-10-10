@@ -149,11 +149,14 @@
                 </dl>
                 <%--<!-- /ko -->--%>
                 <%--<!-- ko if: hold() -->--%>
-                <a class="btn btn-default" href="{{$parent.cancelHeldURL}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>
+                    <div style="text-align: right;">
+                        <button class="btn btn-danger" data-bind="click: $root.cancelHeldEvent">Cancel</button>
+                    </div>
+                <%--<a class="btn btn-default" href="{{$parent.cancelHeldEvent}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>--%>
                 <%--<!-- /ko -->--%>
-                <a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>
-                <a class="btn btn-default" href="{{$parent.viewNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">View Record</a>
-                <a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>
+                <%--<a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>--%>
+                <%--<a class="btn btn-default" href="{{$parent.viewNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">View Record</a>--%>
+                <%--<a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>--%>
             </div>
         </div>
     </div>
@@ -337,8 +340,8 @@
                 eventSources: [
                     {
                         events: <%=eventsString%>,
-                        color: 'blue',
-                        eventTextColor: 'black',
+                        color: 'lightblue',
+                        eventTextColor: 'white',
                         className: 'testClass'
                     },
                     {
@@ -616,6 +619,23 @@
                     failure: LABKEY.Utils.getCallbackWrapper(function (response)
                     {
                         $('#scheduleRequestForm').unblock();
+                    }, this)
+                });
+            },
+            cancelHeldEvent: function() {
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
+                        requestId: WebUtils.VM.taskDetails.requestid(),
+                        QCState: "5"
+                    }),
+                    success: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        if (response.success) {
+                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
+                            location.reload(true);
+                        } else {
+                            alert('There was an error while trying to cancel the event.');
+                        }
                     }, this)
                 });
             },

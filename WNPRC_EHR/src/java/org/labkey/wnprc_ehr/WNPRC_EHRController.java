@@ -1313,7 +1313,10 @@ public class WNPRC_EHRController extends SpringActionController
 
                 if ("5".equals(event.getQCState()))
                 {
-                    String apptid = "AAMkAGQ5ZmYzNzkxLTU1MzYtNDYzMy1iMWRhLTJhNDhiMTY3YTQ5MgBGAAAAAABgNltItURlR7cWdQMaZ6DUBwBrKiSMTH+HSJ4PCFQl0+DUAAAAAAENAABrKiSMTH+HSJ4PCFQl0+DUAABYxkdTAAA=";
+                    String apptid = null;
+                    if(spRows.size() > 0) {
+                        apptid = (String) spRows.get(0).get("apptid");
+                    }
                     Office365Calendar calendar = new Office365Calendar();
                     calendar.cancelEvent(apptid);
                 }
@@ -1334,6 +1337,7 @@ public class WNPRC_EHRController extends SpringActionController
     {
         List<FieldKey> columns = new ArrayList<>();
         columns.add(FieldKey.fromString("objectid"));
+        columns.add(FieldKey.fromString("apptid"));
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");

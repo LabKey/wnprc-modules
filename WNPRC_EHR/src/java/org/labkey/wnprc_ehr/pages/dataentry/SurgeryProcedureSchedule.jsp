@@ -13,6 +13,9 @@
 <%@ page import="java.text.ParseException" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
+<%@ page import="org.labkey.api.security.Group" %>
+<%@ page import="org.labkey.api.security.GroupManager" %>
+<%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
@@ -104,16 +107,29 @@
 
     List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "surgery_procedure_rooms"));
 
+    Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
+    Group spiGroup = GroupManager.getGroup(getContainer(), "spi (LDAP)", GroupEnumType.SITE);
+    boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
+    boolean isSpi = getUser().isInGroup(spiGroup.getUserId()) || getUser().isInSiteAdminGroup();
+
     GoogleCalendar ct = new GoogleCalendar();
     ct.setUser(getUser());
     ct.setContainer(getContainer());
-    String eventsString = ct.getCalendarEventsAsJson();
+    String gCalEventsString = "[]";
+    if (isVet) {
+        gCalEventsString = ct.getCalendarEventsAsJson();
+    }
 
     Office365Calendar oct = new Office365Calendar();
     oct.setUser(getUser());
     oct.setContainer(getContainer());
-    String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
-    String outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
+    String outlookScheduledEventsString = "[]";
+    outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
+
+    String outlookHeldEventsString = "[]";
+    if (isVet) {
+        outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
+    }
 %>
 
 <div class="col-xs-12 col-xl-8">
@@ -339,7 +355,7 @@
 
                 eventSources: [
                     {
-                        events: <%=eventsString%>,
+                        events: <%=gCalEventsString%>,
                         color: 'lightblue',
                         eventTextColor: 'white',
                         className: 'testClass'
@@ -601,7 +617,7 @@
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
-                        QCState: 7,
+                        QCState: '7',
                         statusChangeReason: form.statuschangereason
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -626,7 +642,7 @@
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: WebUtils.VM.taskDetails.requestid(),
-                        QCState: "5"
+                        QCState: '5'
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {
@@ -639,15 +655,6 @@
                     }, this)
                 });
             },
-            cancelHeldURL: ko.pureComputed(function() {
-                <% ActionURL cancelHeldURL = new ActionURL(WNPRC_EHRController.SurgeryProcedureChangeStatusAction.class, getContainer()); %>
-
-                return LABKEY.ActionURL.buildURL('<%= cancelHeldURL.getController() %>', '<%= cancelHeldURL.getAction() %>', null, {
-                    requestId: WebUtils.VM.taskDetails.requestid(),
-                    QCState: "5",
-                    statusChangeReason: "cancel hold"
-                });
-            }),
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>
 

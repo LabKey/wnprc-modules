@@ -54,7 +54,7 @@
                         {name: 'Grant Accounts', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'aliases', showImport: true})},
 //                        {name: 'Investigators', url: LABKEY.ActionURL.buildURL(ehrQueryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'wnprc_ehr', 'query.queryName': 'investigators', showImport: true})},
 //                        {name: 'Financial Analysts', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'fiscalAuthorities', showImport: true})},
-                        {name: 'Groups', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'groups',showImport: true})}
+                        {name: 'Departments', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'groups',showImport: true})}
                     ]
                 },{
                     header: 'Rates and Fee Structure',
@@ -78,7 +78,8 @@
                 },{
                     header: 'Other',
                     items: [
-                        {name: 'Import Historical Misc. Charges', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr_billing', 'query.queryName': 'miscCharges', showImport: true})}
+                        {name: 'Import Historical Misc. Charges', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr_billing', 'query.queryName': 'miscCharges', showImport: true})},
+                        {name: 'Chargeable Item Categories', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeableItemCategories', showImport: true})}
                     ]
                 }]
             }]

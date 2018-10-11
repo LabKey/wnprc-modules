@@ -20,14 +20,14 @@
   FROM
     (SELECT
     pdt.id,
-    pdt.adate as date,
+    pdt.adate AS date,
     pdt.project,
     pdt.account as debitedAccount,
     (cr1.unitCost + (cr1.unitCost * pdt.tierRate)) AS unitCost,
     pdt.quantity,
-    cr1.chargeId as chargeId,
-    ci1.name as item,
-    ci1.category as category,
+    cr1.chargeId AS chargeId,
+    ci1.name AS item,
+    ci1.chargeCategoryId.name AS category,
     pdt.comment,
     ci1.serviceCode AS serviceCenter,
     pdt.tierRate AS tierRate,
@@ -36,5 +36,6 @@
   LEFT JOIN ehr_billing.chargeRates cr1 ON (
     CAST(pdt.adate AS DATE) >= CAST(cr1.startDate AS DATE) AND
     (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
-  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId) pdr
+  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId
+  LEFT JOIN ehr_billing.chargeableItemCategories cic ON ci1.chargeCategoryId = cic.rowid) pdr
   WHERE pdr.item = 'Per diems'

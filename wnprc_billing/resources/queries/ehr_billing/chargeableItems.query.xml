@@ -15,11 +15,12 @@
                     <column columnName="departmentCode">
                         <columnTitle>Group Name</columnTitle>
                     </column>
-                    <column columnName="category">
+                    <column columnName="chargeCategoryId">
+                        <columnTitle>Charge Category</columnTitle>
                         <fk>
-                            <fkDbSchema>wnprc_billing</fkDbSchema>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>chargeableItemCategories</fkTable>
-                            <fkColumnName>category</fkColumnName>
+                            <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>
                 </columns>

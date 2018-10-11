@@ -3,8 +3,29 @@ require("ehr/triggers").initScript(this);
 
 var validItems = [];
 var validRates = {};
+var chargeableItemCategories = {};
 
 function onInit(event, helper){
+
+    LABKEY.Query.selectRows({
+        requiredVersion: 9.1,
+        schemaName: 'ehr_billing',
+        queryName: 'chargeableItemCategories',
+        columns: ['rowId, name'],
+        scope: this,
+        success: function (results) {
+
+            var rows = results.rows;
+
+            for(var i=0; i< rows.length; i++) {
+                var row = rows[i];
+                chargeableItemCategories[row["name"]["value"]] = row["rowId"]["value"];
+            }
+        },
+        failure: function (error) {
+            console.log(error);
+        }
+    });
 
     // Cache saved chargeable items
     LABKEY.Query.selectRows({
@@ -105,7 +126,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     var ciRow = {
         "name": row.name,
         "oldPk": row.oldPk,
-        "category": row.category,
+        "chargeCategoryId": chargeableItemCategories[row.category],
         "serviceCode": row.serviceCode,
         "departmentCode": row.departmentCode,
         "comment": row.comment,

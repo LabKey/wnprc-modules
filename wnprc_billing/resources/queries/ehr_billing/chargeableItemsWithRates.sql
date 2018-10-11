@@ -2,7 +2,7 @@
 SELECT
 --   "test" AS oldPk,
   ci.name,
-  ci.category,
+  ci.chargeCategoryId AS category,
   ci.serviceCode,
   ci.departmentCode,
   ci.startDate AS chargeableItemStartDate,

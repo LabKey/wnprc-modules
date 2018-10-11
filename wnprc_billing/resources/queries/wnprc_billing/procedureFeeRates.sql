@@ -29,7 +29,7 @@ FROM
   pFees1.taskid,
   cr1.chargeId AS chargeId,
   ci1.name AS item,
-  ci1.category AS category,
+  ci1.chargeCategoryId.name AS category,
   ci1.serviceCode AS serviceCenter,
   NULL AS isMiscCharge,
   pFees1.tierRate
@@ -38,6 +38,7 @@ FROM
    CAST(pFees1.date AS DATE) >= CAST(cr1.startDate AS DATE) AND
    (CAST(pFees1.date AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId
+ LEFT JOIN ehr_billing.chargeableItemCategories cic ON ci1.chargeCategoryId = cic.rowid
  WHERE ci1.name = 'Blood draws'
 
 UNION ALL
@@ -54,7 +55,7 @@ SELECT
   pFees2.taskid,
   cr2.chargeId AS chargeId,
   ci2.name AS item,
-  ci2.category AS category,
+  ci2.chargeCategoryId.name AS category,
   ci2.serviceCode AS serviceCenter,
   NULL AS isMiscCharge,
   pFees2.tierRate
@@ -63,5 +64,6 @@ FROM wnprc_billing.procedureFeesWithTierRates pFees2
     CAST(pFees2.date AS DATE) >= CAST(cr2.startDate AS DATE) AND
     (CAST(pFees2.date AS DATE) <= cr2.enddate OR cr2.enddate IS NULL))
   LEFT JOIN ehr_billing.chargeableItems ci2 ON ci2.rowid = cr2.chargeId
+  LEFT JOIN ehr_billing.chargeableItemCategories cic ON ci2.chargeCategoryId = cic.rowid
   WHERE ci2.name = 'Blood draws - Additional Tubes') procFees
 WHERE procFees.quantity > 0

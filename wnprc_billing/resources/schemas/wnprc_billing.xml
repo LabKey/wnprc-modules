@@ -647,15 +647,6 @@
             </column>
         </columns>
     </table>
-    <table tableName="chargeableItemCategories" tableDbType="TABLE" useColumnOrder="true">
-        <auditLogging>DETAILED</auditLogging>
-        <tableTitle>Chargeable Item Categories</tableTitle>
-        <columns>
-            <column columnName="category">
-                <columnTitle>Category</columnTitle>
-            </column>
-        </columns>
-    </table>
     <table tableName="aliasCategories" tableDbType="TABLE" useColumnOrder="true">
         <auditLogging>DETAILED</auditLogging>
         <tableTitle>Alias Categories</tableTitle>

@@ -44,7 +44,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     if (oldRow && !(rowDate.getTime()>=nextDate.getTime()) && (oldRow.QCStateLabel == "Scheduled") ){
 
         if ((row.QCStateLabel == "In Progress" || row.QCStateLabel == "Scheduled") && !row.taskid ){
-            EHR.Server.Utils.addError(scriptErrors, 'date', 'Cannot request same day food deprives 2.', 'INFO');
+            EHR.Server.Utils.addError(scriptErrors, 'date', 'Cannot request same day food deprives.', 'INFO');
         }
 
         else if (row.QCStateLabel == "Started" && !row.depriveStartTime){
@@ -70,6 +70,10 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 function beforeUpdate(row, oldRow, scriptErrors){
     if (row.QCStateLabel=='Started' && oldRow.QCStateLabel=='Scheduled' && !row.depriveStartTime){
         EHR.Server.Utils.addError(scriptErrors, 'depriveStartTime', 'Need to enter a start time to start food deprive', 'ERROR');
+    }
+
+    if (row.QCStateLabel=='Complete' && oldRow.QCStateLabel=='Started' && (row.depriveStartTime > row.restoredTime)){
+        EHR.Server.Utils.addError(scriptErrors, 'restoredTime', 'Restore time must be after than start time', 'ERROR');
     }
 }
 function afterInsert(row, errors){

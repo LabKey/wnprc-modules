@@ -125,7 +125,7 @@ exports.init = function (EHR) {
         if (row.Id && !helper.isQuickValidation() && !helper.isETL()) {
             if (row.Id.match(/(^rh([0-9]{4})$)|(^r([0-9]{5})$)|(^rh-([0-9]{3})$)|(^rh[a-z]{2}([0-9]{2})$)/))
                 species = 'Rhesus';
-            else if (row.Id.match(/^cy?([0-9]{4,5})$/))
+            else if (row.Id.match(/(^cy?([0-9]{4,5})$)|(^c([0-9]{5})$)/))
                 species = 'Cynomolgus';
             else if (row.Id.match(/^ag([0-9]{4})$/))
                 species = 'Vervet';
@@ -183,12 +183,12 @@ exports.init = function (EHR) {
         return description;
     });
 
-    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'assignment', function (row) {
+    EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.DESCRIPTION, 'study', 'assignment', function (row, helper) {
         //we need to set description for every field
         var description = [];
 
-        description.push('Start Date: ' + EHR.Server.Utils.dateToString(row.Date));
-        description.push('Removal Date: ' + (row.enddate ? EHR.Server.Utils.dateToString(row.enddate) : ''));
+        description.push('Start Date: ' + helper.getJavaHelper().formatDate(row.Date, null, true));
+        description.push('Removal Date: ' + (row.enddate ? helper.getJavaHelper().formatDate(row.enddate, null, true): ''));
 
         return description;
     });

@@ -18,6 +18,10 @@ function createNavMenu()
     new EHR.ext.NavMenu({
         renderTo: 'animalServices',
         sections: [
+            {header: 'All Staff Minutes',
+            items: [
+                {name:'Meeting Notes', url:'<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/begin.view?'}
+            ]},
             {header: 'Behavioral Management',
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/Issue_Tracker/start.view?'},

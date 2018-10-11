@@ -16,14 +16,16 @@
 
   SELECT
     *,
-    round(CAST(pdr.quantity * pdr.unitCost AS DOUBLE), 2) AS totalCost
+    round(CAST(pdr.quantity * pdr.unitCostDirect AS DOUBLE), 2) AS totalCostDirect, -- total cost without tier rate
+    round(CAST(pdr.quantity * pdr.unitCost AS DOUBLE), 2) AS totalCost -- total cost with tier rate
   FROM
     (SELECT
     pdt.id,
     pdt.adate AS date,
     pdt.project,
     pdt.account as debitedAccount,
-    (cr1.unitCost + (cr1.unitCost * pdt.tierRate)) AS unitCost,
+    cr1.unitCost AS unitCostDirect, -- unit cost without tier rate
+   (cr1.unitCost + (cr1.unitCost * pdt.tierRate)) AS unitCost, -- unit cost with tier rate
     pdt.quantity,
     cr1.chargeId AS chargeId,
     ci1.name AS item,
@@ -36,6 +38,5 @@
   LEFT JOIN ehr_billing.chargeRates cr1 ON (
     CAST(pdt.adate AS DATE) >= CAST(cr1.startDate AS DATE) AND
     (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
-  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId
-  LEFT JOIN ehr_billing.chargeableItemCategories cic ON ci1.chargeCategoryId = cic.rowid) pdr
+  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId) pdr
   WHERE pdr.item = 'Per diems'

@@ -3,9 +3,19 @@
         <column name="Id"/>
         <column name="date"/>
         <column name="project"/>
+        <column name="unitCost">
+            <properties>
+                <property name="columnTitle" value="Unit Cost Indirect"/>
+            </properties>
+        </column>
+        <column name="unitCostDirect"/>
         <column name="quantity"/>
-        <column name="unitCost"/>
-        <column name="totalcost"/>
+        <column name="totalCost">
+            <properties>
+                <property name="columnTitle" value="Total Cost Indirect"/>
+            </properties>
+        </column>
+        <column name="totalCostDirect"/>
         <column name="item"/>
         <column name="chargeId/serviceCode"/>
         <column name="chargeId/departmentCode">

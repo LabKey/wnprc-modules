@@ -1,5 +1,6 @@
 SELECT *,
-  round((CAST(miscWithRates.quantity * miscWithRates.unitCost AS DOUBLE)), 2) AS totalCost
+   round((CAST(miscWithRates.quantity * miscWithRates.unitCostDirect AS DOUBLE)), 2) AS totalCostDirect, -- total cost without tier rate
+   round((CAST(miscWithRates.quantity * miscWithRates.unitCost AS DOUBLE)), 2)       AS totalCost -- total cost with tier rate
 FROM
   (SELECT
   wmisc.Id,
@@ -12,9 +13,14 @@ FROM
   ci.departmentCode AS serviceCenter,
   ci.name AS item,
   (CASE
+     WHEN wmisc.unitCost IS NULL OR wmisc.unitCost = 0
+             THEN cr.unitCost
+     ELSE wmisc.unitCost
+      END)  AS unitCostDirect, -- unit cost without tier rate
+  (CASE
     WHEN wmisc.unitCost IS NULL OR wmisc.unitCost = 0
       THEN (cr.unitCost + (cr.unitCost * wmisc.tierRate))
-    ELSE (wmisc.unitCost + (wmisc.unitCost * wmisc.tierRate)) END) AS unitCost,
+    ELSE (wmisc.unitCost + (wmisc.unitCost * wmisc.tierRate)) END) AS unitCost, -- unit cost with tier rate
   coalesce(wmisc.quantity, 1) AS quantity,
   coalesce(cic.name, 'Misc. Fees') AS category,
   wmisc.chargeCategory, --adjustment or reversal

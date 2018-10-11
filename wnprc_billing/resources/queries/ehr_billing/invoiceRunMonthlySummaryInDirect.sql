@@ -1,3 +1,4 @@
+-- Includes tier rates
 SELECT
   c.invoiceId,
   c.invoiceId.billingPeriodStart,
@@ -5,7 +6,7 @@ SELECT
   c.category,
   max(c.total) as total
 
-FROM wnprc_billing.invoicedItemsByInvoiceCategory c
+FROM ehr_billing.invoicedItemsByInvoiceCategoryInDirect c
 WHERE c.category IS NOT NULL
 GROUP BY c.invoiceId, c.category, c.invoiceId.billingPeriodStart, c.invoiceId.billingPeriodEnd
 

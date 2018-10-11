@@ -25,6 +25,14 @@
                     <column columnName="po_amount">
                         <formatString>$###,##0.00</formatString>
                     </column>
+                    <column columnName="unitCostDirect">
+                        <columnTitle>Unit Cost Direct</columnTitle>
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                    <column columnName="totalCostDirect">
+                        <columnTitle>Total Cost Direct</columnTitle>
+                        <formatString>$###,##0.00</formatString>
+                    </column>
                     <column columnName="chargeId">
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>

@@ -15,7 +15,8 @@
  */
 
 SELECT *,
-round((CAST((procFees.quantity * procFees.unitCost) AS DOUBLE)), 2) AS totalCost
+round((CAST((procFees.quantity * procFees.unitCostDirect) AS DOUBLE)), 2) AS totalCostDirect, -- total cost without tier rate
+round((CAST((procFees.quantity * procFees.unitCost) AS DOUBLE)), 2) AS totalCost -- total cost with tier rate
 FROM
 (SELECT
   pFees1.id,
@@ -23,7 +24,8 @@ FROM
   pFees1.project,
   pFees1.account AS debitedAccount,
   pFees1.sourceRecord,
-  (CASE WHEN pFees1.tubes >= 1 THEN (cr1.unitCost + (pFees1.tierRate*cr1.unitCost)) end) AS unitCost,
+  (CASE WHEN pFees1.tubes >= 1 THEN cr1.unitCost END) AS unitCostDirect, -- unit cost without tier rate
+  (CASE WHEN pFees1.tubes >= 1 THEN (cr1.unitCost + (pFees1.tierRate*cr1.unitCost)) end) AS unitCost, -- unit cost with tier rate
   (CASE WHEN pFees1.tubes >= 1 THEN ('Blood Draws ' || pFees1.id) end) AS comment,
   (CASE WHEN pFees1.tubes >= 1 THEN 1 end) AS quantity,
   pFees1.taskid,
@@ -38,7 +40,6 @@ FROM
    CAST(pFees1.date AS DATE) >= CAST(cr1.startDate AS DATE) AND
    (CAST(pFees1.date AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
  LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId
- LEFT JOIN ehr_billing.chargeableItemCategories cic ON ci1.chargeCategoryId = cic.rowid
  WHERE ci1.name = 'Blood draws'
 
 UNION ALL
@@ -49,7 +50,8 @@ SELECT
   pFees2.project,
   pFees2.account AS debitedAccount,
   pFees2.sourceRecord,
-  (CASE WHEN pFees2.tubes > 1 THEN (cr2.unitCost + (pFees2.tierRate*cr2.unitCost)) END) AS unitCost,
+  (CASE WHEN pFees2.tubes > 1 THEN cr2.unitCost END) AS unitCostDirect, -- unit cost without tier rate
+  (CASE WHEN pFees2.tubes > 1 THEN (cr2.unitCost + (pFees2.tierRate*cr2.unitCost)) END) AS unitCost, -- unit cost with tier rate
   null AS comment,
   (CASE WHEN pFees2.tubes > 1 THEN (pFees2.tubes - 1) ELSE 0 END) AS quantity,
   pFees2.taskid,
@@ -64,6 +66,5 @@ FROM wnprc_billing.procedureFeesWithTierRates pFees2
     CAST(pFees2.date AS DATE) >= CAST(cr2.startDate AS DATE) AND
     (CAST(pFees2.date AS DATE) <= cr2.enddate OR cr2.enddate IS NULL))
   LEFT JOIN ehr_billing.chargeableItems ci2 ON ci2.rowid = cr2.chargeId
-  LEFT JOIN ehr_billing.chargeableItemCategories cic ON ci2.chargeCategoryId = cic.rowid
   WHERE ci2.name = 'Blood draws - Additional Tubes') procFees
 WHERE procFees.quantity > 0

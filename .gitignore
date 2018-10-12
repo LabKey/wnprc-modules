@@ -3,6 +3,7 @@
 docker/**/data
 docker/**/logs
 docker/**/.env
+docker/.gradle
 
 **/node_modules/
 **/build/

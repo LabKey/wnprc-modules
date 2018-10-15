@@ -34,5 +34,5 @@ LK_BASE_URL=https://ehr.primate.wisc.edu/
 25     7-17     *     *       *         root   $ALERT_DIR/siteErrorAlerts.pl > /dev/null
 0      6,10,13  *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
 0      15,17,19 *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
-30     13,20    *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
+30     13       *     *       *         root   $ALERT_DIR/treatmentAlerts.pl > /dev/null
 10     15       *     *       *         root   $ALERT_DIR/weightAlerts.pl > /dev/null

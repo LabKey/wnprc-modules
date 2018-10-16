@@ -125,7 +125,7 @@ exports.init = function (EHR) {
         if (row.Id && !helper.isQuickValidation() && !helper.isETL()) {
             if (row.Id.match(/(^rh([0-9]{4})$)|(^r([0-9]{5})$)|(^rh-([0-9]{3})$)|(^rh[a-z]{2}([0-9]{2})$)/))
                 species = 'Rhesus';
-            else if (row.Id.match(/^cy?([0-9]{4,5})$/))
+            else if (row.Id.match(/(^cy?([0-9]{4,5})$)|(^c([0-9]{5})$)/))
                 species = 'Cynomolgus';
             else if (row.Id.match(/^ag([0-9]{4})$/))
                 species = 'Vervet';

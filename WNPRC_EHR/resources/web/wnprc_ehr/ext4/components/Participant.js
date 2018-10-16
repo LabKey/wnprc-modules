@@ -28,10 +28,11 @@ Ext4.define('WNPRC.ext.plugins.AnimalField', {
                 if (val.match(/(^rh([0-9]{4})$)|(^r([0-9]{5})$)|(^rh-([0-9]{3})$)|(^rh[a-z]{2}([0-9]{2})$)/)) {
                     species = 'Rhesus';
                 }
-                else if (val.match(/^cy?([0-9]{4,5})$/)) {
+                else if (val.match(/(^cy?([0-9]{4,5})$)|(^c([0-9]{5})$)/)) {
+                    console.log ("change species from participant");
                     species = 'Cynomolgus';
                 }
-                else if (val.match(/^cj([0-9]{4})$/)) {
+                else if (val.match(/(^cj([0-9]{4})$)|(^cja([0-9]{3})$)/)) {
                     species = 'Marmoset';
                 }
                 else if (val.match(/^pd([0-9]{4})$/) || val.match(/^pdtemp/i) ) {

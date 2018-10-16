@@ -8,3 +8,5 @@ docker/**/.env
 **/build/
 
 **/resources/credits/dependencies.txt
+
+**/.gradle

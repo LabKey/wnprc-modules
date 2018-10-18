@@ -6,7 +6,7 @@
                     <column columnName="Id"/>
                     <column columnName="project">
                         <fk>
-                            <fkDbSchema>ehrLinked</fkDbSchema> <!--ehrLinked Schema is expected with published ehr.project table-->
+                            <fkDbSchema>ehrLinked</fkDbSchema> <!--linked schema ehrLinked is expected in Private folder. Use ehrLinked.template.xml to create this linked schema-->
                             <fkTable>project</fkTable>
                             <fkColumnName>project</fkColumnName>
                         </fk>

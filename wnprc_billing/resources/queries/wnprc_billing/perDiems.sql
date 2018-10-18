@@ -58,7 +58,7 @@ SELECT * FROM
                 ELSE CAST(assgn.enddate AS DATE)
             END AS edate,
             project.research AS research
-        FROM studyLinked.assignment assgn
+        FROM studyLinked.assignment assgn -- linked schema studyLinked is expected in Private folder. Use studyLinked.template.xml to create this linked schema
         JOIN
         (SELECT h.id AS id, h.room AS room, h.date, h.enddate,
                 CASE

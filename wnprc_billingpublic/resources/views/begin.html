@@ -14,7 +14,7 @@ Ext4.onReady(function(){
         itemId: 'outerPanel',
         border: false,
         items: [{
-            html: 'Below are the projects are you authorized to view.  Click the project name to view more detail for each billing period.  If you believe there is an error in this list of projects, please use the help menu above to enter an issue.',
+            html: 'Below are the projects are you authorized to view.  Click the project name to view more detail for each billing period.  If you believe there is an error in this list of projects, please enter an issue.',
             style: 'padding-bottom: 10px;',
             border: false
         },{
@@ -22,7 +22,21 @@ Ext4.onReady(function(){
             style: 'padding-bottom: 10px;',
             hidden: !billingContainer,
             border: false
-        }]
+        },{
+            xtype: 'ldk-querypanel',
+            queryConfig: {
+                frame: 'none',
+                buttonBar: {
+                    //position: 'none'
+                },
+                schemaName: 'wnprc_billing_public',
+                queryName: 'projects',
+                success: function () {
+                    LDK.Assert.assertNotEmpty('Error in scope of DataRegion success()', (this.up && this.up('#outerPanel')));
+                    this.up('#outerPanel').setWidth(this.getWidth() + 10);
+                }
+            }
+         }]
     }).render(webpart.wrapperDivId);
 });
 

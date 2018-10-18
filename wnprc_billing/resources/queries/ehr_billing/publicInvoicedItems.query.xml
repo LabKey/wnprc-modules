@@ -22,11 +22,23 @@
                     <column columnName="lastName">
                         <isHidden>true</isHidden>
                     </column>
+                    <column columnName="objectid">
+                        <isHidden>true</isHidden>
+                    </column>
                     <column columnName="invoiceId">
                         <fk>
-                            <fkDbSchema>onprc_billing</fkDbSchema>
-                            <fkTable>invoiceRuns</fkTable>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>publicInvoiceRuns</fkTable>
                             <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>rowid</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                            <fkDisplayColumnName>project</fkDisplayColumnName>
                         </fk>
                     </column>
                 </columns>

@@ -18,7 +18,6 @@ SELECT
   r.runDate,
   r.billingPeriodStart,
   r.billingPeriodEnd,
-  r.invoiceNumber,
   r.comment,
   r.objectid
 FROM ehr_billing.invoiceRuns r

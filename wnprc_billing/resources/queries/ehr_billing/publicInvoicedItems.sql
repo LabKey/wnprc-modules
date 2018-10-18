@@ -42,18 +42,20 @@ SELECT
   i.chargeCategory
 
 FROM ehr_billing.invoicedItems i
-WHERE ((SELECT max(rowid) as expr FROM wnprc_billing.dataAccess da WHERE isMemberOf(da.userid) AND (
+WHERE ((SELECT max(rowid) AS expr FROM ehr_billing.dataAccess da WHERE isMemberOf(da.userid) AND (
     da.allData = true OR
-    (da.project = i.project) OR
-    --TODO: this needs to get cleaned up
+    (da.project = i.project)
+      OR
     (
       da.investigatorId = i.investigatorId
       OR da.investigatorId = i.debitedaccount.investigatorId
-      OR da.investigatorId = i.project.investigatorId
+--       OR da.investigatorId = i.project.investigatorId <!-- TODO: Currently, there is no easy way to add an investigatorId to ehr.project (editing on ehr.project routes to a custom page which has investigatorId as hidden) -->
     )
-  )) IS NOT NULL OR
+  )) IS NOT NULL
+      OR
 
   --include if the user is either the project's PI, the account PI, or the financial analyst
-  isMemberOf(i.project.investigatorId.userid) OR isMemberOf(i.debitedaccount.investigatorId.userid) OR isMemberOf(i.project.investigatorId.financialAnalyst)
-
+--   isMemberOf(i.project.investigatorId.userid) OR <!-- TODO: same problem as mentioned above -->
+  isMemberOf(i.debitedaccount.investigatorId)
+--          OR isMemberOf(i.project.investigatorId.financialAnalyst) <!-- TODO: same problem as mentioned above -->
 )

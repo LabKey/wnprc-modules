@@ -41,6 +41,13 @@
                             <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehrLinked</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

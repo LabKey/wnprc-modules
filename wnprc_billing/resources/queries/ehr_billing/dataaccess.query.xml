@@ -1,0 +1,37 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="dataaccess" tableDbType="TABLE">
+                <tableTitle>Investigator Data Access</tableTitle>
+                <columns>
+                    <column columnName="userId">
+                        <fk>
+                            <fkDbSchema>coreLinked</fkDbSchema>
+                            <fkTable>Users</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="project">
+                       <fk>
+                            <fkDbSchema>ehrLinked</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="investigatorid">
+                        <columnTitle>Investigator</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehrLinked</fkDbSchema>
+                            <fkTable>investigators</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>lastname</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="alldata">
+                        <columnTitle>Access to all investigator projects?</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

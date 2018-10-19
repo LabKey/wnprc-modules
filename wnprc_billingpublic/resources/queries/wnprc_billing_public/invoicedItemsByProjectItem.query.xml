@@ -2,7 +2,6 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="invoicedItemsByProjectItem" tableDbType="TABLE">
-                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
                 <tableTitle>Invoices By Project And Item</tableTitle>
                 <columns>
                     <column columnName="invoiceId">
@@ -11,14 +10,14 @@
                             <fkDbSchema>wnprc_billing_public</fkDbSchema>
                             <fkTable>publicInvoiceRuns</fkTable>
                             <fkColumnName>objectid</fkColumnName>
-                            <!--<fkDisplayColumnName>rowid</fkDisplayColumnName>-->
+                            <fkDisplayColumnName>rowid</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="numItems">
                         <columnTitle># Items</columnTitle>
                         <url>/query/executeQuery.view?schemaName=wnprc_billing_public&amp;
                             queryName=publicInvoicedItems&amp;
-                            query.invoiceId/rowid~eq=${invoiceId/rowid}&amp;
+                            query.invoiceRunId~eq=${invoiceId/rowid}&amp;
                             query.project~eq=${project}&amp;
                             query.item~eq=${item}
                         </url>

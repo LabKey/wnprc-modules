@@ -1,5 +1,6 @@
 SELECT
   i.invoiceId,
+  i.invoiceId.rowid as invoiceRunId,
   i.project,
   sum(i.quantity) as numItems,
   sum(i.totalCost) as total,
@@ -8,4 +9,4 @@ SELECT
 
 FROM wnprc_billing_public.publicInvoicedItems i
 
-GROUP BY i.invoiceId, i.project
+GROUP BY i.invoiceId, i.project, i.invoiceId.rowid

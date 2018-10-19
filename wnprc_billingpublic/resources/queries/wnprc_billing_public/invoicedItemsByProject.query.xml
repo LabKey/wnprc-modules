@@ -4,7 +4,6 @@
             <table tableName="invoicedItemsByProject" tableDbType="TABLE">
                 <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
                 <tableTitle>Invoices By Project</tableTitle>
-                <!--<tableUrl>/query/executeQuery.view?schemaName=wnprc_billing_public&amp;queryName=invoicedItemsByProjectItem&amp;query.invoiceId/rowid~eq=${invoiceId/rowid}&amp;query.project~eq=${project}</tableUrl>-->
                 <columns>
                     <column columnName="invoiceId">
                         <fk>
@@ -16,11 +15,6 @@
                     </column>
                     <column columnName="numItems">
                         <columnTitle># Items</columnTitle>
-                        <url>/query/executeQuery.view?schemaName=wnprc_billing_public&amp;
-                            queryName=invoicedItemsByProjectItem&amp;
-                            query.invoiceId/rowid~eq=${invoiceId/rowid}&amp;
-                            query.project~eq=${project}
-                        </url>
                         <formatString>###,##0.00</formatString>
                     </column>
                     <column columnName="total">
@@ -28,7 +22,7 @@
                         <formatString>$###,##0.00</formatString>
                     </column>
                     <column columnName="summaryByItem">
-                        <columnTitle></columnTitle>
+                        <columnTitle>Summary By Item Category</columnTitle>
                         <url>/query/executeQuery.view?schemaName=wnprc_billing_public&amp;
                             queryName=invoicedItemsByProjectItem&amp;
                             query.invoiceId/rowid~eq=${invoiceId/rowid}&amp;
@@ -36,10 +30,10 @@
                         </url>
                     </column>
                     <column columnName="allItems">
-                        <columnTitle></columnTitle>
+                        <columnTitle>All Items</columnTitle>
                         <url>/query/executeQuery.view?schemaName=wnprc_billing_public&amp;
                             queryName=publicInvoicedItems&amp;
-                            query.invoiceId/rowid~eq=${invoiceId/rowid}&amp;
+                            query.invoiceRunId~eq=${invoiceId/rowid}&amp;
                             query.project~eq=${project}
                         </url>
                     </column>

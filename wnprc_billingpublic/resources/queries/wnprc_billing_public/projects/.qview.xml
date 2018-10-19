@@ -1,17 +1,9 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="project"/>
+        <column name="projectContact"/>
         <column name="title"/>
-        <column name="summaryByInvoice">
-            <properties>
-                <property name="columnTitle" value="Summary by Invoice"/>
-            </properties>
-        </column>
-        <column name="allItems">
-            <properties>
-                <property name="columnTitle" value="All Items"/>
-            </properties>
-        </column>
+        <column name="protocol"/>
     </columns>
     <sorts>
         <sort column="project/displayName"/>

@@ -32,6 +32,13 @@
                 <column columnName="investigatorName">
                     <columnTitle>Principal Investigator</columnTitle>
                 </column>
+                <column columnName="investigatorId">
+                    <fk>
+                        <fkDbSchema>ehr</fkDbSchema>
+                        <fkTable>investigators</fkTable>
+                        <fkColumnName>investigatorId</fkColumnName>
+                    </fk>
+                </column>
                 <column columnName="affiliate"/>
                 <column columnName="contact_name"/>
                 <column columnName="contact_phone"/>

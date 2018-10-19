@@ -3,7 +3,6 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="publicInvoiceRuns" tableDbType="TABLE">
                 <tableTitle>Billing Periods</tableTitle>
-                <tableUrl>/wnprc_billingpublic/publicInvoiceRunDetails.view?invoiceId=${rowId}</tableUrl>
                 <columns>
                     <column columnName="objectid">
                         <isHidden>true</isHidden>

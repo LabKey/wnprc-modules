@@ -4,5 +4,7 @@
                 sourceSchemaName="ehr">
     <tables>
         <tableName>project</tableName>
+        <tableName>protocol</tableName>
+        <tableName>investigators</tableName>
     </tables>
 </templateSchema>

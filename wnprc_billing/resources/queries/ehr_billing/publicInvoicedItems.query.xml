@@ -26,6 +26,7 @@
                         <isHidden>true</isHidden>
                     </column>
                     <column columnName="invoiceId">
+                        <isHidden>true</isHidden>
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>publicInvoiceRuns</fkTable>
@@ -35,7 +36,7 @@
                     </column>
                     <column columnName="project">
                         <fk>
-                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkDbSchema>ehrLinked</fkDbSchema> <!--linked schema ehrLinked is expected in Private folder. Use ehrLinked.template.xml to create this linked schema-->
                             <fkTable>project</fkTable>
                             <fkColumnName>project</fkColumnName>
                             <fkDisplayColumnName>project</fkDisplayColumnName>

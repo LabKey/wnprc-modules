@@ -28,7 +28,8 @@
                         </fk>
                     </column>
                     <column columnName="alldata">
-                        <columnTitle>Access to all investigator projects?</columnTitle>
+                        <columnTitle>Access to all projects?</columnTitle>
+                        <description>True if you want the User to have access to ALL the projects that Investigator has access to (in this case, leave Project field empty). False otherwise.</description>
                     </column>
                 </columns>
             </table>

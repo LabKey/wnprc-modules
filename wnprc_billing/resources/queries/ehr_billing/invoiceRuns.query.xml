@@ -3,7 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="invoiceRuns" tableDbType="TABLE">
                 <tableTitle>Invoice Runs</tableTitle>
-                <javaCustomizer>org.labkey.wnprc_billing.WNPRC_InvoiceRunCustomizer</javaCustomizer>
+                <javaCustomizer class = "org.labkey.wnprc_billing.WNPRC_InvoiceRunCustomizer"/>
             </table>
         </tables>
     </metadata>

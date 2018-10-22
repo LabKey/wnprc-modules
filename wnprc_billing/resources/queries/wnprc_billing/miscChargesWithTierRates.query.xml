@@ -13,7 +13,7 @@
                     </column>
                     <column columnName="tierRate">
                         <fk>
-                            <fkDbSchema>wnprc_billing</fkDbSchema>
+                            <fkDbSchema>wnprc_billingLinked</fkDbSchema>
                             <fkTable>tierRates</fkTable>
                             <fkColumnName>tier_rate</fkColumnName>
                         </fk>

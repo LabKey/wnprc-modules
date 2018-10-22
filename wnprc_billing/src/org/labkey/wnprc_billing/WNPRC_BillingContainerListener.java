@@ -19,6 +19,11 @@ package org.labkey.wnprc_billing;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager.ContainerListener;
+import org.labkey.api.data.DatabaseTableType;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.security.User;
 import java.util.Collections;
 import java.util.Collection;
@@ -35,6 +40,16 @@ public class WNPRC_BillingContainerListener implements ContainerListener
     @Override
     public void containerDeleted(Container c, User user)
     {
+        DbScope scope = WNPRC_BillingSchema.getInstance().getSchema().getScope();
+        SimpleFilter containerFilter = SimpleFilter.createContainerFilter(c);
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
+        {
+            TableInfo tierRatesTable = WNPRC_BillingSchema.getInstance().getTierRates();
+            if (tierRatesTable.getTableType() == DatabaseTableType.TABLE)
+                Table.delete(tierRatesTable, containerFilter);
+
+            transaction.commit();
+        }
     }
 
     @Override

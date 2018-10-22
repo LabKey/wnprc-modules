@@ -1,3 +1,5 @@
+<!--Linked Schema named wnprc_billing_public with this template to be created in PI Portal Folder-->
+
 <templateSchema sourceSchemaName="ehr_billing" xmlns="http://labkey.org/data/xml/externalSchema" xmlns:cv="http://labkey.org/data/xml/queryCustomView">
     <tables>
         <tableName>publicInvoiceRuns</tableName>
@@ -7,32 +9,4 @@
         <tableName>chargeRates</tableName>
         <tableName>chargeUnits</tableName>
     </tables>
-    <!--<metadata>-->
-        <!--<tables xmlns="http://labkey.org/data/xml">-->
-            <!--<table tableName="publicInvoiceRuns" tableDbType="NOT_IN_DB">-->
-                <!--<javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />-->
-                <!--<tableTitle>Invoice Runs</tableTitle>-->
-            <!--</table>-->
-            <!--<table tableName="publicInvoicedItems" tableDbType="NOT_IN_DB">-->
-                <!--<javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />-->
-                <!--<tableTitle>Invoiced Items</tableTitle>-->
-            <!--</table>-->
-            <!--<table tableName="chargeableItems" tableDbType="NOT_IN_DB">-->
-                <!--<javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />-->
-                <!--<tableTitle>Chargeable Items</tableTitle>-->
-            <!--</table>-->
-            <!--<table tableName="aliases" tableDbType="NOT_IN_DB">-->
-                <!--<javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />-->
-                <!--<tableTitle>Aliases</tableTitle>-->
-            <!--</table>-->
-            <!--<table tableName="chargeRates" tableDbType="NOT_IN_DB">-->
-                <!--<javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />-->
-                <!--<tableTitle>Charge Rates</tableTitle>-->
-            <!--</table>-->
-            <!--<table tableName="chargeUnits" tableDbType="NOT_IN_DB">-->
-                <!--<javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />-->
-                <!--<tableTitle>Charge Units</tableTitle>-->
-            <!--</table>-->
-        <!--</tables>-->
-    <!--</metadata>-->
 </templateSchema>

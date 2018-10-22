@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="chargeUnits" tableDbType="NOT_IN_DB">
+            <table tableName="chargeUnits" tableDbType="TABLE">
                 <tableTitle>Charge Units</tableTitle>
                 <columns>
                     <column columnName="serviceCenter">

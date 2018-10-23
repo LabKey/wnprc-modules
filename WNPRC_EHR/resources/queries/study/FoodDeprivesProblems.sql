@@ -2,14 +2,14 @@ SELECT
 fd.id,
 fd.date,
 fd.schedule,
-fd.id.demographics.room,
-fd.id.demographics.cage,
+fd.id.demographics.room AS room,
+fd.id.demographics.cage AS cage,
 fd.assignedTo,
 fd.protocolContact,
-fd.reason
+fd.reason,
+fd.qcstate
 
 FROM study.foodDeprives fd
 WHERE
 fd.id.dataset.demographics.calculated_status = 'Alive' AND
-fd.qcstate.label = 'Scheduled' AND
 fd.date = curdate()

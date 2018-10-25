@@ -84,8 +84,6 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
         }else {
           return null;
         }
-
-
     }
 
     private void foodDeprivesNotStarted (Container c, User u, StringBuilder msg, String schedule){

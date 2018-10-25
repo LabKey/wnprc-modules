@@ -10,20 +10,28 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserPrincipal;
 
 import javax.jws.soap.SOAPBinding;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
-public class HusbandryNotification extends AbstractEHRNotification
+public class FoodNotStartedNotification extends AbstractEHRNotification
 {
-    public HusbandryNotification(Module owner){super (owner);}
+    protected String cronString = "0 45 7,15,21 * * ?";
 
-    public String getName(){return "Husbandry Notification";}
+
+    public FoodNotStartedNotification(Module owner){
+        super (owner);
+    }
+
+
+    public String getName(){return "Food Deprive Not Started Notification";}
 
     public String getDescription(){
-        return "This notification gets send several times a day";
+        return "This notification looks for food deprives that have not start after the time frame for each schedule.";
     }
 
     @Override
@@ -32,42 +40,30 @@ public class HusbandryNotification extends AbstractEHRNotification
     }
 
     public String getScheduleDescription(){
-        return "Husbandry notification are send at 9:00, 13:00, 17:00 and 22:00";
+        return "Husbandry notification are send at 7:45, 15:45 and 21:45";
     }
 
     @Override
-    public String getCronString(){ return "0 0 9,13,17,22 * * ?";}
+    public String getCronString(){ return this.cronString;}
+
+    public void setCronString(String schedule){
+        this.cronString = schedule;
+    }
 
     public String getCategory(){
         return "Husbandry";
     }
 
-    public String getMessage(Container c, User u){
-
-        return " ";
-    }
-
-    public void getReciepients (Container c, User u, String requestId){
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestId"),requestId);
-
-        TableInfo ti = getStudySchema(c,u).getTable("requests");
-        TableSelector ts = new TableSelector(ti, filter, null);
-        long total = ts.getRowCount();
-        if (total>0){
-            //System.out.print();
-        }
-
-    }
     @Override
     public String getMessageBodyHTML (Container c, User u){
         StringBuilder msg = new StringBuilder();
 
         //LocalTime currentTime = LocalTime.now();
-        LocalTime currentTime = LocalTime.of(8,15,0);
-        LocalTime morningNotification = LocalTime.of(8,10,0);
+        LocalTime currentTime = LocalTime.of(12,15,0);
+        LocalTime morningNotification = LocalTime.of(7,40,0);
         LocalTime noonNotification = LocalTime.of(12,10,0);
-        LocalTime afternoonNotification = LocalTime.of(16,10,0);
-        LocalTime nightNotification = LocalTime.of(22,10,0);
+        LocalTime afternoonNotification = LocalTime.of(15,40,0);
+        LocalTime nightNotification = LocalTime.of(21,40,0);
 
         msg.append("This email contains information regarding husbandry problems across the center.");
         String schedule = null;
@@ -83,7 +79,13 @@ public class HusbandryNotification extends AbstractEHRNotification
         }
         foodDeprivesNotStarted(c, u, msg, schedule);
 
-        return msg.toString();
+        if (sentNotification){
+            return msg.toString();
+        }else {
+          return null;
+        }
+
+
     }
 
     private void foodDeprivesNotStarted (Container c, User u, StringBuilder msg, String schedule){
@@ -110,8 +112,8 @@ public class HusbandryNotification extends AbstractEHRNotification
                 msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "'>Click here to view this list</a></p>\n");
 
             }
-
-
+        } else{
+            setSentNotification(false);
         }
 
     }

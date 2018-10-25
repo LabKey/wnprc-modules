@@ -48,6 +48,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
     protected final static SimpleDateFormat _timeFormat = new SimpleDateFormat("kk:mm");
     protected final static SimpleDateFormat _hourFormat = new SimpleDateFormat("kk");
     protected static final String lastSave = "lastSave";
+    protected boolean sentNotification = true;
 
     public AbstractEHRNotification(Module owner)
     {
@@ -145,5 +146,9 @@ abstract public class AbstractEHRNotification extends AbstractNotification
 
 
         return sb.toString();
+    }
+    public void setSentNotification(boolean sent){
+        this.sentNotification= sent;
+
     }
 }

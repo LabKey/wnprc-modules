@@ -1,0 +1,24 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="date" />
+        <column name="schedule" />
+        <column name="depriveStartTime"/>
+        <column name="restoredTime"/>
+        <column name="hoursSinceStarted"/>
+        <column name="room" />
+        <column name="cage" />
+        <column name="assignedTo"/>
+        <column name="protocolContact"/>
+        <column name="reason"/>
+        <column name="qcstate"/>
+    </columns>
+    <sorts>
+        <sort column="room" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="qcstate/label" operator="eq" value="Completed"/>
+        <filter column="date" operator="dategte" value="-2d"/>
+        <filter column="hoursSinceStarted" operator="gte" value="24"/>
+    </filters>
+</customView>

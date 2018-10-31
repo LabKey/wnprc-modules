@@ -59,7 +59,7 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
         StringBuilder msg = new StringBuilder();
 
         //LocalTime currentTime = LocalTime.now();
-        LocalTime currentTime = LocalTime.of(12,15,0);
+        LocalTime currentTime = LocalTime.of(8,15,0);
         LocalTime morningNotification = LocalTime.of(7,40,0);
         LocalTime noonNotification = LocalTime.of(12,10,0);
         LocalTime afternoonNotification = LocalTime.of(15,40,0);

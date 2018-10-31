@@ -1,6 +1,5 @@
 package org.labkey.wnprc_ehr.notification;
 
-import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -19,11 +18,17 @@ import javax.jws.soap.SOAPBinding;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.lang.Math.toIntExact;
 
 public class FoodNotCompletedNotification extends AbstractEHRNotification
 {
@@ -61,8 +66,8 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
     public String getMessageBodyHTML (Container c, User u){
         StringBuilder msg = new StringBuilder();
 
-        //LocalTime currentTime = LocalTime.now();
-        LocalTime currentTime = LocalTime.of(12,15,0);
+        LocalDateTime currentTime = LocalDateTime.now();
+        //LocalDateTime currentTime = LocalTime.of(12,15,0);
         LocalTime morningNotification = LocalTime.of(7,40,0);
         LocalTime noonNotification = LocalTime.of(12,10,0);
         LocalTime afternoonNotification = LocalTime.of(15,40,0);
@@ -72,7 +77,8 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         String schedule = null;
 
 
-        foodDeprivesNotCompleted(c, u, msg, currentTime);
+        foodDeprivesNotCompleted(c, u, msg);
+        foodDepriveCompleteProblems(c, u, msg, currentTime);
 
         if (sentNotification){
             return msg.toString();
@@ -81,15 +87,18 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         }
     }
 
-    private void foodDeprivesNotCompleted (Container c, User u, StringBuilder msg, LocalTime currentTime){
-        TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("FoodDeprivesProblems");
+    private void foodDeprivesNotCompleted (Container c, User u, StringBuilder msg){
+        TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("foodDeprivesStarted");
 
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("qcstate/label"), "Started", CompareType.EQUAL);
+        Double maxHours = 22.0;
 
-        Sort roomCage = new Sort(FieldKey.fromString("room"));
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("hoursSinceStarted"),maxHours, CompareType.GTE);
+        filter.addCondition(FieldKey.fromString("qcstate/label"),"Started",CompareType.EQUAL);
+
+        //Sort roomCage = new Sort(FieldKey.fromString("room"));
         //roomCage.insertSortColumn(FieldKey.fromString("room"), Sort.SortDirection.ASC);
 
-        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","date","depriveStartTime"),filter, roomCage);
+        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","date","depriveStartTime","restoredTime"),filter, null);
 
         long count = ts.getRowCount();
         if (count > 0)
@@ -97,58 +106,120 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
             Set<foodDepriveInfo> startedFoodDeprives = new HashSet<>();
             startedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));
             int overFoodDeprives = 0;
-
             for (foodDepriveInfo row : startedFoodDeprives){
                 if (row.timeSinceStarted() >= 22)  {
                     overFoodDeprives++;
-
                 }
-                //row.get("depriveStartTime");
-
+            }
+            if (overFoodDeprives >0)
+            {
+                msg.append("<p><b>WARNING: There are " + overFoodDeprives + " food deprives that have started and are more than 22 hours open</b><br>");
+                if (overFoodDeprives > 0)
+                {
+                    msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesStarted", "Started") + "&query.hoursSinceStarted~gte=22'>Click here to view this list</a></p>\n");
+                }
             }
 
 
-
-            msg.append("<p><b>WARNING: There are "+ overFoodDeprives + " food deprives that are scheduled for today but have not started</b><br>");
-            /*if (schedule != null){
-                msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "&query.schedule~eq="+ schedule + "'>Click here to view this list</a></p>\n");
-
-            }else {
-                msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "'>Click here to view this list</a></p>\n");
-
-            }*/
         } else{
             setSentNotification(false);
         }
 
     }
+
+    public void foodDepriveCompleteProblems(Container c, User u, StringBuilder msg, LocalDateTime currentTime){
+        TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("foodDeprivesStarted");
+        LocalDateTime reportPeriod = currentTime.minusDays(2);
+
+        Date dateFilter = java.sql.Timestamp.valueOf(reportPeriod);
+        Double maxHours = 24.0;
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), dateFilter, CompareType.GTE);
+        filter.addCondition(FieldKey.fromString("qcstate/label"), "Completed", CompareType.EQUAL);
+        filter.addCondition(FieldKey.fromString("hoursSinceStarted"),maxHours, CompareType.GTE);
+
+        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","date","depriveStartTime","restoredTime"), filter, null);
+
+        long count = ts.getRowCount();
+
+        if (count > 0){
+            Set<foodDepriveInfo> CompletedFoodDeprives = new HashSet<>();
+            CompletedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));
+            int overFoodDeprives = 0;
+            for (foodDepriveInfo row : CompletedFoodDeprives){
+                if (row.timeSinceStarted() >= 24)  {
+                    overFoodDeprives++;
+                }
+            }
+            if (overFoodDeprives > 0){
+                setSentNotification(true);
+
+                msg.append("<p><b>WARNING: There are "+ overFoodDeprives + " food deprives in the last two days that were completed and ran for more than 24 hours.</b><br>");
+                if (overFoodDeprives > 0 ){
+                    msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesStarted", "CompletedErrors") + "'>Click here to view this list</a></p>\n");
+                }
+            }
+        }
+    }
+
     public static class foodDepriveInfo implements Comparable<foodDepriveInfo>
     {
-        private Date _date;
         private String _id;
-        private LocalDateTime _fdStartTime;
+        private Date _date;
+        private LocalDateTime _depriveStartTime;
+        private LocalDateTime _restoredTime;
 
         public foodDepriveInfo(){}
 
-        public foodDepriveInfo (Date date, String id, LocalDateTime fdStartTime ){
-            _date = date;
-            _id = id;
-            _fdStartTime = fdStartTime;
-        }
-
         @Override
         public int compareTo (@NotNull foodDepriveInfo currentTime){
-            return getDateTime().compareTo(currentTime.getDateTime());
+            if (_restoredTime == null){
+                return toIntExact(ChronoUnit.HOURS.between(getDepriveStartTime(),currentTime.getDepriveStartTime()));
+            }else{
+                return toIntExact(ChronoUnit.HOURS.between(getDepriveStartTime(), getRestoredTime()));
+            }
         }
 
-        public LocalDateTime getDateTime(){return _fdStartTime;}
 
         public int timeSinceStarted (){
-            LocalDateTime currentTime = LocalDateTime.now();
-            return this.getDateTime().compareTo(currentTime);
+            foodDepriveInfo currentTime = new foodDepriveInfo();
+            Date today = new Date();
+            currentTime.setDepriveStartTime(today);
+            return this.compareTo(currentTime);
         }
 
         public String getId(){return _id;}
+
+        public void setId(String Id){_id=Id;}
+
+        public Date getDate(){return _date;}
+
+        public void setDate(Date date){_date = date;}
+
+        public LocalDateTime getDepriveStartTime(){return _depriveStartTime;}
+
+        //TODO: fix class to set depriveStartTime and restoredTime, at the moment it does not add values to these arguments.
+        public void setDepriveStartTime(Date depriveStartTime){
+            _depriveStartTime= convertToLocalDateTimeViaInstant(depriveStartTime);
+        }
+
+        public LocalDateTime getRestoredTime(){return _restoredTime;}
+
+        public void setRestoredTime(Date restoredTime){
+            if (restoredTime == null)
+            {
+                _restoredTime=convertToLocalDateTimeViaInstant(new Date());
+            }else{
+                _restoredTime = convertToLocalDateTimeViaInstant(restoredTime);
+            }
+        }
+        public LocalDateTime convertToLocalDateTimeViaInstant(Date dateToConvert) {
+            return dateToConvert.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+        }
+
+
 
     }
 

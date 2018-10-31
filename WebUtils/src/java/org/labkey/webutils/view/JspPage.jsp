@@ -115,7 +115,7 @@
     Module module = ModuleLoader.getInstance().getModule(WebUtilsModule.class);
     ModuleProperty prop = module.getModuleProperties().get(QUnitOnPropertyName);
 
-    String QUnitOnPropertyValue = PropertyManager.getCoalecedProperty(PropertyManager.SHARED_USER, getContainer(), prop.getCategory(), QUnitOnPropertyName);
+    String QUnitOnPropertyValue = PropertyManager.getCoalescedProperty(PropertyManager.SHARED_USER, getContainer(), prop.getCategory(), QUnitOnPropertyName);
 
     boolean QUnitOn = (QUnitOnPropertyValue != null) && QUnitOnPropertyValue.toLowerCase().equals("true");
 

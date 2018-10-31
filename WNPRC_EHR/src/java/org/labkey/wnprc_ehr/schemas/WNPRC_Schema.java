@@ -12,7 +12,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.security.EHRRequestPermission;
-import org.labkey.api.ehr.security.EHRVeternarianPermission;
+import org.labkey.api.ehr.security.EHRVeterinarianPermission;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -84,7 +84,7 @@ public class WNPRC_Schema extends SimpleUserSchema {
         }
         if (name.equalsIgnoreCase("vvc")){
             CustomPermissionsTable vvc = new CustomPermissionsTable(this,_dbSchema.getTable(name));
-            vvc.addPermissionMapping(UpdatePermission.class, EHRVeternarianPermission.class);
+            vvc.addPermissionMapping(UpdatePermission.class, EHRVeterinarianPermission.class);
             vvc.addPermissionMapping(InsertPermission.class, EHRRequestPermission.class);
 
             return vvc.init();

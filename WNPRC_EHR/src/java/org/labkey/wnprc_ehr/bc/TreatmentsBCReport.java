@@ -49,7 +49,7 @@ public class TreatmentsBCReport extends BusinessContinuityExcelReport {
         // Bold the column headers
         CellStyle headerStyle = workbook.createCellStyle();
         Font font = workbook.createFont();
-        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        font.setBold(true);
         headerStyle.setFont(font);
 
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);

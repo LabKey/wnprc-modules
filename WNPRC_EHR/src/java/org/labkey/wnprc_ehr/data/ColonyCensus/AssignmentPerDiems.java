@@ -1,6 +1,6 @@
 package org.labkey.wnprc_ehr.data.ColonyCensus;
 
-import com.google.common.base.Joiner;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
@@ -284,7 +284,7 @@ public class AssignmentPerDiems {
 
         public String[] toCsvLine() {
             // Build a string representation of the shared projects.
-            String sharedProjects = Joiner.on(";").join(this.getSharedProjects());
+            String sharedProjects = StringUtils.join(this.getSharedProjects(),';');
 
             List<String> csvFields = Arrays.asList(
                     this.getProject(),

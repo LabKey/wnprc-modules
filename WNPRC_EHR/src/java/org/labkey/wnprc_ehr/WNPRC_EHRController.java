@@ -16,7 +16,7 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import com.google.common.base.MoreObjects;
+//import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -40,7 +40,7 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.resource.FileResource;
-import org.labkey.api.resource.MergedDirectoryResource;
+import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
@@ -120,10 +120,10 @@ public class WNPRC_EHRController extends SpringActionController
         return wnprc_ehrModule;
     }
 
-    MergedDirectoryResource getModuleDataDir(String subdirectory)
+    DirectoryResource getModuleDataDir(String subdirectory)
     {
         Resource r = getModule().getModuleResource("data/" + subdirectory);
-        MergedDirectoryResource dir = ((MergedDirectoryResource) r);
+        DirectoryResource dir = ((DirectoryResource) r);
 
         if ((dir == null) || dir.isFile() || !dir.exists())
         {
@@ -622,7 +622,7 @@ public class WNPRC_EHRController extends SpringActionController
             Map<String, Object> props = new HashMap<>();
 
             // Grab the changelists directory
-            MergedDirectoryResource changelistDir = getModuleDataDir("changelists");
+            DirectoryResource changelistDir = getModuleDataDir("changelists");
 
             for (Resource resource : changelistDir.list())
             {
@@ -1209,9 +1209,8 @@ public class WNPRC_EHRController extends SpringActionController
             Map<String, String[]> params = oldUrl.getParameterMap();
             // just to be safe, make sure we're reading the form type regardless of the capitalization
             // (it _should_ be all lowercase, but we should check anyway)
-            String formType = MoreObjects.firstNonNull(
-                    oldUrl.getParameter(LOWERCASE_FORMTYPE),
-                    oldUrl.getParameter(CAMELCASE_FORMTYPE));
+            String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
+
             switch (formType)
             {
                 // this is the list of things that need redirected to the dataEntryForm.view in the EHR

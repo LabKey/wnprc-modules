@@ -25,6 +25,7 @@ import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.SchemaTreeVisitor;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.ContainerContext;
@@ -379,13 +380,13 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public void fireBatchTrigger(Container c, TriggerType type, boolean before, BatchValidationException errors, Map<String, Object> extraContext) throws BatchValidationException {
-        _tableInfo.fireBatchTrigger(c, type, before, errors, extraContext);
+    public void fireBatchTrigger(Container c, User u,TriggerType type, boolean before, BatchValidationException errors, Map<String, Object> extraContext) throws BatchValidationException {
+        _tableInfo.fireBatchTrigger(c, u, type, before, errors, extraContext);
     }
 
     @Override
-    public void fireRowTrigger(Container c, TriggerType type, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext) throws ValidationException {
-        _tableInfo.fireRowTrigger(c, type, before, rowNumber, newRow, oldRow, extraContext);
+    public void fireRowTrigger(Container c, User u, TriggerType type, boolean before, int rowNumber, @Nullable Map<String, Object> newRow, @Nullable Map<String, Object> oldRow, Map<String, Object> extraContext) throws ValidationException {
+        _tableInfo.fireRowTrigger(c, u, type, before, rowNumber, newRow, oldRow, extraContext);
     }
 
     @Override
@@ -428,6 +429,9 @@ public class DecoratedTableInfo implements TableInfo {
     public ContainerContext getContainerContext() {
         return _tableInfo.getContainerContext();
     }
+
+    @Override
+    public FieldKey getContainerFieldKey(){return _tableInfo.getContainerFieldKey();}
 
     @Override
     public Set<ColumnInfo> getAllInvolvedColumns(Collection<ColumnInfo> selectColumns) {

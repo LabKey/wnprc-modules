@@ -1,8 +1,6 @@
 package org.labkey.dbutils.api.exception;
 
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.security.permissions.PermissionManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +20,7 @@ public class MissingPermissionsException extends Exception {
 
         List<String> requiredPermissions = new ArrayList();
         for(Class<? extends Permission> perm : requiredPermissionClasses) {
-            requiredPermissions.add(PermissionManager.getPermission(perm).getName());
+            requiredPermissions.add(getPermission(perm).getName());
         }
 
         if (requiredPermissions.size() == 1)
@@ -48,5 +46,23 @@ public class MissingPermissionsException extends Exception {
         }
 
         return new MissingPermissionsException(message, requiredPermissionClasses);
+    }
+
+    public static Permission getPermission(Class<? extends Permission> cls)
+    {
+            try
+            {
+                return cls.newInstance();
+            }
+            catch(InstantiationException e)
+            {
+                throw new RuntimeException(e);
+            }
+            catch(IllegalAccessException e)
+            {
+                throw new RuntimeException(e);
+            }
+
+
     }
 }

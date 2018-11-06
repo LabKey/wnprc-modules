@@ -100,10 +100,12 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
 
         TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","date","depriveStartTime","restoredTime"),filter, null);
 
+        //TODO: get rows first than count on the list it self
         long count = ts.getRowCount();
         if (count > 0)
         {
             Set<foodDepriveInfo> startedFoodDeprives = new HashSet<>();
+            List<Map> maps = ts.getArrayList(Map.class);
             startedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));
             int overFoodDeprives = 0;
             for (foodDepriveInfo row : startedFoodDeprives){
@@ -174,9 +176,9 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         @Override
         public int compareTo (@NotNull foodDepriveInfo currentTime){
             if (_restoredTime == null){
-                return toIntExact(ChronoUnit.HOURS.between(getDepriveStartTime(),currentTime.getDepriveStartTime()));
+                return toIntExact(ChronoUnit.HOURS.between(getDeprivestarttime(),currentTime.getDeprivestarttime()));
             }else{
-                return toIntExact(ChronoUnit.HOURS.between(getDepriveStartTime(), getRestoredTime()));
+                return toIntExact(ChronoUnit.HOURS.between(getDeprivestarttime(), getRestoredTime()));
             }
         }
 
@@ -184,7 +186,7 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         public int timeSinceStarted (){
             foodDepriveInfo currentTime = new foodDepriveInfo();
             Date today = new Date();
-            currentTime.setDepriveStartTime(today);
+            currentTime.setDeprivestarttime(today);
             return this.compareTo(currentTime);
         }
 
@@ -196,10 +198,10 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
 
         public void setDate(Date date){_date = date;}
 
-        public LocalDateTime getDepriveStartTime(){return _depriveStartTime;}
+        public LocalDateTime getDeprivestarttime(){return _depriveStartTime;}
 
         //TODO: fix class to set depriveStartTime and restoredTime, at the moment it does not add values to these arguments.
-        public void setDepriveStartTime(Date depriveStartTime){
+        public void setDeprivestarttime(Date depriveStartTime){
             _depriveStartTime= convertToLocalDateTimeViaInstant(depriveStartTime);
         }
 

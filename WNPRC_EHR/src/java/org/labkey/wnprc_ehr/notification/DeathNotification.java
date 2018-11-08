@@ -1,6 +1,8 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.labkey.api.data.Container;
+import org.labkey.api.ldk.notification.Notification;
+import org.labkey.api.security.User;
 
 /**
  * Created by jon on 7/13/16.
@@ -41,5 +43,11 @@ public class DeathNotification extends AbstractJspEmailNotification {
     @Override
     String getPathToJsp() {
         return "/org/labkey/wnprc_ehr/email_templates/notifications/DeathNotification.jsp";
+    }
+
+
+    public void sendManually (Container container, User user, Notification notification){
+        sendManually(container, user);
+
     }
 }

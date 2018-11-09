@@ -86,7 +86,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
 
             // Set subject and body
             msg.setSubject(getEmailSubject(container));
-            msg.setHtmlContent(getMessageBodyHTML(container, user));
+            msg.setEncodedHtmlContent(getMessageBodyHTML(container, user));
 
             MailHelper.send(msg, user, container);
         }

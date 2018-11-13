@@ -2,12 +2,14 @@ package org.labkey.wnprc_ehr.email;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.mail.BodyPart;
@@ -197,12 +199,12 @@ public class EmailServer {
                                 columnNameLookup.put(cell.getColumnIndex(), cell.getStringCellValue());
                             }
                             else {
-                                if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+                                if (cell.getCellType() == CellType.STRING) {
                                     if (columnNameLookup.containsKey(cell.getColumnIndex())) {
                                         rowJSON.put(columnNameLookup.get(cell.getColumnIndex()), cell.getStringCellValue());
                                     }
                                 }
-                                else if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+                                else if (cell.getCellType() == CellType.NUMERIC) {
                                     if (columnNameLookup.containsKey(cell.getColumnIndex())) {
                                         String columnName = columnNameLookup.get(cell.getColumnIndex());
 
@@ -227,7 +229,7 @@ public class EmailServer {
                     attachmentJSON.put("rows", rows);
                 }
             }
-            catch (IOException |InvalidFormatException e) {
+            catch (IOException | JSONException e) {
                 attachmentJSON.put("error", e.getMessage());
             }
 
@@ -268,10 +270,10 @@ public class EmailServer {
                                 columnNameLookup.put(cell.getColumnIndex(), cell.getStringCellValue());
                             }
 
-                            if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+                            if (cell.getCellType() == CellType.STRING) {
                                 value = cell.getStringCellValue();
                             }
-                            else if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+                            else if (cell.getCellType() == CellType.NUMERIC) {
                                 if (columnNameLookup.containsKey(cell.getColumnIndex())
                                         && Pattern.compile("date", Pattern.CASE_INSENSITIVE).matcher(columnNameLookup.get(cell.getColumnIndex())).find()) {
 
@@ -293,7 +295,7 @@ public class EmailServer {
                     attachmentJSON.put("rows", rows);
                 }
             }
-            catch (IOException |InvalidFormatException e) {
+            catch (IOException |JSONException e) {
                 attachmentJSON.put("error", e.getMessage());
             }
 

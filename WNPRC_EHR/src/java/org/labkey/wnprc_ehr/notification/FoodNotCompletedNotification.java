@@ -40,10 +40,10 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
     }
 
 
-    public String getName(){return "Food Deprive Longer Than 22 Hours Notification";}
+    public String getName(){return "Food Deprive Longer Than 22 Hours Notification or Completed with problems";}
 
     public String getDescription(){
-        return "This notification looks for food deprives that are going longer than 22 hours.";
+        return "This notification looks for food deprives that are going longer than 22 hours or that have been completed but ran more than 24 hours.";
     }
 
     @Override
@@ -67,15 +67,8 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         StringBuilder msg = new StringBuilder();
 
         LocalDateTime currentTime = LocalDateTime.now();
-        //LocalDateTime currentTime = LocalTime.of(12,15,0);
-        LocalTime morningNotification = LocalTime.of(7,40,0);
-        LocalTime noonNotification = LocalTime.of(12,10,0);
-        LocalTime afternoonNotification = LocalTime.of(15,40,0);
-        LocalTime nightNotification = LocalTime.of(21,40,0);
 
         msg.append("This email contains information regarding husbandry problems across the center.");
-        String schedule = null;
-
 
         foodDeprivesNotCompleted(c, u, msg);
         foodDepriveCompleteProblems(c, u, msg, currentTime);
@@ -95,12 +88,7 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("hoursSinceStarted"),maxHours, CompareType.GTE);
         filter.addCondition(FieldKey.fromString("qcstate/label"),"Started",CompareType.EQUAL);
 
-        //Sort roomCage = new Sort(FieldKey.fromString("room"));
-        //roomCage.insertSortColumn(FieldKey.fromString("room"), Sort.SortDirection.ASC);
-
         TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","date","depriveStartTime","restoredTime"),filter, null);
-
-
 
         Set<foodDepriveInfo> startedFoodDeprives = new HashSet<>();
         startedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));

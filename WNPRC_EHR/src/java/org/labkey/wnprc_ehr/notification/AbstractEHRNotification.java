@@ -149,6 +149,8 @@ abstract public class AbstractEHRNotification extends AbstractNotification
     }
     public void setSentNotification(boolean sent){
         this.sentNotification= sent;
-
+    }
+    public boolean getSentNotification(){
+        return sentNotification;
     }
 }

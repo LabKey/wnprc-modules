@@ -100,14 +100,12 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
 
         TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","date","depriveStartTime","restoredTime"),filter, null);
 
-        //TODO: get rows first than count on the list it self
-        long count = ts.getRowCount();
-        if (count > 0)
-        {
-            Set<foodDepriveInfo> startedFoodDeprives = new HashSet<>();
-            List<Map> maps = ts.getArrayList(Map.class);
-            startedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));
-            int overFoodDeprives = 0;
+
+
+        Set<foodDepriveInfo> startedFoodDeprives = new HashSet<>();
+        startedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));
+        if (startedFoodDeprives.size()>0){
+        int overFoodDeprives = 0;
             for (foodDepriveInfo row : startedFoodDeprives){
                 if (row.timeSinceStarted() >= 22)  {
                     overFoodDeprives++;
@@ -121,7 +119,6 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
                     msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesStarted", "Started") + "&query.hoursSinceStarted~gte=22'>Click here to view this list</a></p>\n");
                 }
             }
-
 
         } else{
             setSentNotification(false);
@@ -142,11 +139,10 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
 
         TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id","date","depriveStartTime","restoredTime"), filter, null);
 
-        long count = ts.getRowCount();
 
-        if (count > 0){
-            Set<foodDepriveInfo> CompletedFoodDeprives = new HashSet<>();
-            CompletedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));
+        Set<foodDepriveInfo> CompletedFoodDeprives = new HashSet<>();
+        CompletedFoodDeprives.addAll(Arrays.asList(ts.getArray(foodDepriveInfo.class)));
+        if (CompletedFoodDeprives.size()>0){
             int overFoodDeprives = 0;
             for (foodDepriveInfo row : CompletedFoodDeprives){
                 if (row.timeSinceStarted() >= 24)  {
@@ -156,11 +152,13 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
             if (overFoodDeprives > 0){
                 setSentNotification(true);
 
-                msg.append("<p><b>WARNING: There are "+ overFoodDeprives + " food deprives in the last two days that were completed and ran for more than 24 hours.</b><br>");
+                msg.append("<p><b>INFO: There are "+ overFoodDeprives + " food deprives in the last two days that were completed and ran for more than 24 hours.</b><br>");
                 if (overFoodDeprives > 0 ){
                     msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesStarted", "CompletedErrors") + "'>Click here to view this list</a></p>\n");
                 }
             }
+        }else if(!getSentNotification()){
+            setSentNotification(false);
         }
     }
 
@@ -168,25 +166,26 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
     {
         private String _id;
         private Date _date;
-        private LocalDateTime _depriveStartTime;
-        private LocalDateTime _restoredTime;
+        private Date _depriveStartTime;
+        private Date _restoredTime;
 
         public foodDepriveInfo(){}
 
         @Override
         public int compareTo (@NotNull foodDepriveInfo currentTime){
+
             if (_restoredTime == null){
-                return toIntExact(ChronoUnit.HOURS.between(getDeprivestarttime(),currentTime.getDeprivestarttime()));
+                return toIntExact(ChronoUnit.HOURS.between(getLocalDepriveStartTime(),currentTime.getLocalDepriveStartTime()));
             }else{
-                return toIntExact(ChronoUnit.HOURS.between(getDeprivestarttime(), getRestoredTime()));
+                return toIntExact(ChronoUnit.HOURS.between(getLocalDepriveStartTime(), getLocalRestoreTime()));
             }
         }
 
 
         public int timeSinceStarted (){
             foodDepriveInfo currentTime = new foodDepriveInfo();
-            Date today = new Date();
-            currentTime.setDeprivestarttime(today);
+            //Date today = new Date();
+            currentTime.setDeprivestarttime(new Date());
             return this.compareTo(currentTime);
         }
 
@@ -198,32 +197,33 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
 
         public void setDate(Date date){_date = date;}
 
-        public LocalDateTime getDeprivestarttime(){return _depriveStartTime;}
+        public Date getDeprivestarttime(){return _depriveStartTime;}
 
-        //TODO: fix class to set depriveStartTime and restoredTime, at the moment it does not add values to these arguments.
         public void setDeprivestarttime(Date depriveStartTime){
-            _depriveStartTime= convertToLocalDateTimeViaInstant(depriveStartTime);
+            _depriveStartTime = depriveStartTime;
         }
 
-        public LocalDateTime getRestoredTime(){return _restoredTime;}
+        public LocalDateTime getLocalDepriveStartTime(){
+            return convertToLocalDateTimeViaInstant(_depriveStartTime);
+        }
+
+        public Date getRestoredTime(){return _restoredTime;}
 
         public void setRestoredTime(Date restoredTime){
             if (restoredTime == null)
             {
-                _restoredTime=convertToLocalDateTimeViaInstant(new Date());
+                _restoredTime=new Date();
             }else{
-                _restoredTime = convertToLocalDateTimeViaInstant(restoredTime);
+                _restoredTime = restoredTime;
             }
+        }
+        public LocalDateTime getLocalRestoreTime(){
+            return convertToLocalDateTimeViaInstant(_restoredTime);
         }
         public LocalDateTime convertToLocalDateTimeViaInstant(Date dateToConvert) {
             return dateToConvert.toInstant()
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();
         }
-
-
-
     }
-
-
 }

@@ -88,6 +88,9 @@ import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
 import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
+import org.labkey.wnprc_ehr.notification.FoodNotCompletedNotification;
+import org.labkey.wnprc_ehr.notification.FoodNotStartedNoonNotification;
+import org.labkey.wnprc_ehr.notification.FoodNotStartedNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
@@ -302,7 +305,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 new ColonyAlertsNotification(this),
                 new WaterMonitoringNotification(this),
                 new TreatmentAlertsNotification(this),
-                new VvcNotification(this)
+                new VvcNotification(this),
+                new FoodNotStartedNotification(this),
+                new FoodNotStartedNoonNotification(this),
+                new FoodNotCompletedNotification(this)
         );
 
         for(Notification notification : notifications) {

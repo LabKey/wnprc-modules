@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 LabKey Corporation
+ * Copyright (c) 2017 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     protected void init()
     {
         addController(WNPRC_BillingController.NAME, WNPRC_BillingController.class);
-        ServiceRegistry.get().registerService(InvoicedItemsProcessingService.class, InvoicedItemsProcessingServiceImpl.INSTANCE);
+        ServiceRegistry.get().registerService(InvoicedItemsProcessingService.class, new InvoicedItemsProcessingServiceImpl());
     }
 
     @Override

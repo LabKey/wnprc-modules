@@ -10,13 +10,9 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserPrincipal;
-
-import javax.jws.soap.SOAPBinding;
 import java.time.LocalTime;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
+
 
 public class FoodNotStartedNotification extends AbstractEHRNotification
 {
@@ -58,8 +54,7 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
     public String getMessageBodyHTML (Container c, User u){
         StringBuilder msg = new StringBuilder();
 
-        //LocalTime currentTime = LocalTime.now();
-        LocalTime currentTime = LocalTime.of(8,15,0);
+        LocalTime currentTime = LocalTime.now();
         LocalTime morningNotification = LocalTime.of(7,40,0);
         LocalTime noonNotification = LocalTime.of(12,10,0);
         LocalTime afternoonNotification = LocalTime.of(15,40,0);
@@ -71,11 +66,11 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
         if (currentTime.isAfter(morningNotification) ){
             schedule = "am";
         }if (currentTime.isAfter(noonNotification)){
-            schedule = "noon";
+            schedule = "am;noon";
         }if (currentTime.isAfter(afternoonNotification)){
-            schedule = "pm";
+            schedule = "am;noon;pm";
         }if (currentTime.isAfter(nightNotification)){
-            schedule = "night";
+            schedule = "am;noon;pm;night";
         }
         foodDeprivesNotStarted(c, u, msg, schedule);
 
@@ -91,7 +86,7 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("qcstate/label"), "Scheduled", CompareType.EQUAL);
         if (schedule != null){
-            filter.addCondition(FieldKey.fromString("schedule"),schedule,CompareType.EQUAL);
+            filter.addCondition(FieldKey.fromString("schedule"),schedule,CompareType.IN);
         }
 
         Sort roomCage = new Sort(FieldKey.fromString("room"));
@@ -104,7 +99,7 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
         {
             msg.append("<p><b>WARNING: There are "+ count + " food deprives that are scheduled for today but have not started</b><br>");
             if (schedule != null){
-                msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "&query.schedule~eq="+ schedule + "'>Click here to view this list</a></p>\n");
+                msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "&query.schedule~in="+ schedule + "&query.sort=-schedule/title'>Click here to view this list</a></p>\n");
 
             }else {
                 msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "'>Click here to view this list</a></p>\n");

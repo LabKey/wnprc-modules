@@ -43,7 +43,7 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         proceduresProcess.setRequiredFields(Arrays.asList("date", "unitCost", "totalcost"));
         processes.add(proceduresProcess);
 
-        BillingPipelineJobProcess miscChargesProcess = new BillingPipelineJobProcess(" Fees", WNPRC_BillingSchema.NAME, "miscChargesFeeRates", getMisChargesColMap());
+        BillingPipelineJobProcess miscChargesProcess = new BillingPipelineJobProcess("Misc Charges", WNPRC_BillingSchema.NAME, "miscChargesFeeRates", getMisChargesColMap());
         miscChargesProcess.setRequiredFields(Arrays.asList("date", "unitCost", "totalcost"));
         miscChargesProcess.setUseEHRContainer(true);
         miscChargesProcess.setMiscCharges(true);

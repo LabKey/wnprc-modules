@@ -187,7 +187,7 @@
         <td><%= necropsy.optString("timeofdeath", NONE_SPECIFIED) %></td>
     </tr>
     <tr>
-        <td>Cause of Death:</td>
+        <td>Type of Death:</td>
         <td><%= cause.equals("") ? NONE_SPECIFIED : h(cause) %></td>
     </tr>
     <tr>
@@ -198,19 +198,28 @@
         <td>Animal Replacement Fee:</td>
         <td>
             <%
-                if (cause.equals("Clinical")) {
+                SimplerFilter causeFilter = new SimplerFilter("value", CompareType.EQUAL, cause);
+                JSONArray deathCause = queryFactory.selectRows("ehr_lookups", "death_cause", causeFilter);
+                String feeCategory = deathCause.getJSONObject(0).getString("category");
+
+                if (feeCategory.equals("No Fee")) {
             %>
-            No animal replacement fee to be paid (clinical death)
+            No animal replacement fee to be paid (clinical death) <br>
+            Charge to clinical project 300901 <br>
+            Charge any tissue to distribution as NHPBMD to PI
+
+            <%
+                }
+                else if (feeCategory.equals("Fee")){
+            %>
+            Animal replacement charge or prepaid <br>
+            <%= (prepaid == null) ? "Nx cost to assigned experimental grant/project" : "Nx was paid by " + prepaid %>
+
             <%
                 }
                 else if (isPrenatalDeath) {
             %>
             <em>N/A (prenatal death)</em>
-            <%
-                }
-                else {
-            %>
-            Animal replacement fee <%= (prepaid == null) ? "to be paid (not prepaid animal)" : "was paid by " + prepaid %>
             <%
                 }
             %>

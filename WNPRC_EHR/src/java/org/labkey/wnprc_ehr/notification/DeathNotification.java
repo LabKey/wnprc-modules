@@ -20,7 +20,7 @@ public class DeathNotification extends AbstractJspEmailNotification {
 
     @Override
     public String getName() {
-        return "Death Notification";
+        return "WNPRC Death Notification";
     }
 
     @Override

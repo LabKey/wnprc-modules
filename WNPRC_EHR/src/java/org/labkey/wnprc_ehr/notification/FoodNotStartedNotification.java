@@ -63,6 +63,7 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
         msg.append("This email contains information regarding husbandry problems across the center.");
         String schedule = null;
 
+        //The notification should be commulative overt the day, therefore we include all previous time slots.
         if (currentTime.isAfter(morningNotification) ){
             schedule = "am";
         }if (currentTime.isAfter(noonNotification)){

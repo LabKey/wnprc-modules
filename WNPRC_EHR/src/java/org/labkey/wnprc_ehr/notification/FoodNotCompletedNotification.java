@@ -113,7 +113,7 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         }
 
     }
-
+    //Send notification for food deprives that had problems in the last 2 days. Problem reported are food deprives longer than 24 hours.
     public void foodDepriveCompleteProblems(Container c, User u, StringBuilder msg, LocalDateTime currentTime){
         TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("foodDeprivesStarted");
         LocalDateTime reportPeriod = currentTime.minusDays(2);
@@ -150,6 +150,7 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
         }
     }
 
+    //Internal class to parse food dperive information. Helps to calculate difference between start time and restore time.
     public static class foodDepriveInfo implements Comparable<foodDepriveInfo>
     {
         private String _id;
@@ -172,7 +173,6 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
 
         public int timeSinceStarted (){
             foodDepriveInfo currentTime = new foodDepriveInfo();
-            //Date today = new Date();
             currentTime.setDeprivestarttime(new Date());
             return this.compareTo(currentTime);
         }

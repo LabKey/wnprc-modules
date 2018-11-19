@@ -47,14 +47,14 @@ public class TriggerScriptHelper {
 
     public void sendDeathNotification(final List<String> ids) {
 
-        if (!NotificationService.get().isServiceEnabled()){
+        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(), container)){
             _log.info("Notification service is not enabled, will not send death notification");
             return;
         }
         for (String id : ids) {
-            DeathNotification notification = new DeathNotification();
-            notification.setParam(DeathNotification.idParamName, id);
-            notification.sendManually(container, user);
+            DeathNotification idNotification = new DeathNotification();
+            idNotification.setParam(DeathNotification.idParamName, id);
+            idNotification.sendManually(container, user);
         }
     }
 

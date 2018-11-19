@@ -60,7 +60,6 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
         LocalTime afternoonNotification = LocalTime.of(15,40,0);
         LocalTime nightNotification = LocalTime.of(21,40,0);
 
-        msg.append("This email contains information regarding husbandry problems across the center.");
         String schedule = null;
 
         //The notification should be commulative overt the day, therefore we include all previous time slots.
@@ -75,11 +74,11 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
         }
         foodDeprivesNotStarted(c, u, msg, schedule);
 
-        if (sentNotification){
-            return msg.toString();
-        }else {
-          return null;
+        if (msg.length() ==0){
+            return null;
         }
+        return "This email contains information regarding husbandry problems across the center." + msg.toString();
+
     }
 
     private void foodDeprivesNotStarted (Container c, User u, StringBuilder msg, String schedule){
@@ -101,13 +100,9 @@ public class FoodNotStartedNotification extends AbstractEHRNotification
             msg.append("<p><b>WARNING: There are "+ count + " food deprives that are scheduled for today but have not started</b><br>");
             if (schedule != null){
                 msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "&query.schedule~in="+ schedule + "&query.sort=-schedule/title'>Click here to view this list</a></p>\n");
-
             }else {
                 msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "'>Click here to view this list</a></p>\n");
-
             }
-        } else{
-            setSentNotification(false);
         }
 
     }

@@ -32,7 +32,7 @@ import static java.lang.Math.toIntExact;
 
 public class FoodNotCompletedNotification extends AbstractEHRNotification
 {
-    protected String cronString = "0 0/60 6-18 * * ?";
+    protected String cronString = "0 0/60 6-21 * * ?";
 
 
     public FoodNotCompletedNotification(Module owner){
@@ -68,16 +68,14 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        msg.append("This email contains information regarding husbandry problems across the center.");
-
         foodDeprivesNotCompleted(c, u, msg);
         foodDepriveCompleteProblems(c, u, msg, currentTime);
 
-        if (sentNotification){
-            return msg.toString();
-        }else {
-          return null;
+        if (msg.length() == 0)
+        {
+            return null;
         }
+        return "This email contains information regarding husbandry problems across the center." + msg.toString();
     }
 
     private void foodDeprivesNotCompleted (Container c, User u, StringBuilder msg){
@@ -107,12 +105,9 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
                     msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesStarted", "Started") + "&query.hoursSinceStarted~gte=22'>Click here to view this list</a></p>\n");
                 }
             }
-
-        } else{
-            setSentNotification(false);
         }
-
     }
+
     //Send notification for food deprives that had problems in the last 2 days. Problem reported are food deprives longer than 24 hours.
     public void foodDepriveCompleteProblems(Container c, User u, StringBuilder msg, LocalDateTime currentTime){
         TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("foodDeprivesStarted");
@@ -138,15 +133,11 @@ public class FoodNotCompletedNotification extends AbstractEHRNotification
                 }
             }
             if (overFoodDeprives > 0){
-                setSentNotification(true);
-
                 msg.append("<p><b>INFO: There are "+ overFoodDeprives + " food deprives in the last two days that were completed and ran for more than 24 hours.</b><br>");
                 if (overFoodDeprives > 0 ){
                     msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesStarted", "CompletedErrors") + "'>Click here to view this list</a></p>\n");
                 }
             }
-        }else if(!getSentNotification()){
-            setSentNotification(false);
         }
     }
 

@@ -233,8 +233,10 @@
     %>
     <tr>
         <td>Death Remark:</td>
-        <td><%=deathRemark%></td>
-        <% }%>
+        <td><%=deathRemark.equals("") ? NONE_SPECIFIED : h(deathRemark) %></td>
+        <%
+            }
+        %>
 
     </tr>
 </table>

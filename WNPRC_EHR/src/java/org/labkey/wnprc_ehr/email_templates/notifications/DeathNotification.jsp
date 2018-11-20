@@ -227,7 +227,7 @@
         <td><%= necropsy.optString("mannerofdeath", NONE_SPECIFIED) %></td>
     </tr>
     <%
-        JSONArray animalDeath = queryFactory.selectRows("study", "death", idFilter);
+        JSONArray animalDeath = queryFactory.selectRows("study", "deaths", idFilter);
         String deathRemark = animalDeath.getJSONObject(0).getString("remark");
         if (!deathRemark.isEmpty()){
     %>

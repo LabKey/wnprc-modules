@@ -5,6 +5,8 @@ import org.json.JSONArray;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.ldk.notification.NotificationSection;
+import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
@@ -22,7 +24,7 @@ import java.util.List;
 public class TriggerScriptHelper {
     protected final Container container;
     protected final User user;
-    protected static final Logger log = Logger.getLogger(TriggerScriptHelper.class);
+    protected static final Logger _log = Logger.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
 
     private TriggerScriptHelper(int userId, String containerId) {
@@ -44,10 +46,15 @@ public class TriggerScriptHelper {
     }
 
     public void sendDeathNotification(final List<String> ids) {
+
+        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new DeathNotification(), container)){
+            _log.info("Notification service is not enabled, will not send death notification");
+            return;
+        }
         for (String id : ids) {
-            DeathNotification notification = new DeathNotification();
-            notification.setParam(DeathNotification.idParamName, id);
-            notification.sendManually(container, user);
+            DeathNotification idNotification = new DeathNotification();
+            idNotification.setParam(DeathNotification.idParamName, id);
+            idNotification.sendManually(container, user);
         }
     }
 

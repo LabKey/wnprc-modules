@@ -9,3 +9,5 @@ docker/.gradle
 **/build/
 
 **/resources/credits/dependencies.txt
+
+**/.gradle

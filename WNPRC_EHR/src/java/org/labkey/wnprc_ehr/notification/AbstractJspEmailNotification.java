@@ -63,7 +63,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
 
     abstract String getPathToJsp();
 
-    public void sendManually(Container container, User user) {
+    public void sendManually(Container container, User user, List<String> notificationEmails) {
         // Check to make sure the service is enabled before sending
         if (!NotificationService.get().isServiceEnabled()) {
             log.info("The notification service is not enabled, so notification (" + getPathToJsp() + ") will not be sent manually.");
@@ -71,7 +71,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
         }
 
         // Grab the emails to send the email to, and make sure we have more than one recipient.
-        List<String> emails = this.getRecipientEmailAddresses(container);
+        List<String> emails = notificationEmails;
         if (emails.size() == 0) {
             log.warn("Not sending notification as there are no configured recipients");
             return;
@@ -86,36 +86,13 @@ abstract public class AbstractJspEmailNotification implements Notification {
 
             // Set subject and body
             msg.setSubject(getEmailSubject(container));
-            msg.setHtmlContent(getMessageBodyHTML(container, user));
+            msg.setEncodedHtmlContent(getMessageBodyHTML(container, user));
 
             MailHelper.send(msg, user, container);
         }
         catch (Exception e) {
             log.error("Failed to send notification manually", e);
         }
-    }
-
-    public List<String> getRecipientEmailAddresses(Container container) {
-        Set<UserPrincipal> recipients = NotificationService.get().getRecipients(new DeathNotification(), container);
-
-        List<String> emails = new ArrayList<>();
-        for (UserPrincipal u : recipients) {
-            try {
-                List<Address> addresses = NotificationService.get().getEmailsForPrincipal(u);
-                if (addresses != null) {
-                    for (Address a : addresses) {
-                        if (a.toString() != null) {
-                            emails.add(a.toString());
-                        }
-                    }
-                }
-            }
-            catch (ValidEmail.InvalidEmailException e) {
-                log.error("Could not get emails for UserPrincipal " + u.getUserId() + " of type " + u.getType());
-            }
-        }
-
-        return emails;
     }
 
     public String getParam(String key) {

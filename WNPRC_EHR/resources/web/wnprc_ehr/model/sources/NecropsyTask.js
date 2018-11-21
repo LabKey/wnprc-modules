@@ -5,6 +5,11 @@ EHR.model.DataModelManager.registerMetadata('NecropsyTask', {
                 hidden: false,
                 editable: false,
                 label: "Requester Comments"
+            },
+            causeofdeath:{
+                lookup: {
+                    filterArray: [LABKEY.Filter.create('date_disabled', null, LABKEY.Filter.Types.ISBLANK)]
+                }
             }
         },
         'study.drug': {

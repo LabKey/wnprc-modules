@@ -229,7 +229,7 @@
     <%
         JSONArray animalDeath = queryFactory.selectRows("study", "deaths", idFilter);
         String deathRemark = animalDeath.getJSONObject(0).getString("remark");
-        if (!deathRemark.isEmpty()){
+        if (!deathRemark.isEmpty() && deathRemark != null){
     %>
     <tr>
         <td>Death Remark:</td>

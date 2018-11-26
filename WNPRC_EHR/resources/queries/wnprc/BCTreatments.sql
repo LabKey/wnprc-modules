@@ -8,6 +8,7 @@ Id,
 Id.curlocation.area as area,
 Id.curlocation.room as room,
 Id.curlocation.cage as cage,
+Id.mostRecentWeight.mostRecentWeight as weight,
 
 frequency.meaning as frequency,
 code.meaning as treatment,

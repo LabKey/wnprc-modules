@@ -34,7 +34,7 @@ public class HousingBCReport extends BusinessContinuityExcelReport {
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
         List<JSONObject> housings = Arrays.asList(queryFactory.selectRows("wnprc", "BCHousing").toJSONObjectArray());
 
-        List<String> columns = Arrays.asList("Id", "Room", "Cage", "Condition", "Remark");
+        List<String> columns = Arrays.asList("Id", "Medical","viralStatus", "Weight" , "Room", "Cage", "Condition", "Remark");
 
         Map<String, List<CaseInsensitiveMapWrapper>> areas = new HashMap<>();
         for (JSONObject housing : housings) {

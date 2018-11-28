@@ -17,6 +17,7 @@ ARG LABKEY_TEAMCITY_BUILD=
 
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
+
 RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
  && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \

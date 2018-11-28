@@ -6,6 +6,8 @@ FROM alpine:latest as download
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 
+ARG WNPRC_BRANCH=master
+
 ENV LABKEY_TEAMCITY_CONFIG LabKey_172wnprc_Community_Installers
 ENV LABKEY_VERSION 17.2
 
@@ -15,8 +17,9 @@ ARG LABKEY_TEAMCITY_BUILD=
 
 RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
-RUN W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success,branch:develop/id`" \
- && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success,branch:develop/number`" \
+RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
+ && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
+ && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
  && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/wisc_community/LabKey${LABKEY_VERSION}-${Y}-UWisc-Community-bin.tar.gz" \
  && echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \

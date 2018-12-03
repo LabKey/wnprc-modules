@@ -30,21 +30,39 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureMultipleRequest', {
             date: {
                 editorConfig: {
                     dateConfig: {
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 10)
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                     }
+                },
+                setInitialValue: function(v){
+                    var date = (new Date()).add(Date.DAY, 2);
+                    date.setHours(9);
+                    date.setMinutes(30);
+                    return v || date;
                 }
             },
             enddate: {
                 editorConfig: {
                     dateConfig: {
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 10)
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                     }
+                },
+                setInitialValue: function(v){
+                    var date = (new Date()).add(Date.DAY, 2);
+                    date.setHours(9);
+                    date.setMinutes(30);
+                    return v || date;
                 }
             },
             project: {
                 xtype: 'wnprc-projectentryfield',
             },
             account: {
+                //nothing
+            },
+            consultRequest: {
+                //nothing
+            },
+            biopsyNeeded: {
                 //nothing
             },
             surgerytechneeded: {

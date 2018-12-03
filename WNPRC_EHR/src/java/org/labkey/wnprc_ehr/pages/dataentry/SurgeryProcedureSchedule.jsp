@@ -123,8 +123,7 @@
     Office365Calendar oct = new Office365Calendar();
     oct.setUser(getUser());
     oct.setContainer(getContainer());
-    String outlookScheduledEventsString = "[]";
-    outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
+    String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
 
     String outlookHeldEventsString = "[]";
     if (isVet) {
@@ -132,7 +131,7 @@
     }
 %>
 
-<div class="col-xs-12 col-xl-8">
+<div class="col-xs-12 col-xl-10">
     <div class="col-xs-12 col-md-4">
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Surgery Details</span></div>
@@ -187,7 +186,7 @@
     </div>
 </div>
 
-<div class="col-xs-12 col-xl-8">
+<div class="col-xs-12 col-xl-10">
     <div class="col-xs-12 col-md-8">
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Pending Requests</span></div>

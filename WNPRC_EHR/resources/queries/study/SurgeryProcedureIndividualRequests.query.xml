@@ -74,6 +74,14 @@
                         <columnTitle>Surgeon</columnTitle>
                         <nullable>false</nullable>
                     </column>
+                    <column columnName="consultRequest">
+                        <columnTitle>New Project / Consult Request</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="biopsyNeeded">
+                        <columnTitle>Necropsy/Biopsy Needed</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
                     <column columnName="surgeryTechNeeded">
                         <columnTitle>Surgery Tech Needed</columnTitle>
                         <nullable>false</nullable>

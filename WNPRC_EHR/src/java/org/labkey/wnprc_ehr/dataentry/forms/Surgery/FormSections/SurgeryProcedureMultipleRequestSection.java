@@ -2,6 +2,7 @@ package org.labkey.wnprc_ehr.dataentry.forms.Surgery.FormSections;
 
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,7 +10,7 @@ public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
 {
     public SurgeryProcedureMultipleRequestSection() {
         super("study", "surgery_procedure", "Surgery/Procedure");
-        setTemplateMode(TEMPLATE_MODE.NONE);
+        //setTemplateMode(TEMPLATE_MODE.NONE);
 
         //this.maxItemsPerColumn = 14;
 
@@ -28,6 +29,8 @@ public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
                 "project",
                 "account",
                 "surgeon",
+                "consultRequest",
+                "biopsyNeeded",
                 "surgerytechneeded",
                 "spineeded",
                 "vetneeded",
@@ -38,4 +41,14 @@ public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
                 "comments"
         );
     }
+
+//    @Override
+//    public List<String> getTbarButtons() {
+//        List<String> defaultButtons = new ArrayList<>();
+//        defaultButtons.addAll(super.getTbarButtons());
+//
+//        defaultButtons.remove("COPYFROMSECTION");
+//
+//        return defaultButtons;
+//    }
 }

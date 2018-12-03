@@ -31,23 +31,45 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 xtype: 'wnprc-surgeryprocedureroomfield'
             },
             date: {
+                defaultValue: Ext4.Date.add(new Date()),//'2018-12-05 11:00 AM',
                 editorConfig: {
                     dateConfig: {
                         minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                     }
-                }
+                }//,
+                // setInitialValue: function(v){
+                //     var date = (new Date()).add(Date.DAY, 1);
+                //     date.setHours(8);
+                //     date.setMinutes(0);
+                //     return v || date;
+                // }
             },
             enddate: {
                 editorConfig: {
                     dateConfig: {
                         minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
+                    },
+                    timeConfig: {
+                        minValue: '10:00 AM'
                     }
-                }
+                }//,
+                // setInitialValue: function(v){
+                //     var date = (new Date()).add(Date.DAY, 1);
+                //     date.setHours(10);
+                //     date.setMinutes(0);
+                //     return v || date;
+                // }
             },
             project: {
                 xtype: 'wnprc-projectentryfield',
             },
             account: {
+                //nothing
+            },
+            consultRequest: {
+                //nothing
+            },
+            biopsyNeeded: {
                 //nothing
             },
             surgerytechneeded: {

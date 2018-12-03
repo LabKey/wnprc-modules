@@ -9,7 +9,7 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
 {
     public SurgeryProcedureRequestSection() {
         super("study", "surgery_procedure", "Surgery/Procedure");
-        setTemplateMode(TEMPLATE_MODE.NONE);
+        //setTemplateMode(TEMPLATE_MODE.NONE);
 
         this.maxItemsPerColumn = 14;
 
@@ -28,6 +28,8 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
                 "project",
                 "account",
                 "surgeon",
+                "consultRequest",
+                "biopsyNeeded",
                 "surgerytechneeded",
                 "spineeded",
                 "vetneeded",

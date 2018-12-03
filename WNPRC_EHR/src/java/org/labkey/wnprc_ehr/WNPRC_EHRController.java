@@ -1324,6 +1324,7 @@ public class WNPRC_EHRController extends SpringActionController
                 transaction.commit();
                 response.put("success", true);
             } catch (Exception e) {
+                int x = 3;
                 //TODO nothing?
             } finally {
 

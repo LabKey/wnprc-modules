@@ -27,14 +27,14 @@ PARAMETERS(StartDate TIMESTAMP, EndDate TIMESTAMP)
 
 SELECT
   bloodSch.Id,
-  bloodSch.dateOnly AS date,
+  bloodSch.date,
   max(bloodSch.project) AS project,
   bloodSch.project.account,
   max(bloodSch.objectid) AS sourceRecord,
   max(bloodSch.taskid) AS taskid,
   sum(bloodSch.num_tubes) AS tubes
 FROM studyLinked.BloodSchedule bloodSch -- linked schema studyLinked is expected in Private folder. Use studyLinked.template.xml to create this linked schema
-WHERE CAST(bloodSch.dateonly AS date) >= CAST(StartDate AS date) AND CAST(bloodSch.dateonly AS date) <= CAST(EndDate AS date)
+WHERE CAST(bloodSch.date AS date) >= CAST(StartDate AS date) AND CAST(bloodSch.date AS date) <= CAST(EndDate AS date)
 AND bloodSch.qcstate.publicdata = true
 AND bloodSch.billedby.value = 'a'
-GROUP BY bloodSch.dateOnly, bloodSch.id, bloodSch.project.account, bloodSch.billedby.value
+GROUP BY bloodSch.date, bloodSch.id, bloodSch.project.account, bloodSch.billedby.value

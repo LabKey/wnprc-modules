@@ -50,7 +50,7 @@ FROM
      WHEN pFees1.account.investigatorId IS NOT NULL THEN pFees1.account.investigatorId.lastName
      WHEN pFees1.project.investigatorId IS NOT NULL THEN pFees1.project.investigatorId.lastName
      ELSE NULL END) AS investigatorLastName,
---   CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', pFees1.date, curdate()) > 45) THEN 'Y' ELSE null END AS isOldCharge,
+  CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', pFees1.date, curdate()) > 45) THEN 'Y' ELSE null END AS isOldCharge,
   pFees1.account.projectNumber
 
 
@@ -95,7 +95,7 @@ SELECT
      WHEN pFees2.account.investigatorId IS NOT NULL THEN pFees2.account.investigatorId.lastName
      WHEN pFees2.project.investigatorId IS NOT NULL THEN pFees2.project.investigatorId.lastName
      ELSE NULL END) AS investigatorLastName,
-     --   CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', pFees2.date, curdate()) > 45) THEN 'Y' ELSE null END AS isOldCharge,
+       CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', pFees2.date, curdate()) > 45) THEN 'Y' ELSE null END AS isOldCharge,
   pFees2.account.projectNumber
 
 FROM wnprc_billing.procedureFeesWithTierRates pFees2

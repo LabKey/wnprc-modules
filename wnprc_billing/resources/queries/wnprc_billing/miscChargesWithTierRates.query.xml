@@ -11,6 +11,14 @@
                             <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="project">
+                        <columnTitle>Project</columnTitle>
+                            <fk>
+                                <fkDbSchema>ehr</fkDbSchema>
+                                <fkTable>project</fkTable>
+                                <fkColumnName>project</fkColumnName>
+                            </fk>
+                    </column>
                     <column columnName="tierRate">
                         <fk>
                             <fkDbSchema>wnprc_billingLinked</fkDbSchema>

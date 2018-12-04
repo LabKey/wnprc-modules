@@ -7,7 +7,7 @@ FROM
   wmisc.date,
   wmisc.billingDate,
   wmisc.project,
-  wmisc.debitedaccount,
+  wmisc.debitedAccount,
   wmisc.chargetype,
   wmisc.chargeId,
   ci.departmentCode AS serviceCenter,
@@ -33,13 +33,6 @@ FROM
   wmisc.creditedaccount,
   coalesce(acct.investigatorName, wmisc.investigator) AS investigator,
 
-     CASE WHEN (wmisc.chargeCategory = 'Reversal' OR wmisc.chargeCategory LIKE 'Adjustment%')
-       THEN 'Y'
-     ELSE NULL END                                       AS isAdjustment,
-     CASE WHEN (wmisc.unitCost IS NULL AND cr.unitCost IS NULL)
-       THEN 'Y'
-     ELSE NULL END                                       AS lacksRate,
-
      cr.rowid                                            AS rateId,
      (SELECT group_concat(DISTINCT a.project.displayName, chr(10)) AS projects
       FROM study.assignment a
@@ -50,23 +43,38 @@ FROM
      )                                                   AS assignmentAtTime,
 
      wmisc.container,
-
-     CASE
-     WHEN (acct.budgetStartDate IS NOT NULL AND CAST(acct.budgetStartDate AS DATE) > CAST(wmisc.date AS DATE))
-       THEN 'Prior To Budget Start'
-     WHEN (acct.budgetEndDate IS NOT NULL AND CAST(acct.budgetEndDate AS DATE) < CAST(wmisc.date AS DATE))
-       THEN 'After Budget End'
-     ELSE NULL
-     END                                                 AS isExpiredAccount,
-
-     CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', wmisc.date, curdate()) > 45) -- TODO: 45 may not always be true depending on the center, adjust accordingly.
-       THEN 'Y'
-     ELSE NULL END                                       AS isOldCharge,
-
      wmisc.currentActiveAlias,
      wmisc.sourceInvoicedItem,
 
-     TRUE                                                AS isMiscCharge
+     TRUE                                                AS isMiscCharge,
+
+  --fields used in email notification
+  (CASE WHEN wmisc.debitedaccount IS NULL THEN 'Y' ELSE NULL END) AS isMissingAccount,
+  (CASE
+     WHEN (wmisc.debitedaccount.budgetStartDate IS NOT NULL AND CAST(wmisc.debitedaccount.budgetStartDate AS date) > CAST(wmisc.date AS date))
+             THEN 'Prior To Budget Start'
+     WHEN (wmisc.debitedaccount.budgetEndDate IS NOT NULL AND CAST(wmisc.debitedaccount.budgetEndDate AS date) < CAST(wmisc.date AS date))
+             THEN 'After Budget End'
+     ELSE NULL END) AS isExpiredAccount,
+  (CASE WHEN wmisc.debitedaccount.isAcceptingCharges IS FALSE THEN 'N' END) AS isAcceptingCharges,
+  (CASE
+     WHEN ((wmisc.unitCost IS NULL OR wmisc.unitCost = 0) AND (cr.unitCost IS NULL OR cr.unitCost = 0)) THEN 'Y'
+     ELSE NULL END) AS lacksRate,
+  (CASE
+      WHEN wmisc.debitedAccount.investigatorId IS NOT NULL THEN wmisc.debitedAccount.investigatorId.lastName
+      WHEN wmisc.project.investigatorId IS NOT NULL THEN wmisc.project.investigatorId.lastName
+      ELSE NULL END) AS investigatorLastName,
+  (CASE
+    WHEN (SELECT count(*) as projects
+          FROM study.assignment a
+          WHERE wmisc.Id = a.Id
+            AND (wmisc.project = a.project OR wmisc.project.protocol = a.project.protocol)
+            AND (cast(wmisc.date AS DATE) <= a.enddateCoalesced OR a.enddate IS NULL)
+            AND cast(wmisc.date AS date) >= a.dateOnly) > 0 THEN NULL ELSE 'N'
+    END) AS matchesProject,
+  CASE WHEN (wmisc.chargeCategory = 'Reversal' OR wmisc.chargeCategory = 'Adjustment') THEN 'Y' ELSE NULL END AS isAdjustment,
+  CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', wmisc.date, curdate()) > 45) THEN 'Y' ELSE null END AS isOldCharge,
+  wmisc.debitedAccount.projectNumber
 
    FROM wnprc_billing.miscChargesWithTierRates wmisc
 

@@ -23,7 +23,7 @@
     pdt.id,
     pdt.adate AS date,
     pdt.project,
-    pdt.account as debitedAccount,
+    pdt.account AS debitedAccount,
     cr1.unitCost AS unitCostDirect, -- unit cost without tier rate
    (cr1.unitCost + (cr1.unitCost * pdt.tierRate)) AS unitCost, -- unit cost with tier rate
     pdt.quantity,
@@ -33,8 +33,26 @@
     pdt.comment,
     ci1.serviceCode AS serviceCenter,
     pdt.tierRate AS tierRate,
-    NULL AS isMiscCharge
-  FROM wnprc_billing.perDiemWithTierRates pdt
+    NULL AS isMiscCharge,
+
+    --fields used in email notification
+    (CASE WHEN pdt.account IS NULL THEN 'Y' ELSE NULL END) AS isMissingAccount,
+    (CASE
+       WHEN (pdt.account.budgetStartDate IS NOT NULL AND CAST(pdt.account.budgetStartDate AS date) > CAST(pdt.adate AS date))
+               THEN 'Prior To Budget Start'
+       WHEN (pdt.account.budgetEndDate IS NOT NULL AND CAST(pdt.account.budgetEndDate AS date) < CAST(pdt.adate AS date))
+               THEN 'After Budget End'
+       ELSE null END) AS isExpiredAccount,
+    (CASE WHEN pdt.account.isAcceptingCharges IS FALSE THEN 'N' END) AS isAcceptingCharges,
+    (CASE WHEN (cr1.unitCost IS NULL OR cr1.unitCost = 0) THEN 'Y' ELSE null END) AS lacksRate,
+    (CASE
+       WHEN pdt.account.investigatorId IS NOT NULL THEN pdt.account.investigatorId.lastName
+       WHEN pdt.project.investigatorId IS NOT NULL THEN pdt.project.investigatorId.lastName
+       ELSE NULL END) AS investigatorLastName,
+    CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', pdt.adate, curdate()) > 45) THEN 'Y' ELSE null END AS isOldCharge,
+    pdt.account.projectNumber
+
+     FROM wnprc_billing.perDiemWithTierRates pdt
   LEFT JOIN ehr_billing.chargeRates cr1 ON (
     CAST(pdt.adate AS DATE) >= CAST(cr1.startDate AS DATE) AND
     (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))

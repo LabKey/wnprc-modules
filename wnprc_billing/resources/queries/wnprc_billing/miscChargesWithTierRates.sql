@@ -6,7 +6,7 @@ SELECT * FROM
       wmisc.date,
       wmisc.billingDate,
       wmisc.project,
-      wmisc.debitedaccount,
+      wmisc.debitedAccount,
       wmisc.chargetype,
       wmisc.chargeId,
       wmisc.chargeCategory, --adjustment or reversal

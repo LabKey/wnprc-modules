@@ -19,6 +19,14 @@
                             <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="project">
+                        <columnTitle>Project</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehrLinked</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

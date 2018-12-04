@@ -1,8 +1,8 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="perDiemRates" tableDbType="NOT_IN_DB">
-                <tableTitle>Per Diem with Tier Rates</tableTitle>
+            <table tableName="procedureFeesWithTierRates" tableDbType="NOT_IN_DB">
+                <tableTitle>Procedure Charges with Tier Rates</tableTitle>
                 <columns>
                     <column columnName="account">
                         <fk>

@@ -91,8 +91,7 @@ public class BillingNotificationServiceImpl implements BillingNotificationServic
     {
         List<FieldDescriptor> fields = new ArrayList<FieldDescriptor>();
 
-        fields.add(new FieldDescriptor("project", true, "Project Number", false));
-        fields.add(new FieldDescriptor("debitedAccount", true, "Debited Account", false));
+        //these fields are expected in the sql queries mentioned in getCategoriesToQuery() above
 
         fields.add(new FieldDescriptor("isMissingAccount", true, "Missing Alias", true));
         fields.add(new FieldDescriptor("isExpiredAccount", true, "Expired/Invalid Account", true));

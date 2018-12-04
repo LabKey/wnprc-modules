@@ -126,7 +126,7 @@
     String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
 
     String outlookHeldEventsString = "[]";
-    if (isVet) {
+    if (isVet || isSpi) {
         outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
     }
 %>

@@ -34,9 +34,19 @@
                 </column>
                 <column columnName="investigatorId">
                     <fk>
-                        <fkDbSchema>ehr</fkDbSchema>
+                        <fkDbSchema>ehrLinked</fkDbSchema>
                         <fkTable>investigators</fkTable>
                         <fkColumnName>rowid</fkColumnName>
+                    </fk>
+                </column>
+                <column columnName="fiscalAuthority">
+                    <columnTitle>Financial Analyst</columnTitle>
+                    <fk>
+                        <fkFolderPath>/WNPRC/EHR</fkFolderPath>
+                        <fkDbSchema>ehr_billing</fkDbSchema>
+                        <fkTable>fiscalAuthorities</fkTable>
+                        <fkColumnName>rowid</fkColumnName>
+                        <fkDisplayColumnName>lastName</fkDisplayColumnName>
                     </fk>
                 </column>
                 <column columnName="affiliate"/>
@@ -63,6 +73,14 @@
                 <column columnName="predecessor_account"/>
                 <column columnName="gencredits"/>
                 <column columnName="mds_number"/>
+                <column columnName="faRate">
+                    <isHidden>true</isHidden>
+                    <shownInInsertView>false</shownInInsertView>
+                </column>
+                <column columnName="faSchedule">
+                    <isHidden>true</isHidden>
+                    <shownInInsertView>false</shownInInsertView>
+                </column>
             </columns>
             </table>
         </tables>

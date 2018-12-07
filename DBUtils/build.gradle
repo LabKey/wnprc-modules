@@ -2,4 +2,5 @@ dependencies {
     apiCompile "com.google.guava:guava:17.0"
     compile project(":server:modules:query")
     external "org.jooq:jooq:3.8.4"
+    external "javax.xml.bind:jaxb-api:${jaxbVersion}"
 }

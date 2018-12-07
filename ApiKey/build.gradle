@@ -3,4 +3,5 @@ dependencies {
     compile "javax.servlet:jsp-api:2.0"
     compile files(apiJar)
     external "org.jooq:jooq:3.8.4"
+    external "javax.xml.bind:jaxb-api:${jaxbVersion}"
 }

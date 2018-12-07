@@ -9,6 +9,7 @@ import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.security.EHRRequestPermission;
@@ -71,7 +72,7 @@ public class WNPRC_Schema extends SimpleUserSchema {
     }
 
     public WNPRC_Schema(User user, Container container) {
-        super(NAME, DESCRIPTION, user, container, DbSchema.get(NAME));
+        super(NAME, DESCRIPTION, user, container, DbSchema.get(NAME, DbSchemaType.Module));
         _container = container;
     }
 

@@ -27,6 +27,7 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -614,7 +615,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresPermission(ReadPermission.class)
     @ActionNames("getChanges")
-    @CSRF
+    @CSRF(CSRF.Method.POST)
     public class GetChangeLists extends ApiAction<Void>
     {
         public ApiResponse execute(Void form, BindException errors) throws Exception
@@ -675,7 +676,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresLogin
     @ActionNames("getPopulationChangeEventsOverPeriod")
-    public class GetPopulationEventsOverPeriod extends ApiAction<PopulationEventsOverPeriodForm>
+    public class GetPopulationEventsOverPeriod extends MutatingApiAction<PopulationEventsOverPeriodForm>
     {
         public ApiResponse execute(PopulationEventsOverPeriodForm form, BindException errors)
         {
@@ -693,8 +694,8 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    @CSRF
-    public class GetAnimalDemographicsForRoomAction extends ApiAction<GetAnimalDemographicsForRoomForm>
+    @CSRF(CSRF.Method.POST)
+    public class GetAnimalDemographicsForRoomAction extends MutatingApiAction<GetAnimalDemographicsForRoomForm>
     {
         public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors)
         {

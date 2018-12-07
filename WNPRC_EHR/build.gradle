@@ -5,10 +5,16 @@ dependencies {
     compile project(path: "${project.parent.path}:DBUtils", configuration: "apiCompile")
     compile project("${project.parent.path}:WebUtils")
     compile project(path: "${project.parent.path}:GoogleDrive", configuration: "apiCompile")
-    external "joda-time:joda-time:2.9.3"
+    external "joda-time:joda-time:2.8.1"
     external "org.jsoup:jsoup:1.10.3"
     external "org.reflections:reflections:0.9.10"
     jspCompile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
     jspCompile project("${project.parent.path}:WebUtils")
-    jspCompile "joda-time:joda-time:2.9.3"
+    jspCompile "joda-time:joda-time:2.8.1"
+}
+configurations.all {
+    Configuration config ->
+        resolutionStrategy {
+            force "org.javassist:javassist:3.20.0-GA"
+        }
 }

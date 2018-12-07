@@ -2,12 +2,13 @@ package org.labkey.wnprc_compliance;
 
 import org.json.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
@@ -156,13 +157,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("updatePersonClearances")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
-    public class UpdatePersonClearanceAPI extends ApiAction<AddDataToExistingPersonForm> {
+    @CSRF(CSRF.Method.POST)
+    public class UpdatePersonClearanceAPI extends MutatingApiAction<AddDataToExistingPersonForm> {
         @Override
         public Object execute(AddDataToExistingPersonForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().beginTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().beginTransaction()) {
                 PersonService service = new PersonService(getUser(), getContainer());
                 String personId = form.personid;
 
@@ -197,15 +198,15 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("newUser")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
-    public class NewUserAPI extends ApiAction<NewUserFormWithData> {
+    @CSRF(CSRF.Method.POST)
+    public class NewUserAPI extends MutatingApiAction<NewUserFormWithData> {
         @Override
         public Object execute(NewUserFormWithData form, BindException errors) throws Exception {
             PersonService service = new PersonService(getUser(), getContainer());
 
             JSONObject returnJSON = new JSONObject();
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().ensureTransaction()) {
                 String personId = service.newUser((NewUserForm) form);
 
                 if (form.tbInfo != null) {
@@ -297,8 +298,8 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
     @ActionNames("personSearch")
     @RequiresPermission(ComplianceAdminPermission.class)
-    @CSRF
-    public class SearchUserAPI extends ApiAction<SearchPersonForm> {
+    @CSRF(CSRF.Method.POST)
+    public class SearchUserAPI extends MutatingApiAction<SearchPersonForm> {
         @Override
         public Object execute(SearchPersonForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
@@ -347,13 +348,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("markCardsExempt")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
-    public class MarkCardExemptAPI extends ApiAction<CardExemptionsForm> {
+    @CSRF(CSRF.Method.POST)
+    public class MarkCardExemptAPI extends MutatingApiAction<CardExemptionsForm> {
         @Override
         public Object execute(CardExemptionsForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME,DbSchemaType.Module).getScope().ensureTransaction()) {
                 SimpleQueryUpdater cardUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "cards");
                 List<Map<String, Object>> cardsToUpdate = new ArrayList<>();
 
@@ -388,15 +389,16 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
     @ActionNames("resolvePendingTBResults")
     @RequiresPermission(ComplianceAdminPermission.class)
-    @CSRF
+    @CSRF(CSRF.Method.POST)
     @Marshal(Marshaller.Jackson)
-    public class ResolvePendingTBResultsAPI extends ApiAction<ResolvePendingTBResultsForm> {
+    public class ResolvePendingTBResultsAPI extends MutatingApiAction<ResolvePendingTBResultsForm>
+    {
         @Override
         public Object execute(ResolvePendingTBResultsForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
             SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().ensureTransaction()) {
                 SimpleQueryUpdater pendingTbUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "pending_tb_clearances");
                 SimpleQueryUpdater tbUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "tb_clearances");
                 SimpleQueryUpdater tbMapUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "persons_tb_clearances");

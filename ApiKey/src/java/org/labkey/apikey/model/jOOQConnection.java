@@ -4,7 +4,9 @@ import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
+import org.labkey.apikey.ApiKeySchema;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,7 +20,7 @@ public class jOOQConnection implements AutoCloseable {
     private DbScope _scope;
 
     public jOOQConnection() {
-        this._scope = DbSchema.get("apikey").getScope();
+        this._scope = DbSchema.get(ApiKeySchema.getInstance().NAME, DbSchemaType.Module).getScope();
         this._connection = null;
         try {
             this._connection = this._scope.getConnection();

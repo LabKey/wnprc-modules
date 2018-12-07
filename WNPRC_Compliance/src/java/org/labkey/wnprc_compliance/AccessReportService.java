@@ -9,6 +9,7 @@ import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.query.BatchValidationException;
@@ -160,7 +161,7 @@ public class AccessReportService {
             }
         }
 
-        try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+        try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().ensureTransaction()) {
             SimpleQueryUpdater updater = new SimpleQueryUpdater(user, container, WNPRC_ComplianceSchema.NAME, "access_reports");
             JSONObject reportRecord = new JSONObject();
             reportRecord.put("report_id", reportid);

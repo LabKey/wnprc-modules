@@ -22,7 +22,7 @@ FROM
   pFees1.id,
   pFees1.date,
   pFees1.project,
-  pFees1.account AS debitedaccount,
+  pFees1.account AS debitedAccount,
   pFees1.sourceRecord,
   (CASE WHEN pFees1.tubes >= 1 THEN cr1.unitCost END) AS unitCostDirect, -- unit cost without tier rate
   (CASE WHEN pFees1.tubes >= 1 THEN (cr1.unitCost + (pFees1.tierRate*cr1.unitCost)) end) AS unitCost, -- unit cost with tier rate

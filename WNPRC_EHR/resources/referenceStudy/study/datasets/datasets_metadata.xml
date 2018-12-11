@@ -213,6 +213,11 @@
             <column columnName="restraint">
                 <columnTitle>Restraint</columnTitle>
                 <datatype>varchar</datatype>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>restraint_type</fkTable>
+                    <fkColumnName>type</fkColumnName>
+                </fk>
             </column>
             <column columnName="fetal_heartbeat">
                 <columnTitle>+ Fetal HB</columnTitle>

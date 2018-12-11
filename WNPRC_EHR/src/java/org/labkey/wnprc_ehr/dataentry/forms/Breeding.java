@@ -2,11 +2,14 @@ package org.labkey.wnprc_ehr.dataentry.forms;
 
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.dataentry.AbstractDataEntryForm;
+import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.DataEntryFormFactory;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;
 import org.labkey.api.ehr.dataentry.SimpleFormSection;
+import org.labkey.api.ehr.dataentry.TaskForm;
+import org.labkey.api.ehr.dataentry.TaskFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 
@@ -52,6 +55,14 @@ public final class Breeding
                 , Arrays.asList("Ultrasounds", "ultrasounds", LINKED_PANEL_XTYPE)
         ).map(e -> Breeding.bulkFactory(module, e.get(0), e.get(1), e.get(2)))
                 .forEach(es::registerFormType);
+
+        // register my temp form thing
+
+        es.registerFormType(multiFactory(module,
+                Arrays.asList("Breeding Encounter Test", "Pregnancies", "Pregnancy Outcomes", "Ultrasounds"),
+                Arrays.asList("breeding_encounters", "pregnancies", "pregnancy_outcomes", "ultrasounds"),
+                Arrays.asList(false, true, true, true),
+                Arrays.asList(MASTER_PANEL_XTYPE, "wnprc-pregnancygridpanel", LINKED_PANEL_XTYPE, LINKED_PANEL_XTYPE)));
     }
 
     /**
@@ -67,6 +78,11 @@ public final class Breeding
     private static DataEntryFormFactory bulkFactory(Module module, String formName, String queryName, String xtype)
     {
         return (ctx) -> BreedingForm.bulk(ctx, module, formName, queryName, xtype);
+    }
+
+    private static DataEntryFormFactory multiFactory(Module module, List<String> formName, List<String> queryName, List<Boolean> isBulk, List<String> xtype)
+    {
+        return (ctx) -> BreedingForm.multi(ctx, module, formName, queryName, isBulk, xtype);
     }
 
     /**
@@ -101,10 +117,10 @@ public final class Breeding
         {
             super(ctx, owner, formName, formName, "Colony Records", Arrays.asList(sections));
             addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
-            getFormSections().forEach(s -> {
-                s.addConfigSource("Breeding.Columns");
-                s.addConfigSource("Breeding.Editors");
-            });
+//            getFormSections().forEach(s -> {
+//                s.addConfigSource("Breeding.Columns");
+//                s.addConfigSource("Breeding.Editors");
+//            });
             setStoreCollectionClass("WNPRC.ext.data.BreedingStoreCollection");
         }
 
@@ -128,6 +144,33 @@ public final class Breeding
         {
             return new BreedingForm(ctx, owner, formName,
                     new SimpleFormPanelSection("study", queryName, formName, false));
+        }
+
+        private static BreedingForm multi(DataEntryFormContext ctx, Module owner, List<String> formName, List<String> queryName, List<Boolean> isBulk, List<String> xtype)
+        {
+            final int DEFAULT_FORM_SECTIONS = 1;
+            FormSection[] formSections = new FormSection[formName.size() + DEFAULT_FORM_SECTIONS];
+            //formSections[0] = new TaskFormSection();
+            formSections[0] = new AnimalDetailsFormSection();
+            for(int i = 0; i < formSections.length - DEFAULT_FORM_SECTIONS; i++)
+            {
+                if(isBulk.get(i)) {
+                    formSections[DEFAULT_FORM_SECTIONS + i] = (new SimpleFormSection("study", queryName.get(i), formName.get(i), xtype.get(i))
+                    {
+                        @Override
+                        public List<String> getTbarButtons()
+                        {
+                            List<String> buttons = super.getTbarButtons();
+                            buttons.remove("ADDRECORD");
+                            buttons.add(0, "APPENDRECORD");
+                            return buttons;
+                        }
+                    });
+                } else {
+                    formSections[DEFAULT_FORM_SECTIONS + i] = (new SimpleFormPanelSection("study", queryName.get(i), formName.get(i), false));
+                }
+            }
+            return new BreedingForm(ctx, owner, formName.get(0), formSections);
         }
     }
 }

@@ -24,13 +24,25 @@
 
         // get the model for the selected/active row
         const model = this.getSelectionModel().getSelection()[0];
+
+        //TODO update marmoset gestation period with correct value
+        var id = model.get('Id');
+        var gestationPeriod;
+        if (id != null && id.startsWith('cy')) {
+            gestationPeriod = 155;
+        } else if (id != null && id.startsWith('cj')) {
+            gestationPeriod = 153;
+        } else {
+            gestationPeriod = 165;
+        }
+
         switch (args.field) {
             case 'date_conception': {
-                model.set("date_due", Ext4.Date.add(args.value, Ext4.Date.DAY, 165));
+                model.set("date_due", Ext4.Date.add(args.value, Ext4.Date.DAY, gestationPeriod));
                 break;
             }
             case 'date_due': {
-                model.set("date_conception", Ext4.Date.add(args.value, Ext4.Date.DAY, -165));
+                model.set("date_conception", Ext4.Date.add(args.value, Ext4.Date.DAY, -gestationPeriod));
                 break;
             }
         }

@@ -74,7 +74,15 @@ allprojects {
 }
 
 def wnprcDir = project.projectDir
-def modules  = subprojects - project('docker') - project('java2ts') - (project('distributions').subprojects)
+def modules  = [
+    project('ApiKey'),
+    project('DBUtils'),
+    project('DeviceProxy'),
+    project('GoogleDrive'),
+    project('primateid'),
+    project('WebUtils'),
+    project('WNPRC_Compliance'),
+    project('WNPRC_EHR')]
 configure(modules) {
     // tell IntelliJ to ignore any build directories
     apply plugin: 'idea'

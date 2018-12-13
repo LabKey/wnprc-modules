@@ -12,9 +12,9 @@
                 <!--<titleColumn>rowid</titleColumn>-->
                 <columns>
                     <column columnName="editLink">
-                        <columnTitle></columnTitle>
+                        <columnTitle>Edit Link</columnTitle>
                         <!--<url>/ehr/manageRecord.view?schemaName=study&amp;queryName=surgery_procedure&amp;keyField=lsid&amp;key=${lsid}&amp;update=1</url>-->
-                        <url>/EHR/taskDetails.view?formtype=SurgeryProcedureRequest&taskid=9b7e6b40-56d0-441b-96a0-60f010a28623</url>
+                        <url>/EHR/dataEntryForm.view?formType=${formtype}&amp;requestid=${requestid}</url>
                     </column>
                     <column columnName="Id">
                         <columnTitle>Animal ID</columnTitle>

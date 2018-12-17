@@ -4,7 +4,7 @@ sourceSets {
         output.classesDir = "${project.buildDir}/api-classes"
     }
     main {
-        java { srcDirs = ['src/java', 'src/test'] }
+        java { srcDirs = ["src"] }
     }
 }
 

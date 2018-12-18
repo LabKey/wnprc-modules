@@ -187,7 +187,7 @@
         <td><%= necropsy.optString("timeofdeath", NONE_SPECIFIED) %></td>
     </tr>
     <tr>
-        <td>Cause of Death:</td>
+        <td>Type of Death:</td>
         <td><%= cause.equals("") ? NONE_SPECIFIED : h(cause) %></td>
     </tr>
     <tr>
@@ -198,19 +198,25 @@
         <td>Animal Replacement Fee:</td>
         <td>
             <%
-                if (cause.equals("Clinical")) {
+                SimplerFilter causeFilter = new SimplerFilter("value", CompareType.EQUAL, cause);
+                JSONArray deathCause = queryFactory.selectRows("ehr_lookups", "death_cause", causeFilter);
+                String feeCategory = deathCause.getJSONObject(0).getString("category");
+
+                if (feeCategory.equals("No Fee")) {
             %>
             No animal replacement fee to be paid (clinical death)
+            <%
+                }
+                else if (feeCategory.equals("Fee")){
+            %>
+            Animal replacement charge or prepaid <br>
+            <%= (prepaid == null) ? "Animal Replacement fee to be paid (not prepaid animal)" : "Nx was paid by " + prepaid %>
+
             <%
                 }
                 else if (isPrenatalDeath) {
             %>
             <em>N/A (prenatal death)</em>
-            <%
-                }
-                else {
-            %>
-            Animal replacement fee <%= (prepaid == null) ? "to be paid (not prepaid animal)" : "was paid by " + prepaid %>
             <%
                 }
             %>
@@ -219,6 +225,19 @@
     <tr>
         <td>Manner of Death:</td>
         <td><%= necropsy.optString("mannerofdeath", NONE_SPECIFIED) %></td>
+    </tr>
+    <%
+        JSONArray animalDeath = queryFactory.selectRows("study", "deaths", idFilter);
+        String deathRemark = animalDeath.getJSONObject(0).getString("remark");
+        if (deathRemark != null && !deathRemark.isEmpty()){
+    %>
+    <tr>
+        <td>Death Remark:</td>
+        <td><%=deathRemark.equals("") ? NONE_SPECIFIED : h(deathRemark) %></td>
+        <%
+            }
+        %>
+
     </tr>
 </table>
 <br/>

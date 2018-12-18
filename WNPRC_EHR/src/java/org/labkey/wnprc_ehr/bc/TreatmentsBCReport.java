@@ -88,6 +88,7 @@ public class TreatmentsBCReport extends BusinessContinuityExcelReport {
 
         displayNames.put("room", "Room");
         displayNames.put("cage", "Cage");
+        displayNames.put("weight", "Weight");
 
         displayNames.put("frequency", "Frequency");
         displayNames.put("treatment", "Treatment");

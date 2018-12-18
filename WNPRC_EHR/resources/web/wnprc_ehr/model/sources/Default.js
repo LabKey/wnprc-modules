@@ -85,7 +85,7 @@ EHR.model.DataModelManager.registerMetadata('Default', {
                 setInitialValue: function(v) {
                     var date = (new Date());
                     date.setHours(12);
-                    date.setMinutes(00);
+                    date.setMinutes(0);
                     return v || date;
                 }
 

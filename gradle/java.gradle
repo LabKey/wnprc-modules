@@ -1,7 +1,7 @@
 sourceSets {
     api {
         java { srcDirs = ['api-src'] }
-        output.classesDir = "${project.buildDir}/api-classes"
+        output.resourcesDir = "${project.buildDir}/api-classes"
     }
     main {
         java { srcDirs = ['src/java', 'src/test'] }

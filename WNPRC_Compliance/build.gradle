@@ -11,6 +11,6 @@ dependencies {
 
 sourceSets {
     main {
-        java { srcDirs = [ "src/java", "gen-src/java-jooq" ]}
+        java { srcDirs = [ "src", "gen-src/java-jooq" ]}
     }
 }

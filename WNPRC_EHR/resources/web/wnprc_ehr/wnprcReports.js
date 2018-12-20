@@ -69,6 +69,42 @@ EHR.reports.viralLoads = function(panel, tab){
     });
 };
 
+EHR.reports.breeding_encounters = function(panel, tab) {
+    var animalId = panel.activeFilterType.getTitle(tab);
+
+    LABKEY.Query.selectRows({
+        schemaName: 'study',
+        queryName: 'demographics',
+        columns: 'gender',
+        filterArray: [LABKEY.Filter.create('Id', animalId, LABKEY.Filter.Types.EQUAL)],
+        scope: this,
+        success: function(results) {
+            if (results.rows && results.rows.length) {
+                var row = results.rows[0];
+                var gender = row.gender;
+                var filterColumn = 'Id';
+                if (gender == 'm') {
+                    filterColumn = 'sireid';
+                }
+
+                var breeding_encounters = panel.getQWPConfig({
+                    title: 'Breeding Encounters',
+                    schemaName: 'study',
+                    queryName: 'breeding_encounters',
+                    filters: [LABKEY.Filter.create(filterColumn, animalId, LABKEY.Filter.Types.EQUAL)],
+                    frame: true
+                });
+
+                tab.add({
+                    xtype: 'ldk-querypanel',
+                    style: 'margin-bottom:20px;',
+                    queryConfig: breeding_encounters
+                })
+            }
+        }
+    });
+};
+
 EHR.reports.hematology = function(panel, tab){
     var filterArray = panel.getFilterArray(tab);
     var title = panel.getTitleSuffix();

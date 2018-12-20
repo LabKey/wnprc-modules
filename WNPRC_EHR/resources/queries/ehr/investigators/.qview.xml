@@ -12,5 +12,6 @@
         <column name="phoneNumber"/>
         <column name="investigatorType"/>
         <column name="emailAddress"/>
+        <column name="financialAnalyst"/>
     </columns>
 </customView>

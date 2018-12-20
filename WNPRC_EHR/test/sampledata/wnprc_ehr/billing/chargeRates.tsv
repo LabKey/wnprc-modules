@@ -1,0 +1,4 @@
+chargeId	serviceCode	description	groupName	genCredits	unitCost	startDate	endDate
+1	44	Blood draws	Business Office	1	15.66	1/1/2005	12/31/2050
+2	44	Blood draws - Additional Tubes	Business Office	1	0.47	1/1/2005	12/31/2050
+3	20	Per diems	Business Office	1	12.75	1/1/2005	12/31/2050

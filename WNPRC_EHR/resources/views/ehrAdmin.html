@@ -16,7 +16,6 @@ if (LABKEY.Security.currentUser.isAdmin){
                 items: [
                     {name: 'Client Errors', url: '<%=contextPath%>/query/shared/executeQuery.view?schemaName=auditlog&query.queryName=Client%20API%20Actions'},
                     {name: 'EHR Backups', url: '<%=contextPath%>/project<%=containerPath%>/Backups/begin.view?'},
-                    {name: 'ETL Admin', url: '<%=contextPath%>/ONPRC_EHR<%=containerPath%>/etlAdmin.view?'},
                     {name: 'Genetics Calculations', url: '<%=contextPath%>/ehr<%=containerPath%>/geneticCalculationSettings.view?'},
                     //{name: 'ETL Duration', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=core&query.queryName=Sync Duration'},
                     //{name: 'ETL History', url: '<%=contextPath%>/query<%=containerPath%>/executeQuery.view?schemaName=core&query.queryName=Sync History'},
@@ -69,7 +68,7 @@ if (LABKEY.Security.currentUser.isAdmin){
             {header: 'Munin',
                 items: [
                     {name: 'EHR', url: 'http://ehr.primate.wisc.edu:8449/'},
-                    {name: 'Test-EHR', url: 'http://test-ehr.primate.wisc.edu/munin/'},                                                
+                    {name: 'Test-EHR', url: 'http://test-ehr.primate.wisc.edu/munin/'},
                     {name: 'Gems', url: 'http://gems.primate.wisc.edu/munin/'}
                 ]
             },

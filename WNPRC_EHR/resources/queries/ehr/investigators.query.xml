@@ -29,6 +29,14 @@
                         <formatString>Date</formatString>
                         <shownInInsertView>false</shownInInsertView>
                     </column>
+                    <column columnName="financialAnalyst">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>fiscalAuthorities</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>lastName</fkDisplayColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

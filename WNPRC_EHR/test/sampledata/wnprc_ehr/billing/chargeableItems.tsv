@@ -1,0 +1,4 @@
+rowid	name	departmentCode	startDate	endDate	category
+1	Blood draws	Business Office	1/1/2005	12/31/2050	Blood Draws
+2	Blood draws - Additional Tubes	Business Office	1/1/2005	12/31/2050	Blood Draws
+3	Per diems	Business Office	1/1/2005	12/31/2050	Animal Per Diem

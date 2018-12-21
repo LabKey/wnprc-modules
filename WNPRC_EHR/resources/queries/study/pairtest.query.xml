@@ -1,0 +1,94 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="pairtest" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=pairtest&amp;lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                      <column columnName="participantid">
+                        <columnTitle>Participant ID</columnTitle>
+                        <description>Participant identifier</description>
+                        <nullable>false</nullable>
+                      </column>
+                      <column columnName="date">
+                        <columnTitle>Date</columnTitle>
+                        <nullable>false</nullable>
+                        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                      </column>
+                      <column columnName="endDate">
+                        <columnTitle>End Date</columnTitle>
+                      </column>
+                      <column columnName="bhav">
+                        <columnTitle>BHAV</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>pairtest_bhav</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                      </column>
+                      <column columnName="testNo">
+                        <columnTitle>Test Number</columnTitle>
+                      </column>
+                      <column columnName="conclusion">
+                        <columnTitle>Test Conclusion</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>pairtest_conclusion</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                      </column>
+                      <column columnName="sharedFood">
+                        <columnTitle>Shared Food</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>yesno</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                      </column>
+                      <column columnName="aggression">
+                        <columnTitle>Aggression Demonstrated</columnTitle>
+                      </column>
+                      <column columnName="affiliation">
+                        <columnTitle>Affiliation Demonstrated</columnTitle>
+                      </column>
+                      <column columnName="remark">
+                        <columnTitle>Remark</columnTitle>
+                        <displayWidth>110</displayWidth>
+                        <inputType>textarea</inputType>
+                      </column>
+                      <column columnName="description">
+                        <columnTitle>Description</columnTitle>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <shownInDetailsView>false</shownInDetailsView>
+                        <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+                        <isHidden>true</isHidden>
+                        <inputType>textarea</inputType>
+                      </column>
+                      <column columnName="objectid">
+                        <columnTitle>Key</columnTitle>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <shownInDetailsView>false</shownInDetailsView>
+                        <isHidden>true</isHidden>
+                        <!--<isKeyField>true</isKeyField>-->
+                      </column>
+                      <column columnName="parentid">
+                        <columnTitle>Parent Id</columnTitle>
+                        <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                      </column>
+                    </columns>
+                    <tableTitle>Pair Tests</tableTitle>
+                    <description>Pair Tests</description>
+            </table>
+        </tables>
+    </metadata>
+</query>

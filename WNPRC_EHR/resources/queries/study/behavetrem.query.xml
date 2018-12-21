@@ -1,0 +1,56 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="behavetrem" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="project">
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>project</fkTable>
+                          <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="category">
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>behavior_category</fkTable>
+                          <fkColumnName>category</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="remark">
+                        <displayWidth>350</displayWidth>
+                    </column>
+                    <!--<column columnName="code">-->
+                        <!--<columnTitle>SNOMED</columnTitle>-->
+                        <!--<fk>-->
+                            <!--<fkDbSchema>ehr_lookups</fkDbSchema>-->
+                            <!--<fkTable>snomed</fkTable>-->
+                            <!--<fkColumnName>code</fkColumnName>-->
+                        <!--</fk>-->
+                    <!--</column>                    -->
+                    <column columnName="so">
+                        <columnTitle>Subjective/Objective</columnTitle>
+                    </column>
+                    <column columnName="a">
+                        <columnTitle>Assessment</columnTitle>
+                    </column>
+                    <column columnName="p">
+                        <columnTitle>Plan</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

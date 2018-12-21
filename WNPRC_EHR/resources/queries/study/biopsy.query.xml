@@ -1,0 +1,41 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Biopsies" tableDbType="TABLE">
+                <tableUrl>/EHR/biopsyDetails.view?key=${objectid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <titleColumn>caseno</titleColumn>
+                <columns>
+                    <column columnName="caseno">
+                        <nullable>true</nullable>
+                    </column>
+                  <column columnName="nhpbmd">
+                      <columnTitle>NHPBMD</columnTitle>
+                  </column>
+                  <column columnName="remark">
+                      <columnTitle>Final Summary Comments</columnTitle>
+                  </column>
+                  <column columnName="grossdescription">
+                      <columnTitle>Gross Morphologic Description</columnTitle>
+                      <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="histologicalDescription">
+                  	<inputType>textarea</inputType>
+                  	<columnTitle>Histological Description</columnTitle>
+                  </column>
+                  <column columnName="type">
+                    <columnTitle>Type</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>biopsy_type</fkTable>
+                      <fkColumnName>value</fkColumnName>
+                    </fk>
+                  </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

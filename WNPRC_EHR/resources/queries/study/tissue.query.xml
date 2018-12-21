@@ -1,0 +1,101 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="tissue" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=tissue&amp;lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                  <column columnName="participantid">
+                    <columnTitle>Participant ID</columnTitle>
+                    <description>Participant identifier</description>
+                    <nullable>false</nullable>
+                  </column>
+                  <column columnName="date">
+                    <columnTitle>Date</columnTitle>
+                    <nullable>false</nullable>
+                    <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                  </column>
+                    <column columnName="gender">
+                        <columnTitle>Gender</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>gender_codes</fkTable>
+                            <fkColumnName>Code</fkColumnName>
+                        </fk>
+                    </column>
+                  <column columnName="livedead">
+                    <columnTitle>Live/Dead</columnTitle>
+                  </column>
+                  <column columnName="wbo">
+                    <columnTitle>WBO</columnTitle>
+                  </column>
+                  <column columnName="tissue">
+                    <columnTitle>Tissue</columnTitle>
+                  </column>
+                  <column columnName="source">
+                    <columnTitle>Source</columnTitle>
+                  </column>
+                  <column columnName="dest">
+                    <columnTitle>Destination</columnTitle>
+                  </column>
+                  <column columnName="recip">
+                    <columnTitle>Recipient</columnTitle>
+                  </column>
+                  <column columnName="affil">
+                    <columnTitle>Affiliation</columnTitle>
+                  </column>
+                  <column columnName="remark">
+                    <columnTitle>Remark</columnTitle>
+                    <displayWidth>110</displayWidth>
+                    <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+                    <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="description">
+                    <columnTitle>Description</columnTitle>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+                    <isHidden>true</isHidden>
+                    <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="objectid">
+                    <columnTitle>Key</columnTitle>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <isHidden>true</isHidden>
+                    <!--<isKeyField>true</isKeyField>-->
+                  </column>
+                  <column columnName="requestid">
+                    <columnTitle>Request Id</columnTitle>
+                    <isHidden>true</isHidden>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                  </column>
+                  <column columnName="parentid">
+                    <columnTitle>Parent Id</columnTitle>
+                    <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                      <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                      <!--</fk>-->
+                  </column>
+                  <column columnName="ts">
+                    <columnTitle>Last Changed</columnTitle>
+                    <!--<nullable>false</nullable>-->
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <isHidden>true</isHidden>
+                  </column>
+                </columns>
+                <tableTitle>Tissue Requests</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

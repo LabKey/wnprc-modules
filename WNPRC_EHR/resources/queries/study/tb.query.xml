@@ -1,0 +1,72 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="tb" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=TB Tests&amp;lsid=${lsid}</tableUrl>
+                <!--<insertUrl>/ehr/manageRecord.view?schemaName=study&amp;queryName=TB Tests&amp;keyField=lsid&amp;</insertUrl>-->
+                <!--<updateUrl>/ehr/manageRecord.view?schemaName=study&amp;queryName=TB Tests&amp;keyField=lsid&amp;key=${lsid}</updateUrl>-->
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                <column columnName="parentid">
+                    <!--<fk>-->
+                      <!--<fkDbSchema>study</fkDbSchema>-->
+                      <!--<fkTable>studyDataParent</fkTable>-->
+                      <!--<fkColumnName>objectid</fkColumnName>-->
+                    <!--</fk>-->
+                </column>
+                  <column columnName="lot">
+                    <columnTitle>Lot</columnTitle>
+                  </column>
+                  <column columnName="dilution">
+                    <columnTitle>Dilution</columnTitle>
+                    <displayWidth>50</displayWidth>
+                  </column>
+                  <column columnName="eye">
+                    <columnTitle>Eye</columnTitle>
+                    <displayWidth>50</displayWidth>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>tb_eye</fkTable>
+                      <fkColumnName>eye</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="result1">
+                    <columnTitle>24 Hr</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>tb_result</fkTable>
+                      <fkColumnName>result</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="result2">
+                    <columnTitle>48 Hr</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>tb_result</fkTable>
+                      <fkColumnName>result</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="result3">
+                    <columnTitle>72 Hr</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>tb_result</fkTable>
+                      <fkColumnName>result</fkColumnName>
+                    </fk>
+                  </column>
+                    <column columnName="missingResults">
+                        <columnTitle>Missing Results?</columnTitle>
+                        <shownInInsertView>false</shownInInsertView>
+
+                    </column>
+                    <column columnName="notPerformedAtCenter">
+                        <columnTitle>Not Performed At Center</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

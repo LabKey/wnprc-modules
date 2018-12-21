@@ -1,0 +1,99 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="tissue_samples" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="project">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="qualifier">
+                      <columnTitle>Qualifier</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed_qualifiers</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="preservation">
+                      <columnTitle>Preservation</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>preservation_solutions</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="tissue">
+                      <columnTitle>Organ/Tissue</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="stain">
+                      <columnTitle>Stain</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>histology_stain</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="container_type">
+                        <columnTitle>Container Type</columnTitle>
+                          <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>container_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                          </fk>
+                    </column>
+                    <column columnName="ship_to">
+                        <columnTitle>Ship To</columnTitle>
+                    </column>
+                    <column columnName="accountToCharge">
+                        <columnTitle>Account To Charge</columnTitle>
+                    </column>
+                    <column columnName="tissueRemarks">
+                    	<columnTitle>Tissue Remark</columnTitle>
+                    	<inputType>textarea</inputType>
+                    </column>
+                    <column columnName="trim_remarks">
+                    	<columnTitle>Trim Remarks</columnTitle>
+                    	<inputType>textarea</inputType>
+                    </column>
+                    <column columnName="quantity">
+                        <columnTitle>Quantity</columnTitle>
+                    </column>
+                    <column columnName="tissueCondition">
+                        <columnTitle>Tissue Condition</columnTitle>
+                    </column>
+                    <column columnName="slideNum">
+                        <columnTitle>Slide Number</columnTitle>
+                    </column>
+                    <column columnName="pathologist">
+                        <columnTitle>Pathologist</columnTitle>
+                    </column>
+                    <column columnName="trimdate">
+                        <columnTitle>Trim Date</columnTitle>
+                    </column>
+                    <column columnName="trimmed_by">
+                        <columnTitle>Trimmed By</columnTitle>
+                    </column>
+                    <column columnName="recipient">
+                        <columnTitle>Recipient</columnTitle>
+                    </column>
+                    <column columnName="weight">
+                        <columnTitle>Weight</columnTitle>
+                    </column>
+                    <column columnName="remark">
+
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

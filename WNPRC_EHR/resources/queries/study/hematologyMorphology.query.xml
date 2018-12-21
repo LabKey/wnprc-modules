@@ -1,0 +1,89 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="hematologyMorphology" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=hematologyMorphology&amp;lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                  <column columnName="participantid">
+                    <columnTitle>Participant ID</columnTitle>
+                    <description>Participant identifier</description>
+                    <nullable>false</nullable>
+                  </column>
+                  <column columnName="date">
+                    <columnTitle>Date</columnTitle>
+                    <nullable>false</nullable>
+                    <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                  </column>
+                  <column columnName="account">
+                    <!--<nullable>false</nullable>-->
+                    <columnTitle>Account</columnTitle>
+                    <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+                  </column>
+                  <column columnName="morphology">
+                    <!--<nullable>false</nullable>-->
+                    <columnTitle>Morphology</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>hematology_morphology</fkTable>
+                      <fkColumnName>value</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="score">
+                    <!--<nullable>false</nullable>-->
+                    <columnTitle>Score</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>hematology_score</fkTable>
+                      <fkColumnName>value</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="remark">
+                    <columnTitle>Remark</columnTitle>
+                    <displayWidth>110</displayWidth>
+                    <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="description">
+                    <columnTitle>Description</columnTitle>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+                    <isHidden>true</isHidden>
+                    <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="objectid">
+                    <columnTitle>Key</columnTitle>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <isHidden>true</isHidden>
+                    <!--<isKeyField>true</isKeyField>-->
+                  </column>
+                  <column columnName="parentid">
+                    <columnTitle>Parent Id</columnTitle>
+                    <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                        <fk>
+                          <fkDbSchema>study</fkDbSchema>
+                          <fkTable>clinpathRuns</fkTable>
+                          <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                  </column>
+                  <column columnName="ts">
+                    <columnTitle>Last Changed</columnTitle>
+                    <!--<nullable>false</nullable>-->
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <isHidden>true</isHidden>
+                  </column>
+                </columns>
+                <tableTitle>Hematology Morphology</tableTitle>
+                <description>Hematology Morphology Data</description>
+            </table>
+        </tables>
+    </metadata>
+</query>

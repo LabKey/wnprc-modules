@@ -1,0 +1,67 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="cageObs" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=Cage Observations&amp;lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="RoomAtTime">
+                      <columnTitle>Room At Time</columnTitle>
+                      <url>/ehr/cageDetails.view?
+                          room=${RoomAtTime}&amp;
+                          cage=${CageAtTime}&amp;
+                      </url>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>rooms</fkTable>
+                        <fkColumnName>room</fkColumnName>
+                      </fk>
+                      <displayWidth>60</displayWidth>
+                    </column>
+                    <column columnName="CageAtTime">
+                      <columnTitle>Cage At Time</columnTitle>
+                      <url>/ehr/cageDetails.view?
+                          room=${RoomAtTime}&amp;
+                          cage=${CageAtTime}&amp;
+                      </url>
+                      <displayWidth>60</displayWidth>
+                    </column>
+                    <column columnName="observationRecord">
+                      <columnTitle>Observation Record</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr</fkDbSchema>
+                        <fkTable>cage_observations</fkTable>
+                        <fkColumnName>objectid</fkColumnName>
+                      </fk>
+                      <shownInUpdateView>false</shownInUpdateView>
+                      <shownInDetailsView>false</shownInDetailsView>
+                      <shownInInsertView>false</shownInInsertView>
+                      <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="housingRecord">
+                      <columnTitle>Housing Record</columnTitle>
+                      <fk>
+                        <fkDbSchema>study</fkDbSchema>
+                        <fkTable>housing</fkTable>
+                        <fkColumnName>lsid</fkColumnName>
+                      </fk>
+                      <shownInUpdateView>false</shownInUpdateView>
+                      <shownInDetailsView>false</shownInDetailsView>
+                      <shownInInsertView>false</shownInInsertView>
+                      <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

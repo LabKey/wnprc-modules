@@ -1,0 +1,197 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="necropsies" tableDbType="TABLE">
+                <tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <titleColumn>caseno</titleColumn>
+                <columns>
+                  <column columnName="participantid">
+                    <columnTitle>Participant ID</columnTitle>
+                    <description>Participant identifier</description>
+                    <nullable>false</nullable>
+                  </column>
+                  <column columnName="date">
+                    <formatString>Date</formatString>
+                    <columnTitle>Necropsy Date</columnTitle>
+                    <nullable>false</nullable>
+                    <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                  </column>
+                  <column columnName="caseno">
+                    <columnTitle>Case Number</columnTitle>
+                    <nullable>true</nullable>
+                    <!--<isKeyField>true</isKeyField>-->
+                  </column>
+                  <column columnName="project">
+                    <nullable>true</nullable>
+                    <columnTitle>Project</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr</fkDbSchema>
+                      <fkTable>project</fkTable>
+                      <fkColumnName>project</fkColumnName>
+                    </fk>
+                    <formatString>00000000</formatString>
+                    <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                  </column>
+                  <column columnName="account">
+                    <columnTitle>Account</columnTitle>
+                    <nullable>true</nullable>
+                    <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+                  </column>
+                  <column columnName="performedby">
+                    <columnTitle>Pathologist</columnTitle>
+                  </column>
+                  <column columnName="assistant">
+                    <columnTitle>Prosector</columnTitle>
+                  </column>
+                  <column columnName="billing">
+                    <columnTitle>Billing Complete</columnTitle>
+                  </column>
+                  <column columnName="tissue_distribution">
+                      <columnTitle>Tissue Distribution</columnTitle>
+                  </column>
+                  <column columnName="remark">
+                      <columnTitle>Final Summary Comments</columnTitle>
+                  </column>
+                  <column columnName="perfusion_area">
+                    <columnTitle>Perfusion</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>necropsy_perfusion_area</fkTable>
+                      <fkColumnName>value</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="perfusion_soln1">
+                    <isHidden>true</isHidden>
+                    <columnTitle>Perfusion Solution 1</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>necropsy_perfusion</fkTable>
+                      <fkColumnName>value</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="perfusion_soln2">
+                      <isHidden>true</isHidden>
+                    <columnTitle>Perfusion Solution 2</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>necropsy_perfusion</fkTable>
+                      <fkColumnName>value</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="perfusion_time1">
+                    <isHidden>true</isHidden>
+                    <formatString>DateTime</formatString>
+                    <columnTitle>Perfusion Time 1</columnTitle>
+                  </column>
+                  <column columnName="perfusion_time2">
+                    <isHidden>true</isHidden>
+                    <columnTitle>Perfusion Time 2</columnTitle>
+                    <formatString>DateTime</formatString>
+                  </column>
+                  <column columnName="bcs">
+                    <columnTitle>Body Condition</columnTitle>
+                    <isHidden>true</isHidden>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>necropsy_condition</fkTable>
+                      <fkColumnName>value</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="patho_notes">
+                    <inputType>textarea</inputType>
+                    <columnTitle>Pathology Unit Notes</columnTitle>
+                  </column>
+                  <column columnName="histopathologic">
+                      <columnTitle>Histopathologic Description</columnTitle>
+                  </column>
+                  <column columnName="final_description">
+                    <inputType>textarea</inputType>
+                    <columnTitle>Final Description</columnTitle>
+                  </column>
+                  <column columnName="histologicalDescription">
+                  	<inputType>textarea</inputType>
+                  	<columnTitle>Histological Description</columnTitle>
+                  </column>
+                  <column columnName="description">
+                    <columnTitle>Description</columnTitle>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+                    <isHidden>true</isHidden>
+                    <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="objectid">
+                    <columnTitle>Key</columnTitle>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <isHidden>true</isHidden>
+                    <!--<isKeyField>true</isKeyField>-->
+                  </column>
+                  <column columnName="parentid">
+                    <columnTitle>Parent Id</columnTitle>
+                    <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+                    <!--<fk>-->
+                      <!--<fkDbSchema>study</fkDbSchema>-->
+                      <!--<fkTable>studyDataParent</fkTable>-->
+                      <!--<fkColumnName>objectid</fkColumnName>-->
+                    <!--</fk>-->
+                  </column>
+                  <column columnName="requestid">
+                    <columnTitle>Request Id</columnTitle>
+                    <isHidden>true</isHidden>
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                  </column>
+                  <column columnName="ts">
+                    <columnTitle>Last Changed</columnTitle>
+                    <!--<nullable>false</nullable>-->
+                    <shownInInsertView>false</shownInInsertView>
+                    <shownInUpdateView>false</shownInUpdateView>
+                    <shownInDetailsView>false</shownInDetailsView>
+                    <isHidden>true</isHidden>
+                  </column>
+                  <column columnName="timeofdeath">
+                      <columnTitle>Time of Death</columnTitle>
+                  </column>
+                  <column columnName="nhpbmd">
+                      <columnTitle>NHPBMD</columnTitle>
+                  </column>
+                  <column columnName="grossdescription">
+                      <columnTitle>Gross Morphologic Description</columnTitle>
+                      <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="comments">
+                      <columnTitle>Comments</columnTitle>
+                      <inputType>textarea</inputType>
+                  </column>
+                  <column columnName="causeofdeath">
+                    <columnTitle>Type of Death</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>death_cause</fkTable>
+                      <fkColumnName>cause</fkColumnName>
+                    </fk>
+                  </column>
+                  <column columnName="mannerofdeath">
+                    <columnTitle>Manner of Death</columnTitle>
+                    <fk>
+                      <fkDbSchema>ehr_lookups</fkDbSchema>
+                      <fkTable>death_manner</fkTable>
+                      <fkColumnName>manner</fkColumnName>
+                    </fk>
+                  </column>
+                    <column columnName="tattoo">
+                      <columnTitle>Tattoo/Tag</columnTitle>
+                    </column>
+                </columns>
+                <tableTitle>Necropsies</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

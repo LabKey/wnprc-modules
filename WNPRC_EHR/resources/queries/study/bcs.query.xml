@@ -1,0 +1,71 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Body Condition" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="weightStatus">
+                        <columnTitle>Weight Monitoring Needed</columnTitle>
+                    </column>
+                    <column columnName="tattoo_remark">
+                        <columnTitle>Tattoo Remark</columnTitle>
+                    </column>
+                    <column columnName="remark">
+                        <columnTitle>Weight Remark</columnTitle>
+                    </column>
+                    <column columnName="score">
+                        <columnTitle>Body Condition Score</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>bcs_score</fkTable>
+                          <fkColumnName>score</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="tattoo_chest">
+                        <columnTitle>Tattoo - Chest</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>tattoo_status</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="tattoo_thigh">
+                        <columnTitle>Tattoo - Thigh</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>tattoo_status</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="microchip">
+                        <columnTitle>Microchip</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>microchip_comments</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="tag">
+                        <columnTitle>Neck Tag</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>microchip_comments</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

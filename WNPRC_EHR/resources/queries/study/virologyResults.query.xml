@@ -1,0 +1,91 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="virologyResults" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>Clinpath Runs</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="date">
+                        <formatString>Date</formatString>
+                    </column>
+                    <column columnName="runid">
+                        <isHidden>false</isHidden>
+                    </column>
+                    <column columnName="method">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Method</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>virology_method</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="virus">
+                        <columnTitle>Virus</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>virology_tests</fkTable>
+                          <fkColumnName>testid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="result">
+                        <columnTitle>Result</columnTitle>
+                    </column>
+                    <column columnName="units">
+                        <columnTitle>Units</columnTitle>
+                    </column>
+                    <column columnName="qualresult">
+                        <columnTitle>Qualifier</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>qualitative_results</fkTable>
+                            <fkColumnName>result</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="testid">
+                        <columnTitle>Test Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>virology_tests</fkTable>
+                            <fkColumnName>testid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="source">
+                        <columnTitle>Sample Type</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>clinpath_sampletype</fkTable>
+                          <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="sampleType">
+                        <columnTitle>Sample Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="virusCode">
+                        <columnTitle>Virus</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

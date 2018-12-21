@@ -1,0 +1,171 @@
+ <query xmlns="http://labkey.org/data/xml/query">
+    <metadata> 
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="MorphologicDiagnosis" tableDbType="TABLE">
+                <tableUrl>/query/detailsQueryRow.view?schemaName=study&amp;query.queryName=Morphologic Diagnosis&amp;lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <!--<column columnName="parentid">-->
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>encountersParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    <!--</column>-->
+                    <column columnName="code">
+                        <columnTitle>SNOMED</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="tissue">
+                      <columnTitle>Organ/Tissue</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="severity">
+                      <columnTitle>Severity</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="diagnosis">
+                      <columnTitle>Diagnosis</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="seq1">
+                      <columnTitle>Diagnosis Number</columnTitle>
+                      <url>/query/executeQuery.view?schemaName=study&amp;
+                          query.queryName=Morphologic%20Diagnosis&amp;
+                          query.id~eq=${id}&amp;
+                          query.date~eq=${date}&amp;
+                          query.seq1~eq=${seq1}&amp;
+                      </url>
+                    </column>
+                    <column columnName="tissue_qualifier">
+                      <columnTitle>Qualifier</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed_qualifiers</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="seq2">
+                      <columnTitle>Diagnosis Code Number</columnTitle>
+                    </column>
+                    <column columnName="duration">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Duration</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="severity">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Severity</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="process">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Process</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="process2">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Process 2</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="distribution">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Distribution/Pattern</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="distribution2">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Distribution/Pattern 2</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="inflammation">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Inflammation</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="inflammation2">
+                      <!--<nullable>false</nullable>-->
+                      <columnTitle>Inflammation</columnTitle>
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="etiology">
+                    	<!--
+                      <nullable>false</nullable>
+                      -->
+                      <columnTitle>Etiology</columnTitle>
+                      <!--
+                      <fk>
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>snomed</fkTable>
+                        <fkColumnName>code</fkColumnName>
+                      </fk>
+                      -->
+                    </column>
+                    <column columnName="caseno" wrappedColumnName="parentid">
+                      <isUnselectable>true</isUnselectable>
+                      <columnTitle>CaseNo</columnTitle>
+                      <fk>
+                        <fkDbSchema>study</fkDbSchema>
+                        <fkTable>encountersParent</fkTable>
+                        <fkColumnName>objectid</fkColumnName>
+                      </fk>
+                    </column>
+                    <column columnName="remark">
+                        <columnTitle>Diagnosis</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

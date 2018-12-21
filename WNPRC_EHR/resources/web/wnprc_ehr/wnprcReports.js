@@ -640,122 +640,124 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
                                   LABKEY.Filter.create('Id', subject, LABKEY.Filter.Types.EQUAL)],
                     success: Ext4.Function.pass(function(subj, results){
                         var target = targetPanel.down('#tabArea');
-                        LDK.Assert.assertNotEmpty('target panel not present in callback of weight report.  This may indicate the layout changed before load.', target);
-                        if (!results.rowCount){
-                            target.update('');
-                            target.add({
-                                html:'No animal weights for that animal Id'
-                            });
-                            return;
+                        if (target) {
+                            LDK.Assert.assertNotEmpty('target panel not present in callback of weight report.  This may indicate the layout changed before load.', target);
+                            if (!results.rowCount) {
+                                target.update('');
+                                target.add({
+                                    html: 'No animal weights for that animal Id'
+                                });
+                                return;
 
-                        }
-                        weightLastYear = (cloneObject(results));
-                        var lastYear = new Date(results.rows[0].date.value);
-                        console.log('value of last weight ' +lastYear);
-                        var dateLastYear = new Date(lastYear.setYear(lastYear.getFullYear()-1));
-                        console.log('value after extracting a year ' +dateLastYear);
-                        for (var i=0; i<results.rowCount;i++){
-
-                            var tempDate = new Date(results.rows[i].date.value);
-
-                            if (tempDate < dateLastYear){
-                                weightLastYear.rows.splice(i,weightLastYear.rowCount-i);
                             }
+                            weightLastYear = (cloneObject(results));
+                            var lastYear = new Date(results.rows[0].date.value);
+                            console.log('value of last weight ' + lastYear);
+                            var dateLastYear = new Date(lastYear.setYear(lastYear.getFullYear() - 1));
+                            console.log('value after extracting a year ' + dateLastYear);
+                            for (var i = 0; i < results.rowCount; i++) {
 
+                                var tempDate = new Date(results.rows[i].date.value);
+
+                                if (tempDate < dateLastYear) {
+                                    weightLastYear.rows.splice(i, weightLastYear.rowCount - i);
+                                }
+
+                            }
+                            weightLastYear.rowCount = weightLastYear.rows.length;
+                            console.log('rowcount ' + results.rowCount);
+                            console.log('rowcount ' + weightLastYear.rowCount);
+
+                            target.removeAll();
+                            target.add({
+                                xtype: 'tabpanel',
+                                style: 'margin-bottom: 20px',
+                                items: [{
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Graph',
+                                    style: 'margin-bottom: 30px',
+                                    plotConfig: {
+                                        results: results,
+                                        title: 'Weight : ' + subj,
+                                        height: 400,
+                                        width: 1000,
+                                        yLabel: 'Weight (kg)',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'weight',
+                                            hoverText: function (row) {
+                                                var lines = [];
+
+                                                lines.push('Date: ' + row.date.format(LABKEY.extDefaultDateFormat));
+                                                lines.push('Weight: ' + row.weight + ' kg');
+                                                lines.push('Latest Weight: ' + row.LatestWeight + ' kg');
+                                                if (row.LatestWeightDate)
+                                                    lines.push('Latest Weight Date: ' + row.LatestWeightDate.format(LABKEY.extDefaultDateFormat));
+                                                if (row.PctChange)
+                                                    lines.push('% Change From Current: ' + row.PctChange + '%');
+                                                lines.push('Interval (Months): ' + row.IntervalInMonths);
+
+                                                return lines.join('\n');
+                                            },
+                                            name: 'Weight'
+                                        }]
+                                    }
+                                    //    }]
+                                }, {
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Graph Last Year',
+                                    style: 'margin-bottom: 30px',
+                                    plotConfig: {
+                                        results: weightLastYear,
+                                        title: ' Weight : ' + subj,
+                                        height: 400,
+                                        width: 1000,
+                                        yLabel: 'Weight (kg)',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'weight',
+                                            hoverText: function (row) {
+                                                var lines = [];
+
+                                                lines.push('Date: ' + row.date.format('Y-m-d'));
+                                                lines.push('Weight: ' + row.weight + ' kg');
+                                                lines.push('Latest Weight: ' + row.LatestWeight + ' kg');
+                                                if (row.LatestWeightDate)
+                                                    lines.push('Latest Weight Date: ' + row.LatestWeightDate.format('Y-m-d'));
+                                                if (row.PctChange)
+                                                    lines.push('% Change From Current: ' + row.PctChange + '%');
+                                                lines.push('Interval (Months): ' + row.IntervalInMonths);
+
+                                                return lines.join('\n');
+                                            },
+                                            name: 'Weight'
+                                        }]
+                                    }
+                                }]
+                            });
+                            target.add({
+                                /*xtype: 'tabpanel',
+                                 style: 'margin-bottom: 20px',
+                                 items: [{*/
+                                xtype: 'ldk-querypanel',
+                                title: 'Raw Data',
+                                style: 'margin: 5px;',
+                                queryConfig: panel.getQWPConfig({
+                                    frame: 'none',
+                                    schemaName: 'study',
+                                    queryName: 'weight',
+                                    viewName: 'Percent Change',
+                                    sort: 'id,-date',
+                                    filterArray: filterArray
+                                })
+                            });
+                            target.update('');
+                            //},{
                         }
-                        weightLastYear.rowCount= weightLastYear.rows.length;
-                        console.log ('rowcount ' + results.rowCount);
-                        console.log ('rowcount ' + weightLastYear.rowCount);
-
-                        target.removeAll();
-                        target.add({
-                            xtype: 'tabpanel',
-                            style: 'margin-bottom: 20px',
-                            items: [{
-                                xtype: 'ldk-graphpanel',
-                                title: 'Graph',
-                                style: 'margin-bottom: 30px',
-                                plotConfig: {
-                                    results: results,
-                                    title: 'Weight : ' + subj,
-                                    height: 400,
-                                    width: 1000,
-                                    yLabel: 'Weight (kg)',
-                                    xLabel: 'Date',
-                                    xField: 'date',
-                                    grouping: ['Id'],
-                                    layers: [{
-                                        y: 'weight',
-                                        hoverText: function(row){
-                                            var lines = [];
-
-                                            lines.push('Date: ' + row.date.format(LABKEY.extDefaultDateFormat));
-                                            lines.push('Weight: ' + row.weight + ' kg');
-                                            lines.push('Latest Weight: ' + row.LatestWeight + ' kg');
-                                            if(row.LatestWeightDate)
-                                                lines.push('Latest Weight Date: ' + row.LatestWeightDate.format(LABKEY.extDefaultDateFormat));
-                                            if(row.PctChange)
-                                                lines.push('% Change From Current: '+row.PctChange + '%');
-                                            lines.push('Interval (Months): ' + row.IntervalInMonths);
-
-                                            return lines.join('\n');
-                                        },
-                                        name: 'Weight'
-                                    }]
-                                }
-                            //    }]
-                        },{xtype: 'ldk-graphpanel',
-                                title: 'Graph Last Year',
-                                style: 'margin-bottom: 30px',
-                                plotConfig: {
-                                    results: weightLastYear,
-                                    title: ' Weight : ' + subj,
-                                    height: 400,
-                                    width: 1000,
-                                    yLabel: 'Weight (kg)',
-                                    xLabel: 'Date',
-                                    xField: 'date',
-                                    grouping: ['Id'],
-                                    layers: [{
-                                        y: 'weight',
-                                        hoverText: function(row){
-                                            var lines = [];
-
-                                            lines.push('Date: ' + row.date.format('Y-m-d'));
-                                            lines.push('Weight: ' + row.weight + ' kg');
-                                            lines.push('Latest Weight: ' + row.LatestWeight + ' kg');
-                                            if(row.LatestWeightDate)
-                                                lines.push('Latest Weight Date: ' + row.LatestWeightDate.format('Y-m-d'));
-                                            if(row.PctChange)
-                                                lines.push('% Change From Current: '+row.PctChange + '%');
-                                            lines.push('Interval (Months): ' + row.IntervalInMonths);
-
-                                            return lines.join('\n');
-                                        },
-                                        name: 'Weight'
-                                    }]
-                                }
-                            }]
-                        });
-                        target.add({
-                            /*xtype: 'tabpanel',
-                             style: 'margin-bottom: 20px',
-                             items: [{*/
-                            xtype: 'ldk-querypanel',
-                            title: 'Raw Data',
-                            style: 'margin: 5px;',
-                            queryConfig: panel.getQWPConfig({
-                                frame: 'none',
-                                schemaName: 'study',
-                                queryName: 'weight',
-                                viewName: 'Percent Change',
-                                sort: 'id,-date',
-                                filterArray: filterArray
-                            })
-                        });
-                        target.update('');
-                        //},{
-
                     }, [subject])
                 });
                 function cloneObject(obj) {

@@ -1,8 +1,13 @@
+/*
+ * Copyright (c) 2015-2016 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 Ext4.namespace('EHR.Reports');
 
 EHR.reports.AnimalPortal =  function(panel2,tab) {
     if (tab.filters.subjects){
-        var animalIds = tab.filters.subjects[0];
+        var animalIds = tab.filters.subjects;
         renderFiles(animalIds,tab);
     }
 

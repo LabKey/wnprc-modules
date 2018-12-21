@@ -42,7 +42,7 @@
                   <column columnName="qcstate">
                       <isHidden>true</isHidden>
                      <fk>
-                         <fkDbSchema>study</fkDbSchema>
+                         <fkDbSchema>core</fkDbSchema>
                          <fkTable>qcstate</fkTable>
                          <fkColumnName>qcstate</fkColumnName>
                      </fk>

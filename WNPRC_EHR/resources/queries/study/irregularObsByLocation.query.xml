@@ -46,41 +46,27 @@
                     <column columnName="QCState">
                         <columnTitle>Status</columnTitle>
                         <fk>
-                          <fkDbSchema>study</fkDbSchema>
+                          <fkDbSchema>core</fkDbSchema>
                           <fkTable>qcstate</fkTable>
                           <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>
                 </columns>
                 <buttonBarOptions position="both" includeStandardButtons="false">
+                    <includeScript>ehr.context</includeScript>
                     <includeScript>/ehr/studyButtons.js</includeScript>
                     <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
-                    <item text="Views">
+                    <item text="Grid Views">
                         <originalText>Grid Views</originalText>
                     </item>
-                    <item text="Insert New">
-                        <originalText>Insert New</originalText>
+                    <item text="Charts">
+                        <originalText>Charts</originalText>
                     </item>
-                    <!--<item text="Cohorts">-->
-                        <!--<originalText>Cohorts</originalText>-->
-                    <!--</item>-->
-                    <!--<item text="QCState">-->
-                        <!--<originalText>QC State</originalText>-->
-                    <!--</item>-->
                     <item text="Export">
                         <originalText>Export</originalText>
                     </item>
                     <item text="Print">
                         <originalText>Print</originalText>
-                    </item>
-                    <item text="Import Data">
-                        <originalText>Import Data</originalText>
-                    </item>
-                    <item text="Page Size">
-                        <originalText>Paging</originalText>
-                    </item>
-                    <item text="Delete">
-                        <originalText>Delete</originalText>
                     </item>
                     <item text="More Actions" insertPosition="end" >
                         <item text="Jump To History">

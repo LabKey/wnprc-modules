@@ -1,0 +1,31 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="Id" />
+       <column name="date" />
+       <column name="timeofdeath" />
+       <column name="caseno" />
+
+       <column name="project" />
+       <column name="account" />
+       <column name="performedby" />
+       <column name="assistant" />
+
+       <!--<column name="nhpbmd" />-->
+       <!--<column name="perfusion_area" />-->
+       <!--<column name="perfusion_soln1" />-->
+       <!--<column name="perfusion_time1" />-->
+       <!--<column name="perfusion_soln2" />-->
+       <!--<column name="perfusion_time2" />-->
+       <column name="grossdescription" />
+       <!--<column name="patho_notes" />-->
+       <column name="remark" />
+       <column name="qcstate" />
+       <!--<column name="taskid" />-->
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+    <!--<filters>-->
+        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

@@ -89,7 +89,7 @@
                         <columnTitle>Record Status</columnTitle>
                         <displayWidth>50</displayWidth>
                         <fk>
-                            <fkDbSchema>study</fkDbSchema>
+                            <fkDbSchema>core</fkDbSchema>
                             <fkTable>qcstate</fkTable>
                             <fkColumnName>rowid</fkColumnName>
                         </fk>

@@ -3,7 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="roomUtilization" tableDbType="NOT_IN_DB">
                 <tableTitle>Room Utilization</tableTitle>
-                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
                 <columns>
                     <column columnName="room">
                         <isKeyField>true</isKeyField>

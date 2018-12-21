@@ -11,8 +11,8 @@
                 </column>
             </columns>
             <buttonBarOptions includeStandardButtons="false">
-                <item text="Views">
-                    <originalText>Views</originalText>
+                <item text="Grid Views">
+                    <originalText>Grid Views</originalText>
                 </item>
                 <item text="Export">
                     <originalText>Export</originalText>

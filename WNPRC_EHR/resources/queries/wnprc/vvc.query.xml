@@ -51,7 +51,7 @@
                     <includeScript>ehr.context</includeScript>
                     <includeScript>ehr/studyButtons.js</includeScript>
                     <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
-                    <item text="Views">
+                    <item text="Grid Views">
                         <originalText>Grid Views</originalText>
                     </item>
                     <item text="Insert New">

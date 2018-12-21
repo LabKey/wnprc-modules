@@ -8,6 +8,7 @@ SELECT
 d.id as Id,
 d.dam as Dam,
 d.sire as Sire,
+'' as Display,
 
 --TODO: handle gender better
 /*

@@ -11,32 +11,21 @@
                     </column>
                 </columns>
                 <buttonBarOptions position="both" includeStandardButtons="false">
+                    <includeScript>ehr.context</includeScript>
                     <includeScript>/ehr/studyButtons.js</includeScript>
                     <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
 
-                    <item text="Views">
-                        <originalText>Views</originalText>
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
                     </item>
-                    <item text="Insert New">
-                        <originalText>Insert New</originalText>
-                    </item>
-                    <item text="Cohorts">
-                        <originalText>Cohorts</originalText>
-                    </item>
-                    <item text="QCState">
-                        <originalText>QC State</originalText>
+                    <item text="Charts">
+                        <originalText>Charts</originalText>
                     </item>
                     <item text="Export">
                         <originalText>Export</originalText>
                     </item>
                     <item text="Print">
                         <originalText>Print</originalText>
-                    </item>
-                    <item text="Import Data">
-                        <originalText>Import Data</originalText>
-                    </item>
-                    <item text="Page Size">
-                        <originalText>Page Size</originalText>
                     </item>
                     <item text="More Actions" insertPosition="end" requiresSelection="true">
                         <item text="Jump To History">

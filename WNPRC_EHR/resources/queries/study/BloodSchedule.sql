@@ -24,6 +24,7 @@ b.remark,
 b.qcstate,
 b.taskid,
 b.requestid,
+b.objectid,
 CASE
   WHEN (b.project = 300901 OR b.project = 400901 OR a1.project is not null) THEN null
   ELSE 'NOT ASSIGNED'

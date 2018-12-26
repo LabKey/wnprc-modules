@@ -5,7 +5,7 @@ networks:
       name: sharedservices
 
 services:
-  labkey:
+  labkeydev:
     image: wnprcehr/labkey:17.2
     volumes:
       - "${LABKEY_FILES_DIR}:/backups/new_files_dir"

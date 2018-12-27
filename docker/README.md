@@ -40,6 +40,14 @@ docker build \
     --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
     -t wnprcehr/labkey:XX.X labkey
 ```
+If you want to build an images for an specific branch within Github, you should pass one additional argument `--build-arg WNPRC_BRANCH`. Your commands will look something like this, use the name of the branch without the fb prefix, the name should match as how TeamCity creates the image:
+```
+docker build \
+    --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
+    --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
+    --build-arg WNPRC_BRANCH=develop \
+    -t wnprcehr/labkeyDev:XX.X labkey
+```
 
 The LabKey build also requires the official Oracle Java Server JRE image, which is only available via Docker Hub if you accept the terms and conditions of use from Oracle directly. In order to get the image, you will need:
 

@@ -82,7 +82,7 @@ We created a folder called `development` in this repo. This folder contains a si
  1. `nginx/nginx.conf`
  1. `docker-compose.yml`
 
-In the `.env` file, edit the following variables: `LABKEY_DANGER_PORT` to other number than 8080, this is the port which labkey service will use outside the Docker container. `LABKEY_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
+In the `.env` file, edit the following variables: `LABKEY_DANGER_PORT` to other number than 8080, this is the port which labkey service will use outside the Docker container. `LABKEY_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Server for testing](EHR_Documentation/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
 
 In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end of the file, to the name you have selected for your new service, it also has to match the name on your `docker-compose` and `.env` files.
 

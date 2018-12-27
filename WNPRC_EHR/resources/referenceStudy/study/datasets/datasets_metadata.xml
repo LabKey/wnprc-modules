@@ -52,6 +52,10 @@
                     <fkColumnName>id</fkColumnName>
                 </fk>
             </column>
+            <column columnName="enddate">
+                <columnTitle>End Time</columnTitle>
+                <datatype>timestamp</datatype>
+            </column>
             <column columnName="sireid">
                 <columnTitle>Male</columnTitle>
                 <datatype>varchar</datatype>

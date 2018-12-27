@@ -74,6 +74,20 @@ docker-compose stop postgres
 ```
 All other Docker Compose commands (`logs`, `ps`, etc.) work also.
 
+## Running multiple instances of LabKey in same Server
+
+We created a folder called `development` in this repo. This folder contains a simplify version of the main `docker-compose` file. It only has two services: labkey and ngnix. To start a secondary version of labkey in the test server. Copy the development folder, and rename it to particular project. Within the new folder, you have to edit three of files:
+
+ 1. `.env`
+ 1. `nginx/nginx.conf`
+ 1. `docker-compose.yml`
+
+In the `.env` file, edit the following variables: `LABKEY_DANGER_PORT` to other number than 8080, this is the port which labkey service will use outside the Docker container. `LABKEY_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
+
+In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end of the file, to the name you have selected for your new service, it also has to match the name on your `docker-compose` and `.env` files.
+
+Finally, in your `docker-compose` file edit the name of the labkey service, it should be unique, therefore check other development folder for all the names used.
+
 ## Loading a Database Backup Using the Script
 
 Along with the Docker-specific utilities in this folder, there is a (Bash-only) script to restore a database backup into a local Docker container: **load_database_backup.sh**. By default, this script will download the latest backup from the production server (assumed to have been created the same day at 1AM) and restore that backup into a PostgreSQL container as defined in the docker-compose.yml and .env files in this folder. Depending on resource on local machine or server, it is possible to increase the number of processors for the restore process. Change the number in line 132 right after -j option, by default is set to 4 processes.

@@ -5,11 +5,21 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="breeding_encounters" tableDbType="TABLE">
                 <columns>
-                    <column columnName="date"/>
-                    <column columnName="id">
-                        <columnTitle>Female</columnTitle>
+                    <column columnName="date">
+                        <columnTitle>Start Time</columnTitle>
+                        <nullable>false</nullable>
                     </column>
-                    <column columnName="sireid"/>
+                    <column columnName="enddate">
+                        <columnTitle>End Time</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="Id">
+                        <columnTitle>Female</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="sireid">
+                        <nullable>false</nullable>
+                    </column>
                     <column columnName="ejaculation"/>
                     <column columnName="project"/>
                     <column columnName="remark"/>

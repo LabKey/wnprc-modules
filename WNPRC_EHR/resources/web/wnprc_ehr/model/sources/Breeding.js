@@ -7,11 +7,12 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
         'study.breeding_encounters': {
             Id:                     { columnConfig: { columnIndex: 1 } },
             sireid:                 { columnConfig: { columnIndex: 2 } },
-            remark:                 { columnConfig: { columnIndex: 3, width: 400 } },
-            ejaculation:            { columnConfig: { columnIndex: 4 } },
-            project:                { columnConfig: { columnIndex: 5 } },
-            performedby:            { columnConfig: { columnIndex: 6 } },
-            date:                   { columnConfig: { columnIndex: 7 } }
+            date:                   { columnConfig: { columnIndex: 3 } },
+            enddate:                { columnConfig: { columnIndex: 4 } },
+            ejaculation:            { columnConfig: { columnIndex: 5 } },
+            project:                { columnConfig: { columnIndex: 6 } },
+            remark:                 { columnConfig: { columnIndex: 7, width: 400 } },
+            performedby:            { columnConfig: { columnIndex: 8 } }
         },
         'study.pregnancies': {
             Id:                     { columnConfig: { columnIndex: 1 } },

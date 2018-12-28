@@ -16,7 +16,7 @@
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
                             <fkTable>animal</fkTable>
-                            <fkColumnName>id</fkColumnName>
+                            <fkColumnName>Id</fkColumnName>
                         </fk>
                     </column>
                     <column columnName="offered_to"/>

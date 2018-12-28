@@ -2,14 +2,14 @@
 <tables xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://labkey.org/data/xml ../../../../../../../schemas/tableInfo.xsd" >
     <sharedConfig>
         <columns>
-            <column columnName="id">
+            <column columnName="Id">
                 <datatype>varchar</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
                 <nullable>false</nullable>
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
+                    <fkColumnName>Id</fkColumnName>
                 </fk>
             </column>
             <column columnName="objectid">
@@ -41,17 +41,6 @@
         <tableTitle>Breeding Encounters</tableTitle>
         <description>Contains one row for each breeding pairing/assignment for a dam at the center.</description>
         <columns>
-            <column columnName="id">
-                <columnTitle>Female</columnTitle>
-                <datatype>varchar</datatype>
-                <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
-                <nullable>false</nullable>
-                <fk>
-                    <fkDbSchema>study</fkDbSchema>
-                    <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
-                </fk>
-            </column>
             <column columnName="enddate">
                 <columnTitle>End Time</columnTitle>
                 <datatype>timestamp</datatype>
@@ -63,7 +52,7 @@
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
+                    <fkColumnName>Id</fkColumnName>
                 </fk>
             </column>
             <column columnName="ejaculation">
@@ -113,7 +102,7 @@
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
+                    <fkColumnName>Id</fkColumnName>
                 </fk>
             </column>
         </columns>
@@ -155,7 +144,7 @@
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
+                    <fkColumnName>Id</fkColumnName>
                 </fk>
             </column>
             <column columnName="project">

@@ -58,10 +58,11 @@ Ext4.define('WNPRC.ext.data.BreedingStoreCollection', {
     addServerStoreFromConfig: function (config) {
         try {
             const modded = Ext4.applyIf({filterArray: []}, config);
-            if (this._pregnancyId)
+            if (this._pregnancyId) {
                 modded.filterArray.push(LABKEY.Filter.create('pregnancyid', this._pregnancyId, LABKEY.Filter.Types.CONTAINS));
-            else
+            } else {
                 modded.filterArray.push(LABKEY.Filter.create('date', new Date(), LABKEY.Filter.Types.DATE_GREATER_THAN));
+            }
             modded.sort = 'date';
             this.callParent([modded]);
         }

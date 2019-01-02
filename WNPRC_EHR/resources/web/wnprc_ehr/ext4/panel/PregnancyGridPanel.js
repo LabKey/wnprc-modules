@@ -25,14 +25,16 @@
         // get the model for the selected/active row
         const model = this.getSelectionModel().getSelection()[0];
 
-        //TODO update marmoset gestation period with correct value
         var id = model.get('Id');
         var gestationPeriod;
         if (id != null && id.startsWith('cy')) {
+            //Cynomolgus
             gestationPeriod = 155;
         } else if (id != null && id.startsWith('cj')) {
-            gestationPeriod = 153;
+            //Marmoset
+            gestationPeriod = 144;
         } else {
+            //Rhesus
             gestationPeriod = 165;
         }
 

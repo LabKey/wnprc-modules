@@ -4,10 +4,12 @@ require("ehr/triggers").initScript(this);
 function onUpsert(helper, scriptErrors, row, oldRow){
     console.log(row);
 
+    //validate that the dam is female
     if (row.Id){
         EHR.Server.Validation.verifyIsFemale(row, scriptErrors, helper);
     }
 
+    //validate that the sire is male
     if (row.sireid) {
         EHR.Server.Utils.findDemographics({
             participant: row.sireid,

@@ -6,11 +6,11 @@
             <table tableName="breeding_encounters" tableDbType="TABLE">
                 <columns>
                     <column columnName="date">
-                        <columnTitle>Start Time</columnTitle>
+                        <columnTitle>Encounter Start Time</columnTitle>
                         <nullable>false</nullable>
                     </column>
                     <column columnName="enddate">
-                        <columnTitle>End Time</columnTitle>
+                        <columnTitle>Encounter End Time</columnTitle>
                         <nullable>false</nullable>
                     </column>
                     <column columnName="Id">

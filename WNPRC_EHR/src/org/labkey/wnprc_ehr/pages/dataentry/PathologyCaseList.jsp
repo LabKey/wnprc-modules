@@ -176,7 +176,7 @@
 
                 var config = {
                     'date~gte': startOfYear.format("YYYY-MM-DD"),
-                    'date~lte': endOfYear.format("YYYY-MM-DD"),
+                    'date~lte': endOfYear.format("YYYY-MM-DD HH:mm:ss"),
                     columns: ['Id', 'date', 'taskid', 'caseno', 'QCState/label']
                 };
 

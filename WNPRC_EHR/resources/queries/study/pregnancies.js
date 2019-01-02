@@ -1,3 +1,4 @@
+var console = require('console');
 require("ehr/triggers").initScript(this);
 
 function onUpsert(helper, scriptErrors, row, oldRow){

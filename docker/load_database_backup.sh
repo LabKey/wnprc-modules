@@ -93,7 +93,7 @@ fi
 # Take down the entire docker-compose project, including the network and volumes
 # then build a new postgresql configuration using the specified one as a base.
 #-------------------------------------------------------------------------------
-docker-compose down
+docker-compose down -v
 if [[ ! -e .env ]]; then
     cp default.env .env
 fi
@@ -139,7 +139,7 @@ echo -e '\033[0;32mdone\033[0m'
 # Drop and recreate the labkey database and the various roles that we use
 #-------------------------------------------------------------------------------
 echo -n 'Preparing database and roles ... '
-docker-compose exec postgres psql -U postgres -c 'drop database if exists' $dbname ';' &>/dev/null
+docker-compose exec postgres psql -U postgres -c 'drop database if exists ' $dbname ';' &>/dev/null
 docker-compose exec postgres psql -U postgres -c 'create database ' $dbname ';' &>/dev/null
 docker-compose exec postgres psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
 echo -e '\033[0;32mdone\033[0m'
@@ -196,6 +196,6 @@ fi
 # Tear down and re-start the docker-compose environment using the 'regular'
 # postgresql configuration rather than the 'restore' one
 #-------------------------------------------------------------------------------
-docker-compose down
+docker-compose down -v
 unset PG_CONF_FILE
 docker-compose up -d postgres

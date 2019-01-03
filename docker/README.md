@@ -40,6 +40,14 @@ docker build \
     --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
     -t wnprcehr/labkey:XX.X labkey
 ```
+If you want to build an images for an specific branch within Github, you should pass one additional argument `--build-arg WNPRC_BRANCH`. Your commands will look something like this, use the name of the branch without the fb prefix, the name should match as how TeamCity creates the image:
+```
+docker build \
+    --build-arg LABKEY_TEAMCITY_USERNAME=<your username> \
+    --build-arg LABKEY_TEAMCITY_PASSWORD=<your password> \
+    --build-arg WNPRC_BRANCH=develop \
+    -t wnprcehr/labkeyDev:XX.X labkey
+```
 
 The LabKey build also requires the official Oracle Java Server JRE image, which is only available via Docker Hub if you accept the terms and conditions of use from Oracle directly. In order to get the image, you will need:
 
@@ -73,6 +81,20 @@ docker-compose up -d postgres
 docker-compose stop postgres
 ```
 All other Docker Compose commands (`logs`, `ps`, etc.) work also.
+
+## Running multiple instances of LabKey in same Server
+
+We created a folder called `development` in this repo. This folder contains a simplify version of the main `docker-compose` file. It only has two services: labkey and ngnix. To start a secondary version of labkey in the test server. Copy the development folder, and rename it to particular project. Within the new folder, you have to edit three of files:
+
+ 1. `.env`
+ 1. `nginx/nginx.conf`
+ 1. `docker-compose.yml`
+
+In the `.env` file, edit the following variables: `LABKEY_DANGER_PORT` to other number than 8080, this is the port which labkey service will use outside the Docker container. `LABKEY_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Test_Servers](https://github.com/WNPRC-EHR-Services/EHR_Documentation/blob/master/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
+
+In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end of the file, to the name you have selected for your new service, it also has to match the name on your `docker-compose` and `.env` files.
+
+Finally, in your `docker-compose` file edit the name of the labkey service, it should be unique, therefore check other development folder for all the names used.
 
 ## Loading a Database Backup Using the Script
 

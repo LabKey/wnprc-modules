@@ -39,7 +39,7 @@ Ext4.define('WNPRC.ext4.ChildRecordsPanel', {
             // get the first record for filtering and such
             const record = store.getAt(0);
             // dynamically update the title to show the dam's id
-            this.setTitle((this.title && (this.title + ' - ')) + record.get('id'));
+            this.setTitle((this.title && (this.title + ' - ')) + record.get('Id'));
             // set the style for the child divs
             const style = 'margin: 10px 0px 0px 0px';
             // loop over each of the child record configs passed to the component and generate a new QueryWebPart to
@@ -48,8 +48,8 @@ Ext4.define('WNPRC.ext4.ChildRecordsPanel', {
             Promise.all((this.childRecords || []).map(function (/** @type {{filterArrayFactory, parametersFactory}} */ c, i) {
                 return new Promise((function (resolve, reject) {
                     // create the new element into which to render each child
-                    const childId = this.id + '-child-' + i;
-                    Ext4.DomHelper.append(this.body, {tag: 'div', id: childId, cls: c.cls, style: style});
+                    const childId = this.Id + '-child-' + i;
+                    Ext4.DomHelper.append(this.body, {tag: 'div', Id: childId, cls: c.cls, style: style});
                     // add the filter for the participant id and the success handler
                     Ext4.merge(c, {
                         failure: reject,

@@ -152,7 +152,7 @@ public final class PregnancyHistoryCreator
         {
             return new CaseInsensitiveMapWrapper<>(Stream.of(
                     // @formatter:off
-                      new AbstractMap.SimpleEntry<>("id", rs.getString("dam"))
+                      new AbstractMap.SimpleEntry<>("Id", rs.getString("dam"))
                     , new AbstractMap.SimpleEntry<>("date", rs.getDate("date"))
                     , new AbstractMap.SimpleEntry<>("infantid", rs.getString("infantid"))
                     , new AbstractMap.SimpleEntry<>("outcome", rs.getString("outcome"))
@@ -183,9 +183,10 @@ public final class PregnancyHistoryCreator
                 return new CaseInsensitiveMapWrapper<>(Stream.of(
                         // @formatter:off
                           new AbstractMap.SimpleEntry<>("date", rs.getDate("date"))
-                        , new AbstractMap.SimpleEntry<>("id", rs.getString("dam"))
+                        , new AbstractMap.SimpleEntry<>("Id", rs.getString("dam"))
                         , new AbstractMap.SimpleEntry<>("sireid", rs.getString("sire"))
-                        , new AbstractMap.SimpleEntry<>("date_conception", rs.getDate("conception"))
+                        , new AbstractMap.SimpleEntry<>("date_conception_early", rs.getDate("conception"))
+                        , new AbstractMap.SimpleEntry<>("date_conception_late", rs.getDate("conception"))
                         // @formatter:on
                 ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll));
             }

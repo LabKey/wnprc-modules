@@ -14,7 +14,7 @@
                             <fkDbSchema>study</fkDbSchema>
                             <fkTable>pregnancies</fkTable>
                             <fkColumnName>lsid</fkColumnName>
-                            <fkDisplayColumnName>date_conception</fkDisplayColumnName>
+                            <fkDisplayColumnName>date_conception_early</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="project"/>

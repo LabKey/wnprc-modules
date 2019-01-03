@@ -12,7 +12,7 @@ export class Breeding
      * Placeholder value for the details link. Replaced by a JavaScript click handler
      * @type {string}
      */
-    private static readonly DETAIL_PLACEHOLDER: string = '__DETAIL__.view?id=';
+    private static readonly DETAIL_PLACEHOLDER: string = '__DETAIL__.view?Id=';
 
     /**
      * Configuration for all the child records to display in the parent-child detail panel
@@ -174,7 +174,7 @@ export class Breeding
     private attachDetailClickHandler()
     {
         $(`a[href*='${Breeding.DETAIL_PLACEHOLDER}']`).each((i, e) => {
-            const id = (URI($(e).attr('href')).query(true) as any).id;
+            const id = (URI($(e).attr('href')).query(true) as any).Id;
             $(e).attr('href', 'javascript:void(0)')
                 .click(this.onDetailClick.bind(this, id));
         });

@@ -139,7 +139,7 @@ public class UpdateTo15_15 extends ModuleUpdate.ComparableUpdater
             BatchValidationException bve = new BatchValidationException();
             qus.insertRows(user, container, Arrays.asList(
                     generateReportRecord("js", "pregnancies", "Pregnancies", "PregnancyReport", "This report contains a list of known pregnancies, including conception dates and sire (where available)"),
-                    generateReportRecord("query", "breeding_encounters", "Breeding Encounters", "breeding_encounters", "This report contains a list of encounters between a breeding dam and a possible sire"),
+                    generateReportRecord("js", "breeding_encounters", "Breeding Encounters", "breeding_encounters", "This report contains a list of encounters between a breeding dam and a possible sire"),
                     generateReportRecord("query", "ultrasounds", "Ultrasounds", "ultrasounds", "This report details the ultrasounds performed on breeding dams")),
                     bve, null, null);
 

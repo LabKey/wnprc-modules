@@ -15,13 +15,13 @@
     const GET_ACTIVE_PREGNANCY_LSID_BY_ID_SQL =
             'select lsid \
                from (select p.lsid \
-                           ,p.date_conception \
+                           ,p.date_conception_early \
                        from pregnancies p \
                       where p.Id = {0} \
                         and not exists (select * \
                                           from pregnancy_outcomes po \
                                          where po.pregnancyid = p.lsid) \
-                                      order by date_conception desc) \
+                                      order by date_conception_early desc) \
               limit 1'.replace(/\s+/g, ' ');
 
     /**

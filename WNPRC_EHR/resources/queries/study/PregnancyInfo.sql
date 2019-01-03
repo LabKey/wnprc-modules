@@ -2,15 +2,15 @@ SELECT p.objectid
       ,p.id
       ,p.sireid
       ,p.date
-      ,p.date_conception
-      ,timestampadd('SQL_TSI_DAY', 30,  p.date_conception) date_conception_plus_30
-      ,timestampadd('SQL_TSI_DAY', 60,  p.date_conception) date_conception_plus_60
-      ,timestampadd('SQL_TSI_DAY', 90,  p.date_conception) date_conception_plus_90
-      ,timestampadd('SQL_TSI_DAY', 120, p.date_conception) date_conception_plus_120
-      ,timestampadd('SQL_TSI_DAY', 150, p.date_conception) date_conception_plus_150
-      ,timestampadd('SQL_TSI_DAY', 165, p.date_conception) date_conception_plus_165
-      ,p.date_due
-      ,timestampdiff('SQL_TSI_DAY', p.date_conception, coalesce(po.date, curdate())) gestation_day
+      ,to_char(p.date_conception_early, 'Mon DD, YYYY') || ' to ' || to_char(p.date_conception_late, 'Mon DD, YYYY') AS date_conception
+      ,to_char(timestampadd('SQL_TSI_DAY',  30,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY',  30,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_30
+      ,to_char(timestampadd('SQL_TSI_DAY',  60,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY',  60,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_60
+      ,to_char(timestampadd('SQL_TSI_DAY',  90,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY',  90,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_90
+      ,to_char(timestampadd('SQL_TSI_DAY', 120,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY', 120,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_120
+      ,to_char(timestampadd('SQL_TSI_DAY', 150,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY', 150,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_150
+      ,to_char(timestampadd('SQL_TSI_DAY', 165,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY', 165,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_165
+      ,to_char(p.date_due_early, 'Mon DD, YYYY') || ' to ' || to_char(p.date_due_late, 'Mon DD, YYYY') AS date_due
+      ,timestampdiff('SQL_TSI_DAY', p.date_conception_late, coalesce(po.date, curdate())) || ' to ' || timestampdiff('SQL_TSI_DAY', p.date_conception_early, coalesce(po.date, curdate())) || ' days' AS gestation_day
       ,po.outcome
       ,po.date outcome_date
       ,po.remark outcome_remark

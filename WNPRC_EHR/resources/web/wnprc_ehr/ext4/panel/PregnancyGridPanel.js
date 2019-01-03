@@ -39,12 +39,20 @@
         }
 
         switch (args.field) {
-            case 'date_conception': {
-                model.set("date_due", Ext4.Date.add(args.value, Ext4.Date.DAY, gestationPeriod));
+            case 'date_conception_early': {
+                model.set("date_due_early", Ext4.Date.add(args.value, Ext4.Date.DAY, gestationPeriod));
                 break;
             }
-            case 'date_due': {
-                model.set("date_conception", Ext4.Date.add(args.value, Ext4.Date.DAY, -gestationPeriod));
+            case 'date_due_early': {
+                model.set("date_conception_early", Ext4.Date.add(args.value, Ext4.Date.DAY, -gestationPeriod));
+                break;
+            }
+            case 'date_conception_late': {
+                model.set("date_due_late", Ext4.Date.add(args.value, Ext4.Date.DAY, gestationPeriod));
+                break;
+            }
+            case 'date_due_late': {
+                model.set("date_conception_late", Ext4.Date.add(args.value, Ext4.Date.DAY, -gestationPeriod));
                 break;
             }
         }

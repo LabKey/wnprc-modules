@@ -136,6 +136,12 @@
                 <columnTitle>Outcome</columnTitle>
                 <datatype>varchar</datatype>
                 <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>birth_type</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                    <fkDisplayColumnName>description</fkDisplayColumnName>
+                </fk>
             </column>
             <column columnName="infantid">
                 <columnTitle>Infant</columnTitle>

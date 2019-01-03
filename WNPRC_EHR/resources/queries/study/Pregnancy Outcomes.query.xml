@@ -6,6 +6,15 @@
             <table tableName="pregnancy_outcomes" tableDbType="TABLE">
                 <columns>
                     <column columnName="Id"/>
+                    <column columnName="outcome">
+                        <columnTitle>Outcome</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>birth_type</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>description</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="date"/>
                     <column columnName="perfomedby"/>
                     <column columnName="pregnancyid">

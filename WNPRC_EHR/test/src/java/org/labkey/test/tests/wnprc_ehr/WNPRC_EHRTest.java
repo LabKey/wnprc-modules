@@ -543,7 +543,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
 
         DataRegionTable procedureFeeRatesTable = new DataRegionTable("procedureFeeRatesQueryRegion", getDriver());
-        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27", "640991", "acct101", "$13.00", "1", "0.3", "$13.00");
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "640991", "acct101", "$13.00", "1", "0.3", "$13.00");
         actualRowData = procedureFeeRatesTable.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
         assertEquals("Wrong row data for Procedure Fee Rates Table", expectedRowData, actualRowData);
         assertEquals("Two rows should be displayed", procedureFeeRatesTable.getDataRowCount(), 2);

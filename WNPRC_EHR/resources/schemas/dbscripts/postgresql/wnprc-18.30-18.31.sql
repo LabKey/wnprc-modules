@@ -1,0 +1,2 @@
+ALTER TABLE wnprc.necropsy_suite DROP CONSTRAINT IF EXISTS fk_necropsy_suite_rooms;
+ALTER TABLE wnprc.necropsy_suite ADD CONSTRAINT fk_necropsy_suite_rooms FOREIGN KEY (container, room) REFERENCES ehr_lookups.rooms (container, room);

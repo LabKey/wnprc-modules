@@ -12,6 +12,7 @@ interface Configuration extends Webpack.Configuration {
 
 declare const module: any;
 module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
+    console.log('Output dir for WNPRC_EHR webpack: ' + `${env.BUILD_DIR}/explodedModule/web/wnprc_ehr`)
     return {
         devtool: 'source-map',
         entry: './src/ts/breeding.ts',

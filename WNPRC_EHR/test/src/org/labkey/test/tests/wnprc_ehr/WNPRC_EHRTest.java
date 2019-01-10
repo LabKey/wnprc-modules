@@ -359,8 +359,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         EHRAdminPage ehrAdminPage = EHRAdminPage.beginAt(this, getContainerPath());
         NotificationAdminPage notificationAdminPage = ehrAdminPage.clickNotificationService(this);
         notificationAdminPage.setNotificationUserAndReplyEmail(DATA_ADMIN_USER);
-        notificationAdminPage.enableBillingNotification();
-        notificationAdminPage.addManageUsers("Billing Notification", "EHR Administrators");
+        notificationAdminPage.enableBillingNotification("status_org.labkey.ehr_billing.notification.BillingNotification");
+        notificationAdminPage.addManageUsers("org.labkey.ehr_billing.notification.BillingNotification", "EHR Administrators");
 
         log("Running report in the browser");
         notificationAdminPage.clickRunReportInBrowser("Billing Notification");

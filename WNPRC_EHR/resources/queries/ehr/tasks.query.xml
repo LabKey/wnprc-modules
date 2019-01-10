@@ -2,7 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="tasks" tableDbType="TABLE">
-                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
                 <tableUrl>/ehr/taskDetails.view?formtype=${formtype}&amp;taskid=${taskid}</tableUrl>
                 <insertUrl />
                 <importUrl />

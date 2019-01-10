@@ -80,16 +80,6 @@ if [[ -z $dbname ]]; then
 fi
 
 #-------------------------------------------------------------------------------
-# If the user did not provide a path to an existing dump file, secure copy the
-# latest daily from the EHR production server's backup folder
-#-------------------------------------------------------------------------------
-if [[ -z $filepath ]]; then
-    filename="labkey_$(date +'%Y%m%d')_0100.pg"
-    scp ${username}ehr.primate.wisc.edu:/backups/labkey/labkey_backup/database/daily/${filename} $tmpdir || exit 1
-    filepath="$tmpdir/$filename"
-fi
-
-#-------------------------------------------------------------------------------
 # Take down the entire docker-compose project, including the network and volumes
 # then build a new postgresql configuration using the specified one as a base.
 #-------------------------------------------------------------------------------
@@ -134,6 +124,16 @@ pgport=$(docker-compose port postgres 5432)
 echo -n 'Waiting for postgres to start ... '
 docker-compose exec postgres /bin/bash -c 'count=0;while [ $count -lt 120 ]; do if psql -U postgres -c "\l" &>/dev/null; then sleep 3; break; fi; sleep 1; let count=count+1; done;' &>/dev/null
 echo -e '\033[0;32mdone\033[0m'
+
+#-------------------------------------------------------------------------------
+# If the user did not provide a path to an existing dump file, secure copy the
+# latest daily from the EHR production server's backup folder
+#-------------------------------------------------------------------------------
+if [[ -z $filepath ]]; then
+    filename="labkey_$(date +'%Y%m%d')_0100.pg"
+    scp ${username}ehr.primate.wisc.edu:/backups/labkey/labkey_backup/database/daily/${filename} $tmpdir || exit 1
+    filepath="$tmpdir/$filename"
+fi
 
 #-------------------------------------------------------------------------------
 # Drop and recreate the labkey database and the various roles that we use

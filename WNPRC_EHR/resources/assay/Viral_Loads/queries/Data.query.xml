@@ -2,7 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="Data" tableDbType="TABLE">
-                <javaCustomizer>org.labkey.wnprc_ehr.query.ViralAssayCustomizer</javaCustomizer>
+                <javaCustomizer class="org.labkey.wnprc_ehr.query.ViralAssayCustomizer"/>
                 <columns>
                     <column columnName="subjectId">
                         <columnTitle>Subject Id</columnTitle>

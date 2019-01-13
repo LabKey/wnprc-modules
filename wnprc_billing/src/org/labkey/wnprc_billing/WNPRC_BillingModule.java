@@ -32,7 +32,7 @@ import org.labkey.api.query.QuerySchema;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.wnprc_billing.dataentry.ChargesFormType;
-import org.labkey.wnprc_billing.notification.BillingNotificationServiceImpl;
+import org.labkey.wnprc_billing.notification.WNPRCBillingNotificationProvider;
 import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
 import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
 import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
@@ -79,7 +79,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     {
         addController(WNPRC_BillingController.NAME, WNPRC_BillingController.class);
         ServiceRegistry.get().registerService(InvoicedItemsProcessingService.class, new InvoicedItemsProcessingServiceImpl());
-        ServiceRegistry.get().registerService(BillingNotificationService.class, BillingNotificationServiceImpl.get());
+        BillingNotificationService.get().registerBillingNotificationProvider(WNPRCBillingNotificationProvider.get());
     }
 
     @Override

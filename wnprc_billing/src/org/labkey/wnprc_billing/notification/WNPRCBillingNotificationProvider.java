@@ -3,7 +3,7 @@ package org.labkey.wnprc_billing.notification;
 import org.labkey.api.data.Container;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr_billing.EHR_BillingService;
-import org.labkey.api.ehr_billing.notification.BillingNotificationService;
+import org.labkey.api.ehr_billing.notification.BillingNotificationProvider;
 import org.labkey.api.ehr_billing.notification.FieldDescriptor;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BillingNotificationServiceImpl implements BillingNotificationService
+public class WNPRCBillingNotificationProvider implements BillingNotificationProvider
 {
-    private static final BillingNotificationServiceImpl INSTANCE = new BillingNotificationServiceImpl();
-    public static BillingNotificationServiceImpl get()
+    private static final WNPRCBillingNotificationProvider INSTANCE = new WNPRCBillingNotificationProvider();
+    public static WNPRCBillingNotificationProvider get()
     {
         return INSTANCE;
     }
@@ -29,7 +29,7 @@ public class BillingNotificationServiceImpl implements BillingNotificationServic
     private static final String CATEGORY_PROCEDURE_FEE_RATES = "Blood Draws";
     private static final String CATEGORY_MISC_CHARGES = "Misc. Charges";
 
-    private BillingNotificationServiceImpl()
+    private WNPRCBillingNotificationProvider()
     {
     }
 

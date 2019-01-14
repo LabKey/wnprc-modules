@@ -209,8 +209,7 @@
                 }
                 else if (feeCategory.equals("Fee")){
             %>
-            Animal replacement charge or prepaid <br>
-            <%= (prepaid == null) ? "Animal Replacement fee to be paid (not prepaid animal)" : "Nx was paid by " + prepaid %>
+            <%= (prepaid == null) ? "Animal Replacement fee to be paid (not prepaid animal)" : prepaid %>
 
             <%
                 }

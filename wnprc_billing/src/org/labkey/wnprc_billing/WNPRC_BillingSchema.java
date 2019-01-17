@@ -33,6 +33,7 @@ public class WNPRC_BillingSchema
     public static final String TABLE_TIER_RATES = "tierrates";
     public static final String TABLE_JET_INVOICE_ITEMS = "JetInvoiceItems";
     public static final String TABLE_ALIASES = "Aliases";
+    public static final String TABLE_SUMMARIZED_ITEMS = "summarizedInvoicedItemsByCategory";
 
     public static WNPRC_BillingSchema getInstance()
     {

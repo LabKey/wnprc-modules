@@ -1,6 +1,6 @@
 SELECT
-	MAX(date) AS chargedate,
-	category AS description,
+	MAX(date) AS date,
+	category as comment,
 	SUM(totalcost) AS totalcost,
 	invoicenumber
 FROM ehr_billing.invoiceditems

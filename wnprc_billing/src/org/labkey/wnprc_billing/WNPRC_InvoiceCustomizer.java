@@ -27,10 +27,9 @@ public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
     @Override
     public void customize(TableInfo tableInfo)
     {
-        addLinkColumn(tableInfo, false,"View PDF","viewPdf");
-        addLinkColumn(tableInfo, true,"Download PDF","downloadPDF");
-        addLinkColumn(tableInfo, true,"Summarized PDF","summarizedPDF",
-                new ActionURL(WNPRC_BillingController.SummarizedPDFExportAction.class, tableInfo.getUserSchema().getContainer()));
+        addLinkColumn(tableInfo, false,"View PDF","viewPdf", "Invoice PDF");
+        addLinkColumn(tableInfo, true,"Download PDF","downloadPDF", "Invoice PDF");
+        addLinkColumn(tableInfo, true,"Summarized PDF","summarizedPDF", "Summary PDF");
     }
 
     private void addViewPdf(TableInfo ti)
@@ -58,13 +57,7 @@ public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
         }
     }
 
-    private void addLinkColumn(TableInfo ti, boolean asAttachment, String label, String colName)
-    {
-        ActionURL url = new ActionURL(WNPRC_BillingController.PDFExportAction.class, ti.getUserSchema().getContainer());
-        addLinkColumn(ti, asAttachment, label, colName, url);
-    }
-
-    private void addLinkColumn(TableInfo ti, boolean asAttachment, String label, String colName, ActionURL url)
+    private void addLinkColumn(TableInfo ti, boolean asAttachment, String label, String colName, String formName)
     {
 
 
@@ -78,8 +71,10 @@ public class WNPRC_InvoiceCustomizer extends AbstractTableCustomizer
                 SimpleDisplayColumn simpleDisplayColumn = new SimpleDisplayColumn();
                 simpleDisplayColumn.setName(colName);
                 simpleDisplayColumn.setDisplayHtml(label);
+                ActionURL url = new ActionURL(WNPRC_BillingController.PDFExportAction.class, ti.getUserSchema().getContainer());
                 url.addParameter("invoiceNumber", "${invoiceNumber}");
                 url.addParameter("asAttachment", asAttachment);
+                url.addParameter("name", formName);
                 simpleDisplayColumn.setURL(url.toString());
 
                 return simpleDisplayColumn;

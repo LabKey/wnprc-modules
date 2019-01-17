@@ -21,6 +21,11 @@
                 <property name="columnTitle" value="Download PDF"/>
             </properties>
         </column>
+        <column name="summarizedPDF">
+            <properties>
+                <property name="columnTitle" value="Summarized PDF"/>
+            </properties>
+        </column>
     </columns>
     <filters></filters>
 </customView>

@@ -34,11 +34,9 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.wnprc_billing.domain.Alias;
-import org.labkey.wnprc_billing.domain.Invoice;
-import org.labkey.wnprc_billing.domain.InvoiceRun;
-import org.labkey.wnprc_billing.domain.InvoicedItem;
+import org.labkey.wnprc_billing.domain.*;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
+import org.labkey.wnprc_billing.invoice.SummaryPDF;
 import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -118,11 +116,21 @@ public class WNPRC_BillingController extends SpringActionController
         return tableSelector.getObject(Alias.class);
     }
 
+    private List<InvoicedItem> getSummarizedItems(String invoiceNumber)
+    {
+        TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_SUMMARIZED_ITEMS);
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("invoiceNumber"), invoiceNumber);
+        TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort( "date"));
+        return tableSelector.getArrayList(InvoicedItem.class);
+    }
+
     public static class InvoicePdfForm
     {
         String _invoiceNumber;
         int _rowId;
         boolean _asAttachment;
+        String name;
 
         public String getInvoiceNumber()
         {
@@ -152,6 +160,14 @@ public class WNPRC_BillingController extends SpringActionController
         public void setAsAttachment(boolean asAttachment)
         {
             this._asAttachment = asAttachment;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 
@@ -439,7 +455,6 @@ public class WNPRC_BillingController extends SpringActionController
             Alias alias = getInvoiceAccount(invoice.getAccountNumber());
             InvoiceRun invoiceRun = getInvoiceRunByObjectId(invoice.getInvoiceRunId());
             TierRate accountTierRate = getTierRate(alias.getTier_rate());
-            List<InvoicedItem> invoicedItems = getInvoicedItems(invoicePdfForm.getInvoiceNumber());
 
             Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
             String contactEmail = moduleProperties.get(WNPRC_BillingModule.BillingContactEmail).getEffectiveValue(getContainer());
@@ -447,9 +462,20 @@ public class WNPRC_BillingController extends SpringActionController
             String creditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
 
             double tierRate = accountTierRate != null ? accountTierRate.getTierRate() : 0;
-            InvoicePDF pdf = new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount);
+            String formName = invoicePdfForm.getName();
+            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount):
+                    new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount);
 
             pdf.addPage();
+            List<InvoicedItem> invoicedItems;
+
+            if(formName.equalsIgnoreCase("Invoice PDF"))
+            {
+                invoicedItems = getInvoicedItems(invoicePdfForm.getInvoiceNumber());
+            } else
+            {
+                invoicedItems = getSummarizedItems(invoicePdfForm.getInvoiceNumber());
+            }
             pdf.createLineItems(invoicedItems);
             SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM_yyyy");
             String filename = alias.getGrantNumber() + "_" + dateFormatBillingFor.format(invoiceRun.getBillingPeriodStart()) + "_Invoice.pdf";

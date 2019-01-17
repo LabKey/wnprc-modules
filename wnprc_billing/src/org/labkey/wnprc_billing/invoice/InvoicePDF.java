@@ -147,7 +147,8 @@ public class InvoicePDF extends FPDF
 
     private void addDetailsToLineItem(FormattedLineItem formattedLineItem, InvoicedItem invoicedItem ){
         formattedLineItem._quantity = invoicedItem.getQuantity();
-        formattedLineItem._unitPrice = invoicedItem.getUnitCost().floatValue();
+        if(invoicedItem.getUnitCost() != null)
+            formattedLineItem._unitPrice = invoicedItem.getUnitCost().floatValue();
         formattedLineItem._linePrice = invoicedItem.getTotalCost().floatValue();
     }
 
@@ -176,7 +177,7 @@ public class InvoicePDF extends FPDF
     int angle = 0;
 
     // total width is 190
-    private static abstract class Column
+    protected static abstract class Column
     {
         private final String _header;
         private final int _width;
@@ -250,6 +251,11 @@ public class InvoicePDF extends FPDF
                 }
             });
 
+    public List<Column> getHeaders()
+    {
+        return headers;
+    }
+
     public static class FormattedLineItem
     {
         private String _description;
@@ -258,6 +264,30 @@ public class InvoicePDF extends FPDF
         private Float _unitPrice;
         private boolean _isBold;
         public Float _linePrice;
+
+        public String get_description() {
+            return _description;
+        }
+
+        public Date get_chargeDate() {
+            return _chargeDate;
+        }
+
+        public Double get_quantity() {
+            return _quantity;
+        }
+
+        public Float get_unitPrice() {
+            return _unitPrice;
+        }
+
+        public boolean is_isBold() {
+            return _isBold;
+        }
+
+        public Float get_linePrice() {
+            return _linePrice;
+        }
 
         public FormattedLineItem(Date chargeDate, String description, Double quantity, Float unitPrice, Float linePrice, boolean isBold)
         {
@@ -305,7 +335,7 @@ public class InvoicePDF extends FPDF
             if (comments != null && !comments.trim().isEmpty())
                 addComments();
             addBillingDate(invoiceRun.getBillingPeriodStart(), invoiceRun.getBillingPeriodEnd());
-            addCols(headers);
+            addCols(this.getHeaders());
 
             setY(75);
         }

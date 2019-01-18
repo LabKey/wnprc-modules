@@ -1,0 +1,9 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <sorts>
+        <sort column="chargeId/name"/>
+        <sort column="startDate" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="endDate" operator="isblank"/>
+    </filters>
+</customView>

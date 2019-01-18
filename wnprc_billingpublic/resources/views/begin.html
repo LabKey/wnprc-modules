@@ -1,0 +1,45 @@
+<script type="text/javascript">
+
+Ext4.onReady(function(){
+    var webpart = <%=webpartContext%>;
+    var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+    if(!ctx)
+        return;
+
+    var billingCtx = LABKEY.getModuleContext('wnprc_billing');
+    var billingContainer = billingCtx ? billingCtx.BillingContainer : null;
+
+    Ext4.widget({
+        xtype: 'panel',
+        itemId: 'outerPanel',
+        border: false,
+        items: [{
+            html: 'Below are the projects are you authorized to view.  Click the project name to view more detail for each billing period.  If you believe there is an error in this list of projects, please contact the Finance Group.',
+            style: 'padding-bottom: 10px;',
+            border: false
+        },{
+            html: '<a href="' + LABKEY.ActionURL.buildURL('project', 'start', billingContainer) + '">Note: Authorized users can click here to view the private section, which may have more detail on charges.</a>',
+            style: 'padding-bottom: 10px;',
+            hidden: !billingContainer,
+            border: false
+        },{
+            xtype: 'ldk-querypanel',
+            queryConfig: {
+                frame: 'none',
+                buttonBar: {
+                    //position: 'none'
+                },
+                schemaName: 'wnprc_billing_public',
+                queryName: 'projects',
+                dataRegionName: 'PIPortalProjects',
+                success: function () {
+                    LDK.Assert.assertNotEmpty('Error in scope of DataRegion success()', (this.up && this.up('#outerPanel')));
+                    this.up('#outerPanel').setWidth(this.getWidth() + 10);
+                }
+            }
+         }]
+    }).render(webpart.wrapperDivId);
+});
+
+</script>
+

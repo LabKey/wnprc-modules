@@ -1,0 +1,34 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="invoicedItemsByProjectItem" tableDbType="TABLE">
+                <tableTitle>Invoices By Project And Item</tableTitle>
+                <columns>
+                    <column columnName="invoiceId">
+                        <columnTitle>Invoice Run Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc_billing_public</fkDbSchema>
+                            <fkTable>publicInvoiceRuns</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>rowid</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="numItems">
+                        <columnTitle># Items</columnTitle>
+                        <url>/query/executeQuery.view?schemaName=wnprc_billing_public&amp;
+                            queryName=publicInvoicedItems&amp;
+                            query.invoiceRunId~eq=${invoiceId/rowid}&amp;
+                            query.project~eq=${project}&amp;
+                            query.item~eq=${item}
+                        </url>
+                        <formatString>###,##0.00</formatString>
+                    </column>
+                    <column columnName="total">
+                        <columnTitle>Total</columnTitle>
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

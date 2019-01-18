@@ -375,7 +375,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         for (Container container : getAllContainers()) {
             if (container.getActiveModules().contains(module)) {
                 Container studyContainer = EHRService.get().getEHRStudyContainer(container);
-                studyContainers.add(studyContainer);
+                if (studyContainer != null) {
+                    studyContainers.add(studyContainer);
+                }
             }
         }
 

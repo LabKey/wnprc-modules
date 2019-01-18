@@ -1,0 +1,14 @@
+<!--Linked Schema named ehr_billing_public with this template to be created in EHR Folder-->
+
+<templateSchema xmlns="http://labkey.org/data/xml/externalSchema"
+                xmlns:dat="http://labkey.org/data/xml"
+                xmlns:cv="http://labkey.org/data/xml/queryCustomView"
+                sourceSchemaName="ehr_billing">
+    <tables>
+        <tableName>chargeableItems</tableName>
+        <tableName>aliases</tableName>
+        <tableName>chargeRates</tableName>
+        <tableName>chargeUnits</tableName>
+        <tableName>chargeableItemCategories</tableName>
+    </tables>
+</templateSchema>

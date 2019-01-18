@@ -1,0 +1,29 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="project"/>
+        <column name="name"/>
+        <column name="protocol"/>
+        <column name="title"/>
+        <column name="investigatorId"/>
+        <column name="protocol/investigatorId">
+            <properties>
+                <property name="columnTitle" value="Protocol Investigator"/>
+            </properties>
+        </column>
+        <column name="account"/>
+        <column name="startdate"/>
+        <column name="enddate"/>
+        <column name="use_category"/>
+        <column name="account/isAcceptingCharges"/>
+        <column name="account/projectNumber"/>
+        <column name="account/projectStatus"/>
+        <column name="account/budgetStartDate"/>
+        <column name="account/budgetEndDate"/>
+        <column name="account/investigatorId"/>
+        <column name="account/aliasType"/>
+        <column name="account/faRate"/>
+    </columns>
+    <sorts>
+        <sort column="name" />
+    </sorts>
+</customView>

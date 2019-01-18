@@ -1,0 +1,5 @@
+{table}
+Filename|Component|Version|Source|License|LabKey Dev|Purpose
+java-fpdf-1.6.0.jar|Java-FPDF PDF generation library|1.6.0|{link:Java-FPDF|https://github.com/nkiraly/Java-FPDF}|{link:BSD 2|https://github.com/nkiraly/Java-FPDF/blob/master/LICENSE.md}|jeckels|Used to generate PDF invoices
+sanselan-0.97-incubator.jar|Apache Commons Imaging|0.97|{link:Sanselan|https://commons.apache.org/proper/commons-imaging/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jeckels|Required by Java-FPDF
+{table}

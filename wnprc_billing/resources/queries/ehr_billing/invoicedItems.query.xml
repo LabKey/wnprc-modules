@@ -1,0 +1,55 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="invoicedItems" tableDbType="TABLE">
+                <tableTitle>Invoiced Items</tableTitle>
+                <auditLogging>DETAILED</auditLogging>
+                <columns>
+                    <column columnName="debitedAccount">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="creditedAccount">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="quantity">
+                        <formatString>##,##0.00</formatString>
+                    </column>
+                    <column columnName="po_amount">
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                    <column columnName="unitCostDirect">
+                        <columnTitle>Unit Cost Direct</columnTitle>
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                    <column columnName="totalCostDirect">
+                        <columnTitle>Total Cost Direct</columnTitle>
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                    <column columnName="chargeId">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeableItems</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>name</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehrLinked</fkDbSchema> <!--linked schema ehrLinked is expected in Private folder. Use ehrLinked.template.xml to create this linked schema-->
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

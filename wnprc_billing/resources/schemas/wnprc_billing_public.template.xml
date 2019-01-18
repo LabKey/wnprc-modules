@@ -1,0 +1,12 @@
+<!--Linked Schema named wnprc_billing_public with this template to be created in PI Portal Folder-->
+
+<templateSchema sourceSchemaName="ehr_billing" xmlns="http://labkey.org/data/xml/externalSchema" xmlns:cv="http://labkey.org/data/xml/queryCustomView">
+    <tables>
+        <tableName>publicInvoiceRuns</tableName>
+        <tableName>publicInvoicedItems</tableName>
+        <tableName>chargeableItems</tableName>
+        <tableName>aliases</tableName>
+        <tableName>chargeRates</tableName>
+        <tableName>chargeUnits</tableName>
+    </tables>
+</templateSchema>

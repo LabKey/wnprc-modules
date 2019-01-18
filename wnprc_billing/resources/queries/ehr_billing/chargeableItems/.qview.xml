@@ -1,0 +1,17 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="All Items">
+    <columns>
+        <column name="rowid"/>
+        <column name="oldPk"/>
+        <column name="name"/>
+        <column name="chargeCategoryid"/>
+        <column name="serviceCode"/>
+        <column name="departmentCode"/>
+        <column name="comment"/>
+        <column name="active"/>
+        <column name="startdate"/>
+        <column name="enddate"/>
+    </columns>
+    <sorts>
+        <sort column="name"/>
+    </sorts>
+</customView>

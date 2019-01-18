@@ -1,0 +1,33 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="chargeRates" tableDbType="TABLE">
+                <importTemplates>
+                    <template label="Download Template for Chargeable Items with Rates" url="/query/exportExcelTemplate.view?schemaName=ehr_billing&amp;query.queryName=chargeableItemsWithRates&amp;captionType=Label&amp;filenamePrefix=chargeRatesWithItemsTemplate" />
+                </importTemplates>
+                <tableTitle>Standard Rates</tableTitle>
+                <auditLogging>DETAILED</auditLogging>
+                <columns>
+                    <column columnName="descriptions"/>
+                    <column columnName="genCredits"/>
+                    <column columnName="groupName">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeUnits</fkTable>
+                            <fkColumnName>chargetype</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="chargeId">
+                        <columnTitle>Charge Item</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>chargeableItems</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

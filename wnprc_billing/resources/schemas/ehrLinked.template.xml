@@ -1,0 +1,12 @@
+<!--Linked Schema named ehrLinked with this template to be created in Private Folder-->
+
+<templateSchema xmlns="http://labkey.org/data/xml/externalSchema"
+                xmlns:dat="http://labkey.org/data/xml"
+                xmlns:cv="http://labkey.org/data/xml/queryCustomView"
+                sourceSchemaName="ehr">
+    <tables>
+        <tableName>project</tableName>
+        <tableName>protocol</tableName>
+        <tableName>investigators</tableName>
+    </tables>
+</templateSchema>

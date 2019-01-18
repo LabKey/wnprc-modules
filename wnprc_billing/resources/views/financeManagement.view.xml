@@ -1,0 +1,6 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Finance">
+    <dependencies>
+        <dependency path="ehr.context" />
+        <dependency path="ehr_billing/BillingUtils.js" />
+    </dependencies>
+</view>

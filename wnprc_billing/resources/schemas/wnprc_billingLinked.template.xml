@@ -1,0 +1,10 @@
+<!--Linked Schema named wnprc_billingLinked with this template to be created in EHR Folder-->
+
+<templateSchema xmlns="http://labkey.org/data/xml/externalSchema"
+                xmlns:dat="http://labkey.org/data/xml"
+                xmlns:cv="http://labkey.org/data/xml/queryCustomView"
+                sourceSchemaName="wnprc_billing">
+    <tables>
+        <tableName>tierRates</tableName>
+    </tables>
+</templateSchema>

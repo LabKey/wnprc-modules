@@ -1,0 +1,28 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <properties>
+        <propertyDescriptor name="BillingContactEmail">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the email address that will appear in the invoice footer.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+            <defaultValue>Please set module property BillingContactEmail</defaultValue>
+        </propertyDescriptor>
+        <propertyDescriptor name="BillingAddress">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the address that will appear in the invoice header.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+            <defaultValue>Please set module property BillingAddress</defaultValue>
+        </propertyDescriptor>
+        <propertyDescriptor name="CreditToAccount">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>This is the Credit account information that will appear in the invoice header.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+            <defaultValue>Please set module property CreditToAccount</defaultValue>
+        </propertyDescriptor>
+    </properties>
+</module>

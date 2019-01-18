@@ -1,0 +1,36 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="alias"/>
+        <column name="grantNumber"/>
+        <column name="tier_rate"/>
+        <column name="type"/>
+        <column name="budgetStartDate"/>
+        <column name="budgetEndDate"/>
+        <column name="affiliate"/>
+        <column name="investigatorName"/>
+        <column name="contact_name"/>
+        <column name="contact_phone"/>
+        <column name="contact_email"/>
+        <column name="address"/>
+        <column name="city"/>
+        <column name="state"/>
+        <column name="zip"/>
+        <column name="comments"/>
+        <column name="po_number"/>
+        <column name="po_amount"/>
+        <column name="charge_grant_accounts_id"/>
+        <column name="uw_fund"/>
+        <column name="uw_account"/>
+        <column name="uw_udds"/>
+        <column name="uw_class_code"/>
+        <column name="grant_period_end"/>
+        <column name="order_cutoff"/>
+        <column name="successor_account"/>
+        <column name="predecessor_account"/>
+        <column name="gencredits"/>
+        <column name="mds_number"/>
+    </columns>
+    <sorts>
+        <sort column="budgetEndDate" descending="true" />
+    </sorts>
+</customView>

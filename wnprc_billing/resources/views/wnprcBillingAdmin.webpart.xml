@@ -1,0 +1,6 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart" title="WNPRC Finance Admin">
+    <view name="wnprcBillingAdmin"/>
+    <locations>
+        <location name="body"/>
+    </locations>
+</webpart>

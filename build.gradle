@@ -80,6 +80,8 @@ def modules  = [
     project('DeviceProxy'),
     project('GoogleDrive'),
     project('primateid'),
+    project('wnprc_billing'),
+    project('wnprc_billingpublic'),
     project('WebUtils'),
     project('WNPRC_Compliance'),
     project('WNPRC_EHR')]

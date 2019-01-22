@@ -32,6 +32,7 @@ dependencies {
     compile project(":server:api")
     compile project(":server:internal")
     compile project(":externalModules:labModules:LDK")
+    compile project(":externalModules:DISCVR:OpenLdapSync")
     compile project(":externalModules:wnprc-modules:java2ts")
 }
 

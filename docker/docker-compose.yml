@@ -22,6 +22,8 @@ services:
     environment:
       TZ: America/Chicago
     command: postgres -c log_directory=/logs -c config_file=/conf/postgresql.conf -c hba_file=/conf/pg_hba.conf
+    stop_signal: SIGTERM
+    stop_grace_period: "120s"
 
   mailcatcher:
     image: schickling/mailcatcher

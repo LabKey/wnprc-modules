@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implements methods to get queries and columns to be processed during a Billing Run.
+ * Implements methods to define the set of queries (and their column mappings) to be included in the Billing Task processing.
+ * Rows from the processed queries will be written to the ehr_billing.invoicedItems table.
  */
 public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessingService
 {

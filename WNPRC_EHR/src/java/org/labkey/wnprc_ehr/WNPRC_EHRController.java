@@ -18,6 +18,7 @@ package org.labkey.wnprc_ehr;
 import au.com.bytecode.opencsv.CSVWriter;
 //import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
@@ -81,6 +82,7 @@ import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -1203,7 +1205,7 @@ public class WNPRC_EHRController extends SpringActionController
         private static final String LOWERCASE_FORMTYPE = "formtype";
 
         @Override
-        public URLHelper getSuccessURL(java.lang.Void aVoid)
+        public @Nullable URLHelper getURL(Void aVoid, Errors errors)
         {
             ActionURL oldUrl = getViewContext().getActionURL();
             ActionURL newUrl;
@@ -1240,11 +1242,6 @@ public class WNPRC_EHRController extends SpringActionController
             return newUrl;
         }
 
-        @Override
-        public boolean doAction(java.lang.Void aVoid, BindException errors)
-        {
-            return true;
-        }
     }
 
     /**

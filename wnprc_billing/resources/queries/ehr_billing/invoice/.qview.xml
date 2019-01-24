@@ -21,6 +21,15 @@
                 <property name="columnTitle" value="Download PDF"/>
             </properties>
         </column>
+        <column name="invoiceSentOn"/>
+        <column name="invoiceSentComment"/>
+        <column name="paymentAmountReceived"/>
+        <column name="balanceDue"/>
+        <column name="fullPaymentReceived"/>
+        <column name="paymentReceivedOn"/>
+        <column name="paymentReceivedComment"/>
     </columns>
-    <filters></filters>
+    <filters>
+        <filter column="accountNumber/type" operator="contains" value="external"/>
+    </filters>
 </customView>

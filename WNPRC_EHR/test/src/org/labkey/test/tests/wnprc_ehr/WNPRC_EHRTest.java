@@ -59,6 +59,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -117,6 +119,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
+
+    protected DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Nullable
     @Override
@@ -350,6 +354,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Verify notification link");
         testBillingNotification();
+
+        log("Verify payments received for invoice runs");
+        testPaymentsReceived();
     }
 
     private void testBillingNotification()
@@ -1562,6 +1569,41 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void selectHistoryTab(String tab)
     {
         click(Locator.tagWithText("span", tab));
+    }
+
+    private void testPaymentsReceived()
+    {
+        String date = LocalDateTime.now().format(_dateTimeFormatter);
+        String amount = "1065.08";
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        waitForText("Invoice");
+        clickAndWait(Locator.bodyLinkContainingText("Invoice"));
+        DataRegionTable invoice = new DataRegionTable("query", getDriver());
+        invoice.clickEditRow(0);
+        setFormElement(Locator.input("invoiceSentOn"), date);
+        setFormElement(Locator.input("paymentReceivedOn"), date);
+        setFormElement(Locator.input("paymentAmountReceived"), amount);
+
+        clickButton("Submit",0);
+        waitForElement(Ext4Helper.Locators.window("Success"));
+        assertElementPresent(Locator.tagWithText("div", "Your upload was successful!"));
+        clickButton("OK");
+
+        invoice = new DataRegionTable("query", getDriver());
+        String balance = invoice.getDataAsText(0,"balanceDue");
+        assertEquals("Wrong data: balance due", "$0.00", balance);
+
+        log("Verify audit logs in admin console.");
+        goToAdminConsole().clickAuditLog();
+        doAndWaitForPageToLoad(() -> selectOptionByText(Locator.name("view"), "Query update events"));
+
+        _customizeViewsHelper.openCustomizeViewPanel();
+        _customizeViewsHelper.addColumn("DataChanges");
+        _customizeViewsHelper.applyCustomView();
+        DataRegionTable auditTable =  new DataRegionTable("query", this);
+        String auditLog = auditTable.getDataAsText(0,"DataChanges");
+        assertTrue(auditLog.contains("paymentamountreceived:  » 1065.08"));
+        assertTrue(auditLog.contains("balancedue:  » 0.0"));
     }
 
     @Override

@@ -30,7 +30,7 @@
                 sections: [{
                     header: 'Accounts Receivable',
                     items: [
-                        {name: 'Invoice', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'invoice', showImport: false})}
+                        {name: 'Invoices', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'invoice', 'query.viewName': 'AccountsReceivable', showImport: false})}
                     ]
                 },{
                     header: 'Historic Billing Data',

@@ -1585,9 +1585,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         setFormElement(Locator.input("paymentAmountReceived"), amount);
 
         clickButton("Submit",0);
-        waitForElement(Ext4Helper.Locators.window("Success"));
-        assertElementPresent(Locator.tagWithText("div", "Your upload was successful!"));
-        clickButton("OK");
+
+        Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Success").waitFor();
+        assertEquals("Your upload was successful!", "Success", msgWindow.getTitle());
+        msgWindow.clickButton("OK", 0);
 
         invoice = new DataRegionTable("query", getDriver());
         String balance = invoice.getDataAsText(0,"balanceDue");

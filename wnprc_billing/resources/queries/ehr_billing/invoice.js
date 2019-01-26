@@ -56,9 +56,9 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     });
 
     //calculate balanceDue
-    if (row.paymentAmountReceived && row.paymentAmountReceived > 0) {
+    if (row.paymentAmountReceived != null) {
 
-        if (oldRow.balanceDue && oldRow.balanceDue > 0) {
+        if (oldRow.balanceDue != null) {
             row.balanceDue = oldRow.balanceDue - row.paymentAmountReceived;
         }
         else {
@@ -69,7 +69,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         row.balanceDue = row.invoiceAmount;
     }
 
-    if(row.balanceDue == 0) {
+    if(row.balanceDue <= 0) {
         row.fullPaymentReceived = true;
     }
     else {

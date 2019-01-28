@@ -2,10 +2,6 @@ require("ehr/triggers").initScript(this);
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
 
-    var billingRunDate;
-    var pmtReceivedDate;
-    var format = "E MMM dd yyyy";
-
     LABKEY.Query.selectRows({
         requiredVersion: 9.1,
         schemaName: 'ehr_billing',
@@ -14,6 +10,11 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         filterArray: [LABKEY.Filter.create('objectId', row.invoiceRunId, LABKEY.Filter.Types.EQUAL)],
         scope: this,
         success: function (results) {
+
+            var billingRunDate;
+            var pmtReceivedDate;
+            var format = "E MMM dd yyyy";
+
             if (!results || !results.rows || results.rows.length < 1)
                 return;
 

@@ -32,6 +32,19 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
                     sort: 'inves'
                 }
             },
+            chargeId: {
+                xtype: 'wnprc_billing-chargeitemfield',
+                hidden: false,
+                userEditable: true,
+                columnConfig:{
+                    width: 250
+                },
+                lookup: {
+                    schemaName: 'wnprc_billing',
+                    queryName: 'activeChargeItemsAndRates',
+                    columns: 'rowId, name, chargeCategoryId, departmentCode, unitCost'
+                }
+            },
             debitedaccount: {
                 hidden: true
             }

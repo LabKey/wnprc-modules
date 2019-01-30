@@ -44,7 +44,8 @@
                         {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'miscChargesNotBilledUpdate'})},
                         {name: 'Perform Billing Run', url: LABKEY.ActionURL.buildURL('ehr_billing', 'billingPipeline', null)},
                         {name: 'Enter New Charges', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'Charges'})},
-                        {name: 'Invoice', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternal'})}
+                        {name: 'Invoice External', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternal'})},
+                        {name: 'Invoice Internal', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceInternal'})}
                     ].concat(issuesContainer ? [{name: 'Finance Issue Tracker', url: LABKEY.ActionURL.buildURL('issues', 'begin', issuesContainer)}] : [])
                 },{
                     header: 'Reference Tables',

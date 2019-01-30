@@ -2,11 +2,30 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="invoice" tableDbType="TABLE">
-                <tableTitle>Invoice</tableTitle>
+                <javaCustomizer class = "org.labkey.wnprc_billing.WNPRC_InvoiceCustomizer"/>
+
+                <buttonBarOptions position="both" includeStandardButtons="false">
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
+                    </item>
+                    <item text="Charts">
+                        <originalText>Charts</originalText>
+                    </item>
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                </buttonBarOptions>
+            <tableTitle>Invoice</tableTitle>
                 <columns>
                     <column columnName="rowId"/>
-                    <column columnName="invoiceNumber"/>
+                    <column columnName="invoiceNumber">
+                        <isReadOnly>true</isReadOnly>
+                    </column>
                     <column columnName="invoiceRunId">
+                        <isUserEditable>false</isUserEditable>
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>invoiceRuns</fkTable>
@@ -14,20 +33,35 @@
                         </fk>
                     </column>
                     <column columnName="accountNumber">
+                        <isReadOnly>true</isReadOnly>
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>aliases</fkTable>
                             <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="invoiceSentOn"/>
+                    <column columnName="invoiceSentOn">
+                        <formatString>Date</formatString>
+                    </column>
                     <column columnName="invoiceAmount">
                         <formatString>$###,##0.00</formatString>
+                        <isReadOnly>true</isReadOnly>
                     </column>
                     <column columnName="invoiceSentComment"/>
-                    <column columnName="paymentAmountReceived"/>
-                    <column columnName="fullPaymentReceived"/>
-                    <column columnName="paymentReceivedOn"/>
+                    <column columnName="paymentAmountReceived">
+                        <formatString>$###,##0.00</formatString>
+                        <defaultValue>0</defaultValue>
+                    </column>
+                    <column columnName="balanceDue">
+                        <formatString>$###,##0.00</formatString>
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="fullPaymentReceived">
+                        <isUserEditable>false</isUserEditable>
+                    </column>
+                    <column columnName="paymentReceivedOn">
+                        <formatString>Date</formatString>
+                    </column>
                     <column columnName="paymentReceivedComment"/>
                 </columns>
             </table>

@@ -10,21 +10,15 @@
         <column name="invoiceRunId/billingPeriodEnd"/>
         <column name="invoiceRunId/runDate"/>
         <column name="accountNumber"/>
-        <column name="accountNumber/type"/>
         <column name="accountNumber/po_number"/>
-        <column name="accountNumber/contact_name"/>
-        <column name="accountNumber/address"/>
         <column name="invoiceAmount"/>
-        <column name="viewPdf">
-            <properties>
-                <property name="columnTitle" value="View PDF"/>
-            </properties>
-        </column>
-        <column name="downloadPDF">
-            <properties>
-                <property name="columnTitle" value="Download PDF"/>
-            </properties>
-        </column>
+        <column name="invoiceSentOn"/>
+        <column name="invoiceSentComment"/>
+        <column name="paymentAmountReceived"/>
+        <column name="paymentReceivedOn"/>
+        <column name="paymentReceivedComment"/>
+        <column name="balanceDue"/>
+        <column name="fullPaymentReceived"/>
     </columns>
     <filters>
         <filter column="accountNumber/type" operator="contains" value="external"/>

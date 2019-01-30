@@ -28,6 +28,11 @@
                     linkCls: 'none'
                 },
                 sections: [{
+                    header: 'Accounts Receivable',
+                    items: [
+                        {name: 'Invoices', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'invoice', 'query.viewName': 'AccountsReceivable', showImport: false})}
+                    ]
+                },{
                     header: 'Historic Billing Data',
                     items: [
                         {name: 'Invoice Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRuns'})},

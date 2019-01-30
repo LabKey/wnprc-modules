@@ -347,7 +347,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         viewJET();
 
         log("View and download invoice PDF.");
-        viewInvoicePDF();
+        viewPDF("downloadPDF");
 
         log("View Estimated Charges By Project.");
         viewEstimatedChargesByProject();
@@ -355,8 +355,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Verify notification link");
         testBillingNotification();
 
+        log("Download Summary Invoice PDF");
+        viewPDF("summarizedPDF");
+        
         log("Verify payments received for invoice runs");
-        testPaymentsReceived();
+        testPaymentsReceived();        
     }
 
     private void testBillingNotification()
@@ -609,18 +612,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return viewQueryData("ehr_billing", "invoiceRuns");
     }
 
-    private void viewInvoicePDF()
+    private void viewPDF(String pdfName)
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
         goToSchemaBrowser();
         DataRegionTable dataRegionTable = viewQueryData("ehr_billing", "invoiceExternal");
 
-        log("Download invoice PDF.");
-        DataRegionTable finalInvoiceRunsDataRegionTable = dataRegionTable;
-        File pdf = doAndWaitForDownload(() -> {
-            finalInvoiceRunsDataRegionTable.link(0, "downloadPDF").click();
-        });
+        log("Download "+ (pdfName.equalsIgnoreCase("downloadPDF") ? "Invoice PDF.": "Summary PDF."));
+        File pdf = doAndWaitForDownload(() -> dataRegionTable.link(0, pdfName).click());
 
         assertTrue("Wrong file type for export pdf [" + pdf.getName() + "]", pdf.getName().endsWith(".pdf"));
         assertTrue("Empty pdf downloaded [" + pdf.getName() + "]", pdf.length() > 0);

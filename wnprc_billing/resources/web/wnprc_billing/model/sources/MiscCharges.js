@@ -16,9 +16,7 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
             project: {
                 xtype: 'wnprc_billing-projectentryfield',
                 hidden: false,
-                allowBlank: false,
                 nullable: false,
-                userEditable: true,
                 lookup: {
                     columns: 'project'
                 }

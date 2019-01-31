@@ -10,12 +10,14 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
                 hidden: false,
                 columnConfig: {
                     width: 75
-                }
+                },
+                nullable: false
             },
             project: {
                 xtype: 'wnprc_billing-projectentryfield',
                 hidden: false,
                 allowBlank: false,
+                nullable: false,
                 userEditable: true,
                 lookup: {
                     columns: 'project'

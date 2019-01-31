@@ -26,7 +26,7 @@ Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
                         scope: this,
                         success: function(results){
                             EHR.DataEntryUtils.setSiblingFields(combo, {
-                                unitCost: results.rows[0].unitCost
+                                unitCost: (results.rows[0] != null ? results.rows[0].unitCost : null)
                             });
                         }
                 });

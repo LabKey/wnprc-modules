@@ -5,10 +5,14 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
     byQuery: {
         'ehr_billing.miscCharges': {
             Id: {
-                hidden: true
+                hidden: true,
+                allowBlank: true,
+                nullable: true
+
             },
             project: {
-                hidden: true
+                hidden: true,
+                allowBlank: true
             },
             debitedaccount: {
                 hidden: false,
@@ -35,7 +39,7 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                     id: 'wnprc_billing-debitAcct-investigator',
                     valueField: 'investigatorName',
                     displayField: 'investigatorName',
-                    observedField: 'debitedAccount',
+                    observedField: 'debitedaccount',
                     observerLookupField: 'alias'
                 }
             },

@@ -1,50 +1,42 @@
-/*
- * Copyright (c) 2018 LabKey Corporation
- *
- * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
- */
-EHR.model.DataModelManager.registerMetadata('Charges', {
+EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
+    allQueries: {
+
+    },
     byQuery: {
         'ehr_billing.miscCharges': {
             Id: {
-                hidden: false,
-                columnConfig: {
-                    width: 75
-                }
-            },
-            project: {
-                xtype: 'wnprc_billing-projectentryfield',
-                hidden: false,
-                allowBlank: false,
-                userEditable: true,
-                lookup: {
-                    columns: 'project'
-                }
-            },
-            debitedaccount: {
                 hidden: true
             },
-            investigator: {
-                xtype: 'wnprc_billing-investigatorfield',
+            project: {
+                hidden: true
+            },
+            debitedaccount: {
                 hidden: false,
-                userEditable: true,
+                xtype: 'wnprc_billing-miscchargesdebitacctentryfield',
                 columnConfig: {
-                    width: 150
+                    width: 125
+                }
+            },
+            investigator: {
+                hidden: false,
+                columnConfig: {
+                    width: 250
+                },
+                xtype: 'ehr_billingRowObserverEntryField',
+                lookup: {
+                    schemaName: 'ehr_billing',
+                    queryName: 'aliases',
+                    keyColumn: 'investigatorName',
+                    displayColumn: 'investigatorName',
+                    columns: 'alias, investigatorName'
                 },
                 editorConfig: {
-                  caseSensitive: false,
-                  id: 'wnprc_billing-Charges-investigator',
-                  valueField: 'inves',
-                  displayField: 'inves',
-                  observedField: 'project',
-                  observerLookupField: 'project'
-                },
-                lookup: {
-                    schemaName: 'ehr',
-                    queryName: 'project',
-                    keyColumn: 'inves',
-                    displayColumn: 'inves',
-                    columns: 'inves'
+                    caseSensitive: false,
+                    id: 'wnprc_billing-debitAcct-investigator',
+                    valueField: 'investigatorName',
+                    displayField: 'investigatorName',
+                    observedField: 'debitedAccount',
+                    observerLookupField: 'alias'
                 }
             },
             chargeId: {
@@ -59,7 +51,7 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
                 },
                 editorConfig: {
                     caseSensitive: false,
-                    id: 'ehr_billing-Misc-charges-chargeId',
+                    id: 'ehr_billing-nonAnimalCharges-chargeId',
                     valueField: 'rowId',
                     displayField: 'name',
                     observedField: 'chargetype',
@@ -95,6 +87,7 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
                     width: 125
                 }
             },
+
         }
     }
 });

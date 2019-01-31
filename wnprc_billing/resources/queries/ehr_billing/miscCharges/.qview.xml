@@ -3,6 +3,7 @@
         <column name="Id"/>
         <column name="date"/>
         <column name="project"/>
+        <column name="investigator"/>
         <column name="chargeId"/>
         <column name="chargecategory"/>
         <column name="chargetype"/>

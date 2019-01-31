@@ -26,14 +26,7 @@
                             <fkColumnName>project</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="investigator">
-                        <fk>
-                            <fkDbSchema>ehr</fkDbSchema>
-                            <fkTable>project</fkTable>
-                            <fkColumnName>investigatorId</fkColumnName>
-                            <fkDisplayColumnName>inves</fkDisplayColumnName>
-                        </fk>
-                    </column>
+                    <column columnName="investigator"/>
                     <column columnName="chargecategory">
                         <fk>
                             <fkDbSchema>wnprc_billing</fkDbSchema>

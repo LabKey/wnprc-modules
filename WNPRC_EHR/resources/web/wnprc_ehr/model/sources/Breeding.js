@@ -55,3 +55,18 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
 });
 
 EHR.model.DataModelManager.registerMetadata('Breeding.Editors', {});
+
+EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
+    byQuery: {
+        'study.pregnancy_outcomes': {
+            pregnancyid: {
+                xtype: 'wnprc-pregnancyidfield'
+            }
+        },
+        'study.ultrasounds': {
+            pregnancyid: {
+                xtype: 'wnprc-pregnancyidfield'
+            }
+        }
+    }
+});

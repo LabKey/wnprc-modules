@@ -152,12 +152,12 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
                from (select p.lsid \
                            ,p.date_conception_early \
                        from pregnancies p \
-                      where p.Id = ' + id + ' \
+                      where p.Id = \'' + id + '\' \
                         and not exists (select * \
                                           from pregnancy_outcomes po \
                                          where po.pregnancyid = p.lsid) \
                                       order by date_conception_early desc) \
-              limit 1'.replace(/\s+/g, ' ');
+              current_pregnancies limit 1'.replace(/\s+/g, ' ');
 
         // var sql = "SELECT DISTINCT t.project, t.displayName, t.account, t.protocolDisplayName, t.protocol, t.title, t.shortname, false as fromClient, min(sort_order) as sort_order, max(isAssigned) as isAssigned FROM (";
         //
@@ -210,7 +210,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         //     date = boundRecord.get('date');
         // }
 
-        this.emptyText = 'Select project...';
+        this.emptyText = 'Select pregnancy...';
         var sql = this.makeSql(id);
         if (sql){
             this.store.loading = true;

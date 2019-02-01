@@ -1,7 +1,7 @@
 EHR.DataEntryUtils.registerGridButton('APPENDRECORD', function (config) {
     return Ext4.Object.merge({
         itemId: 'appendRecordBtn',
-        text: 'Append Record',
+        text: 'Add Record',
         tooltip: 'Click to append a row at the bottom of the grid',
         handler: function (btn) {
             const grid = btn.up('gridpanel');

@@ -1,6 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="date" />
+        <column name="enddate" />
         <column name="Id" />
         <column name="sireid"/>
         <column name="ejaculation"/>

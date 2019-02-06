@@ -71,7 +71,7 @@ To use Docker Compose, you can execute commands like the following (*from this d
 # for spinning up all the services
 docker-compose up -d
 
-# for tearing down all the services
+# for tearing down all the services*
 docker-compose down
 
 # for spinning up just one of the services (e.g., postgres)
@@ -81,6 +81,8 @@ docker-compose up -d postgres
 docker-compose stop postgres
 ```
 All other Docker Compose commands (`logs`, `ps`, etc.) work also.
+
+*Note that sometimes the postgres container closes before the database itself is completely shut down. Be sure to disconnect your pgAdmin and IntelliJ database connections, if any, stop labkey, and then do a shutdown. Otherwise the next time postgres starts it will go into an automatic recovery mode and take a long time to start back up.
 
 ## Running multiple instances of LabKey in same Server
 

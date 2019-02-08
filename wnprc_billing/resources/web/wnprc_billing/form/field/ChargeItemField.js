@@ -21,7 +21,7 @@ Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
                             LABKEY.Filter.create('startDate', chargeDate.format("Y-m-d"), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL),
                             LABKEY.Filter.create('endDate', chargeDate.format("Y-m-d"), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL)
                         ],
-                        columns: 'chargeId, startDate, endDate, unitCost',
+                        columns: 'chargeId, unitCost',
                         failure: LDK.Utils.getErrorCallback(),
                         scope: this,
                         success: function(results){

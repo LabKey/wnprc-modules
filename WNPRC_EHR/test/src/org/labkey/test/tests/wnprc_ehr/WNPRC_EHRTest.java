@@ -628,7 +628,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void enterCharges()
     {
-        Map<String, String> mapWithAnimalId = new LinkedHashMap<String, String>();
+        Map<String, String> mapWithAnimalId = new LinkedHashMap<>();
         mapWithAnimalId.put("Id", PROJECT_MEMBER_ID);
         mapWithAnimalId.put("date", "2010-10-23");
         mapWithAnimalId.put("project", PROJECT_ID);
@@ -637,13 +637,21 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("quantity", "10");
         mapWithAnimalId.put("chargecategory", "Adjustment");
 
-        Map<String, String> mapWithDebitAct = new LinkedHashMap<String, String>();
+        Map<String, String> mapWithDebitAct = new LinkedHashMap<>();
         mapWithDebitAct.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAct.put("date", "2010-10-23");
         mapWithDebitAct.put("chargetype", "Business Office");
         mapWithDebitAct.put("chargeId", "Blood draws - Additional Tubes");
         mapWithDebitAct.put("quantity", "8");
         mapWithDebitAct.put("chargecategory", "Adjustment");
+
+        Map<String, String> mapWithAnimalId2 = new LinkedHashMap<>();
+        mapWithAnimalId2.put("Id", PROJECT_MEMBER_ID);
+        mapWithAnimalId2.put("date", "2011-09-15");
+        mapWithAnimalId2.put("project", PROJECT_ID);
+        mapWithAnimalId2.put("chargetype", "Clinical Pathology");
+        mapWithAnimalId2.put("chargeId", "vaccine supplies");
+        mapWithAnimalId2.put("quantity", "10");
 
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
@@ -657,6 +665,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Enter Misc. Charges with debit account");
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         enterChargesInGrid(1, mapWithDebitAct);
+
+        log("Submit the form");
+        submitForm();
+
+        log("Enter another Misc. Charges with animal Id");
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
+        enterChargesInGrid(1, mapWithAnimalId2);
 
         log("Submit the form");
         submitForm();

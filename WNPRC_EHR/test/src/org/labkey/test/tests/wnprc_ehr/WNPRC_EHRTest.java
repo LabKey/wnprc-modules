@@ -1547,7 +1547,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void testPaymentsReceived()
     {
         String date = LocalDateTime.now().format(_dateTimeFormatter);
-        String amount = "1065.08";
+        String amount = "1028.95";
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         waitForText("Invoice");
         clickAndWait(Locator.bodyLinkContainingText("Invoice"));
@@ -1576,7 +1576,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _customizeViewsHelper.applyCustomView();
         DataRegionTable auditTable =  new DataRegionTable("query", this);
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
-        assertTrue(auditLog.contains("paymentamountreceived:  » 1065.08"));
+        assertTrue(auditLog.contains("paymentamountreceived:  » 1028.95"));
         assertTrue(auditLog.contains("balancedue:  » 0.0"));
     }
 

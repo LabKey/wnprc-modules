@@ -638,7 +638,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("chargecategory", "Adjustment");
 
         Map<String, String> mapWithDebitAct = new LinkedHashMap<String, String>();
-        mapWithDebitAct.put("debitedaccount", ACCOUNT_ID_2);
+        mapWithDebitAct.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAct.put("date", "2010-10-23");
         mapWithDebitAct.put("chargetype", "Business Office");
         mapWithDebitAct.put("chargeId", "Blood draws - Additional Tubes");
@@ -933,7 +933,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void testSummaryReports()
     {
         testReports("Invoice Runs", 1, "2010-10-01", "2010-10-31");
-        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$33.15", "$195.00");
+        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$32.75", "$195.00");
     }
 
     private void testReports(String linkText, int numRows, String... texts)

@@ -59,6 +59,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -119,6 +121,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
+
+    protected DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Nullable
     @Override
@@ -345,13 +349,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         viewJET();
 
         log("View and download invoice PDF.");
-        viewInvoicePDF();
+        viewPDF("downloadPDF");
 
         log("View Estimated Charges By Project.");
         viewEstimatedChargesByProject();
 
         log("Verify notification link");
         testBillingNotification();
+
+        log("Download Summary Invoice PDF");
+        viewPDF("summarizedPDF");
+        
+        log("Verify payments received for invoice runs");
+        testPaymentsReceived();        
     }
 
     private void testBillingNotification()
@@ -604,18 +614,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return viewQueryData("ehr_billing", "invoiceRuns");
     }
 
-    private void viewInvoicePDF()
+    private void viewPDF(String pdfName)
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
         goToSchemaBrowser();
         DataRegionTable dataRegionTable = viewQueryData("ehr_billing", "invoiceExternal");
 
-        log("Download invoice PDF.");
-        DataRegionTable finalInvoiceRunsDataRegionTable = dataRegionTable;
-        File pdf = doAndWaitForDownload(() -> {
-            finalInvoiceRunsDataRegionTable.link(0, "downloadPDF").click();
-        });
+        log("Download "+ (pdfName.equalsIgnoreCase("downloadPDF") ? "Invoice PDF.": "Summary PDF."));
+        File pdf = doAndWaitForDownload(() -> dataRegionTable.link(0, pdfName).click());
 
         assertTrue("Wrong file type for export pdf [" + pdf.getName() + "]", pdf.getName().endsWith(".pdf"));
         assertTrue("Empty pdf downloaded [" + pdf.getName() + "]", pdf.length() > 0);
@@ -1535,6 +1542,42 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void selectHistoryTab(String tab)
     {
         click(Locator.tagWithText("span", tab));
+    }
+
+    private void testPaymentsReceived()
+    {
+        String date = LocalDateTime.now().format(_dateTimeFormatter);
+        String amount = "1065.08";
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        waitForText("Invoice");
+        clickAndWait(Locator.bodyLinkContainingText("Invoice"));
+        DataRegionTable invoice = new DataRegionTable("query", getDriver());
+        invoice.clickEditRow(0);
+        setFormElement(Locator.input("invoiceSentOn"), date);
+        setFormElement(Locator.input("paymentReceivedOn"), date);
+        setFormElement(Locator.input("paymentAmountReceived"), amount);
+
+        clickButton("Submit",0);
+
+        Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Success").waitFor();
+        assertEquals("Your upload was successful!", "Success", msgWindow.getTitle());
+        msgWindow.clickButton("OK", 0);
+
+        invoice = new DataRegionTable("query", getDriver());
+        String balance = invoice.getDataAsText(0,"balanceDue");
+        assertEquals("Wrong data: balance due", "$0.00", balance);
+
+        log("Verify audit logs in admin console.");
+        goToAdminConsole().clickAuditLog();
+        doAndWaitForPageToLoad(() -> selectOptionByText(Locator.name("view"), "Query update events"));
+
+        _customizeViewsHelper.openCustomizeViewPanel();
+        _customizeViewsHelper.addColumn("DataChanges");
+        _customizeViewsHelper.applyCustomView();
+        DataRegionTable auditTable =  new DataRegionTable("query", this);
+        String auditLog = auditTable.getDataAsText(0,"DataChanges");
+        assertTrue(auditLog.contains("paymentamountreceived:  » 1065.08"));
+        assertTrue(auditLog.contains("balancedue:  » 0.0"));
     }
 
     @Override

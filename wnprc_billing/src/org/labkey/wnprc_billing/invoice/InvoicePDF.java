@@ -8,6 +8,7 @@ import com.koadweb.javafpdf.FontStyle;
 import com.koadweb.javafpdf.Format;
 import com.koadweb.javafpdf.ImageType;
 import com.koadweb.javafpdf.Position;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.wnprc_billing.domain.Alias;
@@ -44,14 +45,14 @@ public class InvoicePDF extends FPDF
     SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM-dd-yyyy");
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
 
-    public InvoicePDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddess, String creditToAccount)
+    public InvoicePDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddress, String creditToAccount)
     {
         super(Format.LETTER);
         this.alias = alias;
         this.invoiceRun = invoiceRun;
         this.invoice = invoice;
 
-        companyAddress += billingAddess;
+        companyAddress += billingAddress;
         _creditToAccount = creditToAccount;
         double overheadAssessment = invoice.getInvoiceAmount() * tierRate;
         tier_rate = moneyFormat.format(tierRate);
@@ -61,7 +62,7 @@ public class InvoicePDF extends FPDF
     }
 
 
-    public void createLineItems(List<InvoicedItem> invoicedItems) throws IOException
+    public void createLineItems(List<InvoicedItem> invoicedItems, boolean includeSubtotal) throws IOException
     {
         List<FormattedLineItem> items = new ArrayList<>();
         Calendar calendarCurrent = Calendar.getInstance();
@@ -69,8 +70,11 @@ public class InvoicePDF extends FPDF
         boolean isFirstItem =true;
         String currentServiceCenter=null;
         float subTotal = 0;
+
         for (InvoicedItem invoicedItem : invoicedItems)
         {
+            String groupHeader = (null == invoicedItem.getGroupName() ? invoicedItem.getCategory() : invoicedItem.getGroupName());
+
             calendarItem.setTime(invoicedItem.getDate());
             boolean isDateChange = isFirstItem || calendarCurrent.get(Calendar.DAY_OF_MONTH) != calendarItem.get(Calendar.DAY_OF_MONTH);
             boolean isServiceCenterChange = false;
@@ -81,21 +85,22 @@ public class InvoicePDF extends FPDF
                 isServiceCenterChange = !invoicedItem.getServicecenter().equals(currentServiceCenter);
             }
 
-
-            if((isDateChange || isServiceCenterChange) && !isFirstItem ){
-                items.add(new FormattedLineItem(null,"Sub total:", null,   null, subTotal, true));
-                subTotal = 0;
+            if(includeSubtotal) {
+                if((isDateChange || isServiceCenterChange) && !isFirstItem ){
+                    items.add(new FormattedLineItem(null,"Sub total:", null,   null, subTotal, true));
+                    subTotal = 0;
+                }
             }
 
             if (isDateChange){
-                items.add(new FormattedLineItem(invoicedItem.getDate(), invoicedItem.getServicecenter(), null, null, null, true));
+                items.add(new FormattedLineItem(invoicedItem.getDate(), groupHeader, null, null, null, true));
                 currentServiceCenter = invoicedItem.getServicecenter();
                 calendarCurrent.setTime(invoicedItem.getDate());
                 isFirstItem = false;
             }
 
             if (!isDateChange && isServiceCenterChange){
-                items.add(new FormattedLineItem(null, invoicedItem.getServicecenter(), null, null, null, true));
+                items.add(new FormattedLineItem(null, groupHeader, null, null, null, true));
                 currentServiceCenter = invoicedItem.getServicecenter();
             }
 
@@ -103,11 +108,14 @@ public class InvoicePDF extends FPDF
 
             items.addAll(getLineItemsFromInvoicedItem(invoicedItem));
         }
-        items.add(new FormattedLineItem(null,"Sub total:", null,   null, subTotal, true));
+
+        if(includeSubtotal) {
+            items.add(new FormattedLineItem(null, "Sub total:", null, null, subTotal, true));
+        }
         addLines(items);
     }
 
-    private List<FormattedLineItem> getLineItemsFromInvoicedItem(InvoicedItem invoicedItem){
+    protected List<FormattedLineItem> getLineItemsFromInvoicedItem(InvoicedItem invoicedItem){
         String indent = "  ";
         List<FormattedLineItem> formattedLineItems = new ArrayList<>();
         boolean showDetailsWithItem = invoicedItem.getComment() == null;
@@ -125,7 +133,10 @@ public class InvoicePDF extends FPDF
 
         if(invoicedItem.getComment() != null){
             commentLine = new FormattedLineItem();
-            commentLine._description = indent + invoicedItem.getComment() + participantId;
+            if (invoicedItem.getComment().length() > 60)
+                commentLine._description = indent + invoicedItem.getComment().substring(0, 59) + participantId;
+            else
+                commentLine._description = indent + invoicedItem.getComment() + participantId;
         }
 
 
@@ -331,9 +342,7 @@ public class InvoicePDF extends FPDF
             addInvoiceNo();
             addCharge();
             addPaymentInfo();
-            String comments = alias.getComments() != null? alias.getComments():alias.getContact_email();
-            if (comments != null && !comments.trim().isEmpty())
-                addComments();
+            addAccountContact(alias.getContact_email());
             addBillingDate(invoiceRun.getBillingPeriodStart(), invoiceRun.getBillingPeriodEnd());
             addCols(this.getHeaders());
 
@@ -473,11 +482,11 @@ public class InvoicePDF extends FPDF
         // to is used for all accounts
         setXY(x, y);
         setFont("Arial", Collections.singleton(FontStyle.BOLD), 10);
-        MultiCell(20, 4, "To:", null, Alignment.RIGHT, false);
+        MultiCell(20, 3, "To:", null, Alignment.RIGHT, false);
         x = right_x;
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
-        MultiCell(76, 4, alias.getAddress());
+        MultiCell(76, 3, alias.getAddress());
 
         String req_text;
 
@@ -504,16 +513,16 @@ public class InvoicePDF extends FPDF
         y = getY() + 2;
         setXY(x, y);
         setFont("Arial", Collections.singleton(FontStyle.BOLD), 10);
-        MultiCell(20, 4, req_text, null, Alignment.RIGHT, false);
+        MultiCell(20, 5, req_text, null, Alignment.RIGHT, false);
         x = right_x;
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
-        MultiCell(60, 4, alias.getPo_number() == null? "": alias.getPo_number());
+        MultiCell(60, 5, alias.getPo_number() == null? "": alias.getPo_number());
         x = left_x;
         y = getY();
         setXY(x, y);
         setFont("Arial", Collections.singleton(FontStyle.BOLD), 10);
-        MultiCell(20, 4, "Expires:", null, Alignment.RIGHT, false);
+        MultiCell(20, 5, "Expires:", null, Alignment.RIGHT, false);
         x = right_x;
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
@@ -589,7 +598,7 @@ public class InvoicePDF extends FPDF
     }
 
     // comments
-    private void addComments() throws IOException
+    private void addAccountContact(String contact) throws IOException
     {
         float x = 10;
         float y = 52;
@@ -597,7 +606,8 @@ public class InvoicePDF extends FPDF
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 8);
         setFillColor(230, 230, 230);
-        MultiCell(w - 20, 3, alias.getComments() != null? alias.getComments():alias.getContact_email(), null, Alignment.LEFT, false);
+        MultiCell(w - 20, 3, "\n");
+        MultiCell(w - 20, 3, (StringUtils.trimToNull(contact)), null, Alignment.LEFT, false);
     }
 
     // payment info
@@ -773,7 +783,7 @@ public class InvoicePDF extends FPDF
         else
             setFont("Helvetica", Collections.emptySet(), 9);
 
-        for (Column header : headers)
+        for (Column header : this.getHeaders())
         {
             int cellWidth  = header._width -2;
             String s = header.getValue(lineItem);

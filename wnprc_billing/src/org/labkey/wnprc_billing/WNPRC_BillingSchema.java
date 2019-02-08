@@ -27,7 +27,7 @@ public class WNPRC_BillingSchema
     public static final String NAME = "wnprc_billing";
 
     //Tables
-    public static final String TABLE_INVOICED_ITEMS = "InvoicedItems";
+    public static final String TABLE_INVOICED_ITEMS_FOR_PDF = "InvoicedItemsForPDF";
     public static final String TABLE_INVOICE = "Invoice";
     public static final String TABLE_INVOICE_RUNS = "InvoiceRuns";
     public static final String TABLE_TIER_RATES = "tierrates";

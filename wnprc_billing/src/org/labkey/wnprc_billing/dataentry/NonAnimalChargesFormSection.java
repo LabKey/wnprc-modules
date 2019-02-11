@@ -7,19 +7,19 @@ import org.labkey.api.view.template.ClientDependency;
 import java.util.Collections;
 
 /**
- * Class to administer Ext4JS component/panel for ehr_billing.miscCharges table for data entry form.
+ * Class to administer Ext4JS component/panel for ehr_billing.miscCharges data entry for charges without animal id and project
  */
-public class ChargesFormSection extends SimpleFormSection
-{
-    public ChargesFormSection()
+public class NonAnimalChargesFormSection extends SimpleFormSection {
+
+    public NonAnimalChargesFormSection()
     {
         this(EHRService.FORM_SECTION_LOCATION.Body);
     }
 
-    public ChargesFormSection(EHRService.FORM_SECTION_LOCATION location)
+    public NonAnimalChargesFormSection(EHRService.FORM_SECTION_LOCATION location)
     {
         super("ehr_billing", "miscCharges", "Misc. Charges", "ehr-gridpanel", location);
         setConfigSources(Collections.singletonList("Task"));
-        addClientDependency(ClientDependency.fromPath("wnprc_billing/model/sources/MiscCharges.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/model/sources/NonAnimalCharges.js"));
     }
 }

@@ -59,7 +59,7 @@ public class WNPRC_BillingController extends SpringActionController
 
     private List<InvoicedItem> getInvoicedItems(String invoiceNumber)
     {
-        TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICED_ITEMS);
+        TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICED_ITEMS_FOR_PDF);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("invoiceNumber"), invoiceNumber);
         TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort( "date,serviceCenter,id"));
@@ -449,10 +449,22 @@ public class WNPRC_BillingController extends SpringActionController
         public void export(InvoicePdfForm invoicePdfForm, HttpServletResponse response, BindException errors) throws Exception
         {
             Invoice invoice = getInvoice(invoicePdfForm.getInvoiceNumber());
-            if(invoice == null){
-                throw new NotFoundException("The selected invoice could not be found.");
+            if (null == invoice)
+            {
+                throw new NotFoundException(" Unable to generate PDF. The selected invoice could not be found.");
             }
+            if (null == invoice.getInvoiceAmount())
+            {
+                throw new NotFoundException(" Unable to generate PDF. No Invoice Amount found.");
+            }
+
             Alias alias = getInvoiceAccount(invoice.getAccountNumber());
+
+            if (null == alias)
+            {
+                throw new NotFoundException("Unable to generate PDF. Account Number not found.");
+            }
+
             InvoiceRun invoiceRun = getInvoiceRunByObjectId(invoice.getInvoiceRunId());
             TierRate accountTierRate = getTierRate(alias.getTier_rate());
 
@@ -463,20 +475,23 @@ public class WNPRC_BillingController extends SpringActionController
 
             double tierRate = accountTierRate != null ? accountTierRate.getTierRate() : 0;
             String formName = invoicePdfForm.getName();
-            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount):
+            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount) :
                     new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount);
 
             pdf.addPage();
             List<InvoicedItem> invoicedItems;
 
-            if(formName.equalsIgnoreCase("Invoice PDF"))
+            if (formName.equalsIgnoreCase("Invoice PDF"))
             {
                 invoicedItems = getInvoicedItems(invoicePdfForm.getInvoiceNumber());
-            } else
+                pdf.createLineItems(invoicedItems, true);
+            }
+            else
             {
                 invoicedItems = getSummarizedItems(invoicePdfForm.getInvoiceNumber());
+                pdf.createLineItems(invoicedItems, false);
             }
-            pdf.createLineItems(invoicedItems);
+
             SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM_yyyy");
             String filename = alias.getGrantNumber() + "_" + dateFormatBillingFor.format(invoiceRun.getBillingPeriodStart()) + "_Invoice.pdf";
             PageFlowUtil.prepareResponseForFile(getViewContext().getResponse(), Collections.emptyMap(), filename, invoicePdfForm.isAsAttachment());

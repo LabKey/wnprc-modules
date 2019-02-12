@@ -1,14 +1,10 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="invoiceNumber"/>
-        <column name="invoiceRunId/rowid">
-            <properties>
-                <property name="columnTitle" value="Invoice Run Id"/>
-            </properties>
-        </column>
+        <column name="invoiceRunId"/>
         <column name="invoiceRunId/billingPeriodStart"/>
         <column name="invoiceRunId/billingPeriodEnd"/>
-        <column name="invoiceRunId/runDate"/>
+        <column name="BillingRunDate"/>
         <column name="accountNumber"/>
         <column name="accountNumber/type"/>
         <column name="accountNumber/po_number"/>
@@ -25,8 +21,11 @@
                 <property name="columnTitle" value="Download PDF"/>
             </properties>
         </column>
+        <column name="summarizedPDF">
+            <properties>
+                <property name="columnTitle" value="Summarized PDF"/>
+            </properties>
+        </column>
     </columns>
-    <filters>
-        <filter column="accountNumber/type" operator="contains" value="external"/>
-    </filters>
+    <filters></filters>
 </customView>

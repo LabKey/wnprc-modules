@@ -4,6 +4,7 @@
             <table tableName="project" tableDbType="TABLE">
                 <columns>
                     <column columnName="investigatorId">
+                        <isHidden>false</isHidden>
                         <fk>
                             <fkDbSchema>ehr</fkDbSchema>
                             <fkTable>investigators</fkTable>

@@ -28,6 +28,11 @@
                     linkCls: 'none'
                 },
                 sections: [{
+                    header: 'Accounts Receivable',
+                    items: [
+                        {name: 'Invoices', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'invoice', 'query.viewName': 'AccountsReceivable', showImport: false})}
+                    ]
+                },{
                     header: 'Historic Billing Data',
                     items: [
                         {name: 'Invoice Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRuns'})},
@@ -44,15 +49,16 @@
                         {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'miscChargesNotBilledUpdate'})},
                         {name: 'Perform Billing Run', url: LABKEY.ActionURL.buildURL('ehr_billing', 'billingPipeline', null)},
                         {name: 'Enter New Charges', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'Charges'})},
-                        {name: 'Invoice', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternal'})}
+                        {name: 'Invoice External', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternal'})},
+                        {name: 'Invoice Internal', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceInternal'})}
                     ].concat(issuesContainer ? [{name: 'Finance Issue Tracker', url: LABKEY.ActionURL.buildURL('issues', 'begin', issuesContainer)}] : [])
                 },{
                     header: 'Reference Tables',
                     items: [
                         {name: 'IACUC Protocols', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'protocol'})},
-                        {name: 'WNPRC Projects', url: LABKEY.ActionURL.buildURL(ehrQueryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'project', showImport: true})},
+                        {name: 'WNPRC Projects', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'project', showImport: true})},
                         {name: 'Grant Accounts', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'aliases', showImport: true})},
-                        {name: 'Investigators', url: LABKEY.ActionURL.buildURL(ehrQueryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'investigators', showImport: true})},
+                        {name: 'Investigators', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr', 'query.queryName': 'investigators', showImport: true})},
                         {name: 'Financial Analysts', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr_billing', 'query.queryName': 'fiscalAuthorities', showImport: true})},
                         {name: 'Departments', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'groups',showImport: true})}
                     ]

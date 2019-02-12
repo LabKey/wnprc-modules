@@ -4,6 +4,17 @@
             <table tableName="invoiceRuns" tableDbType="TABLE">
                 <tableTitle>Invoice Runs</tableTitle>
                 <javaCustomizer class = "org.labkey.wnprc_billing.WNPRC_InvoiceRunCustomizer"/>
+                <columns>
+                    <column columnName="billingPeriodStart">
+                        <formatString>Date</formatString>
+                    </column>
+                    <column columnName="billingPeriodEnd">
+                        <formatString>Date</formatString>
+                    </column>
+                    <column columnName="runDate">
+                        <formatString>Date</formatString>
+                    </column>
+                </columns>
             </table>
         </tables>
     </metadata>

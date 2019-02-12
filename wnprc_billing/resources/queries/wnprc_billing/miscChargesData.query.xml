@@ -51,6 +51,14 @@
                             <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="debitedaccount">
+                        <columnTitle>Debited Account</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="objectid">
                         <isHidden>true</isHidden>
                     </column>

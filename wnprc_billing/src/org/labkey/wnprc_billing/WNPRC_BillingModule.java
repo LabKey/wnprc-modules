@@ -32,6 +32,7 @@ import org.labkey.api.query.QuerySchema;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.wnprc_billing.dataentry.ChargesFormType;
+import org.labkey.wnprc_billing.dataentry.NonAnimalChargesFormType;
 import org.labkey.wnprc_billing.notification.WNPRCBillingNotificationProvider;
 import org.labkey.wnprc_billing.pipeline.BillingPipelineProvider;
 import org.labkey.wnprc_billing.pipeline.InvoicedItemsProcessingServiceImpl;
@@ -87,6 +88,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
 
         EHRService.get().registerTableCustomizer(this, WNPRC_BillingCustomizer.class);
         EHRService.get().registerFormType(new DefaultDataEntryFormFactory(ChargesFormType.class, this));
+        EHRService.get().registerFormType(new DefaultDataEntryFormFactory(NonAnimalChargesFormType.class, this));
 
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_BillingContainerListener());

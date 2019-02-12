@@ -21,7 +21,7 @@ SELECT DISTINCT
   misc.unitCost,
   misc.quantity,
   misc.project.account AS currentActiveAlias,
-  misc.project.inves AS investigator,
+  coalesce(misc.investigator, coalesce(misc.debitedaccount.investigatorName, misc.project.inves)) AS investigator,
   TRUE AS isMiscCharge
 FROM ehr_billing.miscCharges misc
 WHERE cast(misc.date AS date) >= CAST(StartDate AS date) AND cast(misc.date AS date) <= CAST(EndDate AS date)

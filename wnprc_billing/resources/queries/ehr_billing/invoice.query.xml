@@ -58,6 +58,7 @@
                     </column>
                     <column columnName="fullPaymentReceived">
                         <isUserEditable>false</isUserEditable>
+                        <formatString>Y;N;</formatString>
                     </column>
                     <column columnName="paymentReceivedOn">
                         <formatString>Date</formatString>

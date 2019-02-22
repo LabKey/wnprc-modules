@@ -139,8 +139,8 @@ echo -e '\033[0;32mdone\033[0m'
 # Drop and recreate the labkey database and the various roles that we use
 #-------------------------------------------------------------------------------
 echo -n 'Preparing database and roles ... '
-docker-compose exec postgres psql -U postgres -c 'drop database if exists ' $dbname ';' &>/dev/null
-docker-compose exec postgres psql -U postgres -c 'create database ' $dbname ';' &>/dev/null
+docker-compose exec postgres psql -U postgres -c "drop database if exists ${dbname};" &>/dev/null
+docker-compose exec postgres psql -U postgres -c "create database ${dbname};" &>/dev/null
 docker-compose exec postgres psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
 echo -e '\033[0;32mdone\033[0m'
 
@@ -151,7 +151,7 @@ echo -n "Restoring database from $filepath ...  0%"
 ${pgpath}pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
-${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
+${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j 1 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
 pg_restore_pid=$!
 while kill -0 "$pg_restore_pid" &>/dev/null; do
     if [[ $total -ne 0 ]]; then

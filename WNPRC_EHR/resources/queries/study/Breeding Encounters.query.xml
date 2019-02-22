@@ -11,7 +11,7 @@
                     </column>
                     <column columnName="enddate">
                         <columnTitle>Encounter End Time</columnTitle>
-                        <nullable>false</nullable>
+                        <nullable>true</nullable>
                     </column>
                     <column columnName="Id">
                         <columnTitle>Female</columnTitle>
@@ -22,8 +22,8 @@
                     </column>
                     <column columnName="ejaculation"/>
                     <column columnName="project"/>
-                    <column columnName="remark"/>
                     <column columnName="perfomedby"/>
+                    <column columnName="remark"/>
                 </columns>
             </table>
         </tables>

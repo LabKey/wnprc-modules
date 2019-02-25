@@ -44,7 +44,7 @@ public class FoodCompletedProblemsNotification extends AbstractEHRNotification
     }
 
     public String getScheduleDescription(){
-        return "Food Deprive Notification sent once a day  at 8:00 AM";
+        return "Food Deprive Notification sent once a day at 8:00 AM";
     }
 
     @Override

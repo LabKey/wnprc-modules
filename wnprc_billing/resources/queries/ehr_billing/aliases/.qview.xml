@@ -33,4 +33,7 @@
     <sorts>
         <sort column="budgetEndDate" descending="true" />
     </sorts>
+    <filters>
+        <filter column="tier_rate/isActive" operator="eq" value="true"/>
+    </filters>
 </customView>

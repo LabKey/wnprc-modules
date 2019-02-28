@@ -31,7 +31,7 @@ FROM
   wmisc.createdby,
   wmisc.taskId,
   wmisc.creditedaccount,
-  coalesce(acct.investigatorName, wmisc.investigator) AS investigator,
+  wmisc.investigator AS investigator,
 
      cr.rowid                                            AS rateId,
      (SELECT group_concat(DISTINCT a.project.displayName, chr(10)) AS projects

@@ -59,10 +59,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -117,6 +121,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
+
+    protected DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Nullable
     @Override
@@ -343,13 +349,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         viewJET();
 
         log("View and download invoice PDF.");
-        viewInvoicePDF();
+        viewPDF("downloadPDF");
 
         log("View Estimated Charges By Project.");
         viewEstimatedChargesByProject();
 
         log("Verify notification link");
         testBillingNotification();
+
+        log("Download Summary Invoice PDF");
+        viewPDF("summarizedPDF");
+        
+        log("Verify payments received for invoice runs");
+        testPaymentsReceived();        
     }
 
     private void testBillingNotification()
@@ -602,18 +614,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return viewQueryData("ehr_billing", "invoiceRuns");
     }
 
-    private void viewInvoicePDF()
+    private void viewPDF(String pdfName)
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
         goToSchemaBrowser();
         DataRegionTable dataRegionTable = viewQueryData("ehr_billing", "invoiceExternal");
 
-        log("Download invoice PDF.");
-        DataRegionTable finalInvoiceRunsDataRegionTable = dataRegionTable;
-        File pdf = doAndWaitForDownload(() -> {
-            finalInvoiceRunsDataRegionTable.link(0, "downloadPDF").click();
-        });
+        log("Download "+ (pdfName.equalsIgnoreCase("downloadPDF") ? "Invoice PDF.": "Summary PDF."));
+        File pdf = doAndWaitForDownload(() -> dataRegionTable.link(0, pdfName).click());
 
         assertTrue("Wrong file type for export pdf [" + pdf.getName() + "]", pdf.getName().endsWith(".pdf"));
         assertTrue("Empty pdf downloaded [" + pdf.getName() + "]", pdf.length() > 0);
@@ -626,111 +635,81 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void enterCharges()
     {
+        Map<String, String> mapWithAnimalId = new LinkedHashMap<>();
+        mapWithAnimalId.put("Id", PROJECT_MEMBER_ID);
+        mapWithAnimalId.put("date", "2010-10-23");
+        mapWithAnimalId.put("project", PROJECT_ID);
+        mapWithAnimalId.put("chargetype", "Clinical Pathology");
+        mapWithAnimalId.put("chargeId", "vaccine supplies");
+        mapWithAnimalId.put("quantity", "10");
+        mapWithAnimalId.put("chargecategory", "Adjustment");
+
+        Map<String, String> mapWithDebitAct = new LinkedHashMap<>();
+        mapWithDebitAct.put("debitedaccount", ACCOUNT_ID_1);
+        mapWithDebitAct.put("date", "2010-10-23");
+        mapWithDebitAct.put("chargetype", "Business Office");
+        mapWithDebitAct.put("chargeId", "Blood draws - Additional Tubes");
+        mapWithDebitAct.put("quantity", "8");
+        mapWithDebitAct.put("chargecategory", "Adjustment");
+
+        Map<String, String> mapWithAnimalId2 = new LinkedHashMap<>();
+        mapWithAnimalId2.put("Id", PROJECT_MEMBER_ID);
+        mapWithAnimalId2.put("date", "2011-09-15");
+        mapWithAnimalId2.put("project", PROJECT_ID);
+        mapWithAnimalId2.put("chargetype", "Clinical Pathology");
+        mapWithAnimalId2.put("chargeId", "vaccine supplies");
+        mapWithAnimalId2.put("quantity", "10");
+
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
-        clickAndWait(Locator.bodyLinkContainingText("Enter New Charges"));
-        waitForText("Location");
+        log("Enter Misc. Charges with animal Id.");
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
+        enterChargesInGrid(1, mapWithAnimalId);
 
-        log("**Begin: Enter Misc. Charges without animal Id.");
+        log("Submit the form");
+        submitForm();
+
+        log("Enter Misc. Charges with debit account");
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+        enterChargesInGrid(1, mapWithDebitAct);
+
+        log("Submit the form");
+        submitForm();
+
+        log("Enter another Misc. Charges with animal Id");
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
+        enterChargesInGrid(1, mapWithAnimalId2);
+
+        log("Submit the form");
+        submitForm();
+
+    }
+
+    private void enterChargesInGrid(int rowIndex, Map<String, String> items)
+    {
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
-
-        log("Adds an empty row - clicks on 'Add' button on the panel");
         _helper.addRecordToGrid(miscChargesGrid);
 
-        int rowIndex = 1;
+        Iterator iterator = items.entrySet().iterator();
+        while (iterator.hasNext())
+        {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            String colName = pair.getKey().toString();
+            String colValue = pair.getValue().toString();
+            if (colName.equals("Id") || colName.equals("date") || colName.equals("quantity"))
+                miscChargesGrid.setGridCell(rowIndex, colName, colValue);
+            else
+                addComboBoxRecord(rowIndex, colName, colValue, miscChargesGrid, CONTAINS);
+        }
+    }
 
-        log("Add Date");
-        miscChargesGrid.setGridCell(rowIndex, "date", "2010-10-05");
-
-        log("Select Charge Unit (column name: chargetype) from drop down");
-        String colName = "chargetype";
-        String comboBoxSelectionValue = "Immunology\u00A0";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, null);
-
-        log("Select Charge Item (column name: chargeId) from drop down, which gets populated based on value selected for Charge Unit");
-        colName = "chargeId";
-        comboBoxSelectionValue = "vaccine";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, CONTAINS);
-
-        log("Add Quantity");
-        miscChargesGrid.setGridCell(rowIndex, "quantity", Integer.toString(3));
-
-        log("Select Debited Account from drop down");
-        colName = "debitedaccount";
-        comboBoxSelectionValue = "acct100\u00A0";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, null);
-
-        log("**End: Enter Misc. Charges without animal Id.");
-
-        log("**Begin: Enter Misc. Charges with animal Id.");
-        _helper.addRecordToGrid(miscChargesGrid);
-
-        rowIndex = 2;
-
-        log("Add Animal Id");
-        miscChargesGrid.setGridCell(rowIndex, "Id", PROJECT_MEMBER_ID);
-
-        log("Add Date");
-        miscChargesGrid.setGridCell(rowIndex, "date", "2010-10-23");
-
-        log("Select Charge Unit");
-        colName = "chargetype";
-        comboBoxSelectionValue = "EHR Services\u00A0";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, CONTAINS);
-
-        log("Add Quantity");
-        miscChargesGrid.setGridCell(rowIndex, "quantity", Integer.toString(1));
-
-        assertTextPresent("Must provide either Project or Debited Account");
-        assertTextPresent("Must provide either Charge Item or Unit Cost");
-
-        log("Select Project");
-        colName = "project";
-        comboBoxSelectionValue = "640991";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, CONTAINS);
-
-        log("Add Unit Cost");
-        miscChargesGrid.setGridCell(rowIndex, "unitCost", "177.79");
-        log("**End: Enter Misc. Charges with animal Id.");
-
-        log("**Begin: Enter another Misc. Charges with animal Id " + PROJECT_MEMBER_ID + ".");
-        _helper.addRecordToGrid(miscChargesGrid);
-
-        rowIndex = 3;
-
-        log("Add Animal Id");
-        miscChargesGrid.setGridCell(rowIndex, "Id", PROJECT_MEMBER_ID);
-
-        log("Add Date");
-        miscChargesGrid.setGridCell(rowIndex, "date", "2011-09-15");
-
-        log("Select Charge Unit");
-        colName = "chargetype";
-        comboBoxSelectionValue = "Clinical Pathology\u00A0";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, CONTAINS);
-
-        log("Select Charge Item (column name: chargeId) from drop down, which gets populated based on value selected for Charge Unit");
-        colName = "chargeId";
-        comboBoxSelectionValue = "vaccine";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, CONTAINS);
-
-        log("Add Quantity");
-        miscChargesGrid.setGridCell(rowIndex, "quantity", Integer.toString(10));
-
-        log("Select Project");
-        colName = "project";
-        comboBoxSelectionValue = "640991";
-        addComboBoxRecord(rowIndex, colName, comboBoxSelectionValue, miscChargesGrid, CONTAINS);
-
-        miscChargesGrid.completeEdit();
-        log("**End: Enter another Misc. Charges with animal Id " + PROJECT_MEMBER_ID + ".");
-        sleep(2000);
+    private void submitForm()
+    {
         clickButton("Submit", 0);
         _extHelper.waitForExtDialog("Finalize Form");
         click(Ext4Helper.Locators.ext4Button("Yes"));
         waitForTextToDisappear("Saving Changes", 5000);
     }
-
     private void addComboBoxRecord(int rowIndex, String colName, String comboBoxSelectionValue, Ext4GridRef miscChargesGrid,
                                    @Nullable Ext4Helper.TextMatchTechnique matchTechnique)
     {
@@ -969,14 +948,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvoicedItems()
     {
-        testReports("All Invoiced Items", 6, "Blood Draws test2312318", "$1.95", "$13.00",
-                "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "231.13");
+        testReports("All Invoiced Items", 6, "test2312318","640991" , "$19.50", "$15.00",
+                "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "$195.00");
     }
 
     private void testSummaryReports()
     {
         testReports("Invoice Runs", 1, "2010-10-01", "2010-10-31");
-        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$27.95", "$303.13");
+        testReports("Monthly Summary Indirect", 1, "Animal Per Diem", "Blood Draws", "Misc. Fees", "$806.00", "$32.75", "$195.00");
     }
 
     private void testReports(String linkText, int numRows, String... texts)
@@ -987,6 +966,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertEquals("Wrong row count", numRows, results.getDataRowCount());
         assertTextPresent(texts);
     }
+
 
     @Test
     public void testWeightDataEntry()
@@ -1004,7 +984,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         setFormElement(Locator.name("title"), TASK_TITLE);
         _extHelper.selectComboBoxItem("Assigned To:", BASIC_SUBMITTER.getGroup() + "\u00A0"); // appended with a nbsp (Alt+0160)
-        assertFormElementEquals(Locator.name("title"), TASK_TITLE);
+        assertEquals(TASK_TITLE, getFormElement(Locator.name("title")));
 
         log("Add blank weight entries");
         waitAndClick(Locator.extButtonEnabled("Add Record"));
@@ -1018,7 +998,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.linkWithText(DEAD_ANIMAL_ID), WAIT_FOR_JAVASCRIPT);
 
         //these fields seem to be forgetting their values, so verify they show the correct value
-        assertFormElementEquals(Locator.name("title"), TASK_TITLE);
+        assertEquals(TASK_TITLE, getFormElement(Locator.name("title")));
 
         waitForElement(Locator.button("Add Batch"), WAIT_FOR_JAVASCRIPT);
         click(Locator.extButton("Add Batch"));
@@ -1562,6 +1542,42 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void selectHistoryTab(String tab)
     {
         click(Locator.tagWithText("span", tab));
+    }
+
+    private void testPaymentsReceived()
+    {
+        String date = LocalDateTime.now().format(_dateTimeFormatter);
+        String amount = "1028.95";
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        waitForText("Invoice");
+        clickAndWait(Locator.bodyLinkContainingText("Invoice"));
+        DataRegionTable invoice = new DataRegionTable("query", getDriver());
+        invoice.clickEditRow(0);
+        setFormElement(Locator.input("invoiceSentOn"), date);
+        setFormElement(Locator.input("paymentReceivedOn"), date);
+        setFormElement(Locator.input("paymentAmountReceived"), amount);
+
+        clickButton("Submit",0);
+
+        Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Success").waitFor();
+        assertEquals("Your upload was successful!", "Success", msgWindow.getTitle());
+        msgWindow.clickButton("OK", 0);
+
+        invoice = new DataRegionTable("query", getDriver());
+        String balance = invoice.getDataAsText(0,"balanceDue");
+        assertEquals("Wrong data: balance due", "$0.00", balance);
+
+        log("Verify audit logs in admin console.");
+        goToAdminConsole().clickAuditLog();
+        doAndWaitForPageToLoad(() -> selectOptionByText(Locator.name("view"), "Query update events"));
+
+        _customizeViewsHelper.openCustomizeViewPanel();
+        _customizeViewsHelper.addColumn("DataChanges");
+        _customizeViewsHelper.applyCustomView();
+        DataRegionTable auditTable =  new DataRegionTable("query", this);
+        String auditLog = auditTable.getDataAsText(0,"DataChanges");
+        assertTrue(auditLog.contains("paymentamountreceived:  » 1028.95"));
+        assertTrue(auditLog.contains("balancedue:  » 0.0"));
     }
 
     @Override

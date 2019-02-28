@@ -15,6 +15,7 @@
                     <columnTitle>Grant Number</columnTitle>
                 </column>
                 <column columnName="tier_rate">
+                    <nullable>false</nullable>
                     <fk>
                         <fkDbSchema>wnprc_billing</fkDbSchema>
                         <fkTable>tierRates</fkTable>

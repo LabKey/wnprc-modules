@@ -1,0 +1,43 @@
+require("ehr/triggers").initScript(this);
+
+EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr_billing', 'miscCharges', function(helper, scriptErrors, row, oldRow){
+
+    console.log("in ehr billing modules");
+
+    if (!helper.isETL() && row) {
+
+        if (!row.Id) {
+            if (!row.debitedaccount) {
+                EHR.Server.Utils.addError(scriptErrors, 'debitedaccount', 'Must provide Debit Account and Investigator.');
+            }
+        }
+
+        if (row.debitedaccount) {
+            row.debitedaccount = row.debitedaccount.replace(/^\s+|\s+$/g, '');
+        }
+
+        if (row.creditedaccount) {
+            row.creditedaccount = row.creditedaccount.replace(/^\s+|\s+$/g, '');
+        }
+
+        if(!row.chargeId && !row.unitcost) {
+            EHR.Server.Utils.addError(scriptErrors, 'chargeId', 'Must provide either Charge Item or Unit Cost', 'ERROR');
+        }
+
+        if (row.invoiceId) {
+
+            var severity = 'INFO';
+            var fields = ['Id', 'project', 'debitedaccount', 'chargetype', 'creditedaccount', 'chargeId', 'quantity', 'unitcost'];
+
+            for (var i = 0; i < fields.length; i++) {
+                if (row[fields[i]] != oldRow[fields[i]]) {
+                    severity = 'WARN';
+                }
+            }
+            severity = billingHelper.isBillingAdmin() || billingHelper.isDataAdmin() ? 'INFO' : severity;
+            EHR.Server.Utils.addError(scriptErrors, 'Id', 'This item has already been invoiced and should not be edited through this form unless you are certain about this change.', severity);
+        }
+
+        row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
+    }
+});

@@ -11,6 +11,7 @@ public class InvoicedItem
     String _transactionNumber;
     String _item;
     String _comment;
+    String _groupName;
     Double _quantity;
     Double _unitCost;
     Double _totalCost;
@@ -137,5 +138,15 @@ public class InvoicedItem
     public void setServicecenter(String servicecenter)
     {
         _servicecenter = servicecenter;
+    }
+
+    public String getGroupName()
+    {
+        return _groupName;
+    }
+
+    public void setGroupName(String groupName)
+    {
+        _groupName = groupName;
     }
 }

@@ -12,7 +12,7 @@ SELECT
   mcfr.category,
   mcfr.comment AS itemDescription,
   mcfr.debitedAccount,
-  mcfr.debitedAccount.investigatorName AS principalInvestigator,
+  mcfr.investigator AS principalInvestigator,
   mcfr.debitedAccount.contact_name AS contactName,
   mcfr.debitedAccount.po_amount AS poAmount,
   mcfr.created,

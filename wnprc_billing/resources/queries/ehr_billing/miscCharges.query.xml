@@ -26,6 +26,7 @@
                             <fkColumnName>project</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="investigator"/>
                     <column columnName="chargecategory">
                         <fk>
                             <fkDbSchema>wnprc_billing</fkDbSchema>

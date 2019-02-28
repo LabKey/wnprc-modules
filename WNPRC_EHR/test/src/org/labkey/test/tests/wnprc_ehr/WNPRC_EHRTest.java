@@ -361,7 +361,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         viewPDF("summarizedPDF");
         
         log("Verify payments received for invoice runs");
-        testPaymentsReceived();        
+        testPaymentsReceived();
+
+        log("Testing investigator facing links");
+        testInvestigatorFacingLinks();
+
+        log("View Charges and adjustments Not Yet Billed");
+        viewChargesAdjustmentsNotYetBilled();
     }
 
     private void testBillingNotification()

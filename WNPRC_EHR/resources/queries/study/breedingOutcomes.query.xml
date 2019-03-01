@@ -22,7 +22,7 @@
                     </column>
                     <column columnName="ejaculation"/>
                     <column columnName="project"/>
-                    <column columnName="perfomedby"/>
+                    <column columnName="performedby"/>
                     <column columnName="remark"/>
                     <column columnName="Outcome"/>
                 </columns>

@@ -16,7 +16,7 @@
                         </fk>
                     </column>
                     <column columnName="date"/>
-                    <column columnName="perfomedby"/>
+                    <column columnName="performedby"/>
                     <column columnName="pregnancyid">
                         <columnTitle>Pregnancy (Conc. Date)</columnTitle>
                         <fk>

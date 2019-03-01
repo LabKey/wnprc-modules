@@ -8,7 +8,7 @@
                     <column columnName="Id"/>
                     <column columnName="date"/>
                     <column columnName="sireid"/>
-                    <column columnName="perfomedby"/>
+                    <column columnName="performedby"/>
                     <column columnName="remark"/>
                     <column columnName="qcstate">
                         <isHidden>true</isHidden>

@@ -49,7 +49,7 @@ public final class Breeding
         Stream.of(Arrays.asList("Breeding Encounters", "breeding_encounters", MASTER_PANEL_XTYPE)
                 , Arrays.asList("Pregnancies", "pregnancies", "wnprc-pregnancygridpanel")
                 , Arrays.asList("Pregnancy Outcomes", "pregnancy_outcomes", MASTER_PANEL_XTYPE)
-                , Arrays.asList("Ultrasounds", "ultrasounds", MASTER_PANEL_XTYPE)
+                , Arrays.asList("Ultrasounds", "ultrasounds", "wnprc-ultrasoundgridpanel")
         ).map(e -> Breeding.bulkFactory(module, e.get(0), e.get(1), e.get(2)))
                 .forEach(es::registerFormType);
     }

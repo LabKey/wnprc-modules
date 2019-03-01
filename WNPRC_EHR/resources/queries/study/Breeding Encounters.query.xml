@@ -20,6 +20,15 @@
                     <column columnName="sireid">
                         <nullable>false</nullable>
                     </column>
+                    <column columnName="breedingencounterid">
+                        <columnTitle>Breeding Encounter</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>breeding_encounters</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                            <fkDisplayColumnName>sireid</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="ejaculation"/>
                     <column columnName="project"/>
                     <column columnName="performedby"/>

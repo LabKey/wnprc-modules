@@ -86,6 +86,16 @@
         <tableTitle>Pregnancies</tableTitle>
         <description>Contains one row for each pregnancy at the center.</description>
         <columns>
+            <column columnName="breedingencounterid">
+                <columnTitle>Breeding Encounter</columnTitle>
+                <datatype>entityid</datatype>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>breeding_encounters</fkTable>
+                    <fkColumnName>lsid</fkColumnName>
+                    <fkDisplayColumnName>sireid</fkDisplayColumnName>
+                </fk>
+            </column>
             <column columnName="date_conception_early">
                 <columnTitle>Earliest Est. Conception Date</columnTitle>
                 <datatype>date</datatype>

@@ -17,14 +17,15 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
         'study.pregnancies': {
             Id:                             { columnConfig: { columnIndex:  1 } },
             sireid:                         { columnConfig: { columnIndex:  2 } },
-            date_conception_early:          { columnConfig: { columnIndex:  3, width: 200 } },
-            date_conception_late:           { columnConfig: { columnIndex:  4, width: 200 } },
-            date_due_early:                 { columnConfig: { columnIndex:  5, width: 200 } },
-            date_due_late:                  { columnConfig: { columnIndex:  6, width: 200 } },
-            remark:                         { columnConfig: { columnIndex:  7, width: 200 } },
-            pregnancyid:                    { columnConfig: { columnIndex:  8, width: 200 } },
-            performedby:                    { columnConfig: { columnIndex:  9 } },
-            date:                           { columnConfig: { columnIndex: 10 } }
+            breedingencounterid:            { columnConfig: { columnIndex:  3 } },
+            date_conception_early:          { columnConfig: { columnIndex:  4, width: 200 } },
+            date_conception_late:           { columnConfig: { columnIndex:  5, width: 200 } },
+            date_due_early:                 { columnConfig: { columnIndex:  6, width: 200 } },
+            date_due_late:                  { columnConfig: { columnIndex:  7, width: 200 } },
+            remark:                         { columnConfig: { columnIndex:  8, width: 200 } },
+            pregnancyid:                    { columnConfig: { columnIndex:  9, width: 200 } },
+            performedby:                    { columnConfig: { columnIndex: 10 } },
+            date:                           { columnConfig: { columnIndex: 11 } }
         },
         'study.pregnancy_outcomes':         {
             Id:                             { columnConfig: { columnIndex: 1 } },
@@ -65,6 +66,11 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Editors', {});
 
 EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
     byQuery: {
+        'study.pregnancies': {
+            breedingencounterid: {
+                xtype: 'wnprc-breedingencounteridfield'
+            }
+        },
         'study.pregnancy_outcomes': {
             pregnancyid: {
                 xtype: 'wnprc-pregnancyidfield'

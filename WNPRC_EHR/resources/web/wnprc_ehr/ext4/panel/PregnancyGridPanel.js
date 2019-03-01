@@ -19,8 +19,9 @@
     function _onEdit(sender, args) {
 
         // short-circuit if the value did not actually change
-        if (args.originalValue === args.value)
+        if (args.originalValue === args.value) {
             return;
+        }
 
         // get the model for the selected/active row
         const model = this.getSelectionModel().getSelection()[0];

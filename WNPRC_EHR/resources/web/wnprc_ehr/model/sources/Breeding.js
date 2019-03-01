@@ -5,52 +5,58 @@
 EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
     byQuery: {
         'study.breeding_encounters': {
-            Id:                     { columnConfig: { columnIndex: 1 } },
-            sireid:                 { columnConfig: { columnIndex: 2 } },
-            date:                   { columnConfig: { columnIndex: 3 } },
-            enddate:                { columnConfig: { columnIndex: 4 } },
-            ejaculation:            { columnConfig: { columnIndex: 5 } },
-            project:                { columnConfig: { columnIndex: 6 } },
-            remark:                 { columnConfig: { columnIndex: 7, width: 400 } },
-            performedby:            { columnConfig: { columnIndex: 8 } }
+            Id:                             { columnConfig: { columnIndex: 1 } },
+            sireid:                         { columnConfig: { columnIndex: 2 } },
+            date:                           { columnConfig: { columnIndex: 3 } },
+            enddate:                        { columnConfig: { columnIndex: 4 } },
+            ejaculation:                    { columnConfig: { columnIndex: 5 } },
+            project:                        { columnConfig: { columnIndex: 6 } },
+            remark:                         { columnConfig: { columnIndex: 7, width: 400 } },
+            performedby:                    { columnConfig: { columnIndex: 8 } }
         },
         'study.pregnancies': {
-            Id:                     { columnConfig: { columnIndex:  1 } },
-            sireid:                 { columnConfig: { columnIndex:  2 } },
-            date_conception_early:  { columnConfig: { columnIndex:  3, width: 200 } },
-            date_conception_late:   { columnConfig: { columnIndex:  4, width: 200 } },
-            date_due_early:         { columnConfig: { columnIndex:  5, width: 200 } },
-            date_due_late:          { columnConfig: { columnIndex:  6, width: 200 } },
-            remark:                 { columnConfig: { columnIndex:  7, width: 200 } },
-            pregnancyid:            { columnConfig: { columnIndex:  8, width: 200 } },
-            performedby:            { columnConfig: { columnIndex:  9 } },
-            date:                   { columnConfig: { columnIndex: 10 } }
+            Id:                             { columnConfig: { columnIndex:  1 } },
+            sireid:                         { columnConfig: { columnIndex:  2 } },
+            date_conception_early:          { columnConfig: { columnIndex:  3, width: 200 } },
+            date_conception_late:           { columnConfig: { columnIndex:  4, width: 200 } },
+            date_due_early:                 { columnConfig: { columnIndex:  5, width: 200 } },
+            date_due_late:                  { columnConfig: { columnIndex:  6, width: 200 } },
+            remark:                         { columnConfig: { columnIndex:  7, width: 200 } },
+            pregnancyid:                    { columnConfig: { columnIndex:  8, width: 200 } },
+            performedby:                    { columnConfig: { columnIndex:  9 } },
+            date:                           { columnConfig: { columnIndex: 10 } }
         },
-        'study.pregnancy_outcomes': {
-            Id:                     { columnConfig: { columnIndex: 1 } },
-            pregnancyid:            { columnConfig: { columnIndex: 2, width: 200 } },
-            outcome:                { columnConfig: { columnIndex: 3 } },
-            infantid:               { columnConfig: { columnIndex: 4 } },
-            project:                { columnConfig: { columnIndex: 5 } },
-            remark:                 { columnConfig: { columnIndex: 6, width: 400 } },
-            performedby:            { columnConfig: { columnIndex: 7 } },
-            date:                   { columnConfig: { columnIndex: 8 } }
+        'study.pregnancy_outcomes':         {
+            Id:                             { columnConfig: { columnIndex: 1 } },
+            pregnancyid:                    { columnConfig: { columnIndex: 2, width: 200 } },
+            outcome:                        { columnConfig: { columnIndex: 3 } },
+            infantid:                       { columnConfig: { columnIndex: 4 } },
+            project:                        { columnConfig: { columnIndex: 5 } },
+            remark:                         { columnConfig: { columnIndex: 6, width: 400 } },
+            performedby:                    { columnConfig: { columnIndex: 7 } },
+            date:                           { columnConfig: { columnIndex: 8 } }
         },
         'study.ultrasounds': {
-            Id:                     { columnConfig: { columnIndex:  1 } },
-            date:                   { columnConfig: { columnIndex:  2 } },
-            pregnancyid:            { columnConfig: { columnIndex:  3, width: 200 } },
-            project:                { columnConfig: { columnIndex:  4 } },
-            fetal_heartbeat:        { columnConfig: { columnIndex:  5 } },
-            beats_per_minute:       { columnConfig: { columnIndex:  6 } },
-            crown_rump_cm:          { columnConfig: { columnIndex:  7 } },
-            head_circumference_cm:  { columnConfig: { columnIndex:  8 } },
-            femur_length_cm:        { columnConfig: { columnIndex:  9 } },
-            biparietal_diameter_cm: { columnConfig: { columnIndex: 10 } },
-            restraint:              { columnConfig: { columnIndex: 11 } },
-            code:                   { columnConfig: { columnIndex: 12 } },
-            remark:                 { columnConfig: { columnIndex: 13, width: 200 } },
-            performedby:            { columnConfig: { columnIndex: 14 } }
+            Id:                             { columnConfig: { columnIndex:  1 } },
+            date:                           { columnConfig: { columnIndex:  2 } },
+            pregnancyid:                    { columnConfig: { columnIndex:  3, width: 200 } },
+            project:                        { columnConfig: { columnIndex:  4 } },
+            restraint:                      { columnConfig: { columnIndex:  5 } },
+            fetal_heartbeat:                { columnConfig: { columnIndex:  6 } },
+            beats_per_minute:               { columnConfig: { columnIndex:  7 } },
+            beats_per_minute_gest_day:      { columnConfig: { columnIndex:  8 } },
+            crown_rump_mm:                  { columnConfig: { columnIndex:  9 } },
+            crown_rump_gest_day:            { columnConfig: { columnIndex: 10 } },
+            head_circumference_mm:          { columnConfig: { columnIndex: 11 } },
+            head_circumference_gest_day:    { columnConfig: { columnIndex: 12 } },
+            femur_length_mm:                { columnConfig: { columnIndex: 13 } },
+            femur_length_gest_day:          { columnConfig: { columnIndex: 14 } },
+            biparietal_diameter_mm:         { columnConfig: { columnIndex: 15 } },
+            biparietal_diameter_gest_day:   { columnConfig: { columnIndex: 16 } },
+            code:                           { columnConfig: { columnIndex: 17 } },
+            remark:                         { columnConfig: { columnIndex: 18, width: 150 } },
+            performedby:                    { columnConfig: { columnIndex: 19 } },
+            followup_required:              { columnConfig: { columnIndex: 20 } }
         }
     }
 });
@@ -62,12 +68,63 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
         'study.pregnancy_outcomes': {
             pregnancyid: {
                 xtype: 'wnprc-pregnancyidfield'
-            }
+            },
+
         },
         'study.ultrasounds': {
             pregnancyid: {
                 xtype: 'wnprc-pregnancyidfield'
-            }
+            },
+            beats_per_minute: {
+                editorConfig: {
+                    selectOnFocus: true
+                }
+            },
+            beats_per_minute_gest_day: {
+                editorConfig: {
+                    readOnly: true
+                },
+            },
+            crown_rump_mm: {
+                editorConfig: {
+                    selectOnFocus: true
+                }
+            },
+            crown_rump_gest_day: {
+                editorConfig: {
+                    readOnly: true
+                },
+            },
+            head_circumference_mm: {
+                editorConfig: {
+                    selectOnFocus: true
+                }
+            },
+            head_circumference_gest_day: {
+                editorConfig: {
+                    readOnly: true,
+                },
+            },
+            femur_length_mm: {
+                editorConfig: {
+                    selectOnFocus: true
+                }
+            },
+            femur_length_gest_day: {
+                editorConfig: {
+                    readOnly: true,
+                },
+            },
+            biparietal_diameter_mm: {
+                editorConfig: {
+                    selectOnFocus: true
+                }
+            },
+            biparietal_diameter_gest_day: {
+                editorConfig: {
+                    readOnly: true,
+                },
+            },
         }
     }
 });

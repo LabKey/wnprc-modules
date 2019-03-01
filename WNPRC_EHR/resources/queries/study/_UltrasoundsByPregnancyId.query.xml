@@ -5,16 +5,23 @@
             <table tableName="_UltrasoundsByPregnancyId" tableDbType="NOT_IN_DB">
                 <columns>
                     <column columnName="date"/>
-                    <column columnName="perfomedby"/>
                     <column columnName="project"/>
                     <column columnName="restraint"/>
                     <column columnName="fetal_heartbeat"/>
                     <column columnName="beats_per_minute"/>
-                    <column columnName="crown_rump_cm"/>
-                    <column columnName="head_circumference_cm"/>
-                    <column columnName="femur_length_cm"/>
-                    <column columnName="biparietal_diameter_cm"/>
+                    <column columnName="beats_per_minute_gest_day"/>
+                    <column columnName="crown_rump_mm"/>
+                    <column columnName="crown_rump_gest_day"/>
+                    <column columnName="head_circumference_mm"/>
+                    <column columnName="head_circumference_gest_day"/>
+                    <column columnName="femur_length_mm"/>
+                    <column columnName="femur_length_gest_day"/>
+                    <column columnName="biparietal_diameter_mm"/>
+                    <column columnName="biparietal_diameter_gest_day"/>
+                    <column columnName="code"/>
                     <column columnName="remark"/>
+                    <column columnName="performedby"/>
+                    <column columnName="followup_required"/>
                 </columns>
             </table>
         </tables>

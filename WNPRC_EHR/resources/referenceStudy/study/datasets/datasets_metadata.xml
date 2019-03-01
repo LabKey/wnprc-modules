@@ -235,21 +235,50 @@
                 <columnTitle>BPM</columnTitle>
                 <datatype>integer</datatype>
             </column>
-            <column columnName="crown_rump_cm">
+            <column columnName="beats_per_minute_gest_day">
+                <columnTitle>BPM GD</columnTitle>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="crown_rump_mm">
                 <columnTitle>Crown Rump</columnTitle>
                 <datatype>float</datatype>
             </column>
-            <column columnName="head_circumference_cm">
-                <columnTitle>HC</columnTitle>
+            <column columnName="crown_rump_gest_day">
+                <columnTitle>CR GD</columnTitle>
+                <description>Estimated gestation day based on crown rump</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="head_circumference_mm">
+                <columnTitle>Head Circ</columnTitle>
                 <datatype>float</datatype>
             </column>
-            <column columnName="femur_length_cm">
+            <column columnName="head_circumference_gest_day">
+                <columnTitle>HD GD</columnTitle>
+                <description>Estimated gestation day based on head circumference</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="femur_length_mm">
                 <columnTitle>Femur Length</columnTitle>
                 <datatype>float</datatype>
             </column>
-            <column columnName="biparietal_diameter_cm">
-                <columnTitle>BPD</columnTitle>
+            <column columnName="femur_length_gest_day">
+                <columnTitle>FL GD</columnTitle>
+                <description>Estimated gestation day based on femur length</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="biparietal_diameter_mm">
+                <columnTitle>Biparietal Diameter</columnTitle>
                 <datatype>float</datatype>
+            </column>
+            <column columnName="biparietal_diameter_gest_day">
+                <columnTitle>BPD GD</columnTitle>
+                <description>Estimated gestation day based on biparietal diameter</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="followup_required">
+                <columnTitle>Followup Required</columnTitle>
+                <description>Indicates whether or not a followup ultrasound is required</description>
+                <datatype>boolean</datatype>
             </column>
         </columns>
         <indices>

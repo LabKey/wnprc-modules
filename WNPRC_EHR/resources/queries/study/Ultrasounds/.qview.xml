@@ -3,16 +3,23 @@
         <column name="date"/>
         <column name="Id"/>
         <column name="pregnancyid"/>
-        <column name="fetal_heartbeat"/>
-        <column name="beats_per_minute"/>
-        <column name="crown_rump_cm"/>
-        <column name="head_circumference_cm"/>
-        <column name="femur_length_cm"/>
-        <column name="biparietal_diameter_cm"/>
         <column name="project"/>
         <column name="restraint"/>
-        <column name="performedby"/>
+        <column name="fetal_heartbeat"/>
+        <column name="beats_per_minute"/>
+        <column name="beats_per_minute_gest_day"/>
+        <column name="crown_rump_mm"/>
+        <column name="crown_rump_gest_day"/>
+        <column name="head_circumference_mm"/>
+        <column name="head_circumference_gest_day"/>
+        <column name="femur_length_mm"/>
+        <column name="femur_length_gest_day"/>
+        <column name="biparietal_diameter_mm"/>
+        <column name="biparietal_diameter_gest_day"/>
+        <column name="code"/>
         <column name="remark"/>
+        <column name="performedby"/>
+        <column name="followup_required"/>
     </columns>
     <sorts>
         <sort column="date" descending="true"/>

@@ -1,16 +1,23 @@
 PARAMETERS ( PARENT_RECORD_ID VARCHAR )
 SELECT
   u.date,
-  u.performedby,
   u.project,
   u.restraint,
   u.fetal_heartbeat,
   u.beats_per_minute,
-  u.crown_rump_cm,
-  u.head_circumference_cm,
-  u.femur_length_cm,
-  u.biparietal_diameter_cm,
-  u.remark
+  u.beats_per_minute_gest_day,
+  u.crown_rump_mm,
+  u.crown_rump_gest_day,
+  u.head_circumference_mm,
+  u.head_circumference_gest_day,
+  u.femur_length_mm,
+  u.femur_length_gest_day,
+  u.biparietal_diameter_mm,
+  u.biparietal_diameter_gest_day,
+  u.code,
+  u.remark,
+  u.performedby,
+  u.followup_required
 FROM ultrasounds u
 WHERE u.pregnancyid = (SELECT p.lsid
                        FROM pregnancies p

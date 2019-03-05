@@ -31,7 +31,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
             queryName: 'pregnancies',
             columns: 'lsid,date_conception_early',
             //filterArray: [LABKEY.Filter.create('enddate', null, LABKEY.Filter.Types.ISBLANK)],
-            sort: 'date_conception_early',
+            sort: '-date_conception_early',
             storeId: ['study', 'pregnancies', 'Id', 'lsid'].join('||'),
             autoLoad: true
         });
@@ -49,7 +49,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
                 type: 'labkey-store',
                 schemaName: 'study',
                 sql: this.makeSql(),
-                sort: 'date_conception_early',
+                sort: '-date_conception_early',
                 autoLoad: false,
                 loading: true,
                 listeners: {
@@ -110,7 +110,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
 
     getInnerTpl: function(){
         //return ['{[values["displayName"] + " " + (values["shortname"] ? ("(" + values["shortname"] + ")") : (values["investigator"] ? "(" + (values["investigator"] ? values["investigator"] : "") : "") + (values["account"] ? ": " + values["account"] : "") + (values["investigator"] ? ")" : ""))]}&nbsp;</span>'];
-        return '{[values["date_conception_early"]]}';
+        return ['{[values["date_conception_early"]]}'];
     },
 
     /*<span style="white-space:nowrap;{[values["isAssigned"] ? "font-weight:bold;" : ""]}">*/
@@ -148,7 +148,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,date_conception_early \
+        var sql = 'select lsid,to_char(date_conception_early, \'Mon DD, YYYY HH24:MI\') as date_conception_early \
                from (select p.lsid \
                            ,p.date_conception_early \
                        from pregnancies p \

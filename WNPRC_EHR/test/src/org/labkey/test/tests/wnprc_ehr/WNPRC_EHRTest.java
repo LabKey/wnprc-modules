@@ -882,6 +882,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void uploadData() throws IOException, CommandException
     {
+        //upload Tier Rates
+        importBulkDataFromFile(TIER_RATES_TSV, "Tier Rates", TIER_RATES_NUM_ROWS);
+        testExpectedRowCount(TIER_RATES_NUM_ROWS);
+
         //upload Grant Accounts
         importBulkDataFromFile(ALIASES_TSV, "Grant Accounts", ALIASES_NUM_ROWS);
         testExpectedRowCount(ALIASES_NUM_ROWS);
@@ -892,10 +896,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //upload Chargeable Items and Charge Rates
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_TSV, CHARGE_RATES_NUM_ROWS, CHARGEABLE_ITEMS_NUM_ROWS);
-
-        //upload Tier Rates
-        importBulkDataFromFile(TIER_RATES_TSV, "Tier Rates", TIER_RATES_NUM_ROWS);
-        testExpectedRowCount(TIER_RATES_NUM_ROWS);
 
         //upload Charge Units
         importBulkDataFromFile(CHARGE_UNITS_TSV, "Charge Units", CHARGE_UNITS_NUM_ROWS);

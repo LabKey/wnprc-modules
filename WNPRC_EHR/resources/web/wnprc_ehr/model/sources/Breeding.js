@@ -17,7 +17,7 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
         'study.pregnancies': {
             Id:                             { columnConfig: { columnIndex:  1 } },
             sireid:                         { columnConfig: { columnIndex:  2 } },
-            breedingencounterid:            { columnConfig: { columnIndex:  3 } },
+            breedingencounterid:            { columnConfig: { columnIndex:  3, width: 200 } },
             date_conception_early:          { columnConfig: { columnIndex:  4, width: 200 } },
             date_conception_late:           { columnConfig: { columnIndex:  5, width: 200 } },
             date_due_early:                 { columnConfig: { columnIndex:  6, width: 200 } },
@@ -69,6 +69,18 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
         'study.pregnancies': {
             breedingencounterid: {
                 xtype: 'wnprc-breedingencounteridfield'
+            },
+            date_conception_early: {
+                hidden: true
+            },
+            date_conception_late: {
+                hidden: true
+            },
+            date_due_early: {
+                hidden: true
+            },
+            date_due_late: {
+                hidden: true
             }
         },
         'study.pregnancy_outcomes': {

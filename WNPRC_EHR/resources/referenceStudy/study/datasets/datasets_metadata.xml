@@ -69,6 +69,10 @@
                     <fkColumnName>project</fkColumnName>
                 </fk>
             </column>
+            <column columnName="outcome">
+                <columnTitle>Resulted In Pregnancy</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
         </columns>
         <indices>
             <index type="non-unique">
@@ -104,6 +108,10 @@
                 <columnTitle>Latest Est. Conception Date</columnTitle>
                 <datatype>date</datatype>
             </column>
+            <column columnName="date_conception">
+                <columnTitle>Estimated Date of Conception</columnTitle>
+                <datatype>date</datatype>
+            </column>
             <column columnName="date_due_early">
                 <columnTitle>Earliest Est. Due Date</columnTitle>
                 <datatype>date</datatype>
@@ -111,6 +119,11 @@
             </column>
             <column columnName="date_due_late">
                 <columnTitle>Latest Est. Due Date</columnTitle>
+                <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
+            </column>
+            <column columnName="date_due">
+                <columnTitle>Estimated Due Date</columnTitle>
                 <datatype>date</datatype>
                 <formatString>y-M-d</formatString>
             </column>

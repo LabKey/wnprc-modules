@@ -1,4 +1,3 @@
-DROP TABLE  IF EXISTS primateid.unique_ids;
 DROP SCHEMA IF EXISTS primateid;
 
 CREATE SCHEMA primateid;

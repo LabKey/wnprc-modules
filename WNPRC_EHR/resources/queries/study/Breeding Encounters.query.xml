@@ -33,6 +33,7 @@
                     <column columnName="project"/>
                     <column columnName="performedby"/>
                     <column columnName="remark"/>
+                    <column columnName="outcome"/>
                 </columns>
             </table>
         </tables>

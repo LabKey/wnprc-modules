@@ -23,3 +23,29 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         });
     }
 }
+
+function onComplete(event, errors, helper){
+    var pregnancyRows = helper.getRows();
+    var updateRows = [];
+
+    if (pregnancyRows){
+        for (var i=0;i<pregnancyRows.length;i++){
+            var updateRow = {};
+            updateRow.lsid = pregnancyRows[i].row.breedingencounterid;
+            updateRow.outcome = true;
+            updateRows.push(updateRow);
+        }
+        LABKEY.Query.updateRows( {
+            schemaName : 'study',
+            queryName : 'breeding_encounters',
+            rows : updateRows,
+            success: function (data) {
+                console.log('success');
+                if (data && data.rows) {
+                    //nothing
+                }
+            },
+            failure : EHR.Server.Utils.onFailure
+        });
+    }
+}

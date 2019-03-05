@@ -282,7 +282,7 @@ EHR.Metadata.registerMetadata('Default', {
                                     ejacConfirmed.hide();
                                 }
                             }
-                        },
+                        }
                     }
                 }
             },

@@ -131,10 +131,10 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select be.lsid,be.sireid,to_char(be.date, \'Mon DD, YYYY HH24:MI\') as date,to_char(be.enddate, \'Mon DD, YYYY HH24:MI\') as enddate \
-                    from breeding_encounters be \
-                    where be.Id = \'' + id + '\' \
-                    order by be.date desc \
+        var sql = 'select lsid,sireid,to_char(date, \'Mon DD, YYYY HH24:MI\') as date,to_char(enddate, \'Mon DD, YYYY HH24:MI\') as enddate \
+                    from breeding_encounters \
+                    where Id = \'' + id + '\' \
+                    order by date desc \
                     limit 5'.replace(/\s+/g, ' ');
         return sql;
     },

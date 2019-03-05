@@ -18,14 +18,12 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
             Id:                             { columnConfig: { columnIndex:  1 } },
             sireid:                         { columnConfig: { columnIndex:  2 } },
             breedingencounterid:            { columnConfig: { columnIndex:  3, width: 200 } },
-            date_conception_early:          { columnConfig: { columnIndex:  4, width: 200 } },
-            date_conception_late:           { columnConfig: { columnIndex:  5, width: 200 } },
-            date_due_early:                 { columnConfig: { columnIndex:  6, width: 200 } },
-            date_due_late:                  { columnConfig: { columnIndex:  7, width: 200 } },
-            remark:                         { columnConfig: { columnIndex:  8, width: 200 } },
-            pregnancyid:                    { columnConfig: { columnIndex:  9, width: 200 } },
-            performedby:                    { columnConfig: { columnIndex: 10 } },
-            date:                           { columnConfig: { columnIndex: 11 } }
+            date_conception:                { columnConfig: { columnIndex:  4, width: 200 } },
+            date_due:                       { columnConfig: { columnIndex:  5, width: 200 } },
+            remark:                         { columnConfig: { columnIndex:  6, width: 200 } },
+            pregnancyid:                    { columnConfig: { columnIndex:  7, width: 200 } },
+            performedby:                    { columnConfig: { columnIndex:  8 } },
+            date:                           { columnConfig: { columnIndex:  9 } }
         },
         'study.pregnancy_outcomes':         {
             Id:                             { columnConfig: { columnIndex: 1 } },

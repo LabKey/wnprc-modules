@@ -1,12 +1,13 @@
 require("ehr/triggers").initScript(this);
 
+//TODO removed console output
 function onComplete(event, errors, helper){
-    var housingRows = helper.getRows();
+    let housingRows = helper.getRows();
 
     //this object will be used to group animals by which cage they're being moved into
-    var groupedByCage = {};
+    let groupedByCage = {};
     if (housingRows){
-        for (var i=0;i<housingRows.length;i++){
+        for (let i = 0; i < housingRows.length; i++){
             if (housingRows[i].row.reason === 'Breeding' && !housingRows[i].row.enddate) {
                 EHR.Server.Utils.findDemographics({
                     participant: housingRows[i].row.Id,
@@ -37,7 +38,7 @@ function onComplete(event, errors, helper){
                                 LABKEY.Query.selectRows({
                                     schemaName: 'study',
                                     queryName: 'breeding_encounters',
-                                    //columns: 'lsid',
+                                    columns: 'lsid,sireid,remark',
                                     filterArray: [
                                             LABKEY.Filter.create('Id', housingRows[i].row.Id, LABKEY.Filter.Types.EQUAL),
                                             LABKEY.Filter.create('QCState', EHR.Server.Security.getQCStateByLabel('In Progress').RowId, LABKEY.Filter.Types.EQUAL)
@@ -46,16 +47,37 @@ function onComplete(event, errors, helper){
                                     scope: this,
                                     success: function(results) {
                                         if (results.rows && results.rows.length) {
-                                            var row = results.rows[0];
-                                            row.enddate = new Date(housingRows[i].row.date.time)
+                                            let row = results.rows[0];
+
+                                            let remark = 'Breeding Ended\n';
+                                            let remarkFound = false;
+
+                                            if (!!housingRows[i].row.remark) {
+                                                remarkFound = true;
+                                                remark += housingRows[i].row.Id + ': ' + housingRows[i].row.remark + '\n';
+                                            }
+                                            //TODO figure out why sire remarks aren't being recorded!!
+                                            let sireList = row.sireid.split(",");
+                                            for (let sireId in sireList) {
+                                                for (let j = 0; j < housingRows.length; j++) {
+                                                    if (housingRows[j].row.Id === sireId && housingRows[j].row.reason === 'Breeding ended') {
+                                                        if (!!housingRows[j].row.remark) {
+                                                            remarkFound = true;
+                                                            remark += sireId + ': ' + housingRows[j].row.remark + '\n';
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            row.enddate = new Date(housingRows[i].row.date.time);
                                             row.ejaculation = housingRows[i].row.ejacConfirmed;
                                             row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId;
+                                            if (remarkFound) {
+                                                row.remark += remark;
+                                            }
 
-                                            console.log('Row: ' + JSON.stringify(row));
-                                            var updateRows = [];
+                                            let updateRows = [];
                                             updateRows.push(row);
-                                            console.log('updateRows: ' + JSON.stringify(updateRows));
-
                                             LABKEY.Query.updateRows({
                                                 schemaName: 'study',
                                                 queryName: 'breeding_encounters',
@@ -78,17 +100,17 @@ function onComplete(event, errors, helper){
             }
         }
         //this object will have a property for each 'encounter' that occurred
-        var breeding_encounters = {};
+        let breeding_encounters = {};
 
-        for(var cageIndex in groupedByCage) {
+        for(let cageIndex in groupedByCage) {
             if (groupedByCage.hasOwnProperty(cageIndex)) {
-                for (var i = 0; i < groupedByCage[cageIndex].length; i++) {
+                for (let i = 0; i < groupedByCage[cageIndex].length; i++) {
                     if (groupedByCage[cageIndex][i].gender === 'f') {
                         if (!breeding_encounters[groupedByCage[cageIndex][i].Id]) {
                             breeding_encounters[groupedByCage[cageIndex][i].Id] = [];
                         }
                         breeding_encounters[groupedByCage[cageIndex][i].Id].push(groupedByCage[cageIndex][i]);
-                        for (var j = 0; j < groupedByCage[cageIndex].length; j++) {
+                        for (let j = 0; j < groupedByCage[cageIndex].length; j++) {
                             if (groupedByCage[cageIndex][j].gender === 'm') {
                                 breeding_encounters[groupedByCage[cageIndex][i].Id].push(groupedByCage[cageIndex][j]);
                             }
@@ -98,20 +120,30 @@ function onComplete(event, errors, helper){
             }
         }
 
-        var insertRows = [];
-        for(var femaleId in breeding_encounters) {
+        let insertRows = [];
+        for(let femaleId in breeding_encounters) {
             if (breeding_encounters.hasOwnProperty(femaleId)) {
-                var sireid = '';
-                var remark = breeding_encounters[femaleId][0].Id + ': ' + breeding_encounters[femaleId][0].remark + '\n';
-                for(var i = 1; i < breeding_encounters[femaleId].length; i++) {
+                let sireid = '';
+                let remark = 'Breeding Started\n';
+                let remarkFound = false;
+                if (!!breeding_encounters[femaleId][0].remark) {
+                    remarkFound = true;
+                    remark += breeding_encounters[femaleId][0].Id + ': ' + breeding_encounters[femaleId][0].remark + '\n';
+                }
+                for(let i = 1; i < breeding_encounters[femaleId].length; i++) {
                     sireid += breeding_encounters[femaleId][i].Id;
-                    remark += breeding_encounters[femaleId][i].Id + ': ' + breeding_encounters[femaleId][i].remark + '\n';
+                    if (!!breeding_encounters[femaleId][i].remark) {
+                        remarkFound = true;
+                        remark += breeding_encounters[femaleId][i].Id + ': ' + breeding_encounters[femaleId][i].remark + '\n';
+                    }
                     if (breeding_encounters[femaleId].length - i > 1) {
                         sireid += ',';
+                        remark += '\n';
                     }
                 }
-                var date = new Date(breeding_encounters[femaleId][0].date.time);
-                var encounter = {
+                remark = remarkFound ? remark : '';
+                let date = new Date(breeding_encounters[femaleId][0].date.time);
+                let encounter = {
                     Id: breeding_encounters[femaleId][0].Id,
                     sireid: sireid,
                     date: date,
@@ -119,12 +151,11 @@ function onComplete(event, errors, helper){
                     QCState: EHR.Server.Security.getQCStateByLabel('In Progress').RowId,
                     performedby: breeding_encounters[femaleId][0].performedby,
                     remark: remark
-                }
+                };
                 insertRows.push(encounter);
             }
         }
 
-        console.log('insertRows: ' + JSON.stringify(insertRows));
         LABKEY.Query.insertRows( {
             schemaName : 'study',
             queryName : 'breeding_encounters',

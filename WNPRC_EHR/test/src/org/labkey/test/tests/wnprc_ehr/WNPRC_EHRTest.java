@@ -882,6 +882,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void uploadData() throws IOException, CommandException
     {
+        //upload Tier Rates
+        importBulkDataFromFile(TIER_RATES_TSV, "Tier Rates", TIER_RATES_NUM_ROWS);
+        testExpectedRowCount(TIER_RATES_NUM_ROWS);
+
         //upload Grant Accounts
         importBulkDataFromFile(ALIASES_TSV, "Grant Accounts", ALIASES_NUM_ROWS);
         testExpectedRowCount(ALIASES_NUM_ROWS);
@@ -892,10 +896,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         //upload Chargeable Items and Charge Rates
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_TSV, CHARGE_RATES_NUM_ROWS, CHARGEABLE_ITEMS_NUM_ROWS);
-
-        //upload Tier Rates
-        importBulkDataFromFile(TIER_RATES_TSV, "Tier Rates", TIER_RATES_NUM_ROWS);
-        testExpectedRowCount(TIER_RATES_NUM_ROWS);
 
         //upload Charge Units
         importBulkDataFromFile(CHARGE_UNITS_TSV, "Charge Units", CHARGE_UNITS_NUM_ROWS);
@@ -1045,6 +1045,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertEquals("Incorrect number of task rows.", 1, ((Locator) Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a[.='Test weight task']")).findElements(getDriver()).size());
         _extHelper.clickExtTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
+        sleep(WAIT_FOR_JAVASCRIPT); //For the table to completely load - Teamcity error fix.
         assertEquals("Incorrect number of task rows.", 3, ((Locator) Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a[.='Test weight task']")).findElements(getDriver()).size());
         _extHelper.clickExtTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);

@@ -23,12 +23,12 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -459,7 +459,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public static class ReleaseAnimalFromBehaviorAssignmentAction extends ApiAction<ReleaseAnimalFromBehaviorAssignmentForm>
+    public static class ReleaseAnimalFromBehaviorAssignmentAction extends MutatingApiAction<ReleaseAnimalFromBehaviorAssignmentForm>
     {
 
         @Override
@@ -497,7 +497,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public static class ValidateAnimalIdAction extends ApiAction<ValidateAnimalIdForm>
+    public static class ValidateAnimalIdAction extends ReadOnlyApiAction<ValidateAnimalIdForm>
     {
         @Override
         public Object execute(ValidateAnimalIdForm form, BindException errors)
@@ -568,7 +568,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresLogin
     @ActionNames("checkIfAnimalIsAssigned")
-    public static class CheckIfAnimalIsAssigned extends ApiAction<CheckAnimalAssignment>
+    public static class CheckIfAnimalIsAssigned extends ReadOnlyApiAction<CheckAnimalAssignment>
     {
         @Override
         public Object execute(CheckAnimalAssignment form, BindException errors)
@@ -618,7 +618,7 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @ActionNames("getChanges")
     @CSRF(CSRF.Method.POST)
-    public class GetChangeLists extends ApiAction<Void>
+    public class GetChangeLists extends ReadOnlyApiAction<Void>
     {
         public ApiResponse execute(Void form, BindException errors) throws Exception
         {
@@ -662,7 +662,7 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @RequiresLogin
     @ActionNames("getColonyPopulationPerMonth")
-    public class GetPopulationPerMonth extends ApiAction<Void>
+    public class GetPopulationPerMonth extends ReadOnlyApiAction<Void>
     {
         public ApiResponse execute(Void form, BindException errors)
         {
@@ -766,7 +766,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresLogin()
     @ActionNames("billablePerDiems")
-    public class BillablePerDiemsAction extends ApiAction<BillablePerDiemsForm>
+    public class BillablePerDiemsAction extends ReadOnlyApiAction<BillablePerDiemsForm>
     {
         @Override
         public Object execute(BillablePerDiemsForm form, BindException errors)
@@ -873,7 +873,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresNoPermission()
-    public class ExampleEmailAction extends ApiAction<EmailForm>
+    public class ExampleEmailAction extends MutatingApiAction<EmailForm>
     {
         @Override
         public ApiResponse execute(EmailForm form, BindException errors) throws Exception
@@ -897,7 +897,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("listEmails")
     @RequiresNoPermission()
-    public class ListEmailsAction extends ApiAction<EmailServerForm>
+    public class ListEmailsAction extends ReadOnlyApiAction<EmailServerForm>
     {
         @Override
         public ApiResponse execute(EmailServerForm form, BindException errors) throws Exception
@@ -908,7 +908,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("getVirologyResultsFromEmail")
     @RequiresNoPermission()
-    public class GetVirologyResultsFromEmailAction extends ApiAction<VirologyResultsForm>
+    public class GetVirologyResultsFromEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -924,7 +924,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("deleteEmail")
     @RequiresNoPermission()
-    public class deleteEmailAction extends ApiAction<VirologyResultsForm>
+    public class deleteEmailAction extends MutatingApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -939,7 +939,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("previewEmailExcelAttachment")
     @RequiresNoPermission()
-    public class previewEmailAction extends ApiAction<VirologyResultsForm>
+    public class previewEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -1114,7 +1114,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public class AddBehaviorAssignmentAction extends ApiAction<AddBehaviorAssignmentForm>
+    public class AddBehaviorAssignmentAction extends MutatingApiAction<AddBehaviorAssignmentForm>
     {
 
         @Override
@@ -1134,7 +1134,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UploadBCReports")
-    public class uploadBCReportAction extends ApiAction<Void>
+    public class uploadBCReportAction extends MutatingApiAction<Void>
     {
         @Override
         public Object execute(Void form, BindException errors) throws NotFoundException
@@ -1148,7 +1148,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("MakeUserWriterForBCReports")
-    public class ShareBCReportsWithUserAction extends ApiAction<UserForm>
+    public class ShareBCReportsWithUserAction extends MutatingApiAction<UserForm>
     {
         @Override
         public Object execute(UserForm form, BindException errors) throws Exception
@@ -1167,7 +1167,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("ScheduleBCReports")
-    public class ScheduleBCReportsAction extends ApiAction<Void>
+    public class ScheduleBCReportsAction extends MutatingApiAction<Void>
     {
         @Override
         public Object execute(Void form, BindException errors)
@@ -1179,7 +1179,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UnscheduleBCReports")
-    public class UnscheduleBCReportsAction extends ApiAction<Void>
+    public class UnscheduleBCReportsAction extends MutatingApiAction<Void>
     {
         @Override
         public Object execute(Void form, BindException errors)
@@ -1250,7 +1250,7 @@ public class WNPRC_EHRController extends SpringActionController
      */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetDataAction extends ApiAction<java.lang.Void>
+    public static class ImportDatasetDataAction extends MutatingApiAction<java.lang.Void>
     {
         @Override
         public Object execute(java.lang.Void aVoid, BindException errors)
@@ -1266,7 +1266,7 @@ public class WNPRC_EHRController extends SpringActionController
      */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetMetadataAction extends ApiAction<java.lang.Void>
+    public static class ImportDatasetMetadataAction extends MutatingApiAction<java.lang.Void>
     {
         @Override
         public Object execute(java.lang.Void aVoid, BindException errors) throws Exception

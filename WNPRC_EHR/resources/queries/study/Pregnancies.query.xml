@@ -8,6 +8,15 @@
                     <column columnName="Id"/>
                     <column columnName="date"/>
                     <column columnName="sireid"/>
+                    <column columnName="breedingencounterid">
+                        <columnTitle>Breeding Encounter</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>breeding_encounters</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                            <fkDisplayColumnName>sireid</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="performedby"/>
                     <column columnName="remark"/>
                     <column columnName="qcstate">

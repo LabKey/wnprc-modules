@@ -12,9 +12,9 @@
                         <columnTitle>Breeding Encounter</columnTitle>
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
-                            <fkTable>breeding_encounters</fkTable>
+                            <fkTable>breedingEncounterWindow</fkTable>
                             <fkColumnName>lsid</fkColumnName>
-                            <fkDisplayColumnName>sireid</fkDisplayColumnName>
+                            <fkDisplayColumnName>window</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="performedby"/>

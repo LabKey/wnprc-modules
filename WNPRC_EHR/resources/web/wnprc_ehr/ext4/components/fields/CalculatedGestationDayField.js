@@ -36,10 +36,6 @@ Ext4.define('WNPRC.form.field.CalculatedGestationDayField', {
     },
 
     updateGestationDay: function(fieldName, val, oldVal) {
-        console.log('Field: ' + fieldName);
-        console.log('Value: ' + val);
-        console.log('Old Value: ' + oldVal);
-
         let animalIdField = this.up('form').getForm().findField('Id');
         let animalId = !!animalIdField ? animalIdField.value : '';
 

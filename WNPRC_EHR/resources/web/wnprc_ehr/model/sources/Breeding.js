@@ -103,30 +103,36 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             crown_rump_mm: {
                 editorConfig: {
-                    selectOnFocus: true
+                    plugins: ['wnprc-gestationcalculation'],
+                    selectOnFocus: true,
                 }
             },
             crown_rump_gest_day: {
+                xtype: 'wnprc-calculatedgestationdayfield',
                 editorConfig: {
                     readOnly: true
                 },
             },
             head_circumference_mm: {
                 editorConfig: {
+                    plugins: ['wnprc-gestationcalculation'],
                     selectOnFocus: true
                 }
             },
             head_circumference_gest_day: {
+                xtype: 'wnprc-calculatedgestationdayfield',
                 editorConfig: {
                     readOnly: true,
                 },
             },
             femur_length_mm: {
                 editorConfig: {
+                    plugins: ['wnprc-gestationcalculation'],
                     selectOnFocus: true
                 }
             },
             femur_length_gest_day: {
+                xtype: 'wnprc-calculatedgestationdayfield',
                 editorConfig: {
                     readOnly: true,
                 },

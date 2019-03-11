@@ -26,9 +26,7 @@
         // get the model for the selected/active row
         const model = this.getSelectionModel().getSelection()[0];
 
-        var id = model.get('Id');
-        var species;
-        var gd;
+        let id = model.get('Id');
         if (args.field === 'beats_per_minute' || args.field === 'crown_rump_mm' || args.field === 'head_circumference_mm' || args.field === 'femur_length_mm' || args.field === 'biparietal_diameter_mm') {
             LABKEY.Query.selectRows({
                 schemaName: 'study',
@@ -38,8 +36,7 @@
                 scope: this,
                 success: function(results) {
                     if (results.rows && results.rows.length) {
-                        var row = results.rows[0];
-                        console.log('Species: ' + row.species + ', Search Column: ' + args.field + ', Search Value: ' + args.value);
+                        let row = results.rows[0];
                         LABKEY.Query.selectRows({
                             schemaName: 'study',
                             queryName: 'getGestationalDay',
@@ -51,9 +48,9 @@
                             scope: this,
                             success: function(results) {
                                 if (results.rows && results.rows.length) {
-                                    var row = results.rows[0];
-                                    gd = row.gestational_day;
-                                    var theField = args.field;
+                                    let row = results.rows[0];
+                                    let gd = row.gestational_day;
+                                    let theField = args.field;
                                     if (theField.endsWith('_mm')) {
                                         theField = args.field.slice(0, -3);
                                     }

@@ -106,10 +106,6 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         this.getPregnancies(id);
     },
 
-    getDisallowedProtocols: function(){
-        return null;
-    },
-
     makeSql: function(id){
         if (!id && !this.includeDefaultProjects)
             return;

@@ -2,7 +2,8 @@ package org.labkey.wnprc_compliance;
 
 import org.json.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
-import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.SpringActionController;

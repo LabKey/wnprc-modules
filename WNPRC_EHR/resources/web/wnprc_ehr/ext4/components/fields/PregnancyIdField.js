@@ -1,13 +1,5 @@
-/*
- * Copyright (c) 2013-2016 LabKey Corporation
- *
- * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
- */
 /**
- * This field is used to display EHR projects.  It contains a custom template for the combo list which displays both the project and protocol.
- * It also listens for participantchange events and will display only the set of allowable projects for the selected animal.
- *
- * @cfg includeDefaultProjects defaults to true
+ * This field is used to display a list of pregnancies that the entry can be linked with.
  */
 Ext4.define('WNPRC.form.field.PregnancyIdField', {
     extend: 'Ext.form.field.ComboBox',
@@ -19,7 +11,6 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
     emptyText:'',
     disabled: false,
     matchFieldWidth: false,
-    includeDefaultProjects: true,
 
     initComponent: function(){
         var ctx = EHR.Utils.getEHRContext();
@@ -29,8 +20,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
             containerPath: ctx ? ctx['EHRStudyContainer'] : null,
             schemaName: 'study',
             queryName: 'pregnancies',
-            columns: 'lsid,date_conception_early',
-            //filterArray: [LABKEY.Filter.create('enddate', null, LABKEY.Filter.Types.ISBLANK)],
+            columns: 'lsid,date_conception_early,sireid',
             sort: '-date_conception_early',
             storeId: ['study', 'pregnancies', 'Id', 'lsid'].join('||'),
             autoLoad: true
@@ -92,28 +82,11 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         });
 
         this.callParent(arguments);
-
-        // this.addEvents('projectchange');
-        // this.enableBubble('projectchange');
-        //
-        // this.on('change', function(field, val, oldVal){
-        //     this.fireEvent('projectchange', val);
-        // }, this, {buffer: 200});
-        //
-        // this.on('render', function(){
-        //     Ext4.QuickTips.register({
-        //         target: this.triggerEl.elements[0],
-        //         text: 'Click to recalculate allowable projects'
-        //     });
-        // }, this);
     },
 
     getInnerTpl: function(){
-        //return ['{[values["displayName"] + " " + (values["shortname"] ? ("(" + values["shortname"] + ")") : (values["investigator"] ? "(" + (values["investigator"] ? values["investigator"] : "") : "") + (values["account"] ? ": " + values["account"] : "") + (values["investigator"] ? ")" : ""))]}&nbsp;</span>'];
-        return ['{[values["date_conception_early"]]}'];
+        return ['Sire: {[values["sireid"] + " - " + values["date_conception_early"]]}'];
     },
-
-    /*<span style="white-space:nowrap;{[values["isAssigned"] ? "font-weight:bold;" : ""]}">*/
 
     trigger1Cls: 'x4-form-search-trigger',
 
@@ -148,46 +121,17 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,to_char(date_conception_early, \'Mon DD, YYYY HH24:MI\') as date_conception_early \
+        var sql = 'select lsid,to_char(date_conception_early, \'Mon DD, YYYY HH24:MI\') as date_conception_early, sireid \
                from (select p.lsid \
                            ,p.date_conception_early \
+                           ,p.sireid \
                        from pregnancies p \
                       where p.Id = \'' + id + '\' \
                         and not exists (select * \
                                           from pregnancy_outcomes po \
                                          where po.pregnancyid = p.lsid) \
                                       order by date_conception_early desc) \
-              current_pregnancies limit 1'.replace(/\s+/g, ' ');
-
-        // var sql = "SELECT DISTINCT t.project, t.displayName, t.account, t.protocolDisplayName, t.protocol, t.title, t.shortname, false as fromClient, min(sort_order) as sort_order, max(isAssigned) as isAssigned FROM (";
-        //
-        // if (id){
-        //     //NOTE: show any actively assigned projects, or projects under the same protocol.  we also only show projects if either the animal is assigned, or that project is active
-        //     sql += "SELECT p.project as project, p.displayName as displayName, p.account as account, p.protocol.displayName as protocolDisplayName, p.protocol as protocol, p.title, p.shortname, CASE WHEN (a.project = p.project AND p.use_category = 'Research') THEN 0 WHEN (a.project = p.project) THEN 1 ELSE 2 END as sort_order, CASE WHEN (a.project = p.project) THEN 1 ELSE 0 END as isAssigned " +
-        //             " FROM ehr.project p JOIN study.assignment a ON (a.project.protocol = p.protocol) " +
-        //             " WHERE a.id='"+id+"' AND (a.project = p.project) "; //TODO: restore this OR p.enddate IS NULL OR p.enddate >= curdate()
-        //
-        //     //NOTE: if the date is in the future, we assume active projects
-        //     if (date){
-        //         sql += "AND cast(a.date as date) <= '"+date.format('Y-m-d')+"' AND ((a.enddateCoalesced >= '"+date.format('Y-m-d')+"') OR ('"+date.format('Y-m-d')+"' >= now() and a.enddate IS NULL))";
-        //     }
-        //     else {
-        //         sql += "AND a.isActive = true ";
-        //     }
-        //
-        //     if (this.getDisallowedProtocols()){
-        //         sql += " AND p.protocol NOT IN ('" + this.getDisallowedProtocols().join("', '") + "') ";
-        //     }
-        // }
-        //
-        // if (this.includeDefaultProjects){
-        //     if (id)
-        //         sql += ' UNION ALL ';
-        //
-        //     sql += " SELECT p.project, p.displayName, p.account, p.protocol.displayName as protocolDisplayName, p.protocol as protocol, p.title, p.shortname, 3 as sort_order, 0 as isAssigned FROM ehr.project p WHERE p.alwaysavailable = true"; //TODO: restore this: and p.enddateCoalesced >= curdate()
-        // }
-        //
-        // sql+= " ) t GROUP BY t.project, t.displayName, t.account, t.protocolDisplayName, t.protocol, t.title, t.shortname";
+              current_pregnancies order by date_conception_early desc'.replace(/\s+/g, ' ');
 
         return sql;
     },
@@ -202,13 +146,9 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
             LDK.Assert.assertNotEmpty('PregnancyIdField is being used on a store that lacks an Id field: ' + boundRecord.store.storeId, boundRecord.fields.get('Id'));
         }
 
-        if (!id && boundRecord)
+        if (!id && boundRecord) {
             id = boundRecord.get('Id');
-
-        // var date;
-        // if (boundRecord){
-        //     date = boundRecord.get('date');
-        // }
+        }
 
         this.emptyText = 'Select pregnancy...';
         var sql = this.makeSql(id);
@@ -228,13 +168,6 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
 
         if (val && Ext4.isPrimitive(val)){
             rec = this.store.findRecord('pregnancyid', val);
-            // if (!rec){
-            //     rec = this.store.findRecord('displayName', val, null, false, false, true);
-            //
-            //     if (rec)
-            //         console.log('resolved project entry field by display value')
-            // }
-
             if (!rec){
                 rec = this.resolvePregnancy(val);
             }
@@ -270,17 +203,10 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
             newRec.set({
                 lsid: rec.data.lsid,
                 date_conception_early: rec.data.date_conception_early,
-                // displayName: rec.data.displayName,
-                // protocolDisplayName: rec.data['protocol/displayName'],
-                // protocol: rec.data.protocol,
-                // title: rec.data.title,
-                // //      investigator: rec.data['investigatorId/lastName'],
-                // isAssigned: 0,
                 fromClient: true
             });
 
             this.store.insert(0, newRec);
-
             return newRec;
         }
     },

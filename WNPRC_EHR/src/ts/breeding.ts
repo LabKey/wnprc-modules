@@ -19,7 +19,13 @@ export class Breeding
      * @type ChildRecordConfiguration[]
      */
     private static readonly CHILD_RECORDS: ChildRecordConfiguration[] = [
-        { // ultrasounds
+        {   // breeding encounter
+            formName: 'Breeding Encounter',
+            parametersFactory: Breeding.createQueryParams,
+            queryName: '_BreedingEncounterByBreedingId',
+            schemaName: 'study',
+            title: 'Breeding Encounter'
+        }, { // ultrasounds
             formName: 'Ultrasounds',
             parametersFactory: Breeding.createQueryParams,
             queryName: '_UltrasoundsByPregnancyId',

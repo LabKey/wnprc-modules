@@ -18,14 +18,26 @@ package org.labkey.wnprc_ehr.table;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
+import org.labkey.api.view.ActionURL;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Set;
 
 
 /**
@@ -52,6 +64,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeBirthTable((AbstractTableInfo) table);
             else if (table.getName().equalsIgnoreCase("protocol") && table.getSchema().getName().equalsIgnoreCase("ehr"))
                 customizeProtocolTable((AbstractTableInfo)table);
+            else if (table.getName().equalsIgnoreCase("breeding_encounters") && table.getSchema().getName().equalsIgnoreCase("study")) {
+                customizeBreedingEncountersTable((AbstractTableInfo)table);
+            }
         }
     }
 
@@ -226,6 +241,45 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 });*/
 
 
+    }
+
+    private void customizeBreedingEncountersTable(AbstractTableInfo ti)
+    {
+        ColumnInfo sireid = ti.getColumn("sireid");
+        if (sireid != null)
+        {
+            UserSchema us = getUserSchema(ti, "study");
+            if (us != null)
+            {
+                sireid.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    @Override
+                    public DisplayColumn createRenderer(final ColumnInfo colInfo)
+                    {
+                        return new DataColumn(colInfo){
+
+                            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                            {
+                                ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
+                                String[] ids = ((String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"))).split(",");
+                                String urlString = "";
+                                for (int i = 0; i < ids.length; i++) {
+                                    String id = ids[i];
+                                    url.replaceParameter("participantId", id);
+                                    urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                                    urlString += PageFlowUtil.filter(id);
+                                    urlString += "</a>";
+                                    if (i + 1 < ids.length) {
+                                        urlString += ",";
+                                    }
+                                }
+                                out.write(urlString);
+                            }
+                        };
+                    }
+                });
+            }
+        }
     }
 
     private ColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)

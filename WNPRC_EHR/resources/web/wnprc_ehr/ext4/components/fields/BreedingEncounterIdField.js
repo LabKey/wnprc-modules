@@ -132,8 +132,11 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         this.loadedKey = key;
 
         var sql = 'select lsid,sireid,to_char(date, \'Mon DD, YYYY HH24:MI\') as date,to_char(enddate, \'Mon DD, YYYY HH24:MI\') as enddate \
-                    from breeding_encounters \
+                    from breeding_encounters be \
                     where Id = \'' + id + '\' \
+                    and not exists (select * \
+                                    from pregnancies p \
+                                    where p.breedingencounterid = be.lsid) \
                     order by date desc \
                     limit 5'.replace(/\s+/g, ' ');
         return sql;

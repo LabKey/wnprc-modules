@@ -251,31 +251,24 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(ti, "study");
             if (us != null)
             {
-                sireid.setDisplayColumnFactory(new DisplayColumnFactory()
-                {
-                    @Override
-                    public DisplayColumn createRenderer(final ColumnInfo colInfo)
-                    {
-                        return new DataColumn(colInfo){
+                sireid.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
-                            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                            {
-                                ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
-                                String[] ids = ((String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"))).split(",");
-                                String urlString = "";
-                                for (int i = 0; i < ids.length; i++) {
-                                    String id = ids[i];
-                                    url.replaceParameter("participantId", id);
-                                    urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
-                                    urlString += PageFlowUtil.filter(id);
-                                    urlString += "</a>";
-                                    if (i + 1 < ids.length) {
-                                        urlString += ",";
-                                    }
-                                }
-                                out.write(urlString);
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
+                        String[] ids = ((String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"))).split(",");
+                        String urlString = "";
+                        for (int i = 0; i < ids.length; i++) {
+                            String id = ids[i];
+                            url.replaceParameter("participantId", id);
+                            urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                            urlString += PageFlowUtil.filter(id);
+                            urlString += "</a>";
+                            if (i + 1 < ids.length) {
+                                urlString += ",";
                             }
-                        };
+                        }
+                        out.write(urlString);
                     }
                 });
             }

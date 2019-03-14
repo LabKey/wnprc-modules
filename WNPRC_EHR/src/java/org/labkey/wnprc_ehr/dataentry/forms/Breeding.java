@@ -25,9 +25,11 @@ public final class Breeding
      */
     private static final String MASTER_PANEL_XTYPE = "wnprc-appendrecordgridpanel";
     /**
-     * Panel xtype for the "linked" data that is linked to a particular, "parent" pregnancy record.
+     * Panel xtypes for the pregnancy and ultrasound data to provide some automated data entry
      */
-    private static final String LINKED_PANEL_XTYPE = "wnprc-pregnancylinkedgridpanel";
+    private static final String PREGNANCY_PANEL_XTYPE = "wnprc-pregnancygridpanel";
+    private static final String ULTRASOUND_PANEL_XTYPE = "wnprc-ultrasoundgridpanel";
+
 
     /**
      * Registers the breeding data entry forms in the passed EHR service for the passed module.
@@ -47,9 +49,9 @@ public final class Breeding
 
         // register the generic bulk entry forms
         Stream.of(Arrays.asList("Breeding Encounters", "breeding_encounters", MASTER_PANEL_XTYPE)
-                , Arrays.asList("Pregnancies", "pregnancies", "wnprc-pregnancygridpanel")
+                , Arrays.asList("Pregnancies", "pregnancies", PREGNANCY_PANEL_XTYPE)
                 , Arrays.asList("Pregnancy Outcomes", "pregnancy_outcomes", MASTER_PANEL_XTYPE)
-                , Arrays.asList("Ultrasounds", "ultrasounds", "wnprc-ultrasoundgridpanel")
+                , Arrays.asList("Ultrasounds", "ultrasounds", ULTRASOUND_PANEL_XTYPE)
         ).map(e -> Breeding.bulkFactory(module, e.get(0), e.get(1), e.get(2)))
                 .forEach(es::registerFormType);
     }

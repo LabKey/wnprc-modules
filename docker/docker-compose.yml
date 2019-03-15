@@ -22,7 +22,7 @@ services:
     environment:
       TZ: America/Chicago
     command: postgres -c log_directory=/logs -c config_file=/conf/postgresql.conf -c hba_file=/conf/pg_hba.conf
-    stop_signal: SIGINT
+    stop_signal: SIGTERM
     stop_grace_period: "120s"
 
   mailcatcher:
@@ -61,7 +61,7 @@ services:
     environment:
       CATALINA_OPTS:
       JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME}"
-      LK_BACKGROUND_USER: 
+      LK_BACKGROUND_USER:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL:
       PG_NAME:
@@ -104,3 +104,16 @@ services:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL:
       TZ: America/Chicago
+  cadvisor:
+    image: google/cadvisor:latest
+    depends_on:
+      - "postgres"
+    ports:
+      - 9080:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - network1

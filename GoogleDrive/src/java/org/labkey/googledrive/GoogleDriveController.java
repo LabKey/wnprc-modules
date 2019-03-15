@@ -2,7 +2,7 @@ package org.labkey.googledrive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -77,7 +77,8 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("registerAccount")
-    public class AddAcount extends ApiAction<SimpleApiJsonForm> {
+    public class AddAcount extends MutatingApiAction<SimpleApiJsonForm>
+    {
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {
             ObjectMapper mapper = new ObjectMapper();
@@ -119,7 +120,8 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("updateAccountDisplayName")
-    public class UpdateAccountDisplayName extends ApiAction<UpdateDisplayNameForm> {
+    public class UpdateAccountDisplayName extends MutatingApiAction<UpdateDisplayNameForm>
+    {
         @Override
         public Object execute(UpdateDisplayNameForm form, BindException errors) throws Exception {
             GoogleDriveService.get().updateDisplayNameForAccount(form.getId(), form.getDisplayName(), getUser());
@@ -129,7 +131,7 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("deleteAccount")
-    public class DeleteAccount extends ApiAction<AccountForm> {
+    public class DeleteAccount extends MutatingApiAction<AccountForm> {
         @Override
         public Object execute(AccountForm form, BindException errors) throws Exception {
             GoogleDriveService.get().deleteAccount(form.getId(), getUser());

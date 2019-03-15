@@ -611,7 +611,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             finalInvoiceRunsDataRegionTable.link(0, "downloadJetCsv").click();
         });
         TextSearcher tsvSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(csv)).setSearchTransformer(t -> t);
-        assertTextPresentInThisOrder(tsvSearcher, "NSCT", "Primate Center OCT");
+        assertTextPresentInThisOrder(tsvSearcher, "NSCT", "Primate Center OCT", "-4.8", "1010Set Project");
     }
 
     private DataRegionTable getInvoiceRunsDataRegionTable()

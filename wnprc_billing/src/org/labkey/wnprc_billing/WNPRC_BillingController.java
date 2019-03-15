@@ -24,6 +24,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.query.FieldKey;
@@ -206,6 +207,12 @@ public class WNPRC_BillingController extends SpringActionController
         List<JetInvoiceItem> invoiceItems = getJetItems(runId);
         InvoiceRun invoiceRun = getInvoiceRunById(runId);
         StringWriter writer = new StringWriter();
+
+        Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
+        String jetSettingFromModuleProperty = moduleProperties.get(WNPRC_BillingModule.JetCsvSetting).getEffectiveValue(getContainer());
+        String[] jetSettings = jetSettingFromModuleProperty.split(",");
+
+
         CSVWriter csvWriter = new CSVWriter(writer,CSVWriter.DEFAULT_SEPARATOR,CSVWriter.NO_QUOTE_CHARACTER);
         csvWriter.writeNext(new String[]{"NSCT"});
         String[] emptyLine = {""};
@@ -213,7 +220,9 @@ public class WNPRC_BillingController extends SpringActionController
         csvWriter.writeNext(new String[]{"Department","Fund","Program","Project","Activity ID","Account","Class",
                 "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
 
-        for (JetInvoiceItem invoiceItem : invoiceItems){
+        double sum = 0;
+        for (JetInvoiceItem invoiceItem : invoiceItems)
+        {
             csvWriter.writeNext(emptyLine);
             csvWriter.writeNext(new String[]{
                     invoiceItem.Department,
@@ -221,16 +230,36 @@ public class WNPRC_BillingController extends SpringActionController
                     invoiceItem.Program,
                     invoiceItem.Project,
                     invoiceItem.ActivityID,
-                    String.valueOf(invoiceItem.Account != null ?invoiceItem.Account.intValue():0),
+                    String.valueOf(invoiceItem.Account != null ? invoiceItem.Account.intValue() : 0),
                     invoiceItem.Class,
-                    String.valueOf(invoiceItem.Amount != null ?invoiceItem.Amount.doubleValue():0),
+                    String.valueOf(invoiceItem.Amount != null ? invoiceItem.Amount.doubleValue() : 0),
                     invoiceItem.Description,
-                    invoiceItem.Jnl_Ln_Ref,
+                    (invoiceItem.billingPeriodMMyy + invoiceItem.Project), //Jnl_Ln_Ref
                     invoiceItem.PurchRefNo,
                     invoiceItem.VoucherNo,
                     invoiceItem.InvoiceNo
             });
+            sum += invoiceItem.Amount != null ? invoiceItem.Amount.doubleValue() : 0;
         }
+
+        csvWriter.writeNext(emptyLine);
+        //last row in JET CSV with a negative total
+        csvWriter.writeNext(new String[]{
+                jetSettings[0], //Department
+                jetSettings[1], //Fund
+                jetSettings[2], //Program
+                jetSettings[3], //Project
+                null, //ActivityID
+                jetSettings[4], //Account,
+                null, //Class
+                String.valueOf(sum * -1.0), //Amount
+                invoiceItems.get(0).Description, //Description, which is same for all the rows
+                (invoiceItems.get(0).billingPeriodMMyy + jetSettings[3]), //Jnl_Ln_Ref. billingPeriodMMyy is same for all the rows
+                null, //PurchRefNo
+                null, //VoucherNo
+                null //InvoiceNo
+        });
+        csvWriter.writeNext(emptyLine);
         csvWriter.close();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yy");
@@ -294,7 +323,7 @@ public class WNPRC_BillingController extends SpringActionController
         Integer Account;
         Double Amount;
         String Description;
-        String Jnl_Ln_Ref;
+        String billingPeriodMMyy;
         String Class;
         String PurchRefNo;
         String VoucherNo;
@@ -381,14 +410,14 @@ public class WNPRC_BillingController extends SpringActionController
             Description = description;
         }
 
-        public String getJnl_Ln_Ref()
+        public String getbillingPeriodMMyy()
         {
-            return Jnl_Ln_Ref;
+            return billingPeriodMMyy;
         }
 
-        public void setJnl_Ln_Ref(String jnl_Ln_Ref)
+        public void setbillingPeriodMMyy(String partialDate)
         {
-            Jnl_Ln_Ref = jnl_Ln_Ref;
+            billingPeriodMMyy = partialDate;
         }
 
         public String getItemClass()
@@ -470,13 +499,13 @@ public class WNPRC_BillingController extends SpringActionController
 
             Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
             String contactEmail = moduleProperties.get(WNPRC_BillingModule.BillingContactEmail).getEffectiveValue(getContainer());
-            String billingAddess = moduleProperties.get(WNPRC_BillingModule.BillingAddress).getEffectiveValue(getContainer());
+            String billingAddress = moduleProperties.get(WNPRC_BillingModule.BillingAddress).getEffectiveValue(getContainer());
             String creditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
 
             double tierRate = accountTierRate != null ? accountTierRate.getTierRate() : 0;
             String formName = invoicePdfForm.getName();
-            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount) :
-                    new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddess, creditToAccount);
+            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount) :
+                    new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount);
 
             pdf.addPage();
             List<InvoicedItem> invoicedItems;

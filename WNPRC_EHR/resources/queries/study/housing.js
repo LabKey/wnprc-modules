@@ -1,12 +1,11 @@
 require("ehr/triggers").initScript(this);
 
-//TODO removed console output
 function onComplete(event, errors, helper){
     let housingRows = helper.getRows();
 
     //this object will be used to group animals by which cage they're being moved into
     let groupedByCage = {};
-    if (housingRows){
+    if (housingRows) {
         for (let i = 0; i < housingRows.length; i++){
             if (housingRows[i].row.reason === 'Breeding' && !housingRows[i].row.enddate) {
                 EHR.Server.Utils.findDemographics({
@@ -49,21 +48,21 @@ function onComplete(event, errors, helper){
                                         if (results.rows && results.rows.length) {
                                             let row = results.rows[0];
 
-                                            let remark = 'Breeding Ended\n';
+                                            let remark = '\n--Breeding Ended--';
                                             let remarkFound = false;
 
                                             if (!!housingRows[i].row.remark) {
                                                 remarkFound = true;
-                                                remark += housingRows[i].row.Id + ': ' + housingRows[i].row.remark + '\n';
+                                                remark += '\n' + housingRows[i].row.Id + ': ' + housingRows[i].row.remark;
                                             }
-                                            //TODO figure out why sire remarks aren't being recorded!!
+
                                             let sireList = row.sireid.split(",");
-                                            for (let sireId in sireList) {
-                                                for (let j = 0; j < housingRows.length; j++) {
-                                                    if (housingRows[j].row.Id === sireId && housingRows[j].row.reason === 'Breeding ended') {
-                                                        if (!!housingRows[j].row.remark) {
+                                            for (let j = 0; j < sireList.length; j++) {
+                                                for (let k = 0; k < housingRows.length; k++) {
+                                                    if (housingRows[k].row.Id === sireList[j] && housingRows[k].row.reason === 'Breeding ended') {
+                                                        if (!!housingRows[k].row.remark) {
                                                             remarkFound = true;
-                                                            remark += sireId + ': ' + housingRows[j].row.remark + '\n';
+                                                            remark += '\n' + sireList[j] + ': ' + housingRows[k].row.remark;
                                                         }
                                                     }
                                                 }
@@ -124,7 +123,7 @@ function onComplete(event, errors, helper){
         for(let femaleId in breeding_encounters) {
             if (breeding_encounters.hasOwnProperty(femaleId)) {
                 let sireid = '';
-                let remark = 'Breeding Started\n';
+                let remark = '--Breeding Started--\n';
                 let remarkFound = false;
                 if (!!breeding_encounters[femaleId][0].remark) {
                     remarkFound = true;
@@ -136,9 +135,8 @@ function onComplete(event, errors, helper){
                         remarkFound = true;
                         remark += breeding_encounters[femaleId][i].Id + ': ' + breeding_encounters[femaleId][i].remark + '\n';
                     }
-                    if (breeding_encounters[femaleId].length - i > 1) {
+                    if (i + 1 < breeding_encounters[femaleId].length) {
                         sireid += ',';
-                        remark += '\n';
                     }
                 }
                 remark = remarkFound ? remark : '';
@@ -150,7 +148,8 @@ function onComplete(event, errors, helper){
                     project: breeding_encounters[femaleId][0].project,
                     QCState: EHR.Server.Security.getQCStateByLabel('In Progress').RowId,
                     performedby: breeding_encounters[femaleId][0].performedby,
-                    remark: remark
+                    remark: remark,
+                    outcome: false
                 };
                 insertRows.push(encounter);
             }

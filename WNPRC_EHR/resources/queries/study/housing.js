@@ -50,6 +50,7 @@ function onComplete(event, errors, helper){
 
                                             let remark = '\n--Breeding Ended--';
                                             let remarkFound = false;
+                                            let ejacConfirmed = !!housingRows[i].row.ejacConfirmed;
 
                                             if (!!housingRows[i].row.remark) {
                                                 remarkFound = true;
@@ -63,6 +64,11 @@ function onComplete(event, errors, helper){
                                                         if (!!housingRows[k].row.remark) {
                                                             remarkFound = true;
                                                             remark += '\n' + sireList[j] + ': ' + housingRows[k].row.remark;
+                                                        }
+                                                        if (!!housingRows[k].row.ejacConfirmed) {
+                                                            remarkFound = true;
+                                                            ejacConfirmed = true;
+                                                            remark += '\n(Ejaculation Confirmed)';
                                                         }
                                                     }
                                                 }

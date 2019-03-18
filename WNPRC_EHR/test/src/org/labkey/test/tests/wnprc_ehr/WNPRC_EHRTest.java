@@ -611,7 +611,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             finalInvoiceRunsDataRegionTable.link(0, "downloadJetCsv").click();
         });
         TextSearcher tsvSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(csv)).setSearchTransformer(t -> t);
-        assertTextPresentInThisOrder(tsvSearcher, "NSCT", "Primate Center OCT", "-4.8", "1010Set Project");
+        assertTextPresentInThisOrder(tsvSearcher, "NSCT", "Primate Center OCT", "-94.8", "1010Set Project");
     }
 
     private DataRegionTable getInvoiceRunsDataRegionTable()
@@ -650,13 +650,20 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("quantity", "10");
         mapWithAnimalId.put("chargecategory", "Adjustment");
 
-        Map<String, String> mapWithDebitAct = new LinkedHashMap<>();
-        mapWithDebitAct.put("debitedaccount", ACCOUNT_ID_1);
-        mapWithDebitAct.put("date", "2010-10-23");
-        mapWithDebitAct.put("chargetype", "Business Office");
-        mapWithDebitAct.put("chargeId", "Blood draws - Additional Tubes");
-        mapWithDebitAct.put("quantity", "8");
-        mapWithDebitAct.put("chargecategory", "Adjustment");
+        Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
+        mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
+        mapWithDebitAcct.put("date", "2010-10-23");
+        mapWithDebitAcct.put("chargetype", "Business Office");
+        mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
+        mapWithDebitAcct.put("quantity", "8");
+        mapWithDebitAcct.put("chargecategory", "Adjustment");
+
+        Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
+        mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
+        mapWithDebitAcct2.put("date", "2010-10-22");
+        mapWithDebitAcct2.put("chargetype", "Clinical Pathology");
+        mapWithDebitAcct2.put("chargeId", "vaccine supplies");
+        mapWithDebitAcct2.put("quantity", "5");
 
         Map<String, String> mapWithAnimalId2 = new LinkedHashMap<>();
         mapWithAnimalId2.put("Id", PROJECT_MEMBER_ID);
@@ -677,7 +684,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Enter Misc. Charges with debit account");
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
-        enterChargesInGrid(1, mapWithDebitAct);
+        enterChargesInGrid(1, mapWithDebitAcct);
+
+        log("Enter another Misc. Charges with debit account");
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+        enterChargesInGrid(1, mapWithDebitAcct2);
 
         log("Submit the form");
         submitForm();

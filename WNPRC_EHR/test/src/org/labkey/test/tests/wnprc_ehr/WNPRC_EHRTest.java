@@ -968,7 +968,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvoicedItems()
     {
-        testReports("All Invoiced Items", 6, "test2312318","640991" , "$19.50", "$15.00",
+        testReports("All Invoiced Items", 7, "test2312318","640991" , "$19.50", "$15.00",
                 "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "$195.00");
     }
 

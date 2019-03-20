@@ -56,7 +56,7 @@
                 </fk>
             </column>
             <column columnName="ejaculation">
-                <columnTitle>Ejaculation?</columnTitle>
+                <columnTitle>Ejaculation Confirmed?</columnTitle>
                 <datatype>boolean</datatype>
             </column>
             <column columnName="project">

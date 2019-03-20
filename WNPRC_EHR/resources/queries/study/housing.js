@@ -75,7 +75,7 @@ function onComplete(event, errors, helper){
                                             }
 
                                             row.enddate = new Date(housingRows[i].row.date.time);
-                                            row.ejaculation = housingRows[i].row.ejacConfirmed;
+                                            row.ejaculation = ejacConfirmed;
                                             row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId;
                                             if (remarkFound) {
                                                 row.remark += remark;

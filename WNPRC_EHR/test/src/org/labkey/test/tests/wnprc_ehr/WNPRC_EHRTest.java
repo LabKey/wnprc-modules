@@ -438,13 +438,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         switchToWindow(1);
 
         DataRegionTable invoicedItemsByProject = new DataRegionTable("query", getDriver());
-        expectedRowData = Arrays.asList("2010-10-01 00:00", "2010-10-31 00:00", "00640991", "37.00",	"$1,065.08");
+        expectedRowData = Arrays.asList("2010-10-01", "2010-10-31", "00640991", "46.00",	"$1,028.95");
         actualRowData = invoicedItemsByProject.getRowDataAsText(0, "invoiceId/billingPeriodStart", "invoiceId/billingPeriodEnd", "project", "numItems", "total");
         assertEquals("Wrong row data for invoicedItemsByProject ", expectedRowData, actualRowData);
 
         log("Validating Summary By Item's total sum value");
         clickAndWait(Locator.linkContainingText("Summary By Item"));
-        assertTextPresent("Sum", "$1,065.08");
+        assertTextPresent("Sum", "$1,028.95");
 
         goBack();
 
@@ -452,7 +452,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable invoicedItems = new DataRegionTable("query", getDriver());
         assertEquals("Wrong row count", 5, invoicedItems.getDataRowCount());
         log("Validating Totals");
-        assertTextPresent("$806.00", "$13.00", "$1.95", "$231.13");
+        assertTextPresent("$806.00", "$13.00", "$1.95", "$195.00");
     }
 
     public int getUserId(String email) throws IOException, CommandException

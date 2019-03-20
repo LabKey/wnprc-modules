@@ -31,12 +31,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused") // reflection
-public class UpdateTo15_15 extends ModuleUpdate.ComparableUpdater
+public class UpdateTo15_16 extends ModuleUpdate.ComparableUpdater
 {
     /**
      * Logger for logging the logs
      */
-    private static final Logger LOG = Logger.getLogger(UpdateTo15_15.class);
+    private static final Logger LOG = Logger.getLogger(UpdateTo15_16.class);
 
     /**
      * Returns a new animal history report row built from the passed name, title, query, and description as a
@@ -175,7 +175,7 @@ public class UpdateTo15_15 extends ModuleUpdate.ComparableUpdater
     @Override
     public double getTargetVersion()
     {
-        return 15.15;
+        return 15.16;
     }
 
     @Override

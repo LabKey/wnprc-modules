@@ -184,7 +184,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public double getVersion()
     {
-        return 15.15;
+        return 15.16;
     }
 
     public boolean hasScripts()

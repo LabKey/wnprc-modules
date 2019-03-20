@@ -2,7 +2,8 @@ SELECT p.objectid
       ,p.id
       ,p.sireid
       ,p.date
-      ,to_char(p.date_conception_early, 'Mon DD, YYYY') || ' to ' || to_char(p.date_conception_late, 'Mon DD, YYYY') AS date_conception
+      ,to_char(p.date_conception, 'Mon DD, YYYY') AS est_date_conception
+      ,to_char(p.date_conception_early, 'Mon DD, YYYY') || ' to ' || to_char(p.date_conception_late, 'Mon DD, YYYY') AS conception_range
       ,to_char(timestampadd('SQL_TSI_DAY',  30,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY',  30,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_30
       ,to_char(timestampadd('SQL_TSI_DAY',  60,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY',  60,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_60
       ,to_char(timestampadd('SQL_TSI_DAY',  90,  p.date_conception_early), 'Mon DD, YYYY') || ' to ' || to_char(timestampadd('SQL_TSI_DAY',  90,  p.date_conception_late), 'Mon DD, YYYY') AS date_conception_plus_90
@@ -25,3 +26,4 @@ SELECT p.objectid
                        WHERE pregnancyid = p.lsid
                        ORDER BY date DESC
                        LIMIT 1)
+ORDER BY p.date_conception DESC

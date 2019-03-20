@@ -24,8 +24,11 @@
                             <fkColumnName>Id</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="date_conception">
-                        <columnTitle>Est. Conception</columnTitle>
+                    <column columnName="est_date_conception">
+                        <columnTitle>Est. Conception Date</columnTitle>
+                    </column>
+                    <column columnName="conception_range">
+                        <columnTitle>Conception Range</columnTitle>
                         <formatString>MM/dd/yyyy</formatString>
                     </column>
                     <column columnName="date_conception_plus_30">

@@ -52,6 +52,4 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             }
         }
     }
-
-
 }

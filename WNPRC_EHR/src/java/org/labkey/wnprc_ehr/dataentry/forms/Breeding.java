@@ -9,6 +9,7 @@ import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;
 import org.labkey.api.ehr.dataentry.SimpleFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_ehr.dataentry.generics.sections.AnimalDetailsPanel;
 
 import java.util.Arrays;
 import java.util.List;
@@ -114,6 +115,7 @@ public final class Breeding
         private static BreedingForm bulk(DataEntryFormContext ctx, Module owner, String formName, String queryName, String xtype)
         {
             return new BreedingForm(ctx, owner, formName,
+                    //new AnimalDetailsPanel(), //FYI Add back in if we want the animal details panel to show
                     new SimpleFormSection("study", queryName, formName, xtype)
                     {
                         @Override

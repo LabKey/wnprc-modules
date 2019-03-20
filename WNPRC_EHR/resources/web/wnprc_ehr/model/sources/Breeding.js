@@ -27,13 +27,13 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
         },
         'study.pregnancy_outcomes':         {
             Id:                             { columnConfig: { columnIndex: 1 } },
-            pregnancyid:                    { columnConfig: { columnIndex: 2, width: 200 } },
-            outcome:                        { columnConfig: { columnIndex: 3 } },
-            infantid:                       { columnConfig: { columnIndex: 4 } },
-            project:                        { columnConfig: { columnIndex: 5 } },
-            remark:                         { columnConfig: { columnIndex: 6, width: 400 } },
-            performedby:                    { columnConfig: { columnIndex: 7 } },
-            date:                           { columnConfig: { columnIndex: 8 } }
+            date:                           { columnConfig: { columnIndex: 2 } },
+            pregnancyid:                    { columnConfig: { columnIndex: 3, width: 200 } },
+            outcome:                        { columnConfig: { columnIndex: 4 } },
+            infantid:                       { columnConfig: { columnIndex: 5 } },
+            project:                        { columnConfig: { columnIndex: 6 } },
+            remark:                         { columnConfig: { columnIndex: 7, width: 400 } },
+            performedby:                    { columnConfig: { columnIndex: 8 } }
         },
         'study.ultrasounds': {
             Id:                             { columnConfig: { columnIndex:  1 } },

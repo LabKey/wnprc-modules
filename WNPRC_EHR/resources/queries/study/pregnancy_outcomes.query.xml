@@ -15,7 +15,9 @@
                             <fkDisplayColumnName>description</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="date"/>
+                    <column columnName="date">
+                        <columnTitle>Delivery Date</columnTitle>
+                    </column>
                     <column columnName="performedby"/>
                     <column columnName="pregnancyid">
                         <columnTitle>Pregnancy (Conc. Date)</columnTitle>

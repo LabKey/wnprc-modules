@@ -2,11 +2,14 @@
     <columns>
         <column name="Id" />
         <column name="date" />
+        <column name="schedule"/>
+        <column name="id/curlocation/location"/>
+        <column name="id/curlocation/cond"/>
+        <column name="assignedTo"/>
         <column name="project"/>
         <column name="protocolContact"/>
         <column name="remarks"/>
         <column name="reason"/>
-        <column name="schedule"/>
         <column name="qcstate"/>
         <column name="requestid"/>
 

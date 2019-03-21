@@ -12,6 +12,7 @@
               password="${jdbc.pass}"
               driverClassName="org.postgresql.Driver"
               url="${jdbc.url}"
+              maxTotal="40"
               maxActive="40"
               maxIdle="10"
               accessToUnderlyingConnectionAllowed="true"

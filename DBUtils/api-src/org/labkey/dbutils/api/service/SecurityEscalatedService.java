@@ -6,7 +6,7 @@ import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
-import org.labkey.dbutils.api.security.SecurityEscalator;
+import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
 import org.labkey.dbutils.api.schema.DecoratedTableInfo;
 import org.labkey.api.query.BatchValidationException;
@@ -110,6 +110,7 @@ public abstract class SecurityEscalatedService {
             // Wrap the whole thing in a transaction so that the insert is an all or nothing thing.
             try (DbScope.Transaction transaction = getTableInfo().getSchema().getScope().ensureTransaction()) {
                 try (SecurityEscalatorAggregator escalator = SecurityEscalatorAggregator.beginEscalation(user, container, escalationComment)) {
+                    escalator.registerSecurityEscalators(getEscalators(user, container, escalationComment));
                     returnedRows = getUpdateService().insertRows(user, container, this.castToCaseInsensitiveMap(rowMaps), batchValidationException, null, null);
                 }
                 catch (QueryUpdateServiceException|SQLException e) {

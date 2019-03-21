@@ -1,11 +1,13 @@
 **/.DS_Store
 
-docker/data
-docker/logs
-docker/.env
+docker/**/data
+docker/**/logs
+docker/**/.env
 docker/.gradle
 
 **/node_modules/
 **/build/
 
 **/resources/credits/dependencies.txt
+
+**/.gradle

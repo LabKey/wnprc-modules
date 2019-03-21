@@ -44,7 +44,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     if (oldRow && !(rowDate.getTime()>=nextDate.getTime()) && (oldRow.QCStateLabel == "Scheduled") ){
 
         if ((row.QCStateLabel == "In Progress" || row.QCStateLabel == "Scheduled") && !row.taskid ){
-            EHR.Server.Utils.addError(scriptErrors, 'date', 'Cannot request same day food deprives 2.', 'INFO');
+            EHR.Server.Utils.addError(scriptErrors, 'date', 'Cannot request same day food deprives.', 'INFO');
         }
 
         else if (row.QCStateLabel == "Started" && !row.depriveStartTime){
@@ -66,36 +66,14 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         }
     }
 
-    //test if statement remove once in production. Only allow request for animal in WMIR or A2
-    if (row.id && row.QCStateLabel == 'Scheduled' ){
-
-
-        EHR.Server.Utils.findDemographics({
-            participant: row.Id,
-            helper: helper,
-            scope: this,
-            callback: function(data){
-                if (data){
-                    if (row.Id ){
-                        var room = data['id/curlocation/room'] ||  '';
-                        var WMIRlocation = 'mr';
-                        var A2location = 'a2';
-                        if (!(room.indexOf(WMIRlocation) == 0 || room.indexOf(A2location) == 0)){
-                            EHR.Server.Utils.addError(scriptErrors,'Id','Food deprives are being tested and they can only be requested for WMIR and A2 areas. ' +
-                                                                        'Send your request to the Excel schedule.', 'ERROR');
-                        }
-
-                    }
-                }
-
-            }
-
-        });
-    }
 }
 function beforeUpdate(row, oldRow, scriptErrors){
     if (row.QCStateLabel=='Started' && oldRow.QCStateLabel=='Scheduled' && !row.depriveStartTime){
         EHR.Server.Utils.addError(scriptErrors, 'depriveStartTime', 'Need to enter a start time to start food deprive', 'ERROR');
+    }
+
+    if (row.QCStateLabel=='Complete' && oldRow.QCStateLabel=='Started' && (row.depriveStartTime > row.restoredTime)){
+        EHR.Server.Utils.addError(scriptErrors, 'restoredTime', 'Restore time must be after than start time', 'ERROR');
     }
 }
 function afterInsert(row, errors){
@@ -112,6 +90,8 @@ function setDescription(row, helper){
 
     if(row.reason)
         description.push('Reason: ' + EHR.Server.Utils.nullToString(row.reason));
+    if(row.remarks)
+        description.push('Remarks: ' + EHR.Server.Utils.nullToString(row.remarks));
     if (row.protocolContact)
         description.push('Protocol Contact: ' + EHR.Server.Utils.nullToString(row.protocolContact));
     if(row.depriveStartedBy)
@@ -119,7 +99,7 @@ function setDescription(row, helper){
     if (row.depriveStartTime)
         description.push('Start Time: ' + EHR.Server.Utils.nullToString(row.depriveStartTime));
     if (row.foodRestoredBy)
-        description.push('Restore by: ' + EHR.Server.Utils.nullToString(row.depriveRestoredBy));
+        description.push('Restore by: ' + EHR.Server.Utils.nullToString(row.foodRestoredBy));
     if (row.restoredTime)
         description.push('Restore Time: ' + EHR.Server.Utils.nullToString(row.restoredTime));
 

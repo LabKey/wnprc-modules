@@ -65,7 +65,7 @@ Ext4.define('EHR.window.AddStartedFoodDeprivesWindow', {
                     autoLoad: true,
                     schemaName: 'study',
                     queryName: 'foodDeprives',
-                    viewName: 'Started Food Deprive',
+                    viewName: 'Started Food Deprives',
                     sort: 'id'
 
                 },
@@ -74,8 +74,7 @@ Ext4.define('EHR.window.AddStartedFoodDeprivesWindow', {
                 }
             },{
                 xtype: 'textfield',
-                fieldLabel: 'Performed By',
-                value: LABKEY.Security.currentUser.displayName,
+                fieldLabel: 'Performed By',                
                 itemId: 'performedBy'
             }],
             buttons: [{
@@ -99,9 +98,14 @@ Ext4.define('EHR.window.AddStartedFoodDeprivesWindow', {
         var animalid = EHR.DataEntryUtils.ensureArray(this.down('#animalId').getValue()) || [];
         var area = this.down('#areaField') ? this.down('#areaField').getValue() : null;
         var rooms = EHR.DataEntryUtils.ensureArray(this.down('#roomField').getValue()) || [];
+        var performedBy = this.down('#performedBy') ? this.down('#performedBy').getValue() : null;
 
         if (!animalid.length && !area && !rooms.length){
             alert('Must provide at least an animalId, one room, or an area');
+            return;
+        }
+        if (!performedBy){
+            Ext4.Msg.alert('Error','Must enter initials in the  \'PerformedBy\' field');
             return;
         }
         var filterArray = [];
@@ -134,7 +138,7 @@ Ext4.define('EHR.window.AddStartedFoodDeprivesWindow', {
             schemaName: 'study',
             queryName: 'foodDeprives',
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
-            columns: 'lsid,objectid,Id,date,project,account,schedule,reason,remarks,assignedTo,separated,protocolContact,depriveStartTime,taskid,requestid,modified,qcstate',
+            columns: 'lsid,objectid,Id,date,project,account,schedule,reason,remarks,assignedTo,separated,protocolContact,depriveStartedBy,depriveStartTime,taskid,requestid,modified,qcstate',
             filterArray: filterArray,
             scope: this,
             success: this.onSuccess,
@@ -175,7 +179,7 @@ Ext4.define('EHR.window.AddStartedFoodDeprivesWindow', {
                 depriveStartedBy:   row.getValue('depriveStartedBy'),
                 separated:          row.getValue('separated'),
                 protocolContact:    row.getValue('protocolContact'),
-                depriveRestoredBy:  performedby,
+                foodRestoredBy:     performedby,
                 startedTaskId:      startTaskId,
                 taskId:             this.targetStore.storeCollection.getTaskId(),
                 requestid:          row.getValue('requestid'),

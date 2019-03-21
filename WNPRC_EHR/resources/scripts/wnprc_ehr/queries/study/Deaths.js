@@ -15,9 +15,10 @@ exports.registerTriggers = function (EHR, registerGenericHandler, Events) {
 
         // Trigger the update through Java.
         // noinspection JSUnresolvedFunction
+        console.log('sending notification from wnprc triggers animal '+ ids);
         WNPRC.Utils.getJavaHelper().sendDeathNotification(ids);
 
-        if (helper.getPublicParticipantsModified().length && !helper.isETL()) {
+      /*  if (helper.getPublicParticipantsModified().length && !helper.isETL()) {
             var generateAnEmail = 0;
             var valuesMap = {};
             var r;
@@ -239,7 +240,7 @@ exports.registerTriggers = function (EHR, registerGenericHandler, Events) {
                     recipients: recipients
                 });
             }
-        }
+        }*/
         function hasAnimalNotificationBeenSent(animalID) {
             var retValue = 0;
             LABKEY.Query.selectRows({

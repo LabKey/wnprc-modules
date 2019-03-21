@@ -321,7 +321,7 @@ EHR.reports.diagnostics = function(panel, tab){
 
     tab.add({
         xtype: 'ldk-querypanel',
-        style: 'margin-bottom:20px;',
+        style: 'margin-bottom:20px;min-height:500px',
         queryConfig: config
     });
 
@@ -725,11 +725,11 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
                                         hoverText: function(row){
                                             var lines = [];
 
-                                            lines.push('Date: ' + row.date.format('Y-m-d'));
+                                            lines.push('Date: ' + row.date.format(LABKEY.extDefaultDateFormat));
                                             lines.push('Weight: ' + row.weight + ' kg');
                                             lines.push('Latest Weight: ' + row.LatestWeight + ' kg');
                                             if(row.LatestWeightDate)
-                                                lines.push('Latest Weight Date: ' + row.LatestWeightDate.format('Y-m-d'));
+                                                lines.push('Latest Weight Date: ' + row.LatestWeightDate.format(LABKEY.extDefaultDateFormat));
                                             if(row.PctChange)
                                                 lines.push('% Change From Current: '+row.PctChange + '%');
                                             lines.push('Interval (Months): ' + row.IntervalInMonths);

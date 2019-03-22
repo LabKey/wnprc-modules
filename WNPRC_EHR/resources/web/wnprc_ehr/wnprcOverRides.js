@@ -7,15 +7,16 @@ Ext4.namespace('WNPRC_EHR');
 
 EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
     var dataRegion = LABKEY.DataRegions[dataRegionName],
-        headerEl = Ext4.DomQuery.select('table[lk-region-name=' + dataRegion.name + ']'),
+        headerEl = Ext4.get(dataRegion.domId + "-headerbar"),
         menu_customized = false;
 
     if (headerEl) {
-        var btnEls = Ext4.DomQuery.select('.labkey-menu-button', headerEl);
+        var btnEls = Ext4.DomQuery.select('.lk-menu-drop', headerEl.dom);
         Ext4.each(btnEls, function(btnEl) {
             if (btnEl.innerHTML.indexOf('More Actions') > -1) {
-                var menu = Ext4.menu.MenuMgr.get(Ext4.get(btnEl).getAttribute('lk-menu-id'));
-                if (menu) {
+                var menuEls = Ext4.DomQuery.select(".dropdown-menu", btnEl);
+                if (menuEls && menuEls.length > 0) {
+                    var menu = menuEls[0];
                     menu_customized = true;
                     var action = LABKEY.ActionURL.getAction();
                     var queryName = dataRegion.queryName.replace(' ', '');
@@ -38,7 +39,7 @@ EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
                         }
                     }
 
-                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^BloodDraws$/i)) {
+                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^blood$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Blood Draws', schemaName: 'study'})) {
                             WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Blood Draws'}], formType: 'Blood Draws'});
                             WNPRC_EHR.DatasetButtons.addChangeBloodQCStateBtn(dataRegion.name, menu);

@@ -261,7 +261,8 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
 
         @Override
-        protected String getResponse(Map files, FileUploadForm form) throws UploadException {
+        public String getResponse(FileUploadForm form, Map files) throws UploadException
+        {
             return "";
         }
     }

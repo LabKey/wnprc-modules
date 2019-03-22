@@ -31,7 +31,7 @@
 
     HashMap<String,HashMap> form = (HashMap<String,HashMap>)getModelBean();
 
-    boolean isAdmin = getUser().isSiteAdmin();
+    boolean isAdmin = getUser().hasSiteAdminPermission();
 %>
 
 <style>

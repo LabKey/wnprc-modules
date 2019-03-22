@@ -287,11 +287,8 @@ WNPRC_EHR.DatasetButtons = new function(){
         addMarkReviewedBtn: function(dataRegionName, menu, schemaName, queryName, config){
             config = config || {};
 
-            menu.add({
-                text: 'Mark Reviewed',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Mark Reviewed', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -401,8 +398,16 @@ WNPRC_EHR.DatasetButtons = new function(){
                         Ext.Msg.hide();
 
                     }
-                }
-            })
+                });
+        },
+
+        addMenuItem: function(menu, text, handler) {
+            var el = document.createElement('li');
+            var a = document.createElement('a');
+            a.innerText = text;
+            a.onclick = handler;
+            el.appendChild(a);
+            menu.appendChild(el);
         },
 
         /**
@@ -414,11 +419,8 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param [config.formType]
          */
         addCreateTaskFromIdsBtn: function(dataRegionName, menu, config){
-            menu.add({
-                text: 'Schedule '+config.formType,
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Schedule ' + config.formType, function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -559,8 +561,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                         Ext.Msg.hide();
 
                     }
-                }
-            });
+                });
         },
 
         /**
@@ -574,11 +575,8 @@ WNPRC_EHR.DatasetButtons = new function(){
         addCreateTaskBtn: function(dataRegionName, menu, config){
             config = config || {};
 
-            menu.add({
-                text: 'Schedule '+config.formType+' Task',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Schedule '+config.formType+' Task', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -712,8 +710,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                         Ext.Msg.hide();
 
                     }
-                }
-            });
+                });
         },
 
         /**
@@ -723,11 +720,8 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param menu
          */
         addChangeBloodQCStateBtn: function(dataRegionName, menu){
-            menu.add({
-                text: 'Change Request Status',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Change Request Status', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -874,8 +868,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                             }]
                         }).show();
                     }
-                }
-            })
+                });
         },
 
         /**
@@ -884,11 +877,8 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param menu
          */
         addChangeQCStateBtn: function(dataRegionName, menu){
-            menu.add({
-                text: 'Change Request Status',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Change Request Status', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -1007,8 +997,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                             }]
                         }).show();
                     }
-                }
-            })
+                });
         },
 
         /**
@@ -1032,20 +1021,13 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param menu
          */
         addFeedingTaskBtn: function(dataRegionName, menu){
-            menu.add({
-                text: 'Add Batch of Records',
-                dataRegionName: dataRegionName,
-                handler: function(){
+            this.addMenuItem(menu, 'Add Batch of Records', function() {
                     window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {formtype: 'Feeding'});
-                }
             });
         },
         addVVCChangeQCStateBtn: function(dataRegionName, menu){
-            menu.add({
-                text: 'Approve VVC Request',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Approve VVC Request', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -1167,8 +1149,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                             }]
                         }).show();
                     }
-                }
-            })
+                });
         }
     }
 };

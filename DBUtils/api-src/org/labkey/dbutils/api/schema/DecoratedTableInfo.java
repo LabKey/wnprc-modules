@@ -169,11 +169,6 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public NamedObjectList getSelectList() {
-        return _tableInfo.getSelectList();
-    }
-
-    @Override
     public NamedObjectList getSelectList(String columnName) {
         return _tableInfo.getSelectList(columnName);
     }

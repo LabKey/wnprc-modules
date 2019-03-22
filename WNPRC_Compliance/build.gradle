@@ -10,7 +10,7 @@ dependencies {
     external "org.jooq:jooq:3.8.4"
     external "org.apache.pdfbox:pdfbox:${pdfboxVersion}"
     jspCompile project("${project.parent.path}:WebUtils")
-    jspCompile project(":server:modules:experiment")
+    jspCompile project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"))
 }
 
 sourceSets {

@@ -1,3 +1,26 @@
+buildscript {
+    repositories {
+        maven {
+            url "${artifactory_contextUrl}/plugins-release"
+        }
+        if (gradlePluginsVersion.contains("SNAPSHOT"))
+        {
+            maven {
+                url "${artifactory_contextUrl}/plugins-snapshot-local"
+            }
+
+        }
+    }
+    dependencies {
+        classpath "org.labkey.build:gradlePlugins:${gradlePluginsVersion}"
+    }
+    configurations.all {
+        // Check for updates every build for SNAPSHOT dependencies
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}
+import org.labkey.gradle.util.BuildUtils
+
 sourceSets {
     api {
         java { srcDirs = ['api-src'] }
@@ -26,17 +49,20 @@ tasks.compileJava {
 
 dependencies {
     apiCompile 'org.jetbrains:annotations:15.0'
-    apiCompile project(':server:api')
+    apiCompile project(BuildUtils.getApiProjectPath(project.gradle))
     apiCompile project(":externalModules:wnprc-modules:java2ts")
 
     compile 'org.jetbrains:annotations:15.0'
     compile "junit:junit:${junitVersion}"
-    compile project(":server:api")
-    compile project(":server:internal")
+    compile project(BuildUtils.getApiProjectPath(project.gradle))
+    compile project(BuildUtils.getInternalProjectPath(project.gradle))
     compile project(":externalModules:labModules:LDK")
     compile project(":externalModules:DISCVR:OpenLdapSync")
     compile project(":externalModules:wnprc-modules:java2ts")
 }
+
+project.evaluationDependsOn(BuildUtils.getInternalProjectPath(project.gradle))
+project.evaluationDependsOn(BuildUtils.getApiProjectPath(project.gradle))
 
 tasks.jar {
     manifest {

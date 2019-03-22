@@ -1,0 +1,18 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="runId"/>
+        <column name="Department"/>
+        <column name="Fund"/>
+        <column name="Program"/>
+        <column name="Project"/>
+        <column name="Account"/>
+        <column name="Amount"/>
+        <column name="Description"/>
+        <column name="Jnl_Ln_Ref"/>
+        <column name="Class"/>
+        <column name="PurchRefNo"/>
+        <column name="VoucherNo"/>
+        <column name="InvoiceNo"/>
+        <column name="ActivityID"/>
+    </columns>
+</customView>

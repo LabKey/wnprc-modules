@@ -6,6 +6,7 @@ dependencies {
     compile project(path: "${project.parent.path}:DBUtils", configuration: "apiCompile")
     compile project("${project.parent.path}:DBUtils")
     compile project("${project.parent.path}:WebUtils")
+    compile "javax.servlet:jsp-api:2.0"
     external "org.jooq:jooq:3.8.4"
     external "org.apache.pdfbox:pdfbox:${pdfboxVersion}"
     jspCompile project("${project.parent.path}:WebUtils")
@@ -14,6 +15,6 @@ dependencies {
 
 sourceSets {
     main {
-        java { srcDirs = [ "src/java", "gen-src/java-jooq" ]}
+        java { srcDirs = [ "src", "gen-src/java-jooq" ]}
     }
 }

@@ -9,7 +9,7 @@
                     </column>
                     <column columnName="AnySurgery">
                         <url>/query/executeQuery.view?schemaName=study&amp;
-                            query.queryName=Clinical Encounters&amp;
+                            query.queryName=Encounters&amp;
                             query.type~contains=surgery&amp;
                             query.Id~eq=${Id}
                         </url>
@@ -17,12 +17,20 @@
                     </column>
                     <column columnName="MajorSurgery">
                         <url>/query/executeQuery.view?schemaName=study&amp;
-                            query.queryName=Clinical Encounters&amp;
+                            query.queryName=Encounters&amp;
                             query.Id~eq=${Id}&amp;
                             query.type~contains=surgery&amp;
                             query.Major~eq=Yes
                         </url>
                         <columnTitle>Had A Major Surgery?</columnTitle>
+                    </column>
+                    <column columnName="NumberOfMajorSurgeries">
+                        <url>/query/executeQuery.view?schemaName=study&amp;
+                            query.queryName=Encounters&amp;
+                            query.Id~eq=${Id}&amp;
+                            query.type~contains=surgery
+                        </url>
+                        <columnTitle>Number of Major Surgery</columnTitle>
                     </column>
                 </columns>
                 <titleColumn>MajorSurgery</titleColumn>

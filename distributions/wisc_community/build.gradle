@@ -1,0 +1,35 @@
+import org.labkey.gradle.plugin.Distribution
+import org.labkey.gradle.task.ModuleDistribution
+import org.labkey.gradle.util.BuildUtils
+import org.labkey.gradle.util.GroupNames
+
+apply plugin: 'org.labkey.distribution'
+
+Distribution.inheritDependencies(project, ":server:distributions:community")
+
+BuildUtils.addModuleDistributionDependencies(project, [
+         ":externalModules:labModules:GenotypeAssays"
+        ,":externalModules:labModules:laboratory"
+        ,":externalModules:labModules:LDK"
+        ,":externalModules:labModules:SequenceAnalysis"
+        ,":externalModules:labModules:Viral_Load_Assay"
+        ,":externalModules:DISCVR:OpenLdapSync"
+        ,":server:customModules:ehr"
+        ,":server:customModules:EHR_ComplianceDB"
+        ,":server:customModules:fcsexpress"
+        ,":server:customModules:genotyping"
+        ,":server:customModules:specimencheck"
+        ,":server:customModules:targetedms"
+])
+
+BuildUtils.addModuleDistributionDependencies(project, file("../../").listFiles().findAll { d ->
+    d.isDirectory() && (d.getName() != 'docker') && (d.getName() != 'java2ts') && (new File(d.getAbsolutePath(), 'build.gradle')).exists()
+}.collect { d ->
+    ":externalModules:wnprc-modules:${d.getName()}"
+})
+
+project.task("distribution", group: GroupNames.DISTRIBUTION, type: ModuleDistribution) { ModuleDistribution dist ->
+    dist.subDirName='wisc_community'
+    dist.includeTarGZArchive=true
+    dist.extraFileIdentifier='-UWisc-Community'
+}

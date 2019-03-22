@@ -1,7 +1,7 @@
 <module xmlns="http://labkey.org/moduleProperties/xml/">
     <properties>
         <propertyDescriptor name="BillingContactEmail">
-            <canSetPerContainer>true</canSetPerContainer>
+            <canSetPerContainer>false</canSetPerContainer>
             <description>This is the email address that will appear in the invoice footer.</description>
             <editPermissions>
                 <permission>ADMIN</permission>
@@ -9,7 +9,7 @@
             <defaultValue>Please set module property BillingContactEmail</defaultValue>
         </propertyDescriptor>
         <propertyDescriptor name="BillingAddress">
-            <canSetPerContainer>true</canSetPerContainer>
+            <canSetPerContainer>false</canSetPerContainer>
             <description>This is the address that will appear in the invoice header.</description>
             <editPermissions>
                 <permission>ADMIN</permission>
@@ -17,12 +17,20 @@
             <defaultValue>Please set module property BillingAddress</defaultValue>
         </propertyDescriptor>
         <propertyDescriptor name="CreditToAccount">
-            <canSetPerContainer>true</canSetPerContainer>
+            <canSetPerContainer>false</canSetPerContainer>
             <description>This is the Credit account information that will appear in the invoice header.</description>
             <editPermissions>
                 <permission>ADMIN</permission>
             </editPermissions>
             <defaultValue>Please set module property CreditToAccount</defaultValue>
+        </propertyDescriptor>
+        <propertyDescriptor name="JETCSVSetting">
+            <canSetPerContainer>false</canSetPerContainer>
+            <description>Comma separated values for 'Department,Fund,Program,Project,Account' for the total/last row in JET CSV.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+            <defaultValue>Set Department,Set Fund,Set Program,Set Project,Set Account</defaultValue>
         </propertyDescriptor>
     </properties>
 </module>

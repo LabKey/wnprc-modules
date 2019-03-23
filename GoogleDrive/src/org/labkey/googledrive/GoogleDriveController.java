@@ -77,7 +77,7 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("registerAccount")
-    public class AddAcount extends MutatingApiAction<SimpleApiJsonForm>
+    public class AddAccount extends MutatingApiAction<SimpleApiJsonForm>
     {
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception {

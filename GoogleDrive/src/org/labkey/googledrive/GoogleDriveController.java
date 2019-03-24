@@ -51,7 +51,7 @@ public class GoogleDriveController extends SpringActionController {
 
     @RequiresSiteAdmin()
     @ActionNames("RegisterAccountPage")
-    public class AddAcountPage extends GoogleDrivePageAction {
+    public class AddAccountPage extends GoogleDrivePageAction {
         @Override
         public String getPathToJsp() {
             return "view/RegisterServiceAccount.jsp";

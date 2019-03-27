@@ -147,6 +147,10 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
                     readOnly: true,
                 },
             },
+            code: {
+                //diagnostic ultrasound of abdomen and retroperitoneum, nos
+                defaultValue: 'p5-bb320'
+            }
         }
     }
 });

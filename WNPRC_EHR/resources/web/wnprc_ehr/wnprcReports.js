@@ -908,6 +908,31 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
             housingHTML = getErrorHTML("Please select three or fewer animals to view this visualization.");
         }
 
+        var filterArray = panel.getFilterArray(tab);
+        var title = panel.getTitleSuffix();
+
+        var pregnancies = panel.getQWPConfig({
+            title: 'Pregnancies' + title,
+            schemaName: 'study',
+            queryName: 'PregnancyInfo',
+            //viewName: 'abstract',
+            filters: filterArray.nonRemovable,
+            removeableFilters: filterArray.removable,
+            frame: true
+        });
+
+        tab.add({
+            xtype: 'ldk-querypanel',
+            style: 'margin-bottom:20px;',
+            queryConfig: pregnancies
+        });
+
+        // tab.add({
+        //     xtype: 'ldk-querypanel',
+        //     title: 'Test',
+        //     frame: true,
+        //     style: 'margin-bottom: 20px'
+        // });
 
         LABKEY.Utils.requiresCSS("wnprc_ehr/HousingAndAssignmentHistory.css");
         WNPRC_EHR.Utils.Lib.loadLibrary(['/webutils/lib/webutils'], function() {

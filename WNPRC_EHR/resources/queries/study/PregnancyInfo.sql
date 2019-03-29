@@ -16,7 +16,6 @@ SELECT p.objectid
       ,po.date outcome_date
       ,po.remark outcome_remark
       ,po.infantid
-      ,'EDIT' updatelink
   FROM pregnancies p
     -- select only the most recent outcome, in case there are multiple outcomes
     -- (note that we do not expect there to be multiples, but just in case)

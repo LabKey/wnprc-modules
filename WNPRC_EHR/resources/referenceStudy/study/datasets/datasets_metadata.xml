@@ -90,6 +90,16 @@
         <tableTitle>Pregnancies</tableTitle>
         <description>Contains one row for each pregnancy at the center.</description>
         <columns>
+            <column columnName="sireid">
+                <columnTitle>Sire</columnTitle>
+                <datatype>varchar</datatype>
+                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${sire_id}</url>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+            </column>
             <column columnName="breedingencounterid">
                 <columnTitle>Breeding Encounter</columnTitle>
                 <datatype>entityid</datatype>
@@ -126,16 +136,6 @@
                 <columnTitle>Estimated Due Date</columnTitle>
                 <datatype>date</datatype>
                 <formatString>y-M-d</formatString>
-            </column>
-            <column columnName="sireid">
-                <columnTitle>Sire</columnTitle>
-                <datatype>varchar</datatype>
-                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${sire_id}</url>
-                <fk>
-                    <fkDbSchema>study</fkDbSchema>
-                    <fkTable>animal</fkTable>
-                    <fkColumnName>Id</fkColumnName>
-                </fk>
             </column>
         </columns>
         <indices>

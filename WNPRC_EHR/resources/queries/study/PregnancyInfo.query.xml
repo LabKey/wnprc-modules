@@ -4,11 +4,6 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="PregnancyInfo" tableDbType="NOT_IN_DB">
                 <columns>
-                    <column columnName="updatelink">
-                        <columnTitle/>
-                        <url>/ehr/dataEntryForm.view?formType=Pregnancy&amp;objectid=${objectid}</url>
-                        <urlTarget>_blank</urlTarget>
-                    </column>
                     <column columnName="objectid">
                         <isHidden>true</isHidden>
                     </column>

@@ -224,6 +224,18 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         return new ContactsColumn(colInfo);
                     }
                 });*/
+        if (table.getColumn("expirationDate") == null)
+        {
+            UserSchema us = getUserSchema(table, "ehr");
+            if (us != null)
+            {
+                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
+                col2.setLabel("Expiration Date");
+                col2.setUserEditable(false);
+                col2.setIsUnselectable(true);
+                col2.setFk(new QueryForeignKey(us, null, "protocolExpirationDate", "protocol", "protocol"));
+            }
+        }
 
 
     }

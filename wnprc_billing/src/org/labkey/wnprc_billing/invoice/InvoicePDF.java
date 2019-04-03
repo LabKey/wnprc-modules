@@ -32,14 +32,12 @@ import static java.lang.Math.sqrt;
 
 public class InvoicePDF extends FPDF
 {
-    private String invoice_no;
     private String payment_info = "";
-    private String charges_total_month;
-    private String overheadCharges_total_month;
-    private String charges_total_balance_month;
-    private final Invoice invoice;
+    private double tier_rate;
+    private Invoice invoice;
     private Alias alias;
     private InvoiceRun invoiceRun;
+    private double grandTotal = 0.0;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yy");
     SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM-dd-yyyy");
@@ -51,13 +49,9 @@ public class InvoicePDF extends FPDF
         this.alias = alias;
         this.invoiceRun = invoiceRun;
         this.invoice = invoice;
-
+        this.tier_rate = tierRate;
         companyAddress += billingAddress;
         _creditToAccount = creditToAccount;
-        double overheadAssessment = invoice.getInvoiceAmount() * tierRate;
-        tier_rate = moneyFormat.format(tierRate);
-        overheadCharges_total_month = moneyFormat.format(overheadAssessment);
-        charges_total_balance_month = moneyFormat.format(invoice.getInvoiceAmount() + overheadAssessment);
         footer_text += contactEmail;
     }
 
@@ -105,6 +99,7 @@ public class InvoicePDF extends FPDF
             }
 
             subTotal += invoicedItem.getTotalCost();
+            grandTotal += invoicedItem.getTotalCost();
 
             items.addAll(getLineItemsFromInvoicedItem(invoicedItem));
         }
@@ -183,7 +178,6 @@ public class InvoicePDF extends FPDF
     int page_number = 1;
     String footer_text = "For questions regarding this invoice contact ";
     private String _creditToAccount;
-    String tier_rate;
 
     int angle = 0;
 
@@ -702,16 +696,16 @@ public class InvoicePDF extends FPDF
         setXY(r3, y1 + 2);
 //		Cell( 17,4, String.format("%0.2f", req_amount), '', '', 'R');
 //		setXY( r3, y1+7 );
-        Cell(17, 4, moneyFormat.format(invoice.getInvoiceAmount()), Alignment.RIGHT);
+        Cell(17, 4, moneyFormat.format(grandTotal), Alignment.RIGHT);
         setXY(r3, y1 + 8);
-        Cell(17, 4, tier_rate, Alignment.RIGHT);
+        Cell(17, 4, moneyFormat.format(tier_rate), Alignment.RIGHT);
         setXY(r3, y1 + 14);
-        Cell(17, 4, overheadCharges_total_month, Alignment.RIGHT);
+        Cell(17, 4, moneyFormat.format(grandTotal * tier_rate), Alignment.RIGHT); //overhead assessment
         setXY(r3, y1 + 20);
 //		Cell( 17,4, String.format("%0.2f", (floatval (charges_total) - floatval (charges_total_month))), '', '', 'R');
 //		setXY( r3, y1+17 );
 //		Cell( 17,4, String.format("%0.2f", (req_amount - charges_total)), '', '', 'R');
-        Cell(17, 4, charges_total_balance_month, Alignment.RIGHT);
+        Cell(17, 4, moneyFormat.format(grandTotal + (grandTotal * tier_rate)), Alignment.RIGHT); //grandtotal plus overhead assessment
     }
 
 

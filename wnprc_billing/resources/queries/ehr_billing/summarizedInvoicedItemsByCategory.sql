@@ -1,7 +1,7 @@
 SELECT
 	MAX(summarizedInvoiceItems.date) AS date,
 	summarizedInvoiceItems.category AS comment,
-	SUM(summarizedInvoiceItems.totalcost) AS totalcost,
+	SUM(summarizedInvoiceItems.totalcostdirect) AS totalcost,
 	summarizedInvoiceItems.invoicenumber
 FROM (
 				SELECT
@@ -9,7 +9,7 @@ FROM (
 					(CASE WHEN category like '%Misc. Fees%' AND chargeId.departmentCode IS NULL THEN category
 								WHEN category like '%Misc. Fees%' AND chargeId.departmentCode IS NOT NULL THEN chargeId.departmentCode
 								ELSE category END) AS category,
-					totalcost,
+					totalcostdirect,
 					invoiceNumber
 				FROM
 				ehr_billing.invoiceditems

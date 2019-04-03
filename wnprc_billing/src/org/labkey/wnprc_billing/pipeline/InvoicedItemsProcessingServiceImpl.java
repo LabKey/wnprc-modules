@@ -119,7 +119,7 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
     @Override
     public String getInvoiceNum(Map<String, Object> row, Date billingPeriodEndDate)
     {
-        SimpleDateFormat f = new SimpleDateFormat("MMddYYYY");//d = day in a month, D = day in a year
+        SimpleDateFormat f = new SimpleDateFormat("MMddyyyy");//d = day in a month, D = day in a year, yyyy = calendar year
         String dateStr = f.format(billingPeriodEndDate);
         String debitedAcct = (String)row.getOrDefault("debitedAccount", "Unknown");
         return dateStr + debitedAcct.toUpperCase();

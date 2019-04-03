@@ -236,14 +236,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 col2.setFk(new QueryForeignKey(us, null, "protocolExpirationDate", "protocol", "protocol"));
             }
         }
-        
+
         if (table.getColumn("countsBySpecies") == null)
         {
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
                 ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
-                col2.setLabel("Counts Per Species");
+                col2.setLabel("Max Animals Per Species");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
                 col2.setFk(new QueryForeignKey(us, null, "protocolCountsBySpecies", "protocol", "protocol"));

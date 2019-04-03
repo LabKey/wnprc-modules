@@ -12,4 +12,3 @@ SELECT
   TIMESTAMPADD('SQL_TSI_YEAR', 3, p.approve) as expirationDate
 
 FROM ehr.protocol p
-GROUP BY p.protocol, p.approve

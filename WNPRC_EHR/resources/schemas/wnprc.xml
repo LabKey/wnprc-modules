@@ -60,4 +60,33 @@
       <column columnName="modified"/>
     </columns>
   </table>
+  <table tableName="animal_requests" tableDbType="TABLE">
+    <tableTitle>Animal Requests</tableTitle>
+    <columns>
+      <column columnName="rowid"/>
+      <column columnName="principalinvestigator"/>
+      <column columnName="date"/>
+      <column columnName="speciesneeded"/>
+      <column columnName="sex"/>
+      <column columnName="age"/>
+      <column columnName="numberofanimals"/>
+      <column columnName="viralstatus"/>
+      <column columnName="dateneeded"/>
+      <column columnName="protocol"/>
+      <column columnName="project"/>
+      <column columnName="account"/>
+      <column columnName="comments"/>
+      <column columnName="requestid"/>
+      <column columnName="taskid"/>
+      <column columnName="QCState"/>
+      <column columnName="dateapprovedordenied"/>
+      <column columnName="dateorderd"/>
+      <column columnName="datearrival"/>
+      <column columnName="container"/>
+      <column columnName="createdby"/>
+      <column columnName="created"/>
+      <column columnName="modifiedby"/>
+      <column columnName="modified"/>
+    </columns>
+  </table>
 </tables>

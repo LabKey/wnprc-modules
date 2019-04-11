@@ -42,6 +42,7 @@ public class InvoicePDF extends FPDF
     SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yy");
     SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM-dd-yyyy");
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
+    DecimalFormat quantityFormat = new DecimalFormat("#,##0.00");
 
     public InvoicePDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddress, String creditToAccount)
     {
@@ -235,7 +236,7 @@ public class InvoicePDF extends FPDF
                 @Override
                 public String getValue(FormattedLineItem lineItem)
                 {
-                    return lineItem._quantity == null? "": Double.toString(lineItem._quantity);
+                    return lineItem._quantity == null? "": quantityFormat.format(lineItem._quantity);
                 }
             },
             new Column("Unit Price", 20, Alignment.RIGHT)
@@ -252,7 +253,7 @@ public class InvoicePDF extends FPDF
                 public String getValue(FormattedLineItem lineItem)
                 {
 
-                    return lineItem._linePrice == null ?"":moneyFormat.format(lineItem._linePrice);
+                    return lineItem._linePrice == null ?"": moneyFormat.format(lineItem._linePrice);
                 }
             });
 
@@ -442,11 +443,6 @@ public class InvoicePDF extends FPDF
         int length = 0;//GetStringWidth (name);
         setTextColor(199, 0, 49);
         Cell(length, 2, name, Position.BELOW, Alignment.CENTER);
-        //setXY (x1, y1 + 3 );
-        //setFont ("Arial", Collections.emptySet(),10);
-        //length = 0;//GetStringWidth (adress);
-        //lines = sizeOfText(adress, length);
-        //MultiCell (length, 4, adress, 0, 'C');
     }
 
     private void addAddress(String address) throws IOException
@@ -454,10 +450,6 @@ public class InvoicePDF extends FPDF
         int x1 = 20;
         int y1 = 5;
 
-        //setXY (x1, y1);
-        //setFont ("Arial", Collections.singleton(FontStyle.BOLD),12);
-        //length = 0;//GetStringWidth (name);
-        //Cell (length, 2, name, 0, 0, 'C');
         setXY(x1, y1 + 3);
         setFont("Arial", Collections.emptySet(), 10);
         setTextColor(1, 1, 1);
@@ -668,17 +660,13 @@ public class InvoicePDF extends FPDF
     {
         float r1 = w - 90;
         float r2 = r1 + 80;
-        //y1= h - 55;
         float y1 = h - 40;
-//		y2= y1+23;
         float y2 = y1 + 26;
         RoundedRect(r1, y1, (r2 - r1), (y2 - y1), 2.5, "D");
         Line(new Coordinate(r1 + 50, y1), new Coordinate(r1 + 50, y2));
         setFont("Arial", Collections.singleton(FontStyle.BOLD), 9);
         setXY(r1, y1 + 2);
-//		po_or_req = (type == "blanket") ? "REQ AMOUNT" : "PO AMOUNT";
-//		Cell(48,4, po_or_req, Alignment.RIGHT);
-//		setXY( r1, y1+7 );
+
         Cell(48, 4, "CHARGES THIS MONTH", Alignment.RIGHT);
 
         setXY(r1, y1 + 8);
@@ -687,24 +675,19 @@ public class InvoicePDF extends FPDF
         setXY(r1, y1 + 14);
         Cell(48, 4, "OVERHEAD ASSESSMENT", Alignment.RIGHT);
         setXY(r1, y1 + 20);
-//		Cell(48,4, "PREVIOUS CHARGES", Alignment.RIGHT);
-//		setXY( r1, y1+17 );
-//		Cell(48,4, "BALANCE REMAINING", Alignment.RIGHT);
+
         Cell(48, 4, "BALANCE DUE", Alignment.RIGHT);
         float r3 = r2 - 25;
         setFont("Arial", Collections.emptySet(), 10);
         setXY(r3, y1 + 2);
-//		Cell( 17,4, String.format("%0.2f", req_amount), '', '', 'R');
-//		setXY( r3, y1+7 );
+
         Cell(17, 4, moneyFormat.format(grandTotal), Alignment.RIGHT);
         setXY(r3, y1 + 8);
         Cell(17, 4, moneyFormat.format(tier_rate), Alignment.RIGHT);
         setXY(r3, y1 + 14);
         Cell(17, 4, moneyFormat.format(grandTotal * tier_rate), Alignment.RIGHT); //overhead assessment
         setXY(r3, y1 + 20);
-//		Cell( 17,4, String.format("%0.2f", (floatval (charges_total) - floatval (charges_total_month))), '', '', 'R');
-//		setXY( r3, y1+17 );
-//		Cell( 17,4, String.format("%0.2f", (req_amount - charges_total)), '', '', 'R');
+
         Cell(17, 4, moneyFormat.format(grandTotal + (grandTotal * tier_rate)), Alignment.RIGHT); //grandtotal plus overhead assessment
     }
 
@@ -734,17 +717,6 @@ public class InvoicePDF extends FPDF
         }
     }
 
-    private void addLineFormat(List<List<String>> tab)
-    {
-//        global format, columns;
-
-//        while ( list( lib, pos ) = each (columns) )
-//        {
-//            if ( isset( tab["lib"] ) )
-//                format[ lib ] = tab["lib"];
-//        }
-    }
-
     public void addLines(List<FormattedLineItem> lineItems) throws IOException
     {
         boolean newPage = false;
@@ -754,7 +726,6 @@ public class InvoicePDF extends FPDF
                 addPage(currentOrientation);
                 newPage = false;
             }
-//            $bold = ($line["Charge Date"] == ' ') ? false : true;
             float size = addLine(getY(), lineItem, lineItem._isBold);
             setY(size + 1);
             if (getY() >= 225)

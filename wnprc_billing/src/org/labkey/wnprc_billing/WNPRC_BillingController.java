@@ -43,6 +43,8 @@ import org.springframework.validation.BindException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
@@ -52,6 +54,7 @@ public class WNPRC_BillingController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_BillingController.class);
     public static final String NAME = "wnprc_billing";
+    private NumberFormat decimalFormat = new DecimalFormat("###0.00"); //note no comma in the format, otherwise it will get separated in the csv.
 
     public WNPRC_BillingController()
     {
@@ -220,7 +223,7 @@ public class WNPRC_BillingController extends SpringActionController
         csvWriter.writeNext(new String[]{"Department","Fund","Program","Project","Activity ID","Account","Class",
                 "Amount","Description","Jnl_Ln_Ref","Purch Ref No","Voucher No","Invoice No"});
 
-        double sum = 0;
+        double sum = 0.0;
         for (JetInvoiceItem invoiceItem : invoiceItems)
         {
             csvWriter.writeNext(emptyLine);
@@ -232,7 +235,7 @@ public class WNPRC_BillingController extends SpringActionController
                     invoiceItem.ActivityID,
                     String.valueOf(invoiceItem.Account != null ? invoiceItem.Account.intValue() : 0),
                     invoiceItem.Class,
-                    String.valueOf(invoiceItem.Amount != null ? invoiceItem.Amount.doubleValue() : 0),
+                    String.valueOf(invoiceItem.Amount != null ? decimalFormat.format(invoiceItem.Amount.doubleValue()) : 0.00),
                     invoiceItem.Description,
                     (invoiceItem.billingPeriodMMyy + invoiceItem.Project), //Jnl_Ln_Ref
                     invoiceItem.PurchRefNo,
@@ -252,7 +255,7 @@ public class WNPRC_BillingController extends SpringActionController
                 null, //ActivityID
                 jetSettings[4], //Account,
                 null, //Class
-                String.valueOf(sum * -1.0), //Amount
+                String.valueOf(decimalFormat.format(sum * -1.0)), //Amount
                 invoiceItems.get(0).Description, //Description, which is same for all the rows
                 (invoiceItems.get(0).billingPeriodMMyy + jetSettings[3]), //Jnl_Ln_Ref. billingPeriodMMyy is same for all the rows
                 null, //PurchRefNo

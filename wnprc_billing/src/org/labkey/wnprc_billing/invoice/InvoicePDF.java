@@ -44,7 +44,17 @@ public class InvoicePDF extends FPDF
     DecimalFormat moneyFormat = new DecimalFormat("#,##0.00");
     DecimalFormat quantityFormat = new DecimalFormat("#,##0.00");
 
-    public InvoicePDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddress, String creditToAccount)
+    String companyName = "Wisconsin National Primate Research Center";
+    String companyAddress = "University of Wisconsin - Madison\n";
+    String type = "Totally fake";
+    int page_number = 1;
+    String footer_text = "For questions regarding this invoice contact ";
+    private String _creditToAccount;
+    private String _chargeLine;
+
+    int angle = 0;
+
+    public InvoicePDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddress, String creditToAccount, String chargeLine)
     {
         super(Format.LETTER);
         this.alias = alias;
@@ -54,6 +64,7 @@ public class InvoicePDF extends FPDF
         companyAddress += billingAddress;
         _creditToAccount = creditToAccount;
         footer_text += contactEmail;
+        _chargeLine = chargeLine;
     }
 
 
@@ -172,15 +183,6 @@ public class InvoicePDF extends FPDF
             throw new UnexpectedException(e);
         }
     }
-
-    String companyName = "Wisconsin National Primate Research Center";
-    String companyAddress = "University of Wisconsin - Madison\n";
-    String type = "Totally fake";
-    int page_number = 1;
-    String footer_text = "For questions regarding this invoice contact ";
-    private String _creditToAccount;
-
-    int angle = 0;
 
     // total width is 190
     protected static abstract class Column
@@ -335,7 +337,8 @@ public class InvoicePDF extends FPDF
             page_number++;
             addGrantAddress();
             addInvoiceNo();
-            addCharge();
+            addChargeLine();
+            addCreditLine();
             addPaymentInfo();
             addAccountContact(alias.getContact_email());
             addBillingDate(invoiceRun.getBillingPeriodStart(), invoiceRun.getBillingPeriodEnd());
@@ -610,19 +613,31 @@ public class InvoicePDF extends FPDF
         MultiCell(0, 4, invoiceNo, null, Alignment.LEFT, false);
     }
 
-    private void addCharge() throws IOException
+    private void addChargeLine() throws IOException
+    {
+        float x = w - 98;
+        float y = 45;
+
+        setXY(x, y);
+        String font = "Courier";
+        setFont(font, Collections.singleton(FontStyle.BOLD), 11);
+        String chargeLine = (StringUtils.isNotBlank(_chargeLine)) ? ("CHARGE: " + _chargeLine) : "";
+        MultiCell(0, 4, chargeLine, null, Alignment.LEFT, false);
+    }
+
+    private void addCreditLine() throws IOException
     {
         float x = w - 98;
         float y = 50;
 
         setXY(x, y);
-        String font = "Courier";//: "Arial";
+        String font = "Courier";
         setFont(font, Collections.singleton(FontStyle.BOLD), 11);
-        String charge = "CREDIT: ";
-        charge += _creditToAccount;
-        MultiCell(0, 4, charge, null, Alignment.LEFT, false);
+        String creditLine = (StringUtils.isNotBlank(_creditToAccount)) ? ("CREDIT: " + _creditToAccount) : "";
+        MultiCell(0, 4, creditLine, null, Alignment.LEFT, false);
 
     }
+
 
     private String addItem(String item)
     {

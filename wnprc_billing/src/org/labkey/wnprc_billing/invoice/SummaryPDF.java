@@ -8,9 +8,9 @@ import java.util.List;
 
 public class SummaryPDF extends InvoicePDF
 {
-    public SummaryPDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddress, String creditToAccount)
+    public SummaryPDF(Invoice invoice, Alias alias, InvoiceRun invoiceRun, double tierRate, String contactEmail, String billingAddress, String creditToAccount, String creditLine)
     {
-        super(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount);
+        super(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount, creditLine);
     }
 
     List<Column> headers = Arrays.asList(

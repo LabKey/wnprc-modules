@@ -34,6 +34,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.wnprc_billing.domain.*;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
@@ -503,12 +504,23 @@ public class WNPRC_BillingController extends SpringActionController
             Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
             String contactEmail = moduleProperties.get(WNPRC_BillingModule.BillingContactEmail).getEffectiveValue(getContainer());
             String billingAddress = moduleProperties.get(WNPRC_BillingModule.BillingAddress).getEffectiveValue(getContainer());
-            String creditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
+
+            String creditToAccount = null;
+            String chargeLine = null;
+            if (alias.getType().toLowerCase().contains("internal"))
+            {
+                creditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
+                chargeLine = (StringUtils.isNotBlank(alias.getUw_fund()) ? alias.getUw_fund() : "") +
+                            " " + (StringUtils.isNotBlank(alias.getUw_account()) ?  alias.getUw_account() : "") +
+                            " " + (StringUtils.isNotBlank(alias.getUw_udds()) ? alias.getUw_udds() : "") +
+                            " 4 " + //4 is a Program Number, and it will always remain 4.
+                            (StringUtils.isNotBlank(alias.getUw_class_code()) ? alias.getUw_class_code() : "");
+            }
 
             double tierRate = accountTierRate != null ? accountTierRate.getTierRate() : 0;
             String formName = invoicePdfForm.getName();
-            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount) :
-                    new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount);
+            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount, chargeLine) :
+                    new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount, chargeLine);
 
             pdf.addPage();
             List<InvoicedItem> invoicedItems;

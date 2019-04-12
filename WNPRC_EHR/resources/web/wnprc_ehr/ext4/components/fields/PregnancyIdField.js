@@ -20,8 +20,8 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
             containerPath: ctx ? ctx['EHRStudyContainer'] : null,
             schemaName: 'study',
             queryName: 'pregnancies',
-            columns: 'lsid,date_conception_early,sireid',
-            sort: '-date_conception_early',
+            columns: 'lsid,date_conception,sireid',
+            sort: '-date_conception',
             storeId: ['study', 'pregnancies', 'Id', 'lsid'].join('||'),
             autoLoad: true
         });
@@ -30,7 +30,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         this.onTrigger2Click = Ext4.form.field.ComboBox.prototype.onTriggerClick;
 
         Ext4.apply(this, {
-            displayField: 'date_conception_early',
+            displayField: 'date_conception',
             valueField: 'lsid',
             queryMode: 'local',
             validationDelay: 500,
@@ -39,7 +39,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
                 type: 'labkey-store',
                 schemaName: 'study',
                 sql: this.makeSql(),
-                sort: '-date_conception_early',
+                sort: '-date_conception',
                 autoLoad: false,
                 loading: true,
                 listeners: {
@@ -85,7 +85,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
     },
 
     getInnerTpl: function(){
-        return ['Sire: {[values["sireid"] + " - " + values["date_conception_early"]]}'];
+        return ['Sire: {[values["sireid"] + " - " + values["date_conception"]]}'];
     },
 
     trigger1Cls: 'x4-form-search-trigger',
@@ -117,17 +117,17 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,to_char(date_conception_early, \'Mon DD, YYYY HH24:MI\') as date_conception_early, sireid \
+        var sql = 'select lsid,to_char(date_conception, \'Mon DD, YYYY HH24:MI\') as date_conception, sireid \
                from (select p.lsid \
-                           ,p.date_conception_early \
+                           ,p.date_conception \
                            ,p.sireid \
                        from pregnancies p \
                       where p.Id = \'' + id + '\' \
                         and not exists (select * \
                                           from pregnancy_outcomes po \
                                          where po.pregnancyid = p.lsid) \
-                                      order by date_conception_early desc) \
-              current_pregnancies order by date_conception_early desc'.replace(/\s+/g, ' ');
+                                      order by date_conception desc) \
+              current_pregnancies order by date_conception desc'.replace(/\s+/g, ' ');
 
         return sql;
     },
@@ -195,10 +195,10 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
 
         rec = this.allPregnancyStore.findRecord('pregnancyid', val);
         if (rec){
-            var newRec = this.store.createModel({});
+            var newRec = this.store.createModel({})
             newRec.set({
                 lsid: rec.data.lsid,
-                date_conception_early: rec.data.date_conception_early,
+                date_conception: rec.data.date_conception,
                 fromClient: true
             });
 

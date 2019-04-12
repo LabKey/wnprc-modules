@@ -143,10 +143,10 @@
                 <column>sireid</column>
             </index>
             <index type="non-unique">
-                <column>date_conception_early</column>
+                <column>date_conception</column>
             </index>
             <index type="non-unique">
-                <column>date_due_early</column>
+                <column>date_due</column>
             </index>
         </indices>
     </table>
@@ -161,7 +161,7 @@
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>pregnancies</fkTable>
                     <fkColumnName>lsid</fkColumnName>
-                    <fkDisplayColumnName>date_conception_early</fkDisplayColumnName>
+                    <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                 </fk>
             </column>
             <column columnName="outcome">
@@ -219,7 +219,7 @@
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>pregnancies</fkTable>
                     <fkColumnName>lsid</fkColumnName>
-                    <fkDisplayColumnName>date_conception_early</fkDisplayColumnName>
+                    <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                 </fk>
             </column>
             <column columnName="project">

@@ -276,7 +276,7 @@
                 <datatype>float</datatype>
             </column>
             <column columnName="head_circumference_gest_day">
-                <columnTitle>HD GD</columnTitle>
+                <columnTitle>HC GD</columnTitle>
                 <description>Estimated gestation day based on head circumference</description>
                 <datatype>integer</datatype>
             </column>

@@ -64,7 +64,10 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
             listeners: {
                 scope: this,
                 beforerender: function(field){
-                    var target = field.up('form');
+                    let target = field.up('form');
+                    if (!!target && !target.hasListener('pregnancydatechange_' + field.name)) {
+                        field.mon(target, 'pregnancydatechange_' + field.name, field.updatePregnancyConceptionDates, field, {buffer: 300});
+                    }
                     if (!target)
                         target = field.up('grid');
 
@@ -92,6 +95,46 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         });
 
         this.callParent(arguments);
+    },
+
+    updatePregnancyConceptionDates: function(fieldName, val, oldVal) {
+        let theForm = this.up('form').getForm();
+        let animalIdField = theForm.findField('Id');
+        let animalId = !!animalIdField ? animalIdField.value : '';
+
+        if (!!animalId && !!val && (val !== oldVal)) {
+            let gestationPeriod = 165; //Rhesus
+            if (animalId.startsWith('cy')) {
+                //Cynomolgus
+                gestationPeriod = 155;
+            } else if (animalId.startsWith('cj')) {
+                //Marmoset
+                gestationPeriod = 144;
+            }
+
+            LABKEY.Query.selectRows({
+                schemaName: 'study',
+                queryName: 'breeding_encounters',
+                columns: 'date,enddate',
+                filterArray: [
+                    LABKEY.Filter.create('lsid', val, LABKEY.Filter.Types.EQUALS)
+                ],
+                scope: this,
+                success: function(data) {
+                    if (data.rows && data.rows.length) {
+                        var row = data.rows[0];
+                        var early = LDK.ConvertUtils.parseDate(row.date, 'Y/m/d H:i:s');
+                        //Conception can occur up to 3 days after the breeding window has ended
+                        var late = Ext4.Date.add(LDK.ConvertUtils.parseDate(row.enddate, 'Y/m/d H:i:s'), Ext4.Date.DAY, 3);
+                        theForm.findField('date_conception_early').setValue(early);
+                        theForm.findField('date_conception_late').setValue(late);
+                        theForm.findField('date_due_early').setValue(Ext4.Date.add(early, Ext4.Date.DAY, gestationPeriod));
+                        theForm.findField('date_due_late').setValue(Ext4.Date.add(late, Ext4.Date.DAY, gestationPeriod));
+                    }
+                },
+                failure: EHR.Utils.onFailure
+            });
+        }
     },
 
     getInnerTpl: function(){

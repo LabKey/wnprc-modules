@@ -3,7 +3,7 @@ SELECT
        Id,
        transactionNumber,
        item,
-       (CASE WHEN comment IS NULL THEN 'Unknown Item' ELSE comment END) AS comment,
+       comment,
        chargeId.departmentCode AS groupName,
        quantity,
        unitCostDirect AS unitCost,

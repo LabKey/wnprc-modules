@@ -79,7 +79,7 @@ public class InvoicePDF extends FPDF
 
         for (InvoicedItem invoicedItem : invoicedItems)
         {
-            String groupHeader = (null == invoicedItem.getGroupName() ? invoicedItem.getCategory() : invoicedItem.getGroupName());
+            String groupHeader = (null == invoicedItem.getCategory() ? invoicedItem.getGroupName() : invoicedItem.getCategory());
 
             calendarItem.setTime(invoicedItem.getDate());
             boolean isDateChange = isFirstItem || calendarCurrent.get(Calendar.DAY_OF_MONTH) != calendarItem.get(Calendar.DAY_OF_MONTH);

@@ -78,6 +78,16 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     var rowChargeableItemStartDate = EHR.Server.Utils.normalizeDate(row.chargeableItemStartDate);
     var rowChargeableItemEndDate = EHR.Server.Utils.normalizeDate(row.chargeableItemEndDate);
 
+    if (!row.unitCost) {
+        EHR.Server.Utils.addError(scriptErrors, 'unitCost', "unitCost cannot be blank.", 'ERROR');
+        return false;
+    }
+
+    //remove any commas from the unitCost
+    if (row.unitCost.toString().indexOf(",") > -1) {
+        row.unitCost = row.unitCost.replace(/[^\d\.\-\ ]/g, '');
+    }
+
     if (helper.getJavaHelper().dateCompare(rowChargeRateStartDate, rowChargeRateEndDate, format) > 0) {
         EHR.Server.Utils.addError(scriptErrors, 'chargeRateEndDate', "For charge Item " + row.name + ": Charge rate start date (" + helper.getJavaHelper().formatDate(rowChargeRateStartDate, format, false) + ") is after charge rate end date (" + helper.getJavaHelper().formatDate(rowChargeRateEndDate, format, false) + ").", 'ERROR');
         return false;

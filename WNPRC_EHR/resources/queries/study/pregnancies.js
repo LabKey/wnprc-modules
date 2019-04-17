@@ -1,5 +1,6 @@
 var console = require('console');
 require("ehr/triggers").initScript(this);
+var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
 function onUpsert(helper, scriptErrors, row, oldRow){
 
@@ -16,7 +17,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             scope: this,
             callback: function (data) {
                 if (data) {
-                    if (data['gender/origGender'] && data['gender/origGender'] != 'm')
+                    if (data['gender/origGender'] && data['gender/origGender'] !== 'm')
                         EHR.Server.Utils.addError(scriptErrors, 'sireid', 'This animal is not male', 'ERROR');
                 }
             }
@@ -25,27 +26,34 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 }
 
 function onComplete(event, errors, helper){
-    var pregnancyRows = helper.getRows();
-    var updateRows = [];
+    let pregnancyRows = helper.getRows();
+    let updateRows = [];
 
     if (pregnancyRows){
-        for (var i=0;i<pregnancyRows.length;i++){
+        for (let i = 0; i < pregnancyRows.length; i++) {
             var updateRow = {};
-            updateRow.lsid = pregnancyRows[i].row.breedingencounterid;
-            updateRow.outcome = true;
-            updateRows.push(updateRow);
+            updateRows.push(pregnancyRows[i].row.breedingencounterid);
         }
-        LABKEY.Query.updateRows( {
-            schemaName : 'study',
-            queryName : 'breeding_encounters',
-            rows : updateRows,
-            success: function (data) {
-                console.log('success');
-                if (data && data.rows) {
-                    //nothing
-                }
-            },
-            failure : EHR.Server.Utils.onFailure
-        });
+        WNPRC.Utils.getJavaHelper().updateBreedingOutcome(updateRows);
     }
+
+    // let ids = helper.getRows().map(function (pregnancy) {
+    //     return pregnancy.row.Id;
+    // });
+    //
+    // let objectids = helper.getRows().map(function (pregnancy) {
+    //     return pregnancy.row.objectid;
+    // });
+    //
+    // // for (let i = 0; i < pregnancyRows.length; i++) {
+    // //     console.log(JSON.stringify(pregnancyRows[i].row));
+    // // }
+    //
+    // // var foo;
+    // // foo.causeException();
+    //
+    // WNPRC.Utils.getJavaHelper().sendPregnancyNotification(ids, objectids);
+    //
+    // var foo;
+    // foo.causeException();
 }

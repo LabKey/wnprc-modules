@@ -161,7 +161,7 @@ public class SimpleQueryUpdater {
     }
 
     public List<Map<String, Object>> doInsert(List<Map<String, Object>> rows) throws BatchValidationException , DuplicateKeyException, SQLException, QueryUpdateServiceException{
-        List<Map<String, Object>> insertedRows = null;
+        List<Map<String, Object>> insertedRows = new ArrayList<>();
         if (rows.size() > 0) {
             BatchValidationException validationException = new BatchValidationException();
             insertedRows = service.insertRows(user, container, rows, validationException, null, null);
@@ -180,7 +180,7 @@ public class SimpleQueryUpdater {
     }
 
     public List<Map<String, Object>> doUpdate(List<Map<String, Object>> rows) throws BatchValidationException , InvalidKeyException, SQLException, QueryUpdateServiceException {
-        List<Map<String, Object>> updatedRows = null;
+        List<Map<String, Object>> updatedRows = new ArrayList<>();
         if (rows.size() > 0) {
             updatedRows = service.updateRows(user, container, rows, rows, null, null);
 

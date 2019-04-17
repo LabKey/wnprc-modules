@@ -84,7 +84,7 @@ Ext4.define('WNPRC.ext.data.BreedingStoreCollection', {
             model.suspendEvents(true);
             model.set('Id', this._participantId);
             model.set('pregnancyid', this._pregnancyLsid);
-            model.set('performedby', LABKEY.user.displayName);
+            //model.set('performedby', LABKEY.user.displayName);
             model.resumeEvents();
         }
         return this.callParent([model]);

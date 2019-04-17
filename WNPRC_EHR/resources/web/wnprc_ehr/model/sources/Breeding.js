@@ -66,19 +66,83 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
     byQuery: {
         'study.pregnancies': {
             breedingencounterid: {
-                xtype: 'wnprc-breedingencounteridfield'
+                xtype: 'wnprc-breedingencounteridfield',
+                editorConfig: {
+                    plugins: ['wnprc-pregnancyduedatecalculation'],
+                }
+            },
+            date_due: {
+                xtype: 'wnprc-calculatedpregnancyduedatefield',
+                editorConfig: {
+                    plugins: ['wnprc-pregnancyduedatecalculation'],
+                }
+            },
+            date_conception: {
+                xtype: 'wnprc-calculatedpregnancyduedatefield',
+                editorConfig: {
+                    plugins: ['wnprc-pregnancyduedatecalculation'],
+                }
             },
             date_conception_early: {
-                hidden: true
+                hidden: false,
+                editorConfig: {
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                            field.setVisible(false);
+                        }
+                    }
+                },
+                columnConfig: {
+                    hidden: true
+                }
             },
             date_conception_late: {
-                hidden: true
+                hidden: false,
+                editorConfig: {
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
+                },
+                columnConfig: {
+                    hidden: true
+                }
             },
             date_due_early: {
-                hidden: true
+                hidden: false,
+                editorConfig: {
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
+                },
+                columnConfig: {
+                    hidden: true
+                }
             },
             date_due_late: {
-                hidden: true
+                hidden: false,
+                editorConfig: {
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
+                },
+                columnConfig: {
+                    hidden: true
+                }
             }
         },
         'study.pregnancy_outcomes': {

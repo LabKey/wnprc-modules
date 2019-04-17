@@ -79,20 +79,20 @@ public class TriggerScriptHelper {
     }
 
     public void sendPregnancyNotification(final List<String> ids, final List<String> objectids) {
-        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new PregnancyNotification(), container)){
-            _log.info("Notification service is not enabled, will not send pregnancy notification");
-            return;
-        }
-        if (ids.size() != objectids.size()) {
-            _log.warn("Mismatch between list of animal ids and object ids.  Will not send pregnancy notification");
-            return;
-        }
-        for (int i = 0; i < ids.size(); i++) {
-            PregnancyNotification pregnancyNotification = new PregnancyNotification();
-            pregnancyNotification.setParam(PregnancyNotification.idParamName, ids.get(i));
-            pregnancyNotification.setParam(PregnancyNotification.objectidsParamName, objectids.get(i));
-            pregnancyNotification.sendManually(container, user);
-        }
+//        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new PregnancyNotification(), container)){
+//            _log.info("Notification service is not enabled, will not send pregnancy notification");
+//            return;
+//        }
+//        if (ids.size() != objectids.size()) {
+//            _log.warn("Mismatch between list of animal ids and object ids.  Will not send pregnancy notification");
+//            return;
+//        }
+//        for (int i = 0; i < ids.size(); i++) {
+//            PregnancyNotification pregnancyNotification = new PregnancyNotification();
+//            pregnancyNotification.setParam(PregnancyNotification.idParamName, ids.get(i));
+//            pregnancyNotification.setParam(PregnancyNotification.objectidsParamName, objectids.get(i));
+//            pregnancyNotification.sendManually(container, user);
+//        }
     }
 
     public void updateBreedingOutcome(final List<String> lsids) {

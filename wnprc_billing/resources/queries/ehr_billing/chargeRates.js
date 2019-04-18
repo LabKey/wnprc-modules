@@ -23,7 +23,7 @@ function onInit(event, helper){
             }
         },
         failure: function (error) {
-            console.log(error);
+            console.log("Error getting data from ehr_billing.chargeableItemCategories: " + error);
         }
     });
 
@@ -43,7 +43,7 @@ function onInit(event, helper){
             }
         },
         failure: function (error) {
-            console.log(error);
+            console.log("Error getting data from ehr_billing.chargeableItems: " + error);
         }
     });
 
@@ -65,7 +65,7 @@ function onInit(event, helper){
             }
         },
         failure: function (error) {
-            console.log(error);
+            console.log("Error getting data from ehr_billing.chargeRates: " + error);
         }
     });
 }
@@ -73,15 +73,40 @@ function onInit(event, helper){
 function onInsert(helper, scriptErrors, row, oldRow) {
     var format = "E MMM dd yyyy";
 
+    if (!row.chargeableItemStartDate) {
+        EHR.Server.Utils.addError(scriptErrors, 'chargeableItemStartDate', "Chargeable item start date cannot be blank.", 'ERROR');
+        return false;
+    }
+
+    if (!row.chargeRateStartDate) {
+        EHR.Server.Utils.addError(scriptErrors, 'chargeRateStartDate', "Charge rate start date cannot be blank.", 'ERROR');
+        return false;
+    }
+
+    if (!row.chargeableItemEndDate) {
+        EHR.Server.Utils.addError(scriptErrors, 'chargeableItemEndDate', "Chargeable item end date cannot be blank.", 'ERROR');
+        return false;
+    }
+
+    if (!row.chargeRateEndDate) {
+        EHR.Server.Utils.addError(scriptErrors, 'chargeRateEndDate', "Charge rate end date cannot be blank.", 'ERROR');
+        return false;
+    }
+
+    if (!row.unitCost) {
+        EHR.Server.Utils.addError(scriptErrors, 'unitCost', "unitCost cannot be blank or zero.", 'ERROR');
+        return false;
+    }
+
+    if (!chargeableItemCategories[row.category]) {
+        EHR.Server.Utils.addError(scriptErrors, 'chargeCategoryId', row.category + " is not a valid chargeable item category. If this is a new category, please add this category to ehr_billing.chargeableItemCategories.", 'ERROR');
+        return false;
+    }
+
     var rowChargeRateStartDate = EHR.Server.Utils.normalizeDate(row.chargeRateStartDate);
     var rowChargeRateEndDate = EHR.Server.Utils.normalizeDate(row.chargeRateEndDate);
     var rowChargeableItemStartDate = EHR.Server.Utils.normalizeDate(row.chargeableItemStartDate);
     var rowChargeableItemEndDate = EHR.Server.Utils.normalizeDate(row.chargeableItemEndDate);
-
-    if (!row.unitCost) {
-        EHR.Server.Utils.addError(scriptErrors, 'unitCost', "unitCost cannot be blank.", 'ERROR');
-        return false;
-    }
 
     //remove any commas from the unitCost
     if (row.unitCost.toString().indexOf(",") > -1) {
@@ -140,7 +165,6 @@ function onInsert(helper, scriptErrors, row, oldRow) {
         "serviceCode": row.serviceCode,
         "departmentCode": row.departmentCode,
         "comment": row.comment,
-        "active": row.active,
         "container": row.container,
         "startDate": row.chargeableItemStartDate,
         "endDate": row.chargeableItemEndDate,

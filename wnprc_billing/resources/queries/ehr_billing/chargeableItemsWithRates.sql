@@ -8,7 +8,6 @@ SELECT
   ci.startDate AS chargeableItemStartDate,
   ci.endDate AS chargeableItemEndDate,
   ci.comment,
-  ci.active,
   ci.allowBlankId,
   cr.unitCost,
   cr.genCredits,

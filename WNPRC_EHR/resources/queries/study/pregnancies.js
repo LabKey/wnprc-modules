@@ -37,16 +37,13 @@ function onComplete(event, errors, helper){
         WNPRC.Utils.getJavaHelper().updateBreedingOutcome(updateRows);
     }
 
-    let ids = helper.getRows().map(function (pregnancy) {
-        return pregnancy.row.Id;
-    });
-
-    let objectids = helper.getRows().map(function (pregnancy) {
-        return pregnancy.row.objectid;
-    });
-
-    WNPRC.Utils.getJavaHelper().sendPregnancyNotification(ids, objectids);
-
-    var foo;
-    foo.causeException();
+    // let ids = helper.getRows().map(function (pregnancy) {
+    //     return pregnancy.row.Id;
+    // });
+    //
+    // let objectids = helper.getRows().map(function (pregnancy) {
+    //     return pregnancy.row.objectid;
+    // });
+    //
+    // WNPRC.Utils.getJavaHelper().sendPregnancyNotification(ids, objectids);
 }

@@ -122,6 +122,15 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         SimpleDateFormat f = new SimpleDateFormat("MMddyyyy");//d = day in a month, D = day in a year, yyyy = calendar year
         String dateStr = f.format(billingPeriodEndDate);
         String debitedAcct = (String)row.getOrDefault("debitedAccount", "Unknown");
-        return dateStr + debitedAcct.toUpperCase();
+
+        if (null == debitedAcct)
+        {
+            Integer project = (Integer) row.get("project");
+            String animalId = (String) row.get("Id");
+            throw new RuntimeException("Unable to complete Billing Run. Debit Account not found for category '" + row.get("category") + "'" +
+                    ((null != project) ? (", where project = " + project) : "") +
+                    ((null != animalId) ? (" and animal Id = " + animalId) : ""));
+        }
+        return dateStr + debitedAcct.trim().toUpperCase();
     }
 }

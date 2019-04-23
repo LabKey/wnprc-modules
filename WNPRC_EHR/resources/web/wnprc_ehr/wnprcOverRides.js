@@ -176,6 +176,33 @@ EHR.Metadata.registerMetadata('Default', {
         cage_observations: {
             cage: {
                 allowBlank: false
+            },
+            room: {
+                editorConfig: {
+                    listeners: {
+                        //Add a listener that will automatically fill in the room field for the Observations Per Cage
+                        //section based on the room selected in the Observations Per Animal section on the Irregular obs page.
+                        render: function(){
+                            if (this.ownerCt.ownerCt && this.ownerCt.ownerCt.ownerCt.formType === 'Irregular Observations') {
+                                let formGridPanel = this.ownerCt.ownerCt.items.items[0];
+                                formGridPanel.on('recordchange', function () {
+                                    let theForm = this.ownerCt.getForm();
+                                    let roomField = theForm.findField('room');
+                                    if (!roomField.value) {
+                                        if (this.ownerCt.ownerCt.ownerCt.items.items[2].store.data.items[0]) {
+                                            let location = this.ownerCt.ownerCt.ownerCt.items.items[2].store.data.items[0].data['id/curlocation/location'];
+                                            if (location) {
+                                                let roomValue = location.substr(0, location.indexOf('-') === -1 ? location.length : location.indexOf('-'));
+                                                roomField.setValue(roomValue);
+                                                theForm.findField('cage').focus();
+                                            }
+                                        }
+                                    }
+                                }, this, {buffer: 20});
+                            }
+                        }
+                    }
+                }
             }
         },
         'Blood Draws': {

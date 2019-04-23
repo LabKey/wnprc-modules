@@ -1,0 +1,23 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <!--<column name="enddate"/>-->
+        <!--<column name="caseno"/>-->
+        <column name="major"/>
+
+        <column name="participants/participants" />
+        <column name="summaries/summary" />
+        <!--<column name="remark"/>
+        <column name="description"/>-->
+        <column name="qcstate" />
+        <column name="taskid" />
+        <column name="requestid" />
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+    <filters>
+        <filter column="type" operator="eq" value="Surgery"/>
+    </filters>
+</customView>

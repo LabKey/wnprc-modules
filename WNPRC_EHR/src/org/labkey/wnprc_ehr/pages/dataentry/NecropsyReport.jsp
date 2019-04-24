@@ -146,6 +146,9 @@
 
                     <dt>Performed On</dt>
                     <dd class="dateWithTimeThatNeedsFormatting"><%= necropsy.optString("date", "")%></dd>
+
+                    <dt>Dam</dt>
+                    <dd><%= necropsy.optString("dam", NOT_SPECIFIED)%></dd>
                 </dl>
         </div>
 

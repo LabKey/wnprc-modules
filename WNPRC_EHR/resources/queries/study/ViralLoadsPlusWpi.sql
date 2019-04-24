@@ -20,7 +20,7 @@ FROM study.ViralLoads v
 LEFT JOIN ViralChallenges vc
   ON (v.id = vc.id)
 
-WHERE vc.challenge_type like 'SIV%' AND vc.challenge_Type NOT LIKE '%Vaccine%'
+WHERE ((vc.challenge_type like 'SIV%' OR vc.challenge_type like '%virus'  ) AND vc.challenge_Type NOT LIKE '%Vaccine%')
 
 AND vc.date is not null
 

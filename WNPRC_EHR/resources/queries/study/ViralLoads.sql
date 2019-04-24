@@ -4,29 +4,18 @@
  * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
 SELECT
-  v.rowid,
-  v.SubjectId as Id,
-  v.Date as date,
-  v.assayId.virus AS Virus,
+  pv.rowid,
+  pv.Id as Id,
+  pv.date as date,
+  pv.Virus AS Virus,
+  pv.Comments as Comments,
 
-  CASE
-    WHEN (v.ViralLoad < 50)
-      THEN 50
-    else
-      v.ViralLoad
-    END
-   as ViralLoad,
+   AVG(pv.ViralLoad) AS AverViralLoad,
+   log10(AVG(pv.ViralLoad)) as LogVL
 
-  round(
-  CASE
-    WHEN (v.ViralLoad < 50)
-      THEN log10(50)
-    else
-      log10(v.ViralLoad)
-    END, 1)
-   as LogVL
+FROM study.preViralLoad pv
 
-FROM "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/".assay."Viral_Load Data" v
+GROUP BY pv.date,pv.Id, pv.Virus, pv.Comments
 
 --TODO
 --WHERE v.qcstate.publicdata = true

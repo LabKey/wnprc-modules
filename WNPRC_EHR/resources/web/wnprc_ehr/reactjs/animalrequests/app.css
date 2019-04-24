@@ -153,6 +153,7 @@ select {
     -moz-appearance: none;
     -webkit-appearance: none;
     background: url(/_images/arrow_down.png) right no-repeat !important;
+    text-transform: Capitalize !important;
 
 }
 .react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle, .react-datepicker-popper[data-placement^="top"] .react-datepicker__triangle, .react-datepicker__year-read-view--down-arrow,

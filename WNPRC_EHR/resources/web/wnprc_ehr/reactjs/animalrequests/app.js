@@ -49868,7 +49868,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
 
         let from = LABKEY.Security.currentUser.email; //TODO get this list from the database?
 
-        let recipients = 'csebranek@primate.wisc.edu';
+        let recipients = LABKEY.Security.currentUser.email;
         let subject = '[EHR Services] A new animal request was submitted';
         let msg = Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["a" /* constructNotficationEmail */])(data);
 

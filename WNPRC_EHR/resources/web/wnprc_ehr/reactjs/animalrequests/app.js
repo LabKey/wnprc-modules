@@ -8926,12 +8926,14 @@ function selectRowsSql(id) {
       }
     });
   });
-}
-function getEHRData(schemaName, queryName, sort = "rowid") {
+} //filters for project
+
+function getEHRData(schemaName, queryName, sort = 'rowid', columns = '') {
   return new Promise((resolve, reject) => {
     return LABKEY.Query.selectRows({
       schemaName: schemaName,
       queryName: queryName,
+      columns: columns,
       sort: sort,
       containerPath: '/WNPRC/EHR',
       success: data => {
@@ -49757,7 +49759,7 @@ const renderField = ({
 }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
   className: asyncValidating ? 'async-validating' : ''
 }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-  className: "col-xs-3 form-control-label"
+  className: "col-xs-4 form-control-label"
 }, " ", label, " "), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", Object.assign({
   className: "col-xs-6 form-control-input"
 }, input)), visited && warnings && warnings.length > 0 && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("span", {
@@ -49803,6 +49805,12 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
       }],
       protocoldata: [{
         value: ''
+      }],
+      dispositiondata: [{
+        value: ''
+      }],
+      infectiousdiseasedata: [{
+        value: ''
       }]
     };
     this.onSubmit = this.onSubmit.bind(this);
@@ -49821,9 +49829,13 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
       }, {
         'sexdata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_sex')
       }, {
-        'projectdata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'project', '-project')
+        'projectdata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'project', '-project', 'project')
       }, {
         'protocoldata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'protocol', '-protocol')
+      }, {
+        'dispositiondata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_disposition')
+      }, {
+        'infectiousdiseasedata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_infectiousdisease')
       }]);
       console.log('from promise all...');
     });
@@ -49904,6 +49916,10 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
       mutators: Object.assign({}, __WEBPACK_IMPORTED_MODULE_3_final_form_arrays__["a" /* default */], {
         setFieldData: __WEBPACK_IMPORTED_MODULE_4_final_form_set_field_data__["a" /* default */]
       }),
+      subscription: {
+        submitting: true,
+        pristine: true
+      },
       render: ({
         handleSubmit,
         form: {
@@ -49929,7 +49945,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
         }, "PI:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */] //TODO custom component for rendering dropdowns
         , {
           //TODO custom component for rendering dropdowns
@@ -49942,23 +49958,18 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
           name: "pidata",
           rowkey: "inves"
-        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
-          className: "row top-buffer"
-        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
-        }, "Origin:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
-          name: "originneeded",
+        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "numberofanimals",
           className: "col-xs-6 form-control-input",
-          component: "select",
+          component: renderField,
+          label: "# of Animals:",
+          type: "text",
           validate: required,
           required: true
-        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "origindata",
-          rowkey: "meaning"
-        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+        }), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
         }, "Species:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "speciesneeded",
           className: "col-xs-6 form-control-input",
@@ -49971,7 +49982,20 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
+        }, "Origin:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "originneeded",
+          className: "col-xs-6 form-control-input",
+          component: "select",
+          validate: required,
+          required: true
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
+          name: "origindata",
+          rowkey: "meaning"
+        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+          className: "row top-buffer"
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
+          className: "col-xs-4 form-control-label"
         }, "Sex:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "sex",
           className: "col-xs-6 form-control-input",
@@ -49990,17 +50014,25 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
           validate: required,
           required: true
         }), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
-          name: "numberofanimals",
+          name: "weight",
           className: "col-xs-6 form-control-input",
           component: renderField,
-          label: "# of Animals:",
+          label: "Weight:",
+          type: "text",
+          validate: required,
+          required: true
+        }), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "mhctype",
+          className: "col-xs-6 form-control-input",
+          component: renderField,
+          label: "MHC Type:",
           type: "text",
           validate: required,
           required: true
         }), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
         }, "Viral Status:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "viralstatus",
           className: "col-xs-6 form-control-input",
@@ -50013,7 +50045,33 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
+        }, "Disposition:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "disposition",
+          className: "col-xs-6 form-control-input",
+          component: "select",
+          validate: required,
+          required: true
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
+          name: "dispositiondata",
+          rowkey: "value"
+        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+          className: "row top-buffer"
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
+          className: "col-xs-4 form-control-label"
+        }, "Infectious Disease:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "infectiousdisease",
+          className: "col-xs-6 form-control-input",
+          component: "select",
+          validate: required,
+          required: true
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
+          name: "infectiousdiseasedata",
+          rowkey: "value"
+        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+          className: "row top-buffer"
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
+          className: "col-xs-4 form-control-label"
         }, "Date Needed:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "dateneeded",
           className: "col-xs-6 form-control-input",
@@ -50024,33 +50082,37 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         })), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
         }, "Project:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "project",
           className: "col-xs-6 form-control-input",
           component: "select",
           validate: required,
           required: true
-        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", {
+          value: "TBD"
+        }, "TBD"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
           name: "projectdata",
           rowkey: "project"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
         }, "Protocol:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "protocol",
           className: "col-xs-6 form-control-input",
           component: "select",
           validate: required,
           required: true
-        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", {
+          value: "TBD"
+        }, "TBD"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
           name: "protocoldata",
           rowkey: "protocol"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
         }, "Account #:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "account",
           className: "col-xs-6 form-control-input",
@@ -50059,7 +50121,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         })), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-3 form-control-label"
+          className: "col-xs-4 form-control-label"
         }, "Comments:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "comments",
           className: "col-xs-6",
@@ -66306,6 +66368,8 @@ const submitAnimalRequest = (values, qcstate) => {
 const sendNotificationEmail = (from, subject, recipients, content) => {
   function errorHandler(errorInfo, responseObj) {
     LABKEY.Utils.displayAjaxErrorResponse(responseObj, errorInfo);
+    console.log(responseObj);
+    console.log(errorInfo);
   }
 
   function onSuccess(result) {//TODO log to server?
@@ -66326,7 +66390,8 @@ const sendNotificationEmail = (from, subject, recipients, content) => {
 const constructNotficationEmail = data => {
   try {
     let rowid = data['result'][0]['rows'][0].rowid.toString();
-    let content = 'Click ' + '<a href="localhost:8080/labkey/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&keyField=rowid&key=' + rowid + '">' + 'here</a> to view the request.<br><br>' + 'See all of the animal requests ' + '' + '<a href="localhost:8080/labkey/wnprc_ehr/WNPRC/EHR/dataEntry.view?#topTab:Requests&activeReport:AnimalRequests"' + ' >here</a>.';
+    let domain = window.location.origin;
+    let content = 'Click ' + '<a href="' + domain + '/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&keyField=rowid&key=' + rowid + '">' + 'here</a> to view the request.<br><br>' + 'See all of the animal requests ' + '' + '<a href="' + domain + '/wnprc_ehr/WNPRC/EHR/dataEntry.view?#topTab:Requests&activeReport:AnimalRequests"' + ' >here</a>.';
     return content;
   } catch (err) {
     console.log(err);

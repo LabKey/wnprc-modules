@@ -11,4 +11,4 @@ species.USDA,
 species.Gestation
 FROM ehr_lookups.species
 
-where species.common in ('Cynomolgus','Rhesus')
+where species.common in ('Cynomolgus','Rhesus','Marmoset')

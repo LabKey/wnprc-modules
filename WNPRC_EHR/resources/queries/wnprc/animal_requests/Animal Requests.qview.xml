@@ -5,8 +5,8 @@
         <column name="createdBy"/>
         <column name="principalinvestigator"></column>
         <column name="protocol"></column>
-        <column name="originneeded"></column>
         <column name="speciesneeded"></column>
+        <column name="originneeded"></column>
         <column name="numberofanimals"></column>
         <column name="dateneeded"></column>
         <column name="QCState"></column>

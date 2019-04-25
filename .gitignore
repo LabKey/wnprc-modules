@@ -11,3 +11,8 @@ docker/.gradle
 **/resources/credits/dependencies.txt
 
 **/.gradle
+
+**/app.css
+**/app.css.map
+**/app.js
+**/app.js.map

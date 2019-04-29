@@ -391,12 +391,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable table = new DataRegionTable("query", getDriver());
         assertEquals("Wrong number of rows in project", 2, table.getDataRowCount());
         goBack(WAIT_FOR_PAGE);
-
-        scrollIntoView(Locator.tagWithAttributeContaining("a", "href", "queryName=duplicateChargeableItems"));
-        clickAndWait(Locator.tagWithAttributeContaining("a", "href", "queryName=duplicateChargeableItems").findElement(getDriver()));
-        table = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong number of rows in project", 3, table.getDataRowCount());
-
     }
 
     private void verifyChargeSummary(String category, int rowCount)
@@ -649,6 +643,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("chargeId", "vaccine supplies");
         mapWithAnimalId.put("quantity", "10");
         mapWithAnimalId.put("chargecategory", "Adjustment");
+        mapWithAnimalId.put("comment", "charge 1 with animal id");
 
         Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
         mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
@@ -657,6 +652,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
         mapWithDebitAcct.put("quantity", "8");
         mapWithDebitAcct.put("chargecategory", "Adjustment");
+        mapWithDebitAcct.put("comment", "charge 1 without animal id");
 
         Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
         mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
@@ -664,6 +660,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithDebitAcct2.put("chargetype", "Clinical Pathology");
         mapWithDebitAcct2.put("chargeId", "vaccine supplies");
         mapWithDebitAcct2.put("quantity", "5");
+        mapWithDebitAcct2.put("comment", "charge 2 without animal id");
 
         Map<String, String> mapWithAnimalId2 = new LinkedHashMap<>();
         mapWithAnimalId2.put("Id", PROJECT_MEMBER_ID);
@@ -672,6 +669,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId2.put("chargetype", "Clinical Pathology");
         mapWithAnimalId2.put("chargeId", "vaccine supplies");
         mapWithAnimalId2.put("quantity", "10");
+        mapWithAnimalId2.put("comment", "charge 2 with animal id");
 
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
@@ -680,6 +678,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         enterChargesInGrid(1, mapWithAnimalId);
 
         log("Submit the form");
+        sleep(5000);
         submitForm();
 
         log("Enter Misc. Charges with debit account");
@@ -687,6 +686,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         enterChargesInGrid(1, mapWithDebitAcct);
 
         log("Submit the form");
+        sleep(5000);
         submitForm();
 
         log("Enter another Misc. Charges with debit account");
@@ -694,6 +694,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         enterChargesInGrid(1, mapWithDebitAcct2);
 
         log("Submit the form");
+        sleep(5000);
         submitForm();
 
         log("Enter another Misc. Charges with animal Id");
@@ -701,6 +702,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         enterChargesInGrid(1, mapWithAnimalId2);
 
         log("Submit the form");
+        sleep(5000);
         submitForm();
 
     }
@@ -716,7 +718,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             Map.Entry pair = (Map.Entry) iterator.next();
             String colName = pair.getKey().toString();
             String colValue = pair.getValue().toString();
-            if (colName.equals("Id") || colName.equals("date") || colName.equals("quantity"))
+            if (colName.equals("Id") || colName.equals("date") || colName.equals("quantity") || colName.equals("comment"))
                 miscChargesGrid.setGridCell(rowIndex, colName, colValue);
             else
                 addComboBoxRecord(rowIndex, colName, colValue, miscChargesGrid, CONTAINS);

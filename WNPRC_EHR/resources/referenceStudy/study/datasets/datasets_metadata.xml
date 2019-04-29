@@ -185,6 +185,10 @@
                     <fkColumnName>Id</fkColumnName>
                 </fk>
             </column>
+            <column columnName="protected">
+                <columnTitle>Protected</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
             <column columnName="project">
                 <columnTitle>Offered To</columnTitle>
                 <datatype>integer</datatype>

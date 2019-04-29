@@ -37,5 +37,8 @@ function onInsert(helper, scriptErrors, row, oldRow){
             },
             failure: EHR.Server.Utils.onFailure
         });
+
+        row.followup_required = !!row.followup_required;
+        row.fetal_heartbeat = !!row.fetal_heartbeat;
     }
 }

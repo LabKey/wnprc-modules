@@ -209,6 +209,11 @@ public class WNPRC_BillingController extends SpringActionController
     private JetCSV getJetCsv(int runId) throws IOException
     {
         List<JetInvoiceItem> invoiceItems = getJetItems(runId);
+        if (invoiceItems.isEmpty())
+        {
+            throw new NotFoundException("Unable to generate JET CSV. Invoiced Items not found for the selected invoice.");
+        }
+
         InvoiceRun invoiceRun = getInvoiceRunById(runId);
         StringWriter writer = new StringWriter();
 

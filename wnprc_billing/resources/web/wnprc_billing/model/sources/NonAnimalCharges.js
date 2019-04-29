@@ -78,7 +78,7 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
             },
             comment: {
                 hidden: false,
-                xtype: 'textareafield',
+                xtype: 'textfield',
                 anchor: '50%',
                 height: 20,
                 columnConfig: {

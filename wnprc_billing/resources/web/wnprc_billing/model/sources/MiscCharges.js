@@ -82,7 +82,7 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
             },
             comment: {
                 hidden: false,
-                xtype: 'textareafield',
+                xtype: 'textfield',
                 anchor: '50%',
                 height: 20,
                 columnConfig: {
@@ -94,7 +94,7 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
                 columnConfig: {
                     width: 125
                 }
-            },
+            }
         }
     }
 });

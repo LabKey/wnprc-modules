@@ -22,13 +22,13 @@ EHR.reports.viralLoads = function(panel, tab){
                 schemaName: 'study',
                 queryName: 'ViralLoads',
                 filterArray: filterArray.removable.concat(filterArray.nonRemovable),
-                columns: 'Id,date,LogVL,Virus,Comments',
+                columns: 'Id,date,LogVL,Virus,SampleType,Comments',
                 sort: 'Id,-date, Virus',
                 requiredVersion: 9.1,
                 success: Ext4.Function.pass(function(subj, results){
                     if (!results.rowCount){
-                        target.update('');
-                        target.add({
+                        tab.update('');
+                        tab.add({
                             html: 'No animal selected to display Viral Load data'
                         });
                         return;
@@ -37,12 +37,13 @@ EHR.reports.viralLoads = function(panel, tab){
                     var virusMap = new Map();
                     Ext4.each(results.rows, function(row){
                         console.log(row['Virus']);
-                        if (virusMap.get(row['Virus'].value) === undefined){
-                            virusMap.set(row['Virus'].value,1);
+                        var virusAndSample = row['Virus'].value +";"+ row['SampleType'].value;
+                        if (virusMap.get(virusAndSample) === undefined){
+                            virusMap.set(virusAndSample,1);
                         }else{
                             //var numberViralLoads = virusMap.get(row['Virus'].value);
                             //numberViralLoads++;
-                            virusMap.set(row['Virus'].value, virusMap.get(row['Virus'].value)+1);
+                            virusMap.set(virusAndSample, virusMap.get(virusAndSample)+1);
 
                         }
 
@@ -52,11 +53,167 @@ EHR.reports.viralLoads = function(panel, tab){
 
                     var virusType;
 
+                    tab.add({
+                        xtype: 'tabpanel',
+                        style: 'margin-bottom: 20px',
+                        itemId: 'tabArea'
+
+                    });
+                    var panelOrder = 0;
+                    var target = tab.down('#tabArea');
+
                     virusMap.forEach(function (value, key) {
                         console.log(key + ' number of VLs = '+ value );
+                        var arrayFilter = key.split(";",2);
                         virusType = (cloneObject(results));
-                        //clear array of clone
-                        virusType.rows = results.rows.filter(item => item.Virus.value === key);
+
+                        if (arrayFilter[1] !== "null"){
+                            //clear array of clone
+                            console.log ('first filter '+arrayFilter[0]);
+                            virusType.rows = results.rows.filter(item => (item.Virus.value === arrayFilter[0] && item.SampleType.value === arrayFilter[1]));
+                            if (arrayFilter[1] === 'Plasma'){
+                                panelOrder = 0;
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    plotConfig: {
+                                        results: virusType,
+                                        title: 'Viral Loads: ' + subj + ' '+ key,
+                                        height: 400,
+                                        width: 900,
+                                        yLabel: 'Log Copies/mL',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'LogVL',
+                                            name: 'Viral Load'
+                                        }]
+                                    }
+                                });
+
+                            } else if (arrayFilter[1] === 'Urine'){
+                                panelOrder = 1;
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    plotConfig: {
+                                        results: virusType,
+                                        title: 'Viral Loads: ' + subj + ' '+ key,
+                                        height: 400,
+                                        width: 900,
+                                        yLabel: 'Log Copies/mL',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'LogVL',
+                                            name: 'Viral Load'
+                                        }]
+                                    }
+                                });
+
+                            }
+                            else if (arrayFilter[1] === 'Tissue'){
+                                panelOrder++;
+                                //filterArray.nonRemovable.push(LABKEY.Filter.create('SampleType', 'Tissue', LABKEY.Filter.Types.EQUAL));
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-querypanel',
+                                    style: 'margin-bottom:20px;',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    queryConfig: panel.getQWPConfig({
+                                        title: 'Viral Load: ' + subj + ' '+key,
+                                        schemaName: 'study',
+                                        queryName: 'ViralLoads',
+                                        filterArray: [
+                                            LABKEY.Filter.create('Id', subject, LABKEY.Filter.Types.EQUAL),
+                                            LABKEY.Filter.create('SampleType', arrayFilter[1], LABKEY.Filter.Types.EQUAL)
+
+
+                                        ],
+                                        columns: 'Id,date,LogVL,Virus,SampleType,Comments',
+                                        frame: true
+                                    })
+                                });
+
+                            }else {
+                                panelOrder++;
+                                //filterArray.nonRemovable.push(LABKEY.Filter.create('SampleType', 'Tissue', LABKEY.Filter.Types.EQUAL));
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-querypanel',
+                                    style: 'margin-bottom:20px;',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    queryConfig: panel.getQWPConfig({
+                                        title: 'Viral Load: ' + subj + ' '+key,
+                                        schemaName: 'study',
+                                        queryName: 'ViralLoads',
+                                        filterArray: [
+                                            LABKEY.Filter.create('Id', subject, LABKEY.Filter.Types.EQUAL),
+                                            LABKEY.Filter.create('SampleType', arrayFilter[1] , LABKEY.Filter.Types.EQUAL)
+
+
+                                        ],
+                                        columns: 'Id,date,LogVL,Virus,SampleType,Comments',
+                                        frame: true
+                                    })
+                                });
+
+                            }
+                        } else {
+
+                            //if (item.Comment.value === 'plas'){
+                                virusType.rows = results.rows.filter(item => (item.Virus.value === arrayFilter[0] && (item.Comments.value === 'plas' || item.Comments.value === 'plasma')));
+                                panelOrder = 0;
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Viral Load: ' + subj + ' '+arrayFilter[0],
+                                    plotConfig: {
+                                        results: virusType,
+                                        title: 'Viral Loads: ' + subj + ' '+ arrayFilter[0]+ ' '+ 'plasma',
+                                        height: 400,
+                                        width: 900,
+                                        yLabel: 'Log Copies/mL',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'LogVL',
+                                            name: 'Viral Load'
+                                        }]
+                                    }
+                                });
+
+
+                                virusType.rows = results.rows.filter(item => (item.Virus.value === arrayFilter[0] && item.SampleType.value === null && item.Comments.value !== 'plas' ));
+
+                                 if(virusType.rows.length>0) {
+
+                                     target.insert(panelOrder, {
+                                         xtype: 'ldk-querypanel',
+                                         style: 'margin-bottom:20px;',
+                                         title: 'Viral Load: ' + subj + ' ' + arrayFilter[0],
+                                         queryConfig: panel.getQWPConfig({
+                                             title: 'Viral Load: ' + subj + ' ' + arrayFilter[0],
+                                             schemaName: 'study',
+                                             queryName: 'ViralLoads',
+                                             filterArray: [
+                                                 LABKEY.Filter.create('Id', subject, LABKEY.Filter.Types.EQUAL),
+                                                 LABKEY.Filter.create('Virus', arrayFilter[0], LABKEY.Filter.Types.EQUAL),
+                                                 LABKEY.Filter.create('Comments', 'plas', LABKEY.Filter.Types.NOT_EQUAL_OR_MISSING),
+                                                 LABKEY.Filter.create('SampleType', null, LABKEY.Filter.Types.MISSING)
+
+                                             ],
+                                             columns: 'Id,date,LogVL,Virus,SampleType,Comments',
+                                             frame: true
+                                         })
+                                     });
+                                 }
+
+
+
+                        }
+
+                        //virusType.rows = [virusType.rows[0]];
 
                         /*for (var i =results.rowCount-1; i>=0; i--){
                             var virus = results.rows[i].Virus.value;
@@ -66,24 +223,8 @@ EHR.reports.viralLoads = function(panel, tab){
                             }
 
                         }*/
-                        tab.add({
-                            xtype: 'ldk-graphpanel',
-                            title: 'Viral Load: ' + subj + ' '+key,
-                            plotConfig: {
-                                results: virusType,
-                                title: 'Viral Loads: ' + subj + ' '+ key,
-                                height: 400,
-                                width: 900,
-                                yLabel: 'Log Copies/mL',
-                                xLabel: 'Date',
-                                xField: 'date',
-                                grouping: ['Id'],
-                                layers: [{
-                                    y: 'LogVL',
-                                    name: 'Viral Load'
-                                }]
-                            }
-                        });
+
+                        panelOrder++;
 
 
                     })
@@ -107,21 +248,11 @@ EHR.reports.viralLoads = function(panel, tab){
             return temp;
         }
 
-        function virusFilter(virusType){
-
-            return
-
-        }
     }
 
-    LABKEY.Query.selectRows({
-        schemaName: 'study',
-
-
-    })
     var gridFilterArray = panel.getFilterArray(tab);
     var title = panel.getTitleSuffix();
-    gridFilterArray.nonRemovable.push(LABKEY.Filter.create('Challenge', 'zika virus', LABKEY.Filter.Types.EQUAL));
+    //gridFilterArray.nonRemovable.push(LABKEY.Filter.create('Challenge', 'zika virus', LABKEY.Filter.Types.EQUAL));
     //var challengeFilter = LABKEY.Filter.create('Challenge', 'zika virus', LABKEY.Filter.Types.EQUAL);
 
     var config = panel.getQWPConfig({
@@ -134,11 +265,11 @@ EHR.reports.viralLoads = function(panel, tab){
         frame: true
     });
 
-    tab.add({
+    /*tab.add({
         xtype: 'ldk-querypanel',
         style: 'margin-bottom:20px;',
         queryConfig: config
-    });
+    });*/
     tab.add({
         xtype: 'ldk-querypanel',
         style: 'margin-bottom:20px;',

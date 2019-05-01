@@ -31,9 +31,10 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
             pregnancyid:                    { columnConfig: { columnIndex: 3, width: 200 } },
             outcome:                        { columnConfig: { columnIndex: 4 } },
             infantid:                       { columnConfig: { columnIndex: 5 } },
-            project:                        { columnConfig: { columnIndex: 6 } },
-            remark:                         { columnConfig: { columnIndex: 7, width: 400 } },
-            performedby:                    { columnConfig: { columnIndex: 8 } }
+            protected:                      { columnConfig: { columnIndex: 6 } },
+            project:                        { columnConfig: { columnIndex: 7 } },
+            remark:                         { columnConfig: { columnIndex: 8, width: 400 } },
+            performedby:                    { columnConfig: { columnIndex: 9 } }
         },
         'study.ultrasounds': {
             Id:                             { columnConfig: { columnIndex:  1 } },
@@ -91,7 +92,6 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
                         //to the dom it won't be able to be changed while hidden
                         render: function(field){
                             field.hide();
-                            field.setVisible(false);
                         }
                     }
                 },

@@ -28,6 +28,7 @@ import org.labkey.wnprc_ehr.notification.PregnancyNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.mortbay.util.ajax.JSON;
 
+import java.util.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -96,21 +97,45 @@ public class TriggerScriptHelper {
     }
 
     public void updateBreedingOutcome(final List<String> lsids) {
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "breeding_encounters");
+
+        List<Map<String, Object>> updateRows = new ArrayList<>();
+        for (String lsid : lsids) {
+            JSONObject row = new JSONObject();
+            row.put("lsid", lsid);
+            row.put("outcome", true);
+            updateRows.add(row);
+        }
+
         try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that breeding encounter outcome can be changed to true")) {
-            SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "breeding_encounters");
-
-            List<Map<String, Object>> updateRows = new ArrayList<>();
-            for (String lsid : lsids) {
-                JSONObject row = new JSONObject();
-                row.put("lsid", lsid);
-                row.put("outcome", true);
-                updateRows.add(row);
-            }
-
             queryUpdater.update(updateRows);
         } catch (Exception e) {
             _log.error(e);
         }
+    }
+
+    public void updateUltrasoundFollowup(final String id, final Date date) {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("Id", CompareType.EQUAL, id);
+        filter.addCondition("date", CompareType.DATE_LTE, date);
+        filter.addCondition("followup_required", CompareType.EQUAL, true);
+
+        JSONArray encounters = queryFactory.selectRows("study", "ultrasounds", filter);
+        List<JSONObject> ultrasounds = JsonUtils.getListFromJSONArray(encounters);
+
+        List<Map<String, Object>> updateRows = new ArrayList<>();
+        for (JSONObject row : ultrasounds) {
+            row.put("followup_required", false);
+            updateRows.add(row);
+        }
+
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasounds");
+        try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that ultrasound followup_required field can be changed to false")) {
+            queryUpdater.update(updateRows);
+        } catch (Exception e) {
+            _log.error(e);
+        }
+
     }
 
     public void createBreedingRecordsFromHousingChanges(final List<Map<String, Object>> housingRows) {
@@ -127,7 +152,8 @@ public class TriggerScriptHelper {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         Map<String, List<Map<String, Object>>> groupedAnimals = new TreeMap<>();
 
-        //filteredHousingRows = getTestData();
+        //Uncomment the below line to use the test data
+        //filteredHousingRows = getBreedingEncounterTestData();
 
         //Group rows into lists of animals that were caged together at the same time
         for (Map<String, Object> housingRow : filteredHousingRows) {
@@ -328,7 +354,7 @@ public class TriggerScriptHelper {
         }
     }
 
-    private List<Map<String, Object>> getTestData() {
+    private List<Map<String, Object>> getBreedingEncounterTestData() {
         List<Map<String, Object>> testData = new ArrayList<>();
 
         //female 1 - end

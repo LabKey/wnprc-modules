@@ -447,6 +447,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertEquals("Wrong row count", 5, invoicedItems.getDataRowCount());
         log("Validating Totals");
         assertTextPresent("$806.00", "$13.00", "$1.95", "$195.00");
+
+        stopImpersonating();
     }
 
     public int getUserId(String email) throws IOException, CommandException

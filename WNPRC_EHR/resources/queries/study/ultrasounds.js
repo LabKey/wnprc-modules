@@ -34,8 +34,8 @@ function onInsert(helper, scriptErrors, row, oldRow){
                                 },
                                 success: function(data){
                                     if(data && data.rows && data.rows.length){
-                                        let gestationLengthField = gestationField.
-                                        console.log(JSON.stringify(data.rows[0]));
+                                        let gestationDayField = gestationField.slice(0, -3) + '_gest_day';
+                                        row[gestationDayField] = data.rows[0].gestational_day;
                                     }
                                 },
                                 failure: EHR.Server.Utils.onFailure

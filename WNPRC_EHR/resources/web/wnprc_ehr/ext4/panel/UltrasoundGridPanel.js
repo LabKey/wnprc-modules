@@ -27,7 +27,7 @@
         const model = this.getSelectionModel().getSelection()[0];
 
         let id = model.get('Id');
-        if (args.field === 'beats_per_minute' || args.field === 'crown_rump_mm' || args.field === 'head_circumference_mm' || args.field === 'femur_length_mm' || args.field === 'biparietal_diameter_mm') {
+        if (args.field === 'gest_sac_mm' || args.field === 'crown_rump_mm' || args.field === 'biparietal_diameter_mm' || args.field === 'femur_length_mm') {
             LABKEY.Query.selectRows({
                 schemaName: 'study',
                 queryName: 'demographics',

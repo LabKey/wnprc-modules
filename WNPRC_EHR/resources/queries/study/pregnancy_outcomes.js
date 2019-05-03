@@ -5,5 +5,6 @@ function onInsert(helper, scriptErrors, row, oldRow){
 
     if (row && row.Id){
         row.protected = !!row.protected;
+        row.rejected = !!row.rejected;
     }
 }

@@ -44,19 +44,16 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
             restraint:                      { columnConfig: { columnIndex:  5 } },
             fetal_heartbeat:                { columnConfig: { columnIndex:  6 } },
             beats_per_minute:               { columnConfig: { columnIndex:  7 } },
-            beats_per_minute_gest_day:      { columnConfig: { columnIndex:  8 } },
-            crown_rump_mm:                  { columnConfig: { columnIndex:  9 } },
-            crown_rump_gest_day:            { columnConfig: { columnIndex: 10 } },
-            head_circumference_mm:          { columnConfig: { columnIndex: 11 } },
-            head_circumference_gest_day:    { columnConfig: { columnIndex: 12 } },
-            femur_length_mm:                { columnConfig: { columnIndex: 13 } },
-            femur_length_gest_day:          { columnConfig: { columnIndex: 14 } },
-            biparietal_diameter_mm:         { columnConfig: { columnIndex: 15 } },
-            biparietal_diameter_gest_day:   { columnConfig: { columnIndex: 16 } },
-            code:                           { columnConfig: { columnIndex: 17 } },
-            remark:                         { columnConfig: { columnIndex: 18, width: 150 } },
-            performedby:                    { columnConfig: { columnIndex: 19 } },
-            followup_required:              { columnConfig: { columnIndex: 20 } }
+            gest_sac_mm:                    { columnConfig: { columnIndex:  8, width: 150 } },
+            crown_rump_mm:                  { columnConfig: { columnIndex:  9, width: 150 } },
+            biparietal_diameter_mm:         { columnConfig: { columnIndex: 10, width: 150 } },
+            femur_length_mm:                { columnConfig: { columnIndex: 11, width: 150 } },
+            yolk_sac_diameter_mm:           { columnConfig: { columnIndex: 12, width: 150 } },
+            head_circumference_mm:          { columnConfig: { columnIndex: 13, width: 150 } },
+            code:                           { columnConfig: { columnIndex: 14 } },
+            remark:                         { columnConfig: { columnIndex: 15, width: 150 } },
+            performedby:                    { columnConfig: { columnIndex: 16 } },
+            followup_required:              { columnConfig: { columnIndex: 17 } }
         }
     }
 });
@@ -70,7 +67,8 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
                 xtype: 'wnprc-breedingencounteridfield',
                 editorConfig: {
                     plugins: ['wnprc-pregnancyduedatecalculation'],
-                }
+                },
+                helpPopup: 'this is a test'
             },
             date_due: {
                 xtype: 'wnprc-calculatedpregnancyduedatefield',
@@ -160,10 +158,27 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
                     selectOnFocus: true
                 }
             },
-            beats_per_minute_gest_day: {
+            gest_sac_mm: {
                 editorConfig: {
-                    readOnly: true
+                    plugins: ['wnprc-gestationcalculation'],
+                    selectOnFocus: true,
+                }
+            },
+            gest_sac_gest_day: {
+                xtype: 'wnprc-calculatedgestationdayfield',
+                hidden: false,
+                editorConfig: {
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
                 },
+                columnConfig: {
+                    hidden: true
+                }
             },
             crown_rump_mm: {
                 editorConfig: {
@@ -173,21 +188,41 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             crown_rump_gest_day: {
                 xtype: 'wnprc-calculatedgestationdayfield',
+                hidden: false,
                 editorConfig: {
-                    readOnly: true
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
                 },
+                columnConfig: {
+                    hidden: true
+                }
             },
-            head_circumference_mm: {
+            biparietal_diameter_mm: {
                 editorConfig: {
                     plugins: ['wnprc-gestationcalculation'],
                     selectOnFocus: true
                 }
             },
-            head_circumference_gest_day: {
+            biparietal_diameter_gest_day: {
                 xtype: 'wnprc-calculatedgestationdayfield',
+                hidden: false,
                 editorConfig: {
-                    readOnly: true,
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
                 },
+                columnConfig: {
+                    hidden: true
+                }
             },
             femur_length_mm: {
                 editorConfig: {
@@ -197,19 +232,30 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             femur_length_gest_day: {
                 xtype: 'wnprc-calculatedgestationdayfield',
+                hidden: false,
                 editorConfig: {
-                    readOnly: true,
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
                 },
+                columnConfig: {
+                    hidden: true
+                }
             },
-            biparietal_diameter_mm: {
+            yolk_sac_diameter_mm: {
                 editorConfig: {
                     selectOnFocus: true
                 }
             },
-            biparietal_diameter_gest_day: {
+            head_circumference_mm: {
                 editorConfig: {
-                    readOnly: true,
-                },
+                    plugins: ['wnprc-gestationcalculation'],
+                    selectOnFocus: true
+                }
             },
             code: {
                 //diagnostic ultrasound of abdomen and retroperitoneum, nos

@@ -50,6 +50,8 @@ Ext4.define('WNPRC.form.field.CalculatedGestationDayField', {
                                 if (results.rows && results.rows.length) {
                                     let row = results.rows[0];
                                     this.setValue(row.gestational_day);
+                                } else {
+                                    this.setValue(null);
                                 }
                             },
                             failure: function(errors) {

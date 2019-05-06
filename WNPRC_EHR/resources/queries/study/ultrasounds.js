@@ -33,9 +33,12 @@ function onInsert(helper, scriptErrors, row, oldRow){
                                     SEARCH_VALUE: row[gestationField]
                                 },
                                 success: function(data){
+                                    let gestationDayField = gestationField.slice(0, -3) + '_gest_day';
                                     if(data && data.rows && data.rows.length){
-                                        let gestationDayField = gestationField.slice(0, -3) + '_gest_day';
                                         row[gestationDayField] = data.rows[0].gestational_day;
+                                        console.log('gestational_day: ' + data.rows[0].gestational_day);
+                                    } else {
+                                        row[gestationDayField] = null;
                                     }
                                 },
                                 failure: EHR.Server.Utils.onFailure

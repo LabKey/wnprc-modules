@@ -166,16 +166,6 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             gest_sac_gest_day: {
                 xtype: 'wnprc-calculatedgestationdayfield',
-                hidden: false,
-                editorConfig: {
-                    listeners: {
-                        //hide field on render because if it's never rendered
-                        //to the dom it won't be able to be changed while hidden
-                        render: function(field){
-                            field.hide();
-                        }
-                    }
-                },
                 columnConfig: {
                     hidden: true
                 }
@@ -188,16 +178,6 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             crown_rump_gest_day: {
                 xtype: 'wnprc-calculatedgestationdayfield',
-                hidden: false,
-                editorConfig: {
-                    listeners: {
-                        //hide field on render because if it's never rendered
-                        //to the dom it won't be able to be changed while hidden
-                        render: function(field){
-                            field.hide();
-                        }
-                    }
-                },
                 columnConfig: {
                     hidden: true
                 }
@@ -210,16 +190,6 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             biparietal_diameter_gest_day: {
                 xtype: 'wnprc-calculatedgestationdayfield',
-                hidden: false,
-                editorConfig: {
-                    listeners: {
-                        //hide field on render because if it's never rendered
-                        //to the dom it won't be able to be changed while hidden
-                        render: function(field){
-                            field.hide();
-                        }
-                    }
-                },
                 columnConfig: {
                     hidden: true
                 }
@@ -232,16 +202,6 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             femur_length_gest_day: {
                 xtype: 'wnprc-calculatedgestationdayfield',
-                hidden: false,
-                editorConfig: {
-                    listeners: {
-                        //hide field on render because if it's never rendered
-                        //to the dom it won't be able to be changed while hidden
-                        render: function(field){
-                            field.hide();
-                        }
-                    }
-                },
                 columnConfig: {
                     hidden: true
                 }
@@ -253,7 +213,6 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             },
             head_circumference_mm: {
                 editorConfig: {
-                    plugins: ['wnprc-gestationcalculation'],
                     selectOnFocus: true
                 }
             },

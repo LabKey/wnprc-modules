@@ -282,22 +282,22 @@
                 <datatype>float</datatype>
             </column>
             <column columnName="gest_sac_gest_day">
-                <columnTitle>FL GD</columnTitle>
+                <columnTitle>Gest Sac GD</columnTitle>
                 <description>Estimated gestation day based on femur length</description>
                 <datatype>integer</datatype>
             </column>
             <column columnName="crown_rump_gest_day">
-                <columnTitle>CR GD</columnTitle>
+                <columnTitle>Crown Rump GD</columnTitle>
                 <description>Estimated gestation day based on crown rump</description>
                 <datatype>integer</datatype>
             </column>
             <column columnName="biparietal_diameter_gest_day">
-                <columnTitle>BPD GD</columnTitle>
+                <columnTitle>Biparietal GD</columnTitle>
                 <description>Estimated gestation day based on biparietal diameter</description>
                 <datatype>integer</datatype>
             </column>
             <column columnName="femur_length_gest_day">
-                <columnTitle>FL GD</columnTitle>
+                <columnTitle>Femur Length GD</columnTitle>
                 <description>Estimated gestation day based on femur length</description>
                 <datatype>integer</datatype>
             </column>

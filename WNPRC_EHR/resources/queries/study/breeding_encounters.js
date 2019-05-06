@@ -18,6 +18,8 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 }
             }
         });
+
+        row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId
     }
 
     //validate that the sire(s) are male, alive, and not duplicated

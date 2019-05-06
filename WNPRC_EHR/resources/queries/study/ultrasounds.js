@@ -48,5 +48,7 @@ function onInsert(helper, scriptErrors, row, oldRow){
                 }
             }
         });
+
+        row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId
     }
 }

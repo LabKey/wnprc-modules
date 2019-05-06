@@ -19,8 +19,6 @@ import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.WrappedColumn;
@@ -30,14 +28,12 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Set;
 
 
 /**
@@ -239,6 +235,31 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         return new ContactsColumn(colInfo);
                     }
                 });*/
+        if (table.getColumn("expirationDate") == null)
+        {
+            UserSchema us = getUserSchema(table, "ehr");
+            if (us != null)
+            {
+                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
+                col2.setLabel("Expiration Date");
+                col2.setUserEditable(false);
+                col2.setIsUnselectable(true);
+                col2.setFk(new QueryForeignKey(us, null, "protocolExpirationDate", "protocol", "protocol"));
+            }
+        }
+
+        if (table.getColumn("countsBySpecies") == null)
+        {
+            UserSchema us = getUserSchema(table, "ehr");
+            if (us != null)
+            {
+                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
+                col2.setLabel("Max Animals Per Species");
+                col2.setUserEditable(false);
+                col2.setIsUnselectable(true);
+                col2.setFk(new QueryForeignKey(us, null, "protocolCountsBySpecies", "protocol", "protocol"));
+            }
+        }
 
 
     }

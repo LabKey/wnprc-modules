@@ -22,38 +22,110 @@ EHR.reports.viralLoads = function(panel, tab){
                 schemaName: 'study',
                 queryName: 'ViralLoads',
                 filterArray: filterArray.removable.concat(filterArray.nonRemovable),
-                columns: 'Id,date,LogVL',
-                sort: 'Id,-date',
+                columns: 'Id,date,LogVL,Virus,Comments',
+                sort: 'Id,-date, Virus',
                 requiredVersion: 9.1,
                 success: Ext4.Function.pass(function(subj, results){
-                    tab.add({
-                        xtype: 'ldk-graphpanel',
-                        title: 'Viral Loads: ' + subj,
-                        plotConfig: {
-                            results: results,
-                            title: 'Viral Loads: ' + subj,
-                            height: 400,
-                            width: 900,
-                            yLabel: 'Log Copies/mL',
-                            xLabel: 'Date',
-                            xField: 'date',
-                            grouping: ['Id'],
-                            layers: [{
-                                y: 'LogVL',
-                                name: 'Viral Load'
-                            }]
+                    if (!results.rowCount){
+                        target.update('');
+                        target.add({
+                            html: 'No animal selected to display Viral Load data'
+                        });
+                        return;
+                    }
+                    //virusType = (cloneObject(results));
+                    var virusMap = new Map();
+                    Ext4.each(results.rows, function(row){
+                        console.log(row['Virus']);
+                        if (virusMap.get(row['Virus'].value) === undefined){
+                            virusMap.set(row['Virus'].value,1);
+                        }else{
+                            //var numberViralLoads = virusMap.get(row['Virus'].value);
+                            //numberViralLoads++;
+                            virusMap.set(row['Virus'].value, virusMap.get(row['Virus'].value)+1);
+
                         }
-                    });
+
+
+
+                    }, this);
+
+                    var virusType;
+
+                    virusMap.forEach(function (value, key) {
+                        console.log(key + ' number of VLs = '+ value );
+                        virusType = (cloneObject(results));
+                        //clear array of clone
+                        virusType.rows = results.rows.filter(item => item.Virus.value === key);
+
+                        /*for (var i =results.rowCount-1; i>=0; i--){
+                            var virus = results.rows[i].Virus.value;
+
+                            if (virus === key){
+                                virusType.rows[i]= ;
+                            }
+
+                        }*/
+                        tab.add({
+                            xtype: 'ldk-graphpanel',
+                            title: 'Viral Load: ' + subj + ' '+key,
+                            plotConfig: {
+                                results: virusType,
+                                title: 'Viral Loads: ' + subj + ' '+ key,
+                                height: 400,
+                                width: 900,
+                                yLabel: 'Log Copies/mL',
+                                xLabel: 'Date',
+                                xField: 'date',
+                                grouping: ['Id'],
+                                layers: [{
+                                    y: 'LogVL',
+                                    name: 'Viral Load'
+                                }]
+                            }
+                        });
+
+
+                    })
+
+
                 }, [subject])
             });
         }
+
+        function cloneObject(obj) {
+            if (obj === null || typeof obj !== 'object') {
+                return obj;
+            }
+
+            var temp = obj.constructor(); // give temp the original obj's constructor
+            for (var key in obj) {
+                    temp[key] = cloneObject(obj[key]);
+
+            }
+
+            return temp;
+        }
+
+        function virusFilter(virusType){
+
+            return
+
+        }
     }
 
+    LABKEY.Query.selectRows({
+        schemaName: 'study',
+
+
+    })
     var gridFilterArray = panel.getFilterArray(tab);
     var title = panel.getTitleSuffix();
+    gridFilterArray.nonRemovable.push(LABKEY.Filter.create('Challenge', 'zika virus', LABKEY.Filter.Types.EQUAL));
+    //var challengeFilter = LABKEY.Filter.create('Challenge', 'zika virus', LABKEY.Filter.Types.EQUAL);
 
     var config = panel.getQWPConfig({
-        title: 'Viral Load' + title,
+        title: 'Viral Loads' + title,
         schemaName: 'study',
         queryName: 'ViralLoadsWpi',
         filters: gridFilterArray.nonRemovable,
@@ -62,6 +134,11 @@ EHR.reports.viralLoads = function(panel, tab){
         frame: true
     });
 
+    tab.add({
+        xtype: 'ldk-querypanel',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
     tab.add({
         xtype: 'ldk-querypanel',
         style: 'margin-bottom:20px;',
@@ -910,7 +987,6 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         else {
             housingHTML = getErrorHTML("Please select three or fewer animals to view this visualization.");
         }
-
 
         LABKEY.Query.selectRows({
             schemaName: 'study',

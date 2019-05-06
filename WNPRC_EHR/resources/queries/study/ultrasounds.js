@@ -22,8 +22,6 @@ function onInsert(helper, scriptErrors, row, oldRow){
                         let species = demographics['species'];
 
                         gestation_fields.forEach(function(gestationField) {
-                            console.log('field: ' + gestationField);
-                            console.log('value: ' + row[gestationField]);
                             LABKEY.Query.selectRows({
                                 schemaName: 'study',
                                 queryName: 'getGestationalDay',
@@ -36,7 +34,6 @@ function onInsert(helper, scriptErrors, row, oldRow){
                                     let gestationDayField = gestationField.slice(0, -3) + '_gest_day';
                                     if(data && data.rows && data.rows.length){
                                         row[gestationDayField] = data.rows[0].gestational_day;
-                                        console.log('gestational_day: ' + data.rows[0].gestational_day);
                                     } else {
                                         row[gestationDayField] = null;
                                     }

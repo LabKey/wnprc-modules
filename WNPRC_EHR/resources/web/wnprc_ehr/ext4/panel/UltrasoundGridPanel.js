@@ -47,15 +47,17 @@
                             },
                             scope: this,
                             success: function(results) {
+                                let theField = args.field;
+                                if (theField.endsWith('_mm')) {
+                                    theField = args.field.slice(0, -3);
+                                }
+                                theField += '_gest_day';
                                 if (results.rows && results.rows.length) {
                                     let row = results.rows[0];
                                     let gd = row.gestational_day;
-                                    let theField = args.field;
-                                    if (theField.endsWith('_mm')) {
-                                        theField = args.field.slice(0, -3);
-                                    }
-                                    theField += '_gest_day';
                                     model.set(theField, gd);
+                                } else {
+                                    model.set(theField, null);
                                 }
                             },
                             failure: function(errors) {

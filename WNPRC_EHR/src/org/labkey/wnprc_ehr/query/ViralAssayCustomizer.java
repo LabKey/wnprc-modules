@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.query;
 
 import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -54,7 +55,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
 
     public void customizeSharedColumns(AbstractTableInfo ti)
     {
-        ColumnInfo hypothesis = ti.getColumn("hypothesis");
+        BaseColumnInfo hypothesis = ti.getMutableColumn("hypothesis");
         if (hypothesis != null)
         {
             hypothesis.setShownInInsertView(false);
@@ -89,14 +90,14 @@ public class ViralAssayCustomizer implements TableCustomizer {
     }
 
     public void customizeDataTable(AbstractTableInfo ti) {
-        ColumnInfo subject = ti.getColumn("subjectId");
+        BaseColumnInfo subject = ti.getMutableColumn("subjectId");
         if (subject != null) {
             subject.setLabel("Subject Id");
             subject.setConceptURI("http://cpas.labkey.com/Study#ParticipantId");
             LDKService.get().applyNaturalSort(ti, "subjectId");
         }
 
-        ColumnInfo result = ti.getColumn("result");
+        BaseColumnInfo result = ti.getMutableColumn("result");
         if (result != null) {
             result.setLabel("Result");
             result.setMeasure(true);
@@ -105,7 +106,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
             result.setConceptURI(LaboratoryService.ASSAYRESULT_CONCEPT_URI);
         }
 
-        ColumnInfo rawResult = ti.getColumn("rawResult");
+        BaseColumnInfo rawResult = ti.getMutableColumn("rawResult");
         if (rawResult != null) {
             rawResult.setLabel("Raw Result");
             rawResult.setHidden(true);
@@ -119,18 +120,18 @@ public class ViralAssayCustomizer implements TableCustomizer {
             rawResult.setConceptURI(LaboratoryService.ASSAYRAWRESULT_CONCEPT_URI);
         }
 
-        ColumnInfo date = ti.getColumn("date");
+        BaseColumnInfo date = ti.getMutableColumn("date");
         if (date != null) {
             date.setLabel("Sample Date");
             date.setConceptURI(LaboratoryService.SAMPLEDATE_CONCEPT_URI);
         }
 
-        ColumnInfo requestId = ti.getColumn("requestId");
+        BaseColumnInfo requestId = ti.getMutableColumn("requestId");
         if (requestId != null) {
             requestId.setLabel("Request Id");
         }
 
-        ColumnInfo qcFlags = ti.getColumn("qcflags");
+        BaseColumnInfo qcFlags = ti.getMutableColumn("qcflags");
         if (qcFlags != null)
         {
             qcFlags.setLabel("QC Flags");
@@ -139,7 +140,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
             qcFlags.setDimension(false);
         }
 
-        ColumnInfo statusFlags = ti.getColumn("statusflag");
+        BaseColumnInfo statusFlags = ti.getMutableColumn("statusflag");
         if (statusFlags != null)
         {
             statusFlags.setLabel("Status Flag");
@@ -151,15 +152,18 @@ public class ViralAssayCustomizer implements TableCustomizer {
         ColumnInfo sourceMaterialColumn = ti.getColumn("sourceMaterial");
         if (sourceMaterialColumn != null) {
             TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo();
-            ColumnInfo liquidColumn = sourceMaterialTable.getColumn("liquid");
-            if (liquidColumn != null) {
-                liquidColumn.setLabel("Units");
-                liquidColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
-                    @Override
-                    public DisplayColumn createRenderer(ColumnInfo colInfo) {
-                        return new ViralLoadUnitsColumn(colInfo);
-                    }
-                });
+            // TODO    getMutableColumn not defined on TableInfo
+            if (sourceMaterialTable instanceof AbstractTableInfo) {
+                BaseColumnInfo liquidColumn = ((AbstractTableInfo)sourceMaterialTable).getMutableColumn("liquid");
+                if (liquidColumn != null) {
+                    liquidColumn.setLabel("Units");
+                    liquidColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
+                        @Override
+                        public DisplayColumn createRenderer(ColumnInfo colInfo) {
+                            return new ViralLoadUnitsColumn(colInfo);
+                        }
+                    });
+                }
             }
         }
 
@@ -172,18 +176,18 @@ public class ViralAssayCustomizer implements TableCustomizer {
     }
 
     public void customizeBatchTable(AbstractTableInfo ti) {
-        ColumnInfo name = ti.getColumn("name");
+        BaseColumnInfo name = ti.getMutableColumn("name");
         if (name != null) {
             name.setLabel("Batch Name");
             name.setShownInInsertView(false);
         }
 
-        ColumnInfo comments = ti.getColumn("comments");
+        BaseColumnInfo comments = ti.getMutableColumn("comments");
         if (comments != null) {
             comments.setShownInInsertView(false);
         }
 
-        ColumnInfo importMethod = ti.getColumn("importMethod");
+        BaseColumnInfo importMethod = ti.getMutableColumn("importMethod");
         if (importMethod != null) {
             importMethod.setHidden(true);
             importMethod.setLabel("Import Method");

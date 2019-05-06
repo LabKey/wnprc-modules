@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
@@ -77,21 +78,21 @@ public class WNPRC_Schema extends SimpleUserSchema {
     }
 
     @Override
-    public TableInfo createTable(String name) {
+    public TableInfo createTable(String name, ContainerFilter cf) {
         Map<String, TableInfo> enumTables = getEnumTables();
 
         if (enumTables.containsKey(name)) {
             return enumTables.get(name);
         }
         if (name.equalsIgnoreCase("vvc")){
-            CustomPermissionsTable vvc = new CustomPermissionsTable(this,_dbSchema.getTable(name));
+            CustomPermissionsTable vvc = new CustomPermissionsTable(this,_dbSchema.getTable(name),cf);
             vvc.addPermissionMapping(UpdatePermission.class, EHRVeterinarianPermission.class);
             vvc.addPermissionMapping(InsertPermission.class, EHRRequestPermission.class);
 
             return vvc.init();
         }
         else {
-            return super.createTable(name);
+            return super.createTable(name, cf);
         }
     }
 

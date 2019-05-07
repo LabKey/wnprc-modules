@@ -1,6 +1,3 @@
-var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
-var logger = WNPRC.Logger;
-
 /**
  * @external Ext4
  */
@@ -63,15 +60,11 @@ var logger = WNPRC.Logger;
                                     model.set(theField, null);
                                 }
                             },
-                            failure: function(errors) {
-                                logger.error(errors);
-                            }
+                            failure: EHR.Utils.onFailure
                         });
                     }
                 },
-                failure: function(errors) {
-                    logger.error(errors);
-                }
+                failure: EHR.Utils.onFailure
             });
         }
     }

@@ -26,15 +26,16 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
             date:                           { columnConfig: { columnIndex:  9 } }
         },
         'study.pregnancy_outcomes':         {
-            Id:                             { columnConfig: { columnIndex: 1 } },
-            date:                           { columnConfig: { columnIndex: 2 } },
-            pregnancyid:                    { columnConfig: { columnIndex: 3, width: 200 } },
-            outcome:                        { columnConfig: { columnIndex: 4 } },
-            infantid:                       { columnConfig: { columnIndex: 5 } },
-            protected:                      { columnConfig: { columnIndex: 6 } },
-            project:                        { columnConfig: { columnIndex: 7 } },
-            remark:                         { columnConfig: { columnIndex: 8, width: 400 } },
-            performedby:                    { columnConfig: { columnIndex: 9 } }
+            Id:                             { columnConfig: { columnIndex:  1 } },
+            date:                           { columnConfig: { columnIndex:  2 } },
+            pregnancyid:                    { columnConfig: { columnIndex:  3, width: 200 } },
+            outcome:                        { columnConfig: { columnIndex:  4 } },
+            infantid:                       { columnConfig: { columnIndex:  5 } },
+            rejected:                       { columnConfig: { columnIndex:  6, width: 150 } },
+            protected:                      { columnConfig: { columnIndex:  7 } },
+            project:                        { columnConfig: { columnIndex:  8 } },
+            remark:                         { columnConfig: { columnIndex:  9, width: 400 } },
+            performedby:                    { columnConfig: { columnIndex: 10 } }
         },
         'study.ultrasounds': {
             Id:                             { columnConfig: { columnIndex:  1 } },

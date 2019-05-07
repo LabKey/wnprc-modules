@@ -7,7 +7,8 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     //validate that the dam is female
     if (row.Id){
         EHR.Server.Validation.verifyIsFemale(row, scriptErrors, helper);
-        row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId
+        row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId;
+        row.QCStateLabel = EHR.Server.Security.getQCStateByLabel('Completed').Label;
     }
 
     //validate that the sire is male

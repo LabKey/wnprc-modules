@@ -1,3 +1,6 @@
+var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
+var logger = WNPRC.Logger;
+
 /**
  * @external Ext4
  */
@@ -61,13 +64,13 @@
                                 }
                             },
                             failure: function(errors) {
-                                console.log(errors);
+                                logger.error(errors);
                             }
                         });
                     }
                 },
                 failure: function(errors) {
-                    console.log(errors);
+                    logger.error(errors);
                 }
             });
         }

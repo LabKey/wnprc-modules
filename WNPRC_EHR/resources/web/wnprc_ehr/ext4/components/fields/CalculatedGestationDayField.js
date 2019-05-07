@@ -1,3 +1,6 @@
+var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
+var logger = WNPRC.Logger;
+
 Ext4.define('WNPRC.form.field.CalculatedGestationDayField', {
     extend: 'Ext.form.field.Text',
     alias: 'widget.wnprc-calculatedgestationdayfield',
@@ -55,13 +58,13 @@ Ext4.define('WNPRC.form.field.CalculatedGestationDayField', {
                                 }
                             },
                             failure: function(errors) {
-                                console.log(errors);
+                                logger.error(errors);
                             }
                         });
                     }
                 },
                 failure: function(errors) {
-                    console.log(errors);
+                    logger.error(errors);
                 }
             });
         } else if (!!val) {

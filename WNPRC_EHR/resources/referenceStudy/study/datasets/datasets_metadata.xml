@@ -21,10 +21,12 @@
             <column columnName="date">
                 <datatype>timestamp</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+                <nullable>false</nullable>
             </column>
             <column columnName="performedby">
                 <datatype>varchar</datatype>
                 <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+                <nullable>false</nullable>
             </column>
             <column columnName="remark">
                 <datatype>varchar</datatype>
@@ -54,6 +56,7 @@
                     <fkTable>animal</fkTable>
                     <fkColumnName>Id</fkColumnName>
                 </fk>
+                <nullable>false</nullable>
             </column>
             <column columnName="ejaculation">
                 <columnTitle>Ejaculation Confirmed?</columnTitle>
@@ -113,14 +116,18 @@
             <column columnName="date_conception_early">
                 <columnTitle>Earliest Est. Conception Date</columnTitle>
                 <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
             </column>
             <column columnName="date_conception_late">
                 <columnTitle>Latest Est. Conception Date</columnTitle>
                 <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
             </column>
             <column columnName="date_conception">
                 <columnTitle>Estimated Date of Conception</columnTitle>
                 <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
+                <nullable>false</nullable>
             </column>
             <column columnName="date_due_early">
                 <columnTitle>Earliest Est. Due Date</columnTitle>
@@ -136,6 +143,7 @@
                 <columnTitle>Estimated Due Date</columnTitle>
                 <datatype>date</datatype>
                 <formatString>y-M-d</formatString>
+                <nullable>false</nullable>
             </column>
         </columns>
         <indices>
@@ -163,6 +171,7 @@
                     <fkColumnName>lsid</fkColumnName>
                     <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                 </fk>
+                <nullable>false</nullable>
             </column>
             <column columnName="outcome">
                 <columnTitle>Outcome</columnTitle>
@@ -186,7 +195,7 @@
                 </fk>
             </column>
             <column columnName="rejected">
-                <columnTitle>Rejected</columnTitle>
+                <columnTitle>Rejected by Mother</columnTitle>
                 <datatype>boolean</datatype>
             </column>
             <column columnName="protected">

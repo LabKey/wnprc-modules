@@ -12,7 +12,8 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
             ejaculation:                    { columnConfig: { columnIndex: 5 } },
             project:                        { columnConfig: { columnIndex: 6 } },
             remark:                         { columnConfig: { columnIndex: 7, width: 400 } },
-            performedby:                    { columnConfig: { columnIndex: 8 } }
+            performedby:                    { columnConfig: { columnIndex: 8 } },
+            outcome:                        { columnConfig: { columnIndex: 9 } }
         },
         'study.pregnancies': {
             Id:                             { columnConfig: { columnIndex:  1 } },

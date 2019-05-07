@@ -7,7 +7,6 @@
                     <column columnName="date">
                         <formatString>MM/dd/yyyy hh:mm</formatString>
                     </column>
-                    <column columnName="performedby"/>
                     <column columnName="outcome">
                         <columnTitle>Outcome</columnTitle>
                         <fk>
@@ -27,8 +26,11 @@
                             <fkColumnName>Id</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="rejected"/>
+                    <column columnName="protected"/>
                     <column columnName="offered_to"/>
                     <column columnName="remark"/>
+                    <column columnName="performedby"/>
                 </columns>
             </table>
         </tables>

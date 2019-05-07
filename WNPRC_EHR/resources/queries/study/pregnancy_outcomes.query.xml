@@ -18,7 +18,6 @@
                     <column columnName="date">
                         <columnTitle>Delivery Date</columnTitle>
                     </column>
-                    <column columnName="performedby"/>
                     <column columnName="pregnancyid">
                         <columnTitle>Pregnancy (Conc. Date)</columnTitle>
                         <fk>
@@ -29,10 +28,13 @@
                         </fk>
                     </column>
                     <column columnName="infantid"/>
+                    <column columnName="rejected"/>
+                    <column columnName="protected"/>
                     <column columnName="project">
                         <columnTitle>Offered To</columnTitle>
                     </column>
                     <column columnName="remark"/>
+                    <column columnName="performedby"/>
                 </columns>
             </table>
         </tables>

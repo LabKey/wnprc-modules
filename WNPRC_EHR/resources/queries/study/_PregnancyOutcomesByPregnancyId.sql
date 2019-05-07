@@ -1,11 +1,13 @@
 PARAMETERS ( PARENT_RECORD_ID VARCHAR )
 SELECT
   po.date,
-  po.performedby,
   po.outcome,
   po.infantid,
+  po.rejected,
+  po.protected,
   po.project,
-  po.remark
+  po.remark,
+  po.performedby
 FROM pregnancy_outcomes po
 WHERE po.pregnancyid = (SELECT p.lsid
                         FROM pregnancies p

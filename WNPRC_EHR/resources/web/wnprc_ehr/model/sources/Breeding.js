@@ -149,7 +149,12 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
             pregnancyid: {
                 xtype: 'wnprc-pregnancyidfield'
             },
-
+            outcome: {
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'currentBirthTypes'
+                }
+            }
         },
         'study.ultrasounds': {
             pregnancyid: {

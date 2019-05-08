@@ -38,7 +38,7 @@
                     if (results.rows && results.rows.length) {
                         let row = results.rows[0];
                         LABKEY.Query.selectRows({
-                            schemaName: 'study',
+                            schemaName: 'wnprc',
                             queryName: 'getGestationalDay',
                             parameters: {
                                 SPECIES: row.species,

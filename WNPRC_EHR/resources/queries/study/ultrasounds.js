@@ -23,7 +23,7 @@ function onInsert(helper, scriptErrors, row, oldRow){
 
                         gestation_fields.forEach(function(gestationField) {
                             LABKEY.Query.selectRows({
-                                schemaName: 'study',
+                                schemaName: 'wnprc',
                                 queryName: 'getGestationalDay',
                                 parameters: {
                                     SPECIES: species,

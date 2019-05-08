@@ -14,6 +14,7 @@
                             <fkColumnName>value</fkColumnName>
                             <fkDisplayColumnName>description</fkDisplayColumnName>
                         </fk>
+                        <nullable>false</nullable>
                     </column>
                     <column columnName="date">
                         <columnTitle>Delivery Date</columnTitle>
@@ -26,6 +27,7 @@
                             <fkColumnName>lsid</fkColumnName>
                             <fkDisplayColumnName>date_conception_early</fkDisplayColumnName>
                         </fk>
+                        <nullable>false</nullable>
                     </column>
                     <column columnName="infantid"/>
                     <column columnName="rejected"/>
@@ -34,7 +36,9 @@
                         <columnTitle>Offered To</columnTitle>
                     </column>
                     <column columnName="remark"/>
-                    <column columnName="performedby"/>
+                    <column columnName="performedby">
+                        <nullable>false</nullable>
+                    </column>
                 </columns>
             </table>
         </tables>

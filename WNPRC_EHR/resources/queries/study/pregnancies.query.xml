@@ -17,18 +17,19 @@
                             <fkDisplayColumnName>window</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="performedby"/>
+                    <column columnName="performedby">
+                        <nullable>false</nullable>
+                    </column>
                     <column columnName="remark"/>
                     <column columnName="qcstate">
                         <isHidden>true</isHidden>
                     </column>
-                    <column columnName="date_conception_early">
-                        <columnTitle>Earliest Est. Conc. Date</columnTitle>
+                    <column columnName="date_conception">
+                        <nullable>false</nullable>
                     </column>
-                    <column columnName="date_conception_late">
-                        <columnTitle>Latest Est. Conc. Date</columnTitle>
+                    <column columnName="date_due">
+                        <nullable>false</nullable>
                     </column>
-                    <column columnName="date_due"/>
                 </columns>
             </table>
         </tables>

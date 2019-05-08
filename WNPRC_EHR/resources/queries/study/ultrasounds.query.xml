@@ -39,7 +39,9 @@
                         </fk>
                     </column>
                     <column columnName="remark"/>
-                    <column columnName="performedby"/>
+                    <column columnName="performedby">
+                        <nullable>false</nullable>
+                    </column>
                     <column columnName="followup_required"/>
                 </columns>
             </table>

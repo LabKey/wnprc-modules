@@ -8928,7 +8928,7 @@ function selectRowsSql(id) {
   });
 } //filters for project
 
-function getEHRData(schemaName, queryName, sort = 'rowid', columns = '') {
+function getEHRData(schemaName, queryName, sort = 'rowid', columns = '', filterArray = []) {
   return new Promise((resolve, reject) => {
     return LABKEY.Query.selectRows({
       schemaName: schemaName,
@@ -8936,6 +8936,7 @@ function getEHRData(schemaName, queryName, sort = 'rowid', columns = '') {
       columns: columns,
       sort: sort,
       containerPath: '/WNPRC/EHR',
+      filterArray: filterArray,
       success: data => {
         resolve(data);
       },
@@ -49761,6 +49762,7 @@ const renderField = ({
 }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
   className: "col-xs-4 form-control-label"
 }, " ", label, " "), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", Object.assign({
+  required: true,
   className: "col-xs-6 form-control-input"
 }, input)), visited && warnings && warnings.length > 0 && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("span", {
   "data-tooltip": warnings
@@ -49781,91 +49783,68 @@ const renderDateTimePicker = ({
 
 class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
   constructor() {
-    super();
+    super(); //this has to be an array of promises
+
+    const projectFilter = [LABKEY.Filter.create('enddate', '', LABKEY.Filter.Types.EQUAL)];
+    const dataArr = [Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'uniqueProtocolInvestigator'), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_viral_status'), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_origin', 'meaning'), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_species', 'common'), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_sex'), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'project', '-project', 'project,enddate', projectFilter), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'protocol', '-protocol'), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_disposition'), Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_infectiousdisease')];
     this.state = {
       loading: true,
       submitted: false,
-      pidata: [{
+      uniqueProtocolInvestigator: [{
         value: ''
       }],
-      viralstatusdata: [{
+      animal_requests_viral_status: [{
         value: ''
       }],
-      origindata: [{
+      animal_requests_origin: [{
         value: ''
       }],
-      speciesdata: [{
+      animal_requests_species: [{
         value: ''
       }],
-      sexdata: [{
+      animal_requests_sex: [{
         value: ''
       }],
-      projectdata: [{
+      project: [{
         value: ''
       }],
-      protocoldata: [{
+      protocol: [{
         value: ''
       }],
-      dispositiondata: [{
+      animal_requests_disposition: [{
         value: ''
       }],
-      infectiousdiseasedata: [{
+      animal_requests_infectiousdisease: [{
         value: ''
-      }]
+      }],
+      dataArr: dataArr
     };
     this.onSubmit = this.onSubmit.bind(this);
-  }
-
-  getSeveralEHRData() {
-    return __awaiter(this, void 0, void 0, function* () {
-      return Promise.all([{
-        'pidata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'uniqueProtocolInvestigator')
-      }, {
-        'viralstatusdata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_viral_status')
-      }, {
-        'origindata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_origin')
-      }, {
-        'speciesdata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_species')
-      }, {
-        'sexdata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_sex')
-      }, {
-        'projectdata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'project', '-project', 'project')
-      }, {
-        'protocoldata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr', 'protocol', '-protocol')
-      }, {
-        'dispositiondata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_disposition')
-      }, {
-        'infectiousdiseasedata': Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["a" /* getEHRData */])('ehr_lookups', 'animal_requests_infectiousdisease')
-      }]);
-      console.log('from promise all...');
-    });
-  }
-
-  setAllData(values) {
-    return __awaiter(this, void 0, void 0, function* () {
-      for (let val of values) {
-        let key = Object.keys(val); //@ts-ignore
-        //TODO remove ts-ignore
-
-        val[key].then(data => {
-          console.log(data); // @ts-ignore
-          // TODO fix ts-ignore on the key below
-
-          this.setState({
-            [key]: data.rows
-          });
-        });
-      }
-    });
+    this.getSeveralEHRData = this.getSeveralEHRData.bind(this);
   }
 
   componentDidMount() {
     return __awaiter(this, void 0, void 0, function* () {
       //get data for dropdown options
-      this.getSeveralEHRData().then(values => {
-        console.log(values);
-        this.setAllData(values);
+      this.getSeveralEHRData(this.state.dataArr);
+    });
+  }
+
+  getSeveralEHRData(dataArr) {
+    Promise.all(dataArr).then(data => {
+      // Do something with the data here
+      for (let val of data) {
+        //TODO remove ts-ignore
+        //@ts-ignore
+        this.setState({
+          [val['queryName']]: val['rows']
+        });
+      }
+    }).then(() => {
+      this.setState({
+        loading: false
       });
+      console.log('set all values!!!!');
     });
   }
 
@@ -49874,13 +49853,16 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
       this.setState({
         submitted: true
       });
-      Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["c" /* submitAnimalRequest */])(values, 5).then(data => {
-        console.log(data);
+      const QCState = 5; //TODO update this... might be ok to set this to buddy's email since dev/test will catch it.
+
+      const receivers = LABKEY.Security.currentUser.email;
+      Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["c" /* submitAnimalRequest */])(values, QCState).then(data => {
+        //TODO hardcode as little as possible for the email url
         let redirectUrl = LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view#topTab:Requests&activeReport:AnimalRequests', '/WNPRC/EHR'); //send the animal request email here...
 
         let from = LABKEY.Security.currentUser.email; //TODO get this list from the database?
 
-        let recipients = LABKEY.Security.currentUser.email;
+        let recipients = receivers;
         let subject = '[EHR Services] A new animal request was submitted';
         let msg = Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["a" /* constructNotficationEmail */])(data);
 
@@ -49908,14 +49890,31 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
       }));
     };
 
-    const loading = this.state.loading === true ? 'loading-true' : 'loading-false';
+    const Condition = ({
+      when,
+      is,
+      children
+    }) => __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+      name: when,
+      subscription: {
+        value: true
+      }
+    }, ({
+      input: {
+        value
+      }
+    }) => value === is ? children : null);
+
+    const loading = this.state.loading;
     const crsr = this.state.submitted === true ? 'wait' : '';
+    const display = this.state.loading === true ? 'none' : 'block';
     const cancelUrl = LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view', '/WNPRC/EHR');
     return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["b" /* Form */], {
       onSubmit: this.onSubmit,
       mutators: Object.assign({}, __WEBPACK_IMPORTED_MODULE_3_final_form_arrays__["a" /* default */], {
         setFieldData: __WEBPACK_IMPORTED_MODULE_4_final_form_set_field_data__["a" /* default */]
       }),
+      //TODO check this subscription doesnt break stuff
       subscription: {
         submitting: true,
         pristine: true
@@ -49937,28 +49936,46 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: `row content-wrapper-body`
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
-          className: `form-wrapper ${loading}`
+          className: `form-wrapper`
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("form", {
           onSubmit: handleSubmit
-        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+        }, loading && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+          className: "loading"
+        }), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+          style: {
+            display: display
+          },
           className: "card-body"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
           className: "col-xs-4 form-control-label"
-        }, "PI:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */] //TODO custom component for rendering dropdowns
-        , {
-          //TODO custom component for rendering dropdowns
-          name: `principalinvestigator`,
+        }, " PI:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "principalinvestigator",
           label: "PI:",
           component: "select",
           className: "col-xs-6 form-control-input",
           validate: required,
+          //onChange={() => this.setOptionalPiField} do not do this, it overrides
           required: true
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "pidata",
+          name: "uniqueProtocolInvestigator",
           rowkey: "inves"
-        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+        }), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", {
+          value: "other"
+        }, "Other"))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(Condition, {
+          when: "principalinvestigator",
+          is: "other"
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "externalprincipalinvestigator",
+          className: "col-xs-6 form-control-input",
+          component: renderField,
+          label: "Specify PI:",
+          placeholder: "Please Specify PI",
+          type: "text",
+          validate: required,
+          required: true
+        })), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "numberofanimals",
           className: "col-xs-6 form-control-input",
           component: renderField,
@@ -49977,7 +49994,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
           validate: required,
           required: true
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "speciesdata",
+          name: "animal_requests_species",
           rowkey: "common"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
@@ -49990,7 +50007,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
           validate: required,
           required: true
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "origindata",
+          name: "animal_requests_origin",
           rowkey: "meaning"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
@@ -50003,7 +50020,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
           validate: required,
           required: true
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "sexdata",
+          name: "animal_requests_sex",
           rowkey: "value"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "age",
@@ -50040,20 +50057,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
           validate: required,
           required: true
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "viralstatusdata",
-          rowkey: "value"
-        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
-          className: "row top-buffer"
-        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
-          className: "col-xs-4 form-control-label"
-        }, "Disposition:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
-          name: "disposition",
-          className: "col-xs-6 form-control-input",
-          component: "select",
-          validate: required,
-          required: true
-        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "dispositiondata",
+          name: "animal_requests_viral_status",
           rowkey: "value"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
@@ -50066,7 +50070,20 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
           validate: required,
           required: true
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "infectiousdiseasedata",
+          name: "animal_requests_infectiousdisease",
+          rowkey: "value"
+        }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+          className: "row top-buffer"
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
+          className: "col-xs-4 form-control-label"
+        }, "Disposition:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+          name: "disposition",
+          className: "col-xs-6 form-control-input",
+          component: "select",
+          validate: required,
+          required: true
+        }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
+          name: "animal_requests_disposition",
           rowkey: "value"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
@@ -50092,7 +50109,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", {
           value: "TBD"
         }, "TBD"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "projectdata",
+          name: "project",
           rowkey: "project"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
@@ -50107,13 +50124,13 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", null), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("option", {
           value: "TBD"
         }, "TBD"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DropdownOptions, {
-          name: "protocoldata",
+          name: "protocol",
           rowkey: "protocol"
         }))), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
           className: "row top-buffer"
         }, __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("label", {
           className: "col-xs-4 form-control-label"
-        }, "Account #:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
+        }, "Account:"), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["a" /* Field */], {
           name: "account",
           className: "col-xs-6 form-control-input",
           component: "input",
@@ -66317,8 +66334,15 @@ var setFieldData = function setFieldData(args, state) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__actions__ = __webpack_require__(132);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_moment__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_moment__);
-//get the animal info and save it to the store
 
+ //helper method to swap two fields (usecase: user input under a "dropdown" conditional select):
+// https://github.com/final-form/react-final-form#conditional-fields
+
+const overrideAFieldValue = (values, sourceField, destinationField) => {
+  values[destinationField] = values[sourceField];
+  return values;
+};
+/* unused harmony export overrideAFieldValue */
 
 const submitAnimalRequest = (values, qcstate) => {
   console.log(values);
@@ -66326,11 +66350,21 @@ const submitAnimalRequest = (values, qcstate) => {
   let taskid = LABKEY.Utils.generateUUID().toUpperCase();
   let assignedTo = LABKEY.Security.currentUser.id;
   let weightValToInsert = [];
-  let jsonData;
-  values['date'] = currentDate;
-  values['QCState'] = qcstate;
-  values['taskid'] = taskid;
-  weightValToInsert.push(values);
+  let jsonData; //we need to copy the values before the insert because if we update the values of the form then it messes it up
+
+  let valuesToBeInserted = Object.assign({}, values);
+  valuesToBeInserted['date'] = currentDate;
+  valuesToBeInserted['QCState'] = qcstate;
+  valuesToBeInserted['taskid'] = taskid; //replace the principalinvestigator (PI) field if there's custom input from an external PI
+
+  if (valuesToBeInserted['externalprincipalinvestigator']) {
+    let sourceField = 'externalprincipalinvestigator';
+    let destinationField = 'principalinvestigator';
+    let newvalues = overrideAFieldValue(valuesToBeInserted, sourceField, destinationField);
+    valuesToBeInserted = newvalues;
+  }
+
+  weightValToInsert.push(valuesToBeInserted);
   console.log(weightValToInsert);
   let taskIdValToInsert = {
     initialQCState: 'Completed',
@@ -66391,7 +66425,7 @@ const constructNotficationEmail = data => {
   try {
     let rowid = data['result'][0]['rows'][0].rowid.toString();
     let domain = window.location.origin;
-    let content = 'Click ' + '<a href="' + domain + '/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&keyField=rowid&key=' + rowid + '">' + 'here</a> to view the request.<br><br>' + 'See all of the animal requests ' + '' + '<a href="' + domain + '/wnprc_ehr/WNPRC/EHR/dataEntry.view?#topTab:Requests&activeReport:AnimalRequests"' + ' >here</a>.';
+    let content = 'Click ' + '<a href="' + domain + '/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&keyField=rowid&key=' + rowid + '">' + 'here</a> to view the request.<br><br>' + 'View all of the animal requests ' + '' + '<a href="' + domain + '/wnprc_ehr/WNPRC/EHR/dataEntry.view?#topTab:Requests&activeReport:AnimalRequests"' + ' >here</a>.';
     return content;
   } catch (err) {
     console.log(err);

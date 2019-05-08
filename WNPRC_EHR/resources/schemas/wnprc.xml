@@ -94,6 +94,27 @@
             </column>
             <column columnName="sex"/>
             <column columnName="age"/>
+            <column columnName="weight"/>
+            <column columnName="mhctype"/>
+            <column columnName="disposition">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>animal_requests_disposition</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="infectiousdisease">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>animal_requests_infectiousdisease</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                </fk>
+
+            </column>
             <column columnName="numberofanimals"/>
             <column columnName="viralstatus">
                 <measure>false</measure>

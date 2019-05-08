@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="vvc" tableDbType="TABLE">
+            <table tableName="animal_requests" tableDbType="TABLE">
                 <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
                 <columns>
                     <column columnName="date" >
@@ -52,6 +52,9 @@
                             <fkTable>qcstate</fkTable>
                             <fkColumnName>rowid</fkColumnName>
                         </fk>
+                    </column>
+                    <column columnName="infectiousdisease">
+                        <columnTitle>Infectious Disease</columnTitle>
                     </column>
                     <column columnName="viralstatus">
                         <columnTitle>Viral Status</columnTitle>

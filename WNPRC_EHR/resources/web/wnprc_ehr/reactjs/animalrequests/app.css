@@ -77,13 +77,6 @@
     margin-bottom: 2rem;
 }
 
-.row.card {
-    -webkit-transition: 0.5s;
-    -moz-transition: 0.5s;
-    -o-transition: 0.5s;
-    transition: 0.5s;
-}
-
 .btn-wrap {
     display:inline-flex;
     float:right;
@@ -113,20 +106,11 @@ textarea.col-xs-6 {
 
 .form-control-label {
     line-height:27px;
+    text-align:right;
 }
 
 .top-buffer {
     padding-top:5px;
-}
-
-.loading-img.loading-true {
-    display:block;
-}
-.loading-img.loading-false {
-    display:none;
-}
-.col-xs-6.loading-true {
-    display:none;
 }
 
 .select {
@@ -156,7 +140,18 @@ select {
     text-transform: Capitalize !important;
 
 }
-.react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle, .react-datepicker-popper[data-placement^="top"] .react-datepicker__triangle, .react-datepicker__year-read-view--down-arrow,
+
+
+.loading {
+    text-align: center;
+    display: block;
+    position: relative;
+    background: url(/_images/ajax-loading.gif) left no-repeat !important;
+    background-size: fill;
+    font-size: 2em;
+    padding: 20px 0 0 0;
+    z-index: 2;
+}.react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle, .react-datepicker-popper[data-placement^="top"] .react-datepicker__triangle, .react-datepicker__year-read-view--down-arrow,
 .react-datepicker__month-read-view--down-arrow,
 .react-datepicker__month-year-read-view--down-arrow {
   margin-left: -8px;
@@ -816,6 +811,7 @@ select {
     position: relative;
     z-index: 2;
     cursor: pointer;
+    top: 8px;
 }
 
 /* Hide the tooltip content by default */

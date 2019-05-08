@@ -147,7 +147,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     }
 
     public double getVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 15.18;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 15.19;
     }
 
     public boolean hasScripts() {

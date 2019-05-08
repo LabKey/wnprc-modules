@@ -375,6 +375,14 @@ EHR.Metadata.registerMetadata('Default', {
                     shownInGrid: false
                 }
             }
+        },
+        Birth: {
+            type: {
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'currentBirthTypes'
+                }
+            }
         }
     }
 });

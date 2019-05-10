@@ -86,6 +86,7 @@ services:
       - "${LABKEY_DANGER_PORT}:80"
       - "${LABKEY_SECURE_PORT}:443"
       - "${MAIL_CATCHER_PORT}:1080"
+      - "${CADVISOR_PORT}:8080"
     networks:
       - network1
     environment:
@@ -108,8 +109,6 @@ services:
     image: google/cadvisor:latest
     depends_on:
       - "postgres"
-    ports:
-      - 9080:8080
     volumes:
     - /:/rootfs:ro
     - /var/run:/var/run:rw

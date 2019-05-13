@@ -277,6 +277,42 @@ EHR.reports.viralLoads = function(panel, tab){
     });
 };
 
+EHR.reports.breeding_encounters = function(panel, tab) {
+    var animalId = panel.activeFilterType.getTitle(tab);
+
+    LABKEY.Query.selectRows({
+        schemaName: 'study',
+        queryName: 'demographics',
+        columns: 'gender',
+        filterArray: [LABKEY.Filter.create('Id', animalId, LABKEY.Filter.Types.EQUAL)],
+        scope: this,
+        success: function(results) {
+            if (results.rows && results.rows.length) {
+                var row = results.rows[0];
+                var gender = row.gender;
+                var filterColumn = 'Id';
+                if (gender == 'm') {
+                    filterColumn = 'sireid';
+                }
+
+                var breeding_encounters = panel.getQWPConfig({
+                    title: 'Breeding Encounters',
+                    schemaName: 'study',
+                    queryName: 'breeding_encounters',
+                    filters: [LABKEY.Filter.create(filterColumn, animalId, LABKEY.Filter.Types.EQUAL)],
+                    frame: true
+                });
+
+                tab.add({
+                    xtype: 'ldk-querypanel',
+                    style: 'margin-bottom:20px;',
+                    queryConfig: breeding_encounters
+                })
+            }
+        }
+    });
+};
+
 EHR.reports.hematology = function(panel, tab){
     var filterArray = panel.getFilterArray(tab);
     var title = panel.getTitleSuffix();
@@ -1051,6 +1087,9 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         var panelId = panel.getId();
         var housingHTML = "";
 
+        let filterArray = panel.getFilterArray(tab);
+        let title = panel.getTitleSuffix();
+
         // If "Entire Database" is selected, don't add the additional panel
         if (animalId == "") {
             return;
@@ -1062,7 +1101,7 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         }
 
 
-        var animalList = animalId.split(",");
+        var animalList = animalId.split(/[^A-Za-z0-9]+/g);
         if (animalList.length <= 3) {
             jQuery.each(animalList, function(index, id) {
                 id = id.replace(/\s/g, '');
@@ -1080,6 +1119,41 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
             housingHTML = getErrorHTML("Please select three or fewer animals to view this visualization.");
         }
 
+        LABKEY.Query.selectRows({
+            schemaName: 'study',
+            queryName: 'demographics',
+            filterArray: [LABKEY.Filter.create('Id', animalList.join(';'), LABKEY.Filter.Types.IN)],
+            columns: 'gender/origGender',
+            scope: this,
+            success: function(result){
+                if(result && result.rows.length){
+                    let showPregnancies = false;
+                    for (let i = 0; i < result.rows.length; i++) {
+                        if (result.rows[i]['gender/origGender'] === 'f') {
+                            showPregnancies = true;
+                            break;
+                        }
+                    }
+                    if (showPregnancies) {
+                        let pregnancies = panel.getQWPConfig({
+                            title: 'Pregnancies' + title,
+                            schemaName: 'study',
+                            queryName: 'PregnancyInfo',
+                            filters: [LABKEY.Filter.create('Id', animalList.join(';'), LABKEY.Filter.Types.IN)],
+                            removeableFilters: filterArray.removable,
+                            frame: true
+                        });
+
+                        tab.add({
+                            xtype: 'ldk-querypanel',
+                            style: 'margin-bottom:20px;',
+                            queryConfig: pregnancies
+                        });
+                    }
+                }
+            },
+            failure: LDK.Utils.getErrorCallback()
+        });
 
         LABKEY.Utils.requiresCSS("wnprc_ehr/HousingAndAssignmentHistory.css");
         WNPRC_EHR.Utils.Lib.loadLibrary(['/webutils/lib/webutils'], function() {

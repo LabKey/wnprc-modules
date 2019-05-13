@@ -2,14 +2,14 @@
 <tables xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://labkey.org/data/xml ../../../../../../../schemas/tableInfo.xsd" >
     <sharedConfig>
         <columns>
-            <column columnName="id">
+            <column columnName="Id">
                 <datatype>varchar</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
                 <nullable>false</nullable>
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
+                    <fkColumnName>Id</fkColumnName>
                 </fk>
             </column>
             <column columnName="objectid">
@@ -21,22 +21,12 @@
             <column columnName="date">
                 <datatype>timestamp</datatype>
                 <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
-            </column>
-            <column columnName="requestid">
-                <datatype>varchar</datatype>
-                <propertyURI>urn:ehr.labkey.org/#RequestId</propertyURI>
-            </column>
-            <column columnName="taskid">
-                <datatype>varchar</datatype>
-                <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
+                <nullable>false</nullable>
             </column>
             <column columnName="performedby">
                 <datatype>varchar</datatype>
                 <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
-            </column>
-            <column columnName="description">
-                <datatype>varchar</datatype>
-                <propertyURI>urn:ehr.labkey.org/#Description</propertyURI>
+                <nullable>false</nullable>
             </column>
             <column columnName="remark">
                 <datatype>varchar</datatype>
@@ -47,19 +37,62 @@
             <index type="unique">
                 <column>objectid</column>
             </index>
-            <index type="non-unique">
-                <column>taskid</column>
-            </index>
         </indices>
     </sharedConfig>
     <table tableName="breeding_encounters" tableDbType="TABLE">
         <tableTitle>Breeding Encounters</tableTitle>
         <description>Contains one row for each breeding pairing/assignment for a dam at the center.</description>
         <columns>
-            <column columnName="dateend">
-                <columnTitle>End Date</columnTitle>
+            <column columnName="enddate">
+                <columnTitle>End Time</columnTitle>
                 <datatype>timestamp</datatype>
             </column>
+            <column columnName="sireid">
+                <columnTitle>Male</columnTitle>
+                <datatype>varchar</datatype>
+                <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${sire_id}</url>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>animal</fkTable>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+                <nullable>false</nullable>
+            </column>
+            <column columnName="ejaculation">
+                <columnTitle>Ejaculation Confirmed?</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
+            <column columnName="project">
+                <columnTitle>Project</columnTitle>
+                <datatype>integer</datatype>
+                <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>project</fkTable>
+                    <fkColumnName>project</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="outcome">
+                <columnTitle>Resulted In Pregnancy</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
+        </columns>
+        <indices>
+            <index type="non-unique">
+                <column>sireid</column>
+            </index>
+            <index type="non-unique">
+                <column>ejaculation</column>
+            </index>
+            <index type="non-unique">
+                <column>project</column>
+            </index>
+        </indices>
+    </table>
+    <table tableName="pregnancies" tableDbType="TABLE">
+        <tableTitle>Pregnancies</tableTitle>
+        <description>Contains one row for each pregnancy at the center.</description>
+        <columns>
             <column columnName="sireid">
                 <columnTitle>Sire</columnTitle>
                 <datatype>varchar</datatype>
@@ -67,36 +100,89 @@
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
+                    <fkColumnName>Id</fkColumnName>
                 </fk>
             </column>
-            <column columnName="reason">
-                <columnTitle>Reason</columnTitle>
-                <datatype>varchar</datatype>
+            <column columnName="breedingencounterid">
+                <columnTitle>Breeding Encounter</columnTitle>
+                <datatype>entityid</datatype>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>breeding_encounters</fkTable>
+                    <fkColumnName>lsid</fkColumnName>
+                    <fkDisplayColumnName>sireid</fkDisplayColumnName>
+                </fk>
             </column>
-            <column columnName="conceptiondate">
-                <columnTitle>Est. Conception Date</columnTitle>
-                <datatype>timestamp</datatype>
+            <column columnName="date_conception_early">
+                <columnTitle>Earliest Est. Conception Date</columnTitle>
+                <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
             </column>
-            <column columnName="ejaculation">
-                <columnTitle>Ejaculation Confirmed</columnTitle>
-                <datatype>varchar</datatype>
+            <column columnName="date_conception_late">
+                <columnTitle>Latest Est. Conception Date</columnTitle>
+                <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
+            </column>
+            <column columnName="date_conception">
+                <columnTitle>Estimated Date of Conception</columnTitle>
+                <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
+                <nullable>false</nullable>
+            </column>
+            <column columnName="date_due_early">
+                <columnTitle>Earliest Est. Due Date</columnTitle>
+                <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
+            </column>
+            <column columnName="date_due_late">
+                <columnTitle>Latest Est. Due Date</columnTitle>
+                <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
+            </column>
+            <column columnName="date_due">
+                <columnTitle>Estimated Due Date</columnTitle>
+                <datatype>date</datatype>
+                <formatString>y-M-d</formatString>
+                <nullable>false</nullable>
             </column>
         </columns>
-    </table>
-    <table tableName="breeding_remarks" tableDbType="TABLE">
-        <tableTitle>Breeding Remarks</tableTitle>
-        <description>Contains one row for each observation/remark about a breeding encounter.</description>
-        <columns/>
+        <indices>
+            <index type="non-unique">
+                <column>sireid</column>
+            </index>
+            <index type="non-unique">
+                <column>date_conception</column>
+            </index>
+            <index type="non-unique">
+                <column>date_due</column>
+            </index>
+        </indices>
     </table>
     <table tableName="pregnancy_outcomes" tableDbType="TABLE">
         <tableTitle>Pregnancy Outcomes</tableTitle>
         <description>Contains one row for the outcome of each pregnancy completed/terminated at the center.</description>
         <columns>
+            <column columnName="pregnancyid">
+                <columnTitle>Pregnancy (Conc. Date)</columnTitle>
+                <datatype>entityid</datatype>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>pregnancies</fkTable>
+                    <fkColumnName>lsid</fkColumnName>
+                    <fkDisplayColumnName>date_conception</fkDisplayColumnName>
+                </fk>
+                <nullable>false</nullable>
+            </column>
             <column columnName="outcome">
                 <columnTitle>Outcome</columnTitle>
                 <datatype>varchar</datatype>
                 <nullable>false</nullable>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>birth_type</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                    <fkDisplayColumnName>description</fkDisplayColumnName>
+                </fk>
             </column>
             <column columnName="infantid">
                 <columnTitle>Infant</columnTitle>
@@ -105,14 +191,147 @@
                 <fk>
                     <fkDbSchema>study</fkDbSchema>
                     <fkTable>animal</fkTable>
-                    <fkColumnName>id</fkColumnName>
+                    <fkColumnName>Id</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="rejected">
+                <columnTitle>Rejected by Mother</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
+            <column columnName="protected">
+                <columnTitle>Protected</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
+            <column columnName="project">
+                <columnTitle>Offered To</columnTitle>
+                <datatype>integer</datatype>
+                <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>project</fkTable>
+                    <fkColumnName>project</fkColumnName>
                 </fk>
             </column>
         </columns>
+        <indices>
+            <index type="non-unique">
+                <column>pregnancyid</column>
+            </index>
+            <index type="non-unique">
+                <column>outcome</column>
+            </index>
+            <index type="non-unique">
+                <column>project</column>
+            </index>
+        </indices>
     </table>
     <table tableName="ultrasounds" tableDbType="TABLE">
         <tableTitle>Ultrasounds</tableTitle>
         <description>Contains one row for each ultrasound performed at the center.</description>
-        <columns/>
+        <columns>
+            <column columnName="pregnancyid">
+                <columnTitle>Pregnancy (Conc. Date)</columnTitle>
+                <datatype>entityid</datatype>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>pregnancies</fkTable>
+                    <fkColumnName>lsid</fkColumnName>
+                    <fkDisplayColumnName>date_conception</fkDisplayColumnName>
+                </fk>
+            </column>
+            <column columnName="project">
+                <columnTitle>Project</columnTitle>
+                <datatype>integer</datatype>
+                <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>project</fkTable>
+                    <fkColumnName>project</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="restraint">
+                <columnTitle>Restraint</columnTitle>
+                <datatype>varchar</datatype>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>restraint_type</fkTable>
+                    <fkColumnName>type</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="fetal_heartbeat">
+                <columnTitle>+ Fetal HB</columnTitle>
+                <datatype>boolean</datatype>
+            </column>
+            <column columnName="beats_per_minute">
+                <columnTitle>BPM</columnTitle>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="gest_sac_mm">
+                <columnTitle>Gestational Sac (mm)</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="crown_rump_mm">
+                <columnTitle>Crown Rump (mm)</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="biparietal_diameter_mm">
+                <columnTitle>Biparietal Diameter (mm)</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="femur_length_mm">
+                <columnTitle>Femur Length (mm)</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="yolk_sac_diameter_mm">
+                <columnTitle>Yolk Sac Diameter (mm)</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="head_circumference_mm">
+                <columnTitle>Head Circ (mm)</columnTitle>
+                <datatype>float</datatype>
+            </column>
+            <column columnName="gest_sac_gest_day">
+                <columnTitle>Gest Sac GD</columnTitle>
+                <description>Estimated gestation day based on femur length</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="crown_rump_gest_day">
+                <columnTitle>Crown Rump GD</columnTitle>
+                <description>Estimated gestation day based on crown rump</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="biparietal_diameter_gest_day">
+                <columnTitle>Biparietal GD</columnTitle>
+                <description>Estimated gestation day based on biparietal diameter</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="femur_length_gest_day">
+                <columnTitle>Femur Length GD</columnTitle>
+                <description>Estimated gestation day based on femur length</description>
+                <datatype>integer</datatype>
+            </column>
+            <column columnName="code">
+                <columnTitle>Code</columnTitle>
+                <datatype>varchar</datatype>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>snomed</fkTable>
+                    <fkColumnName>code</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="followup_required">
+                <columnTitle>Followup Required</columnTitle>
+                <description>Indicates whether or not a followup ultrasound is required</description>
+                <datatype>boolean</datatype>
+            </column>
+        </columns>
+        <indices>
+            <index type="non-unique">
+                <column>pregnancyid</column>
+            </index>
+            <index type="non-unique">
+                <column>project</column>
+            </index>
+        </indices>
     </table>
 </tables>

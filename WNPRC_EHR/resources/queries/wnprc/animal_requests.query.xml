@@ -2,6 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="animal_requests" tableDbType="TABLE">
+                <tableTitle>Animal Requests</tableTitle>
                 <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
                 <columns>
                     <column columnName="date" >
@@ -106,3 +107,4 @@
         </tables>
     </metadata>
 </query>
+

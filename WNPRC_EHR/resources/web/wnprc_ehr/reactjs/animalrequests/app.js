@@ -8903,7 +8903,7 @@ const saveRowsDirect = jsonData => {
     });
   });
 };
-/* harmony export (immutable) */ __webpack_exports__["c"] = saveRowsDirect;
+/* harmony export (immutable) */ __webpack_exports__["b"] = saveRowsDirect;
  //TODO need to use a specific queryname and make it an sql file?
 
 const selectRowsSql = id => {
@@ -8962,7 +8962,7 @@ const getEmailNotificationRecipients = (schemaName, queryName, sort = '', column
     });
   });
 };
-/* harmony export (immutable) */ __webpack_exports__["b"] = getEmailNotificationRecipients;
+/* unused harmony export getEmailNotificationRecipients */
 
 
 /***/ }),
@@ -49745,7 +49745,7 @@ const renderField = ({
 }, " ", label, " "), __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", Object.assign({
   required: true,
   className: "col-xs-5 form-control-input"
-}, input))));
+}, input)), touched && error && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("span", null, error)));
 
 const renderDateTimePicker = ({
   input: {
@@ -49804,11 +49804,6 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
   componentDidMount() {
     return __awaiter(this, void 0, void 0, function* () {
       this.getSeveralEHRData(this.state.dataArr);
-      let notificationTypeFilter = [LABKEY.Filter.create('notificationtype', 'Animal Requests', LABKEY.Filter.Types.EQUAL)];
-      let r = Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["b" /* getEmailNotificationRecipients */])('ehr', 'notificationrecipients', '', 'recipient', notificationTypeFilter).then(data => {
-        console.log('getting email...');
-        console.log(data);
-      });
     });
   }
 
@@ -49837,24 +49832,9 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
       this.setState({
         submitted: true
       });
-      const QCState = 5; //TODO update this... to query the DB for an email
-
-      const receivers = LABKEY.Security.currentUser.email;
-      Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["c" /* submitAnimalRequest */])(values, QCState).then(data => {
-        let redirectUrl = LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view#topTab:Requests&activeReport:AnimalRequests', LABKEY.Security.currentContainer.path); //send the animal request email here...
-
-        let from = LABKEY.Security.currentUser.email;
-        let notificationTypeFilter = [LABKEY.Filter.create('notificationtype', 'Animal Requests', LABKEY.Filter.Types.EQUAL)];
-        let r = Object(__WEBPACK_IMPORTED_MODULE_6__query_actions__["b" /* getEmailNotificationRecipients */])('ehr', 'notificationrecipients', '', 'recipient', notificationTypeFilter);
-        console.log(r);
-        let recipients = receivers;
-        let subject = '[EHR Services] A new animal request was submitted';
-        let msg = Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["a" /* constructNotficationEmail */])(data);
-
-        if (msg) {
-          Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["b" /* sendNotificationEmail */])(from, subject, recipients, msg);
-        }
-
+      const QCState = 5;
+      Object(__WEBPACK_IMPORTED_MODULE_5__query_helpers__["a" /* submitAnimalRequest */])(values, QCState).then(data => {
+        let redirectUrl = LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view#topTab:Requests&activeReport:AnimalRequests', LABKEY.Security.currentContainer.path);
         window.location = redirectUrl;
       }).catch(err => {
         console.log(err.exception);
@@ -49893,7 +49873,7 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
     }) => value === is ? children : null);
 
     const loading = this.state.loading;
-    const submitted = this.state.submitted === true ? 'form-submitted' : 'test';
+    const submitted = this.state.submitted === true ? 'form-submitted' : '';
     const display = this.state.loading === true ? 'none' : 'block';
     const cancelUrl = LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view', '/WNPRC/EHR');
     return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_final_form__["b" /* Form */], {
@@ -49901,7 +49881,6 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
       mutators: Object.assign({}, __WEBPACK_IMPORTED_MODULE_3_final_form_arrays__["a" /* default */], {
         setFieldData: __WEBPACK_IMPORTED_MODULE_4_final_form_set_field_data__["a" /* default */]
       }),
-      //TODO check this subscription doesnt break stuff
       subscription: {
         submitting: true,
         pristine: true
@@ -49957,7 +49936,6 @@ class AnimalRequestForm extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Co
           className: "col-xs-5 form-control-input",
           component: renderField,
           label: "Specify PI:",
-          placeholder: "Please Specify PI",
           type: "text",
           validate: required,
           required: true
@@ -66360,9 +66338,9 @@ const submitAnimalRequest = (values, qcstate) => {
       rows: weightValToInsert
     }]
   };
-  return Object(__WEBPACK_IMPORTED_MODULE_0__actions__["c" /* saveRowsDirect */])(jsonData);
+  return Object(__WEBPACK_IMPORTED_MODULE_0__actions__["b" /* saveRowsDirect */])(jsonData);
 };
-/* harmony export (immutable) */ __webpack_exports__["c"] = submitAnimalRequest;
+/* harmony export (immutable) */ __webpack_exports__["a"] = submitAnimalRequest;
 
 const sendNotificationEmail = (from, subject, recipients, content) => {
   function errorHandler(errorInfo, responseObj) {
@@ -66382,7 +66360,7 @@ const sendNotificationEmail = (from, subject, recipients, content) => {
     failure: errorHandler
   });
 };
-/* harmony export (immutable) */ __webpack_exports__["b"] = sendNotificationEmail;
+/* unused harmony export sendNotificationEmail */
 
 const constructNotficationEmail = data => {
   try {
@@ -66395,7 +66373,7 @@ const constructNotficationEmail = data => {
     return null;
   }
 };
-/* harmony export (immutable) */ __webpack_exports__["a"] = constructNotficationEmail;
+/* unused harmony export constructNotficationEmail */
 
 
 /***/ }),

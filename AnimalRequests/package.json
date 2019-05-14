@@ -4,12 +4,12 @@
   "description": "Animal request data entry form",
   "main": "index.js",
   "scripts": {
-    "build": "better-npm-run build:prod",
-    "build-style": "npm run build:style",
-    "start": "better-npm-run build:style && better-npm-run build:watch",
+    "build": "better-npm-run build-prod",
+    "build-style": "npm run build-style",
+    "start": "better-npm-run build-style && better-npm-run build-watch",
     "clean": "better-npm-run clean",
     "reallyClean": "better-npm-run reallyClean",
-    "test": "better-npm-run build:jest-test"
+    "test": "better-npm-run build-jest-test"
   },
   "author": "csebranek",
   "license": "Apache 2.0",
@@ -71,19 +71,19 @@
     "jest-transform-css": "2.0.0"
   },
   "betterScripts": {
-    "build:prod": {
+    "build-prod": {
       "command": "webpack --config webpack/prod.config.js",
       "env": {
         "NODE_ENV": "production"
       }
     },
-    "build:style": {
+    "build-style": {
       "command": "webpack --config webpack/dev-style.config.js",
       "env": {
         "NODE_ENV": "development"
       }
     },
-    "build:watch": {
+    "build-watch": {
       "command": "node webpack/dev-server.js",
       "env": {
         "NODE_ENV": "development"
@@ -95,7 +95,7 @@
     "reallyClean": {
       "command": "rimraf resources/web/animalrequest/app/ ; rimraf node_modules"
     },
-    "build:jest-test": {
+    "build-jest-test": {
       "command": "jest",
       "env": {
         "NODE_ENV": "test"

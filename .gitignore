@@ -4,6 +4,10 @@ docker/**/data
 docker/**/logs
 docker/**/.env
 docker/.gradle
+docker/dev_*/**
+docker/nginx/test-ehr*
+docker/nginx/cert.pem
+docker/nginx/key.pem
 
 **/node_modules/
 **/build/

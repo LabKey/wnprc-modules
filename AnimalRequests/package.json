@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "better-npm-run build-prod",
+    "build-prod": "better-npm-run build-prod",
     "build-style": "npm run build-style",
     "start": "better-npm-run build-style && better-npm-run build-watch",
     "clean": "better-npm-run clean",

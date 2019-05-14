@@ -3,11 +3,15 @@ CREATE TABLE wnprc.animal_requests(
     rowid serial NOT NULL,
     principalinvestigator varchar (100) NOT NULL,
     date TIMESTAMP,
-    originneeded varchar (100) NOT NULL,
+    numberofanimals integer,
     speciesneeded varchar (100) NOT NULL, /*new table?*/
+    originneeded varchar (100) NOT NULL,
     sex varchar (255) NOT NULL, /*new table?*/
     age varchar (100) NOT NULL,
-    numberofanimals integer,
+    weight varchar (255) NOT NULL,
+    mhctype varchar (255) NOT NULL,
+    disposition varchar (255) NOT NULL,
+    infectiousdisease varchar (255) NOT NULL,
     viralstatus varchar(255),
     dateneeded TIMESTAMP,
     protocol varchar (100) NOT NULL,
@@ -48,3 +52,17 @@ insert into ehr_lookups.lookups (set_name,container,value) select setname, conta
 insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'M or F' as value from ehr_lookups.lookup_sets where setname='animal_requests_sex';
 insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'Equal # M & F' as value from ehr_lookups.lookup_sets where setname='animal_requests_sex';
 
+
+insert into ehr_lookups.lookup_sets (setname,container)  select 'animal_requests_disposition' as setname, container from ehr_lookups.lookup_sets where setname='viral_status';
+
+insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'Terminal' as value from ehr_lookups.lookup_sets where setname='animal_requests_disposition';
+insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'Return to Colony' as value from ehr_lookups.lookup_sets where setname='animal_requests_disposition';
+
+insert into ehr_lookups.lookup_sets (setname,container)  select 'animal_requests_infectiousdisease' as setname, container from ehr_lookups.lookup_sets where setname='viral_status';
+
+insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'Yes' as value from ehr_lookups.lookup_sets where setname='animal_requests_infectiousdisease';
+insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'No' as value from ehr_lookups.lookup_sets where setname='animal_requests_infectiousdisease';
+
+INSERT INTO ehr_lookups.geographic_origins (meaning) SELECT 'laos' WHERE NOT EXISTS (SELECT meaning FROM ehr_lookups.geographic_origins WHERE meaning = 'laos');
+
+INSERT INTO ehr_lookups.geographic_origins (meaning) SELECT 'vietnam' WHERE NOT EXISTS (SELECT meaning FROM ehr_lookups.geographic_origins WHERE meaning = 'vietnam');

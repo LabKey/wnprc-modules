@@ -85,6 +85,7 @@ import org.labkey.wnprc_ehr.history.DefaultAlopeciaDataSource;
 import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
 import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
@@ -147,7 +148,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     }
 
     public double getVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 15.19;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 15.17;
     }
 
     public boolean hasScripts() {
@@ -310,7 +311,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 new FoodNotStartedNotification(this),
                 new FoodNotStartedNoonNotification(this),
                 new FoodNotCompletedNotification(this),
-                new FoodCompletedProblemsNotification(this)
+                new FoodCompletedProblemsNotification(this),
+                new AnimalRequestNotification(this)
         );
 
         for(Notification notification : notifications) {

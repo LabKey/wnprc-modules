@@ -3,7 +3,7 @@
         <permission name="login"/>
     </permissions>
     <dependencies>
-        <dependency path="/wnprc_ehr/reactjs/animalrequests/app.js"/>
-        <dependency path="/wnprc_ehr/reactjs/animalrequests/app.css"/>
+        <dependency path="animalrequests/app/app.js"/>
+        <dependency path="animalrequests/app/app.css"/>
     </dependencies>
 </view>

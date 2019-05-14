@@ -5,7 +5,6 @@ import org.json.JSONArray;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.ldk.notification.NotificationSection;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
@@ -13,6 +12,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
@@ -87,6 +87,12 @@ public class TriggerScriptHelper {
         VvcNotification sendNotifcation = new VvcNotification(ehr, requestid);
     }
 
+    public void sendAnimalRequestNotification(Integer rowid, String hostName){
+        _log.info("Using java helper to send email for animal request record: "+rowid);
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
+        notification.sendManually(container, user);
+    }
 
 
 }

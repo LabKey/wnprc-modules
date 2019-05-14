@@ -2,6 +2,12 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
 require("ehr/triggers").initScript(this);
 
+function onInit(event, helper) {
+    helper.setScriptOptions({
+        skipHousingCheck: true
+    });
+}
+
 function onComplete(event, errors, helper) {
     let housingRows = helper.getRows();
 

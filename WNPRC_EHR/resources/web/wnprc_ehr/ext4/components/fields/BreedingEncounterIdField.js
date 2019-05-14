@@ -174,10 +174,10 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,sireid,to_char(date, \'Mon DD, YYYY HH24:MI\') as date,to_char(enddate, \'Mon DD, YYYY HH24:MI\') as enddate \
+        var sql = 'select lsid,sireid,to_char(date, \'Mon DD, YYYY HH24:MI\') as date, coalesce(to_char(enddate, \'Mon DD, YYYY HH24:MI\'), \'Ongoing\') as enddate \
                     from breeding_encounters be \
                     where be.Id = \'' + id + '\' \
-                    and be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) \
+                    and (be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) or be.enddate is null) \
                     and not exists (select * \
                                     from pregnancies p \
                                     where p.breedingencounterid = be.lsid) \

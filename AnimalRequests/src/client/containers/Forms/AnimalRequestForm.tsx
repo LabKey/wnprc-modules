@@ -112,7 +112,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
 
         submitAnimalRequest(values,QCState)
             .then(data => {
-                let redirectUrl = LABKEY.ActionURL.buildURL('wnprc_ehr','dataEntry.view#topTab:Requests&activeReport:AnimalRequests',LABKEY.Security.currentContainer.path);
+                let redirectUrl = LABKEY.ActionURL.buildURL('wnprc_ehr','dataEntry.view',LABKEY.Security.currentContainer.path);
                 window.location = redirectUrl;
             }).catch((err) => {
                 console.log(err.exception)

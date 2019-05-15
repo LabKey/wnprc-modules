@@ -20,6 +20,7 @@ import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
@@ -520,5 +521,12 @@ public class TriggerScriptHelper {
         testData.add(row10);
 
         return testData;
+    }
+
+    public void sendAnimalRequestNotification(Integer rowid, String hostName){
+        _log.info("Using java helper to send email for animal request record: "+rowid);
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
+        notification.sendManually(container, user);
     }
 }

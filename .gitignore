@@ -4,6 +4,10 @@ docker/**/data
 docker/**/logs
 docker/**/.env
 docker/.gradle
+docker/dev_*/**
+docker/nginx/test-ehr*
+docker/nginx/cert.pem
+docker/nginx/key.pem
 
 **/node_modules/
 **/build/
@@ -11,3 +15,8 @@ docker/.gradle
 **/resources/credits/dependencies.txt
 
 **/.gradle
+
+**/app.css
+**/app.css.map
+**/app.js
+**/app.js.map

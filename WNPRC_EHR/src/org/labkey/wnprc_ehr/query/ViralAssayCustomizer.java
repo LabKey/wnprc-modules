@@ -151,8 +151,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
 
         ColumnInfo sourceMaterialColumn = ti.getColumn("sourceMaterial");
         if (sourceMaterialColumn != null) {
-            TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo();
-            // TODO    getMutableColumn not defined on TableInfo
+            TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo(); // CONSIDER: replace foreignkey instead attempting surgery on this inner columninfo
             if (sourceMaterialTable instanceof AbstractTableInfo) {
                 BaseColumnInfo liquidColumn = ((AbstractTableInfo)sourceMaterialTable).getMutableColumn("liquid");
                 if (liquidColumn != null) {

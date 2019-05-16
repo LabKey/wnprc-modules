@@ -96,6 +96,7 @@ import org.labkey.wnprc_ehr.notification.FoodNotStartedNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
@@ -189,7 +190,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public double getVersion()
     {
-        return 15.16;
+        return 15.17;
     }
 
     public boolean hasScripts()
@@ -351,7 +352,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new FoodNotStartedNotification(this),
                 new FoodNotStartedNoonNotification(this),
                 new FoodNotCompletedNotification(this),
-                new FoodCompletedProblemsNotification(this)
+                new FoodCompletedProblemsNotification(this),
+                new AnimalRequestNotification(this)
         );
 
         for (Notification notification : notifications)

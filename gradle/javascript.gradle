@@ -34,19 +34,6 @@ if (file("$projectDir/webpack.config.js").exists() || file("$projectDir/webpack.
     if (project.tasks.findByName('processModuleResources') != null)
         project.tasks.processModuleResources.dependsOn 'webpack'
 } 
-else if (file("$projectDir/tsconfig.json").exists()) 
-{
-    task('tsc', group: 'JavaScript', NodeTask: Exec, dependsOn: ["${project.parent.path}:npmInstall"],
-            description: 'Compiles the TypeScript for the module using the tsconfig.json') {
-        workingDir "$projectDir"
-        script = file('../node_modules/typescript/bin/tsc')
-        args   = ['--outDir', "$buildDir/explodedModule/web/${project.name.toLowerCase()}"]
-        if (project.tasks.findByName('java2ts'))
-            dependsOn('java2ts')
-    }
-    if (project.tasks.findByName('processModuleResources') != null)
-        project.tasks.processModuleResources.dependsOn 'tsc'
-}
 
 if (file("$projectDir/src/less/${project.name.toLowerCase()}.less").exists()) 
 {

@@ -34,13 +34,3 @@ function afterInsert(row, errors){
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotification(rowid, hostName);
 }
 
-//Have to register script here to make EHR happy?
-exports.registerTriggers = function (EHR, registerGenericHandler, Events) {
-    var registerHandler = function (event, callback) {
-        registerGenericHandler(event, "wnprc", "animal_requests", callback);
-    };
-
-    registerHandler(Events.AFTER_INSERT, function (helper, scriptErrors, row) {
-    });
-
-};

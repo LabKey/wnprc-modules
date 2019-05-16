@@ -69,8 +69,7 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
                 xtype: 'wnprc-breedingencounteridfield',
                 editorConfig: {
                     plugins: ['wnprc-pregnancyduedatecalculation'],
-                },
-                helpPopup: 'this is a test'
+                }
             },
             date_due: {
                 xtype: 'wnprc-calculatedpregnancyduedatefield',

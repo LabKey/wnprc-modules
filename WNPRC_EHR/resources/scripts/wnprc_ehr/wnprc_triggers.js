@@ -17,8 +17,7 @@ exports.init = function (EHR) {
     var scriptsToLoad = [
         "study/Deaths.js",
         "study/PrenatalDeaths.js",
-        "study/Necropsies.js",
-        "wnprc/animal_requests.js"
+        "study/Necropsies.js"
         /*,
         "wnprc/vvc.js"*/
     ];

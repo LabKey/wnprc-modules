@@ -61,7 +61,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             else if (table.getName().equalsIgnoreCase("protocol") && table.getSchema().getName().equalsIgnoreCase("ehr"))
                 customizeProtocolTable((AbstractTableInfo)table);
             else if (table.getName().equalsIgnoreCase("breeding_encounters") && table.getSchema().getName().equalsIgnoreCase("study")) {
-                customizeBreedingEncountersTable((AbstractTableInfo)table);
+                customizeBreedingEncountersTable((AbstractTableInfo) table);
+            } else if (table.getName().equalsIgnoreCase("pregnancies") && table.getSchema().getName().equalsIgnoreCase("study")) {
+                customizePregnanciesTable((AbstractTableInfo) table);
             }
         }
     }
@@ -266,6 +268,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeBreedingEncountersTable(AbstractTableInfo ti)
     {
+        customizeSireIdColumn(ti);
+    }
+
+    private void customizePregnanciesTable(AbstractTableInfo ti) {
+        customizeSireIdColumn(ti);
+    }
+
+    private void customizeSireIdColumn(AbstractTableInfo ti) {
         ColumnInfo sireid = ti.getColumn("sireid");
         if (sireid != null)
         {

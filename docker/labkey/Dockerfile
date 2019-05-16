@@ -11,7 +11,8 @@ ARG WNPRC_BRANCH=master
 ARG LABKEY_TEAMCITY_CONFIG=LabKey_172wnprc_Community_Installers
 ARG LABKEY_VERSION=17.2
 
-ARG LABKEY_IS_COMMUNITY=true
+# User should set LABKEY_IS_COMMUNITY=true if community version, otherwise don't set any value at all
+ARG LABKEY_IS_COMMUNITY
 
 ENV LABKEY_DISTRIBUTION=${LABKEY_IS_COMMUNITY:+wisc_community}
 ENV LABKEY_DISTRIBUTION=${LABKEY_DISTRIBUTION:-wisc}

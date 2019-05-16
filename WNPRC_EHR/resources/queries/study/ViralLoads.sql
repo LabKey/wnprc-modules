@@ -10,13 +10,16 @@ SELECT
   pv.Virus AS Virus,
   pv.Comments as Comments,
 
-   AVG(pv.ViralLoad) AS AverViralLoad,
-   log10(AVG(pv.ViralLoad)) as LogVL
+   AVG(pv.ViralLoad) AS AverageViralLoad,
+   log10(AVG(pv.ViralLoad)) as LogVL,
+   pv.SampleType as SampleType,
+   pv.VL_ExpNumber
 
 FROM study.preViralLoad pv
+WHERE pv.QC_Pass = 'TRUE'
 
-GROUP BY pv.date,pv.Id, pv.Virus, pv.Comments
+GROUP BY pv.date,pv.Id, pv.Virus, pv.Comments, pv.SampleType, pv.VL_ExpNumber,pv.rowid
 
 --TODO
---WHERE v.qcstate.publicdata = true
+
 

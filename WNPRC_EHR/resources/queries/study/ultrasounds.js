@@ -2,11 +2,16 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 require("ehr/triggers").initScript(this);
 
 function onInsert(helper, scriptErrors, row, oldRow){
-
-
     if (row && row.Id){
         WNPRC.Utils.getJavaHelper().updateUltrasoundFollowup(row.Id, row.date);
 
+        row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId;
+        row.QCStateLabel = EHR.Server.Security.getQCStateByLabel('Completed').Label;
+    }
+}
+
+function onUpsert(helper, scriptErrors, row, oldRow){
+    if (row && row.Id){
         row.followup_required = !!row.followup_required;
         row.fetal_heartbeat = !!row.fetal_heartbeat;
 
@@ -45,8 +50,5 @@ function onInsert(helper, scriptErrors, row, oldRow){
                 }
             }
         });
-
-        row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId;
-        row.QCStateLabel = EHR.Server.Security.getQCStateByLabel('Completed').Label;
     }
 }

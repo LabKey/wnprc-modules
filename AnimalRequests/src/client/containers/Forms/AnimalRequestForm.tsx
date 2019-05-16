@@ -14,12 +14,12 @@ import {getEHRData} from '../../query/actions';
 const required = value => (value ? undefined : <span data-tooltip="Required">❗️</span>);
 
 const renderField = ({
-        input, label, warnings,
+        input, label, warnings, tooltip,
         meta: { touched, error, warning, asyncValidating }
     }) => (
     <div className="row top-buffer">
         <div className={asyncValidating ? 'async-validating' : ''}>
-            <label className="col-xs-4 form-control-label"> {label} </label>
+            <label className="col-xs-4 form-control-label"> {label}{tooltip && (<sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)} </label>
             <input required className="col-xs-5 form-control-input" {...input} />
             {touched && ((error && <span>{error}</span>))}
         </div>
@@ -33,6 +33,7 @@ const renderDateTimePicker = ({ input : {onChange, value}}) => (
         selected={!value ? null : new Date(value)}
         minDate={new Date()}
         validate={required}
+        required
     />
 );
 
@@ -148,6 +149,9 @@ export class AnimalRequestForm extends React.Component<any,State> {
         const submitted = this.state.submitted===true ? 'form-submitted' : '';
         const display = this.state.loading===true ? 'none' : 'block';
         const cancelUrl = LABKEY.ActionURL.buildURL('wnprc_ehr','dataEntry.view','/WNPRC/EHR');
+        const formDescription = 'Note: All fields are required except for Account and Comments fields. ' +
+            'If there is not yet an existing project and or protocol associated with this animal request, ' +
+            'choose "TBD" as the dropdown option and place an explanation in the Comments field.'
 
         return (
             <Form
@@ -213,6 +217,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <DropdownOptions name="animal_requests_species" rowkey="common"/>
@@ -225,6 +230,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <DropdownOptions name="animal_requests_origin" rowkey="meaning"/>
@@ -237,6 +243,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <DropdownOptions name="animal_requests_sex" rowkey="value"/>
@@ -249,15 +256,17 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     label="Age:"
                                                     type="text"
                                                     validate={required}
+                                                    tooltip="Please provide an approximate age range for the animals requested."
                                                 >
                                                 </Field>
                                                 <Field
                                                     name="weight"
                                                     className="col-xs-5 form-control-input"
                                                     component={renderField}
-                                                    label="Weight:"
+                                                    label="Weight (kg):"
                                                     type="text"
                                                     validate={required}
+                                                    tooltip="Please provide an approximate weight range for the animals requested."
                                                 >
                                                 </Field>
                                                 <Field
@@ -276,6 +285,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <DropdownOptions name="animal_requests_viral_status" rowkey="value"/>
@@ -284,15 +294,15 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 <div className="row top-buffer">
                                                     <label
                                                         className="col-xs-4 form-control-label">
-                                                        Infectious Disease
+                                                        Infectious Disease:
                                                         <sup><span id="help-tooltip" data-tooltip="Is this an infectious disease project?">?️</span></sup>
-                                                        :
                                                     </label>
                                                     <Field
                                                         name="infectiousdisease"
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <DropdownOptions name="animal_requests_infectiousdisease" rowkey="value"/>
@@ -305,6 +315,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <DropdownOptions name="animal_requests_disposition" rowkey="value"/>
@@ -333,6 +344,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <option value="TBD">TBD</option>
@@ -346,6 +358,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                         className="col-xs-5 form-control-input"
                                                         component="select"
                                                         validate={required}
+                                                        required
                                                     >
                                                         <option/>
                                                         <option value="TBD">TBD</option>
@@ -391,6 +404,8 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </button>
                                                 </div>
                                             </div>
+                                            <br/>
+                                            <p>{formDescription}</p>
                                         </form>
 
                                     </div>

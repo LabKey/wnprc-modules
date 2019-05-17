@@ -2,7 +2,7 @@
 
 This folder contains a set of Docker images and a Docker Compose service definition to start and run a LabKey server like the one used at the WNPRC. Each of the subfolders corresponds to a particular service/image used in the Compose definition (e.g., `postgres/` contains configuration information for the PostgreSQL service), and the Gradle build file helps to build the custom images that do not come from any online Docker repository (such as LabKey and our own custom cron service).
 
-Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. Before deploying the services with Compose, you will need to create this `.env` file (e.g., by copying and renaming `default.env`).
+Any service-specific configuration needs to be defined in a `.env` file in this directory, with a pre-built example file provided in `default.env`. Before deploying the services with Compose, you will need to create this `.env` file (e.g., by copying and renaming `default.env`). Also, the following files need to be rename to use SSL certificates in your local development machine: `cert.pem.default` and `key.pem.default` both files have to be rename and remove the .default. The names have to match the names in `.env` file. 
 
 ## Building the Custom Images
 
@@ -92,7 +92,7 @@ We created a folder called `development` in this repo. This folder contains a si
  1. `nginx/nginx.conf`
  1. `docker-compose.yml`
 
-In the `.env` file, edit the following variables: `LABKEY_DANGER_PORT` to other number than 8080, this is the port which labkey service will use outside the Docker container. `LABKEY_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Test_Servers](https://github.com/WNPRC-EHR-Services/EHR_Documentation/blob/master/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
+In the `.env` file, edit the following variables: `LABKEY_DANGER_PORT` to other number than 8080, this is the port which Labkey service will use outside the Docker container. `LABKEY_SECURE_PORT` this port is the one user will need to add to the test server URL to access your instance of LabKey (e.g. https://test-ehrvm.primate.wisc.edu:8443). List of ports and databases used for each instance of LabKey in the test-server can be found in this private page: [Test_Servers](https://github.com/WNPRC-EHR-Services/EHR_Documentation/blob/master/sop/Test_Servers.md). Update the list once your instance is up and running. `LK_BASE_URL` to a unique name for your new labkey service, it has to match the name you will modify in the `docker-compose` file. `PG_NAME` to a database you are planning to use with your new instances of LabKey.
 
 In the `ngnix.conf` file you need to edit the following: `proxy_pass` at the end of the file, to the name you have selected for your new service, it also has to match the name on your `docker-compose` and `.env` files.
 

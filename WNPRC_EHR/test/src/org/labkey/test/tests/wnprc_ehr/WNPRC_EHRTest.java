@@ -43,7 +43,6 @@ import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.FileBrowserHelper;
 import org.labkey.test.util.LogMethod;
-import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
@@ -192,7 +191,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void loadBloodBilledByLookup() throws IOException, CommandException
     {
         goToEHRFolder();
-        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+        Connection cn = WebTestHelper.getRemoteApiConnection();
 
         InsertRowsCommand insertCmd = new InsertRowsCommand("ehr_lookups", "lookups");
         Map<String,Object> rowMap = new HashMap<>();
@@ -457,7 +456,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public int getUserId(String email) throws IOException, CommandException
     {
-        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+        Connection cn = WebTestHelper.getRemoteApiConnection();
 
         SelectRowsCommand sr = new SelectRowsCommand("core", "Users");
         sr.addFilter(new Filter("Email", email));
@@ -477,7 +476,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public int getInvestigatorId(int userId) throws IOException, CommandException
     {
-        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+        Connection cn = WebTestHelper.getRemoteApiConnection();
 
         SelectRowsCommand sr = new SelectRowsCommand("ehr", "investigators");
         sr.addFilter(new Filter("userid", userId));
@@ -497,7 +496,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void addInvestigators() throws IOException, CommandException
     {
-        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+        Connection cn = WebTestHelper.getRemoteApiConnection();
 
         log("Inserting Principal Investigator Jon Snow.");
 
@@ -524,7 +523,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void provideBillingDataAccess() throws IOException, CommandException
     {
-        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+        Connection cn = WebTestHelper.getRemoteApiConnection();
 
         log("Provide data access to Investigator Sansa Stark.");
 

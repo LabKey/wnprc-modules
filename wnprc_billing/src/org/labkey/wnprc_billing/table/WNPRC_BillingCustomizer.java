@@ -1,6 +1,7 @@
 package org.labkey.wnprc_billing.table;
 
 import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -50,25 +51,34 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
             return;
         }
 
-        ColumnInfo chargeType = table.getColumn("chargeType");
+        BaseColumnInfo chargeType = table.getMutableColumn("chargeType");
         if (chargeType != null)
         {
-            chargeType.setFk(new QueryForeignKey(us, us.getContainer(), "chargeUnits",
-                    "chargeType", null, true));
+            chargeType.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                    .container(us.getContainer())
+                    .table("chargeUnits")
+                    .key("chargeType")
+                    .raw(true));
         }
 
-        ColumnInfo debitedAcct = table.getColumn("debitedAccount");
+        BaseColumnInfo debitedAcct = table.getMutableColumn("debitedAccount");
         if (debitedAcct != null)
         {
-            debitedAcct.setFk(new QueryForeignKey(us, us.getContainer(), "aliases",
-                    "alias", null, true));
+            debitedAcct.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                    .container(us.getContainer())
+                    .table("aliases")
+                    .key("alias")
+                    .raw(true));
         }
 
-        ColumnInfo chargeId= table.getColumn("chargeId");
+        BaseColumnInfo chargeId= table.getMutableColumn("chargeId");
         if (chargeId != null)
         {
-            chargeId.setFk(new QueryForeignKey(us, us.getContainer(), "chargeableItems",
-                    "rowid", null, true));
+            chargeId.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                    .container(us.getContainer())
+                    .table("chargeableItems")
+                    .key("rowid")
+                    .raw(true));
         }
 
 //        UserSchema wnprcBillingUS = getBillingUserSchema(table, "wnprc_billing");

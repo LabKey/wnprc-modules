@@ -128,10 +128,4 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         return dateStr + debitedAcct.toUpperCase();
     }
 
-    @Override
-    public void performAdditionalProcessing(String invoiceId, User user, Container container)
-    {
-
-    }
-
 }

@@ -178,9 +178,6 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
                     from breeding_encounters be \
                     where be.Id = \'' + id + '\' \
                     and (be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) or be.enddate is null) \
-                    and not exists (select * \
-                                    from pregnancies p \
-                                    where p.breedingencounterid = be.lsid) \
                     order by date desc'.replace(/\s+/g, ' ');
         return sql;
     },

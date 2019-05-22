@@ -296,7 +296,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             urlString += PageFlowUtil.filter(id);
                             urlString += "</a>";
                             if (i + 1 < ids.length) {
-                                urlString += ",";
+                                urlString += ", ";
                             }
                         }
                         out.write(urlString);

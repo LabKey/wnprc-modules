@@ -19,8 +19,9 @@
                             <fkColumnName>Id</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="est_date_conception">
+                    <column columnName="date_conception">
                         <columnTitle>Est. Conception Date</columnTitle>
+                        <formatString>MM/dd/yyyy</formatString>
                     </column>
                     <column columnName="conception_range">
                         <columnTitle>Conception Range</columnTitle>
@@ -50,12 +51,20 @@
                         <columnTitle>+ 165</columnTitle>
                         <formatString>MM/dd/yyyy</formatString>
                     </column>
+                    <column columnName="date_due_range">
+                        <columnTitle>Due Date Range</columnTitle>
+                        <formatString>MM/dd/yyyy</formatString>
+                    </column>
+                    <column columnName="gestation_day_range">
+                        <columnTitle>Current Gestation Range</columnTitle>
+                        <formatString>0</formatString>
+                    </column>
                     <column columnName="date_due">
                         <columnTitle>Est. Due Date</columnTitle>
                         <formatString>MM/dd/yyyy</formatString>
                     </column>
                     <column columnName="gestation_day">
-                        <columnTitle>Current Gestation</columnTitle>
+                        <columnTitle>Current Est. Gestation</columnTitle>
                         <formatString>0</formatString>
                     </column>
                     <column columnName="outcome">

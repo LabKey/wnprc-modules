@@ -407,6 +407,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         // load all the breeding forms (which are embedded in the Breeding class)
         Breeding.registerDataEntryForms(EHRService.get(), this);
+        Breeding.registerSingleFormOverrides(EHRService.get(), this);
     }
 
     public void registerRoles()

@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -132,16 +133,37 @@ public class TriggerScriptHelper {
 
     }
 
-    public void createBreedingRecordsFromHousingChanges(final List<Map<String, Object>> housingRows) {
+    public List<Map<String, String>> createBreedingRecordsFromHousingChanges(final List<Map<String, Object>> housingRows) {
+        boolean stopExecution = false;
+        List<Map<String, String>> errorStrings = new ArrayList<>();
+
+        List<String> requiredFields = new ArrayList<>();
+        requiredFields.add("Id");
+        requiredFields.add("date");
+        requiredFields.add("room");
+        requiredFields.add("cage");
+        requiredFields.add("reason");
+
         //Filter out any rows that aren't related to breeding
         List<Map<String, Object>> filteredHousingRows = new ArrayList<>();
         for (Map<String, Object> housingRow : housingRows) {
             String reason = (String) housingRow.get("reason");
             if ("Breeding".equals(reason) || "Breeding ended".equals(reason)) {
+                for(String field : requiredFields) {
+                    if (housingRow.get(field) == null) {
+                        errorStrings.add(getError(field, "Field '" + field + "' is required.", "ERROR"));
+                        stopExecution = true;
+                    }
+                }
                 housingRow.put("sex", EHRDemographicsServiceImpl.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
                 filteredHousingRows.add(housingRow);
             }
         }
+
+        if (stopExecution) {
+            return errorStrings;
+        }
+
         String keySeparator = "|";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         Map<String, List<Map<String, Object>>> groupedAnimals = new TreeMap<>();
@@ -179,16 +201,25 @@ public class TriggerScriptHelper {
                         saveBreedingEncounter(insertRows, false);
                     } else {
                         //This should not happen
-                        throw new RuntimeException("This female (" + group.get(i).get("Id") + ") has multiple breeding encounters open");
+                        if (group.get(i).get("Id").equals(group.get(i).get("currentId"))) {
+                            errorStrings.add(getError("reason", "Female (" + group.get(i).get("Id") + ") has multiple breeding encounters open", "ERROR"));
+                        }
                     }
                 } else if (group.get(i).get("sex").equals("f") && group.get(i).get("reason").equals("Breeding ended")) {
                     //get open breeding encounter record
                     List<JSONObject> openEncounters = getOpenEncounters((String) group.get(i).get("Id"));
-                    List<Map<String, Object>> updateRows = closeOngoingBreedingEncounter(filteredHousingRows, openEncounters, group, i);
-                    saveBreedingEncounter(updateRows, true);
+                    if (openEncounters.size() == 1) {
+                        List<Map<String, Object>> updateRows = closeOngoingBreedingEncounter(filteredHousingRows, openEncounters, group, i);
+                        saveBreedingEncounter(updateRows, true);
+                    } else if (openEncounters.size() == 0 && group.get(i).get("Id").equals(group.get(i).get("currentId"))) {
+                        errorStrings.add(getError("reason", "There is no open breeding encounter for '" + group.get(i).get("Id") + "'. If you are updating an existing housing change this is probably fine.", "WARN"));
+                    } else if (openEncounters.size() > 1 && group.get(i).get("Id").equals(group.get(i).get("currentId"))) {
+                        errorStrings.add(getError("reason", "Female (" + group.get(i).get("Id") + ") has multiple breeding encounters open", "ERROR"));
+                    }
                 }
             }
         }
+        return errorStrings;
     }
 
     public String lookupValue(String key, String study, String queryName, String keyCol, String displayColumn) {
@@ -277,12 +308,14 @@ public class TriggerScriptHelper {
     }
 
     private List<Map<String, Object>> closeOngoingBreedingEncounter(List<Map<String, Object>> filteredHousingRows, List<JSONObject> openEncounters, List<Map<String, Object>> group, int index) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         JSONObject openEncounter = openEncounters.get(0);
         StringBuilder remark = new StringBuilder("\n--Breeding Ended--");
         boolean remarkFound = false;
         boolean ejacConfirmed = group.get(index).get("ejacConfirmed") != null ? (Boolean) group.get(index).get("ejacConfirmed") : false;
 
         if (!StringUtils.isEmpty((String) group.get(index).get("remark")) && group.get(index).get("reason").equals("Breeding ended")) {
+            remarkFound = true;
             remark.append("\n")
                     .append(group.get(index).get("Id"))
                     .append(": ")
@@ -292,7 +325,7 @@ public class TriggerScriptHelper {
         String[] sireList = openEncounter.getString("sireid").split(",");
         for (int j = 0; j < sireList.length; j++) {
             for(int k = 0; k < filteredHousingRows.size(); k++) {
-                if (sireList[j].equals(filteredHousingRows.get(k).get("Id")) && filteredHousingRows.get(k).get("date").equals(group.get(index).get("date")) && filteredHousingRows.get(k).get("reason").equals("Breeding ended")) {
+                if (sireList[j].equals(filteredHousingRows.get(k).get("Id")) && sdf.format(filteredHousingRows.get(k).get("date")).equals(sdf.format(group.get(index).get("date"))) && filteredHousingRows.get(k).get("reason").equals("Breeding ended")) {
                     if (!StringUtils.isEmpty((String) filteredHousingRows.get(k).get("remark"))) {
                         remarkFound = true;
                         remark.append("\n")
@@ -346,6 +379,14 @@ public class TriggerScriptHelper {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Map<String, String> getError(String field, String message, String severity) {
+        Map<String, String> error = new HashMap<>();
+        error.put("field", field);
+        error.put("message", message);
+        error.put("severity", severity);
+        return error;
     }
 
     private List<Map<String, Object>> getBreedingEncounterTestData() {

@@ -106,7 +106,7 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
             let gestationPeriod = 165; //Rhesus
             if (animalId.startsWith('cy')) {
                 //Cynomolgus
-                gestationPeriod = 155;
+                gestationPeriod = 165;
             } else if (animalId.startsWith('cj')) {
                 //Marmoset
                 gestationPeriod = 144;

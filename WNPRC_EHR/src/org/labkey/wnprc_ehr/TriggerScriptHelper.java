@@ -212,7 +212,7 @@ public class TriggerScriptHelper {
                         List<Map<String, Object>> updateRows = closeOngoingBreedingEncounter(filteredHousingRows, openEncounters, group, i);
                         saveBreedingEncounter(updateRows, true);
                     } else if (openEncounters.size() == 0 && group.get(i).get("Id").equals(group.get(i).get("currentId"))) {
-                        errorStrings.add(getError("reason", "There is no open breeding encounter for '" + group.get(i).get("Id") + "'. If you are updating an existing housing change this is probably fine.", "WARN"));
+                        errorStrings.add(getError("reason", "There is no open breeding encounter for '" + group.get(i).get("Id") + "'. If you are updating an existing housing change this may be fine.", "WARN"));
                     } else if (openEncounters.size() > 1 && group.get(i).get("Id").equals(group.get(i).get("currentId"))) {
                         errorStrings.add(getError("reason", "Female (" + group.get(i).get("Id") + ") has multiple breeding encounters open", "ERROR"));
                     }

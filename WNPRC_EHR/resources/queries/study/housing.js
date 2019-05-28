@@ -22,8 +22,10 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         for (let propertyName in housingRows) {
             if (housingRows.hasOwnProperty(propertyName)) {
                 for (let i = 0; i < housingRows[propertyName].length; i++) {
-                    if (!housingRows[propertyName][i].enddate && housingRows[propertyName][i].reason && housingRows[propertyName][i].room
-                            && housingRows[propertyName][i].cage && housingRows[propertyName][i].date && housingRows[propertyName][i].Id) {
+                    if (housingRows[propertyName][i].event === 'insert' && !housingRows[propertyName][i].enddate
+                            && housingRows[propertyName][i].reason && housingRows[propertyName][i].room
+                            && housingRows[propertyName][i].cage && housingRows[propertyName][i].date
+                            && housingRows[propertyName][i].Id) {
                         housingRows[propertyName][i].date = new Date(housingRows[propertyName][i].date);
                         housingRows[propertyName][i].currentId = row.Id;
                         housingRows[propertyName][i].validateOnly = helper.isValidateOnly();

@@ -7,12 +7,16 @@ import org.labkey.api.ehr.dataentry.DataEntryFormFactory;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.SimpleFormPanelSection;
 import org.labkey.api.ehr.dataentry.SimpleFormSection;
+import org.labkey.api.ehr.dataentry.SingleQueryFormProvider;
+import org.labkey.api.ehr.dataentry.SingleQueryFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.AnimalDetailsPanel;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -30,6 +34,15 @@ public final class Breeding
      */
     private static final String PREGNANCY_PANEL_XTYPE = "wnprc-pregnancygridpanel";
     private static final String ULTRASOUND_PANEL_XTYPE = "wnprc-ultrasoundgridpanel";
+    
+    private static final String BREEDING_ENCOUNTER_LABEL = "Breeding Encounters";
+    private static final String BREEDING_ENCOUNTER_QUERY = "breeding_encounters";
+    private static final String PREGNANCY_LABEL = "Pregnancies";
+    private static final String PREGNANCY_QUERY = "pregnancies";
+    private static final String ULTRASOUND_LABEL = "Ultrasounds";
+    private static final String ULTRASOUND_QUERY = "ultrasounds";
+    private static final String PREGNANCY_OUTCOME_LABEL = "Pregnancy Outcomes";
+    private static final String PREGNANCY_OUTCOME_QUERY = "pregnancy_outcomes";
 
 
     /**
@@ -41,20 +54,36 @@ public final class Breeding
     public static void registerDataEntryForms(EHRService es, Module module)
     {
         // register the generic singular, edit forms
-        Stream.of(Arrays.asList("Breeding Encounter", "breeding_encounters")
-                , Arrays.asList("Pregnancy", "pregnancies")
-                , Arrays.asList("Pregnancy Outcome", "pregnancy_outcomes")
-                , Arrays.asList("Ultrasound", "ultrasounds")
+        Stream.of(Arrays.asList(BREEDING_ENCOUNTER_LABEL, BREEDING_ENCOUNTER_QUERY)
+                , Arrays.asList(PREGNANCY_LABEL, PREGNANCY_QUERY)
+                , Arrays.asList(ULTRASOUND_LABEL, ULTRASOUND_QUERY)
+                , Arrays.asList(PREGNANCY_OUTCOME_LABEL, PREGNANCY_OUTCOME_QUERY)
         ).map(e -> Breeding.editFactory(module, e.get(0), e.get(1)))
                 .forEach(es::registerFormType);
 
         // register the generic bulk entry forms
-        Stream.of(Arrays.asList("Breeding Encounters", "breeding_encounters", MASTER_PANEL_XTYPE)
-                , Arrays.asList("Pregnancies", "pregnancies", PREGNANCY_PANEL_XTYPE)
-                , Arrays.asList("Pregnancy Outcomes", "pregnancy_outcomes", MASTER_PANEL_XTYPE)
-                , Arrays.asList("Ultrasounds", "ultrasounds", ULTRASOUND_PANEL_XTYPE)
+        Stream.of(Arrays.asList(BREEDING_ENCOUNTER_LABEL, BREEDING_ENCOUNTER_QUERY, MASTER_PANEL_XTYPE)
+                , Arrays.asList(PREGNANCY_LABEL, PREGNANCY_QUERY, PREGNANCY_PANEL_XTYPE)
+                , Arrays.asList(ULTRASOUND_LABEL, ULTRASOUND_QUERY, ULTRASOUND_PANEL_XTYPE)
+                , Arrays.asList(PREGNANCY_OUTCOME_LABEL, PREGNANCY_OUTCOME_QUERY, MASTER_PANEL_XTYPE)
         ).map(e -> Breeding.bulkFactory(module, e.get(0), e.get(1), e.get(2)))
                 .forEach(es::registerFormType);
+    }
+
+    public static void registerSingleFormOverrides(EHRService es, Module module) {
+        List<SingleQueryFormSection> breedingSections = new ArrayList<>();
+        breedingSections.add(new SingleQueryFormSection("study", BREEDING_ENCOUNTER_QUERY, BREEDING_ENCOUNTER_LABEL));
+        breedingSections.add(new SingleQueryFormSection("study", PREGNANCY_QUERY, PREGNANCY_LABEL));
+        breedingSections.add(new SingleQueryFormSection("study", ULTRASOUND_QUERY, BREEDING_ENCOUNTER_LABEL));
+        breedingSections.add(new SingleQueryFormSection("study", PREGNANCY_OUTCOME_QUERY, BREEDING_ENCOUNTER_LABEL));
+
+        breedingSections.forEach(fs -> {
+            fs.addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
+            fs.addConfigSource("Breeding.Columns");
+            fs.addConfigSource("Breeding.Editors");
+            fs.addConfigSource("Breeding.Config");
+            es.registerSingleFormOverride(new SingleQueryFormProvider(module, fs.getSchemaName(), fs.getQueryName(), fs));
+        });
     }
 
     /**

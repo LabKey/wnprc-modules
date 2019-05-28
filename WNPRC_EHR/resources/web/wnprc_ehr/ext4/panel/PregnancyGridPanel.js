@@ -30,7 +30,7 @@
         var gestationPeriod;
         if (id != null && id.startsWith('cy')) {
             //Cynomolgus
-            gestationPeriod = 155;
+            gestationPeriod = 165;
         } else if (id != null && id.startsWith('cj')) {
             //Marmoset
             gestationPeriod = 144;

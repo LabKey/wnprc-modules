@@ -106,7 +106,7 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
             let gestationPeriod = 165; //Rhesus
             if (animalId.startsWith('cy')) {
                 //Cynomolgus
-                gestationPeriod = 155;
+                gestationPeriod = 165;
             } else if (animalId.startsWith('cj')) {
                 //Marmoset
                 gestationPeriod = 144;
@@ -174,13 +174,10 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,sireid,to_char(date, \'Mon DD, YYYY HH24:MI\') as date,to_char(enddate, \'Mon DD, YYYY HH24:MI\') as enddate \
+        var sql = 'select lsid,sireid,to_char(date, \'Mon DD, YYYY HH24:MI\') as date, coalesce(to_char(enddate, \'Mon DD, YYYY HH24:MI\'), \'Ongoing\') as enddate \
                     from breeding_encounters be \
                     where be.Id = \'' + id + '\' \
-                    and be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) \
-                    and not exists (select * \
-                                    from pregnancies p \
-                                    where p.breedingencounterid = be.lsid) \
+                    and (be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) or be.enddate is null) \
                     order by date desc'.replace(/\s+/g, ' ');
         return sql;
     },

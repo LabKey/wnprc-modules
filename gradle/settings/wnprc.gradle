@@ -32,12 +32,11 @@ BuildUtils.includeModules(this.settings, [
         ,":externalModules:labModules:SequenceAnalysis"
         ,":externalModules:labModules:Viral_Load_Assay"
         ,":externalModules:DISCVR:OpenLdapSync"
-        ,":server:customModules:ehr"
-        ,":server:customModules:EHR_ComplianceDB"
-        ,":server:customModules:fcsexpress"
-        ,":server:customModules:genotyping"
-        ,":server:customModules:specimencheck"
-        ,":server:customModules:targetedms"
+        ,":server:modules:ehrModules:ehr"
+        ,":server:modules:ehrModules:EHR_ComplianceDB"
+        ,":server:modules:fcsexpress"
+        ,":server:OConnorLabModules:genotyping"
+        ,":server:modules:targetedms"
 ])
 
 // include the WNPRC modules from the git clone

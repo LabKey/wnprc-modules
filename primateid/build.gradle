@@ -1,8 +1,8 @@
 import org.labkey.gradle.util.BuildUtils
 
 dependencies {
-    compile project(":server:customModules:ehr")
+    compile project(":server:modules:ehrModules:ehr")
     BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":externalModules:labModules:LDK", depProjectConfig: "apiCompile")
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:customModules:ehr", depProjectConfig: "apiCompile")
+    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiCompile")
 
 }

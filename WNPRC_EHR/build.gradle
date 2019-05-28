@@ -2,9 +2,9 @@ import org.labkey.gradle.util.BuildUtils
 
 dependencies {
     compile project(BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"))
-    compile project(path: ":server:customModules:ehr", configuration: "apiCompile")
-    compile project(":server:customModules:ehr")
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:customModules:ehr", depProjectConfig: "apiCompile")
+    compile project(path: ":server:modules:ehrModules:ehr", configuration: "apiCompile")
+    compile project(":server:modules:ehrModules:ehr")
+    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiCompile")
     compile project(path: "${project.parent.path}:DBUtils", configuration: "apiCompile")
     compile project("${project.parent.path}:WebUtils")
     compile project(path: "${project.parent.path}:GoogleDrive", configuration: "apiCompile")

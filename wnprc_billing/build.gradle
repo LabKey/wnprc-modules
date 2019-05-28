@@ -5,8 +5,8 @@ dependencies {
     external("org.apache.sanselan:sanselan:${sanselanVersion}")
 
 
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:customModules:ehr_billing", depProjectConfig: "apiCompile")
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:customModules:ehr", depProjectConfig: "apiCompile")
+    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ehrModules:ehr_billing", depProjectConfig: "apiCompile")
+    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiCompile")
     BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":externalModules:labModules:LDK", depProjectConfig: "apiCompile")
 }
 

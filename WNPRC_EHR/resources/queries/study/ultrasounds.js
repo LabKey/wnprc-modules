@@ -56,6 +56,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 function setDescription(row, helper){
     var description = [];
 
+    description.push('Type: Imaging');
     if(row.reason) {
         description.push('Date: ' + row.date);
     }
@@ -84,6 +85,9 @@ function setDescription(row, helper){
     }
     if (row.followup_required) {
         description.push('Followup Required: ' + row.followup_required);
+    }
+    if (row.performedby) {
+        description.push('Performed By: ' + row.performedby);
     }
 
     return description;

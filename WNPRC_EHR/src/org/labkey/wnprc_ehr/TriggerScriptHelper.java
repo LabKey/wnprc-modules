@@ -348,9 +348,11 @@ public class TriggerScriptHelper {
         openEncounter.put("enddate", group.get(index).get("date"));
         openEncounter.put("ejaculation", ejacConfirmed);
         openEncounter.put("QCState", EHRService.get().getQCStates(container).get(EHRService.QCSTATES.Completed.getLabel()).getRowId());
-        if (remarkFound) {
-            openEncounter.put("remark", openEncounter.getString("remark") != null ? openEncounter.getString("remark") + remark : remark.toString());
+
+        if (!remarkFound) {
+            remark.append("\nno remarks");
         }
+        openEncounter.put("remark", openEncounter.getString("remark") != null ? openEncounter.getString("remark") + remark : remark.toString());
 
         List<Map<String, Object>> rows = new ArrayList<>();
         rows.add(openEncounter);

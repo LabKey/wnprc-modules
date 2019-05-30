@@ -52,3 +52,43 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         });
     }
 }
+
+function setDescription(row, helper){
+    var description = [];
+
+    description.push('Type: Imaging');
+    if(row.reason) {
+        description.push('Date: ' + row.date);
+    }
+    if(row.fetal_heartbeat) {
+        description.push('Fetal HB: ' + (!!row.beats_per_minute ? row.beats_per_minute : 'true'));
+    } else {
+        description.push('Fetal HB: false');
+    }
+    if (row.gest_sac_mm) {
+        description.push('Gestational Sac (mm): ' + row.gest_sac_mm);
+    }
+    if(row.crown_rump_mm) {
+        description.push('Crown Rump (mm): ' + row.crown_rump_mm);
+    }
+    if (row.biparietal_diameter_mm) {
+        description.push('Biparietal Diameter (mm): ' + row.biparietal_diameter_mm);
+    }
+    if (row.femur_length_mm) {
+        description.push('Femur Length (mm): ' + row.femur_length_mm);
+    }
+    if (row.yolk_sac_diameter_mm) {
+        description.push('Yolk Sac Diameter (mm): ' + row.yolk_sac_diameter_mm);
+    }
+    if (row.head_circumference_mm) {
+        description.push('Head Circumference (mm): ' + row.head_circumference_mm);
+    }
+    if (row.followup_required) {
+        description.push('Followup Required: ' + row.followup_required);
+    }
+    if (row.performedby) {
+        description.push('Performed By: ' + row.performedby);
+    }
+
+    return description;
+}

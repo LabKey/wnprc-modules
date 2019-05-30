@@ -21,50 +21,50 @@
                     </column>
                     <column columnName="date_conception">
                         <columnTitle>Est. Conception Date</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="conception_range">
                         <columnTitle>Conception Range</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="date_conception_plus_30">
                         <columnTitle>+ 30</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="date_conception_plus_60">
                         <columnTitle>+ 60</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="date_conception_plus_90">
                         <columnTitle>+ 90</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="date_conception_plus_120">
                         <columnTitle>+ 120</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="date_conception_plus_150">
                         <columnTitle>+ 150</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="date_conception_plus_165">
                         <columnTitle>+ 165</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="date_due_range">
                         <columnTitle>Due Date Range</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="gestation_day_range">
-                        <columnTitle>Current Gestation Range</columnTitle>
+                        <columnTitle>Current Gestation Range (days)</columnTitle>
                         <formatString>0</formatString>
                     </column>
                     <column columnName="date_due">
                         <columnTitle>Est. Due Date</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="gestation_day">
-                        <columnTitle>Current Est. Gestation</columnTitle>
+                        <columnTitle>Current Est. Gestation (days)</columnTitle>
                         <formatString>0</formatString>
                     </column>
                     <column columnName="outcome">
@@ -78,7 +78,7 @@
                     </column>
                     <column columnName="outcome_date">
                         <columnTitle>Outcome Date/Time</columnTitle>
-                        <formatString>MM/dd/yyyy hh:mm</formatString>
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="outcome_remark">
                         <columnTitle>Outcome Remark</columnTitle>

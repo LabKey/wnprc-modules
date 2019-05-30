@@ -30,7 +30,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         this.onTrigger2Click = Ext4.form.field.ComboBox.prototype.onTriggerClick;
 
         Ext4.apply(this, {
-            displayField: 'date_conception',
+            displayField: 'displayString',
             valueField: 'lsid',
             queryMode: 'local',
             validationDelay: 500,
@@ -118,7 +118,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,to_char(date_conception, \'yyyy-MM-dd\') as date_conception, sireid \
+        var sql = 'select lsid,to_char(date_conception, \'yyyy-MM-dd\') as date_conception,sireid,to_char(date_conception, \'yyyy-MM-dd\') || \' (Sire: \' || sireid || \')\' as displayString \
                from (select p.lsid \
                            ,p.date_conception \
                            ,p.sireid \

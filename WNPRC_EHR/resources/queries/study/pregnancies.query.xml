@@ -16,6 +16,7 @@
                             <fkColumnName>lsid</fkColumnName>
                             <fkDisplayColumnName>window</fkDisplayColumnName>
                         </fk>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="performedby">
                         <nullable>false</nullable>

@@ -11,10 +11,11 @@
                         <columnTitle>Pregnancy (Conc. Date)</columnTitle>
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
-                            <fkTable>pregnancies</fkTable>
+                            <fkTable>pregnancyConceptionDate</fkTable>
                             <fkColumnName>lsid</fkColumnName>
                             <fkDisplayColumnName>date_conception</fkDisplayColumnName>
                         </fk>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="project"/>
                     <column columnName="restraint"/>

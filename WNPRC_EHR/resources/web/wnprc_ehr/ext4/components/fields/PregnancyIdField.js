@@ -85,7 +85,8 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
     },
 
     getInnerTpl: function(){
-        return ['Sire: {[values["sireid"] + " - " + values["date_conception"]]}'];
+        //return ['Sire: {[values["sireid"] + " - " + values["date_conception"]]}'];
+        return ['{[values["date_conception"] + " (Sire: " + values["sireid"] + ")"]}'];
     },
 
     trigger1Cls: 'x4-form-search-trigger',
@@ -117,7 +118,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,to_char(date_conception, \'Mon DD, YYYY HH24:MI\') as date_conception, sireid \
+        var sql = 'select lsid,to_char(date_conception, \'yyyy-MM-dd\') as date_conception, sireid \
                from (select p.lsid \
                            ,p.date_conception \
                            ,p.sireid \

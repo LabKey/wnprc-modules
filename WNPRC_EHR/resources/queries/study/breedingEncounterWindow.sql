@@ -1,2 +1,2 @@
-SELECT lsid, to_char(date, 'Mon DD, YYYY HH24:MI') || ' to' || chr(10) || COALESCE(to_char(enddate, 'Mon DD, YYYY HH24:MI'), 'Ongoing') AS window
+SELECT lsid, to_char(date, 'yyyy-MM-dd HH24:MI') || ' to ' || COALESCE(to_char(enddate, 'yyyy-MM-dd HH24:MI'), 'Ongoing') AS window
 FROM study.breeding_encounters

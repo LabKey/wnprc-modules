@@ -18,7 +18,7 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Columns', {
         'study.pregnancies': {
             Id:                             { columnConfig: { columnIndex:  1 } },
             sireid:                         { columnConfig: { columnIndex:  2 } },
-            breedingencounterid:            { columnConfig: { columnIndex:  3, width: 200 } },
+            breedingencounterid:            { columnConfig: { columnIndex:  3, width: 300 } },
             date_conception:                { columnConfig: { columnIndex:  4, width: 200 } },
             date_due:                       { columnConfig: { columnIndex:  5, width: 200 } },
             remark:                         { columnConfig: { columnIndex:  6, width: 200 } },

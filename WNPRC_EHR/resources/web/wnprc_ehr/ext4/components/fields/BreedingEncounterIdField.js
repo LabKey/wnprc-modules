@@ -40,7 +40,7 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         this.onTrigger2Click = Ext4.form.field.ComboBox.prototype.onTriggerClick;
 
         Ext4.apply(this, {
-            displayField: 'sireid',
+            displayField: 'daterange',
             valueField: 'lsid',
             queryMode: 'local',
             validationDelay: 500,
@@ -174,7 +174,7 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,sireid,to_char(date, \'Mon DD, YYYY HH24:MI\') as date, coalesce(to_char(enddate, \'Mon DD, YYYY HH24:MI\'), \'Ongoing\') as enddate \
+        var sql = 'select lsid,sireid,to_char(date, \'yyyy-MM-dd HH24:MI\') as date, coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as enddate,to_char(date, \'yyyy-MM-dd HH24:MI\') || \' to \' ||  coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as daterange \
                     from breeding_encounters be \
                     where be.Id = \'' + id + '\' \
                     and (be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) or be.enddate is null) \

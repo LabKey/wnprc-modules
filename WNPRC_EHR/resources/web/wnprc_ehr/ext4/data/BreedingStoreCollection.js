@@ -82,8 +82,12 @@ Ext4.define('WNPRC.ext.data.BreedingStoreCollection', {
     setClientModelDefaults: function (model) {
         if (this.hasLoaded) {
             model.suspendEvents(true);
-            model.set('Id', this._participantId);
-            model.set('pregnancyid', this._pregnancyLsid);
+            if (this._participantId) {
+                model.set('Id', this._participantId);
+            }
+            if (model.caseInsensitiveFieldMap && model.caseInsensitiveFieldMap.pregnancyid) {
+                model.set('pregnancyid', this._pregnancyLsid);
+            }
             //model.set('performedby', LABKEY.user.displayName);
             model.resumeEvents();
         }

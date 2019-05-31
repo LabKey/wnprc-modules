@@ -12,7 +12,6 @@ Ext4.define('WNPRC.form.field.CalculatedPregnancyDueDateField', {
                 scope: this,
                 beforerender: function(field){
                     let target = field.up('form');
-                    LDK.Assert.assertNotEmpty('Unable to find form or grid', target);
                     if (!!target && !target.hasListener('pregnancydatechange_' + field.name)) {
                         field.mon(target, 'pregnancydatechange_' + field.name, field.updatePregnancyDueDate, field, {buffer: 300});
                     }

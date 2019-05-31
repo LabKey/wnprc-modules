@@ -125,11 +125,13 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
                         var row = data.rows[0];
                         var early = LDK.ConvertUtils.parseDate(row.date, 'Y/m/d H:i:s');
                         //Conception can occur up to 3 days after the breeding window has ended
-                        var late = Ext4.Date.add(LDK.ConvertUtils.parseDate(row.enddate, 'Y/m/d H:i:s'), Ext4.Date.DAY, 3);
-                        theForm.findField('date_conception_early').setValue(early);
-                        theForm.findField('date_conception_late').setValue(late);
-                        theForm.findField('date_due_early').setValue(Ext4.Date.add(early, Ext4.Date.DAY, gestationPeriod));
-                        theForm.findField('date_due_late').setValue(Ext4.Date.add(late, Ext4.Date.DAY, gestationPeriod));
+                        if (row.enddate) {
+                            var late = Ext4.Date.add(LDK.ConvertUtils.parseDate(row.enddate, 'Y/m/d H:i:s'), Ext4.Date.DAY, 3);
+                            theForm.findField('date_conception_early').setValue(early);
+                            theForm.findField('date_conception_late').setValue(late);
+                            theForm.findField('date_due_early').setValue(Ext4.Date.add(early, Ext4.Date.DAY, gestationPeriod));
+                            theForm.findField('date_due_late').setValue(Ext4.Date.add(late, Ext4.Date.DAY, gestationPeriod));
+                        }
                     }
                 },
                 failure: EHR.Utils.onFailure
@@ -138,7 +140,7 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
     },
 
     getInnerTpl: function(){
-        return ['Sire: {[values["sireid"] + "<br>" + values["date"] + " to<br>" + values["enddate"]]}'];
+        return ['Sire: {[values["sireid"] + "<br>" + values["date"] + " to<br>" + values["enddate_coalesced"]]}'];
     },
 
     trigger1Cls: 'x4-form-search-trigger',
@@ -174,7 +176,7 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,sireid,to_char(date, \'yyyy-MM-dd HH24:MI\') as date, coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as enddate,to_char(date, \'yyyy-MM-dd HH24:MI\') || \' to \' ||  coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as daterange \
+        var sql = 'select lsid,sireid,to_char(date, \'yyyy-MM-dd HH24:MI\') as date,enddate,coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as enddate_coalesced,to_char(date, \'yyyy-MM-dd HH24:MI\') || \' to \' ||  coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as daterange \
                     from breeding_encounters be \
                     where be.Id = \'' + id + '\' \
                     and (be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) or be.enddate is null) \

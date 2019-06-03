@@ -80,7 +80,7 @@ public class AnimalRequestNotification extends AbstractEHRNotification
 
         msg.append("<p>Click <a href=\"" +
                 hostName +
-                "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&keyField=rowid&key=" +
+                "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" +
                 rowId +
                 "\">here</a> to review the request.</p>");
 

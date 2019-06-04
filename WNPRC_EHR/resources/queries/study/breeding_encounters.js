@@ -19,8 +19,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             }
         });
 
-        console.log(JSON.stringify(row));
-
         if (row.date && row.enddate) {
             //row.QCState = EHR.Server.Security.getQCStateByLabel('Completed').RowId;
             row.QCStateLabel = EHR.Server.Security.getQCStateByLabel('Completed').Label;

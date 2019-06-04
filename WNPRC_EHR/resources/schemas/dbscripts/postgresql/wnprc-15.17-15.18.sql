@@ -1,0 +1,1 @@
+insert into ehr_lookups.species VALUES ('Macaque','','','',60.0,0.2,30.0);

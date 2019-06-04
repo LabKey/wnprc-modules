@@ -62,11 +62,13 @@
                             var row = data.rows[0];
                             var early = LDK.ConvertUtils.parseDate(row.date, 'Y/m/d H:i:s');
                             //Conception can occur up to 3 days after the breeding window has ended
-                            var late = Ext4.Date.add(LDK.ConvertUtils.parseDate(row.enddate, 'Y/m/d H:i:s'), Ext4.Date.DAY, 3);
-                            model.set("date_conception_early", early);
-                            model.set("date_conception_late", late);
-                            model.set("date_due_early", Ext4.Date.add(early, Ext4.Date.DAY, gestationPeriod));
-                            model.set("date_due_late", Ext4.Date.add(late, Ext4.Date.DAY, gestationPeriod));
+                            if (row.enddate) {
+                                var late = Ext4.Date.add(LDK.ConvertUtils.parseDate(row.enddate, 'Y/m/d H:i:s'), Ext4.Date.DAY, 3);
+                                model.set("date_conception_early", early);
+                                model.set("date_conception_late", late);
+                                model.set("date_due_early", Ext4.Date.add(early, Ext4.Date.DAY, gestationPeriod));
+                                model.set("date_due_late", Ext4.Date.add(late, Ext4.Date.DAY, gestationPeriod));
+                            }
                         }
                     },
                     failure: EHR.Utils.onFailure

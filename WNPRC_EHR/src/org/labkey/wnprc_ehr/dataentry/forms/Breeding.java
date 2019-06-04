@@ -141,6 +141,14 @@ public final class Breeding
             setStoreCollectionClass("WNPRC.ext.data.BreedingStoreCollection");
         }
 
+        @Override
+        protected List<String> getButtonConfigs()
+        {
+            List<String> ret = super.getButtonConfigs();
+            ret.remove("SUBMIT");
+            return ret;
+        }
+
         private static BreedingForm bulk(DataEntryFormContext ctx, Module owner, String formName, String queryName, String xtype)
         {
             return new BreedingForm(ctx, owner, formName,

@@ -66,22 +66,22 @@ function setDescription(row, helper){
         description.push('Fetal HB: false');
     }
     if (row.gest_sac_mm) {
-        description.push('Gestational Sac (mm): ' + row.gest_sac_mm);
+        description.push('Gestational Sac (mm): ' + Number(row.gest_sac_mm.toFixed(2)));
     }
     if(row.crown_rump_mm) {
-        description.push('Crown Rump (mm): ' + row.crown_rump_mm);
+        description.push('Crown Rump (mm): ' + Number(row.crown_rump_mm.toFixed(2)));
     }
     if (row.biparietal_diameter_mm) {
-        description.push('Biparietal Diameter (mm): ' + row.biparietal_diameter_mm);
+        description.push('Biparietal Diameter (mm): ' + Number(row.biparietal_diameter_mm.toFixed(2)));
     }
     if (row.femur_length_mm) {
-        description.push('Femur Length (mm): ' + row.femur_length_mm);
+        description.push('Femur Length (mm): ' + Number(row.femur_length_mm.toFixed(2)));
     }
     if (row.yolk_sac_diameter_mm) {
-        description.push('Yolk Sac Diameter (mm): ' + row.yolk_sac_diameter_mm);
+        description.push('Yolk Sac Diameter (mm): ' + Number(row.yolk_sac_diameter_mm.toFixed(2)));
     }
     if (row.head_circumference_mm) {
-        description.push('Head Circumference (mm): ' + row.head_circumference_mm);
+        description.push('Head Circumference (mm): ' + Number(row.head_circumference_mm.toFixed(2)));
     }
     if (row.followup_required) {
         description.push('Followup Required: ' + row.followup_required);

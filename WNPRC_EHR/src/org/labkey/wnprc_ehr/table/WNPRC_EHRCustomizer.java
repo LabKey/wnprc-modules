@@ -284,6 +284,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 sireid.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
+                    @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
                         ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
@@ -300,6 +301,12 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             }
                         }
                         out.write(urlString);
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
                     }
                 });
             }

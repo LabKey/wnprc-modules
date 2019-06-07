@@ -1,14 +1,16 @@
-<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" canOverride="true">
     <columns>
+        <column name="lowestWell"/>
         <column name="subjectId" />
         <column name="date" />
         <column name="category"/>
         <column name="assayId" />
-        <column name="viralLoadScientific" />
-        <column name="sourceMaterial/liquid" />
-        <column name="sampleType" />
-        <column name="comment"/>
+        <column name="viralLoad" />
+        <column name="replicates" />
+        <column name="stdDeviation" />
+        <column name="qcflags" />
         <column name="pooled" />
+        <column name="comments" />
         <column name="Run/RowId">
             <properties>
                 <property name="columnTitle" value="Run"/>
@@ -16,7 +18,4 @@
         </column>
         <column name="workbook" />
     </columns>
-    <sorts>
-        <sort column="subjectId"/>
-    </sorts>
 </customView>

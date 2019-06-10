@@ -285,8 +285,13 @@ EHR.Metadata.registerMetadata('Default', {
                 shownInGrid: true
             },
             reason: {
-                shownInGrid: true,
+                xtype: 'lovcombo',
+                hasOwnTpl: true,
+                includeNullRecord: true,
                 editorConfig: {
+                    tpl: null,
+                    multiSelect: true,
+                    separator: ',',
                     listeners: {
                         select: function(field, val){
                             var theForm = this.ownerCt.getForm();
@@ -296,13 +301,27 @@ EHR.Metadata.registerMetadata('Default', {
                                 var ejacConfirmed = theForm.findField('ejacConfirmed');
                                 //show & hide fields as necessary
                                 //also clear values before hiding them
-                                if(field.value === 'Breeding') {
+                                var breeding = false;
+                                var breedingEnded = false;
+                                if (field.value) {
+                                    let reasons = field.value.split(',');
+                                    if (reasons) {
+                                        for (let i = 0; i < reasons.length; i++) {
+                                            if (reasons[i] === 'Breeding') {
+                                                breeding = true;
+                                            } else if (reasons[i] === 'Breeding ended') {
+                                                breedingEnded = true;
+                                            }
+                                        }
+                                    }
+                                }
+                                if(breeding) {
                                     projectField.show();
                                 } else {
                                     projectField.setValue('');
                                     projectField.hide();
                                 }
-                                if(field.value === 'Breeding ended') {
+                                if(breedingEnded) {
                                     ejacConfirmed.show();
                                 } else {
                                     ejacConfirmed.setValue(false);
@@ -311,7 +330,11 @@ EHR.Metadata.registerMetadata('Default', {
                             }
                         }
                     }
-                }
+                },
+                columnConfig: {
+                    width: 500
+                },
+                shownInGrid: true,
             },
             ejacConfirmed: {
                 hidden: false,

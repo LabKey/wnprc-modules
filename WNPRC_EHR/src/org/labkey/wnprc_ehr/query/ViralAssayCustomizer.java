@@ -93,7 +93,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
         if (subject != null) {
             subject.setLabel("Subject Id");
             subject.setConceptURI("http://cpas.labkey.com/Study#ParticipantId");
-            LDKService.get().applyNaturalSort(ti, "subjectId");
+            // LDKService.get().applyNaturalSort(ti, "subjectId");
         }
 
         ColumnInfo result = ti.getColumn("result");

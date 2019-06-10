@@ -147,8 +147,17 @@ public class TriggerScriptHelper {
         //Filter out any rows that aren't related to breeding
         List<Map<String, Object>> filteredHousingRows = new ArrayList<>();
         for (Map<String, Object> housingRow : housingRows) {
-            String reason = (String) housingRow.get("reason");
-            if ("Breeding".equals(reason) || "Breeding ended".equals(reason)) {
+            String reasonField = (String) housingRow.get("reason");
+            String[] reasons = reasonField != null ? reasonField.split(",") : new String[0];
+            boolean breeding = false;
+            for (String reason : reasons) {
+                if ("Breeding".equals(reason) || "Breeding ended".equals(reason)) {
+                    breeding = true;
+                    housingRow.put("reason", reason);
+                    break;
+                }
+            }
+            if (breeding) {
                 for(String field : requiredFields) {
                     if (housingRow.get(field) == null) {
                         errorStrings.add(getError(field, "Field '" + field + "' is required.", "ERROR"));

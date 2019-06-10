@@ -305,13 +305,11 @@ EHR.Metadata.registerMetadata('Default', {
                                 var breedingEnded = false;
                                 if (field.value) {
                                     let reasons = field.value.split(',');
-                                    if (reasons) {
-                                        for (let i = 0; i < reasons.length; i++) {
-                                            if (reasons[i] === 'Breeding') {
-                                                breeding = true;
-                                            } else if (reasons[i] === 'Breeding ended') {
-                                                breedingEnded = true;
-                                            }
+                                    for (let i = 0; i < reasons.length; i++) {
+                                        if (reasons[i] === 'Breeding') {
+                                            breeding = true;
+                                        } else if (reasons[i] === 'Breeding ended') {
+                                            breedingEnded = true;
                                         }
                                     }
                                 }

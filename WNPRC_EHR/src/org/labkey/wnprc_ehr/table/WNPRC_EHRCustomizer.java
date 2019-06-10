@@ -295,7 +295,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     {
                         ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
                         String joinedIds = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
-                        if (joinedIds != null) {
+                        if (joinedIds != null)
+                        {
                             String[] ids = joinedIds.split(",");
                             String urlString = "";
                             for (int i = 0; i < ids.length; i++)
@@ -338,7 +339,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     {
                         ActionURL url = new ActionURL("query", "recordDetails.view", us.getContainer());
                         String joinedReasons = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
-                        if (joinedReasons != null) {
+                        if (joinedReasons != null)
+                        {
                             String[] reasons = joinedReasons.split(",");
                             url.addParameter("schemaName", "ehr_lookups");
                             url.addParameter("query.queryName", "housing_reason");

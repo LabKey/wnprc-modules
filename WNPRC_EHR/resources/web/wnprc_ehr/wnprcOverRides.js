@@ -166,16 +166,43 @@ Ext.reg('ehr-project_2', WNPRC_EHR.ProjectField2);
 
 EHR.Metadata.Columns['Irregular Observations'] = 'id/curlocation/location,id,id/curlocation/cond,date,enddate,inRoom,feces,menses,other,tlocation,behavior,otherbehavior,other,breeding,'+EHR.Metadata.bottomCols;
 EHR.Metadata.Columns['Treatment Orders']       = EHR.Metadata.topCols+',account,meaning,code,qualifier,route,frequency,concentration,conc_units,dosage,dosage_units,volume,vol_units,amount,amount_units,remark,nocharge,project_2,account_2,billedby,performedBy,qcstate,'+EHR.Metadata.hiddenCols;
-EHR.Metadata.Columns['Behavior Remarks']       = EHR.Metadata.topCols+',so,a,p,,behatype,category, behatreatment, followup,'+EHR.Metadata.bottomCols,
-EHR.Metadata.Columns['Behavior Abstract']      = EHR.Metadata.topCols+',behavior,performedby,'+EHR.Metadata.bottomCols,
-EHR.Metadata.Columns['Virology Results']       = EHR.Metadata.topCols+',virus,method,source,resultOORIndicator,result,units,qualResult,laboratory,performing_lab,'+EHR.Metadata.bottomCols,
-
+EHR.Metadata.Columns['Behavior Remarks']       = EHR.Metadata.topCols+',so,a,p,,behatype,category, behatreatment, followup,'+EHR.Metadata.bottomCols;
+EHR.Metadata.Columns['Behavior Abstract']      = EHR.Metadata.topCols+',behavior,performedby,'+EHR.Metadata.bottomCols;
+EHR.Metadata.Columns['Virology Results']       = EHR.Metadata.topCols+',virus,method,source,resultOORIndicator,result,units,qualResult,laboratory,performing_lab,'+EHR.Metadata.bottomCols;
+EHR.Metadata.Columns['Housing']                = 'id,date,enddate,room,cage,id/numroommates/cagemates,cond,reason,ejacConfirmed,project,isTemp,' + EHR.Metadata.bottomCols;
 
 EHR.Metadata.registerMetadata('Default', {
     byQuery: {
         cage_observations: {
             cage: {
                 allowBlank: false
+            },
+            room: {
+                editorConfig: {
+                    listeners: {
+                        //Add a listener that will automatically fill in the room field for the Observations Per Cage
+                        //section based on the room selected in the Observations Per Animal section on the Irregular obs page.
+                        render: function(){
+                            if (this.ownerCt.ownerCt && this.ownerCt.ownerCt.ownerCt.formType === 'Irregular Observations') {
+                                let formGridPanel = this.ownerCt.ownerCt.items.items[0];
+                                formGridPanel.on('recordchange', function () {
+                                    let theForm = this.ownerCt.getForm();
+                                    let roomField = theForm.findField('room');
+                                    if (!roomField.value) {
+                                        if (this.ownerCt.ownerCt.ownerCt.items.items[2].store.data.items[0]) {
+                                            let location = this.ownerCt.ownerCt.ownerCt.items.items[2].store.data.items[0].data['id/curlocation/location'];
+                                            if (location) {
+                                                let roomValue = location.substr(0, location.indexOf('-') === -1 ? location.length : location.indexOf('-'));
+                                                roomField.setValue(roomValue);
+                                                theForm.findField('cage').focus();
+                                            }
+                                        }
+                                    }
+                                }, this, {buffer: 20});
+                            }
+                        }
+                    }
+                }
             }
         },
         'Blood Draws': {
@@ -223,6 +250,33 @@ EHR.Metadata.registerMetadata('Default', {
             date: { setInitialValue: function() { return null; } }
         },
         'Housing': {
+            Id: {
+                //attached to Id for now because I couldn't figure out how to just attach it to the form itself
+                editorConfig: {
+                    listeners: {
+                        render: function(){
+                            var formPanel = this.ownerCt.ownerCt.items.items[0];
+                            formPanel.on('recordchange', function() {
+                                var theForm = this.ownerCt.getForm();
+                                var reasonField = theForm.findField('reason');
+                                var projectField = theForm.findField('project');
+                                var ejacConfirmed = theForm.findField('ejacConfirmed');
+
+                                if(reasonField.value === 'Breeding') {
+                                    projectField.show();
+                                } else {
+                                    projectField.hide();
+                                }
+                                if(reasonField.value === 'Breeding ended') {
+                                    ejacConfirmed.show();
+                                } else {
+                                    ejacConfirmed.hide();
+                                }
+                            }, this, {buffer: 20});
+                        }
+                    }
+                }
+            },
             // Out Date
             enddate: {
                 shownInGrid: false
@@ -231,7 +285,78 @@ EHR.Metadata.registerMetadata('Default', {
                 shownInGrid: true
             },
             reason: {
-                shownInGrid: true
+                xtype: 'lovcombo',
+                hasOwnTpl: true,
+                includeNullRecord: true,
+                editorConfig: {
+                    tpl: null,
+                    multiSelect: true,
+                    separator: ',',
+                    listeners: {
+                        select: function(field, val){
+                            var theForm = this.ownerCt.getForm();
+
+                            if(theForm){
+                                var projectField = theForm.findField('project');
+                                var ejacConfirmed = theForm.findField('ejacConfirmed');
+                                //show & hide fields as necessary
+                                //also clear values before hiding them
+                                var breeding = false;
+                                var breedingEnded = false;
+                                if (field.value) {
+                                    let reasons = field.value.split(',');
+                                    for (let i = 0; i < reasons.length; i++) {
+                                        if (reasons[i] === 'Breeding') {
+                                            breeding = true;
+                                        } else if (reasons[i] === 'Breeding ended') {
+                                            breedingEnded = true;
+                                        }
+                                    }
+                                }
+                                if(breeding) {
+                                    projectField.show();
+                                } else {
+                                    projectField.setValue('');
+                                    projectField.hide();
+                                }
+                                if(breedingEnded) {
+                                    ejacConfirmed.show();
+                                } else {
+                                    ejacConfirmed.setValue(false);
+                                    ejacConfirmed.hide();
+                                }
+                            }
+                        }
+                    }
+                },
+                columnConfig: {
+                    width: 500
+                },
+                shownInGrid: true,
+            },
+            ejacConfirmed: {
+                hidden: false,
+                editorConfig: {
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be unhidden later
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
+                }
+            },
+            project: {
+                hidden: false,
+                editorConfig: {
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be unhidden later
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
+                }
             },
             performedby: {
                 shownInGrid: true
@@ -269,6 +394,14 @@ EHR.Metadata.registerMetadata('Default', {
                     },
                     hidden: false,
                     shownInGrid: false
+                }
+            }
+        },
+        Birth: {
+            type: {
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'currentBirthTypes'
                 }
             }
         }

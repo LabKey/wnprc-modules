@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 #-------------------------------------------------------------------------------
 # Read the named arguments (e.g., -f, -p) from the command line and replace the
@@ -32,6 +32,16 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --dbname)     ## name of the target database
+            dbname="$2"
+            shift
+            shift
+            ;;
+        --tmppath)
+            tmppath="$2"
+            shift
+            shift
+            ;;
         --debug)       ## flag indicating we are debugging and shouldn't delete the tmpdir
             debug="true"
             shift
@@ -45,11 +55,28 @@ done
 set -- "${args[@]}"
 
 #-------------------------------------------------------------------------------
+# Determining location for temporary folder
+#-------------------------------------------------------------------------------
+if [[ -z $tmppath ]]; then
+    tmppath="/tmp/"
+fi
+
+#-------------------------------------------------------------------------------
 # Create a temporary folder just for this particular run (to clean up later)
 #-------------------------------------------------------------------------------
-tmpdir=$(mktemp -d /tmp/pg_restore.XXXXXXXX)
+
+tmpdir="$(mktemp -d "$tmppath"pg_restore.XXXXXXXX)"
+echo $tmpdir
 if [[ -z $debug ]]; then
     trap 'rm -rf $tmpdir' EXIT
+fi
+
+#-------------------------------------------------------------------------------
+# Default database name to labkey, is dbname is not passed it will used
+# labkey as the target database to restore
+#-------------------------------------------------------------------------------
+if [[ -z $dbname ]]; then
+    dbname="labkey"
 fi
 
 #-------------------------------------------------------------------------------
@@ -64,9 +91,9 @@ fi
 
 #-------------------------------------------------------------------------------
 # Take down the entire docker-compose project, including the network and volumes
-# then build a new postgresql configuration using the specified one as a base. 
+# then build a new postgresql configuration using the specified one as a base.
 #-------------------------------------------------------------------------------
-docker-compose down
+docker-compose down -v
 if [[ ! -e .env ]]; then
     cp default.env .env
 fi
@@ -112,8 +139,8 @@ echo -e '\033[0;32mdone\033[0m'
 # Drop and recreate the labkey database and the various roles that we use
 #-------------------------------------------------------------------------------
 echo -n 'Preparing database and roles ... '
-docker-compose exec postgres psql -U postgres -c 'drop database if exists labkey;' &>/dev/null
-docker-compose exec postgres psql -U postgres -c 'create database labkey; ' &>/dev/null
+docker-compose exec postgres psql -U postgres -c "drop database if exists ${dbname};" &>/dev/null
+docker-compose exec postgres psql -U postgres -c "create database ${dbname};" &>/dev/null
 docker-compose exec postgres psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
 echo -e '\033[0;32mdone\033[0m'
 
@@ -124,7 +151,7 @@ echo -n "Restoring database from $filepath ...  0%"
 ${pgpath}pg_restore -l $filepath | egrep -v 'TABLE DATA (genotyping|audit|col_dump|oconnor) ' > $tmpdir/pg_restore.list
 total=$(egrep -c '^[0-9]+;.*' $tmpdir/pg_restore.list)
 trap 'kill -TERM $pg_restore_pid' TERM INT
-${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d labkey -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
+${pgpath}pg_restore -h localhost -p "${pgport#*:}" -U postgres -d $dbname -j 4 -L $tmpdir/pg_restore.list --verbose $filepath &>$tmpdir/pg_restore.log &
 pg_restore_pid=$!
 while kill -0 "$pg_restore_pid" &>/dev/null; do
     if [[ $total -ne 0 ]]; then
@@ -142,11 +169,11 @@ echo
 # Run the scripts to clean up the instance for development purposes
 #-------------------------------------------------------------------------------
 echo -n "Preparing database for deployment ... "
-${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
+${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d $dbname &>/dev/null <<- XXX
     update prop.properties p set value = 'https://$(hostname -f)' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
 XXX
 if [[ -z $prod ]]; then
-    ${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d labkey &>/dev/null <<- XXX
+    ${pgpath}psql -h localhost -p "${pgport#*:}" -U postgres -d $dbname &>/dev/null <<- XXX
         update prop.properties p set value = 'http://localhost:8080' where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'baseServerURL';
         update prop.properties p set value = FALSE where (select s.category from prop.propertysets s where s.set = p.set) = 'SiteConfig' and p.name = 'sslRequired';
         update prop.properties p set value = 'DevelopmentServer' where (select s.category from prop.propertysets s where s.set = p.set) = 'LookAndFeel' and p.name = 'systemShortName';
@@ -169,7 +196,6 @@ fi
 # Tear down and re-start the docker-compose environment using the 'regular'
 # postgresql configuration rather than the 'restore' one
 #-------------------------------------------------------------------------------
-docker-compose down
+docker-compose down -v
 unset PG_CONF_FILE
 docker-compose up -d postgres
-

@@ -28,13 +28,10 @@ RUN yum -y -q install \
 ENV CATALINA_HOME /usr/local/tomcat
 WORKDIR $CATALINA_HOME
 
-ENV TOMCAT_VERSION 8.5.23
+ENV TOMCAT_VERSION 8.5.32
 RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
   | tar -xz --strip-components=1 \
  && chmod -R 755 .
-
-# update the length of the default web session
-RUN sed -i "s/<session-timeout>[0-9]+<\/session-timeout>/<session-timeout>240<\/session-timeout>/" conf/web.xml
 
 # configure LabKey for tomcat
 RUN mkdir -p conf/Catalina/localhost

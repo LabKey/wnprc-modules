@@ -1,0 +1,28 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="date"/>
+        <column name="Id"/>
+        <column name="pregnancyid"/>
+        <column name="project"/>
+        <column name="restraint"/>
+        <column name="fetal_heartbeat"/>
+        <column name="beats_per_minute"/>
+        <column name="gest_sac_mm"/>
+        <column name="gest_sac_gest_day"/>
+        <column name="crown_rump_mm"/>
+        <column name="crown_rump_gest_day"/>
+        <column name="biparietal_diameter_mm"/>
+        <column name="biparietal_diameter_gest_day"/>
+        <column name="femur_length_mm"/>
+        <column name="femur_length_gest_day"/>
+        <column name="yolk_sac_diameter_mm"/>
+        <column name="head_circumference_mm"/>
+        <column name="code"/>
+        <column name="remark"/>
+        <column name="performedby"/>
+        <column name="followup_required"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+</customView>

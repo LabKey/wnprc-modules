@@ -36,30 +36,56 @@ Validator.new = function(EHR, row, scriptErrors, helper) {
                 value = row[fieldName];
             }
 
-            logger.debug("Checking to see if " + value + " is a user...");
-
             LABKEY.Query.selectRows({
-                schemaName: 'core',
-                queryName:  'users',
-                filterArray:[
-                    LABKEY.Filter.create(isDisplayName ? 'DisplayName' : 'UserId', value, LABKEY.Filter.Types.EQUAL)
+                schemaName: 'study',
+                queryName: 'necropsy',
+                filterArray: [
+                    LABKEY.Filter.create('objectid', row.objectid, LABKEY.Filter.Types.EQUAL)
                 ],
-                success: function(data) {
-                    if (data.rows && data.rows.length > 0) {
-                        retVal = true;
-                    }
-                    else {
-                        var message =  "\"" + value + "\" is not a user in EHR.";
-
-                        if (!Ext.isDefined(severity)) {
-                            severity = Validator.Severity.ERROR;
+                success: function(results) {
+                    let matches = false;
+                    let users = results.rows && results.rows.length > 0 && results.rows[0][fieldName] ? results.rows[0][fieldName].split(',') : ''.split(',');
+                    for (let i = 0; i < users.length; i++) {
+                        if (users[i] === value) {
+                            matches = true;
+                            break;
                         }
-                        addToScriptErrors(fieldName, message, severity);
+                    }
+
+                    // if there is no existing necropsy record for this objectid (this is an insert),
+                    // or if there is an existing record (it's an update) and the user doesn't match
+                    // a user from the original record then check to make sure that the user is
+                    // actually a current user in the system
+                    if (!results.rows || results.rows.length === 0 || (results.rows && results.rows.length > 0 && !matches)) {
+                        logger.debug("Checking to see if " + value + " is a user...");
+
+                        LABKEY.Query.selectRows({
+                            schemaName: 'core',
+                            queryName:  'users',
+                            filterArray:[
+                                LABKEY.Filter.create(isDisplayName ? 'DisplayName' : 'UserId', value, LABKEY.Filter.Types.EQUAL)
+                            ],
+                            success: function(data) {
+                                if (data.rows && data.rows.length > 0) {
+                                    retVal = true;
+                                }
+                                else {
+                                    var message =  "\"" + value + "\" is not a user in EHR.";
+
+                                    if (!Ext.isDefined(severity)) {
+                                        severity = Validator.Severity.ERROR;
+                                    }
+                                    addToScriptErrors(fieldName, message, severity);
+                                }
+                            }
+                        });
+                        logger.debug(value + " is a " + (!retVal ? "not " : "") + "user...");
+                    } else {
+                        retVal = true;
+                        logger.debug('User \'' + value + '\' was already present in initial record for field \'' + fieldName + '\'');
                     }
                 }
             });
-
-            logger.debug(value + " is a " + (!retVal ? "not " : "") + "user...");
 
             return retVal;
         },
@@ -72,22 +98,40 @@ Validator.new = function(EHR, row, scriptErrors, helper) {
             }
 
             LABKEY.Query.selectRows({
-                schemaName: 'ehr_lookups',
-                queryName:  'pathologists',
-                filterArray:[
-                    LABKEY.Filter.create(isDisplayName ? 'UserId' : 'internalUserId', value, LABKEY.Filter.Types.EQUAL)
+                schemaName: 'study',
+                queryName: 'necropsy',
+                filterArray: [
+                    LABKEY.Filter.create('objectid', row.objectid, LABKEY.Filter.Types.EQUAL)
                 ],
-                success: function(data) {
-                    if (data.rows && data.rows.length > 0) {
-                        retVal = true;
-                    }
-                    else {
-                        var message =  "\"" + value + "\" is not a Pathologist in EHR.";
+                success: function(results) {
+                    // if there is no existing necropsy record for this objectid (this is an insert),
+                    // or if there is an existing record (it's an update) and the pathologist doesn't
+                    // match the pathologist from the original record then check to make sure that the
+                    // pathologist is actually a current pathologist in the system
+                    if (!results.rows || results.rows.length === 0 || (results.rows && results.rows.length > 0 && row.performedby !== results.rows[0].performedby)) {
+                        LABKEY.Query.selectRows({
+                            schemaName: 'ehr_lookups',
+                            queryName:  'pathologists',
+                            filterArray:[
+                                LABKEY.Filter.create(isDisplayName ? 'UserId' : 'internalUserId', value, LABKEY.Filter.Types.EQUAL)
+                            ],
+                            success: function(data) {
+                                if (data.rows && data.rows.length > 0) {
+                                    retVal = true;
+                                }
+                                else {
+                                    var message =  "\"" + value + "\" is not a Pathologist in EHR.";
 
-                        if (!Ext.isDefined(severity)) {
-                            severity = Validator.Severity.ERROR;
-                        }
-                        addToScriptErrors(fieldName, message, severity);
+                                    if (!Ext.isDefined(severity)) {
+                                        severity = Validator.Severity.ERROR;
+                                    }
+                                    addToScriptErrors(fieldName, message, severity);
+                                }
+                            }
+                        });
+                    } else {
+                        retVal = true;
+                        logger.debug('Value of performedby field (' + row.performedby + ') was not modified during record update');
                     }
                 }
             });

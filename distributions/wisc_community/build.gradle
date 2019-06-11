@@ -13,6 +13,7 @@ BuildUtils.addModuleDistributionDependencies(project, [
         ,":externalModules:labModules:LDK"
         ,":externalModules:labModules:SequenceAnalysis"
         ,":externalModules:labModules:Viral_Load_Assay"
+        ,":externalModules:DISCVR:OpenLdapSync"
         ,":server:customModules:ehr"
         ,":server:customModules:EHR_ComplianceDB"
         ,":server:customModules:fcsexpress"

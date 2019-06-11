@@ -18,7 +18,7 @@ foldermap=("server/customModules/WNPRC_EHR:WNPRC_EHR"
            "externalModules/wnprcModules/webutils:WebUtils")
 
 # pull specifically from our 15.2 branch in LabKey's SVN
-repo="https://hedgehog.fhcrc.org/tor/stedi/branches/modules15.2/"
+repo="https://svn.mgt.labkey.host/stedi/branches/modules15.2/"
 
 # set the start/end revisions based on the command line arguments or use the .latest file and HEAD revision
 srcrev=${1:-$(<.latest)}

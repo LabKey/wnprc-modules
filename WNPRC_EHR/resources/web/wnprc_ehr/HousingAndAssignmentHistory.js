@@ -607,7 +607,7 @@
                         demographics: {
                             schemaName: 'study',
                             queryName: 'demographics',
-                            columns: '*',
+                            columns: 'birth,death,departdate',
                             filterArray: [
                                 LABKEY.Filter.create('id', animalid, LABKEY.Filter.Types.EQUAL)
                             ]
@@ -732,10 +732,10 @@
                                 var dob = new Date(animalInfo.birth());
                                 var curAge = Utils.yearsOfDifference(new Date(), dob);
                                 var endOfXScaleDomain = curAge;
-                                if (animalInfo.death() !== "") {
+                                if (animalInfo.death()) {
                                     endOfXScaleDomain = Utils.yearsOfDifference(animalInfo.death(), dob);
                                 }
-                                else if (animalInfo.departdate() !== "") {
+                                else if (animalInfo.departdate()) {
                                     endOfXScaleDomain = Utils.yearsOfDifference(animalInfo.departdate(), dob);
                                 }
 
@@ -927,10 +927,10 @@
                                 var dob = new Date(animalInfo.birth());
                                 var curAge = Utils.yearsOfDifference(new Date(), dob);
                                 var endOfXScaleDomain = curAge;
-                                if (animalInfo.death() !== "") {
+                                if (animalInfo.death()) {
                                     endOfXScaleDomain = Utils.yearsOfDifference(animalInfo.death(), dob);
                                 }
-                                else if (animalInfo.departdate() !== "") {
+                                else if (animalInfo.departdate()) {
                                     endOfXScaleDomain = Utils.yearsOfDifference(animalInfo.departdate(), dob);
                                 }
 
@@ -1127,10 +1127,10 @@
                         var curAge = Utils.yearsOfDifference(new Date(), dob);
 
                         var endOfXScaleDomain = curAge;
-                        if (animalInfo.death() !== "") {
+                        if (animalInfo.death()) {
                             endOfXScaleDomain = Utils.yearsOfDifference(animalInfo.death(), dob);
                         }
-                        else if (animalInfo.departdate() !== "") {
+                        else if (animalInfo.departdate()) {
                             endOfXScaleDomain = Utils.yearsOfDifference(animalInfo.departdate(), dob);
                         }
 

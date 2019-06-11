@@ -7,6 +7,9 @@ SELECT *
 FROM (
   SELECT
   Id as id,
+  id.demographics.medical as medical,
+  id.demographics.v_status as viralStatus,
+  Id.mostRecentWeight.mostRecentWeight as weight,
   id.curLocation.area as area,
   id.curLocation.room as room,
   id.curLocation.cage as cage,

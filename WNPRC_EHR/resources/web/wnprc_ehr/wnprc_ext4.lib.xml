@@ -5,6 +5,8 @@
         <script path="/wnprc_ehr/ext4/components/Procedure.js"/>
         <script path="/wnprc_ehr/ext4/components/fields/SurgeryProcedureRoomField.js"/>
         <script path="/wnprc_ehr/ext4/components/fields/SurgeryProcedureNameField.js"/>
+        <script path="/wnprc_ehr/ext4/components/PregnancyDueDateCalculation.js"/>
+        <script path="/wnprc_ehr/ext4/components/GestationCalculation.js"/>
         <script path="/wnprc_ehr/ext4/components/ProjectField.js"/>
         <script path="/wnprc_ehr/ext4/data/RequestStoreCollection.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/MasterSectionClientStore.js"/>
@@ -15,6 +17,7 @@
         <script path="/wnprc_ehr/ext4/panel/AnimalDetailsPanel.js"/>
         <script path="/wnprc_ehr/ext4/panel/TaskDataEntryPanel.js"/>
         <script path="/wnprc_ehr/ext4/utils/DataEntryButtons.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/protocolStaffField.js"/>
     </library>
     <dependencies>
         <dependency path="/wnprc_ehr/wnprc_ext4_core"/>

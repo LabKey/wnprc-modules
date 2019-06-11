@@ -92,6 +92,12 @@
                     <column columnName="remark">
 
                     </column>
+                    <column columnName="collect_before_death">
+                        <columnTitle>Collect Before Death</columnTitle>
+                    </column>
+                    <column columnName="colLection_order">
+                        <columnTitle>Collection Order</columnTitle>
+                    </column>
                 </columns>
             </table>
         </tables>

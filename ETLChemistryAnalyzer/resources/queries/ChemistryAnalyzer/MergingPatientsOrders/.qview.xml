@@ -1,0 +1,18 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="testid"/>
+        <column name="result"/>
+        <column name="units"/>
+
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+        <sort column="Id" descending="false"/>
+        <sort column="testid" descending="false"/>
+    </sorts>
+    <!--<filters>-->
+    <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

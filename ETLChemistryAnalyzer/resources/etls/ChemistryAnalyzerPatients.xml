@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>patients</name>
+    <description>Chemistry Analyzer Patients</description>
+    <transforms>
+        <transform id="step1">
+            <description>Copy to target</description>
+            <source schemaName="ChemistryAnalyzer" queryName="MergingPatientsOrders" />
+            <destination schemaName="study" queryName="chemistryResults" targetOption="merge">
+                <constants>
+                    <column name="Status" type="INTEGER" value="4"/>
+                </constants>
+            </destination>
+        </transform>
+    </transforms>
+    <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="date" />
+    <schedule>
+        <poll interval="60m" />
+    </schedule>
+</etl>
+

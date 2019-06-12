@@ -64,6 +64,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeBreedingEncountersTable((AbstractTableInfo) table);
             } else if (table.getName().equalsIgnoreCase("pregnancies") && table.getSchema().getName().equalsIgnoreCase("study")) {
                 customizePregnanciesTable((AbstractTableInfo) table);
+            } else if (table.getName().equalsIgnoreCase("housing") && table.getSchema().getName().equalsIgnoreCase("study")) {
+                customizeHousingTable((AbstractTableInfo) table);
             }
         }
     }
@@ -275,6 +277,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         customizeSireIdColumn(ti);
     }
 
+    private void customizeHousingTable(AbstractTableInfo ti) {
+        customizeReasonForMoveColumn(ti);
+    }
+
     private void customizeSireIdColumn(AbstractTableInfo ti) {
         ColumnInfo sireid = ti.getColumn("sireid");
         if (sireid != null)
@@ -284,22 +290,83 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 sireid.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
+                    @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
                         ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
-                        String[] ids = ((String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"))).split(",");
-                        String urlString = "";
-                        for (int i = 0; i < ids.length; i++) {
-                            String id = ids[i];
-                            url.replaceParameter("participantId", id);
-                            urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
-                            urlString += PageFlowUtil.filter(id);
-                            urlString += "</a>";
-                            if (i + 1 < ids.length) {
-                                urlString += ", ";
+                        String joinedIds = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
+                        if (joinedIds != null)
+                        {
+                            String[] ids = joinedIds.split(",");
+                            String urlString = "";
+                            for (int i = 0; i < ids.length; i++)
+                            {
+                                String id = ids[i];
+                                url.replaceParameter("participantId", id);
+                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                                urlString += PageFlowUtil.filter(id);
+                                urlString += "</a>";
+                                if (i + 1 < ids.length)
+                                {
+                                    urlString += ", ";
+                                }
                             }
+                            out.write(urlString);
                         }
-                        out.write(urlString);
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
+                    }
+                });
+            }
+        }
+    }
+
+    private void customizeReasonForMoveColumn(AbstractTableInfo ti) {
+        ColumnInfo reason = ti.getColumn("reason");
+        if (reason != null)
+        {
+            UserSchema us = getUserSchema(ti, "study");
+            if (us != null)
+            {
+                reason.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
+
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        ActionURL url = new ActionURL("query", "recordDetails.view", us.getContainer());
+                        String joinedReasons = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
+                        if (joinedReasons != null)
+                        {
+                            String[] reasons = joinedReasons.split(",");
+                            url.addParameter("schemaName", "ehr_lookups");
+                            url.addParameter("query.queryName", "housing_reason");
+                            url.addParameter("keyField", "value");
+
+                            String urlString = "";
+                            for (int i = 0; i < reasons.length; i++)
+                            {
+                                String reasonForMove = reasons[i];
+                                url.replaceParameter("key", reasonForMove);
+                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                                urlString += PageFlowUtil.filter(reasonForMove);
+                                urlString += "</a>";
+                                if (i + 1 < reasons.length)
+                                {
+                                    urlString += ", ";
+                                }
+                            }
+                            out.write(urlString);
+                        }
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
                     }
                 });
             }

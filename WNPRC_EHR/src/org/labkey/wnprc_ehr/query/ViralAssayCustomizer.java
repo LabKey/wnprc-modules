@@ -93,7 +93,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
         if (subject != null) {
             subject.setLabel("Subject Id");
             subject.setConceptURI("http://cpas.labkey.com/Study#ParticipantId");
-            LDKService.get().applyNaturalSort(ti, "subjectId");
+            // LDKService.get().applyNaturalSort(ti, "subjectId");
         }
 
         ColumnInfo result = ti.getColumn("result");
@@ -163,6 +163,17 @@ public class ViralAssayCustomizer implements TableCustomizer {
             }
         }
 
+        ColumnInfo pooledColumn = ti.getColumn("pooled");
+
+        if (pooledColumn != null) {
+            pooledColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo) {
+                    return new ViralLoadPooledColumn(colInfo);
+                }
+            });
+        }
+
         customizeButtonBar(ti, AssayProtocolSchema.DATA_TABLE_NAME);
     }
 
@@ -201,7 +212,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
         @Override
         public Object getValue(RenderContext ctx) {
             Object value = super.getValue(ctx);
-            if (value != null && value instanceof Boolean) {
+            if (value instanceof Boolean) {
                 boolean liquid = (boolean) value;
                 if (liquid) {
                     return "mL";
@@ -211,6 +222,35 @@ public class ViralAssayCustomizer implements TableCustomizer {
                 }
             }
             return "";
+        }
+
+        @Override
+        public Object getDisplayValue(RenderContext ctx) {
+            return getValue(ctx);
+        }
+
+        @Override
+        public String getFormattedValue(RenderContext ctx) {
+            return h(getValue(ctx));
+        }
+    }
+
+    public static class ViralLoadPooledColumn extends DataColumn {
+        public ViralLoadPooledColumn(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            String isPooled = "false";
+            Object value = super.getValue(ctx);
+            if (value instanceof Boolean) {
+                boolean pooled = (boolean) value;
+                if (pooled) {
+                    isPooled = "true";
+                }
+            }
+            return isPooled;
         }
 
         @Override

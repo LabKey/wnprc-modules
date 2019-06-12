@@ -13,6 +13,22 @@ function onInit(event, helper) {
 function onUpsert(helper, scriptErrors, row, oldRow){
     let breedingDataSaved = helper.getProperty('breedingEncountersSaved');
 
+    if (row.reason) {
+        let reasons = row.reason.split(',');
+        let breeding = false;
+        let breedingEnded = false;
+        for (let i = 0; i < reasons.length; i++) {
+            if (reasons[i] === 'Breeding') {
+                breeding = true;
+            } else if (reasons[i] === 'Breeding ended') {
+                breedingEnded = true;
+            }
+        }
+        if (breeding && breedingEnded) {
+            EHR.Server.Utils.addError(scriptErrors, 'reason', 'Reason For Move cannot contain both \'Breeding\' and \'Breeding ended\'.', 'ERROR');
+        }
+    }
+
     if (helper.isValidateOnly() || (!helper.isValidateOnly() && !breedingDataSaved)) {
         let housingRows = helper.getProperty('housingInTransaction');
         let housingArray = [];

@@ -2,6 +2,7 @@ package org.labkey.wnprc_compliance;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.NumberToTextConverter;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
@@ -114,7 +115,16 @@ public class AccessReportRowParser {
                     values.put(columnName, value);
                 }
                 else {
-                    values.put(columnName, cell.getStringCellValue());
+                    //For whatever reason apache ROI library thinks some of these cells are numeric,
+                    //Even though excel says they are text
+                    String value;
+                    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                        value = NumberToTextConverter.toText(cell.getNumericCellValue());
+                    }
+                    else {
+                        value = cell.getStringCellValue();
+                    }
+                    values.put(columnName, value);
                 }
             }
         }

@@ -287,6 +287,12 @@ EHR.Metadata.registerMetadata('Default', {
             reason: {
                 xtype: 'lovcombo',
                 hasOwnTpl: true,
+                lookup: {
+                    schemaName: 'ehr_lookups',
+                    queryName: 'housing_reason',
+                    displayColumn: 'title',
+                    keyColumn: 'value'
+                },
                 includeNullRecord: true,
                 editorConfig: {
                     tpl: null,

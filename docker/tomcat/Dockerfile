@@ -2,8 +2,6 @@ FROM store/oracle/serverjre:8
 
 ENV LANG en_US.utf8
 
-ENV R_VERSION R-3.3.0
-
 # copy in some additional yum repositories
 COPY public-yum-ol7.repo /etc/yum.repos.d
 RUN yum -y -q install \
@@ -16,7 +14,7 @@ RUN yum -y -q install \
     # for creating the netrc file from the template (envsubst)
     gettext \
     # for installing R and the various additional packages
-    ${R_VERSION} \
+    R-3.2.0 \
     make \
     libcurl-devel \
     libxml2-devel \
@@ -44,7 +42,7 @@ COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xm
 
 # install the necessary R scripts
 COPY install.r /tmp/install.r
-RUN mkdir -p /usr/share/doc/${R_VERSION}/html && Rscript /tmp/install.r
+RUN mkdir -p /usr/share/doc/R-3.2.0/html && Rscript /tmp/install.r
 
 # copy over the .netrc template file
 COPY netrc /root/netrc.template

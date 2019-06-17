@@ -20,8 +20,12 @@ ENV LABKEY_DISTRIBUTION=${LABKEY_DISTRIBUTION:-wisc}
 ENV LABKEY_FILE_NAME=${LABKEY_IS_COMMUNITY:+UWisc-Community-bin.tar.gz}
 ENV LABKEY_FILE_NAME=${LABKEY_FILE_NAME:-UWisc-bin.tar.gz}
 
-ENV LABKEY_SNAPSHOT=${LABKEY_IS_COMMUNITY:+-}
-ENV LABKEY_SNAPSHOT=${LABKEY_SNAPSHOT:--SNAPSHOT-}
+# The '-SNAPSHOT-' naming scheme is no longer used as far as I can tell
+#ENV LABKEY_SNAPSHOT=${LABKEY_IS_COMMUNITY:+-}
+#ENV LABKEY_SNAPSHOT=${LABKEY_SNAPSHOT:--SNAPSHOT-}
+
+ENV LABKEY_TEAMCITY_CONFIG=${LABKEY_IS_COMMUNITY:+LabKey_172wnprc_Community_Installers}
+ENV LABKEY_TEAMCITY_CONFIG=${LABKEY_TEAMCITY_CONFIG:-LabKey_172wnprc_Premium_Installers}
 
 WORKDIR /tmp/labkey
 
@@ -34,7 +38,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
  && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
- && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LABKEY_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" \
+ && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LABKEY_VERSION}-${Y}-${LABKEY_FILE_NAME}" \
  && echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
  && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" ${Z} \
   | tar -xz --strip-components=1

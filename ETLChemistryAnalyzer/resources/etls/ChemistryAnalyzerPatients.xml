@@ -9,6 +9,7 @@
             <destination schemaName="study" queryName="chemistryResults" targetOption="merge">
                 <constants>
                     <column name="Status" type="INTEGER" value="4"/>
+                    <column name="Method" type="VARCHAR" value="Alfa Wassermann Vet Axcel"/>
                 </constants>
             </destination>
         </transform>

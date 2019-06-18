@@ -2,9 +2,13 @@
     <columns>
         <column name="Id"/>
         <column name="date"/>
+        <column name="Sample_ID"/>
         <column name="testid"/>
+        <column name="resultOORIndicator"/>
         <column name="result"/>
         <column name="units"/>
+        <column name="Requested_Ordered_Date_and_Time"/>
+        <column name="OrderComment"/>
 
     </columns>
     <sorts>

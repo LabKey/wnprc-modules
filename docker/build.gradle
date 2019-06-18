@@ -23,7 +23,7 @@ task("buildLabkey", group: "Docker", description: "Generates the LabKey docker i
             t.project.exec {
                 workingDir "$projectDir/labkey"
                 executable "docker"
-                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", "--build-arg", "LABKEY_IS_COMMUNITY=true", ".", "-t", "wnprcehr/labkey:17.2", "--no-cache"
+                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2", "--no-cache"
             }
         } else {
             logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'

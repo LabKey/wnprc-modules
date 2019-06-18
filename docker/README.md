@@ -29,7 +29,7 @@ docker build --no-cache -t wnprcehr/labkey:vX.X.X labkey
 
 #### Special Instructions for the LabKey Image
 
-The following build arguments are available for use. The ones that have default values are shown with their defaults.
+The following build arguments are available for use. The ones that have default values are shown with their defaults. These arguments can be passed by using the --build-arg flag as shown later in this section.
 
 ```
 LABKEY_TEAMCITY_USERNAME
@@ -38,9 +38,6 @@ LABKEY_VERSION=17.2
 LABKEY_IS_PREMIUM=false
 WNPRC_BRANCH=master
 ```
-
-These arguments can be passed by using the --build-arg flag as shown later in this section.
-
 
 The LabKey Docker image requires some extra information in order to download the latest build of LabKey from LabKey's TeamCity server--specifically *your* TeamCity credentials.
 

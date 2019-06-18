@@ -10,8 +10,8 @@ ARG WNPRC_BRANCH=master
 
 ARG LABKEY_VERSION=17.2
 
-# User should set LABKEY_IS_COMMUNITY=true if community version, otherwise don't set any value at all
-ARG LABKEY_IS_COMMUNITY
+# User should set LABKEY_IS_PREMIUM=true if community version, otherwise don't set any value at all
+ARG LABKEY_IS_PREMIUM=false
 
 WORKDIR /tmp/labkey
 
@@ -23,14 +23,14 @@ RUN apk update \
 RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
  && if [ "$LABKEY_VERSION" = 17.2 ] ; then \
         LABKEY_SNAPSHOT="-" ; \
-        if [ "$LABKEY_IS_COMMUNITY" = true ] ; then \
-            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Community_Installers" ; \
-            LABKEY_DISTRIBUTION="wisc_community" ; \
-            LABKEY_FILE_NAME="UWisc-Community-bin.tar.gz" ; \
-        else \
+        if [ "$LABKEY_IS_PREMIUM" = true ] ; then \
             LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Premium_Installers" ; \
             LABKEY_DISTRIBUTION="wisc" ; \
             LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
+        else \
+            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Community_Installers" ; \
+            LABKEY_DISTRIBUTION="wisc_community" ; \
+            LABKEY_FILE_NAME="UWisc-Community-bin.tar.gz" ; \
         fi \
     elif [ "$LABKEY_VERSION" = 18.3 ] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_183wnprc_2_Premium_Installers" ; \

@@ -8,7 +8,6 @@ ARG LABKEY_TEAMCITY_USERNAME
 
 ARG WNPRC_BRANCH=master
 
-#ARG LABKEY_TEAMCITY_CONFIG=LabKey_172wnprc_Community_Installers
 ARG LABKEY_VERSION=17.2
 
 # User should set LABKEY_IS_COMMUNITY=true if community version, otherwise don't set any value at all

@@ -26,7 +26,8 @@ If  changes are only committed to TeamCity or a new based LabKey build needs to 
 ```
 docker build --no-cache -t wnprcehr/labkey:vX.X.X labkey
 ```
-## Available Build-Args
+
+#### Special Instructions for the LabKey Image
 
 The following build arguments are available for use. The ones that have default values are shown with their defaults.
 
@@ -38,9 +39,8 @@ LABKEY_IS_PREMIUM=false
 WNPRC_BRANCH=master
 ```
 
-These arguments can be passed by using the --build-arg flag as shown in the next section.
+These arguments can be passed by using the --build-arg flag as shown later in this section.
 
-#### Special Instructions for the LabKey Image
 
 The LabKey Docker image requires some extra information in order to download the latest build of LabKey from LabKey's TeamCity server--specifically *your* TeamCity credentials.
 
@@ -49,6 +49,7 @@ To provide those credentials to Gradle for the Gradle builds (the most convenien
 labkeyTeamcityUsername=<your username>
 labkeyTeamcityPassword=<your password>
 ```
+
 To build using Docker directly, you will need to pass those same credentials as run-time build arguments on the command line:
 ```
 docker build \

@@ -72,12 +72,8 @@ public class WNPRC_Schema extends SimpleUserSchema {
     }
 
     public WNPRC_Schema(User user, Container container) {
-        super(NAME, DESCRIPTION, user, container, getWnprcDbSchema());
+        super(NAME, DESCRIPTION, user, container, DbSchema.get(NAME));
         _container = container;
-    }
-
-    public static DbSchema getWnprcDbSchema() {
-        return DbSchema.get(NAME, DbSchemaType.Module);
     }
 
     @Override

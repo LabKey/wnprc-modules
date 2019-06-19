@@ -66,7 +66,7 @@
 
             <!-- ko foreach2: {data: $parent.table.rows } -->
             <!-- ko if: !isHidden() -->
-            <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err, 'info': info, 'success': success }">
+            <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err }">
                 <!-- ko if: $component.rowsAreSelectable -->
                 <td onclick="event.stopPropagation();"> <%-- prevent click from propagating to the row. --%>
                     <input type="checkbox" data-bind="checked: isSelected" >

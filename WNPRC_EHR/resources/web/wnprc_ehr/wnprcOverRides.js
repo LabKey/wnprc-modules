@@ -189,8 +189,10 @@ EHR.Metadata.registerMetadata('Default', {
                                     let theForm = this.ownerCt.getForm();
                                     let roomField = theForm.findField('room');
                                     if (!roomField.value) {
-                                        if (this.ownerCt.ownerCt.ownerCt.items.items[2].store.data.items[0]) {
-                                            let location = this.ownerCt.ownerCt.ownerCt.items.items[2].store.data.items[0].data['id/curlocation/location'];
+                                        let irregularObsStore = Ext.StoreMgr.get('study||Irregular Observations||||');
+                                        let firstRecord = irregularObsStore.getAt(0);
+                                        if (firstRecord) {
+                                            let location = firstRecord.data['id/curlocation/location'];
                                             if (location) {
                                                 let roomValue = location.substr(0, location.indexOf('-') === -1 ? location.length : location.indexOf('-'));
                                                 roomField.setValue(roomValue);

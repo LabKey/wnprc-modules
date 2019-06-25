@@ -17,10 +17,14 @@ package org.labkey.wnprc_ehr.table;
 
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
@@ -31,6 +35,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
+import org.labkey.dbutils.api.SimplerFilter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -349,10 +354,16 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             String urlString = "";
                             for (int i = 0; i < reasons.length; i++)
                             {
-                                String reasonForMove = reasons[i];
-                                url.replaceParameter("key", reasonForMove);
+                                String reasonForMoveValue = reasons[i];
+                                SimplerFilter filter = new SimplerFilter("set_name", CompareType.EQUAL, "housing_reason").addCondition("value", CompareType.EQUAL, reasonForMoveValue);
+                                DbSchema schema = DbSchema.get("ehr_lookups", DbSchemaType.Module);
+                                TableInfo ti = schema.getTable("lookups");
+                                TableSelector ts = new TableSelector(ti, filter, null);
+                                String reasonForMoveTitle = (String) ts.getMap().get("title");
+
+                                url.replaceParameter("key", reasonForMoveValue);
                                 urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
-                                urlString += PageFlowUtil.filter(reasonForMove);
+                                urlString += PageFlowUtil.filter(reasonForMoveTitle);
                                 urlString += "</a>";
                                 if (i + 1 < reasons.length)
                                 {

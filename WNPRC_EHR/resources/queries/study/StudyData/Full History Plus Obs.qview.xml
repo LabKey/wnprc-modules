@@ -17,7 +17,7 @@
        <sort column="date" descending="true"/>
    </sorts>
    <filters>
-       <filter column="dataset/name" operator="in" value="assignments;behavetrem;biopsy;blood;clinremarks;deaths;drug;encounters;housing;necropsy;problem;weight;tb;clinpathRuns;obs;Cage Observations;foodDeprives"/>
+       <filter column="dataset/name" operator="in" value="assignments;behavetrem;biopsy;blood;clinremarks;deaths;drug;encounters;housing;necropsy;problem;weight;tb;clinpathRuns;obs;Cage Observations;foodDeprives;ultrasounds;pregnancy_outcomes;breeding_encounters"/>
        <!--<filter column="description"  operator="neq" value="No Irregular Observations"/>-->
        <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
    </filters>

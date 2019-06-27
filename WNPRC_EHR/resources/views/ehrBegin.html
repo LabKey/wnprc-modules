@@ -88,6 +88,7 @@ function createNavMenu()
                 {name: 'MHC Genotype Summary', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=alleleFrequencies'},
                 {name: 'Population Summary', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/populationOverview.view?'},
                 {name: 'Colony Census', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/colonyCensus.view?'},
+                {name: 'Pregnancies', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/breeding.view?'},
                 {name: 'Room Utilization', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=roomUtilization'},
                 {name: 'Time Chart', url: '<%=contextPath%>/visualization' + ctx['EHRStudyContainer'] + '/timeChartWizard.view?edit=true'},
                 {name: 'Viral Challenges', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=ViralChallenges'},
@@ -136,7 +137,8 @@ function createNavMenu()
                 {name: 'Views Requests', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/requestServices.view'},
                 {name: 'Request Blood Draws', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Blood%20Draw%20Request'},
                 {name: 'Request Clinpath Services', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/manageRequest.view?formtype=Clinpath%20Request'},
-                {name: 'Request Project', url: 'https://saimiri.primate.wisc.edu/colony-old/project-form.html'}
+                {name: 'Request Project', url: 'https://saimiri.primate.wisc.edu/colony-old/project-form.html'},
+                {name: 'Request Animals', url: '<%=contextPath%>/animalrequests' + ctx['EHRStudyContainer'] + '/app.view'}
             ]}
         ]
     };

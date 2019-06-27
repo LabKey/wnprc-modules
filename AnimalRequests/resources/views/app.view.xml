@@ -1,0 +1,9 @@
+<view xmlns="http://labkey.org/data/xml/view" frame="none" title="Animal Request">
+    <permissions>
+        <permission name="login"/>
+    </permissions>
+    <dependencies>
+        <dependency path="animalrequests/app/app.js"/>
+        <dependency path="animalrequests/app/app.css"/>
+    </dependencies>
+</view>

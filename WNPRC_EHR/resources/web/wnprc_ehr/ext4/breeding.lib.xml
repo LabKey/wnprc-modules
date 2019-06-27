@@ -1,0 +1,21 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="/wnprc_ehr/model/sources/Breeding.js"/>
+        <script path="/wnprc_ehr/ext4/data/BreedingStoreCollection.js"/>
+        <script path="/wnprc_ehr/ext4/components/buttons/AppendRecordButton.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/PregnancyField.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/PregnancyIdField.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/BreedingEncounterIdField.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/CalculatedPregnancyDueDateField.js"/>
+        <script path="/wnprc_ehr/ext4/components/fields/CalculatedGestationDayField.js"/>
+        <script path="/wnprc_ehr/ext4/components/plugins/ButtonHotKeyPlugin.js"/>
+        <script path="/wnprc_ehr/ext4/panel/AppendRecordGridPanel.js"/>
+        <script path="/wnprc_ehr/ext4/panel/PregnancyGridPanel.js"/>
+        <script path="/wnprc_ehr/ext4/panel/UltrasoundGridPanel.js"/>
+        <script path="/wnprc_ehr/ext4/panel/PregnancyLinkedGridPanel.js"/>
+    </library>
+    <dependencies>
+        <dependency path="/wnprc_ehr/wnprc_ext4.lib.xml"/>
+        <dependency path="/wnprc_ehr/dataentry.lib.xml"/>
+    </dependencies>
+</libraries>

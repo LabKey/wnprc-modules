@@ -72,7 +72,7 @@ public class DatasetImportHelperIntegrationTest extends Assert
 
         // ASSERT: make sure that the datasets we are expecting got created
         List<? extends Dataset> datasets = study.getDatasets();
-        Assert.assertArrayEquals(new String[]{"breeding_encounters", "breeding_remarks", "pregnancy_outcomes", "ultrasounds"},
+        Assert.assertArrayEquals(new String[]{"breeding_encounters", "pregnancies", "pregnancy_outcomes", "ultrasounds"},
                 datasets.stream().map(Dataset::getName).sorted().toArray());
     }
 }

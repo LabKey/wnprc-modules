@@ -1,0 +1,110 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="animal_requests" tableDbType="TABLE">
+                <tableTitle>Animal Requests</tableTitle>
+                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
+                <columns>
+                    <column columnName="date" >
+                        <columnTitle>Date Requested</columnTitle>
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                    </column>
+                    <column columnName="createdBy">
+                        <columnTitle>Create By</columnTitle>
+                    </column>
+                    <column columnName="principalinvestigator">
+                    <columnTitle>Principal Investigator</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>uniqueProtocolInvestigator</fkTable>
+                            <fkColumnName>inves</fkColumnName>
+                            <fkDisplayColumnName>inves</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="protocol"></column>
+                    <column columnName="originneeded">
+                        <columnTitle>Origin</columnTitle>
+                        <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>geographic_origins</fkTable>
+                            <fkColumnName>meaning</fkColumnName>
+                            <fkDisplayColumnName>Origin</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="speciesneeded">
+                        <columnTitle>Species</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>animal_requests_species</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>Species</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="numberofanimals">
+                        <columnTitle># of Animals</columnTitle>
+                    </column>
+                    <column columnName="dateneeded">
+                        <columnTitle>Date Needed</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="QCState">
+                        <columnTitle>Status</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>qcstate</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="infectiousdisease">
+                        <columnTitle>Infectious Disease</columnTitle>
+                    </column>
+                    <column columnName="viralstatus">
+                        <columnTitle>Viral Status</columnTitle>
+                    </column>
+                    <column columnName="dateapprovedordenied">
+                        <columnTitle>Date Approved / Denied</columnTitle>
+                    </column>
+                    <column columnName="dateordered">
+                        <columnTitle>Date Ordered</columnTitle>
+                    </column>
+                    <column columnName="datearrival">
+                        <columnTitle>Date Arrival</columnTitle>
+                    </column>
+                    <column columnName="animalsorigin">
+                        <columnTitle>Animal Origin</columnTitle>
+                    </column>
+
+                </columns>
+                <buttonBarOptions position="both" includeStandardButtons="false">
+                    <includeScript>ehr.context</includeScript>
+                    <includeScript>ehr/studyButtons.js</includeScript>
+                    <onRender>EHR.DatasetButtons.moreActionsHandler</onRender>
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
+                    </item>
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                    <item text="Page Size">
+                        <originalText>Paging</originalText>
+                    </item>
+                    <item text="More Actions" insertPosition="end" requiresSelection="true">
+                        <item text="Jump To History">
+                            <onClick>
+                                EHR.DatasetButtons.historyHandler(dataRegion, dataRegionName, 'Assignment');
+                            </onClick>
+                        </item>
+                        <item text="Return Distinct Values">
+                            <onClick>
+                                EHR.window.GetDistinctWindow.getDistinctHandler(dataRegionName, 'Assignment');
+                            </onClick>
+                        </item>
+                    </item>
+                </buttonBarOptions>
+            </table>
+        </tables>
+    </metadata>
+</query>
+

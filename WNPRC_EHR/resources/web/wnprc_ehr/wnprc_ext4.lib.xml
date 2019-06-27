@@ -2,6 +2,8 @@
     <library>
         <script path="/wnprc_ehr/ext4/components/MultiSelectField.js"/>
         <script path="/wnprc_ehr/ext4/components/Participant.js"/>
+        <script path="/wnprc_ehr/ext4/components/PregnancyDueDateCalculation.js"/>
+        <script path="/wnprc_ehr/ext4/components/GestationCalculation.js"/>
         <script path="/wnprc_ehr/ext4/components/ProjectField.js"/>
         <script path="/wnprc_ehr/ext4/data/RequestStoreCollection.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/MasterSectionClientStore.js"/>

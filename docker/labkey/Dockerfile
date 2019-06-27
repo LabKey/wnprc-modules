@@ -11,6 +11,18 @@ ARG WNPRC_BRANCH=master
 ENV LABKEY_TEAMCITY_CONFIG LabKey_183WNPRC_2_Premium_Installers
 ENV LABKEY_VERSION 18.3
 
+# User should set LABKEY_IS_COMMUNITY=true if community version, otherwise don't set any value at all
+ARG LABKEY_IS_COMMUNITY
+
+ENV LABKEY_DISTRIBUTION=${LABKEY_IS_COMMUNITY:+wisc_community}
+ENV LABKEY_DISTRIBUTION=${LABKEY_DISTRIBUTION:-wisc}
+
+ENV LABKEY_FILE_NAME=${LABKEY_IS_COMMUNITY:+UWisc-Community-bin.tar.gz}
+ENV LABKEY_FILE_NAME=${LABKEY_FILE_NAME:-UWisc-bin.tar.gz}
+
+ENV LABKEY_SNAPSHOT=${LABKEY_IS_COMMUNITY:+-}
+ENV LABKEY_SNAPSHOT=${LABKEY_SNAPSHOT:--SNAPSHOT-}
+
 WORKDIR /tmp/labkey
 
 ARG LABKEY_TEAMCITY_BUILD=
@@ -22,7 +34,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
  && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \
- && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/wisc/LabKey${LABKEY_VERSION}-SNAPSHOT-${Y}-UWisc-bin.tar.gz" \
+ && Z="https://teamcity.labkey.org/repository/download/${LABKEY_TEAMCITY_CONFIG}/${W}:id/${LABKEY_DISTRIBUTION}/LabKey${LABKEY_VERSION}${LABKEY_SNAPSHOT}${Y}-${LABKEY_FILE_NAME}" \
  && echo -e "Downloading LabKey build from \033[1;33m${Z}\033[0m" \
  && wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" ${Z} \
   | tar -xz --strip-components=1

@@ -22,38 +22,241 @@ EHR.reports.viralLoads = function(panel, tab){
                 schemaName: 'study',
                 queryName: 'ViralLoads',
                 filterArray: filterArray.removable.concat(filterArray.nonRemovable),
-                columns: 'Id,date,LogVL',
-                sort: 'Id,-date',
+                columns: 'Id,date,LogVL,Virus,SampleType,Comments',
+                sort: 'Id,-date, Virus',
                 requiredVersion: 9.1,
                 success: Ext4.Function.pass(function(subj, results){
-                    tab.add({
-                        xtype: 'ldk-graphpanel',
-                        title: 'Viral Loads: ' + subj,
-                        plotConfig: {
-                            results: results,
-                            title: 'Viral Loads: ' + subj,
-                            height: 400,
-                            width: 900,
-                            yLabel: 'Log Copies/mL',
-                            xLabel: 'Date',
-                            xField: 'date',
-                            grouping: ['Id'],
-                            layers: [{
-                                y: 'LogVL',
-                                name: 'Viral Load'
-                            }]
+                    if (!results.rowCount){
+                        tab.update('');
+                        tab.add({
+                            html: 'No animal selected to display Viral Load data'
+                        });
+                        return;
+                    }
+                    //virusType = (cloneObject(results));
+                    var virusMap = new Map();
+                    Ext4.each(results.rows, function(row){
+                        console.log(row['Virus']);
+                        var virusAndSample = row['Virus'].value +";"+ row['SampleType'].value;
+                        if (virusMap.get(virusAndSample) === undefined){
+                            virusMap.set(virusAndSample,1);
+                        }else{
+                            //var numberViralLoads = virusMap.get(row['Virus'].value);
+                            //numberViralLoads++;
+                            virusMap.set(virusAndSample, virusMap.get(virusAndSample)+1);
+
                         }
+
+
+
+                    }, this);
+
+                    var virusType;
+
+                    tab.add({
+                        xtype: 'tabpanel',
+                        style: 'margin-bottom: 20px',
+                        itemId: 'tabArea'
+
                     });
+                    var panelOrder = 0;
+                    var target = tab.down('#tabArea');
+
+                    virusMap.forEach(function (value, key) {
+                        console.log(key + ' number of VLs = '+ value );
+                        var arrayFilter = key.split(";",2);
+                        virusType = (cloneObject(results));
+
+                        if (arrayFilter[1] !== "null"){
+                            //clear array of clone
+                            console.log ('first filter '+arrayFilter[0]);
+                            virusType.rows = results.rows.filter(item => (item.Virus.value === arrayFilter[0] && item.SampleType.value === arrayFilter[1]));
+                            if (arrayFilter[1] === 'Plasma'){
+                                panelOrder = 0;
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    plotConfig: {
+                                        results: virusType,
+                                        title: 'Viral Loads: ' + subj + ' '+ key,
+                                        height: 400,
+                                        width: 900,
+                                        yLabel: 'Log Copies/mL',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'LogVL',
+                                            name: 'Viral Load'
+                                        }]
+                                    }
+                                });
+
+                            } else if (arrayFilter[1] === 'Urine'){
+                                panelOrder = 1;
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    plotConfig: {
+                                        results: virusType,
+                                        title: 'Viral Loads: ' + subj + ' '+ key,
+                                        height: 400,
+                                        width: 900,
+                                        yLabel: 'Log Copies/mL',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'LogVL',
+                                            name: 'Viral Load'
+                                        }]
+                                    }
+                                });
+
+                            }
+                            else if (arrayFilter[1] === 'Tissue'){
+                                panelOrder++;
+                                //filterArray.nonRemovable.push(LABKEY.Filter.create('SampleType', 'Tissue', LABKEY.Filter.Types.EQUAL));
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-querypanel',
+                                    style: 'margin-bottom:20px;',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    queryConfig: panel.getQWPConfig({
+                                        title: 'Viral Load: ' + subj + ' '+key,
+                                        schemaName: 'study',
+                                        queryName: 'ViralLoads',
+                                        filterArray: [
+                                            LABKEY.Filter.create('Id', subject, LABKEY.Filter.Types.EQUAL),
+                                            LABKEY.Filter.create('SampleType', arrayFilter[1], LABKEY.Filter.Types.EQUAL)
+
+
+                                        ],
+                                        columns: 'Id,date,LogVL,Virus,SampleType,Comments',
+                                        frame: true
+                                    })
+                                });
+
+                            }else {
+                                panelOrder++;
+                                //filterArray.nonRemovable.push(LABKEY.Filter.create('SampleType', 'Tissue', LABKEY.Filter.Types.EQUAL));
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-querypanel',
+                                    style: 'margin-bottom:20px;',
+                                    title: 'Viral Load: ' + subj + ' '+key,
+                                    queryConfig: panel.getQWPConfig({
+                                        title: 'Viral Load: ' + subj + ' '+key,
+                                        schemaName: 'study',
+                                        queryName: 'ViralLoads',
+                                        filterArray: [
+                                            LABKEY.Filter.create('Id', subject, LABKEY.Filter.Types.EQUAL),
+                                            LABKEY.Filter.create('SampleType', arrayFilter[1] , LABKEY.Filter.Types.EQUAL)
+
+
+                                        ],
+                                        columns: 'Id,date,LogVL,Virus,SampleType,Comments',
+                                        frame: true
+                                    })
+                                });
+
+                            }
+                        } else {
+
+                            //if (item.Comment.value === 'plas'){
+                                virusType.rows = results.rows.filter(item => (item.Virus.value === arrayFilter[0] && (item.Comments.value === 'plas' || item.Comments.value === 'plasma')));
+                                panelOrder = 0;
+                                target.insert(panelOrder, {
+                                    xtype: 'ldk-graphpanel',
+                                    title: 'Viral Load: ' + subj + ' '+arrayFilter[0],
+                                    plotConfig: {
+                                        results: virusType,
+                                        title: 'Viral Loads: ' + subj + ' '+ arrayFilter[0]+ ' '+ 'plasma',
+                                        height: 400,
+                                        width: 900,
+                                        yLabel: 'Log Copies/mL',
+                                        xLabel: 'Date',
+                                        xField: 'date',
+                                        grouping: ['Id'],
+                                        layers: [{
+                                            y: 'LogVL',
+                                            name: 'Viral Load'
+                                        }]
+                                    }
+                                });
+
+
+                                virusType.rows = results.rows.filter(item => (item.Virus.value === arrayFilter[0] && item.SampleType.value === null && item.Comments.value !== 'plas' ));
+
+                                 if(virusType.rows.length>0) {
+
+                                     target.insert(panelOrder, {
+                                         xtype: 'ldk-querypanel',
+                                         style: 'margin-bottom:20px;',
+                                         title: 'Viral Load: ' + subj + ' ' + arrayFilter[0],
+                                         queryConfig: panel.getQWPConfig({
+                                             title: 'Viral Load: ' + subj + ' ' + arrayFilter[0],
+                                             schemaName: 'study',
+                                             queryName: 'ViralLoads',
+                                             filterArray: [
+                                                 LABKEY.Filter.create('Id', subject, LABKEY.Filter.Types.EQUAL),
+                                                 LABKEY.Filter.create('Virus', arrayFilter[0], LABKEY.Filter.Types.EQUAL),
+                                                 LABKEY.Filter.create('Comments', 'plas', LABKEY.Filter.Types.NOT_EQUAL_OR_MISSING),
+                                                 LABKEY.Filter.create('SampleType', null, LABKEY.Filter.Types.MISSING)
+
+                                             ],
+                                             columns: 'Id,date,LogVL,Virus,SampleType,Comments',
+                                             frame: true
+                                         })
+                                     });
+                                 }
+
+
+
+                        }
+
+                        //virusType.rows = [virusType.rows[0]];
+
+                        /*for (var i =results.rowCount-1; i>=0; i--){
+                            var virus = results.rows[i].Virus.value;
+
+                            if (virus === key){
+                                virusType.rows[i]= ;
+                            }
+
+                        }*/
+
+                        panelOrder++;
+
+
+                    })
+
+
                 }, [subject])
             });
         }
+
+        function cloneObject(obj) {
+            if (obj === null || typeof obj !== 'object') {
+                return obj;
+            }
+
+            var temp = obj.constructor(); // give temp the original obj's constructor
+            for (var key in obj) {
+                    temp[key] = cloneObject(obj[key]);
+
+            }
+
+            return temp;
+        }
+
     }
 
     var gridFilterArray = panel.getFilterArray(tab);
     var title = panel.getTitleSuffix();
+    //gridFilterArray.nonRemovable.push(LABKEY.Filter.create('Challenge', 'zika virus', LABKEY.Filter.Types.EQUAL));
+    //var challengeFilter = LABKEY.Filter.create('Challenge', 'zika virus', LABKEY.Filter.Types.EQUAL);
 
     var config = panel.getQWPConfig({
-        title: 'Viral Load' + title,
+        title: 'Viral Loads' + title,
         schemaName: 'study',
         queryName: 'ViralLoadsWpi',
         filters: gridFilterArray.nonRemovable,
@@ -62,10 +265,51 @@ EHR.reports.viralLoads = function(panel, tab){
         frame: true
     });
 
+    /*tab.add({
+        xtype: 'ldk-querypanel',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });*/
     tab.add({
         xtype: 'ldk-querypanel',
         style: 'margin-bottom:20px;',
         queryConfig: config
+    });
+};
+
+EHR.reports.breeding_encounters = function(panel, tab) {
+    var animalId = panel.activeFilterType.getTitle(tab);
+
+    LABKEY.Query.selectRows({
+        schemaName: 'study',
+        queryName: 'demographics',
+        columns: 'gender',
+        filterArray: [LABKEY.Filter.create('Id', animalId, LABKEY.Filter.Types.EQUAL)],
+        scope: this,
+        success: function(results) {
+            if (results.rows && results.rows.length) {
+                var row = results.rows[0];
+                var gender = row.gender;
+                var filterColumn = 'Id';
+                if (gender == 'm') {
+                    filterColumn = 'sireid';
+                }
+
+                var breeding_encounters = panel.getQWPConfig({
+                    title: 'Breeding Encounters',
+                    schemaName: 'study',
+                    queryName: 'breeding_encounters',
+                    filters: [LABKEY.Filter.create(filterColumn, animalId, LABKEY.Filter.Types.EQUAL)],
+                    frame: true
+                });
+
+                tab.add({
+                    xtype: 'ldk-querypanel',
+                    style: 'margin-bottom:20px;',
+                    queryConfig: breeding_encounters
+                })
+            }
+        }
     });
 };
 
@@ -845,6 +1089,9 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         var panelId = panel.getId();
         var housingHTML = "";
 
+        let filterArray = panel.getFilterArray(tab);
+        let title = panel.getTitleSuffix();
+
         // If "Entire Database" is selected, don't add the additional panel
         if (animalId == "") {
             return;
@@ -856,7 +1103,7 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         }
 
 
-        var animalList = animalId.split(",");
+        var animalList = animalId.split(/[^A-Za-z0-9]+/g);
         if (animalList.length <= 3) {
             jQuery.each(animalList, function(index, id) {
                 id = id.replace(/\s/g, '');
@@ -874,6 +1121,41 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
             housingHTML = getErrorHTML("Please select three or fewer animals to view this visualization.");
         }
 
+        LABKEY.Query.selectRows({
+            schemaName: 'study',
+            queryName: 'demographics',
+            filterArray: [LABKEY.Filter.create('Id', animalList.join(';'), LABKEY.Filter.Types.IN)],
+            columns: 'gender/origGender',
+            scope: this,
+            success: function(result){
+                if(result && result.rows.length){
+                    let showPregnancies = false;
+                    for (let i = 0; i < result.rows.length; i++) {
+                        if (result.rows[i]['gender/origGender'] === 'f') {
+                            showPregnancies = true;
+                            break;
+                        }
+                    }
+                    if (showPregnancies) {
+                        let pregnancies = panel.getQWPConfig({
+                            title: 'Pregnancies' + title,
+                            schemaName: 'study',
+                            queryName: 'PregnancyInfo',
+                            filters: [LABKEY.Filter.create('Id', animalList.join(';'), LABKEY.Filter.Types.IN)],
+                            removeableFilters: filterArray.removable,
+                            frame: true
+                        });
+
+                        tab.add({
+                            xtype: 'ldk-querypanel',
+                            style: 'margin-bottom:20px;',
+                            queryConfig: pregnancies
+                        });
+                    }
+                }
+            },
+            failure: LDK.Utils.getErrorCallback()
+        });
 
         LABKEY.Utils.requiresCSS("wnprc_ehr/HousingAndAssignmentHistory.css");
         WNPRC_EHR.Utils.Lib.loadLibrary(['/webutils/lib/webutils'], function() {

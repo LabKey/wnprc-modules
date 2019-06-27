@@ -1,0 +1,10 @@
+apply plugin: 'java'
+apply plugin: 'org.labkey.module'
+compileJava {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+
+}
+
+dependencies {
+    compile project(":externalModules:wnprc-modules:WNPRC_EHR")
+}

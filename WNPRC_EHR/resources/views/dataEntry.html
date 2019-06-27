@@ -182,9 +182,9 @@ Ext.onReady(function(){
                         queries: ['foodDeprives']
                     },
                     {
-                        url: makeExt4DataEntryURL("Breeding Encounter"),
-                        title: 'Enter Breeding/Pregnancy',
-                        queries: ['Breeding Encounters']
+                        url: makeExt4DataEntryURL("Ultrasounds"),
+                        title: 'Enter Ultrasounds',
+                        queries: ['ultrasounds']
                     }
                 ]
             },
@@ -273,6 +273,16 @@ Ext.onReady(function(){
                         qcstate: 'Completed',
                         permission: 'admin',
                         queries: ['Demographics']
+                    },
+                    {
+                        url: makeExt4DataEntryURL("Pregnancies"),
+                        title: 'Enter Pregnancies',
+                        queries: ['pregnancies']
+                    },
+                    {
+                        url: makeExt4DataEntryURL("Pregnancy Outcomes"),
+                        title: 'Enter Pregnancy Outcomes',
+                        queries: ['pregnancy_outcomes']
                     }
                 ]
             },
@@ -304,7 +314,12 @@ Ext.onReady(function(){
                         qcstate: 'Completed',
                         permission: 'admin',
                         queries: ['Housing']
-                    }
+                    },
+                    {
+                        url: makeExt4DataEntryURL("Breeding Encounters"),
+                        title: 'Enter Breeding Encounters',
+                        queries: ['breeding_encounters']
+                    },
                 ]
             },
             {
@@ -370,6 +385,11 @@ Ext.onReady(function(){
                         url:  makeExt4DataEntryURL("Food Deprive Request"),
                         title: 'Request Food Deprives',
                         queries: ['foodDeprives']
+                    },
+                    {
+                        url:     LABKEY.ActionURL.buildURL('animalrequests', 'app', ctx['EHRStudyContainer']),
+                        title:   'Request Animals',
+                        queries: ['blood']
                     }
                 ],
                 requests: true
@@ -430,6 +450,13 @@ Ext.onReady(function(){
             if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
                 VVCUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
                 VVCDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
+            }
+
+            var AnimalRequestUpdateURL = '';
+            var AnimalRequestDeleteURL = '';
+            if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
+                AnimalRequestUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=${rowid}&update=1';
+                AnimalRequestDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=animal_requests';
             }
 
             function onSuccess(dr){
@@ -659,6 +686,21 @@ Ext.onReady(function(){
                                                     viewName: 'VVC Request',
                                                     updateURL: VVCUpdateURL,
                                                     deleteURL: VVCDeleteURL,
+                                                    scope: this,
+                                                    success: onSuccess
+                                                }
+                                            },
+                                            {
+                                                title: 'Animal Requests',
+                                                ref: 'AnimalRequests',
+                                                itemId: 'AnimalRequests',
+                                                xtype: 'ehr-qwppanel',
+                                                queryConfig: {
+                                                    schemaName: 'wnprc',
+                                                    queryName: 'animal_requests',
+                                                    viewName: 'Animal Requests',
+                                                    updateURL: AnimalRequestUpdateURL,
+                                                    deleteURL: AnimalRequestDeleteURL,
                                                     scope: this,
                                                     success: onSuccess
                                                 }

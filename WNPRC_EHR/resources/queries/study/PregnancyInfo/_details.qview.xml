@@ -1,20 +1,20 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
     <columns>
         <column name="objectid"/>
-        <column name="taskid"/>
         <column name="id"/>
         <column name="sireid"/>
         <column name="date"/>
-        <column name="dateend"/>
-        <column name="reason"/>
-        <column name="ejaculation"/>
-        <column name="conceptiondate"/>
-        <column name="conceptiondate_plus_30"/>
-        <column name="conceptiondate_plus_60"/>
-        <column name="conceptiondate_plus_90"/>
-        <column name="conceptiondate_plus_120"/>
-        <column name="conceptiondate_plus_150"/>
-        <column name="conceptiondate_plus_165"/>
+        <column name="date_conception"/>
+        <column name="conception_range"/>
+        <column name="date_conception_plus_30"/>
+        <column name="date_conception_plus_60"/>
+        <column name="date_conception_plus_90"/>
+        <column name="date_conception_plus_120"/>
+        <column name="date_conception_plus_150"/>
+        <column name="date_conception_plus_165"/>
+        <column name="date_due_range"/>
+        <column name="gestation_day_range"/>
+        <column name="date_due"/>
         <column name="gestation_day"/>
         <column name="outcome"/>
         <column name="outcome_date"/>

@@ -11,8 +11,8 @@ dependencies {
     jspCompile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
     jspCompile project("${project.parent.path}:WebUtils")
     jspCompile "joda-time:joda-time:2.9.3"
-//    external 'com.google.api-client:google-api-client:1.23.0'
-//    compile 'com.google.apis:google-api-services-calendar:v3-rev378-1.23.0'
-//    external 'com.google.api-client:google-api-client-gson:1.23.0'
-//    external 'com.microsoft.ews-java-api:ews-java-api:2.0'
+    external 'com.google.api-client:google-api-client:1.23.0'
+    external 'com.google.apis:google-api-services-calendar:v3-rev296-1.23.0'
+    external 'com.google.api-client:google-api-client-gson:1.23.0'
+    external 'com.microsoft.ews-java-api:ews-java-api:2.0'
 }

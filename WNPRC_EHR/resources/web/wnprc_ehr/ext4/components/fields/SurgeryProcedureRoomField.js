@@ -65,7 +65,7 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
         this.store.load();
     },
 
-    makeSql(room_type) {
+    makeSql: function (room_type) {
         var sql = 'select room,displayname from wnprc.surgery_procedure_rooms';
         console.log('room_type: ' + room_type);
         if (room_type && room_type.length > 0) {

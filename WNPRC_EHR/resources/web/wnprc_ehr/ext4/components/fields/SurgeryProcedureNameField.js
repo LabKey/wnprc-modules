@@ -89,7 +89,7 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
         this.store.load();
     },
 
-    makeSql(procedure_type) {
+    makeSql: function (procedure_type) {
         var sql = 'select name,displayname from wnprc.surgery_procedure_name';
         console.log('procedure_type: ' + procedure_type);
         if (procedure_type && procedure_type.length > 0) {

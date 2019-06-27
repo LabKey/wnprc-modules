@@ -998,356 +998,356 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-//    @ActionNames("SurgeryProcedureSchedule")
-//    @RequiresLogin()
-//    public class SurgeryProcedureScheduleAction extends WNPRCJspPageAction
-//    {
-//        @Override
-//        public String getPathToJsp()
-//        {
-//            return "pages/dataentry/SurgeryProcedureSchedule.jsp";
-//        }
-//
-//        @Override
-//        public String getTitle()
-//        {
-//            return "Surgery/Procedure Schedule";
-//        }
-//    }
-//
-//    public static class SurgeryProcedureEvent
-//    {
-//        private String requestid;
-//        private Date start;
-//        private Date end;
-//        private String room;
-//        private String subject;
-//        private List categories;
-//        private String assignedto;
-//        private boolean hold;
-//
-//        public String getRequestId()
-//        {
-//            return requestid;
-//        }
-//
-//        public Date getStart()
-//        {
-//            return start;
-//        }
-//
-//        public Date getEnd()
-//        {
-//            return end;
-//        }
-//
-//        public String getRoom()
-//        {
-//            return room;
-//        }
-//
-//        public String getSubject()
-//        {
-//            return subject;
-//        }
-//
-//        public List getCategories() {
-//            return categories;
-//        }
-//
-//        public String getAssignedTo()
-//        {
-//            return assignedto;
-//        }
-//
-//        public boolean getHold() {
-//            return hold;
-//        }
-//
-//        public void setRequestId(String requestid)
-//        {
-//            this.requestid = requestid;
-//        }
-//
-//        public void setStart(Date start)
-//        {
-//            this.start = start;
-//        }
-//
-//        public void setEnd(Date end)
-//        {
-//            this.end = end;
-//        }
-//
-//        public void setRoom(String room)
-//        {
-//            this.room = room;
-//        }
-//
-//        public void setSubject(String title)
-//        {
-//            this.subject = title;
-//        }
-//
-//        public void setCategories(List categories)
-//        {
-//            this.categories = categories;
-//        }
-//
-//        public void setAssignedTo(String assignedto)
-//        {
-//            this.assignedto = assignedto;
-//        }
-//
-//        public void setHold(boolean hold) {
-//            this.hold = hold;
-//        }
-//    }
-//
-//    @ActionNames("ScheduleSurgeryProcedure")
-//    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
-//    @RequiresLogin()
-//    public class ScheduleSurgeryProcedureAction extends ApiAction<SurgeryProcedureEvent>
-//    {
-//        @Override
-//        public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
-//        {
-//            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
-//
-//            JSONObject response = new JSONObject();
-//            response.put("success", false);
-//            org.labkey.wnprc_ehr.calendar.Office365Calendar calendar = new org.labkey.wnprc_ehr.calendar.Office365Calendar();
-//            String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories(), event.hold);
-//
-//            if (apptId != null)
-//            {
-//                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
-//                    TableInfo ti = null;
-//                    QueryUpdateService service =  null;
-//                    List<Map<String, Object>> rowsToInsert = null;
-//                    List<Map<String, Object>> rowsToUpdate = null;
-//
-//                    /**
-//                     * Insert the necessary records into the ehr.tasks table
-//                     */
-//                    //TODO get other info from jsp
-//                    for(Map<String, Object> spRow : spRows)
-//                    {
-//                        String taskId = UUID.randomUUID().toString();
-//                        spRow.put("taskid", taskId);
-//                        JSONObject taskRecord = new JSONObject();
-//                        taskRecord.put("taskid", taskId);
-//                        taskRecord.put("title", "SurgeryProcedure");
-//                        taskRecord.put("category", "task");
-//                        taskRecord.put("assignedto", event.getAssignedTo());
-//                        taskRecord.put("qcstate", 10);
-//                        taskRecord.put("duedate", "");
-//                        taskRecord.put("formtype", "SurgeryProcedure");
-//                        rowsToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
-//
-//                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
-//                        service = ti.getUpdateService();
-//
-//                        BatchValidationException validationException = new BatchValidationException();
-//                        List<Map<String, Object>> insertedRows = service.insertRows(getUser(), getContainer(), rowsToInsert, validationException, null, null);
-//                        if (validationException.hasErrors())
-//                        {
-//                            throw validationException;
-//                        }
-//                    }
-//
-//                    /**
-//                     * Update the surgery record(s) to contain the newly created taskid(s)
-//                     */
-//                    for(Map<String, Object> spRow : spRows)
-//                    {
-//                        //Initialize data to be updated and convert it to the necessary format
-//                        JSONObject surgeryRecord = new JSONObject();
-//                        surgeryRecord.put("objectid", spRow.get("objectid"));
-//                        surgeryRecord.put("apptid", apptId);
-//                        surgeryRecord.put("qcstate", 10);
-//                        surgeryRecord.put("taskid", spRow.get("taskid"));
-//                        surgeryRecord.put("date", event.getStart());
-//                        surgeryRecord.put("enddate", event.getEnd());
-//                        rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
-//
-//                        //Get the service object based on schema/table
-//                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
-//                        service = ti.getUpdateService();
-//
-//                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-//                        if (updatedRows.size() != rowsToUpdate.size())
-//                        {
-//                            throw new QueryUpdateServiceException("Not all rows updated properly");
-//                        }
-//                    }
-//
-//                    //TODO look into permissions stuff... ti.hasPermission(getUser(), DeletePermission.class);
-//
-//                    //TODO add some logic to make sure rows were updated correctly
-//
-//                    JSONObject requestRecord = new JSONObject();
-//                    requestRecord.put("requestid", event.getRequestId());
-//                    requestRecord.put("qcstate", 8);
-//                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(requestRecord);
-//
-//                    //Get the service object based on schema/table
-//                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("requests");
-//                    service = ti.getUpdateService();
-//
-//                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-//                    if (updatedRows.size() != rowsToUpdate.size()) {
-//                        throw new QueryUpdateServiceException("Not all rows updated properly");
-//                    }
-//
-//                    transaction.commit();
-//                    response.put("success", true);
-//                } catch (Exception e) {
-//                    calendar.cancelEvent(apptId);
-//                } finally {
-//
-//                }
-//            }
-//            return response;
-//        }
-//    }
-//
-//    public static class SurgeryProcedureChangeStatusEvent
-//    {
-//        private String requestid;
-//        private String qcstate;
-//        private String statuschangereason;
-//
-//        public String getRequestId()
-//        {
-//            return requestid;
-//        }
-//
-//        public String getQCState()
-//        {
-//            return qcstate;
-//        }
-//
-//        public String getStatusChangeReason()
-//        {
-//            return statuschangereason;
-//        }
-//
-//        public void setRequestId(String requestid)
-//        {
-//            this.requestid = requestid;
-//        }
-//
-//        public void setQCState(String qcstate)
-//        {
-//            this.qcstate = qcstate;
-//        }
-//
-//        public void setStatusChangeReason(String statuschangereason)
-//        {
-//            this.statuschangereason = statuschangereason;
-//        }
-//    }
-//
-//    @ActionNames("SurgeryProcedureChangeStatus")
-//    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
-//    @RequiresLogin()
-//    public class SurgeryProcedureChangeStatusAction extends ApiAction<SurgeryProcedureChangeStatusEvent>
-//    {
-//        @Override
-//        public Object execute(SurgeryProcedureChangeStatusEvent event, BindException errors) throws Exception
-//        {
-//            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
-//
-//            JSONObject response = new JSONObject();
-//            response.put("success", false);
-//
-//            TableInfo ti = null;
-//            QueryUpdateService service =  null;
-//            List<Map<String, Object>> rowsToUpdate = null;
-//
-//            try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
-//                /**
-//                 * Update surgery records
-//                 */
-//                for(Map<String, Object> spRow : spRows)
-//                {
-//                    //Initialize data to be updated and convert it to the necessary format
-//                    JSONObject surgeryRecord = new JSONObject();
-//                    surgeryRecord.put("objectid", spRow.get("objectid"));
-//                    surgeryRecord.put("qcstate", event.getQCState());
-//                    surgeryRecord.put("statuschangereason", event.getStatusChangeReason());
-//                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
-//
-//                    //Get the service object based on schema/table
-//                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
-//                    service = ti.getUpdateService();
-//
-//                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-//                    if (updatedRows.size() != rowsToUpdate.size())
-//                    {
-//                        throw new QueryUpdateServiceException("Not all rows updated properly");
-//                    }
-//                }
-//
-//                /**
-//                 * Update request record
-//                 */
-//                JSONObject requestRecord = new JSONObject();
-//                requestRecord.put("requestid", event.getRequestId());
-//                requestRecord.put("qcstate", event.getQCState());
-//                requestRecord.put("remark", event.getStatusChangeReason());
-//                rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(requestRecord);
-//
-//                //Get the service object based on schema/table
-//                ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("requests");
-//                service = ti.getUpdateService();
-//
-//                List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-//                if (updatedRows.size() != rowsToUpdate.size()) {
-//                    throw new QueryUpdateServiceException("Not all rows updated properly");
-//                }
-//
-//                if ("5".equals(event.getQCState()))
-//                {
-//                    String apptid = null;
-//                    if(spRows.size() > 0) {
-//                        apptid = (String) spRows.get(0).get("apptid");
-//                    }
-//                    org.labkey.wnprc_ehr.calendar.Office365Calendar calendar = new org.labkey.wnprc_ehr.calendar.Office365Calendar();
-//                    calendar.cancelEvent(apptid);
-//                }
-//
-//                transaction.commit();
-//                response.put("success", true);
-//            } catch (Exception e) {
-//                int x = 3;
-//                //TODO nothing?
-//            } finally {
-//
-//            }
-//
-//            return response;
-//        }
-//    }
-//
-//    private List<Map<String, Object>> getSurgeryProcedureRecords(String requestId) throws java.sql.SQLException
-//    {
-//        List<FieldKey> columns = new ArrayList<>();
-//        columns.add(FieldKey.fromString("objectid"));
-//        columns.add(FieldKey.fromString("apptid"));
-//
-//        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
-//        QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
-//        Results rs = spQuery.select(columns, filter);
-//
-//        List<Map<String, Object>> spRows = new ArrayList<>();
-//        while (rs.next())
-//        {
-//            spRows.add(rs.getRowMap());
-//        }
-//        return spRows;
-//    }
+    @ActionNames("SurgeryProcedureSchedule")
+    @RequiresLogin()
+    public class SurgeryProcedureScheduleAction extends WNPRCJspPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/dataentry/SurgeryProcedureSchedule.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Surgery/Procedure Schedule";
+        }
+    }
+
+    public static class SurgeryProcedureEvent
+    {
+        private String requestid;
+        private Date start;
+        private Date end;
+        private String room;
+        private String subject;
+        private List categories;
+        private String assignedto;
+        private boolean hold;
+
+        public String getRequestId()
+        {
+            return requestid;
+        }
+
+        public Date getStart()
+        {
+            return start;
+        }
+
+        public Date getEnd()
+        {
+            return end;
+        }
+
+        public String getRoom()
+        {
+            return room;
+        }
+
+        public String getSubject()
+        {
+            return subject;
+        }
+
+        public List getCategories() {
+            return categories;
+        }
+
+        public String getAssignedTo()
+        {
+            return assignedto;
+        }
+
+        public boolean getHold() {
+            return hold;
+        }
+
+        public void setRequestId(String requestid)
+        {
+            this.requestid = requestid;
+        }
+
+        public void setStart(Date start)
+        {
+            this.start = start;
+        }
+
+        public void setEnd(Date end)
+        {
+            this.end = end;
+        }
+
+        public void setRoom(String room)
+        {
+            this.room = room;
+        }
+
+        public void setSubject(String title)
+        {
+            this.subject = title;
+        }
+
+        public void setCategories(List categories)
+        {
+            this.categories = categories;
+        }
+
+        public void setAssignedTo(String assignedto)
+        {
+            this.assignedto = assignedto;
+        }
+
+        public void setHold(boolean hold) {
+            this.hold = hold;
+        }
+    }
+
+    @ActionNames("ScheduleSurgeryProcedure")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class ScheduleSurgeryProcedureAction extends ApiAction<SurgeryProcedureEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
+        {
+            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+            org.labkey.wnprc_ehr.calendar.Office365Calendar calendar = new org.labkey.wnprc_ehr.calendar.Office365Calendar();
+            String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories(), event.hold);
+
+            if (apptId != null)
+            {
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
+                    TableInfo ti = null;
+                    QueryUpdateService service =  null;
+                    List<Map<String, Object>> rowsToInsert = null;
+                    List<Map<String, Object>> rowsToUpdate = null;
+
+                    /**
+                     * Insert the necessary records into the ehr.tasks table
+                     */
+                    //TODO get other info from jsp
+                    for(Map<String, Object> spRow : spRows)
+                    {
+                        String taskId = UUID.randomUUID().toString();
+                        spRow.put("taskid", taskId);
+                        JSONObject taskRecord = new JSONObject();
+                        taskRecord.put("taskid", taskId);
+                        taskRecord.put("title", "SurgeryProcedure");
+                        taskRecord.put("category", "task");
+                        taskRecord.put("assignedto", event.getAssignedTo());
+                        taskRecord.put("qcstate", 10);
+                        taskRecord.put("duedate", "");
+                        taskRecord.put("formtype", "SurgeryProcedure");
+                        rowsToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
+
+                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
+                        service = ti.getUpdateService();
+
+                        BatchValidationException validationException = new BatchValidationException();
+                        List<Map<String, Object>> insertedRows = service.insertRows(getUser(), getContainer(), rowsToInsert, validationException, null, null);
+                        if (validationException.hasErrors())
+                        {
+                            throw validationException;
+                        }
+                    }
+
+                    /**
+                     * Update the surgery record(s) to contain the newly created taskid(s)
+                     */
+                    for(Map<String, Object> spRow : spRows)
+                    {
+                        //Initialize data to be updated and convert it to the necessary format
+                        JSONObject surgeryRecord = new JSONObject();
+                        surgeryRecord.put("objectid", spRow.get("objectid"));
+                        surgeryRecord.put("apptid", apptId);
+                        surgeryRecord.put("qcstate", 10);
+                        surgeryRecord.put("taskid", spRow.get("taskid"));
+                        surgeryRecord.put("date", event.getStart());
+                        surgeryRecord.put("enddate", event.getEnd());
+                        rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
+
+                        //Get the service object based on schema/table
+                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
+                        service = ti.getUpdateService();
+
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+                        if (updatedRows.size() != rowsToUpdate.size())
+                        {
+                            throw new QueryUpdateServiceException("Not all rows updated properly");
+                        }
+                    }
+
+                    //TODO look into permissions stuff... ti.hasPermission(getUser(), DeletePermission.class);
+
+                    //TODO add some logic to make sure rows were updated correctly
+
+                    JSONObject requestRecord = new JSONObject();
+                    requestRecord.put("requestid", event.getRequestId());
+                    requestRecord.put("qcstate", 8);
+                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(requestRecord);
+
+                    //Get the service object based on schema/table
+                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("requests");
+                    service = ti.getUpdateService();
+
+                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+                    if (updatedRows.size() != rowsToUpdate.size()) {
+                        throw new QueryUpdateServiceException("Not all rows updated properly");
+                    }
+
+                    transaction.commit();
+                    response.put("success", true);
+                } catch (Exception e) {
+                    calendar.cancelEvent(apptId);
+                } finally {
+
+                }
+            }
+            return response;
+        }
+    }
+
+    public static class SurgeryProcedureChangeStatusEvent
+    {
+        private String requestid;
+        private String qcstate;
+        private String statuschangereason;
+
+        public String getRequestId()
+        {
+            return requestid;
+        }
+
+        public String getQCState()
+        {
+            return qcstate;
+        }
+
+        public String getStatusChangeReason()
+        {
+            return statuschangereason;
+        }
+
+        public void setRequestId(String requestid)
+        {
+            this.requestid = requestid;
+        }
+
+        public void setQCState(String qcstate)
+        {
+            this.qcstate = qcstate;
+        }
+
+        public void setStatusChangeReason(String statuschangereason)
+        {
+            this.statuschangereason = statuschangereason;
+        }
+    }
+
+    @ActionNames("SurgeryProcedureChangeStatus")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class SurgeryProcedureChangeStatusAction extends ApiAction<SurgeryProcedureChangeStatusEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureChangeStatusEvent event, BindException errors) throws Exception
+        {
+            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            TableInfo ti = null;
+            QueryUpdateService service =  null;
+            List<Map<String, Object>> rowsToUpdate = null;
+
+            try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
+                /**
+                 * Update surgery records
+                 */
+                for(Map<String, Object> spRow : spRows)
+                {
+                    //Initialize data to be updated and convert it to the necessary format
+                    JSONObject surgeryRecord = new JSONObject();
+                    surgeryRecord.put("objectid", spRow.get("objectid"));
+                    surgeryRecord.put("qcstate", event.getQCState());
+                    surgeryRecord.put("statuschangereason", event.getStatusChangeReason());
+                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
+
+                    //Get the service object based on schema/table
+                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
+                    service = ti.getUpdateService();
+
+                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+                    if (updatedRows.size() != rowsToUpdate.size())
+                    {
+                        throw new QueryUpdateServiceException("Not all rows updated properly");
+                    }
+                }
+
+                /**
+                 * Update request record
+                 */
+                JSONObject requestRecord = new JSONObject();
+                requestRecord.put("requestid", event.getRequestId());
+                requestRecord.put("qcstate", event.getQCState());
+                requestRecord.put("remark", event.getStatusChangeReason());
+                rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(requestRecord);
+
+                //Get the service object based on schema/table
+                ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("requests");
+                service = ti.getUpdateService();
+
+                List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+                if (updatedRows.size() != rowsToUpdate.size()) {
+                    throw new QueryUpdateServiceException("Not all rows updated properly");
+                }
+
+                if ("5".equals(event.getQCState()))
+                {
+                    String apptid = null;
+                    if(spRows.size() > 0) {
+                        apptid = (String) spRows.get(0).get("apptid");
+                    }
+                    org.labkey.wnprc_ehr.calendar.Office365Calendar calendar = new org.labkey.wnprc_ehr.calendar.Office365Calendar();
+                    calendar.cancelEvent(apptid);
+                }
+
+                transaction.commit();
+                response.put("success", true);
+            } catch (Exception e) {
+                int x = 3;
+                //TODO nothing?
+            } finally {
+
+            }
+
+            return response;
+        }
+    }
+
+    private List<Map<String, Object>> getSurgeryProcedureRecords(String requestId) throws java.sql.SQLException
+    {
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("objectid"));
+        columns.add(FieldKey.fromString("apptid"));
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
+        QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
+        Results rs = spQuery.select(columns, filter);
+
+        List<Map<String, Object>> spRows = new ArrayList<>();
+        while (rs.next())
+        {
+            spRows.add(rs.getRowMap());
+        }
+        return spRows;
+    }
 
     @ActionNames("PathologyCaseList")
     @RequiresLogin()

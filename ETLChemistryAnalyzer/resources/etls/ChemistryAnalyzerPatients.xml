@@ -10,6 +10,7 @@
                 <constants>
                     <column name="Status" type="INTEGER" value="4"/>
                     <column name="Method" type="VARCHAR" value="Alfa Wassermann Vet Axcel"/>
+                    <column name="performing_lab" type="VARCHAR" value="WNPRC Clin Path"/>
                 </constants>
             </destination>
         </transform>

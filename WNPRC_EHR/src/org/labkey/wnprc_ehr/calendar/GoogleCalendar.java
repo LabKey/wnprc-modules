@@ -7,6 +7,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -17,6 +18,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
+import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import org.json.JSONArray;
@@ -123,12 +125,11 @@ public class GoogleCalendar
     }
 
     /**
-     * Creates an authorized Credential object.
-     * @param HTTP_TRANSPORT The network HTTP Transport.
-     * @return An authorized Credential object.
+     * Creates an authorized HttpRequestInitializer object.
+     * @return An authorized HttpRequestInitializer object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private HttpRequestInitializer getCredentials() throws IOException {
         // Load client secrets.
         SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "f5c49137-186d-41fb-9c93-9979b7f4c2ba");
         DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
@@ -138,25 +139,12 @@ public class GoogleCalendar
 
         GoogleCredentials credentials = GoogleCredentials.fromStream(in).createScoped(SCOPES);
         credentials.refreshIfExpired();
-        AccessToken token = credentials.getAccessToken();
 
-        in = GoogleCalendar.class.getResourceAsStream("client_secret.json");
-
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in, StandardCharsets.UTF_8));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setApprovalPrompt("auto")
-                .setAccessType("offline")
-                .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        return new HttpCredentialsAdapter(credentials);
     }
 
     private Calendar getCalendar() throws IOException {
-        Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         return service;

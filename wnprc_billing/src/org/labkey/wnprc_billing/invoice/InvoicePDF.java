@@ -340,7 +340,7 @@ public class InvoicePDF extends FPDF
             addChargeLine();
             addCreditLine();
             addPaymentInfo();
-            addAccountContact(alias.getContact_email());
+            addAccountContact(StringUtils.isNotBlank(alias.getContact_email()) ? alias.getContact_email() : "Contact Email Not Specified");
             addBillingDate(invoiceRun.getBillingPeriodStart(), invoiceRun.getBillingPeriodEnd());
             addCols(this.getHeaders());
 

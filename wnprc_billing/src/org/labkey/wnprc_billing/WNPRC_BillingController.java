@@ -20,6 +20,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
@@ -27,6 +28,8 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.module.ModuleProperty;
+import org.labkey.api.pipeline.AbstractSpecimenTransformTask;
+import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
@@ -35,14 +38,22 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.writer.PrintWriters;
+import org.labkey.api.writer.VirtualFile;
+import org.labkey.api.writer.ZipUtil;
 import org.labkey.wnprc_billing.domain.*;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
 import org.labkey.wnprc_billing.invoice.SummaryPDF;
 import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -50,6 +61,11 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class WNPRC_BillingController extends SpringActionController
 {
@@ -481,70 +497,138 @@ public class WNPRC_BillingController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
+    public class DownloadInvoicesAction extends ExportAction<InvoicePdfForm>
+    {
+        @Override
+        public void export(InvoicePdfForm invoicePdfForm, HttpServletResponse response, BindException errors) throws Exception
+        {
+            Set<String> selectedInvoices = DataRegionSelection.getSelected(HttpView.currentContext(), null, true, true);
+
+            response.reset();
+            response.setContentType("application/zip");
+            response.setHeader("Content-Disposition", "attachment; filename=Invoices.zip");
+
+            try(ZipOutputStream zout = new ZipOutputStream(response.getOutputStream()))
+            {
+                selectedInvoices.forEach(invoiceNumber-> {
+                    try
+                    {
+                        PDFFile pdfFile = getInvoicePDF(invoiceNumber, "Download Invoices");
+                        ZipEntry entry = new ZipEntry(pdfFile.getFileName());
+                        zout.putNextEntry(entry);
+                        pdfFile.getInvoicePDF().output(zout);
+                        zout.closeEntry();
+                    }
+                    catch (IOException e)
+                    {
+                       throw new RuntimeException(e);
+                    }
+                });
+            }
+
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
     public class PDFExportAction extends ExportAction<InvoicePdfForm>
     {
         @Override
         public void export(InvoicePdfForm invoicePdfForm, HttpServletResponse response, BindException errors) throws Exception
         {
-            Invoice invoice = getInvoice(invoicePdfForm.getInvoiceNumber());
-            if (null == invoice)
-            {
-                throw new NotFoundException(" Unable to generate PDF. The selected invoice could not be found.");
-            }
-            if (null == invoice.getInvoiceAmount())
-            {
-                throw new NotFoundException(" Unable to generate PDF. No Invoice Amount found.");
-            }
-
-            Alias alias = getInvoiceAccount(invoice.getAccountNumber());
-
-            if (null == alias)
-            {
-                throw new NotFoundException("Unable to generate PDF. Account Number not found.");
-            }
-
-            InvoiceRun invoiceRun = getInvoiceRunByObjectId(invoice.getInvoiceRunId());
-            TierRate accountTierRate = getTierRate(alias.getTier_rate());
-
-            Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
-            String contactEmail = moduleProperties.get(WNPRC_BillingModule.BillingContactEmail).getEffectiveValue(getContainer());
-            String billingAddress = moduleProperties.get(WNPRC_BillingModule.BillingAddress).getEffectiveValue(getContainer());
-
-            String creditToAccount = null;
-            String chargeLine = null;
-            if (alias.getType().toLowerCase().contains("internal"))
-            {
-                creditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
-                chargeLine = (StringUtils.isNotBlank(alias.getUw_fund()) ? alias.getUw_fund() : "") +
-                            " " + (StringUtils.isNotBlank(alias.getUw_account()) ?  alias.getUw_account() : "") +
-                            " " + (StringUtils.isNotBlank(alias.getUw_udds()) ? alias.getUw_udds() : "") +
-                            " 4 " + //4 is a Program Number, and it will always remain 4.
-                            (StringUtils.isNotBlank(alias.getUw_class_code()) ? alias.getUw_class_code() : "");
-            }
-
-            double tierRate = accountTierRate != null ? accountTierRate.getTierRate() : 0;
-            String formName = invoicePdfForm.getName();
-            InvoicePDF pdf = formName.equals("Invoice PDF") ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount, chargeLine) :
-                    new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount, chargeLine);
-
-            pdf.addPage();
-            List<InvoicedItem> invoicedItems;
-
-            if (formName.equalsIgnoreCase("Invoice PDF"))
-            {
-                invoicedItems = getInvoicedItems(invoicePdfForm.getInvoiceNumber());
-                pdf.createLineItems(invoicedItems, true);
-            }
-            else
-            {
-                invoicedItems = getSummarizedItems(invoicePdfForm.getInvoiceNumber());
-                pdf.createLineItems(invoicedItems, false);
-            }
-
-            SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM_yyyy");
-            String filename = alias.getGrantNumber() + "_" + dateFormatBillingFor.format(invoiceRun.getBillingPeriodStart()) + "_Invoice.pdf";
-            PageFlowUtil.prepareResponseForFile(getViewContext().getResponse(), Collections.emptyMap(), filename, invoicePdfForm.isAsAttachment());
-            pdf.output(getViewContext().getResponse().getOutputStream());
+            PDFFile pdfFile = getInvoicePDF(invoicePdfForm.getInvoiceNumber(), invoicePdfForm.getName());
+            PageFlowUtil.prepareResponseForFile(getViewContext().getResponse(), Collections.emptyMap(), pdfFile.getFileName(), invoicePdfForm.isAsAttachment());
+            pdfFile.getInvoicePDF().output(getViewContext().getResponse().getOutputStream());
         }
+    }
+
+    private class PDFFile
+    {
+        String _fileName;
+        InvoicePDF _invoicePDF;
+
+        public String getFileName()
+        {
+            return _fileName;
+        }
+
+        public void setFileName(String fileName)
+        {
+            _fileName = fileName;
+        }
+
+        public InvoicePDF getInvoicePDF()
+        {
+            return _invoicePDF;
+        }
+
+        public void setInvoicePDF(InvoicePDF invoicePDF)
+        {
+            _invoicePDF = invoicePDF;
+        }
+    }
+
+    private PDFFile getInvoicePDF(String invoiceNumber, String formName) throws IOException
+    {
+        Invoice invoice = getInvoice(invoiceNumber);
+        if (null == invoice)
+        {
+            throw new NotFoundException(" Unable to generate PDF. The selected invoice could not be found.");
+        }
+        if (null == invoice.getInvoiceAmount())
+        {
+            throw new NotFoundException(" Unable to generate PDF. No Invoice Amount found.");
+        }
+
+        Alias alias = getInvoiceAccount(invoice.getAccountNumber());
+
+        if (null == alias)
+        {
+            throw new NotFoundException("Unable to generate PDF. Account Number not found.");
+        }
+
+        InvoiceRun invoiceRun = getInvoiceRunByObjectId(invoice.getInvoiceRunId());
+        TierRate accountTierRate = getTierRate(alias.getTier_rate());
+
+        Map<String, ModuleProperty> moduleProperties = ModuleLoader.getInstance().getModule(WNPRC_BillingModule.class).getModuleProperties();
+        String contactEmail = moduleProperties.get(WNPRC_BillingModule.BillingContactEmail).getEffectiveValue(getContainer());
+        String billingAddress = moduleProperties.get(WNPRC_BillingModule.BillingAddress).getEffectiveValue(getContainer());
+
+        String creditToAccount = null;
+        String chargeLine = null;
+        if (alias.getType().toLowerCase().contains("internal"))
+        {
+            creditToAccount = moduleProperties.get(WNPRC_BillingModule.CreditToAccount).getEffectiveValue(getContainer());
+            chargeLine = (StringUtils.isNotBlank(alias.getUw_fund()) ? alias.getUw_fund() : "") +
+                    " " + (StringUtils.isNotBlank(alias.getUw_account()) ?  alias.getUw_account() : "") +
+                    " " + (StringUtils.isNotBlank(alias.getUw_udds()) ? alias.getUw_udds() : "") +
+                    " 4 " + //4 is a Program Number, and it will always remain 4.
+                    (StringUtils.isNotBlank(alias.getUw_class_code()) ? alias.getUw_class_code() : "");
+        }
+
+        double tierRate = accountTierRate != null ? accountTierRate.getTierRate() : 0;
+        InvoicePDF pdf = (formName.equalsIgnoreCase("Invoice PDF") || formName.equalsIgnoreCase("Download Invoices")) ? new InvoicePDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount, chargeLine) :
+                new SummaryPDF(invoice, alias, invoiceRun, tierRate, contactEmail, billingAddress, creditToAccount, chargeLine);
+
+        pdf.addPage();
+        List<InvoicedItem> invoicedItems;
+
+        if (formName.equalsIgnoreCase("Invoice PDF") || formName.equalsIgnoreCase("Download Invoices"))
+        {
+            invoicedItems = getInvoicedItems(invoiceNumber);
+            pdf.createLineItems(invoicedItems, true);
+        }
+        else
+        {
+            invoicedItems = getSummarizedItems(invoiceNumber);
+            pdf.createLineItems(invoicedItems, false);
+        }
+
+        SimpleDateFormat dateFormatBillingFor = new SimpleDateFormat("MM_dd_yyyy");
+        String filename = alias.getGrantNumber() + "_" + dateFormatBillingFor.format(invoiceRun.getBillingPeriodStart()) + "_Invoice.pdf";
+
+        PDFFile pdfFile = new PDFFile();
+        pdfFile.setFileName(filename);
+        pdfFile.setInvoicePDF(pdf);
+        return pdfFile;
     }
 }

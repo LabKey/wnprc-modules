@@ -91,9 +91,6 @@
       }
     },
     "clean": {
-      "command": "rimraf resources/web/animalrequests/app/"
-    },
-    "reallyClean": {
       "command": "rimraf resources/web/animalrequest/app/ ; rimraf node_modules"
     },
     "build-jest-test": {

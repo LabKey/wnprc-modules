@@ -7,7 +7,7 @@ ENV LANG en_US.utf8
 RUN yum-config-manager --enable ol7_optional_latest
 RUN yum -y -q install \
     #for R
-    texinfo-tex \ 
+    texinfo-tex \
     # for the timezone
     tzdata \
     # for downloading LabKey and Tomcat
@@ -46,8 +46,8 @@ RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml
 
 # install the necessary R packages
-COPY install.r /tmp/install.r
-RUN mkdir -p /usr/share/doc/R-3.5.1/html && Rscript /tmp/install.r
+#COPY install.r /tmp/install.r
+#RUN mkdir -p /usr/share/doc/R-3.5.1/html && Rscript /tmp/install.r
 
 # copy over the .netrc template file
 COPY netrc /root/netrc.template

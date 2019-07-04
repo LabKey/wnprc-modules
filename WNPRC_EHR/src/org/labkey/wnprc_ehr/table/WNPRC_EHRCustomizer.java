@@ -17,10 +17,14 @@ package org.labkey.wnprc_ehr.table;
 
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
@@ -31,6 +35,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
+import org.labkey.dbutils.api.SimplerFilter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -64,6 +69,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeBreedingEncountersTable((AbstractTableInfo) table);
             } else if (table.getName().equalsIgnoreCase("pregnancies") && table.getSchema().getName().equalsIgnoreCase("study")) {
                 customizePregnanciesTable((AbstractTableInfo) table);
+            } else if (table.getName().equalsIgnoreCase("housing") && table.getSchema().getName().equalsIgnoreCase("study")) {
+                customizeHousingTable((AbstractTableInfo) table);
             }
         }
     }
@@ -275,6 +282,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         customizeSireIdColumn(ti);
     }
 
+    private void customizeHousingTable(AbstractTableInfo ti) {
+        customizeReasonForMoveColumn(ti);
+    }
+
     private void customizeSireIdColumn(AbstractTableInfo ti) {
         ColumnInfo sireid = ti.getColumn("sireid");
         if (sireid != null)
@@ -284,22 +295,89 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 sireid.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
 
+                    @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
                         ActionURL url = new ActionURL("ehr", "participantView.view", us.getContainer());
-                        String[] ids = ((String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"))).split(",");
-                        String urlString = "";
-                        for (int i = 0; i < ids.length; i++) {
-                            String id = ids[i];
-                            url.replaceParameter("participantId", id);
-                            urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
-                            urlString += PageFlowUtil.filter(id);
-                            urlString += "</a>";
-                            if (i + 1 < ids.length) {
-                                urlString += ", ";
+                        String joinedIds = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
+                        if (joinedIds != null)
+                        {
+                            String[] ids = joinedIds.split(",");
+                            String urlString = "";
+                            for (int i = 0; i < ids.length; i++)
+                            {
+                                String id = ids[i];
+                                url.replaceParameter("participantId", id);
+                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                                urlString += PageFlowUtil.filter(id);
+                                urlString += "</a>";
+                                if (i + 1 < ids.length)
+                                {
+                                    urlString += ", ";
+                                }
                             }
+                            out.write(urlString);
                         }
-                        out.write(urlString);
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "sireid"));
+                    }
+                });
+            }
+        }
+    }
+
+    private void customizeReasonForMoveColumn(AbstractTableInfo ti) {
+        ColumnInfo reason = ti.getColumn("reason");
+        if (reason != null)
+        {
+            UserSchema us = getUserSchema(ti, "study");
+            if (us != null)
+            {
+                reason.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
+
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        ActionURL url = new ActionURL("query", "recordDetails.view", us.getContainer());
+                        String joinedReasons = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
+                        if (joinedReasons != null)
+                        {
+                            String[] reasons = joinedReasons.split(",");
+                            url.addParameter("schemaName", "ehr_lookups");
+                            url.addParameter("query.queryName", "housing_reason");
+                            url.addParameter("keyField", "value");
+
+                            String urlString = "";
+                            for (int i = 0; i < reasons.length; i++)
+                            {
+                                String reasonForMoveValue = reasons[i];
+                                SimplerFilter filter = new SimplerFilter("set_name", CompareType.EQUAL, "housing_reason").addCondition("value", CompareType.EQUAL, reasonForMoveValue);
+                                DbSchema schema = DbSchema.get("ehr_lookups", DbSchemaType.Module);
+                                TableInfo ti = schema.getTable("lookups");
+                                TableSelector ts = new TableSelector(ti, filter, null);
+                                String reasonForMoveTitle = (String) ts.getMap().get("title");
+
+                                url.replaceParameter("key", reasonForMoveValue);
+                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                                urlString += PageFlowUtil.filter(reasonForMoveTitle);
+                                urlString += "</a>";
+                                if (i + 1 < reasons.length)
+                                {
+                                    urlString += ", ";
+                                }
+                            }
+                            out.write(urlString);
+                        }
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
                     }
                 });
             }

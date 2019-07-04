@@ -92,6 +92,8 @@ public class WNPRC_BillingController extends SpringActionController
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICE);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("invoiceNumber"), invoiceNumber);
+        filter.addCondition(FieldKey.fromParts("Container"), getContainer());
+
         TableSelector tableSelector = new TableSelector(tableInfo, filter,null);
         return tableSelector.getObject(Invoice.class);
     }
@@ -111,6 +113,8 @@ public class WNPRC_BillingController extends SpringActionController
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICE_RUNS);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("objectId"), invoiceRunId);
+        filter.addCondition(FieldKey.fromParts("Container"), getContainer());
+
         TableSelector tableSelector = new TableSelector(tableInfo,filter,null);
         return tableSelector.getObject(invoiceRunId, InvoiceRun.class);
     }
@@ -120,6 +124,8 @@ public class WNPRC_BillingController extends SpringActionController
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICE_RUNS);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("rowId"), runId);
+        filter.addCondition(FieldKey.fromParts("Container"), getContainer());
+
         TableSelector tableSelector = new TableSelector(tableInfo,filter,null);
         return tableSelector.getObject(InvoiceRun.class);
     }

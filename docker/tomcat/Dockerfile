@@ -46,8 +46,8 @@ RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml
 
 # install the necessary R packages
-#COPY install.r /tmp/install.r
-#RUN mkdir -p /usr/share/doc/R-3.5.1/html && Rscript /tmp/install.r
+COPY install.r /tmp/install.r
+RUN mkdir -p /usr/share/doc/R-3.5.1/html && Rscript /tmp/install.r
 
 # copy over the .netrc template file
 COPY netrc /root/netrc.template

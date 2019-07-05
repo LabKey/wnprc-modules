@@ -56,7 +56,7 @@
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>housing_reason</fkTable>
-                            <fkColumnName>value</fkColumnName>
+                            <fkColumnName>title</fkColumnName>
                             <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>

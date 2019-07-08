@@ -1,7 +1,6 @@
 package org.labkey.wnprc_ehr.calendar;
 
 import microsoft.exchange.webservices.data.autodiscover.IAutodiscoverRedirectionUrl;
-import microsoft.exchange.webservices.data.autodiscover.exception.AutodiscoverLocalException;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import microsoft.exchange.webservices.data.core.PropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.availability.AvailabilityData;
@@ -10,9 +9,7 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.error.ServiceEr
 import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
 import microsoft.exchange.webservices.data.core.enumeration.property.LegacyFreeBusyStatus;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
-import microsoft.exchange.webservices.data.core.enumeration.service.DeleteMode;
 import microsoft.exchange.webservices.data.core.response.AttendeeAvailability;
-import microsoft.exchange.webservices.data.core.response.ServiceResponseCollection;
 import microsoft.exchange.webservices.data.core.service.folder.CalendarFolder;
 import microsoft.exchange.webservices.data.core.service.item.Appointment;
 import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
@@ -20,14 +17,10 @@ import microsoft.exchange.webservices.data.credential.WebCredentials;
 import microsoft.exchange.webservices.data.misc.availability.AttendeeInfo;
 import microsoft.exchange.webservices.data.misc.availability.GetUserAvailabilityResults;
 import microsoft.exchange.webservices.data.misc.availability.TimeWindow;
-import microsoft.exchange.webservices.data.property.complex.Attendee;
-import microsoft.exchange.webservices.data.property.complex.AttendeeCollection;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.complex.StringList;
 import microsoft.exchange.webservices.data.property.complex.availability.CalendarEvent;
-import microsoft.exchange.webservices.data.property.complex.availability.Suggestion;
-import microsoft.exchange.webservices.data.property.complex.availability.TimeSuggestion;
 import microsoft.exchange.webservices.data.search.CalendarView;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
 import org.json.JSONArray;
@@ -47,6 +40,8 @@ import org.labkey.wnprc_ehr.encryption.AES;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -84,7 +79,10 @@ public class Office365Calendar
             emailAddress = (String) map.get("private_key_id");
 
             String[] bytes = ((String) map.get("private_key")).split(",");
-            byte[] decrypted = AES.decrypt(bytes);
+            byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("key.file")));
+            byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("iv.file")));
+
+            byte[] decrypted = AES.decrypt(bytes, keyBytes, ivBytes);
 
             ExchangeCredentials credentials = new WebCredentials(emailAddress, new String(decrypted, StandardCharsets.UTF_8));
             service.setCredentials(credentials);

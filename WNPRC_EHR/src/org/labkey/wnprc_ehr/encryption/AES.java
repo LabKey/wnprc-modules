@@ -6,24 +6,19 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class AES
 {
-    public static byte[] decrypt(String[] bytes) {
-        return decrypt(stringArrayToBytes(bytes));
+    public static byte[] decrypt(String[] bytes, byte[] keyBytes, byte[] ivBytes) {
+        return decrypt(stringArrayToBytes(bytes), keyBytes, ivBytes);
     }
 
-    public static byte[] decrypt(byte[] password) {
+    public static byte[] decrypt(byte[] password, byte[] keyBytes, byte[] ivBytes) {
         int enc_len = password.length;
         byte[] decrypted = new byte[enc_len];
         try
         {
-            byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("key.file")));
-            byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("iv.file")));
-
             SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
             IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -37,20 +32,17 @@ public class AES
         return decrypted;
     }
 
-    public static byte[] encrypt(char[] password) {
-        return encrypt(charsToBytes(password));
+    public static byte[] encrypt(char[] password, byte[] keyBytes, byte[] ivBytes) {
+        return encrypt(charsToBytes(password), keyBytes, ivBytes);
     }
 
-    public static byte[] encrypt(String password) {
-        return encrypt(password.getBytes(StandardCharsets.UTF_8));
+    public static byte[] encrypt(String password, byte[] keyBytes, byte[] ivBytes) {
+        return encrypt(password.getBytes(StandardCharsets.UTF_8), keyBytes, ivBytes);
     }
 
-    public static byte[] encrypt(byte[] password) {
+    public static byte[] encrypt(byte[] password, byte[] keyBytes, byte[] ivBytes) {
         byte[] encrypted = new byte[password.length];
         try {
-            byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("key.file")));
-            byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("iv.file")));
-
             SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
             IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

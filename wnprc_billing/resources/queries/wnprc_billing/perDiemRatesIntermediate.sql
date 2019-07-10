@@ -13,45 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-SELECT
-  x.Id,
-  x.adate,
-  x.edate,
-  x.totalAccountsPerAnimal,
-  split_part(x.accountProject, ',', 1) account,
-  split_part(x.accountProject, ',', 2) project,
-  x.totalDaysPerAccount,
-  x.comment
-  FROM (
-SELECT
-  pd.Id,
-  pd.adate,
-  pd.edate,
-  unnest(string_to_array(pd.accountsProjects, ';')) AS accountProject,
-  pd.totalAccounts AS totalAccountsPerAnimal,
-  pd.totalDaysPerAccount,
-  'Location(s): ' || group_concat(pd.location, ', ') AS comment
-  FROM
-  (
-    SELECT
-      pds.Id,
-      pds.adate,
-      pds.edate,
-      group_concat((pds.account || ',' || pds.project), '; ') AS accountsProjects,
-      count(pds.account)                                                            AS totalAccounts,
-      (TIMESTAMPDIFF('SQL_TSI_DAY', pds.adate, pds.edate) + 1) / count(pds.account) AS totalDaysPerAccount,
-      pds.location
-    FROM wnprc_billing.perDiems pds
-    GROUP BY
-      pds.Id,
-      pds.adate,
-      pds.edate,
-      pds.location
-  ) pd
-  GROUP BY
-    pd.Id,
-    pd.adate,
-    pd.edate,
-    pd.accountsProjects,
-    pd.totalAccounts,
-    pd.totalDaysPerAccount) x
+SELECT perdiemsByDayOuter.Id,
+       perdiemsByDayOuter.adate,
+       perdiemsByDayOuter.edate,
+       sum(effectiveDays)           AS totalDaysPerAccount,
+       perdiemsByDayOuter.account,
+       perdiemsByDayOuter.project,
+       perdiemsByDayOuter.locations AS comment
+FROM (SELECT perdiemsByDay.singleDayDate,
+             perdiemsByDay.Id,
+             perdiemsByDay.account,
+             perdiemsByDay.project,
+             perdiemsByDay.adate,
+             perdiemsByDay.edate,
+             perdiemsByDay.locations,
+             x.accountDays,
+             ROUND(CAST(1 AS DOUBLE) / x.accountDays, 2) AS effectiveDays
+      FROM perdiemsByDay perdiemsByDay
+      LEFT JOIN (SELECT
+                       perdiemsByDay2.singleDayDate,
+                       perdiemsByDay2.Id,
+                       count(perdiemsByDay2.account) as accountDays
+                FROM perdiemsByDay perdiemsByDay2
+                GROUP BY perdiemsByDay2.singleDayDate,
+                         perdiemsByDay2.Id
+                ) x
+      ON x.Id = perdiemsByDay.Id AND x.singleDayDate = perdiemsByDay.singleDayDate) perdiemsByDayOuter
+
+GROUP BY perdiemsByDayOuter.Id,
+         perdiemsByDayOuter.adate,
+         perdiemsByDayOuter.edate,
+         perdiemsByDayOuter.account,
+         perdiemsByDayOuter.project,
+         perdiemsByDayOuter.locations

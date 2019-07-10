@@ -21,5 +21,6 @@ public class ChargesFormSection extends SimpleFormSection
         super("ehr_billing", "miscCharges", "Misc. Charges", "ehr-gridpanel", location);
         setConfigSources(Collections.singletonList("Task"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/model/sources/MiscCharges.js"));
+        _allowRowEditing = false;
     }
 }

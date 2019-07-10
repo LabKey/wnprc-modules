@@ -4,9 +4,16 @@
             <table tableName="invoiceExternal" tableDbType="NOT_IN_DB">
                 <javaCustomizer class = "org.labkey.wnprc_billing.WNPRC_InvoiceCustomizer"/>
                 <tableTitle>External Invoices for All Billing Runs</tableTitle>
+                <buttonBarOptions position="top" includeStandardButtons="true">
+                    <item text="Download Invoices" insertPosition="end" requiresSelection="true">
+                        <target method="POST">wnprc_billing/DownloadInvoices.view?</target>
+                    </item>
+                </buttonBarOptions>
                 <columns>
                     <column columnName="rowId"/>
-                    <column columnName="invoiceNumber"/>
+                    <column columnName="invoiceNumber">
+                        <isKeyField>true</isKeyField> <!--pk needs to be set on a grid for the requiresSelection to work in above buttonBarOptions item -->
+                    </column>
                     <column columnName="invoiceRunId"/>
                     <column columnName="accountNumber">
                         <fk>

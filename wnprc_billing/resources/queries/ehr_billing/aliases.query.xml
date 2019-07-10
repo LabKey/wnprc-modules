@@ -53,7 +53,9 @@
                 <column columnName="affiliate"/>
                 <column columnName="contact_name"/>
                 <column columnName="contact_phone"/>
-                <column columnName="contact_email"/>
+                <column columnName="contact_email">
+                    <nullable>false</nullable>
+                </column>
                 <column columnName="address"/>
                 <column columnName="city"/>
                 <column columnName="state"/>

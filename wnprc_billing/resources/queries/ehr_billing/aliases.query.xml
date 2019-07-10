@@ -7,12 +7,14 @@
             <columns>
                 <column columnName="alias">
                     <columnTitle>Account Number</columnTitle>
+                    <nullable>false</nullable>
                 </column>
                 <column columnName="projectNumber">
                     <columnTitle>Project Number</columnTitle>
                 </column>
                 <column columnName="grantNumber">
                     <columnTitle>Grant Number</columnTitle>
+                    <nullable>false</nullable>
                 </column>
                 <column columnName="tier_rate">
                     <nullable>false</nullable>
@@ -23,7 +25,11 @@
                         <fkDisplayColumnName>tierRate</fkDisplayColumnName>
                     </fk>
                 </column>
-                <column columnName="type"/>
+                <column columnName="type">
+                    <nullable>false</nullable>
+                    <description>Expected values: internal_uw or external</description>
+                    <defaultValue>internal_uw</defaultValue>
+                </column>
                 <column columnName="budgetStartDate">
                     <columnTitle>Current Service Begin</columnTitle>
                 </column>

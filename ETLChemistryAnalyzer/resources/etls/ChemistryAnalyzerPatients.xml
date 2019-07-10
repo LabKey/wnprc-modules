@@ -7,6 +7,15 @@
             <description>Copy to target</description>
             <source schemaName="ChemistryAnalyzer" queryName="MergingPatientsOrders" />
             <destination schemaName="study" queryName="chemistryResults" targetOption="merge">
+                <alternateKeys>
+                    <column name="alternateIdentifier"/>
+                </alternateKeys>
+                <columnTransforms>
+                    <column source="OrderDate" target="date"/>
+                    <column source="headerDate" target="enddate"/>
+                    <column source="RequestDateTime" target="requestDateTime"/>
+                    <column source="comment_test" target="remark"/>
+                </columnTransforms>
                 <constants>
                     <column name="Status" type="INTEGER" value="4"/>
                     <column name="Method" type="VARCHAR" value="Alfa Wassermann Vet Axcel"/>
@@ -15,7 +24,7 @@
             </destination>
         </transform>
     </transforms>
-    <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="date" />
+    <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="headerDate" />
     <schedule>
         <poll interval="60m" />
     </schedule>

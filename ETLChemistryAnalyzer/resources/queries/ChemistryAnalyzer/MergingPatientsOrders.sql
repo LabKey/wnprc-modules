@@ -1,18 +1,29 @@
 SELECT
-GROUPRESULTS.Sample_ID, GROUPRESULTS.RequestDateTime,
+GROUPRESULTS.Sample_ID, GROUPRESULTS.RequestDateTime as RequestDateTime,
 GROUPRESULTS.testid, GROUPRESULTS.resultOORIndicator, GROUPRESULTS.result, GROUPRESULTS.units,
-GROUPRESULTS.OrderComment, GROUPRESULTS.order_date, GROUPRESULTS.comment_text,
+GROUPRESULTS.OrderComment, GROUPRESULTS.OrderDate, GROUPRESULTS.CommentText,
 PT.Patient_ID, PT.Laboratory_Assigned_Patient_ID AS Id, PT.Patient_Name_Name_First_name, Birthdate, Patient_Sex, Special_Field_1,
-HDR.Header_ID,HDR.Date_and_Time AS date
+HDR.Header_ID,HDR.Date_and_Time AS headerDate,
+-- adding unique identifier for same sample_id if set is ran twice
+(GROUPRESULTS.Sample_ID || PT.Laboratory_Assigned_Patient_ID || GROUPRESULTS.RequestDateTime || GROUPRESULTS.testid) AS alternateIdentifier
 FROM
 (
     SELECT
 
     MAX(ORD.Patient_ID) AS Patient_ID, MAX(ORD.Orden_ID) AS Orden_ID, ORD.Requested_Ordered_Date_and_Time AS RequestDateTime,ORD.Sample_ID,
-    MAX(CMO.text) as OrderComment, CMO.order_date, CMO.comment_text,
-    RST.Universal_Test_ID AS testid, MAX(RST.oor) AS resultOORIndicator ,
-    -- MAX(RST.result_value) AS result,
+    MAX(CMO.text) as OrderComment, MAX(CMO.comment_text) AS CommentText,
+    -- MAX(CMO.order_date) AS OrderDate,
+    
+    --If there is not comment we add the RequestOrderedDateandTime coming from the order_view table
+    --OrderDate cannot be null for the ETL process to work.
+    CASE
+    WHEN MAX(CMO.text) IS NULL THEN ORD.Requested_Ordered_Date_and_Time
+    ELSE MAX(CMO.order_date)
+    END AS OrderDate,
 
+    RST.Universal_Test_ID AS testid, MAX(RST.oor) AS resultOORIndicator ,
+
+    -- Check if same test ran twice and have different values displays '-1'
     CASE
     WHEN MAX(RST.result_value) = MIN(RST.result_value) THEN RST.result_value
 

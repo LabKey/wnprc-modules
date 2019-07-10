@@ -1,7 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="Id"/>
-        <column name="RequestDateTime"/>
+        <column name="date"/>
         <column name="Sample_ID"/>
         <column name="testid"/>
         <column name="resultOORIndicator"/>
@@ -9,12 +9,12 @@
         <column name="units"/>
         <column name="RequestDateTime"/>
         <column name="OrderComment"/>
-        <column name="OrderDate"/>
-        <column name="CommentText"/>
+        <column name="headerDate"/>
+        <column name="AlternateIdentifier"/>
 
     </columns>
     <sorts>
-        <sort column="RequestDateTime" descending="true"/>
+        <sort column="date" descending="true"/>
         <sort column="Id" descending="false"/>
         <sort column="testid" descending="false"/>
     </sorts>

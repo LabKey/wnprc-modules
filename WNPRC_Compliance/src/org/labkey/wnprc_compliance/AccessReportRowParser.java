@@ -119,7 +119,7 @@ public class AccessReportRowParser {
                     //For whatever reason apache ROI library thinks some of these cells are numeric,
                     //Even though excel says they are text
                     String value;
-                    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                    if (cell.getCellType() == CellType.NUMERIC) {
                         value = NumberToTextConverter.toText(cell.getNumericCellValue());
                     }
                     else {

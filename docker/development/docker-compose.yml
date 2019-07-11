@@ -18,10 +18,14 @@ services:
       - networkExt
     environment:
       CATALINA_OPTS:
-      JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME}"
+      JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
+                  -Dmsql.user=${MSQL_USER} -Dmsql.pass=${MSQL_PASS} -Dmsql.url=${MSQL_URL}"
       PG_NAME:
       PG_PASS:
       PG_USER:
+      MSQL_USER:
+      MSQL_PASS:
+      MSQL_URL:
       TZ: America/Chicago
 
   nginx:

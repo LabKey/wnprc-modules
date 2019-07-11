@@ -54,7 +54,7 @@ services:
       - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"
       - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"
-      expose:
+    expose:
       - "8080"
     networks:
       - network1

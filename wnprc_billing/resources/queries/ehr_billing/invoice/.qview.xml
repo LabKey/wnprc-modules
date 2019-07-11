@@ -26,7 +26,4 @@
             </properties>
         </column>
     </columns>
-    <filters>
-        <filter column="accountNumber/type" operator="contains" value="external"/>
-    </filters>
 </customView>

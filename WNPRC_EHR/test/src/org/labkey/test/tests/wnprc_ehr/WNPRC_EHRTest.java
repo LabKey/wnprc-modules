@@ -15,6 +15,7 @@
  */
 package org.labkey.test.tests.wnprc_ehr;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -116,6 +117,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private final File CHARGE_UNITS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeUnits.tsv");
     private static final int CHARGE_UNITS_NUM_ROWS = 6;
+    private static int BILLING_RUN_COUNT = 0;
 
     protected EHRTestHelper _helper = new EHRTestHelper(this);
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
@@ -359,7 +361,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("Download Summary Invoice PDF");
         viewPDF("summarizedPDF");
-        
+
         log("Verify payments received for invoice runs");
         testPaymentsReceived();
 
@@ -368,6 +370,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         log("View Charges and adjustments Not Yet Billed");
         viewChargesAdjustmentsNotYetBilled();
+
+        log("Download Multiple Invoices");
+        testDownloadMultipleInvoices();
+
+        log("Delete invoice runs");
+        testDeleteInvoiceRuns();
     }
 
     private void testBillingNotification()
@@ -953,21 +961,21 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
-        performBillingRun();
+        performBillingRun("10/01/2010", "10/31/2010",++BILLING_RUN_COUNT);
         testInvoicedItems();
         testSummaryReports();
     }
 
-    private void performBillingRun()
+    private void performBillingRun(String startDate, String endDate, int billingRunCount)
     {
         waitAndClickAndWait(Locator.linkContainingText("Perform Billing Run"));
         Ext4FieldRef.waitForField(this, "Start Date");
-        Ext4FieldRef.getForLabel(this, "Start Date").setValue("10/01/2010");
-        Ext4FieldRef.getForLabel(this, "End Date").setValue("10/31/2010");
+        Ext4FieldRef.getForLabel(this, "Start Date").setValue(startDate);
+        Ext4FieldRef.getForLabel(this, "End Date").setValue(endDate);
         waitAndClick(Ext4Helper.Locators.ext4Button("Submit"));
         checkMessageWindow("Success", "Run Started!", "OK");
         waitAndClickAndWait(Locator.linkWithText("All"));
-        waitForPipelineJobsToComplete(1, "Billing Run", false);
+        waitForPipelineJobsToComplete(billingRunCount, "Billing Run", false);
     }
 
     private void testInvoicedItems()
@@ -991,6 +999,83 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertTextPresent(texts);
     }
 
+    public void testDownloadMultipleInvoices()
+    {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        performBillingRun("11/01/2010", "11/10/2010", ++BILLING_RUN_COUNT);
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        performBillingRun("11/11/2010", "11/20/2010", ++BILLING_RUN_COUNT);
+
+        goToSchemaBrowser();
+        DataRegionTable dataRegionTable = viewQueryData("ehr_billing", "invoiceExternal");
+        dataRegionTable.checkCheckbox(0);
+        dataRegionTable.checkCheckbox(1);
+        File zip = doAndWaitForDownload(() -> dataRegionTable.clickHeaderButton("Download Invoices"));
+        assertTrue("Wrong file type for download invoices [" + zip.getName() + "]", zip.getName().endsWith(".zip"));
+        assertTrue("Empty zip downloaded [" + zip.getName() + "]", zip.length() > 0);
+    }
+
+    public void testDeleteInvoiceRuns()
+    {
+        log("Enter Misc Charges");
+        Map<String, String> mapWithAnimalId = new LinkedHashMap<>();
+        mapWithAnimalId.put("Id", PROJECT_MEMBER_ID);
+        mapWithAnimalId.put("date", "2010-11-22");
+        mapWithAnimalId.put("project", PROJECT_ID);
+        mapWithAnimalId.put("chargetype", "Clinical Pathology");
+        mapWithAnimalId.put("chargeId", "vaccine supplies");
+        mapWithAnimalId.put("quantity", "10");
+        mapWithAnimalId.put("chargecategory", "Adjustment");
+        mapWithAnimalId.put("comment", "charge 1 with animal id");
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        log("Enter Misc. Charges with animal Id.");
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
+        enterChargesInGrid(1, mapWithAnimalId);
+        log("Submit the form");
+        sleep(5000);
+        submitForm();
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        performBillingRun("11/21/2010", "11/30/2010", ++BILLING_RUN_COUNT);
+
+        goToFinanceFolderTable("Invoiced Items");
+        DataRegionTable invoicedItems = new DataRegionTable("query", getDriver());
+        int invoicedItemsBeforeDelete = invoicedItems.getDataRowCount();
+
+        goToFinanceFolderTable("Invoice Runs");
+        DataRegionTable invoiceRuns = new DataRegionTable("query", getDriver());
+        int invoiceRunsBeforeDelete = invoiceRuns.getDataRowCount();
+        invoiceRuns.checkCheckbox(0);
+        invoiceRuns.clickHeaderButton("Delete");
+
+        assertTextPresent("2 records from invoiced items");
+        assertTextPresent("1 records from invoice");
+        assertTextPresent("1 invoice records from misc charges");
+
+        clickButton("OK");
+
+        invoiceRuns = new DataRegionTable("query", getDriver());
+        assertEquals("Invoiced Run was not deleted", invoiceRuns.getDataRowCount(), invoiceRunsBeforeDelete-1);
+
+        goToFinanceFolderTable("Invoiced Items");
+        invoicedItems = new DataRegionTable("query", getDriver());
+        assertEquals("Invoiced Items were not deleted", invoicedItems.getDataRowCount(), invoicedItemsBeforeDelete-2);
+
+        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+        goToSchemaBrowser();
+        DataRegionTable miscCharges = viewQueryData("ehr_billing", "miscCharges");
+        miscCharges.setFilter("date", "Equals", "2010-11-22");
+        List<String> invoiceId = miscCharges.getColumnDataAsText("invoiceId");
+        assertTrue("invoiceId should be blank after invoice deletion", StringUtils.isBlank(invoiceId.get(0)));
+    }
+
+    private void goToFinanceFolderTable(String tableName)
+    {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        waitForText(tableName);
+        clickAndWait(Locator.bodyLinkContainingText(tableName));
+    }
 
     @Test
     public void testWeightDataEntry()

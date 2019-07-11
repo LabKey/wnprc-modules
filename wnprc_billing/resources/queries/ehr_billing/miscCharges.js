@@ -2,8 +2,6 @@ require("ehr/triggers").initScript(this);
 
 EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr_billing', 'miscCharges', function(helper, scriptErrors, row, oldRow){
 
-    console.log("in ehr billing modules");
-
     if (!helper.isETL() && row) {
 
         if (!row.Id) {

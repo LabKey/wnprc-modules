@@ -68,6 +68,9 @@ services:
       PG_NAME:
       PG_PASS:
       PG_USER:
+      MSQL_USER:
+      MSQL_PASS:
+      MSQL_URL:
       TZ: America/Chicago
 
   nginx:

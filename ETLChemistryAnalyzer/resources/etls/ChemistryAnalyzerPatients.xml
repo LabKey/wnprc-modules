@@ -14,7 +14,7 @@
                     <column source="OrderDate" target="date"/>
                     <column source="headerDate" target="enddate"/>
                     <column source="RequestDateTime" target="requestDateTime"/>
-                    <column source="comment_test" target="remark"/>
+                    <column source="CommentText" target="remark"/>
                 </columnTransforms>
                 <constants>
                     <column name="Status" type="INTEGER" value="4"/>

@@ -35,8 +35,6 @@ FROM
 
     FROM CHEMISTRYANALYZER.order_view ORD
 
-
-
     JOIN  CHEMISTRYANALYZER.result_view RST
     ON ORD.Orden_ID = RST.Orden_ID
     
@@ -58,6 +56,4 @@ ON PT.Patient_ID = GROUPRESULTS.Patient_ID
 JOIN CHEMISTRYANALYZER.header_view HDR
     ON HDR.Header_ID = PT.Header_ID
 
-WHERE startswith(Patient_Name_Name_First_name,'MONKEY')
-
---
+WHERE startswith(Patient_Name_Name_First_name,'MONKEY') AND HDR.Date_and_Time >='2019-07-08'

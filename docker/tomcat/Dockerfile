@@ -7,7 +7,7 @@ ENV LANG en_US.utf8
 RUN yum-config-manager --enable ol7_optional_latest
 RUN yum -y -q install \
     #for R
-    texinfo-tex \ 
+    texinfo-tex \
     # for the timezone
     tzdata \
     # for downloading LabKey and Tomcat

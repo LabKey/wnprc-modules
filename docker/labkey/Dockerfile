@@ -5,12 +5,8 @@ FROM alpine:latest as download
 
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
-
 ARG WNPRC_BRANCH=master
-
 ARG LABKEY_VERSION=17.2
-
-# User should set LABKEY_IS_PREMIUM=true if premium version, otherwise don't set any value at all
 ARG LABKEY_IS_PREMIUM=false
 
 WORKDIR /tmp/labkey

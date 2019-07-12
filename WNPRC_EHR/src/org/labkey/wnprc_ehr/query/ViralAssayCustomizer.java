@@ -163,13 +163,13 @@ public class ViralAssayCustomizer implements TableCustomizer {
             }
         }
 
-        ColumnInfo pooledColumn = ti.getColumn("pooled");
+        ColumnInfo batchedColumn = ti.getColumn("batched");
 
-        if (pooledColumn != null) {
-            pooledColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
+        if (batchedColumn != null) {
+            batchedColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
                 @Override
                 public DisplayColumn createRenderer(ColumnInfo colInfo) {
-                    return new ViralLoadPooledColumn(colInfo);
+                    return new ViralLoadBatchedColumn(colInfo);
                 }
             });
         }
@@ -235,22 +235,22 @@ public class ViralAssayCustomizer implements TableCustomizer {
         }
     }
 
-    public static class ViralLoadPooledColumn extends DataColumn {
-        public ViralLoadPooledColumn(ColumnInfo colInfo) {
+    public static class ViralLoadBatchedColumn extends DataColumn {
+        public ViralLoadBatchedColumn(ColumnInfo colInfo) {
             super(colInfo);
         }
 
         @Override
         public Object getValue(RenderContext ctx) {
-            String isPooled = "false";
+            String isBatched = "false";
             Object value = super.getValue(ctx);
             if (value instanceof Boolean) {
-                boolean pooled = (boolean) value;
-                if (pooled) {
-                    isPooled = "true";
+                boolean batched = (boolean) value;
+                if (batched) {
+                    isBatched = "true";
                 }
             }
-            return isPooled;
+            return isBatched;
         }
 
         @Override

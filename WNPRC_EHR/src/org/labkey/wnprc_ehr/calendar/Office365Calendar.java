@@ -36,7 +36,6 @@ import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
-import org.labkey.ldk.LDKServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.encryption.AES;
 
@@ -45,6 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,12 +81,14 @@ public class Office365Calendar
             emailAddress = (String) map.get("private_key_id");
 
             String[] bytes = ((String) map.get("private_key")).split(",");
-            byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file")));
+            _log.error("key file property: " + System.getProperty("surgeries_key.file"));
+            _log.error("iv file property: " + System.getProperty("surgeries_iv.file"));
             _log.error("key path: " + Paths.get(System.getProperty("surgeries_key.file")));
-            _log.error("keyBytes: " + keyBytes);
-            byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file")));
             _log.error("iv path: " + Paths.get(System.getProperty("surgeries_iv.file")));
-            _log.error("ivBytes: " + ivBytes);
+            byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file")));
+            _log.error("keyBytes: " + Arrays.toString(keyBytes));
+            byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file")));
+            _log.error("ivBytes: " + Arrays.toString(ivBytes));
 
             byte[] decrypted = AES.decrypt(bytes, keyBytes, ivBytes);
 

@@ -96,6 +96,8 @@ public class Office365Calendar
         }
         catch (Exception e)
         {
+            System.out.println("Exception during authentication: " + e.getMessage());
+            e.printStackTrace();
             int x = 3;
         }
     }

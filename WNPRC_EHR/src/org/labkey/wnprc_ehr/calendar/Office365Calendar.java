@@ -23,6 +23,7 @@ import microsoft.exchange.webservices.data.property.complex.StringList;
 import microsoft.exchange.webservices.data.property.complex.availability.CalendarEvent;
 import microsoft.exchange.webservices.data.search.CalendarView;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
@@ -35,6 +36,7 @@ import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.ldk.LDKServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.encryption.AES;
 
@@ -52,7 +54,7 @@ import java.util.Map;
 public class Office365Calendar
 {
     public static final ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
-    //private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final Logger _log = Logger.getLogger(Office365Calendar.class);
     private User user;
     private Container container;
 
@@ -80,11 +82,11 @@ public class Office365Calendar
 
             String[] bytes = ((String) map.get("private_key")).split(",");
             byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file")));
-            System.out.println("key path: " + Paths.get(System.getProperty("surgeries_key.file")));
-            System.out.println("keyBytes: " + keyBytes);
+            _log.error("key path: " + Paths.get(System.getProperty("surgeries_key.file")));
+            _log.error("keyBytes: " + keyBytes);
             byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file")));
-            System.out.println("iv path: " + Paths.get(System.getProperty("surgeries_iv.file")));
-            System.out.println("ivBytes: " + ivBytes);
+            _log.error("iv path: " + Paths.get(System.getProperty("surgeries_iv.file")));
+            _log.error("ivBytes: " + ivBytes);
 
             byte[] decrypted = AES.decrypt(bytes, keyBytes, ivBytes);
 
@@ -96,8 +98,7 @@ public class Office365Calendar
         }
         catch (Exception e)
         {
-            System.out.println("Exception during authentication: " + e.getMessage());
-            e.printStackTrace();
+            _log.error("Exception during authentication: " + e.getMessage());
             int x = 3;
         }
     }
@@ -355,7 +356,9 @@ public class Office365Calendar
         String events = "";
         try
         {
+            _log.error("authenticate - start");
             authenticate();
+            _log.error("authenticate - end");
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.MONTH, -2);
             Date startDate = cal.getTime();

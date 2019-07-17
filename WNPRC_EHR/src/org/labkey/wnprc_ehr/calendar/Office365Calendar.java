@@ -80,7 +80,11 @@ public class Office365Calendar
 
             String[] bytes = ((String) map.get("private_key")).split(",");
             byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file")));
+            System.out.println("key path: " + Paths.get(System.getProperty("surgeries_key.file")));
+            System.out.println("keyBytes: " + keyBytes);
             byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file")));
+            System.out.println("iv path: " + Paths.get(System.getProperty("surgeries_iv.file")));
+            System.out.println("ivBytes: " + ivBytes);
 
             byte[] decrypted = AES.decrypt(bytes, keyBytes, ivBytes);
 

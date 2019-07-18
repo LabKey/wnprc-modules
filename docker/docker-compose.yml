@@ -55,7 +55,7 @@ services:
       - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"
       - "${SURGERIES_KEY_FILE}:/usr/local/keys/surgeries_key.txt"
-      - "${SURGERIES_KEY_FILE}:/usr/local/keys/surgeries_iv.txt"
+      - "${SURGERIES_IV_FILE}:/usr/local/keys/surgeries_iv.txt"
     expose:
       - "8080"
     networks:

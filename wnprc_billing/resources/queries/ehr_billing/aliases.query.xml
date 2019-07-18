@@ -2,12 +2,19 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="aliases" tableDbType="TABLE" useColumnOrder="true">
-            <tableTitle>Grant Accounts</tableTitle>
+                <javaCustomizer class="org.labkey.ehr_billing.table.EHR_BillingCustomizer" />
+                <tableTitle>Grant Accounts</tableTitle>
             <auditLogging>DETAILED</auditLogging>
             <columns>
                 <column columnName="alias">
                     <columnTitle>Account Number</columnTitle>
                     <nullable>false</nullable>
+                </column>
+                <column columnName="isAcceptingCharges">
+                    <formatString>Y;N;</formatString>
+                </column>
+                <column columnName="gencredits">
+                    <formatString>Y;N;</formatString>
                 </column>
                 <column columnName="projectNumber">
                     <columnTitle>Project Number</columnTitle>
@@ -80,7 +87,6 @@
                 <column columnName="order_cutoff"/>
                 <column columnName="successor_account"/>
                 <column columnName="predecessor_account"/>
-                <column columnName="gencredits"/>
                 <column columnName="mds_number"/>
                 <column columnName="faRate">
                     <isHidden>true</isHidden>

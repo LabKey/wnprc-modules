@@ -17,6 +17,11 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
             debitedaccount: {
                 hidden: false,
                 xtype: 'wnprc_billing-miscchargesdebitacctentryfield',
+                lookup: {
+                    schemaName: 'ehr_billing',
+                    queryName: 'aliases',
+                    filterArray: [LABKEY.Filter.create('isAcceptingCharges', 'Y', LABKEY.Filter.Types.EQUAL)]
+                },
                 columnConfig: {
                     width: 125
                 }

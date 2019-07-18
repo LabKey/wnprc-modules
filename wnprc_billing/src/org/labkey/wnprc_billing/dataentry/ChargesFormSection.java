@@ -5,6 +5,7 @@ import org.labkey.api.ehr.dataentry.SimpleFormSection;
 import org.labkey.api.view.template.ClientDependency;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Class to administer Ext4JS component/panel for ehr_billing.miscCharges table for data entry form.
@@ -19,8 +20,30 @@ public class ChargesFormSection extends SimpleFormSection
     public ChargesFormSection(EHRService.FORM_SECTION_LOCATION location)
     {
         super("ehr_billing", "miscCharges", "Misc. Charges", "ehr-gridpanel", location);
-        setConfigSources(Collections.singletonList("Task"));
-        addClientDependency(ClientDependency.fromPath("wnprc_billing/model/sources/MiscCharges.js"));
         _allowRowEditing = false;
+
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/model/sources/MiscCharges.js"));
+
+        setConfigSources(Collections.singletonList("Task"));
+    }
+
+    @Override
+    public List<String> getTbarButtons()
+    {
+        List<String> defaultButtons = super.getTbarButtons();
+
+        // Remove the default buttons that don't make sense for charges with animal ids
+        defaultButtons.remove("COPYFROMSECTION");
+        defaultButtons.remove("TEMPLATE");
+
+        return defaultButtons;
+    }
+
+    @Override
+    public List<String> getTbarMoreActionButtons()
+    {
+        List<String> defaultMoreActionButtons = super.getTbarMoreActionButtons();
+        defaultMoreActionButtons.remove("BULKEDIT");
+        return defaultMoreActionButtons;
     }
 }

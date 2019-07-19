@@ -93,7 +93,7 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
 
         //these fields are expected in the sql queries mentioned in getCategoriesToQuery() above
 
-        fields.add(new FieldDescriptor("isMissingAccount", true, "Missing Alias", true));
+        fields.add(new FieldDescriptor("isMissingAccount", true, "Missing Account", true));
         fields.add(new FieldDescriptor("isExpiredAccount", true, "Expired/Invalid Account", true));
         fields.add(new FieldDescriptor("isAcceptingCharges", true, "Account Not Accepting Charges", true));
         fields.add(new FieldDescriptor("lacksRate", true, "Lacks Rate", true));

@@ -18,8 +18,12 @@ EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Even
             row.creditedaccount = row.creditedaccount.replace(/^\s+|\s+$/g, '');
         }
 
-        if(!row.chargeId && !row.unitcost) {
+        if (!row.chargeId && !row.unitcost) {
             EHR.Server.Utils.addError(scriptErrors, 'chargeId', 'Must provide either Charge Item or Unit Cost', 'ERROR');
+        }
+
+        if (!row.comment) {
+            EHR.Server.Utils.addError(scriptErrors, 'comment', 'Comment cannot be blank, it is expected as an line item on an Invoice', 'ERROR');
         }
 
         if (row.invoiceId) {

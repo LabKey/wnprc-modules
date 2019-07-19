@@ -5,6 +5,7 @@ import java.util.Date;
 public class Alias
 {
     String _alias;
+    String _type;
     String _po_number;
     String _address;
     String _contact_email;
@@ -25,6 +26,16 @@ public class Alias
     public void setAlias(String alias)
     {
         _alias = alias;
+    }
+
+    public String getType()
+    {
+        return _type;
+    }
+
+    public void setType(String type)
+    {
+        _type = type;
     }
 
     public String getPo_number()

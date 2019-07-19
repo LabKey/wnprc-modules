@@ -15,6 +15,23 @@
                         <formatString>Date</formatString>
                     </column>
                 </columns>
+                <buttonBarOptions includeStandardButtons="false">
+                    <item text="Grid Views">
+                        <originalText>Grid Views</originalText>
+                    </item>
+                    <item text="Charts">
+                        <originalText>Charts</originalText>
+                    </item>
+                    <item text="Export">
+                        <originalText>Export</originalText>
+                    </item>
+                    <item text="Delete" permission="DELETE" requiresSelection="true" insertBefore="Export" iconCls="trash" >
+                        <target method="GET">ehr_billing/DeleteBillingPeriod.view?</target>
+                    </item>
+                    <item text="Print">
+                        <originalText>Print</originalText>
+                    </item>
+                </buttonBarOptions>
             </table>
         </tables>
     </metadata>

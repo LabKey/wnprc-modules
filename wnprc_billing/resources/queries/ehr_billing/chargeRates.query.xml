@@ -18,6 +18,9 @@
                             <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
+                    <column columnName="unitCost">
+                        <nullable>false</nullable>
+                    </column>
                     <column columnName="chargeId">
                         <columnTitle>Charge Item</columnTitle>
                         <fk>

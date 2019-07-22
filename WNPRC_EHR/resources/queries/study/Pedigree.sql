@@ -56,6 +56,7 @@ SELECT
 p.id as Id,
 p.dam as Dam,
 p.sire as Sire,
+'' as Display,
 CASE (p.gender)
   WHEN 'm' THEN 1
   WHEN 'f' THEN 2

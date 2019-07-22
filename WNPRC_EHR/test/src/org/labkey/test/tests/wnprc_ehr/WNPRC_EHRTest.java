@@ -767,6 +767,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         List<String> expectedColumns = Arrays.asList(
                 "alias",
+                "isActive",
+                "isAcceptingCharges",
+                "gencredits",
                 "grantNumber",
                 "tier_rate",
                 "type",
@@ -793,7 +796,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "order_cutoff",
                 "successor_account",
                 "predecessor_account",
-                "gencredits",
                 "mds_number"
         );
 
@@ -913,7 +915,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         testExpectedRowCount(TIER_RATES_NUM_ROWS);
 
         //upload Grant Accounts
-        importBulkDataFromFile(ALIASES_TSV, "Grant Accounts", ALIASES_NUM_ROWS);
+        importBulkDataFromFile(ALIASES_TSV, "Grant Accounts - ALL", ALIASES_NUM_ROWS);
         testExpectedRowCount(ALIASES_NUM_ROWS);
 
         //upload Chargeable Item Categories

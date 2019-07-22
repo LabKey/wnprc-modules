@@ -233,6 +233,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
     @ActionNames("uploadAccessReport")
     @RequiresPermission(ComplianceAdminPermission.class)
+    @CSRF(CSRF.Method.POST)
     public class UploadAccessReportAPI extends AbstractFileUploadAction {
         @Override
         protected File handleFile(String filename, InputStream input, Writer writer) throws IOException {

@@ -767,6 +767,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         List<String> expectedColumns = Arrays.asList(
                 "alias",
+                "isActive",
+                "isAcceptingCharges",
+                "gencredits",
                 "grantNumber",
                 "tier_rate",
                 "type",
@@ -793,7 +796,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "order_cutoff",
                 "successor_account",
                 "predecessor_account",
-                "gencredits",
                 "mds_number"
         );
 

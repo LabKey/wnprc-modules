@@ -77,11 +77,11 @@ public class Office365Calendar
             Map map = ts.getMap();
             emailAddress = (String) map.get("private_key_id");
 
-            String[] bytes = ((String) map.get("private_key")).split(",");
-            byte[] keyBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file")));
-            byte[] ivBytes = Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file")));
+            byte[] passwordBytes = AES.base64StringToByteArray((String) map.get("private_key"));
+            byte[] keyBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file"))), StandardCharsets.UTF_8));
+            byte[] ivBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file"))), StandardCharsets.UTF_8));
 
-            byte[] decrypted = AES.decrypt(bytes, keyBytes, ivBytes);
+            byte[] decrypted = AES.decrypt(passwordBytes, keyBytes, ivBytes);
 
             ExchangeCredentials credentials = new WebCredentials(emailAddress, new String(decrypted, StandardCharsets.UTF_8));
             service.setCredentials(credentials);

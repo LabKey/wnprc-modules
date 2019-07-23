@@ -3,13 +3,19 @@ package org.labkey.wnprc_ehr.encryption;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 
 public class AES
 {
+    public static byte[] decrypt(String encryptedPassword, String keyString, String ivString) {
+        return decrypt(encryptedPassword.getBytes(StandardCharsets.UTF_8), keyString.getBytes(StandardCharsets.UTF_8), ivString.getBytes(StandardCharsets.UTF_8));
+    }
+
     public static byte[] decrypt(String[] bytes, byte[] keyBytes, byte[] ivBytes) {
         return decrypt(stringArrayToBytes(bytes), keyBytes, ivBytes);
     }
@@ -27,9 +33,14 @@ public class AES
             int dec_len = cipher.update(password, 0, enc_len, decrypted, 0);
             dec_len += cipher.doFinal(decrypted, dec_len);
         } catch (Exception e) {
+            int x = 3;
             //TODO add error handling
         }
         return decrypted;
+    }
+
+    public static byte[] encrypt(String password, String keyString, String ivString) {
+        return encrypt(password.getBytes(StandardCharsets.UTF_8), keyString.getBytes(StandardCharsets.UTF_8), ivString.getBytes(StandardCharsets.UTF_8));
     }
 
     public static byte[] encrypt(char[] password, byte[] keyBytes, byte[] ivBytes) {
@@ -52,6 +63,7 @@ public class AES
             int enc_len = cipher.update(password, 0, password.length, encrypted, 0);
             enc_len += cipher.doFinal(encrypted, enc_len);
         } catch (Exception e) {
+            int x = 3;
             //TODO add error handling
         }
         return encrypted;
@@ -82,5 +94,13 @@ public class AES
             pw[i] = Byte.parseByte(bytes[i]);
         }
         return pw;
+    }
+
+    public static byte[] hexStringToByteArray(String hexString) {
+        return DatatypeConverter.parseHexBinary(hexString);
+    }
+
+    public static byte[] base64StringToByteArray(String base64String) {
+        return Base64.getDecoder().decode(new String(base64String.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
     }
 }

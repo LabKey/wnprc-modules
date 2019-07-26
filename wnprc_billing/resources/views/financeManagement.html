@@ -39,6 +39,7 @@
                         {name: 'Estimated Charges By Project', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'invoiceEstimate', null)},
                         {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'miscChargesNotBilledUpdate'})},
                         {name: 'Perform Billing Run', url: LABKEY.ActionURL.buildURL('ehr_billing', 'billingPipeline', null)},
+                        {name: 'Invoice Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRuns'})},
                         {name: 'Invoice External - Latest Run', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternalLastRun'})},
                         {name: 'Invoice Internal - Latest Run', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceInternalLastRun'})}
 
@@ -52,12 +53,11 @@
                 },{
                     header: 'Historic Billing Data',
                     items: [
-                        {name: 'Invoice Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRuns'})},
                         {name: 'Monthly Summary Direct', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRunMonthlySummaryDirect'})},
                         {name: 'Monthly Summary Indirect', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRunMonthlySummaryIndirect'})},
-                        {name: 'All Invoiced Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoicedItems'})},
-                        {name: 'Invoice External - All Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternal'})},
-                        {name: 'Invoice Internal - All Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceInternal'})}
+                        {name: 'Invoiced Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoicedItems'})},
+                        {name: 'Invoice External', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternal'})},
+                        {name: 'Invoice Internal', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceInternal'})}
                     ]
                 },{
                     header: 'Reference Tables',

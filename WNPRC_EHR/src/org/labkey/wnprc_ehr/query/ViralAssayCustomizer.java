@@ -13,8 +13,8 @@ import org.labkey.api.laboratory.LaboratoryService;
 import org.labkey.api.ldk.LDKService;
 import org.labkey.api.ldk.table.ButtonConfigFactory;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
 
 import java.util.List;
 
@@ -204,8 +204,8 @@ public class ViralAssayCustomizer implements TableCustomizer {
         @Override
         public Object getValue(RenderContext ctx) {
             Object value = super.getValue(ctx);
-            if (value != null && value instanceof Boolean) {
-                boolean liquid = (boolean) value;
+            if (value instanceof Boolean) {
+                boolean liquid = (Boolean) value;
                 if (liquid) {
                     return "mL";
                 }

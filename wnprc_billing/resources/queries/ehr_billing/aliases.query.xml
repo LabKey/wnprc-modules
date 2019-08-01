@@ -12,6 +12,7 @@
                 </column>
                 <column columnName="isAcceptingCharges">
                     <formatString>Y;N;</formatString>
+                    <defaultValue>1</defaultValue>
                 </column>
                 <column columnName="gencredits">
                     <formatString>Y;N;</formatString>

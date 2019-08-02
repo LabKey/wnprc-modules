@@ -394,9 +394,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         verifyChargeSummary("Misc. Charges", 1);
         verifyChargeSummary("Per Diems", 1);
 
-        clickAndWait(Locator.tagWithAttributeContaining("a", "href", "queryName=project").findElement(getDriver()));
-        DataRegionTable table = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong number of rows in project", 2, table.getDataRowCount());
         goBack(WAIT_FOR_PAGE);
     }
 

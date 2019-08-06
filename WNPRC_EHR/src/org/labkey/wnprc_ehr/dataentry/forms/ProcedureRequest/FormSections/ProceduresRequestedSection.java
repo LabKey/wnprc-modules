@@ -4,6 +4,6 @@ import org.labkey.api.ehr.dataentry.SimpleFormSection;
 
 public class ProceduresRequestedSection extends SimpleFormSection {
     public ProceduresRequestedSection() {
-        super("study", "Clinical Encounters", "Procedures Requested", "ehr-gridpanel");
+        super("study", "Encounters", "Procedures Requested", "ehr-gridpanel");
     }
 }

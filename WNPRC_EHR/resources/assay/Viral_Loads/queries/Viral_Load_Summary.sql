@@ -24,9 +24,9 @@ SELECT
   group_concat(distinct v.qcflag, ';') as qcflags,
   group_concat(distinct v.comment, ';') as comments,
   cast(min(v.well) as varchar) as lowestWell,~
-  v.pooled,
+  v.batched,
   v.run,
   v.folder
 
 FROM Data v
-GROUP BY v.run, v.subjectid, v.date, v.assayId, v.category, v.pooled, v.folder
+GROUP BY v.run, v.subjectid, v.date, v.assayId, v.category, v.batched, v.folder

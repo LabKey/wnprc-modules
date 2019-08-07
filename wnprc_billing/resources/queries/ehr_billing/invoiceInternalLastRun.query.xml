@@ -1,0 +1,33 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="invoiceInternalLastRun" tableDbType="NOT_IN_DB">
+                <javaCustomizer class = "org.labkey.wnprc_billing.WNPRC_InvoiceCustomizer"/>
+                <tableTitle>Internal Invoices for the Last Billing Run</tableTitle>
+                <buttonBarOptions position="top" includeStandardButtons="true">
+                        <item text="Download Invoices" insertPosition="end" requiresSelection="true">
+                            <target method="POST">wnprc_billing/DownloadInvoices.view?</target>
+                        </item>
+                </buttonBarOptions>
+                <columns>
+                    <column columnName="rowId"/>
+                    <column columnName="invoiceNumber">
+                        <isKeyField>true</isKeyField> <!--pk needs to be set on a grid for the requiresSelection to work in above buttonBarOptions item -->
+                    </column>
+                    <column columnName="invoiceRunId"/>
+                    <column columnName="accountNumber">
+                        <fk>
+                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="invoiceSentOn"/>
+                    <column columnName="invoiceAmount">
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -1,5 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
+        <column name="invoiceId"/>
         <column name="Id"/>
         <column name="date"/>
         <column name="project"/>

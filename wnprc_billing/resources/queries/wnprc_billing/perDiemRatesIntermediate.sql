@@ -16,7 +16,7 @@
 SELECT perdiemsByDayOuter.Id,
        perdiemsByDayOuter.adate,
        perdiemsByDayOuter.edate,
-       sum(effectiveDays)           AS totalDaysPerAccount,
+       round(sum(effectiveDays), 5)          AS totalDaysPerAccount,
        perdiemsByDayOuter.account,
        perdiemsByDayOuter.project,
        perdiemsByDayOuter.locations AS comment
@@ -28,7 +28,7 @@ FROM (SELECT perdiemsByDay.singleDayDate,
              perdiemsByDay.edate,
              perdiemsByDay.locations,
              x.accountDays,
-             ROUND(CAST(1 AS DOUBLE) / x.accountDays, 2) AS effectiveDays
+             ROUND(CAST(1 AS DOUBLE) / x.accountDays, 5) AS effectiveDays
       FROM perdiemsByDay perdiemsByDay
       LEFT JOIN (SELECT
                        perdiemsByDay2.singleDayDate,

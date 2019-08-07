@@ -1,6 +1,9 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="alias"/>
+        <column name="isActive"/>
+        <column name="isAcceptingCharges"/>
+        <column name="gencredits"/>
         <column name="grantNumber"/>
         <column name="tier_rate"/>
         <column name="type"/>
@@ -27,7 +30,6 @@
         <column name="order_cutoff"/>
         <column name="successor_account"/>
         <column name="predecessor_account"/>
-        <column name="gencredits"/>
         <column name="mds_number"/>
     </columns>
     <sorts>

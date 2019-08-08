@@ -33,10 +33,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class GoogleCalendar
+public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
 {
     private User user;
     private Container container;
+    private String eventDefaultBgColor = "#ADD8E6"; //lightblue
+    private String eventSelectedBgColor = "#ADFFFF"; //slightly lighter
 
     /** Application name. */
     private static final String APPLICATION_NAME =
@@ -76,6 +78,22 @@ public class GoogleCalendar
         container = c;
     }
 
+    public String getEventDefaultBgColor() {
+        return eventDefaultBgColor;
+    }
+
+    public void setEventDefaultBgColor(String color) {
+        eventDefaultBgColor = color;
+    }
+
+    public String getEventSelectedBgColor() {
+        return eventSelectedBgColor;
+    }
+
+    public void setEventSelectedBgColor(String color) {
+        eventSelectedBgColor = color;
+    }
+
     private JSONArray getJsonEventList(List<Event> events) {
         JSONArray jsonEvents = new JSONArray();
 
@@ -86,6 +104,8 @@ public class GoogleCalendar
             jsonEvent.put("start", event.getStart() != null ? event.getStart().getDate() : null);
             jsonEvent.put("end", event.getEnd() != null ? event.getEnd().getDate() : null);
             jsonEvent.put("htmlLink", event.getHtmlLink());
+            jsonEvent.put("defaultBgColor", getEventDefaultBgColor());
+            jsonEvent.put("selectedBgColor", getEventSelectedBgColor());
 
             jsonEvents.put(jsonEvent);
         }

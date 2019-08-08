@@ -42,6 +42,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,11 +51,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Office365Calendar
+public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 {
     public static final ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
+    public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private User user;
     private Container container;
+    private String eventDefaultBgColor = "#90EE90"; //lightblue
+    private String eventSelectedBgColor = "#50FF50"; //slightly darker
+    private String heldEventDeafultBgColor = "#F0B0B0";
+    private String heldEventSelectedBgColor = "#F0D0D0";
 
     public void setUser(User u)
     {
@@ -63,6 +70,38 @@ public class Office365Calendar
     public void setContainer(Container c)
     {
         container = c;
+    }
+
+    public String getEventDefaultBgColor() {
+        return eventDefaultBgColor;
+    }
+
+    public void setEventDefaultBgColor(String color) {
+        eventDefaultBgColor = color;
+    }
+
+    public String getEventSelectedBgColor() {
+        return eventSelectedBgColor;
+    }
+
+    public void setEventSelectedBgColor(String color) {
+        eventSelectedBgColor = color;
+    }
+
+    public String getHeldEventDeafultBgColor() {
+        return heldEventDeafultBgColor;
+    }
+
+    public void setHeldEventDeafultBgColor(String color) {
+        heldEventDeafultBgColor = color;
+    }
+
+    public String getHeldEventSelectedBgColor() {
+        return heldEventSelectedBgColor;
+    }
+
+    public void setHeldEventSelectedBgColor(String color) {
+        heldEventSelectedBgColor = color;
     }
 
     public void authenticate()
@@ -256,8 +295,10 @@ public class Office365Calendar
 
                 JSONObject jsonEvent = new JSONObject();
                 jsonEvent.put("title", event.getSubject());
-                jsonEvent.put("start", event.getStart() != null ? event.getStart() : null);
-                jsonEvent.put("end", event.getEnd() != null ? event.getEnd() : null);
+                jsonEvent.put("start", df.format(event.getStart()));
+                jsonEvent.put("end", df.format(event.getEnd()));
+                jsonEvent.put("defaultBgColor", hold ? getHeldEventDeafultBgColor() : getEventDefaultBgColor());
+                jsonEvent.put("selectedBgColor", hold ? getHeldEventSelectedBgColor() : getEventSelectedBgColor());
 
                 //Add data for details panel on Surgery Schedule page
                 JSONObject rawRowData = new JSONObject();
@@ -282,7 +323,6 @@ public class Office365Calendar
                     rawRowData.put("protocol", surgeryInfo.get("protocol"));
                     rawRowData.put("sex", surgeryInfo.get("sex"));
                     rawRowData.put("weight", surgeryInfo.get("weight"));
-                    rawRowData.put("date", surgeryInfo.get("date"));
                     rawRowData.put("enddate", surgeryInfo.get("enddate"));
                     rawRowData.put("comments", surgeryInfo.get("comments"));
                     rawRowData.put("hold", hold);

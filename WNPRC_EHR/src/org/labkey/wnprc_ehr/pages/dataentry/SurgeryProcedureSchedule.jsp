@@ -18,8 +18,14 @@
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js'></script>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.css' />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.css' />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.css' />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.css' />
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.js'></script>
 
 <style type="text/css">
     /* Full Calendar heading */
@@ -37,7 +43,6 @@
     JSONArray jsonRequests = requests.getResults().getJSONArray("rows");
     ArrayList<Integer> positionsToRemove = new ArrayList<>();
     System.out.println("JSON Requests: " + jsonRequests);
-
     for(int i = 0; i < jsonRequests.length(); i++)
     {
         JSONObject row1 = jsonRequests.getJSONObject(i);
@@ -53,11 +58,9 @@
             }
         }
     }
-
     List<JSONObject> statRequests = new ArrayList<>();
     List<JSONObject> asapRequests = new ArrayList<>();
     List<JSONObject> routineRequests = new ArrayList<>();
-
     //Remove linked requests and separate by request priority
     for(int i = 0; i < jsonRequests.length(); i++) {
         if (!positionsToRemove.contains(i)) {
@@ -72,9 +75,7 @@
             }
         }
     }
-
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     Comparator<JSONObject> dateComparator = new Comparator<JSONObject>() {
         @Override
         public int compare(JSONObject o1, JSONObject o2) {
@@ -88,11 +89,9 @@
             return result;
         }
     };
-
     statRequests.sort(dateComparator);
     asapRequests.sort(dateComparator);
     routineRequests.sort(dateComparator);
-
     //Add all requests back into one list that's now ordered by priority followed by start time
     JSONArray pendingRequests = new JSONArray();
     for(JSONObject statRequest : statRequests) {
@@ -104,14 +103,11 @@
     for(JSONObject routineRequest : routineRequests) {
         pendingRequests.put(routineRequest);
     }
-
     List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "surgery_procedure_rooms"));
-
     Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
     Group spiGroup = GroupManager.getGroup(getContainer(), "spi (LDAP)", GroupEnumType.SITE);
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
     boolean isSpi = getUser().isInGroup(spiGroup.getUserId()) || getUser().isInSiteAdminGroup();
-
     GoogleCalendar ct = new GoogleCalendar();
     ct.setUser(getUser());
     ct.setContainer(getContainer());
@@ -119,12 +115,12 @@
     if (isVet) {
         gCalEventsString = ct.getCalendarEventsAsJson();
     }
-
     Office365Calendar oct = new Office365Calendar();
     oct.setUser(getUser());
     oct.setContainer(getContainer());
+    oct.setEventSelectedBgColor("#30FF30");
+    oct.setHeldEventSelectedBgColor("#FF7070");
     String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
-
     String outlookHeldEventsString = "[]";
     if (isVet || isSpi) {
         outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
@@ -164,9 +160,9 @@
                 </dl>
                 <%--<!-- /ko -->--%>
                 <%--<!-- ko if: hold() -->--%>
-                    <div style="text-align: right;">
-                        <button class="btn btn-danger" data-bind="click: $root.cancelHeldEvent">Cancel</button>
-                    </div>
+                <div style="text-align: right;">
+                    <button class="btn btn-danger" data-bind="click: $root.cancelHeldEvent">Cancel</button>
+                </div>
                 <%--<a class="btn btn-default" href="{{$parent.cancelHeldEvent}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>--%>
                 <%--<!-- /ko -->--%>
                 <%--<a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>--%>
@@ -276,39 +272,39 @@
                     </div>
 
                     <%--<div class="form-group">--%>
-                        <%--<label class="col-xs-4 control-label">Pathologist</label>--%>
-                        <%--<div class="col-xs-8">--%>
-                            <%--&lt;%&ndash;<select data-bind="value: pathologist" class="form-control">&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
-                                        <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
-                                        <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                            <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
-                        <%--</div>--%>
+                    <%--<label class="col-xs-4 control-label">Pathologist</label>--%>
+                    <%--<div class="col-xs-8">--%>
+                    <%--&lt;%&ndash;<select data-bind="value: pathologist" class="form-control">&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
+                    <%--</div>--%>
                     <%--</div>--%>
 
                     <%--<div class="form-group">--%>
-                        <%--<label class="col-xs-4 control-label">Prosector</label>--%>
-                        <%--<div class="col-xs-8">--%>
-                            <%--&lt;%&ndash;<select data-bind="value: assistant" class="form-control">&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
-                                        <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
-                                        <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
-                                <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                            <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
-                        <%--</div>--%>
+                    <%--<label class="col-xs-4 control-label">Prosector</label>--%>
+                    <%--<div class="col-xs-8">--%>
+                    <%--&lt;%&ndash;<select data-bind="value: assistant" class="form-control">&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
+                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
+                    <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
+                    <%--</div>--%>
                     <%--</div>--%>
 
                     <div class="form-group">
@@ -321,9 +317,9 @@
 
 
                         <%--<div class="col-xs-8">--%>
-                            <%--<p class="form-control">{{statuschangereason}}</p>--%>
-                            <%--&lt;%&ndash;<input type="hidden" class="hidden-assignedTo-field" data-bind="value: assignedTo">&ndash;%&gt;--%>
-                            <%--&lt;%&ndash;<input type="text" class="form-control assignedTo-field">&ndash;%&gt;--%>
+                        <%--<p class="form-control">{{statuschangereason}}</p>--%>
+                        <%--&lt;%&ndash;<input type="hidden" class="hidden-assignedTo-field" data-bind="value: assignedTo">&ndash;%&gt;--%>
+                        <%--&lt;%&ndash;<input type="text" class="form-control assignedTo-field">&ndash;%&gt;--%>
                         <%--</div>--%>
                     </div>
 
@@ -341,50 +337,41 @@
 </div>
 
 <script>
+    var previousCalendarEvent;
     //debugger
     (function() {
-        var $calendar = $('#calendar');
+        var calendarEl = document.getElementById('calendar');
         $(document).ready(function() {
-            $calendar.fullCalendar({
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                plugins: ['dayGrid', 'timeGrid', 'bootstrap'],
+                themeSystem: 'bootstrap',
+                defaultView: 'dayGridMonth',
                 header: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'month,agendaWeek,agendaDay'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-
                 eventSources: [
                     {
                         events: <%=gCalEventsString%>,
-                        color: 'lightblue',
-                        eventTextColor: 'white',
-                        className: 'testClass'
+                        backgroundColor: "<%=ct.getEventDefaultBgColor()%>"
                     },
                     {
                         events: <%=outlookScheduledEventsString%>,
-                        color: 'lightgreen',
-                        eventTextColor: 'black',
-                        className: 'testClass'
+                        backgroundColor: "<%=oct.getEventDefaultBgColor()%>"
                     },
                     {
                         events: <%=outlookHeldEventsString%>,
-                        color: 'orange',
-                        eventTextColor: 'black',
-                        className: 'testClass'
-                    },
-                    {
-                        events: [
-                            {
-                                title: 'Test123 this is a really long string to see what happens!',
-                                start: '2018-03-22',
-                                end:   '2018-03-23'
-                            }
-                        ],
-                        color: 'yellow',
-                        eventTextColor: 'red'
+                        backgroundColor: "<%=oct.getHeldEventDeafultBgColor()%>"
                     }
                 ],
-                eventClick: function(calEvent, jsEvent, view) {
-                    jQuery.each(calEvent.rawRowData, function(key, value) {
+                eventClick: function(calEvent) {
+                    if (previousCalendarEvent) {
+                        previousCalendarEvent.setProp('backgroundColor', previousCalendarEvent.extendedProps.defaultBgColor);
+                    }
+                    previousCalendarEvent = calEvent.event;
+                    calEvent.event.setProp('backgroundColor', calEvent.event.extendedProps.selectedBgColor);
+                    jQuery.each(calEvent.event.extendedProps.rawRowData, function(key, value) {
                         if (key in WebUtils.VM.taskDetails) {
                             if (key == "date" || key == "enddate") { //TODO modified???
                                 value = displayDate(value);
@@ -393,29 +380,23 @@
                         }
                     });
                 }
-            })
+            });
+            calendar.render();
         });
-
         //debugger
-
         // Build a lookup index of requests.
         var pendingRequestsIndex = {};
-
         var pendingRequests = <%= pendingRequests %>;
         jQuery.each(pendingRequests, function(i, request) {
             pendingRequestsIndex[request.requestid] = request;
         });
-
         var displayDate = function(dateString) {
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
         };
-
         var displayDateTime = function(dateString) {
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY [at] h:mm a');
         };
-
         var $scheduleForm = $('.scheduleForm');
-
         _.extend(WebUtils.VM, {
             disableForm: function() {
                 $scheduleForm.find(":input").attr("disabled", true);
@@ -503,29 +484,23 @@
                 WebUtils.VM.updateForm(row.otherData.requestid);
             }
         });
-
         WebUtils.VM.taskDetails.animalLink = ko.pureComputed(function() {
             var animalId = WebUtils.VM.taskDetails.animalid();
-
             return LABKEY.ActionURL.buildURL('ehr', 'participantView', null, {
                 participantId: animalId
             });
         });
-
         WebUtils.VM.form.href = ko.computed(function() {
             var requestid = WebUtils.VM.form.requestid();
-
             if (requestid == '') {
                 return '#';
             }
-
             return LABKEY.ActionURL.buildURL('ehr', 'dataEntryFormDetails', null, {
                 formType: 'SurgeryProcedureRequest',
                 returnURL: window.location,
                 requestId: requestid
             });
         });
-
         _.extend(WebUtils.VM, {
             clearForm: function() {
                 jQuery.each(WebUtils.VM.form, function(key, observable) {
@@ -536,11 +511,9 @@
             },
             updateForm: function(requestid) {
                 var request = pendingRequestsIndex[requestid];
-
                 if (!_.isObject(request)) {
                     return;
                 }
-
                 jQuery.each(request, function(key, value) {
                     if (key in WebUtils.VM.form) {
                         if (key == "date" || key == "enddate") { //TODO modified???
@@ -563,9 +536,7 @@
                         color: '#fff'
                     }
                 });
-
                 var form = ko.mapping.toJS(WebUtils.VM.form);
-
                 // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
                 // update the study.surgery_procedure, ehr.request, and ehr.task tables
                 LABKEY.Ajax.request({
@@ -610,13 +581,11 @@
                         color: '#fff'
                     }
                 });
-
                 var form = ko.mapping.toJS(WebUtils.VM.form);
-
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
-                        QCState: '7',
+                        QCState: '7', //TODO get actual qcstate from name
                         statusChangeReason: form.statuschangereason
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -656,7 +625,6 @@
             },
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>
-
                 return LABKEY.ActionURL.buildURL('<%= necropsyReportURL.getController() %>', '<%= necropsyReportURL.getAction() %>', null, {
                     reportMode: true,
                     taskid: WebUtils.VM.taskDetails.lsid()
@@ -687,9 +655,7 @@
                         color: '#fff'
                     }
                 });
-
                 var form = ko.mapping.toJS(WebUtils.VM.form);
-
                 // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
                 // update the study.surgery_procedure, ehr.request, and ehr.task tables
                 LABKEY.Ajax.request({
@@ -722,7 +688,6 @@
                 });
             }
         });
-
         WebUtils.VM.disableForm();
         WebUtils.VM.form.requestid.subscribe(function(val) {
             if (val == '') {

@@ -8,7 +8,7 @@
 </style>
 
 <template id="lk-table">
-    <div class="panel panel-default">
+    <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <div class="container-fluid panel-container">
                 <div class="col-xs-8 text-left">
@@ -23,7 +23,9 @@
             </div>
         </div>
 
-        <table class="table table-striped table-bordered table-hover" data-bind="with: table">
+        <div data-bind="visible: table.rows().length==0"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
+
+        <table class="table table-striped table-bordered table-hover" data-bind="with: table, visible: table.rows().length!=0">
             <thead>
             <tr>
                 <!-- ko if: $component.rowsAreSelectable -->
@@ -65,8 +67,7 @@
             </tr>
 
             <!-- ko foreach2: {data: $parent.table.rows } -->
-            <!-- ko if: !isHidden() -->
-            <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err }">
+            <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err}, visible: !isHidden(), style: {background-color: isSelected() ? $component.rowBackgroundColorClicked : '', 'cursor' : $component.cursor} ">
                 <!-- ko if: $component.rowsAreSelectable -->
                 <td onclick="event.stopPropagation();"> <%-- prevent click from propagating to the row. --%>
                     <input type="checkbox" data-bind="checked: isSelected" >
@@ -85,7 +86,6 @@
                 </td>
                 <!-- /ko -->
             </tr>
-            <!-- /ko -->
             <!-- /ko -->
             </tbody>
         </table>
@@ -369,7 +369,10 @@
                         errorMessage:          ko.observable(),
                         table:                 params.table,
                         caseInsensitiveFilter: ko.observable(params.caseInsensitiveFilter || false),
-                        shownRows:             ko.observable(0)
+                        shownRows:             ko.observable(0),
+                        rowBackgroundColorClicked:   params.rowBackgroundColorClicked,
+                        cursor:                params.cursor,
+                        loading:               ko.observable(true)
                     };
 
                     if ('rowClickCallback' in params) {
@@ -473,7 +476,7 @@
                         });
 
                         VM.shownRows(shown);
-                    });
+                    }).extend({throttle:1000});
 
                     ko.computed(function() {
                         var sortColumn    = VM.sortColumn();

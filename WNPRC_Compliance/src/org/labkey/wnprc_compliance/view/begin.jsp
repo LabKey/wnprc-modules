@@ -48,6 +48,9 @@
                         <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UnidentifiedCardsPage.class, getContainer()).toString()%>">
                             View Unidentified Cards
                         </a></li>
+                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.LinkUnidentifiedCardsPage.class, getContainer()).toString()%>">
+                            Link Unidentified Cards
+                        </a></li>
                     </ul>
                 </li>
             </ul>

@@ -78,6 +78,20 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
+    @ActionNames("linkUnidentifiedCards")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class LinkUnidentifiedCardsPage extends HRJspPageAction {
+        @Override
+        public String getPathToJsp() {
+            return "view/linkUnidentifiedCards.jsp";
+        }
+
+        @Override
+        public String getTitle() {
+            return "Link Unidentified Cards";
+        }
+    }
+
     @ActionNames("pendingTBResults")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class PendingTBResultsPage extends HRJspPageAction {
@@ -144,6 +158,18 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String getQuery() {
             return this.query;
         }
+    }
+
+    public static class SearchPersonFromCardForm {
+        public String query;
+        public void setQuery(String term) {
+            this.query = term;
+        }
+
+        public String getQuery() {
+            return this.query;
+        }
+
     }
 
     public static class AddDataToExistingPersonForm {
@@ -338,6 +364,12 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public static class CardExemptForm {
         public Integer cardId;
         public String reason;
+        public String personId;
+    }
+
+    public static class CardLinkForm {
+        public Integer cardId;
+        public String personId;
     }
 
     public static class CardExemptionsForm {
@@ -379,7 +411,76 @@ public class WNPRC_ComplianceController extends SpringActionController {
             return json;
         }
     }
+    @ActionNames("getPersons")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class GetPersonFromCardAPI extends ApiAction<SearchPersonFromCardForm> {
+        public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+            Map<String, List<JSONObject>> results = new HashMap<>();
 
+            // Construct an "OR" clause based on space-delimited queries.
+            SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
+            if (!form.getQuery().equals("")) {
+                orClause.addClause(new SimplerFilter("displayLcase", CompareType.CONTAINS, form.getQuery()).getClauses().get(0));
+            }
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addClause(orClause);
+
+            SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
+
+            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter).toJSONObjectArray()) {
+                String type = row.getString("type");
+
+                List<JSONObject> rows = results.get(type);
+                if (rows == null) {
+                    rows = new ArrayList<>();
+                    results.put(type, rows);
+                }
+
+                rows.add(row);
+            }
+
+            json.put("results", results);
+
+            return json;
+        }
+    }
+
+    @ActionNames("linkCards")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class LinkCardAPI extends ApiAction<CardLinkForm> {
+        @Override
+        public Object execute(CardLinkForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+                SimpleQueryUpdater cardUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "persons_to_cards");
+                List<Map<String, Object>> cardsToUpdate = new ArrayList<>();
+                //TODO make this only one card
+                JSONObject card = new JSONObject();
+
+                card.put("cardid", form.cardId.toString());
+                card.put("container", getContainer().getId());
+
+                card.put("personid", form.personId);
+
+                cardsToUpdate.add(card);
+
+                cardUpdater.upsert(cardsToUpdate);
+
+                json.put("success", true);
+
+                transaction.commit();
+            }
+
+            return json;
+        }
+    }
     public static class ResolvePendingTBResultsForm {
         public String[] pendingTBIds;
         public String notes;

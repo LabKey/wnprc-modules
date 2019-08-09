@@ -55,4 +55,4 @@ FROM (
   'PERSONS' as type
 
   FROM wnprc_compliance.persons
-)
+) ORDER BY last_name ASC

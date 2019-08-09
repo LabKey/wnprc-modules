@@ -20,11 +20,22 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="close">
                     <span aria-hidden="true">&times</span>
                 </button>
-                <h4 class="modal-title">Mark Cards as Exempt</h4>
+                <h4 class="modal-title">Notice</h4>
+            </div>
+            <div class="modal-body" data-bind="with: form">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Reason for marking as exempt:</label>
+                        <div class="col-sm-8">
+                            <textarea rows="4" class="form-control" data-bind="textInput: notes"></textarea>
+                        </div>
+
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-bind="click: customSubmit">Submit</button>
+                <button type="button" class="btn btn-primary" data-bind="click: markExempt">Submit</button>
             </div>
         </div>
     </div>
@@ -45,7 +56,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-bind="click: customSubmit">Submit</button>
+                <button type="button" class="btn btn-primary" data-bind="click: submitLinkCard">Submit</button>
             </div>
         </div>
     </div>
@@ -106,7 +117,7 @@
 
 
             </div>
-                <button style="margin: 8px" data-bind="click: action.execute" id="link-card-button" class="btn btn-primary" disabled>{{action.title}}</button>
+                <button style="margin: 8px" data-bind="click: customActions.linkcard.execute" id="link-card-button" class="btn btn-primary" disabled>{{customActions.linkcard.title}}</button>
 
         </div>
         <!--<button style="margin: 8px" data-bind="click: customActions[0].execute, enable: listPersons.userMatches.selectedUser" class="btn btn-primary">Link this Person to Card</button>-->
@@ -118,16 +129,28 @@
 
 <script>
     (function() {
+        var $exemptDialog = $('#exemptDialog').modal({
+            show: false
+        });
+
         var $linkDialog = $('#linkDialog').modal({
             show: false
         });
 
         var form = {
-            selectedCard: ko.observableArray().extend({notify:'always'})
+            selectedCard: ko.observableArray().extend({notify:'always'}),
+            selectedCardIds: ko.observableArray(),
+            notes: ko.observable('')
         };
 
-        var disableButton = function(){
-            $('#link-card-button').prop('disabled',true);
+        var disableButton = function(el){
+            $(el).prop('disabled',true);
+        };
+
+        var reloadPage = function(ms){
+            setTimeout(function(){
+                window.location.reload();
+            },ms)
         };
 
         WebUtils.VM.form = form;
@@ -136,9 +159,6 @@
             row: ko.observable('')
         };
 
-        WebUtils.VM.actions = [
-        ];
-
         WebUtils.VM.listPersons = {
             selectedUser: ko.observable(""),
             userMatches: ko.observableArray([]),
@@ -146,7 +166,20 @@
             //selectedPersonId: ko.observableArray(),
         };
 
-        //attempt to disable button w knockout
+        WebUtils.VM.actions = [
+            {
+                title: "Mark as Exempt",
+                execute: function(tableRows, table) {
+                    form.selectedCardIds(tableRows.map(function(val) {
+                        return val.rowData[0];
+                    }));
+
+                    $exemptDialog.modal('show');
+                }
+            }
+        ];
+
+        //failed attempt to disable button w knockout
         /*
         WebUtils.VM.actionButtonsDisabled = {
             disabled: ko.observable(true)
@@ -161,35 +194,56 @@
             return WebUtils.VM.listPersons
         });*/
 
-        WebUtils.VM.action = {
-            title: "Link Card to Person",
-            //disabled: typeof ko.mapping.toJS(WebUtils.VM.listPersons).selectedPerson == 'undefined',
-            execute: function (tableRows, table) {
-                var personData = ko.mapping.toJS(WebUtils.VM.listPersons);
-                if (!personData.selectedPerson) {
-                    toastr.error("Hit an error: no person was selected to link the card to.");
+        // need a separate action for linking a card to person
+        // cannot put in WebUtils.VM.actions above since that gets tied to the lk-querytable.
+        WebUtils.VM.customActions = {
+            linkcard: {
+                title: "Link Card to Person",
+                //disabled: typeof ko.mapping.toJS(WebUtils.VM.listPersons).selectedPerson == 'undefined',
+                execute: function (tableRows, table) {
+                    var personData = ko.mapping.toJS(WebUtils.VM.listPersons);
+                    if (!personData.selectedPerson) {
+                        toastr.error("Hit an error: no person was selected to link the card to.");
+                        return;
+                    }
+                    $linkDialog.modal('show');
                     return;
                 }
-                $linkDialog.modal('show');
-                return;
-            }
+            },
+        };
+
+        WebUtils.VM.submitMarkExempt = function() {
+            $exemptDialog.modal('hide');
+
+            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.MarkCardExemptAPI.class, getContainer()) %>", {
+                exemptions: form.selectedCardIds().map(function(id) {
+                    return {
+                        cardId: id,
+                        reason: form.notes()
+                    }
+                })
+            }).then(function(d) {
+                toastr.success("Success! The selected card was marked as exempt. Page is reloading...");
+                reloadPage(1000);
+            }).catch(function(e) {
+                toastr.error("Hit an error: " + e.message || e);
+            });
         };
 
 
-        WebUtils.VM.customSubmit = function() {
+        WebUtils.VM.submitLinkCard = function() {
             $linkDialog.modal('hide');
             var personData = ko.mapping.toJS(WebUtils.VM.listPersons);
             var cardData = ko.mapping.toJS(WebUtils.VM.form);
+
             //TODO validate here...
-            //TODO not sure how this form/closure works here
+            //TODO not sure how this $parent selectedPerson really works here?
             WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.LinkCardAPI.class, getContainer()) %>", {
                 cardId: cardData.selectedCard[0],
                 personId: personData.selectedPerson
             }).then(function(d) {
-                toastr.success("Success! The selected card was linked to the selected person.  Page is reloading...")
-                setTimeout(function(){
-                    window.location.reload();
-                },1000)
+                toastr.success("Success! The selected card was linked to the selected person. Page is reloading...");
+                reloadPage(1000);
             }).catch(function(e) {
                 toastr.error("Hit an error: " + e.message || e);
             });
@@ -198,13 +252,15 @@
         // searches for potential persons
         WebUtils.VM.rowClicked = function(row) {
             WebUtils.VM.listPersons.loading(true);
+            // allow only one row to be selected at a time
             if (WebUtils.VM.rowSelected.row() != ''){
-                disableButton();
+                disableButton('#link-card-button');
                 WebUtils.VM.rowSelected.row().isSelected(false)
             }
             row.isSelected(true);
             WebUtils.VM.rowSelected.row(row);
             WebUtils.VM.form.selectedCard(row.rowData);
+
             <%
                 ActionURL searchQuery = new ActionURL(WNPRC_ComplianceController.GetPersonFromCardAPI.class, getContainer());
             %>
@@ -214,27 +270,29 @@
                 query: row.rowData[1]
             });
 
-            WebUtils.API.getJSON(url).then(function (data) {
-                console.log(data);
-                WebUtils.VM.listPersons.loading(false);
-                var PERSONS = 'PERSONS';
-                var results = data.results;
-                if (!results[PERSONS]){
-                    disableButton();
-                    var fakeUser = results['UW CARD'][0];
-                    fakeUser.display = "User not found for card: " + fakeUser.display;
-                    WebUtils.VM.listPersons.userMatches(fakeUser);
-                    toastr.error("No user found in persons table for selected card.");
-                    return;
-                } else {
-                    $(document).on('click', '#radio-person', function () {
-                        $('#link-card-button').removeProp('disabled');
-                    });
-                }
-                //TODO sort the results by last_name
-                WebUtils.VM.listPersons.userMatches((PERSONS in results) ? results[PERSONS] : []);
+            WebUtils.API.getJSON(url)
+                .then(function (data) {
+                    console.log(data);
+                    WebUtils.VM.listPersons.loading(false);
+                    var PERSONS = 'PERSONS';
+                    var results = data.results;
+                    if (!results[PERSONS]){
+                        disableButton('#link-card-button');
+                        var fakeUser = results['UW CARD'][0];
+                        fakeUser.display = "User not found for card: " + fakeUser.display;
+                        fakeUser.notfound = true;
+                        WebUtils.VM.listPersons.userMatches(fakeUser);
+                        toastr.error("No user found in persons table for selected card.");
+                        return;
+                    } else {
+                        // knockout wasn't playing nice here, using jQuery to force button to disabled
+                        $(document).on('click', '#radio-person', function () {
+                            $('#link-card-button').removeProp('disabled');
+                        });
+                    }
+                    WebUtils.VM.listPersons.userMatches((PERSONS in results) ? results[PERSONS] : []);
             });
-    };
+        };
 
     })();
 </script>

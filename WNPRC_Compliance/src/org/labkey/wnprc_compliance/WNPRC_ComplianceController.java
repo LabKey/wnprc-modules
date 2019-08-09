@@ -372,36 +372,26 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String personId;
     }
 
-    public static class CardExemptionsForm {
-        public CardExemptForm[] exemptions;
-    }
-
     @ActionNames("markCardsExempt")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
     @CSRF
-    public class MarkCardExemptAPI extends ApiAction<CardExemptionsForm> {
+    public class MarkCardExemptAPI extends ApiAction<CardExemptForm> {
         @Override
-        public Object execute(CardExemptionsForm form, BindException errors) throws Exception {
+        public Object execute(CardExemptForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
 
             try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 SimpleQueryUpdater cardUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "cards");
-                List<Map<String, Object>> cardsToUpdate = new ArrayList<>();
 
-                for (CardExemptForm cardExemptForm : form.exemptions) {
-                    JSONObject card = new JSONObject();
+                JSONObject card = new JSONObject();
 
-                    card.put("card_id", cardExemptForm.cardId.toString());
-                    card.put("container", getContainer().getId());
+                card.put("card_id", form.cardId.toString());
+                card.put("exempt_reason", form.reason);
+                card.put("container", getContainer().getId());
+                card.put("exempt", true);
 
-                    card.put("exempt", true);
-                    card.put("exempt_reason", cardExemptForm.reason);
-
-                    cardsToUpdate.add(card);
-                }
-
-                cardUpdater.upsert(cardsToUpdate);
+                cardUpdater.upsert(card);
 
                 json.put("success", true);
 
@@ -460,18 +450,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 SimpleQueryUpdater cardUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "persons_to_cards");
-                List<Map<String, Object>> cardsToUpdate = new ArrayList<>();
-                //TODO make this only one card
-                JSONObject card = new JSONObject();
+                JSONObject personToCard = new JSONObject();
 
-                card.put("cardid", form.cardId.toString());
-                card.put("container", getContainer().getId());
+                personToCard.put("cardid", form.cardId.toString());
+                personToCard.put("personid", form.personId);
+                personToCard.put("container", getContainer().getId());
 
-                card.put("personid", form.personId);
-
-                cardsToUpdate.add(card);
-
-                cardUpdater.upsert(cardsToUpdate);
+                cardUpdater.upsert(personToCard);
 
                 json.put("success", true);
 

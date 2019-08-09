@@ -35,7 +35,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-bind="click: markExempt">Submit</button>
+                <button type="button" class="btn btn-primary" data-bind="click: submitMarkExempt">Submit</button>
             </div>
         </div>
     </div>
@@ -214,14 +214,10 @@
 
         WebUtils.VM.submitMarkExempt = function() {
             $exemptDialog.modal('hide');
-
+            var cardData = ko.mapping.toJS(WebUtils.VM.form);
             WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.MarkCardExemptAPI.class, getContainer()) %>", {
-                exemptions: form.selectedCardIds().map(function(id) {
-                    return {
-                        cardId: id,
-                        reason: form.notes()
-                    }
-                })
+                        cardId: cardData.selectedCard[0],
+                        reason: cardData.notes
             }).then(function(d) {
                 toastr.success("Success! The selected card was marked as exempt. Page is reloading...");
                 reloadPage(1000);

@@ -91,6 +91,9 @@
                                 <!-- ko if: display.indexOf('User not found') == -1 -->
                                     <input id="radio-person" type="radio" name="selectedUser" value="{{id}}" data-bind="checked: $parent.selectedPerson">
                                     {{last_name}}, {{first_name}} {{middle_name}}
+                                <!-- ko if: notes -->
+                                    ({{notes}})
+                                <!-- /ko -->
                                 <!-- /ko -->
                                 <!-- ko ifnot: display.indexOf('User not found') == -1 -->
                                     <strong>{{display}}</strong>

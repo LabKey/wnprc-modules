@@ -78,20 +78,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
-    @ActionNames("linkUnidentifiedCards")
-    @RequiresPermission(ComplianceAdminPermission.class)
-    public class LinkUnidentifiedCardsPage extends HRJspPageAction {
-        @Override
-        public String getPathToJsp() {
-            return "view/linkUnidentifiedCards.jsp";
-        }
-
-        @Override
-        public String getTitle() {
-            return "Link Unidentified Cards";
-        }
-    }
-
     @ActionNames("pendingTBResults")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class PendingTBResultsPage extends HRJspPageAction {

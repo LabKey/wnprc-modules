@@ -8,4 +8,8 @@ require("ehr/triggers").initScript(this);
 
 function onUpsert(helper, scriptErrors, row, oldRow){
    row.alias = row.alias.toLowerCase();
+
+   if (!row.isAcceptingCharges) {
+      row.isAcceptingCharges = true; //true by default
+   }
 }

@@ -1,5 +1,8 @@
 require("ehr/triggers").initScript(this);
 
+var LABKEY = require("labkey");
+var billingHelper = new org.labkey.ehr_billing.query.EHRBillingTriggerHelper(LABKEY.Security.currentUser.id, LABKEY.Security.currentContainer.id);
+
 EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, 'ehr_billing', 'miscCharges', function(helper, scriptErrors, row, oldRow){
 
     if (!helper.isETL() && row) {

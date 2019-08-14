@@ -1,0 +1,31 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="invoiceNumber"/>
+        <column name="invoiceRunId"/>
+        <column name="invoiceRunId/billingPeriodStart"/>
+        <column name="invoiceRunId/billingPeriodEnd"/>
+        <column name="BillingRunDate"/>
+        <column name="accountNumber"/>
+        <column name="accountNumber/type"/>
+        <column name="accountNumber/po_number"/>
+        <column name="accountNumber/contact_name"/>
+        <column name="accountNumber/address"/>
+        <column name="invoiceAmount"/>
+        <column name="viewPdf">
+            <properties>
+                <property name="columnTitle" value="View PDF"/>
+            </properties>
+        </column>
+        <column name="downloadPDF">
+            <properties>
+                <property name="columnTitle" value="Download PDF"/>
+            </properties>
+        </column>
+        <column name="summarizedPDF">
+            <properties>
+                <property name="columnTitle" value="Summarized PDF"/>
+            </properties>
+        </column>
+    </columns>
+    <filters></filters>
+</customView>

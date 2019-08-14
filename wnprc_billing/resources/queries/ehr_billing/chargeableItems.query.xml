@@ -13,6 +13,7 @@
                         <description>PK from the WNPRC's current finance system (from table charges.rate_schedule.Id)</description>
                     </column>
                     <column columnName="departmentCode">
+                        <nullable>false</nullable>
                         <columnTitle>Group Name</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>

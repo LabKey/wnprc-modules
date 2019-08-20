@@ -1,0 +1,9 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="/webutils/lib/bootstrap/plugin/bootstrap-datetimepicker.min.js"/>
+        <script path="/webutils/lib/bootstrap/plugin/bootstrap-datetimepicker.min.css"/>
+    </library>
+    <dependencies>
+        <dependency path="/webutils/lib/webutils_core/webutils_core"/>
+    </dependencies>
+</libraries>

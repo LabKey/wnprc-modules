@@ -394,10 +394,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         verifyChargeSummary("Misc. Charges", 1);
         verifyChargeSummary("Per Diems", 1);
 
-        assertTextPresent("There are 2 active WNPRC project(s) with account(s) that are not accepting charges.");
-        clickAndWait(Locator.tagWithAttributeContaining("a", "href", "queryName=project").findElement(getDriver()));
-        DataRegionTable table = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong number of rows in project", 2, table.getDataRowCount());
         goBack(WAIT_FOR_PAGE);
     }
 
@@ -982,7 +978,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvoicedItems()
     {
-        testReports("All Invoiced Items", 7, "test2312318","640991" , "$19.50", "$15.00",
+        testReports("Invoiced Items", 7, "test2312318","640991" , "$19.50", "$15.00",
                 "Blood draws - Additional Tubes", "Per diems", "Misc. Fees", "vaccine supplies", "$195.00");
     }
 

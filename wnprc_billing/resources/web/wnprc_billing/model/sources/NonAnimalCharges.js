@@ -20,7 +20,7 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                 lookup: {
                     schemaName: 'ehr_billing',
                     queryName: 'aliases',
-                    filterArray: [LABKEY.Filter.create('isAcceptingCharges', 'Y', LABKEY.Filter.Types.EQUAL)]
+                    filterArray: [LABKEY.Filter.create('isAcceptingCharges', 'N', LABKEY.Filter.Types.NEQ_OR_NULL)]
                 },
                 columnConfig: {
                     width: 125

@@ -46,7 +46,7 @@
                             View Most Recent Access Report Summary
                         </a></li>
                         <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UnidentifiedCardsPage.class, getContainer()).toString()%>">
-                            View Unidentified Cards
+                            Manage Unidentified Cards
                         </a></li>
                     </ul>
                 </li>

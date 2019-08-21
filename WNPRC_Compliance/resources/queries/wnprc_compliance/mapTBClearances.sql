@@ -6,8 +6,9 @@ first_name,
 middle_name,
 last_name,
 notes,
-tbResults.tbid as tbid,
-to_char(tbResults.tbdate,'MM/DD/YYYY') as tbdate
+tbResults.tbid as id,
+to_char(tbResults.tbdate,'MM/DD/YYYY') as date,
+'tb_clearances' as table_name
 
 FROM persons
 

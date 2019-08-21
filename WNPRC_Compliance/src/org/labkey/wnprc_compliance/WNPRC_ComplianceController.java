@@ -172,6 +172,25 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
 
     }
+    public static class SearchClearanceFromPersonForm {
+        public String query;
+        public String table;
+        public void setQuery(String term) {
+            this.query = term;
+        }
+
+        public String getQuery() {
+            return this.query;
+        }
+        public void setTable(String table) {
+            this.table = table;
+        }
+
+        public String getTable() {
+            return this.table;
+        }
+
+    }
 
     public static class AddDataToExistingPersonForm {
         public String personid;
@@ -373,10 +392,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String personId;
     }
 
-    public static class TBForm {
-        public String tbId;
-        public String tbDate;
-    }
 
     @ActionNames("markCardsExempt")
     @RequiresPermission(ComplianceAdminPermission.class)
@@ -445,12 +460,12 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
-    @ActionNames("getTBClearances")
+    @ActionNames("getClearances")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
     @CSRF
-    public class GetTBClearancesFromPerson extends ApiAction<SearchPersonFromCardForm> {
-        public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
+    public class GetClearancesFromPerson extends ApiAction<SearchClearanceFromPersonForm> {
+        public Object execute(SearchClearanceFromPersonForm form, BindException errors) throws Exception {
 
             int resultLimit = 3;
             JSONObject json = new JSONObject();
@@ -462,7 +477,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
             SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
             List<JSONObject> rows = new ArrayList<>();
             int resultCount = 0;
-            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapTBClearances", filter).toJSONObjectArray()) {
+            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, form.getTable(), filter).toJSONObjectArray()) {
                 if (resultCount < resultLimit)
                 {
                     rows.add(row);
@@ -475,24 +490,46 @@ public class WNPRC_ComplianceController extends SpringActionController {
             return json;
         }
     }
-    @ActionNames("updateTBClearance")
+
+    public static class ClearanceForm {
+        public String notes;
+        public String first_name;
+        public String last_name;
+        public String middle_name;
+        public String personid;
+        public String date;
+        public String id;
+        public String _row;
+        public String table_name;
+    }
+    public static class Clearances {
+        public ClearanceForm[] clearances;
+        public String table_name;
+    }
+
+    @ActionNames("updateClearance")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
     @CSRF
-    public class UpdateTBClearanceAPI extends ApiAction<TBForm> {
+    public class UpdateClearanceAPI extends ApiAction<Clearances> {
         @Override
-        public Object execute(TBForm form, BindException errors) throws Exception {
+        public Object execute(Clearances form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
 
             try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
-                SimpleQueryUpdater tbClearanceUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "tb_clearances");
-                JSONObject tbClearance = new JSONObject();
+                SimpleQueryUpdater tbClearanceUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, form.table_name);
+                List<Map<String, Object>> clearancesToUpdate = new ArrayList<>();
 
-                tbClearance.put("id", form.tbId);
-                tbClearance.put("date", form.tbDate);
-                tbClearance.put("container", getContainer().getId());
+                for (ClearanceForm tbform : form.clearances)
+                {
+                    JSONObject tbClearance = new JSONObject();
+                    tbClearance.put("id", tbform.id);
+                    tbClearance.put("date", tbform.date);
+                    tbClearance.put("container", getContainer().getId());
+                    clearancesToUpdate.add(tbClearance);
+                }
 
-                tbClearanceUpdater.upsert(tbClearance);
+                tbClearanceUpdater.upsert(clearancesToUpdate);
 
                 json.put("success", true);
 
@@ -521,33 +558,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
             }
 
             json.put("results", rows);
-
-            return json;
-        }
-    }
-    @ActionNames("updateMeaslesClearance")
-    @RequiresPermission(ComplianceAdminPermission.class)
-    @Marshal(Marshaller.Jackson)
-    @CSRF
-    public class UpdateMeaslesClearanceAPI extends ApiAction<TBForm> {
-        @Override
-        public Object execute(TBForm form, BindException errors) throws Exception {
-            JSONObject json = new JSONObject();
-
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
-                SimpleQueryUpdater tbClearanceUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "measles_clearances");
-                JSONObject tbClearance = new JSONObject();
-
-                tbClearance.put("id", form.tbId);
-                tbClearance.put("date", form.tbDate);
-                tbClearance.put("container", getContainer().getId());
-
-                tbClearanceUpdater.upsert(tbClearance);
-
-                json.put("success", true);
-
-                transaction.commit();
-            }
 
             return json;
         }

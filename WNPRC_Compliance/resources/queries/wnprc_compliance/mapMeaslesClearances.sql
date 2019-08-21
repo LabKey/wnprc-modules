@@ -6,8 +6,9 @@ first_name,
 middle_name,
 last_name,
 notes,
-measlesResults.mid as mid,
-to_char(measlesResults.mdate, 'MM/DD/YYYY') as mdate
+measlesResults.mid as id,
+to_char(measlesResults.mdate, 'MM/DD/YYYY') as date,
+'measles_clearances' as table_name
 
 FROM persons
 

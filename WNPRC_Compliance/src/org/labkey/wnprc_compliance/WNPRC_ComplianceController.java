@@ -12,6 +12,7 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
@@ -117,6 +118,20 @@ public class WNPRC_ComplianceController extends SpringActionController {
         @Override
         public String getTitle() {
             return "New User";
+        }
+    }
+
+    @ActionNames("editTBPage")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class EditTBPage extends HRJspPageAction {
+        @Override
+        public String getPathToJsp() {
+            return "view/editTB.jsp";
+        }
+
+        @Override
+        public String getTitle() {
+            return "Edit TB";
         }
     }
 
@@ -358,6 +373,11 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String personId;
     }
 
+    public static class TBForm {
+        public String tbId;
+        public String tbDate;
+    }
+
     @ActionNames("markCardsExempt")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
@@ -420,6 +440,114 @@ public class WNPRC_ComplianceController extends SpringActionController {
             }
 
             json.put("results", results);
+
+            return json;
+        }
+    }
+
+    @ActionNames("getTBClearances")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class GetTBClearancesFromPerson extends ApiAction<SearchPersonFromCardForm> {
+        public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
+
+            int resultLimit = 3;
+            JSONObject json = new JSONObject();
+            Map<String, List<JSONObject>> results = new HashMap<>();
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addCondition(FieldKey.fromString("personid"), form.getQuery(), CompareType.EQUAL);
+
+            SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
+            List<JSONObject> rows = new ArrayList<>();
+            int resultCount = 0;
+            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapTBClearances", filter).toJSONObjectArray()) {
+                if (resultCount < resultLimit)
+                {
+                    rows.add(row);
+                }
+                resultCount++;
+            }
+
+            json.put("results", rows);
+
+            return json;
+        }
+    }
+    @ActionNames("updateTBClearance")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class UpdateTBClearanceAPI extends ApiAction<TBForm> {
+        @Override
+        public Object execute(TBForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+                SimpleQueryUpdater tbClearanceUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "tb_clearances");
+                JSONObject tbClearance = new JSONObject();
+
+                tbClearance.put("id", form.tbId);
+                tbClearance.put("date", form.tbDate);
+                tbClearance.put("container", getContainer().getId());
+
+                tbClearanceUpdater.upsert(tbClearance);
+
+                json.put("success", true);
+
+                transaction.commit();
+            }
+
+            return json;
+        }
+    }
+    @ActionNames("getMeaslesClearances")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class GetMeaslesClearanceFromPerson extends ApiAction<SearchPersonFromCardForm> {
+        public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+            Map<String, List<JSONObject>> results = new HashMap<>();
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addCondition(FieldKey.fromString("personid"), form.getQuery(), CompareType.EQUAL);
+
+            SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
+            List<JSONObject> rows = new ArrayList<>();
+            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapMeaslesClearances", filter).toJSONObjectArray()) {
+                rows.add(row);
+            }
+
+            json.put("results", rows);
+
+            return json;
+        }
+    }
+    @ActionNames("updateMeaslesClearance")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class UpdateMeaslesClearanceAPI extends ApiAction<TBForm> {
+        @Override
+        public Object execute(TBForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+                SimpleQueryUpdater tbClearanceUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "measles_clearances");
+                JSONObject tbClearance = new JSONObject();
+
+                tbClearance.put("id", form.tbId);
+                tbClearance.put("date", form.tbDate);
+                tbClearance.put("container", getContainer().getId());
+
+                tbClearanceUpdater.upsert(tbClearance);
+
+                json.put("success", true);
+
+                transaction.commit();
+            }
 
             return json;
         }

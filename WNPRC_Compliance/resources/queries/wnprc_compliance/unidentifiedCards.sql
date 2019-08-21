@@ -1,7 +1,7 @@
 SELECT
 cards.card_id,
-first_name,
 last_name,
+first_name,
 middle_name,
 department,
 employee_number,

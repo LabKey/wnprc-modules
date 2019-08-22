@@ -35,6 +35,7 @@ import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.components.html.SiteNavBar;
+import org.labkey.test.pages.ImportDataPage;
 import org.labkey.test.pages.ehr.AnimalHistoryPage;
 import org.labkey.test.pages.ehr.EHRAdminPage;
 import org.labkey.test.pages.ehr.NotificationAdminPage;
@@ -679,7 +680,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
         log("Enter Misc. Charges with animal Id.");
-        clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
+        waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         enterChargesInGrid(1, mapWithAnimalId);
 
         log("Submit the form");
@@ -687,7 +688,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         submitForm();
 
         log("Enter Misc. Charges with debit account");
-        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+        waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         enterChargesInGrid(1, mapWithDebitAcct);
 
         log("Submit the form");
@@ -695,7 +696,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         submitForm();
 
         log("Enter another Misc. Charges with debit account");
-        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+        waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         enterChargesInGrid(1, mapWithDebitAcct2);
 
         log("Submit the form");
@@ -843,18 +844,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
 
         DataRegionTable drt = new DataRegionTable("query", getDriver());
-        drt.clickHeaderButton("Import bulk data");
-        waitForText("Format:");
+        drt.clickImportBulkData();
+        ImportDataPage importDataPage = new ImportDataPage(getDriver());
+        importDataPage.setFile(CHARGEABLE_ITEMS_RATES_ERROR_TSV);
+        importDataPage.submitExpectingError();
 
-        click(Locator.id("uploadFileDiv2Expando"));
-        waitForText("Import Lookups by Alternate Key");
-
-        setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), CHARGEABLE_ITEMS_RATES_ERROR_TSV.getPath());
-        click(Locator.button("Submit"));
-
-        waitForText("ERROR");
-        assertTextPresent("ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).");
-        assertTextPresent("ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).");
+        assertTextPresent("ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).",
+                "ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).");
 
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_UPDATE_TSV, CHARGE_RATES_NUM_UPDATE_ROWS, CHARGEABLE_ITEMS_NUM_UPDATE_ROWS);
 
@@ -884,14 +880,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Standard Rates"));
 
         DataRegionTable drt = new DataRegionTable("query", getDriver());
-        drt.clickHeaderButton("Import bulk data");
-        waitForText("Format:");
-
-        click(Locator.id("uploadFileDiv2Expando"));
-        waitForText("Import Lookups by Alternate Key");
-
-        setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), file.getPath());
-        clickButton("Submit");
+        drt.clickImportBulkData();
+        ImportDataPage importDataPage = new ImportDataPage(getDriver());
+        importDataPage.setFile(file);
+        importDataPage.submit();
 
         waitForText("Standard Rates");
         drt = new DataRegionTable("query", getDriver());
@@ -938,7 +930,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText(linkText));
 
         DataRegionTable drt = new DataRegionTable("query", getDriver());
-        drt.clickHeaderButton("Import bulk data");
+        drt.clickImportBulkData();
 
         waitForText("Import Data");
 

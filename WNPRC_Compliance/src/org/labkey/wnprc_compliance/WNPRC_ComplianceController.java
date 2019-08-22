@@ -1,6 +1,7 @@
 package org.labkey.wnprc_compliance;
 
 import org.json.JSONObject;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.labkey.api.action.AbstractFileUploadAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.data.DbSchemaType;
@@ -385,6 +386,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public static class ResolvePendingTBResultsForm {
         public String[] pendingTBIds;
         public String notes;
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
         public Date date;
     }
 

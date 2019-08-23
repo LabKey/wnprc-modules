@@ -7,6 +7,7 @@
     }
 </style>
 
+
 <template id="lk-table">
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
@@ -23,7 +24,7 @@
             </div>
         </div>
 
-        <div data-bind="visible: table.rows().length==0"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
+        <div id="loading-bar" data-bind="visible: table.rows().length==0" ><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
 
         <table class="table table-striped table-bordered table-hover" data-bind="with: table, visible: table.rows().length!=0">
             <thead>
@@ -370,9 +371,9 @@
                         table:                 params.table,
                         caseInsensitiveFilter: ko.observable(params.caseInsensitiveFilter || false),
                         shownRows:             ko.observable(0),
+                        shownRowsPrev:         ko.observable(0),
                         rowBackgroundColorClicked:   params.rowBackgroundColorClicked,
-                        cursor:                params.cursor,
-                        loading:               ko.observable(true)
+                        cursor:                params.cursor
                     };
 
                     if ('rowClickCallback' in params) {
@@ -474,8 +475,12 @@
                                 row.isHidden(true);
                             }
                         });
-
+                        VM.shownRowsPrev(VM.shownRows())
                         VM.shownRows(shown);
+                        //cover the use case to hide loading bar on no results (hack, but works)
+                        if (VM.shownRowsPrev()==0 && VM.shownRows()==0){
+                            $('#loading-bar').hide();
+                        }
                     }).extend({throttle:1000});
 
                     ko.computed(function() {

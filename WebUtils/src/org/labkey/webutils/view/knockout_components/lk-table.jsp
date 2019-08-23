@@ -477,6 +477,7 @@
                         });
                         VM.shownRowsPrev(VM.shownRows())
                         VM.shownRows(shown);
+                        //cover the use case to hide loading bar on no results (hack, but works)
                         if (VM.shownRowsPrev()==0 && VM.shownRows()==0){
                             $('#loading-bar').hide();
                         }

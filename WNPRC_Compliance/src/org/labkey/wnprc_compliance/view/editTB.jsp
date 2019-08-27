@@ -13,35 +13,6 @@
     </a>
 </div>
 
-<div id="exemptDialog" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="close">
-                    <span aria-hidden="true">&times</span>
-                </button>
-                <h4 class="modal-title">Mark Cards as Exempt</h4>
-            </div>
-            <div class="modal-body" data-bind="with: form">
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <label class="col-sm-4 control-label">Reason</label>
-                        <div class="col-sm-8">
-                            <textarea rows="4" class="form-control" data-bind="textInput: notes"></textarea>
-                        </div>
-
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-bind="click: submit">Submit</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 <div class="row">
     <div class="col-xs-8">
 <div class="panel panel-primary">
@@ -66,27 +37,32 @@
             <div class="panel-heading">TB Clearances</div>
             <div class="panel-body" data-bind="with: results">
 
-                <div data-bind="visible:loading()"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
-                <div id="person-results" data-bind="visible:!loading()">
+                <div data-bind="visible:loadingResults()"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
+                <div id="person-results" data-bind="visible:!loadingResults()">
                     <!-- ko if: TBClearances().length == 0 -->
                     <div style="padding-bottom:10px"><strong>Please select a person.</strong></div>
                     <!-- /ko -->
                     <!-- ko if: !TBClearances().length == 0 -->
-                    <div style="padding-bottom:10px"><strong>Displaying recent (up to 3) clearance dates for the selected person:</strong></div>
-                    <!-- /ko -->
+                        <!-- ko if: TBClearances()[0].id == null -->
+                        <div>No results, please enter a measles clearance <a href="enterTBPage.view">here</a>.</div>
+                        <!-- /ko -->
+                        <!-- ko if: TBClearances()[0].id != null -->
+                            <div style="padding-bottom:10px"><strong>Displaying recent (up to 3) clearance dates for the selected person:</strong></div>
 
-                    <div data-bind="foreach: TBClearances">
-                        <div>
-                            <label>
-                                <input id="radio-person" class="form-control" type="text" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}, value: date">
-                            </label>
-                        </div>
-                    </div>
+                            <div data-bind="foreach: TBClearances">
+                                <div>
+                                    <label>
+                                        <input class="form-control" type="text" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}, value: date">
+                                    </label>
+                                </div>
+                            </div>
+                        <!-- /ko -->
+                    <!-- /ko -->
                 </div>
 
 
             </div>
-            <button style="margin: 8px" data-bind="click: submitTB" id="link-card-button" class="btn btn-primary" >Update all</button>
+            <button style="margin: 8px" data-bind="click: submitTB" id="tb-update-button" class="btn btn-primary" disabled>Update all</button>
 
         </div>
         </div>
@@ -96,66 +72,43 @@
                 <div class="panel-heading">Measles Clearances</div>
                 <div class="panel-body" data-bind="with: results">
 
-                    <div data-bind="visible:loading()"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
-                    <div id="person-results" data-bind="visible:!loading()">
+                    <div data-bind="visible:loadingResults()"><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
+                    <div id="person-results" data-bind="visible:!loadingResults()">
                         <!-- ko if: MeaslesClearances().length == 0 -->
                         <div style="padding-bottom:10px"><strong>Please select a person.</strong></div>
                         <!-- /ko -->
                         <!-- ko if: !MeaslesClearances().length == 0 -->
-                        <div style="padding-bottom:10px"><strong>Displaying recent (up to 3) clearance dates for the selected person:</strong></div>
-                        <!-- /ko -->
+                            <!-- ko if: MeaslesClearances()[0].id == null -->
+                                <div>No results, please enter a measles clearance <a href="enterTBPage.view">here</a>.</div>
+                            <!-- /ko -->
 
-                        <div data-bind="foreach: MeaslesClearances">
-                            <div>
-                                <label>
-                                    <input id="radio-person" class="form-control" type="text" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}, value: date">
-                                </label>
-                            </div>
-                        </div>
+                            <!-- ko if: MeaslesClearances()[0].id != null -->
+                                <div style="padding-bottom:10px"><strong>Displaying recent (up to 3) clearance dates for the selected person:</strong></div>
+                                <div data-bind="foreach: MeaslesClearances">
+                                    <div>
+                                        <label>
+                                            <input class="form-control" type="text" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}, value: date">
+                                        </label><br>
+                                        <input type="checkbox" data-bind="checked: required, click: $root.customClick.updateMeasles"> Required<br><br>
+                                    </div>
+                                </div>
+                            <!-- /ko -->
+                        <!-- /ko -->
                     </div>
 
 
                 </div>
-                <button style="margin: 8px" data-bind="click: submitMeasles" id="link-card-button" class="btn btn-primary">Update all</button>
+                <button style="margin: 8px" data-bind="click: submitMeasles" id="measles-update-button" class="btn btn-primary" disabled>Update all</button>
 
             </div>
         </div>
     </div>
 
 </div>
-</div>
-
-<div id="linkDialog" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="close">
-                    <span aria-hidden="true">&times</span>
-                </button>
-                <h4 class="modal-title">Notice</h4>
-            </div>
-            <div class="modal-body" data-bind="with: form">
-                <form class="form-horizontal">
-                    <input id="radio-person" class="form-control" type="text" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}, value: date">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-bind="click: submitLinkCard">Submit</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
     (function() {
-
-        var form = {
-            selectedCardIds: ko.observableArray(),
-            notes: ko.observable(''),
-            date: ko.observable(moment())
-        };
-
         var disableButton = function(el,val){
             $(el).prop('disabled',val);
         };
@@ -164,38 +117,60 @@
             row: ko.observable('')
         };
 
-        WebUtils.VM.form = form;
-
         WebUtils.VM.actions = [
         ];
 
-        WebUtils.VM.customAction = {
-
-        }
+        WebUtils.VM.customClick =  {
+            // sets the measles required value every time it is clicked
+            updateMeasles: function(event){
+                if (event.date){
+                    var wrapdate = moment(event.date);
+                    WebUtils.VM.results.MeaslesClearances()[event._row-1]['date'] = moment.utc(wrapdate).format();
+                }
+                WebUtils.VM.results.MeaslesClearances()[event._row-1]['required'] = event.required;
+                WebUtils.VM.results.MeaslesClearances()[event._row-1]['mutated'] = true;
+                disableButton("#measles-update-button",false);
+                return true;
+            }
+        };
 
         WebUtils.VM.results = {
-            TBClearances: ko.observableArray([]),
+            TBClearances: ko.observableArray([]).extend({notify:'always'}),
             TBClearancesToUpdate: ko.observableArray([]),
             MeaslesClearances: ko.observableArray([]),
             MeaslesClearancesToUpdate: ko.observableArray([]),
-            loading: ko.observable(false).extend({notify:'always'}),
-            TableName: ko.observable("")
+            loadingResults: ko.observable(false).extend({notify:'always'})
         };
 
         WebUtils.VM.submitTB = function() {
+
+            WebUtils.VM.results.TBClearances().forEach(function(val){
+                if (val['mutated']){
+                    WebUtils.VM.results.TBClearancesToUpdate.push(val);
+                }
+            });
+
             WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.UpdateClearanceAPI.class, getContainer()) %>", {
                 clearances: WebUtils.VM.results.TBClearancesToUpdate(),
-                table_name: WebUtils.VM.results.TableName()
+                table_name: 'tb_clearances'
             }).then(function(d) {
                 toastr.success("Success!")
             }).catch(function(e) {
                 toastr.error("Hit an error: " + e.message || e);
             });
         };
+
         WebUtils.VM.submitMeasles = function() {
+
+            WebUtils.VM.results.MeaslesClearances().forEach(function(val){
+                if (val['mutated']){
+                    WebUtils.VM.results.MeaslesClearancesToUpdate.push(val);
+                }
+            });
+
             WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.UpdateClearanceAPI.class, getContainer()) %>", {
                 clearances: WebUtils.VM.results.MeaslesClearancesToUpdate(),
-                table_name: WebUtils.VM.results.TableName()
+                table_name: 'measles_clearances'
             }).then(function(d) {
                 toastr.success("Success!")
             }).catch(function(e) {
@@ -204,12 +179,14 @@
         };
 
         WebUtils.VM.rowClicked = function(row) {
+            WebUtils.VM.results.loadingResults(true);
             //clear the measles and tb data to update each time new person is selected
             WebUtils.VM.results.MeaslesClearancesToUpdate([]);
             WebUtils.VM.results.TBClearancesToUpdate([]);
+            disableButton("#measles-update-button", true);
+            disableButton("#tb-update-button", true);
 
             if (WebUtils.VM.rowSelected.row() != ''){
-                disableButton('#link-card-button',false);
                 WebUtils.VM.rowSelected.row().isSelected(false)
             }
             row.isSelected(true);
@@ -226,7 +203,7 @@
 
             WebUtils.API.getJSON(tbUrl)
                 .then(function (data) {
-                    WebUtils.VM.results.loading(false);
+                    WebUtils.VM.results.loadingResults(false);
                     WebUtils.VM.results.TBClearances(data.results);
                 }).catch(function(e) {
                     toastr.error("Hit an error: " + e.message || e);
@@ -239,7 +216,7 @@
 
             WebUtils.API.getJSON(mUrl)
                 .then(function (data) {
-                    WebUtils.VM.results.loading(false);
+                    WebUtils.VM.results.loadingResults(false);
                     WebUtils.VM.results.MeaslesClearances(data.results)
                 }).catch(function(e) {
                     toastr.error("Hit an error: " + e.message || e);
@@ -276,15 +253,15 @@
                     var context = ko.contextFor(event.target);
                     //need to figure out of TB or measles
                     if (context.$data.table_name == 'measles_clearances'){
-                        WebUtils.VM.results.MeaslesClearances()[context.$data._row-1]['date'] = event.date.format("YYYY-MM-DD");
-                        WebUtils.VM.results.MeaslesClearancesToUpdate.push(WebUtils.VM.results.MeaslesClearances()[context.$data._row-1])
-                        WebUtils.VM.results.TableName(context.$data.table_name);
+                        WebUtils.VM.results.MeaslesClearances()[context.$data._row-1]['date'] = moment.utc(event.date).format();
+                        WebUtils.VM.results.MeaslesClearances()[context.$data._row-1]['mutated'] = true;
+                        disableButton("#measles-update-button",false);
                     }
 
                     if (context.$data.table_name == 'tb_clearances'){
-                        WebUtils.VM.results.TBClearances()[context.$data._row-1]['date'] = event.date.format("YYYY-MM-DD");
-                        WebUtils.VM.results.TBClearancesToUpdate.push(WebUtils.VM.results.TBClearances()[context.$data._row-1])
-                        WebUtils.VM.results.TableName(context.$data.table_name);
+                        WebUtils.VM.results.TBClearances()[context.$data._row-1]['date'] = moment.utc(event.date).format();
+                        WebUtils.VM.results.TBClearances()[context.$data._row-1]['mutated'] = true;
+                        disableButton("#tb-update-button",false);
                     }
                     /*var value = valueAccessor();
                     if (ko.isObservable(value)) {

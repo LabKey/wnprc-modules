@@ -7,6 +7,7 @@ middle_name,
 last_name,
 notes,
 measlesResults.mid as id,
+measlesResults.mrequired as required,
 to_char(measlesResults.mdate, 'MM/DD/YYYY') as date,
 'measles_clearances' as table_name
 
@@ -17,6 +18,7 @@ LEFT JOIN (
   SELECT
   p_m_map.person_id,
   m.id as mid,
+  m.required as mrequired,
   CAST(m.date as DATE) as mdate
 
   FROM measles_clearances m
@@ -25,6 +27,8 @@ LEFT JOIN (
   ON (
     m.id = p_m_map.clearance_id
   )
+
+  ORDER BY mdate DESC
 
 ) measlesResults
 

@@ -1,5 +1,6 @@
 package org.labkey.wnprc_compliance;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.json.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
 import org.labkey.api.action.ApiAction;
@@ -497,10 +498,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String last_name;
         public String middle_name;
         public String personid;
-        public String date;
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+        public Date date;
         public String id;
         public String _row;
         public String table_name;
+        public String required;
+        public boolean mutated;
     }
     public static class Clearances {
         public ClearanceForm[] clearances;
@@ -525,6 +529,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                     JSONObject tbClearance = new JSONObject();
                     tbClearance.put("id", tbform.id);
                     tbClearance.put("date", tbform.date);
+                    tbClearance.put("required", tbform.required);
                     tbClearance.put("container", getContainer().getId());
                     clearancesToUpdate.add(tbClearance);
                 }

@@ -1,5 +1,6 @@
+<%
 /*
- * Copyright (c) 2012 LabKey Corporation
+ * Copyright (c) 2015 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-SELECT
-  v.subjectid,
-  v.date,
-  v.category,
-  v.assayId,
-  avg(v.viralLoad) as viralLoad,
-  count(*) as replicates,
-  stddev(viralLoad) as stdDeviation,
-  group_concat(distinct v.qcflag, ';') as qcflags,
-  group_concat(distinct v.comment, ';') as comments,
-  cast(min(v.well) as varchar) as lowestWell,~
-  v.batched,
-  v.run,
-  v.folder
-
-FROM Data v
-GROUP BY v.run, v.subjectid, v.date, v.assayId, v.category, v.batched, v.folder
+%>
+<%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.security.User" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%
+    Container c = getContainer();
+    User user = getUser();
+%>
+Hello, and welcome to the Chemistry Analyzer ETL module.

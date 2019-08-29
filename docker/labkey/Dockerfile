@@ -5,23 +5,9 @@ FROM alpine:latest as download
 
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
-
 ARG WNPRC_BRANCH=master
-
-ENV LABKEY_TEAMCITY_CONFIG LabKey_183WNPRC_2_Premium_Installers
-ENV LABKEY_VERSION 18.3
-
-# User should set LABKEY_IS_COMMUNITY=true if community version, otherwise don't set any value at all
-ARG LABKEY_IS_COMMUNITY
-
-ENV LABKEY_DISTRIBUTION=${LABKEY_IS_COMMUNITY:+wisc_community}
-ENV LABKEY_DISTRIBUTION=${LABKEY_DISTRIBUTION:-wisc}
-
-ENV LABKEY_FILE_NAME=${LABKEY_IS_COMMUNITY:+UWisc-Community-bin.tar.gz}
-ENV LABKEY_FILE_NAME=${LABKEY_FILE_NAME:-UWisc-bin.tar.gz}
-
-ENV LABKEY_SNAPSHOT=${LABKEY_IS_COMMUNITY:+-}
-ENV LABKEY_SNAPSHOT=${LABKEY_SNAPSHOT:--SNAPSHOT-}
+ARG LABKEY_VERSION=18.3
+ARG LABKEY_IS_PREMIUM=true
 
 WORKDIR /tmp/labkey
 
@@ -31,6 +17,23 @@ RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
 RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
+ && if [ "$LABKEY_VERSION" = 17.2 ] ; then \
+        LABKEY_SNAPSHOT="-" ; \
+        if [ "$LABKEY_IS_PREMIUM" = true ] ; then \
+            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Premium_Installers" ; \
+            LABKEY_DISTRIBUTION="wisc" ; \
+            LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
+        else \
+            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Community_Installers" ; \
+            LABKEY_DISTRIBUTION="wisc_community" ; \
+            LABKEY_FILE_NAME="UWisc-Community-bin.tar.gz" ; \
+        fi \
+    elif [ "$LABKEY_VERSION" = 18.3 ] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_183wnprc_2_Premium_Installers" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
+    fi \
  && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \
  && Y="${LABKEY_TEAMCITY_BUILD:-$X}" \

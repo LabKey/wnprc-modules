@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>patients</name>
+    <description>Chemistry Analyzer Patients</description>
+    <transforms>
+        <transform id="step1">
+            <description>Copy to target</description>
+            <source schemaName="ChemistryAnalyzer" queryName="MergingPatientsOrders" />
+            <destination schemaName="study" queryName="chemistryResults" targetOption="merge">
+                <alternateKeys>
+                    <column name="alternateIdentifier"/>
+                </alternateKeys>
+                <columnTransforms>
+                    <column source="OrderDate" target="date"/>
+                    <column source="headerDate" target="enddate"/>
+                    <column source="RequestDateTime" target="requestDateTime"/>
+                    <column source="CommentText" target="remark"/>
+                </columnTransforms>
+                <constants>
+                    <column name="Status" type="INTEGER" value="4"/>
+                    <column name="Method" type="VARCHAR" value="Alfa Wassermann Vet Axcel"/>
+                    <column name="performing_lab" type="VARCHAR" value="WNPRC Clin Path"/>
+                </constants>
+            </destination>
+        </transform>
+    </transforms>
+    <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="headerDate" />
+    <schedule>
+        <poll interval="60m" />
+    </schedule>
+</etl>
+

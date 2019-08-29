@@ -1,0 +1,6 @@
+{table}
+Filename|Component|Version|Source|License|LabKey Dev|Purpose
+commons-collections4-4.1.jar|Apache Commons Collections|4.1|{link:From Apache|https://git-wip-us.apache.org/repos/asf?p=commons-collections.git}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Tools for managing Java collections
+joda-time-2.9.3.jar|Joda-Time|2.9.3|{link:From GitHub|https://github.com/JodaOrg/joda-time}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Tools for dealing with dates/times in Java
+jooq-3.8.4.jar|jOOQ|3.8.4|{link:From GitHub|https://github.com/jOOQ/jOOQ}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Database-mapping for Java
+{table}

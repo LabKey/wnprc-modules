@@ -115,16 +115,14 @@
     if (isVet) {
         gCalEventsString = ct.getCalendarEventsAsJson();
     }
-    Office365Calendar oct = new Office365Calendar();
-    oct.setUser(getUser());
-    oct.setContainer(getContainer());
-    oct.setEventSelectedBgColor("#30FF30");
-    oct.setHeldEventSelectedBgColor("#FF7070");
-    String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
-    String outlookHeldEventsString = "[]";
-    if (isVet || isSpi) {
-        outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
-    }
+//    Office365Calendar oct = new Office365Calendar();
+//    oct.setUser(getUser());
+//    oct.setContainer(getContainer());
+//    String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
+//    String outlookHeldEventsString = "[]";
+//    if (isVet || isSpi) {
+//        outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
+//    }
 %>
 
 <div class="col-xs-12 col-xl-10">
@@ -353,17 +351,86 @@
                 },
                 eventSources: [
                     {
-                        events: <%=gCalEventsString%>,
-                        backgroundColor: "<%=ct.getEventDefaultBgColor()%>"
+                        events: function(fetchInfo, successCallback, failureCallback) {
+                            LABKEY.Ajax.request({
+                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureOutlookEvents", null, {
+                                    calendarId: 'scheduled'
+                                }),
+                                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                    successCallback(JSON.parse(response.events).map(function(event) {
+                                        return {
+                                            title: event.title,
+                                            start: event.start,
+                                            end: event.end,
+                                            backgroundColor: event.defaultBgColor,
+                                            defaultBgColor: event.defaultBgColor,
+                                            selectedBgColor: event.selectedBgColor,
+                                            rawRowData: event.rawRowData
+                                        }
+                                    }));
+                                }, this)
+                            });
+                        }
                     },
                     {
-                        events: <%=outlookScheduledEventsString%>,
-                        backgroundColor: "<%=oct.getEventDefaultBgColor()%>"
+                        events: function(fetchInfo, successCallback, failureCallback) {
+                            LABKEY.Ajax.request({
+                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureOutlookEvents", null, {
+                                    calendarId: 'held'
+                                }),
+                                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                    successCallback(JSON.parse(response.events).map(function(event) {
+                                        return {
+                                            title: event.title,
+                                            start: event.start,
+                                            end: event.end,
+                                            backgroundColor: event.defaultBgColor,
+                                            defaultBgColor: event.defaultBgColor,
+                                            selectedBgColor: event.selectedBgColor,
+                                            rawRowData: event.rawRowData
+                                        }
+                                    }));
+                                }, this)
+                            });
+                        }
                     },
                     {
-                        events: <%=outlookHeldEventsString%>,
-                        backgroundColor: "<%=oct.getHeldEventDeafultBgColor()%>"
+                        events: function(fetchInfo, successCallback, failureCallback) {
+                            for (let i = 0; i < 5; i++)
+                            {
+                                LABKEY.Ajax.request({
+                                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureGoogleEvents", null, {
+                                        getHeldEvents: true
+                                    }),
+                                    success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                        successCallback(JSON.parse(response.events).map(function (event) {
+                                            return {
+                                                title: event.title,
+                                                start: event.start,
+                                                end: event.end,
+                                                backgroundColor: event.defaultBgColor,
+                                                defaultBgColor: event.defaultBgColor,
+                                                selectedBgColor: event.selectedBgColor,
+                                                rawRowData: event.rawRowData
+                                            }
+                                        }));
+                                    }, this)
+                                });
+                            }
+                        }
                     }
+                    <%--{--%>
+                    <%--    events: <%=gCalEventsString%>,--%>
+                    <%--    backgroundColor: "<%=ct.getEventDefaultBgColor()%>"--%>
+                    <%--},--%>
+                    <%--{--%>
+                    <%--    events: <%=outlookScheduledEventsString%>,--%>
+                    <%--    backgroundColor: "<%=oct.getEventDefaultBgColor()%>"--%>
+                    <%--},--%>
+                    <%--{--%>
+                    <%--    events: <%=outlookHeldEventsString%>,--%>
+                    <%--    backgroundColor: "<%=oct.getHeldEventDeafultBgColor()%>"--%>
+                    <%--}--%>
                 ],
                 eventClick: function(calEvent) {
                     if (previousCalendarEvent) {
@@ -431,6 +498,7 @@
                 lsid:               '',
                 objectid:           '',
                 requestid:          '',
+                taskid:             '',
                 animalid:           '',
                 location:           '',
                 priority:           '',
@@ -585,7 +653,7 @@
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
-                        QCState: '7', //TODO get actual qcstate from name
+                        QCStateLabel: 'Request: Denied', //TODO get actual qcstate from name
                         statusChangeReason: form.statuschangereason
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -610,13 +678,13 @@
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: WebUtils.VM.taskDetails.requestid(),
-                        QCState: '5'
+                        QCStateLabel: 'Request: Pending'
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {
                         if (response.success) {
-                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
-                            location.reload(true);
+
+                            //location.reload(true);
                         } else {
                             alert('There was an error while trying to cancel the event.');
                         }

@@ -53,7 +53,7 @@ import java.util.Map;
 
 public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 {
-    public static final ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
+    public ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP2);
     public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private User user;
     private Container container;

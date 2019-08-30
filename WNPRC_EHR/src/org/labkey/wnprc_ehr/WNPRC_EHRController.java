@@ -40,7 +40,9 @@ import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
@@ -72,6 +74,8 @@ import org.labkey.webutils.api.json.EnhancedJsonResponse;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
+import org.labkey.wnprc_ehr.calendar.GoogleCalendar;
+import org.labkey.wnprc_ehr.calendar.Office365Calendar;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -1116,17 +1120,12 @@ public class WNPRC_EHRController extends SpringActionController
 
             JSONObject response = new JSONObject();
             response.put("success", false);
-            org.labkey.wnprc_ehr.calendar.Office365Calendar calendar = new org.labkey.wnprc_ehr.calendar.Office365Calendar();
+            Office365Calendar calendar = new Office365Calendar();
             String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories(), event.hold);
 
             if (apptId != null)
             {
                 try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
-                    TableInfo ti = null;
-                    QueryUpdateService service =  null;
-                    List<Map<String, Object>> rowsToInsert = null;
-                    List<Map<String, Object>> rowsToUpdate = null;
-
                     /**
                      * Insert the necessary records into the ehr.tasks table
                      */
@@ -1140,20 +1139,10 @@ public class WNPRC_EHRController extends SpringActionController
                         taskRecord.put("title", "SurgeryProcedure");
                         taskRecord.put("category", "task");
                         taskRecord.put("assignedto", event.getAssignedTo());
-                        taskRecord.put("qcstate", 10);
+                        taskRecord.put("QCStateLabel", "Scheduled");
                         taskRecord.put("duedate", "");
                         taskRecord.put("formtype", "SurgeryProcedure");
-                        rowsToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
-
-                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
-                        service = ti.getUpdateService();
-
-                        BatchValidationException validationException = new BatchValidationException();
-                        List<Map<String, Object>> insertedRows = service.insertRows(getUser(), getContainer(), rowsToInsert, validationException, null, null);
-                        if (validationException.hasErrors())
-                        {
-                            throw validationException;
-                        }
+                        insertRecord(taskRecord, "ehr", "tasks");
                     }
 
                     /**
@@ -1165,21 +1154,11 @@ public class WNPRC_EHRController extends SpringActionController
                         JSONObject surgeryRecord = new JSONObject();
                         surgeryRecord.put("objectid", spRow.get("objectid"));
                         surgeryRecord.put("apptid", apptId);
-                        surgeryRecord.put("qcstate", 10);
+                        surgeryRecord.put("QCStateLabel", "Scheduled");
                         surgeryRecord.put("taskid", spRow.get("taskid"));
                         surgeryRecord.put("date", event.getStart());
                         surgeryRecord.put("enddate", event.getEnd());
-                        rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
-
-                        //Get the service object based on schema/table
-                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
-                        service = ti.getUpdateService();
-
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-                        if (updatedRows.size() != rowsToUpdate.size())
-                        {
-                            throw new QueryUpdateServiceException("Not all rows updated properly");
-                        }
+                        updateRecord(surgeryRecord, "study", "surgery_procedure");
                     }
 
                     //TODO look into permissions stuff... ti.hasPermission(getUser(), DeletePermission.class);
@@ -1188,17 +1167,8 @@ public class WNPRC_EHRController extends SpringActionController
 
                     JSONObject requestRecord = new JSONObject();
                     requestRecord.put("requestid", event.getRequestId());
-                    requestRecord.put("qcstate", 8);
-                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(requestRecord);
-
-                    //Get the service object based on schema/table
-                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("requests");
-                    service = ti.getUpdateService();
-
-                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-                    if (updatedRows.size() != rowsToUpdate.size()) {
-                        throw new QueryUpdateServiceException("Not all rows updated properly");
-                    }
+                    requestRecord.put("QCStateLabel", "Scheduled");
+                    updateRecord(requestRecord, "ehr", "requests");
 
                     transaction.commit();
                     response.put("success", true);
@@ -1215,7 +1185,8 @@ public class WNPRC_EHRController extends SpringActionController
     public static class SurgeryProcedureChangeStatusEvent
     {
         private String requestid;
-        private String qcstate;
+        private String taskid;
+        private String qcstatelabel;
         private String statuschangereason;
 
         public String getRequestId()
@@ -1223,9 +1194,14 @@ public class WNPRC_EHRController extends SpringActionController
             return requestid;
         }
 
-        public String getQCState()
+        public String getTaskId()
         {
-            return qcstate;
+            return taskid;
+        }
+
+        public String getQCStateLabel()
+        {
+            return qcstatelabel;
         }
 
         public String getStatusChangeReason()
@@ -1238,9 +1214,14 @@ public class WNPRC_EHRController extends SpringActionController
             this.requestid = requestid;
         }
 
-        public void setQCState(String qcstate)
+        public void setTaskId(String taskid)
         {
-            this.qcstate = qcstate;
+            this.taskid = taskid;
+        }
+
+        public void setQCStateLabel(String qcstatelabel)
+        {
+            this.qcstatelabel = qcstatelabel;
         }
 
         public void setStatusChangeReason(String statuschangereason)
@@ -1262,10 +1243,6 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
 
-            TableInfo ti = null;
-            QueryUpdateService service =  null;
-            List<Map<String, Object>> rowsToUpdate = null;
-
             try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
                 /**
                  * Update surgery records
@@ -1275,19 +1252,9 @@ public class WNPRC_EHRController extends SpringActionController
                     //Initialize data to be updated and convert it to the necessary format
                     JSONObject surgeryRecord = new JSONObject();
                     surgeryRecord.put("objectid", spRow.get("objectid"));
-                    surgeryRecord.put("qcstate", event.getQCState());
+                    surgeryRecord.put("QCStateLabel", event.getQCStateLabel());
                     surgeryRecord.put("statuschangereason", event.getStatusChangeReason());
-                    rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(surgeryRecord);
-
-                    //Get the service object based on schema/table
-                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("surgery_procedure");
-                    service = ti.getUpdateService();
-
-                    List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-                    if (updatedRows.size() != rowsToUpdate.size())
-                    {
-                        throw new QueryUpdateServiceException("Not all rows updated properly");
-                    }
+                    updateRecord(surgeryRecord, "study", "surgery_procedure");
                 }
 
                 /**
@@ -1295,26 +1262,25 @@ public class WNPRC_EHRController extends SpringActionController
                  */
                 JSONObject requestRecord = new JSONObject();
                 requestRecord.put("requestid", event.getRequestId());
-                requestRecord.put("qcstate", event.getQCState());
+                requestRecord.put("QCStateLabel", event.getQCStateLabel());
                 requestRecord.put("remark", event.getStatusChangeReason());
-                rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(requestRecord);
+                updateRecord(requestRecord, "ehr", "requests");
 
-                //Get the service object based on schema/table
-                ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("requests");
-                service = ti.getUpdateService();
+                /**
+                 * Update task record
+                 */
+                JSONObject taskRecord = new JSONObject();
+                taskRecord.put("taskid", event.getRequestId());
+                taskRecord.put("QCStateLabel", event.getQCStateLabel());
+                updateRecord(taskRecord, "ehr", "tasks");
 
-                List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-                if (updatedRows.size() != rowsToUpdate.size()) {
-                    throw new QueryUpdateServiceException("Not all rows updated properly");
-                }
-
-                if ("5".equals(event.getQCState()))
+                if ("Request: Pending".equals(event.getQCStateLabel()))
                 {
                     String apptid = null;
                     if(spRows.size() > 0) {
                         apptid = (String) spRows.get(0).get("apptid");
                     }
-                    org.labkey.wnprc_ehr.calendar.Office365Calendar calendar = new org.labkey.wnprc_ehr.calendar.Office365Calendar();
+                    Office365Calendar calendar = new Office365Calendar();
                     calendar.cancelEvent(apptid);
                 }
 
@@ -1347,6 +1313,95 @@ public class WNPRC_EHRController extends SpringActionController
             spRows.add(rs.getRowMap());
         }
         return spRows;
+    }
+
+    private void insertRecord(JSONObject record, String schema, String table) throws DuplicateKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        List<Map<String, Object>> rowsToInsert  = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
+
+        TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), schema).getTable(table);
+        QueryUpdateService service = ti.getUpdateService();
+
+        BatchValidationException validationException = new BatchValidationException();
+        List<Map<String, Object>> insertedRows = service.insertRows(getUser(), getContainer(), rowsToInsert, validationException, null, null);
+        if (validationException.hasErrors())
+        {
+            throw validationException;
+        }
+    }
+
+    private void updateRecord(JSONObject record, String schema, String table) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
+
+        //Get the service object based on schema/table
+        TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), schema).getTable(table);
+        QueryUpdateService service = ti.getUpdateService();
+
+        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+        if (updatedRows.size() != rowsToUpdate.size()) {
+            throw new QueryUpdateServiceException("Not all " + schema + "." + table + " rows updated properly");
+        }
+    }
+
+    public static class FetchCalendarEvent
+    {
+        private String calendarId;
+
+        public String getCalendarId()
+        {
+            return calendarId;
+        }
+
+        public void setCalendarId(String calendarId)
+        {
+            this.calendarId = calendarId;
+        }
+    }
+
+    @ActionNames("FetchSurgeryProcedureOutlookEvents")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class FetchSurgeryProcedureOutlookEventsAction extends ApiAction<FetchCalendarEvent>
+    {
+        @Override
+        public Object execute(FetchCalendarEvent event, BindException errors) throws Exception
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            Office365Calendar oct = new Office365Calendar();
+            oct.setUser(getUser());
+            oct.setContainer(getContainer());
+            String outlookEventsString = oct.getCalendarEventsAsJson(event.isGetHeldEvents());
+            response.put("events", outlookEventsString);
+            if (outlookEventsString != null && outlookEventsString.trim().length() > 0)
+            {
+                response.put("success", true);
+            }
+
+            return response;
+        }
+    }
+
+    @ActionNames("FetchSurgeryProcedureGoogleEvents")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class FetchSurgeryProcedureGoogleEventsAction extends ApiAction<FetchCalendarEvent>
+    {
+        @Override
+        public Object execute(FetchCalendarEvent event, BindException errors) throws Exception
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            GoogleCalendar gc = new GoogleCalendar();
+            gc.setUser(getUser());
+            gc.setContainer(getContainer());
+            String googleEventsString = gc.getCalendarEventsAsJson();
+
+            return response;
+        }
     }
 
     @ActionNames("PathologyCaseList")

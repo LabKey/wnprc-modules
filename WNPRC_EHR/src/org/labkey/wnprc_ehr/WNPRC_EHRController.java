@@ -1373,7 +1373,7 @@ public class WNPRC_EHRController extends SpringActionController
             Office365Calendar oct = new Office365Calendar();
             oct.setUser(getUser());
             oct.setContainer(getContainer());
-            String outlookEventsString = oct.getCalendarEventsAsJson(event.isGetHeldEvents());
+            String outlookEventsString = oct.getCalendarEventsAsJson(event.getCalendarId() != null && event.getCalendarId() != "held" ? false : true);
             response.put("events", outlookEventsString);
             if (outlookEventsString != null && outlookEventsString.trim().length() > 0)
             {

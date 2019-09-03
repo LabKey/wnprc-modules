@@ -1,1 +1,1 @@
-ALTER TABLE wnprc_compliance.measles_clearances ADD COLUMN required BOOLEAN;
+ALTER TABLE wnprc_compliance.measles_clearances ADD COLUMN required BOOLEAN DEFAULT true;

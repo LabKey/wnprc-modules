@@ -598,6 +598,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public static class ResolvePendingTBResultsForm {
         public String[] pendingTBIds;
         public String notes;
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
         public Date date;
     }
 

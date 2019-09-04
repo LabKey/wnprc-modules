@@ -2371,7 +2371,7 @@ EHR.Metadata.registerMetadata('Default', {
         blood : {
             billedby: {shownInGrid: false}
             ,remark: {shownInGrid: false}
-            project: {shownInGrid: true, allowBlank: false}
+            ,project: {shownInGrid: true, allowBlank: false}
             ,requestor: {shownInGrid: false, hidden: true, formEditorConfig:{readOnly: true}}
             ,performedby: {shownInGrid: false}
             ,instructions: {shownInGrid: false}

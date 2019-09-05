@@ -215,6 +215,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         Resource r = getModuleResource("/scripts/wnprc_ehr/wnprc_triggers.js");
         assert r != null;
         EHRService.get().registerTriggerScript(this, r);
+        EHRService.get().registerClientDependency(ClientDependency.fromPath("ehr/ehr_ext3_api"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcCoreUtils.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcOverRides.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcReports.js"), this);

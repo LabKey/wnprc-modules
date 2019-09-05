@@ -38,7 +38,8 @@ SELECT
   'WNPRC' as currentColony,
   d.gender.code as gender,
   d.dam,
-  d.sire
+  d.sire,
+  curdate() as date
 FROM study.demographics d
 
 LEFT OUTER JOIN study.demographics as ih on d.id = ih.id and ih.origin.code in

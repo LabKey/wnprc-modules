@@ -39,6 +39,7 @@ SELECT
   d.gender.code as gender,
   d.dam,
   d.sire,
+  d.modified as modified,
   curdate() as date
 FROM study.demographics d
 

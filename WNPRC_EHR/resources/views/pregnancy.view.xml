@@ -1,8 +1,5 @@
 <view xmlns="http://labkey.org/data/xml/view" title="Pregnancy Detail">
     <dependencies>
-        <dependency path="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.0/URI.min.js"/>
-        <dependency path="/wnprc_ehr/extjs.lib.xml"/>
-        <dependency path="/wnprc_ehr/breeding.css"/>
-        <dependency path="/wnprc_ehr/gen/breeding.js"/>
+        <dependency path="/wnprc_ehr/breeding.lib.xml"/>
     </dependencies>
 </view>

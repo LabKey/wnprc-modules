@@ -1,63 +1,186 @@
 <tables xmlns="http://labkey.org/data/xml">
-  <table tableName="vvc" tableDbType="TABLE">
-    <columns>
-      <column columnName="rowid"/>
-      <column columnName="date"/>
-      <column columnName="dateapproved"/>
-      <column columnName="pi"/>
-      <column columnName="protocol"/>
-      <column columnName="description"/>
-      <column columnName="rationale"/>
-      <column columnName="veterinarian"/>
-      <column columnName="requestid"/>
-      <column columnName="taskid"/>
-      <column columnName="qcstate"/>
-      <column columnName="container"/>
-      <column columnName="createdby"/>
-      <column columnName="created"/>
-      <column columnName="modifiedby"/>
-      <column columnName="modified"/>
-    </columns>
-  </table>
-  <table tableName="necropsy_suite" tableDbType="TABLE">
-    <columns>
-      <column columnName="room"/>
-      <column columnName="disabled_on"/>
-      <column columnName="display_color"/>
-      <column columnName="container"/>
-      <column columnName="createdby"/>
-      <column columnName="created"/>
-      <column columnName="modifiedby"/>
-      <column columnName="modified"/>
-      <column columnName="displayname"/>
-    </columns>
-  </table>
-  <table tableName="email_server" tableDbType="TABLE">
-    <columns>
-      <column columnName="id"/>
-      <column columnName="hostname"/>
-      <column columnName="protocol"/>
-      <column columnName="port"/>
-      <column columnName="display_name"/>
-      <column columnName="use_ssl"/>
-      <column columnName="disabled_on"/>
-      <column columnName="container"/>
-      <column columnName="createdby"/>
-      <column columnName="created"/>
-      <column columnName="modifiedby"/>
-      <column columnName="modified"/>
-    </columns>
-  </table>
-  <table tableName="external_labs" tableDbType="TABLE">
-    <columns>
-      <column columnName="code"/>
-      <column columnName="lab_name"/>
-      <column columnName="disabled_on"/>
-      <column columnName="container"/>
-      <column columnName="createdby"/>
-      <column columnName="created"/>
-      <column columnName="modifiedby"/>
-      <column columnName="modified"/>
-    </columns>
-  </table>
+    <table tableName="vvc" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="date"/>
+            <column columnName="dateapproved"/>
+            <column columnName="pi"/>
+            <column columnName="protocol"/>
+            <column columnName="description"/>
+            <column columnName="rationale"/>
+            <column columnName="veterinarian"/>
+            <column columnName="requestid"/>
+            <column columnName="taskid"/>
+            <column columnName="qcstate"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="necropsy_suite" tableDbType="TABLE">
+        <columns>
+            <column columnName="room"/>
+            <column columnName="disabled_on"/>
+            <column columnName="display_color"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+            <column columnName="displayname"/>
+        </columns>
+    </table>
+    <table tableName="email_server" tableDbType="TABLE">
+        <columns>
+            <column columnName="id"/>
+            <column columnName="hostname"/>
+            <column columnName="protocol"/>
+            <column columnName="port"/>
+            <column columnName="display_name"/>
+            <column columnName="use_ssl"/>
+            <column columnName="disabled_on"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="external_labs" tableDbType="TABLE">
+        <columns>
+            <column columnName="code"/>
+            <column columnName="lab_name"/>
+            <column columnName="disabled_on"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="animal_requests" tableDbType="TABLE">
+        <tableTitle>Animal Requests</tableTitle>
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="principalinvestigator">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>uniqueProtocolInvestigator</fkTable>
+                    <fkColumnName>inves</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="date"/>
+            <column columnName="originneeded">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>geographic_origin</fkTable>
+                    <fkColumnName>meaning</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="speciesneeded">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>species_codes</fkTable>
+                    <fkColumnName>common_name</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="sex"/>
+            <column columnName="age"/>
+            <column columnName="weight"/>
+            <column columnName="mhctype"/>
+            <column columnName="disposition">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>animal_requests_disposition</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="infectiousdisease">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>animal_requests_infectiousdisease</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                </fk>
+
+            </column>
+            <column columnName="numberofanimals"/>
+            <column columnName="viralstatus">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr_lookups</fkDbSchema>
+                    <fkTable>viral_status</fkTable>
+                    <fkColumnName>value</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="dateneeded"/>
+            <column columnName="protocol">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>protocol</fkTable>
+                    <fkColumnName>protocol</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="project">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>project</fkTable>
+                    <fkColumnName>project</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="account"/>
+            <column columnName="comments"/>
+            <column columnName="requestid">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>requests</fkTable>
+                    <fkColumnName>rowid</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="taskid">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>ehr</fkDbSchema>
+                    <fkTable>tasks</fkTable>
+                    <fkColumnName>rowid</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="QCState">
+                <measure>false</measure>
+                <dimension>true</dimension>
+                <fk>
+                    <fkDbSchema>study</fkDbSchema>
+                    <fkTable>QCState</fkTable>
+                    <fkColumnName>RowId</fkColumnName>
+                </fk>
+            </column>
+            <column columnName="dateapprovedordenied"/>
+            <column columnName="dateordered"/>
+            <column columnName="datearrival"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
 </tables>

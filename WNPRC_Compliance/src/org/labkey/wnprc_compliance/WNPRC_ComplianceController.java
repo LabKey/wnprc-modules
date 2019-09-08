@@ -1,11 +1,12 @@
 package org.labkey.wnprc_compliance;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.json.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.DbSchema;
@@ -147,6 +148,18 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
+    public static class SearchPersonFromCardForm {
+        public String query;
+        public void setQuery(String term) {
+            this.query = term;
+        }
+
+        public String getQuery() {
+            return this.query;
+        }
+
+    }
+
     public static class AddDataToExistingPersonForm {
         public String personid;
         public RequirementForm tbInfo;
@@ -163,7 +176,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public Object execute(AddDataToExistingPersonForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().beginTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().beginTransaction()) {
                 PersonService service = new PersonService(getUser(), getContainer());
                 String personId = form.personid;
 
@@ -206,7 +219,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             JSONObject returnJSON = new JSONObject();
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().ensureTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 String personId = service.newUser((NewUserForm) form);
 
                 if (form.tbInfo != null) {
@@ -298,8 +311,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
     @ActionNames("personSearch")
     @RequiresPermission(ComplianceAdminPermission.class)
-    @CSRF(CSRF.Method.POST)
-    public class SearchUserAPI extends MutatingApiAction<SearchPersonForm> {
+    public class SearchUserAPI extends ReadOnlyApiAction<SearchPersonForm> {
         @Override
         public Object execute(SearchPersonForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
@@ -339,38 +351,34 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public static class CardExemptForm {
         public Integer cardId;
         public String reason;
+        public String personId;
     }
 
-    public static class CardExemptionsForm {
-        public CardExemptForm[] exemptions;
+    public static class CardLinkForm {
+        public Integer cardId;
+        public String personId;
     }
 
     @ActionNames("markCardsExempt")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
     @CSRF(CSRF.Method.POST)
-    public class MarkCardExemptAPI extends MutatingApiAction<CardExemptionsForm> {
+    public class MarkCardExemptAPI extends MutatingApiAction<CardExemptForm> {
         @Override
-        public Object execute(CardExemptionsForm form, BindException errors) throws Exception {
+        public Object execute(CardExemptForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME,DbSchemaType.Module).getScope().ensureTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 SimpleQueryUpdater cardUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "cards");
-                List<Map<String, Object>> cardsToUpdate = new ArrayList<>();
 
-                for (CardExemptForm cardExemptForm : form.exemptions) {
-                    JSONObject card = new JSONObject();
+                JSONObject card = new JSONObject();
 
-                    card.put("card_id", cardExemptForm.cardId.toString());
-                    card.put("container", getContainer().getId());
+                card.put("card_id", form.cardId.toString());
+                card.put("exempt_reason", form.reason);
+                card.put("container", getContainer().getId());
+                card.put("exempt", true);
 
-                    card.put("exempt", true);
-                    card.put("exempt_reason", cardExemptForm.reason);
-
-                    cardsToUpdate.add(card);
-                }
-
-                cardUpdater.upsert(cardsToUpdate);
+                cardUpdater.upsert(card);
 
                 json.put("success", true);
 
@@ -380,10 +388,74 @@ public class WNPRC_ComplianceController extends SpringActionController {
             return json;
         }
     }
+    @ActionNames("getPersons")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    public class GetPersonFromCardAPI extends ReadOnlyApiAction<SearchPersonFromCardForm> {
+        public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+            Map<String, List<JSONObject>> results = new HashMap<>();
 
+            // Construct an "OR" clause based on space-delimited queries.
+            SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
+            if (!form.getQuery().equals("")) {
+                orClause.addClause(new SimplerFilter("displayLcase", CompareType.CONTAINS, form.getQuery()).getClauses().get(0));
+            }
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addClause(orClause);
+
+            SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
+
+            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "searchResults", filter).toJSONObjectArray()) {
+                String type = row.getString("type");
+
+                List<JSONObject> rows = results.get(type);
+                if (rows == null) {
+                    rows = new ArrayList<>();
+                    results.put(type, rows);
+                }
+
+                rows.add(row);
+            }
+
+            json.put("results", results);
+
+            return json;
+        }
+    }
+
+    @ActionNames("linkCards")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF(CSRF.Method.POST)
+    public class LinkCardAPI extends MutatingApiAction<CardLinkForm> {
+        @Override
+        public Object execute(CardLinkForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+                SimpleQueryUpdater cardUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "persons_to_cards");
+                JSONObject personToCard = new JSONObject();
+
+                personToCard.put("cardid", form.cardId.toString());
+                personToCard.put("personid", form.personId);
+                personToCard.put("container", getContainer().getId());
+
+                cardUpdater.upsert(personToCard);
+
+                json.put("success", true);
+
+                transaction.commit();
+            }
+
+            return json;
+        }
+    }
     public static class ResolvePendingTBResultsForm {
         public String[] pendingTBIds;
         public String notes;
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
         public Date date;
     }
 
@@ -391,14 +463,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @RequiresPermission(ComplianceAdminPermission.class)
     @CSRF(CSRF.Method.POST)
     @Marshal(Marshaller.Jackson)
-    public class ResolvePendingTBResultsAPI extends MutatingApiAction<ResolvePendingTBResultsForm>
-    {
+    public class ResolvePendingTBResultsAPI extends MutatingApiAction<ResolvePendingTBResultsForm> {
         @Override
         public Object execute(ResolvePendingTBResultsForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();
             SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
 
-            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME, DbSchemaType.Module).getScope().ensureTransaction()) {
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 SimpleQueryUpdater pendingTbUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "pending_tb_clearances");
                 SimpleQueryUpdater tbUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "tb_clearances");
                 SimpleQueryUpdater tbMapUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, "persons_tb_clearances");

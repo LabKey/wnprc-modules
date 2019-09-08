@@ -9,7 +9,7 @@
                         <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
                     </column>
                     <column columnName="date">
-                        <description>The date this samle was collected</description>
+                        <description>The date this sample was collected</description>
                     </column>
                     <column columnName="sampleType">
                         <columnTitle>Nucleic Acid Type</columnTitle>
@@ -58,7 +58,7 @@
                     </column>
                     <column columnName="sampleVol">
                         <columnTitle>Source Material Size (ml or mg)</columnTitle>
-                        <description>This is the volume or mass of the source material</description>
+                        <description>This is the volume or mass of the source material. If it is a batched sample enter the volume of a single sample (most likely 0.1mL).</description>
                         <measure>false</measure>
                         <dimension>false</dimension>
                     </column>

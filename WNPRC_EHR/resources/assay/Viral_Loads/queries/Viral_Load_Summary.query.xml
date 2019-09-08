@@ -29,6 +29,9 @@
                             <fkDisplayColumnName>well</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="batched">
+                        <columnTitle>Batched</columnTitle>
+                    </column>
                     <column columnName="folder">
                         <isHidden>true</isHidden>
                     </column>

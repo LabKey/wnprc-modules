@@ -3,8 +3,11 @@ FROM store/oracle/serverjre:8
 ENV LANG en_US.utf8
 
 # copy in some additional yum repositories
-COPY public-yum-ol7.repo /etc/yum.repos.d
+#COPY public-yum-ol7.repo /etc/yum.repos.d
+RUN yum-config-manager --enable ol7_optional_latest
 RUN yum -y -q install \
+    #for R
+    texinfo-tex \
     # for the timezone
     tzdata \
     # for downloading LabKey and Tomcat
@@ -14,11 +17,13 @@ RUN yum -y -q install \
     # for creating the netrc file from the template (envsubst)
     gettext \
     # for installing R and the various additional packages
-    R-3.2.0 \
+    R-3.5.1 \
     make \
     libcurl-devel \
     libxml2-devel \
     openssl-devel \
+    #required to render png
+    pango \
     # for checking for when the database is up
     postgresql \
  # to make the image smaller
@@ -40,9 +45,9 @@ COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
 RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml
 
-# install the necessary R scripts
+# install the necessary R packages
 COPY install.r /tmp/install.r
-RUN mkdir -p /usr/share/doc/R-3.2.0/html && Rscript /tmp/install.r
+RUN mkdir -p /usr/share/doc/R-3.5.1/html && Rscript /tmp/install.r
 
 # copy over the .netrc template file
 COPY netrc /root/netrc.template

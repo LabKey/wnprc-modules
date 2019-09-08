@@ -22,7 +22,7 @@ services:
     environment:
       TZ: America/Chicago
     command: postgres -c log_directory=/logs -c config_file=/conf/postgresql.conf -c hba_file=/conf/pg_hba.conf
-    stop_signal: SIGINT
+    stop_signal: SIGTERM
     stop_grace_period: "120s"
 
   mailcatcher:
@@ -60,8 +60,9 @@ services:
       - network1
     environment:
       CATALINA_OPTS:
-      JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME}"
-      LK_BACKGROUND_USER: 
+      JAVA_OPTS: "${JAVA_OPTS} -Djdbc.user=${PG_USER} -Djdbc.pass=${PG_PASS} -Djdbc.url=jdbc:postgresql://postgres:5432/${PG_NAME} \
+                  -Dmsql.user=${MSQL_USER} -Dmsql.pass=${MSQL_PASS} -Dmsql.url=${MSQL_URL}"
+      LK_BACKGROUND_USER:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL:
       PG_NAME:
@@ -86,21 +87,20 @@ services:
       - "${LABKEY_DANGER_PORT}:80"
       - "${LABKEY_SECURE_PORT}:443"
       - "${MAIL_CATCHER_PORT}:1080"
+      - "${CADVISOR_PORT}:8080"
     networks:
       - network1
     environment:
       TZ: America/Chicago
 
-  perlscripts:
-    image: wnprcehr/ehrcron:latest
+  cadvisor:
+    image: google/cadvisor:latest
     depends_on:
-      - "labkey"
+      - "postgres"
     volumes:
-      - "${BACKUP_DIR}:/backups"
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
     networks:
       - network1
-    environment:
-      LK_BACKGROUND_USER:
-      LK_BACKGROUND_USER_PASSWORD:
-      LK_BASE_URL:
-      TZ: America/Chicago

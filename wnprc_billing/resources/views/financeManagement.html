@@ -37,7 +37,7 @@
                     items: [
                         {name: 'Billing Period Summary / Discrepancy Report', url: LABKEY.ActionURL.buildURL('ldk', 'runNotification', ctx.EHRStudyContainer, {key: 'org.labkey.ehr_billing.notification.BillingNotification'})},
                         {name: 'Estimated Charges By Project', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'invoiceEstimate', null)},
-                        {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'wnprc_billing', 'query.queryName': 'miscChargesNotBilledUpdate'})},
+                        {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'ehr_billing', 'query.queryName': 'miscCharges', 'query.viewName': 'Charges Not Billed'})},
                         {name: 'Perform Billing Run', url: LABKEY.ActionURL.buildURL('ehr_billing', 'billingPipeline', null)},
                         {name: 'Invoice Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRuns'})},
                         {name: 'Invoice External - Latest Run', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceExternalLastRun'})},
@@ -82,8 +82,7 @@
                 },{
                     header: 'Other',
                     items: [
-                        {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'dataAccess'})},
-                        {name: 'Import Historical Misc. Charges', url: LABKEY.ActionURL.buildURL(queryController, queryAction, ctx.EHRStudyContainer, {schemaName: 'ehr_billing', 'query.queryName': 'miscCharges', showImport: true})}
+                        {name: 'Access To Billing Data', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'dataAccess'})}
                     ]
                 }]
             }]

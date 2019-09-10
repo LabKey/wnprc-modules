@@ -15,6 +15,7 @@
  */
 SELECT
   d.participantid as animalId,
+  d.participantid.primateId AS primateId,
 --  ih.value as neprcId,
   d.birth,
   d.death,

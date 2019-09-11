@@ -129,7 +129,7 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         try {
             is = new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-
+            //TODO fix!
         }
 
         return is;
@@ -155,34 +155,28 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     private Calendar getCalendar() throws IOException {
-        Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
+        return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-        return service;
     }
 
-    private String getCalendarEvents(Calendar calendar, DateTime minTime, Integer maxResults) throws IOException {
-        String eventsString = null;
-        Events events = calendar.events().list("f5uogvepmaroft2dh30fqh7g7o@group.calendar.google.com")
+    private String getCalendarEvents(Calendar calendar, DateTime minTime, Integer maxResults, String calendarId) throws IOException {
+        Events events = calendar.events().list(calendarId)
                 .setMaxResults(maxResults)
                 .setTimeMin(minTime)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .execute();
-        List<Event> items = events.getItems();
 
-        JSONArray jsonEvents = getJsonEventList(items);
-        eventsString = jsonEvents.toString();
-
-        return eventsString;
+        return getJsonEventList(events.getItems()).toString();
     }
 
-    public String getCalendarEventsAsJson() {
+    public String getCalendarEventsAsJson(String calendarId) {
         String events;
         try {
             Calendar calendar = getCalendar();
             DateTime dateMin = new DateTime(0);
-            events = getCalendarEvents(calendar, dateMin, Integer.MAX_VALUE);
+            events = getCalendarEvents(calendar, dateMin, Integer.MAX_VALUE, calendarId);
         } catch (Exception e) {
             Event error = new Event();
             error.setStart(new EventDateTime().setDate(new DateTime(true, System.currentTimeMillis(), null)));

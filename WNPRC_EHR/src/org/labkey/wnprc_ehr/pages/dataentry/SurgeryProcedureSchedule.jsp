@@ -108,21 +108,6 @@
     Group spiGroup = GroupManager.getGroup(getContainer(), "spi (LDAP)", GroupEnumType.SITE);
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
     boolean isSpi = getUser().isInGroup(spiGroup.getUserId()) || getUser().isInSiteAdminGroup();
-    GoogleCalendar ct = new GoogleCalendar();
-    ct.setUser(getUser());
-    ct.setContainer(getContainer());
-    String gCalEventsString = "[]";
-    if (isVet) {
-        gCalEventsString = ct.getCalendarEventsAsJson();
-    }
-//    Office365Calendar oct = new Office365Calendar();
-//    oct.setUser(getUser());
-//    oct.setContainer(getContainer());
-//    String outlookScheduledEventsString = oct.getCalendarEventsAsJson(false);
-//    String outlookHeldEventsString = "[]";
-//    if (isVet || isSpi) {
-//        outlookHeldEventsString = oct.getCalendarEventsAsJson(true);
-//    }
 %>
 
 <div class="col-xs-12 col-xl-10">
@@ -393,44 +378,7 @@
                                 }, this)
                             });
                         }
-                    },
-                    {
-                        events: function(fetchInfo, successCallback, failureCallback) {
-                            for (let i = 0; i < 5; i++)
-                            {
-                                LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureGoogleEvents", null, {
-                                        getHeldEvents: true
-                                    }),
-                                    success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                        successCallback(JSON.parse(response.events).map(function (event) {
-                                            return {
-                                                title: event.title,
-                                                start: event.start,
-                                                end: event.end,
-                                                backgroundColor: event.defaultBgColor,
-                                                defaultBgColor: event.defaultBgColor,
-                                                selectedBgColor: event.selectedBgColor,
-                                                rawRowData: event.rawRowData
-                                            }
-                                        }));
-                                    }, this)
-                                });
-                            }
-                        }
                     }
-                    <%--{--%>
-                    <%--    events: <%=gCalEventsString%>,--%>
-                    <%--    backgroundColor: "<%=ct.getEventDefaultBgColor()%>"--%>
-                    <%--},--%>
-                    <%--{--%>
-                    <%--    events: <%=outlookScheduledEventsString%>,--%>
-                    <%--    backgroundColor: "<%=oct.getEventDefaultBgColor()%>"--%>
-                    <%--},--%>
-                    <%--{--%>
-                    <%--    events: <%=outlookHeldEventsString%>,--%>
-                    <%--    backgroundColor: "<%=oct.getHeldEventDeafultBgColor()%>"--%>
-                    <%--}--%>
                 ],
                 eventClick: function(calEvent) {
                     if (previousCalendarEvent) {
@@ -448,6 +396,41 @@
                     });
                 }
             });
+
+            LABKEY.Query.selectRows({
+                schemaName: 'wnprc',
+                queryName: 'surgery_procedure_calendars',
+                columns: 'calendar_id,calendar_type,display_name,show_by_default',
+                scope: this,
+                success: function(data){
+                    if (data.rows && data.rows.length > 0) {
+                        for (let i = 0; i < data.rows.length; i++) {
+                            calendar.addEventSource(function(fetchInfo, successCallback, failureCallback) {
+                                LABKEY.Ajax.request({
+                                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureGoogleEvents", null, {
+                                        calendarId: data.rows[i].calendar_id
+                                    }),
+                                    success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                        successCallback(JSON.parse(response.events).map(function (event) {
+                                            return {
+                                                title: event.title,
+                                                start: event.start,
+                                                end: event.end,
+                                                backgroundColor: event.defaultBgColor,
+                                                defaultBgColor: event.defaultBgColor,
+                                                selectedBgColor: event.selectedBgColor,
+                                                rawRowData: event.rawRowData
+                                            }
+                                        }));
+                                    }, this)
+                                });
+                            });
+                        }
+                        calendar.render();
+                    }
+                }
+            });
+
             calendar.render();
         });
         //debugger

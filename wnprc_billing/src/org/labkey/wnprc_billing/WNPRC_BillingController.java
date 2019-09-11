@@ -508,7 +508,7 @@ public class WNPRC_BillingController extends SpringActionController
         @Override
         public void export(InvoicePdfForm invoicePdfForm, HttpServletResponse response, BindException errors) throws Exception
         {
-            Set<String> selectedInvoices = DataRegionSelection.getSelected(HttpView.currentContext(), null, true, true);
+            Set<String> selectedInvoices = DataRegionSelection.getSelected(HttpView.currentContext(), null, true);
 
             response.reset();
             response.setContentType("application/zip");

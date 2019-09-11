@@ -1398,7 +1398,12 @@ public class WNPRC_EHRController extends SpringActionController
             GoogleCalendar gc = new GoogleCalendar();
             gc.setUser(getUser());
             gc.setContainer(getContainer());
-            String googleEventsString = gc.getCalendarEventsAsJson();
+            String googleEventsString = gc.getCalendarEventsAsJson(event.getCalendarId());
+            response.put("events", googleEventsString);
+            if (googleEventsString != null && googleEventsString.trim().length() > 0)
+            {
+                response.put("success", true);
+            }
 
             return response;
         }

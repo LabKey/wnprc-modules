@@ -63,6 +63,6 @@ insert into ehr_lookups.lookup_sets (setname,container)  select 'animal_requests
 insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'Yes' as value from ehr_lookups.lookup_sets where setname='animal_requests_infectiousdisease';
 insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'No' as value from ehr_lookups.lookup_sets where setname='animal_requests_infectiousdisease';
 
-INSERT INTO ehr_lookups.geographic_origins (meaning) SELECT 'laos' WHERE NOT EXISTS (SELECT meaning FROM ehr_lookups.geographic_origins WHERE meaning = 'laos');
+INSERT INTO ehr_lookups.geographic_origins (meaning, container) SELECT meaning, container FROM (SELECT 'laos' AS Meaning, MAX(Container) AS Container FROM ehr_lookups.geographic_origins WHERE (NOT EXISTS (SELECT meaning FROM ehr_lookups.geographic_origins WHERE meaning = 'laos'))) x WHERE Container IS NOT NULL ;
 
-INSERT INTO ehr_lookups.geographic_origins (meaning) SELECT 'vietnam' WHERE NOT EXISTS (SELECT meaning FROM ehr_lookups.geographic_origins WHERE meaning = 'vietnam');
+INSERT INTO ehr_lookups.geographic_origins (meaning, container) SELECT meaning, container FROM (SELECT 'vietnam' AS Meaning, MAX(Container) AS Container FROM ehr_lookups.geographic_origins WHERE (NOT EXISTS (SELECT meaning FROM ehr_lookups.geographic_origins WHERE meaning = 'vietnam'))) x WHERE Container IS NOT NULL ;

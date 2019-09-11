@@ -201,6 +201,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col19.setLabel("Behavior - Current");
             col19.setDescription("This calculates the current behavior(s) for the animal, based on the behavior abstract table");
             ds.addColumn(col19);
+
+            ColumnInfo col20 = getWrappedIdCol(us, ds, "PrimateId", "demographicsPrimateId");
+            col20.setLabel("PrimateId");
+            col20.setDescription("Unique PrimateID column to be shared across all datasets");
+            ds.addColumn(col20);
         }
 
         if (ds.getColumn("totalOffspring") == null)

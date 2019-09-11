@@ -1,5 +1,6 @@
 package org.labkey.wnprc_compliance;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.json.JSONObject;
 import org.labkey.api.action.AbstractFileUploadAction;
 import org.labkey.api.action.ApiAction;
@@ -12,6 +13,7 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
@@ -120,6 +122,20 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
+    @ActionNames("editTBPage")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    public class EditTBPage extends HRJspPageAction {
+        @Override
+        public String getPathToJsp() {
+            return "view/editTB.jsp";
+        }
+
+        @Override
+        public String getTitle() {
+            return "Edit TB";
+        }
+    }
+
     @ActionNames("editUserPage")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class EditUserPage extends HRJspPageAction {
@@ -154,6 +170,25 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
         public String getQuery() {
             return this.query;
+        }
+
+    }
+    public static class SearchClearanceFromPersonForm {
+        public String query;
+        public String table;
+        public void setQuery(String term) {
+            this.query = term;
+        }
+
+        public String getQuery() {
+            return this.query;
+        }
+        public void setTable(String table) {
+            this.table = table;
+        }
+
+        public String getTable() {
+            return this.table;
         }
 
     }
@@ -358,6 +393,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String personId;
     }
 
+
     @ActionNames("markCardsExempt")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
@@ -425,6 +461,113 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
+    @ActionNames("getClearances")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class GetClearancesFromPerson extends ApiAction<SearchClearanceFromPersonForm> {
+        public Object execute(SearchClearanceFromPersonForm form, BindException errors) throws Exception {
+
+            int resultLimit = 3;
+            JSONObject json = new JSONObject();
+            Map<String, List<JSONObject>> results = new HashMap<>();
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addCondition(FieldKey.fromString("personid"), form.getQuery(), CompareType.EQUAL);
+
+            SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
+            List<JSONObject> rows = new ArrayList<>();
+            int resultCount = 0;
+            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, form.getTable(), filter).toJSONObjectArray()) {
+                if (resultCount < resultLimit)
+                {
+                    rows.add(row);
+                }
+                resultCount++;
+            }
+
+            json.put("results", rows);
+
+            return json;
+        }
+    }
+
+    public static class ClearanceForm {
+        public String notes;
+        public String first_name;
+        public String last_name;
+        public String middle_name;
+        public String personid;
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+        public Date date;
+        public String id;
+        public String _row;
+        public String table_name;
+        public String required;
+        public boolean mutated;
+    }
+    public static class Clearances {
+        public ClearanceForm[] clearances;
+        public String table_name;
+    }
+
+    @ActionNames("updateClearance")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class UpdateClearanceAPI extends ApiAction<Clearances> {
+        @Override
+        public Object execute(Clearances form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+
+            try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
+                SimpleQueryUpdater tbClearanceUpdater = new SimpleQueryUpdater(getUser(), getContainer(), WNPRC_ComplianceSchema.NAME, form.table_name);
+                List<Map<String, Object>> clearancesToUpdate = new ArrayList<>();
+
+                for (ClearanceForm tbform : form.clearances)
+                {
+                    JSONObject tbClearance = new JSONObject();
+                    tbClearance.put("id", tbform.id);
+                    tbClearance.put("date", tbform.date);
+                    tbClearance.put("required", tbform.required);
+                    tbClearance.put("container", getContainer().getId());
+                    clearancesToUpdate.add(tbClearance);
+                }
+
+                tbClearanceUpdater.upsert(clearancesToUpdate);
+
+                json.put("success", true);
+
+                transaction.commit();
+            }
+
+            return json;
+        }
+    }
+    @ActionNames("getMeaslesClearances")
+    @RequiresPermission(ComplianceAdminPermission.class)
+    @Marshal(Marshaller.Jackson)
+    @CSRF
+    public class GetMeaslesClearanceFromPerson extends ApiAction<SearchPersonFromCardForm> {
+        public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
+            JSONObject json = new JSONObject();
+            Map<String, List<JSONObject>> results = new HashMap<>();
+
+            SimpleFilter filter = new SimpleFilter();
+            filter.addCondition(FieldKey.fromString("personid"), form.getQuery(), CompareType.EQUAL);
+
+            SimpleQueryFactory factory = new SimpleQueryFactory(getUser(), getContainer());
+            List<JSONObject> rows = new ArrayList<>();
+            for(JSONObject row : factory.selectRows(WNPRC_ComplianceSchema.NAME, "mapMeaslesClearances", filter).toJSONObjectArray()) {
+                rows.add(row);
+            }
+
+            json.put("results", rows);
+
+            return json;
+        }
+    }
+
     @ActionNames("linkCards")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
@@ -455,6 +598,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public static class ResolvePendingTBResultsForm {
         public String[] pendingTBIds;
         public String notes;
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
         public Date date;
     }
 

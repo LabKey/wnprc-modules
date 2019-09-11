@@ -1,0 +1,16 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsPrimateId" tableDbType="TABLE">
+                <columns>
+                    <column columnName="participant">
+                        <isKeyField>true</isKeyField>
+                        <!--<isHidden>true</isHidden>-->
+                    </column>
+
+                </columns>
+                <titleColumn>Primate Id</titleColumn>
+            </table>
+        </tables>
+    </metadata>
+</query>

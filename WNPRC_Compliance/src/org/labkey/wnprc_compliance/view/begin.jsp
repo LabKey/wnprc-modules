@@ -18,6 +18,9 @@
                         <li><a href="<%= new ActionURL(WNPRC_ComplianceController.NewUserPage.class, getContainer()).toString()%>">
                             Enter TB Results
                         </a></li>
+                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.EditTBPage.class, getContainer()).toString()%>">
+                            Edit TB Results
+                        </a></li>
                         <li><a href="<%= new ActionURL(WNPRC_ComplianceController.PendingTBResultsPage.class, getContainer()).toString()%>">
                             View Pending TB Results
                         </a></li>

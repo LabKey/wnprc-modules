@@ -74,6 +74,7 @@ import org.labkey.webutils.api.json.EnhancedJsonResponse;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
+import org.labkey.wnprc_ehr.calendar.Calendar;
 import org.labkey.wnprc_ehr.calendar.GoogleCalendar;
 import org.labkey.wnprc_ehr.calendar.Office365Calendar;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
@@ -1370,12 +1371,9 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
 
-            Office365Calendar oct = new Office365Calendar();
-            oct.setUser(getUser());
-            oct.setContainer(getContainer());
-            String outlookEventsString = oct.getCalendarEventsAsJson(!"held".equals(event.getCalendarId()));
-            response.put("events", outlookEventsString);
-            if (outlookEventsString != null && outlookEventsString.trim().length() > 0)
+            String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId());
+            response.put("events", office365EventsString);
+            if (office365EventsString != null && office365EventsString.trim().length() > 0)
             {
                 response.put("success", true);
             }
@@ -1395,10 +1393,7 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
 
-            GoogleCalendar gc = new GoogleCalendar();
-            gc.setUser(getUser());
-            gc.setContainer(getContainer());
-            String googleEventsString = gc.getCalendarEventsAsJson(event.getCalendarId());
+            String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId());
             response.put("events", googleEventsString);
             if (googleEventsString != null && googleEventsString.trim().length() > 0)
             {
@@ -1407,6 +1402,13 @@ public class WNPRC_EHRController extends SpringActionController
 
             return response;
         }
+    }
+
+    private String fetchCalendarEvents(Calendar calendar, String calendarId)
+    {
+        calendar.setUser(getUser());
+        calendar.setContainer(getContainer());
+        return calendar.getCalendarEventsAsJson(calendarId);
     }
 
     @ActionNames("PathologyCaseList")

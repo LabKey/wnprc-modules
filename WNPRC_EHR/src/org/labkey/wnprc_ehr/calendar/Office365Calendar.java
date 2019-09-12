@@ -9,20 +9,27 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.error.ServiceEr
 import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
 import microsoft.exchange.webservices.data.core.enumeration.property.LegacyFreeBusyStatus;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.enumeration.search.FolderTraversal;
 import microsoft.exchange.webservices.data.core.response.AttendeeAvailability;
 import microsoft.exchange.webservices.data.core.service.folder.CalendarFolder;
+import microsoft.exchange.webservices.data.core.service.folder.Folder;
 import microsoft.exchange.webservices.data.core.service.item.Appointment;
+import microsoft.exchange.webservices.data.core.service.schema.FolderSchema;
 import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
 import microsoft.exchange.webservices.data.credential.WebCredentials;
 import microsoft.exchange.webservices.data.misc.availability.AttendeeInfo;
 import microsoft.exchange.webservices.data.misc.availability.GetUserAvailabilityResults;
 import microsoft.exchange.webservices.data.misc.availability.TimeWindow;
+import microsoft.exchange.webservices.data.property.complex.FolderId;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.complex.StringList;
 import microsoft.exchange.webservices.data.property.complex.availability.CalendarEvent;
 import microsoft.exchange.webservices.data.search.CalendarView;
+import microsoft.exchange.webservices.data.search.FindFoldersResults;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
+import microsoft.exchange.webservices.data.search.FolderView;
+import microsoft.exchange.webservices.data.search.filter.SearchFilter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
@@ -31,6 +38,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.query.FolderSchemaProvider;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
@@ -340,13 +348,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return jsonEvents;
     }
 
-    private String getCalendarEvents(Date startDate, Date endDate, boolean held)
+    private String getCalendarEvents(Date startDate, Date endDate, String calendarName)
     {
         String eventsString = null;
 
         try
         {
-            JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, held));
+            JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, calendarName));
             eventsString = jsonEvents.toString();
         }
         catch (Exception e)
@@ -357,33 +365,28 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return eventsString;
     }
 
-    private List<Appointment> getAppointments(Date startDate, Date endDate, boolean held)
+    private List<Appointment> getAppointments(Date startDate, Date endDate, String calendarName) throws Exception
     {
-        List<Appointment> allAppts = new ArrayList<>();
         List<Appointment> appts = new ArrayList<>();
-        try
-        {
-            CalendarFolder cf = CalendarFolder.bind(service, WellKnownFolderName.Calendar);
+        FolderView folderView = new FolderView(1);
+        folderView.setTraversal(FolderTraversal.Shallow);
+        SearchFilter searchFilter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, calendarName);
+        FolderId rootFolder = new FolderId(WellKnownFolderName.Calendar);
+        FindFoldersResults folderSearchResults = service.findFolders(rootFolder, searchFilter, folderView);
+        ArrayList<Folder> folders = folderSearchResults.getFolders();
+        if (folders.size() == 1) {
+            FolderId folderId = folders.get(0).getId();
+            CalendarFolder cf = CalendarFolder.bind(service, folderId);
             FindItemsResults<Appointment> findResults = cf.findAppointments(new CalendarView(startDate, endDate));
-            allAppts = findResults.getItems();
-            for (Appointment appt : allAppts) {
-                appt.load(PropertySet.FirstClassProperties);
-                if (held && appt.getBody() != null && appt.getBody().toString().startsWith("Hold")) {
-                    appts.add(appt);
-                } else if (!held && appt.getBody() != null && !appt.getBody().toString().startsWith("Hold")) {
-                    appts.add(appt);
-                }
-            }
+            appts = findResults.getItems();
         }
-        catch (Exception e)
-        {
-            int x = 3;
-            //FIXME fix!
+        else {
+            //TODO throw exception??
         }
         return appts;
     }
 
-    public String getCalendarEventsAsJson(boolean held)
+    public String getCalendarEventsAsJson(String calendarName)
     {
         String events = "";
         try
@@ -394,7 +397,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             Date startDate = cal.getTime();
             cal.add(Calendar.MONTH, 23);
             Date endDate = cal.getTime();
-            events = getCalendarEvents(startDate, endDate, held);
+            events = getCalendarEvents(startDate, endDate, calendarName);
         }
         catch (Exception e)
         {

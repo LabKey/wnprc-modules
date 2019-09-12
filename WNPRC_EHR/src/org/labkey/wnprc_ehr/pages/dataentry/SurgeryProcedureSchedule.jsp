@@ -334,52 +334,6 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                eventSources: [
-                    {
-                        events: function(fetchInfo, successCallback, failureCallback) {
-                            LABKEY.Ajax.request({
-                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureOutlookEvents", null, {
-                                    calendarId: 'scheduled'
-                                }),
-                                success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                    successCallback(JSON.parse(response.events).map(function(event) {
-                                        return {
-                                            title: event.title,
-                                            start: event.start,
-                                            end: event.end,
-                                            backgroundColor: event.defaultBgColor,
-                                            defaultBgColor: event.defaultBgColor,
-                                            selectedBgColor: event.selectedBgColor,
-                                            rawRowData: event.rawRowData
-                                        }
-                                    }));
-                                }, this)
-                            });
-                        }
-                    },
-                    {
-                        events: function(fetchInfo, successCallback, failureCallback) {
-                            LABKEY.Ajax.request({
-                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureOutlookEvents", null, {
-                                    calendarId: 'held'
-                                }),
-                                success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                    successCallback(JSON.parse(response.events).map(function(event) {
-                                        return {
-                                            title: event.title,
-                                            start: event.start,
-                                            end: event.end,
-                                            backgroundColor: event.defaultBgColor,
-                                            defaultBgColor: event.defaultBgColor,
-                                            selectedBgColor: event.selectedBgColor,
-                                            rawRowData: event.rawRowData
-                                        }
-                                    }));
-                                }, this)
-                            });
-                        }
-                    }
-                ],
                 eventClick: function(calEvent) {
                     if (previousCalendarEvent) {
                         previousCalendarEvent.setProp('backgroundColor', previousCalendarEvent.extendedProps.defaultBgColor);
@@ -400,14 +354,14 @@
             LABKEY.Query.selectRows({
                 schemaName: 'wnprc',
                 queryName: 'surgery_procedure_calendars',
-                columns: 'calendar_id,calendar_type,display_name,show_by_default',
+                columns: 'calendar_id,calendar_type,display_name,api_action,show_by_default',
                 scope: this,
                 success: function(data){
                     if (data.rows && data.rows.length > 0) {
                         for (let i = 0; i < data.rows.length; i++) {
                             calendar.addEventSource(function(fetchInfo, successCallback, failureCallback) {
                                 LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureGoogleEvents", null, {
+                                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
                                         calendarId: data.rows[i].calendar_id
                                     }),
                                     success: LABKEY.Utils.getCallbackWrapper(function (response) {

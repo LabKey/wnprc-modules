@@ -76,6 +76,7 @@ public class PersonService {
         requirementInfo.put("date", form.dateCompleted);
         requirementInfo.put("comment",   form.notes);
         requirementInfo.put("container", container.getId());
+        requirementInfo.put("required", form.required);
         queryUpdater.upsert(requirementInfo);
 
         JSONObject lookupInfo = new JSONObject();

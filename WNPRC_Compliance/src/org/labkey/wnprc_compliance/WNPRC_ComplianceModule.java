@@ -31,10 +31,6 @@ public class WNPRC_ComplianceModule extends ExtendedSimpleModule {
     @Override
     protected void init() {
         addController(WNPRC_ComplianceController.NAME, WNPRC_ComplianceController.class);
-    }
-
-    @Override
-    protected void doStartupAfterSpringConfig(ModuleContext moduleContext) {
         RoleManager.registerPermission(new ComplianceAdminPermission());
         RoleManager.registerRole(new ComplianceAdminRole());
     }

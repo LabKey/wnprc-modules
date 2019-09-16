@@ -44,6 +44,9 @@
                   <column columnName="performedby">
                     <columnTitle>Pathologist</columnTitle>
                   </column>
+                  <column columnName="pathologyHistology">
+                    <columnTitle>Pathologist Histology</columnTitle>
+                  </column>
                   <column columnName="assistant">
                     <columnTitle>Prosector</columnTitle>
                   </column>

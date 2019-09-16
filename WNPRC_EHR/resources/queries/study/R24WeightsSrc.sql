@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 select w.id as AnimalId,
+       d.participantid.primateId.primateId AS primateId,
        w.date,
        w.weight,
        w.objectid,

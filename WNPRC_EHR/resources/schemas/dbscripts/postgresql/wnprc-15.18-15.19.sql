@@ -49,6 +49,7 @@ CREATE TABLE wnprc.surgery_procedure_calendars(
     calendar_type VARCHAR(100),
     display_name VARCHAR(500),
     api_action VARCHAR(200),
+    folder_id VARCHAR(200),
     show_by_default BOOLEAN DEFAULT TRUE,
 
     -- Default fields for LabKey.

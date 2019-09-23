@@ -121,7 +121,8 @@
                 <%--<!-- ko if: taskid() != '' -->--%>
                 <dl class="dl-horizontal">
                     <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
-                    <dt>Procedure:          </dt> <dd>{{procedure}}</dd>
+                    <dt>Procedure Type:     </dt> <dd>{{proceduretype}}</dd>
+                    <dt>Procedure Name:     </dt> <dd>{{procedurename}}</dd>
                     <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalid}}</a></dd>
                     <dt>Sex:                </dt> <dd>{{sex}}</dd>
                     <dt>Age:                </dt> <dd>{{age}}</dd>
@@ -354,7 +355,7 @@
             LABKEY.Query.selectRows({
                 schemaName: 'wnprc',
                 queryName: 'surgery_procedure_calendars',
-                columns: 'calendar_id,calendar_type,display_name,api_action,show_by_default',
+                columns: 'calendar_id,calendar_type,display_name,api_action,show_by_default,folder_id',
                 scope: this,
                 success: function(data){
                     if (data.rows && data.rows.length > 0) {
@@ -362,7 +363,8 @@
                             calendar.addEventSource(function(fetchInfo, successCallback, failureCallback) {
                                 LABKEY.Ajax.request({
                                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
-                                        calendarId: data.rows[i].calendar_id
+                                        calendarId: data.rows[i].calendar_id,
+                                        folderId:   data.rows[i].folder_id
                                     }),
                                     success: LABKEY.Utils.getCallbackWrapper(function (response) {
                                         successCallback(JSON.parse(response.events).map(function (event) {
@@ -413,7 +415,8 @@
                 objectid:             ko.observable(),
                 requestid:            ko.observable(),
                 taskid:               ko.observable(''),
-                procedure:            ko.observable(),
+                proceduretype:        ko.observable(),
+                procedurename:        ko.observable(),
                 age:                  ko.observable(),
                 animalid:             ko.observable(),
                 account:              ko.observable(),
@@ -441,8 +444,8 @@
                 priority:           '',
                 date:               '',
                 enddate:            '',
-                location:           '',
-                procedure:          '',
+                proceduretype:      '',
+                procedurename:      '',
                 comments:           '',
                 statuschangereason: ''
             }),
@@ -544,16 +547,24 @@
                 var form = ko.mapping.toJS(WebUtils.VM.form);
                 // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
                 // update the study.surgery_procedure, ehr.request, and ehr.task tables
+                let calendarId;
+                if (form.proceduretype === 'surgery') {
+                    calendarId = 'surgeries_on_hold';
+                } else if (form.proceduretype === 'procedure' || form.proceduretype === 'other') {
+                    calendarId = 'procedures_on_hold';
+                } else {
+                    //TODO handle the error!
+                }
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ScheduleSurgeryProcedure", null, {
                         requestId: form.requestid,
                         start: form.date,
                         end: form.enddate,
                         room: form.location,
-                        subject: form.animalid + ' ' + form.procedure,
+                        subject: form.animalid + ' ' + form.procedurename,
                         categories: 'Surgeries',
                         assignedTo: form.assignedto,
-                        hold: true
+                        calendarId: calendarId
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {
@@ -590,7 +601,7 @@
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: form.requestid,
-                        QCStateLabel: 'Request: Denied', //TODO get actual qcstate from name
+                        QCStateLabel: 'Request: Denied',
                         statusChangeReason: form.statuschangereason
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -615,6 +626,7 @@
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: WebUtils.VM.taskDetails.requestid(),
+                        taskId: WebUtils.VM.taskDetails.taskid(),
                         QCStateLabel: 'Request: Pending'
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -669,7 +681,7 @@
                         start: form.date,
                         end: form.enddate,
                         room: form.location,
-                        subject: form.animalid + ' ' + form.procedure,
+                        subject: form.animalid + ' ' + form.procedurename,
                         categories: 'Surgeries',
                         assignedTo: form.assignedto,
                         hold: false

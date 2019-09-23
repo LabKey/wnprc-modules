@@ -63,6 +63,7 @@ import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
@@ -71,6 +72,7 @@ import org.labkey.googledrive.api.GoogleDriveService;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
+import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
@@ -1022,18 +1024,18 @@ public class WNPRC_EHRController extends SpringActionController
 
     public static class SurgeryProcedureEvent
     {
-        private String requestid;
+        private String requestId;
         private Date start;
         private Date end;
         private String room;
         private String subject;
-        private List categories;
-        private String assignedto;
-        private boolean hold;
+        private List<String> categories;
+        private String assignedTo;
+        private String calendarId;
 
         public String getRequestId()
         {
-            return requestid;
+            return requestId;
         }
 
         public Date getStart()
@@ -1056,22 +1058,22 @@ public class WNPRC_EHRController extends SpringActionController
             return subject;
         }
 
-        public List getCategories() {
+        public List<String> getCategories() {
             return categories;
         }
 
         public String getAssignedTo()
         {
-            return assignedto;
+            return assignedTo;
         }
 
-        public boolean getHold() {
-            return hold;
+        public String getCalendarId() {
+            return calendarId;
         }
 
         public void setRequestId(String requestid)
         {
-            this.requestid = requestid;
+            this.requestId = requestid;
         }
 
         public void setStart(Date start)
@@ -1094,18 +1096,18 @@ public class WNPRC_EHRController extends SpringActionController
             this.subject = title;
         }
 
-        public void setCategories(List categories)
+        public void setCategories(List<String> categories)
         {
             this.categories = categories;
         }
 
-        public void setAssignedTo(String assignedto)
+        public void setAssignedTo(String assignedTo)
         {
-            this.assignedto = assignedto;
+            this.assignedTo = assignedTo;
         }
 
-        public void setHold(boolean hold) {
-            this.hold = hold;
+        public void setCalendarId(String calendarId) {
+            this.calendarId = calendarId;
         }
     }
 
@@ -1122,7 +1124,9 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
             Office365Calendar calendar = new Office365Calendar();
-            String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories(), event.hold);
+            calendar.setUser(getUser());
+            calendar.setContainer(getContainer());
+            String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories(), event.getCalendarId());
 
             if (apptId != null)
             {
@@ -1271,7 +1275,7 @@ public class WNPRC_EHRController extends SpringActionController
                  * Update task record
                  */
                 JSONObject taskRecord = new JSONObject();
-                taskRecord.put("taskid", event.getRequestId());
+                taskRecord.put("taskid", event.getTaskId());
                 taskRecord.put("QCStateLabel", event.getQCStateLabel());
                 updateRecord(taskRecord, "ehr", "tasks");
 

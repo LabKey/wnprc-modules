@@ -36,15 +36,22 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.query.FolderSchemaProvider;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
 import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
+import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.encryption.AES;
+import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -69,6 +76,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private String eventSelectedBgColor = "#50FF50"; //slightly darker
     private String heldEventDeafultBgColor = "#F0B0B0";
     private String heldEventSelectedBgColor = "#F0D0D0";
+    private boolean authenticated = false;
 
     public void setUser(User u)
     {
@@ -114,31 +122,35 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     public void authenticate()
     {
-        String emailAddress = null;
-        try
+        if (!authenticated)
         {
-            SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "0ddbf045-1cfc-4cc5-8571-4028a92a5011");
-            DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
-            TableInfo ti = schema.getTable("service_accounts");
-            TableSelector ts = new TableSelector(ti, filter, null);
-            Map map = ts.getMap();
-            emailAddress = (String) map.get("private_key_id");
+            String emailAddress = null;
+            try
+            {
+                SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "0ddbf045-1cfc-4cc5-8571-4028a92a5011");
+                DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
+                TableInfo ti = schema.getTable("service_accounts");
+                TableSelector ts = new TableSelector(ti, filter, null);
+                Map map = ts.getMap();
+                emailAddress = (String) map.get("private_key_id");
 
-            byte[] passwordBytes = AES.base64StringToByteArray((String) map.get("private_key"));
-            byte[] keyBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file"))), StandardCharsets.UTF_8));
-            byte[] ivBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file"))), StandardCharsets.UTF_8));
+                byte[] passwordBytes = AES.base64StringToByteArray((String) map.get("private_key"));
+                byte[] keyBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file"))), StandardCharsets.UTF_8));
+                byte[] ivBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file"))), StandardCharsets.UTF_8));
 
-            byte[] decrypted = AES.decrypt(passwordBytes, keyBytes, ivBytes);
+                byte[] decrypted = AES.decrypt(passwordBytes, keyBytes, ivBytes);
 
-            ExchangeCredentials credentials = new WebCredentials(emailAddress, new String(decrypted, StandardCharsets.UTF_8));
-            service.setCredentials(credentials);
-            URI uri = new URI("https://outlook.office365.com/EWS/Exchange.asmx");
-            service.setUrl(uri);
-            //service.autodiscoverUrl(emailAddress, new RedirectionUrlCallback());
-        }
-        catch (Exception e)
-        {
-            int x = 3;
+                ExchangeCredentials credentials = new WebCredentials(emailAddress, new String(decrypted, StandardCharsets.UTF_8));
+                service.setCredentials(credentials);
+                URI uri = new URI("https://outlook.office365.com/EWS/Exchange.asmx");
+                service.setUrl(uri);
+                authenticated = true;
+                //service.autodiscoverUrl(emailAddress, new RedirectionUrlCallback());
+            }
+            catch (Exception e)
+            {
+                int x = 3;
+            }
         }
     }
 
@@ -215,9 +227,11 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return status != LegacyFreeBusyStatus.Free || !cancelled;
     }
 
-    public String addEvent(Date start, Date end, String room, String subject, String requestId, List categories, boolean hold)
+    public String addEvent(Date start, Date end, String room, String subject, String requestId, List<String> categories, String calendarId)
     {
+        authenticate();
         String apptId = null;
+        FolderId folderId = getFolderIdFromCalendarName(calendarId);
         try
         {
             SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
@@ -232,14 +246,10 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 appt.setStart(start);
                 appt.setEnd(end);
                 appt.setSubject(subject);
-                if (hold) {
-                    appt.setBody(new MessageBody(BodyType.Text, "Hold:" + requestId));
-                } else {
-                    appt.setBody(new MessageBody(BodyType.Text, requestId));
-                }
+                appt.setBody(new MessageBody(BodyType.Text, requestId));
                 appt.setCategories(new StringList(categories));
                 appt.getRequiredAttendees().add(roomEmailAddress);
-                appt.save();
+                appt.save(folderId);
                 apptId = appt.getId().getUniqueId();
             }
         }
@@ -269,6 +279,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     public void cancelEvent(String apptId) throws Exception
     {
+        authenticate();
         Appointment appt = Appointment.bind(service, new ItemId(apptId));
         appt.cancelMeeting();
     }
@@ -316,8 +327,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     rawRowData.put("taskid", surgeryInfo.get("taskid"));
                     rawRowData.put("objectid", surgeryInfo.get("objectid"));
                     rawRowData.put("requestid", surgeryInfo.get("requestid"));
-                    rawRowData.put("procedure", surgeryInfo.get("procedure"));
-
+                    rawRowData.put("proceduretype", surgeryInfo.get("proceduretype"));
+                    rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
                     rawRowData.put("age", surgeryInfo.get("age"));
                     rawRowData.put("animalid", surgeryInfo.get("animalid"));
                     rawRowData.put("date", surgeryInfo.get("date"));
@@ -348,13 +359,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return jsonEvents;
     }
 
-    private String getCalendarEvents(Date startDate, Date endDate, String calendarName)
+    private String getCalendarEvents(Date startDate, Date endDate, FolderId folderId)
     {
         String eventsString = null;
 
         try
         {
-            JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, calendarName));
+            JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, folderId));
             eventsString = jsonEvents.toString();
         }
         catch (Exception e)
@@ -365,25 +376,82 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return eventsString;
     }
 
-    private List<Appointment> getAppointments(Date startDate, Date endDate, String calendarName) throws Exception
+    private List<Appointment> getAppointments(Date startDate, Date endDate, FolderId folderId) throws Exception
     {
-        List<Appointment> appts = new ArrayList<>();
-        FolderView folderView = new FolderView(1);
-        folderView.setTraversal(FolderTraversal.Shallow);
-        SearchFilter searchFilter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, calendarName);
-        FolderId rootFolder = new FolderId(WellKnownFolderName.Calendar);
-        FindFoldersResults folderSearchResults = service.findFolders(rootFolder, searchFilter, folderView);
-        ArrayList<Folder> folders = folderSearchResults.getFolders();
-        if (folders.size() == 1) {
-            FolderId folderId = folders.get(0).getId();
-            CalendarFolder cf = CalendarFolder.bind(service, folderId);
-            FindItemsResults<Appointment> findResults = cf.findAppointments(new CalendarView(startDate, endDate));
-            appts = findResults.getItems();
+        CalendarFolder cf = CalendarFolder.bind(service, folderId);
+        FindItemsResults<Appointment> findResults = cf.findAppointments(new CalendarView(startDate, endDate));
+        return findResults.getItems();
+    }
+
+    private FolderId getFolderIdFromCalendarName(String calendarName)
+    {
+        FolderId folderId = null;
+        String folderIdString = null;
+        try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+        {
+            //Check if folder_id is already in the database
+            SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("calendar_id"), calendarName);
+            JSONArray rowArray = sqf.selectRows("wnprc", "surgery_procedure_calendars", filter);
+            if (rowArray.length() > 0 && rowArray.getJSONObject(0) != null)
+            {
+                JSONObject calendar = rowArray.getJSONObject(0);
+                folderIdString = calendar.getString("folder_id");
+                //If there isn't a folder_id in the database for this calendar then add it
+                if (folderIdString == null || folderIdString.length() == 0)
+                {
+                    //Find the folder_id by searching for it via ews
+                    FolderView folderView = new FolderView(1);
+                    folderView.setTraversal(FolderTraversal.Shallow);
+                    SearchFilter searchFilter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, calendarName);
+                    FolderId rootFolder = new FolderId(WellKnownFolderName.Calendar);
+                    FindFoldersResults folderSearchResults = service.findFolders(rootFolder, searchFilter, folderView);
+                    ArrayList<Folder> folders = folderSearchResults.getFolders();
+                    if (folders.size() == 1)
+                    {
+                        folderId = folders.get(0).getId();
+                    }
+                    else
+                    {
+                        //TODO throw some exception??
+                        throw new Exception("The calendar was not found in EWS.");
+                    }
+
+                    //Now add the folder_id to the database so that we don't have to query ews next time
+                    JSONObject calendarRecord = new JSONObject();
+                    calendarRecord.put("calendar_id", calendarName);
+                    calendarRecord.put("folder_id", folderId.getUniqueId());
+                    List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(calendarRecord);
+
+                    //Get the query service object based on schema/table
+                    TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("surgery_procedure_calendars");
+                    QueryUpdateService service = ti.getUpdateService();
+
+                    List<Map<String, Object>> updatedRows = service.updateRows(user, container, rowsToUpdate, rowsToUpdate, null, null);
+                    if (updatedRows.size() != rowsToUpdate.size()) {
+                        throw new QueryUpdateServiceException("Not all wnprc.surgery_procedure_calendars rows updated properly");
+                    }
+
+                    transaction.commit();
+                }
+                else
+                {
+                    folderId = new FolderId(folderIdString);
+                }
+            }
+            else
+            {
+                //TODO better exception handling
+                throw new Exception("The calendar was not found in the database.");
+            }
         }
-        else {
-            //TODO throw exception??
+        catch (Exception e)
+        {
+            //TODO Better error handling!
+            e.printStackTrace();
         }
-        return appts;
+
+        return folderId;
     }
 
     public String getCalendarEventsAsJson(String calendarName)
@@ -397,7 +465,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             Date startDate = cal.getTime();
             cal.add(Calendar.MONTH, 23);
             Date endDate = cal.getTime();
-            events = getCalendarEvents(startDate, endDate, calendarName);
+            events = getCalendarEvents(startDate, endDate, getFolderIdFromCalendarName(calendarName));
         }
         catch (Exception e)
         {

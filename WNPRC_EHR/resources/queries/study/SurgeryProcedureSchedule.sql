@@ -14,6 +14,7 @@ SELECT lsid
   ,date
   ,enddate
   ,proceduretype
+  ,procedurename
   ,created
   ,project
   ,protocol
@@ -24,11 +25,12 @@ SELECT lsid
 FROM (SELECT lsid
         ,objectid
         ,requestid
-        ,taskid.rowid     AS taskid
+        ,taskid           AS taskid
         ,Id               AS animalid
         ,date
         ,enddate
         ,proceduretype
+        ,procedurename
         ,created
         ,project
         ,project.protocol AS protocol

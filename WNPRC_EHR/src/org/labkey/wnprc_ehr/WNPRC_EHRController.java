@@ -1286,7 +1286,8 @@ public class WNPRC_EHRController extends SpringActionController
                         apptid = (String) spRows.get(0).get("apptid");
                     }
                     Office365Calendar calendar = new Office365Calendar();
-                    calendar.cancelEvent(apptid);
+                    throw new Exception("test!");
+//                    calendar.cancelEvent(apptid);
                 }
 
                 transaction.commit();

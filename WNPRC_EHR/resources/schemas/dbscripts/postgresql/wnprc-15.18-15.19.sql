@@ -51,6 +51,8 @@ CREATE TABLE wnprc.surgery_procedure_calendars(
     api_action VARCHAR(200),
     folder_id VARCHAR(200),
     show_by_default BOOLEAN DEFAULT TRUE,
+    default_bg_color VARCHAR(6),
+    selected_bg_color VARCHAR(6),
 
     -- Default fields for LabKey.
     container  entityid NOT NULL,

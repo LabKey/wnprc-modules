@@ -72,10 +72,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private User user;
     private Container container;
-    private String eventDefaultBgColor = "#90EE90"; //lightblue
-    private String eventSelectedBgColor = "#50FF50"; //slightly darker
-    private String heldEventDeafultBgColor = "#F0B0B0";
-    private String heldEventSelectedBgColor = "#F0D0D0";
+    private String eventDefaultBgColor = "#90EE90";
+    private String eventSelectedBgColor = "#50FF50";
     private boolean authenticated = false;
 
     public void setUser(User u)
@@ -102,22 +100,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     public void setEventSelectedBgColor(String color) {
         eventSelectedBgColor = color;
-    }
-
-    public String getHeldEventDeafultBgColor() {
-        return heldEventDeafultBgColor;
-    }
-
-    public void setHeldEventDeafultBgColor(String color) {
-        heldEventDeafultBgColor = color;
-    }
-
-    public String getHeldEventSelectedBgColor() {
-        return heldEventSelectedBgColor;
-    }
-
-    public void setHeldEventSelectedBgColor(String color) {
-        heldEventSelectedBgColor = color;
     }
 
     public void authenticate()
@@ -303,21 +285,16 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         {
             for (Appointment event : events)
             {
-                boolean hold = false;
                 event.load(PropertySet.FirstClassProperties);
                 String requestId = event.getBody().toString();
-                if(requestId != null && requestId.startsWith("Hold")) {
-                    requestId = requestId.substring(5);
-                    hold = true;
-                }
                 JSONObject surgeryInfo = queryResults.get(requestId);
 
                 JSONObject jsonEvent = new JSONObject();
                 jsonEvent.put("title", event.getSubject());
                 jsonEvent.put("start", df.format(event.getStart()));
                 jsonEvent.put("end", df.format(event.getEnd()));
-                jsonEvent.put("defaultBgColor", hold ? getHeldEventDeafultBgColor() : getEventDefaultBgColor());
-                jsonEvent.put("selectedBgColor", hold ? getHeldEventSelectedBgColor() : getEventSelectedBgColor());
+                jsonEvent.put("defaultBgColor", getEventDefaultBgColor());
+                jsonEvent.put("selectedBgColor", getEventSelectedBgColor());
 
                 //Add data for details panel on Surgery Schedule page
                 JSONObject rawRowData = new JSONObject();
@@ -344,7 +321,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     rawRowData.put("weight", surgeryInfo.get("weight"));
                     rawRowData.put("enddate", surgeryInfo.get("enddate"));
                     rawRowData.put("comments", surgeryInfo.get("comments"));
-                    rawRowData.put("hold", hold);
                     jsonEvent.put("rawRowData", rawRowData);
                 }
 

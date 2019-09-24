@@ -154,6 +154,12 @@
                 <%--<a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>--%>
             </div>
         </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading"><span>Surgery Details</span></div>
+            <div class="panel-body" data-bind="with: taskDetails">
+                <div id="calendar-checklist"></div>
+            </div>
+        </div>
     </div>
 
     <div class="col-xs-12 col-md-8">
@@ -322,45 +328,94 @@
 
 <script>
     var previousCalendarEvent;
+    var calendar;
     //debugger
     (function() {
         var calendarEl = document.getElementById('calendar');
         $(document).ready(function() {
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                plugins: ['dayGrid', 'timeGrid', 'bootstrap'],
-                themeSystem: 'bootstrap',
-                defaultView: 'dayGridMonth',
-                header: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                eventClick: function(calEvent) {
-                    if (previousCalendarEvent) {
-                        previousCalendarEvent.setProp('backgroundColor', previousCalendarEvent.extendedProps.defaultBgColor);
-                    }
-                    previousCalendarEvent = calEvent.event;
-                    calEvent.event.setProp('backgroundColor', calEvent.event.extendedProps.selectedBgColor);
-                    jQuery.each(calEvent.event.extendedProps.rawRowData, function(key, value) {
-                        if (key in WebUtils.VM.taskDetails) {
-                            if (key == "date" || key == "enddate") { //TODO modified???
-                                value = displayDate(value);
-                            }
-                            WebUtils.VM.taskDetails[key](value);
-                        }
-                    });
-                }
-            });
+            document.getElementById('calendar-checklist').innerHTML = '';
 
             LABKEY.Query.selectRows({
                 schemaName: 'wnprc',
                 queryName: 'surgery_procedure_calendars',
-                columns: 'calendar_id,calendar_type,display_name,api_action,show_by_default,folder_id',
+                columns: 'calendar_id,calendar_type,display_name,api_action,folder_id,show_by_default,default_bg_color,selected_bg_color',
                 scope: this,
                 success: function(data){
                     if (data.rows && data.rows.length > 0) {
+                        let calendarChecklist = document.getElementById('calendar-checklist');
+                        for (let i = 0; i < data.rows.length; i++) {
+                            let div = document.createElement('div');
+                            let checkbox = document.createElement('input');
+                            let label = document.createElement('label');
+                            let description = document.createTextNode(data.rows[i].display_name);
+
+                            div.classList.add('form-check');
+
+                            checkbox.type = 'checkbox';
+                            checkbox.classList.add('form-check-input');
+                            checkbox.id = data.rows[i].calendar_id;
+                            checkbox.checked = true;
+                            checkbox.value = '';
+                            checkbox.addEventListener('change', function() {
+                                if (calendar) {
+                                    calendar.rerenderEvents();
+                                }
+                            });
+
+                            label.classList.add('form-check-label');
+                            label.for = checkbox.id;
+                            label.appendChild(description);
+
+                            div.appendChild(checkbox);
+                            div.appendChild(label);
+
+                            calendarChecklist.appendChild(div);
+                        }
+                    }
+
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+                        plugins: ['dayGrid', 'timeGrid', 'bootstrap'],
+                        themeSystem: 'bootstrap',
+                        defaultView: 'dayGridMonth',
+                        header: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        },
+                        eventRender: function(event, element) {
+                            let eventAcceptedClasses = [];
+
+                            if (data.rows && data.rows.length > 0) {
+                                for (let i = 0; i < data.rows.length; i++) {
+
+                                    if (document.getElementById(data.rows[i].calendar_id).checked) {
+                                        eventAcceptedClasses.push(data.rows[i].calendar_id);
+                                    }
+                                }
+                            }
+                            return eventAcceptedClasses.includes(event.event.extendedProps.calendarId, eventAcceptedClasses);
+                        },
+                        eventClick: function(calEvent) {
+                            if (previousCalendarEvent) {
+                                previousCalendarEvent.setProp('backgroundColor', previousCalendarEvent.extendedProps.defaultBgColor);
+                            }
+                            previousCalendarEvent = calEvent.event;
+                            calEvent.event.setProp('backgroundColor', calEvent.event.extendedProps.selectedBgColor);
+                            jQuery.each(calEvent.event.extendedProps.rawRowData, function(key, value) {
+                                if (key in WebUtils.VM.taskDetails) {
+                                    if (key === "date" || key === "enddate") { //TODO modified???
+                                        value = displayDate(value);
+                                    }
+                                    WebUtils.VM.taskDetails[key](value);
+                                }
+                            });
+                        }
+                    });
+
+                    if (data.rows && data.rows.length > 0) {
                         for (let i = 0; i < data.rows.length; i++) {
                             calendar.addEventSource(function(fetchInfo, successCallback, failureCallback) {
+                                let calId = data.rows[i].calendar_id;
                                 LABKEY.Ajax.request({
                                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
                                         calendarId: data.rows[i].calendar_id,
@@ -372,6 +427,7 @@
                                                 title: event.title,
                                                 start: event.start,
                                                 end: event.end,
+                                                calendarId: calId,//data.rows[i].calendar_id,
                                                 backgroundColor: event.defaultBgColor,
                                                 defaultBgColor: event.defaultBgColor,
                                                 selectedBgColor: event.selectedBgColor,
@@ -386,8 +442,6 @@
                     }
                 }
             });
-
-            calendar.render();
         });
         //debugger
         // Build a lookup index of requests.

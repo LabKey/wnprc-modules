@@ -155,7 +155,7 @@
             </div>
         </div>
         <div class="panel panel-primary">
-            <div class="panel-heading"><span>Surgery Details</span></div>
+            <div class="panel-heading"><span>Calendar Selection</span></div>
             <div class="panel-body" data-bind="with: taskDetails">
                 <div id="calendar-checklist"></div>
             </div>

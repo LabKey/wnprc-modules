@@ -59,6 +59,10 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private static final List<String> SCOPES =
             Arrays.asList(CalendarScopes.CALENDAR_READONLY);
 
+    private static final int MAX_EVENT_RESULTS = 2500;
+    private static final long SIX_MONTHS_IN_MILLISECONDS = 1000L * 60L * 60L * 24L * 30L * 6L;
+    private static final long TWO_YEARS_IN_MILLISECONDS = 1000L * 60L * 60L * 24L * 30L * 24L;
+
     static {
         try {
             HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -84,8 +88,8 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
             JSONObject jsonEvent = new JSONObject();
             jsonEvent.put("title", event.getSummary());
-            jsonEvent.put("start", event.getStart() != null ? event.getStart().getDate() : null);
-            jsonEvent.put("end", event.getEnd() != null ? event.getEnd().getDate() : null);
+            jsonEvent.put("start", event.getStart().getDate() != null ? event.getStart().getDate() : event.getStart().getDateTime());
+            jsonEvent.put("end", event.getEnd().getDate() != null ? event.getEnd().getDate() : event.getEnd().getDateTime());
             jsonEvent.put("htmlLink", event.getHtmlLink());
             jsonEvent.put("eventId", i);
 
@@ -143,10 +147,11 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 .build();
     }
 
-    private String getCalendarEvents(Calendar calendar, DateTime minTime, Integer maxResults, String calendarId) throws IOException {
+    private String getCalendarEvents(Calendar calendar, DateTime dateMin, DateTime dateMax, Integer maxResults, String calendarId) throws IOException {
         Events events = calendar.events().list(calendarId)
                 .setMaxResults(maxResults)
-                .setTimeMin(minTime)
+                .setTimeMin(dateMin)
+                .setTimeMax(dateMax)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .execute();
@@ -158,8 +163,10 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         String events;
         try {
             Calendar calendar = getCalendar();
-            DateTime dateMin = new DateTime(0);
-            events = getCalendarEvents(calendar, dateMin, Integer.MAX_VALUE, calendarId);
+            java.util.Calendar currentDate = java.util.Calendar.getInstance();
+            DateTime dateMin = new DateTime(currentDate.getTimeInMillis() - SIX_MONTHS_IN_MILLISECONDS);
+            DateTime dateMax = new DateTime(currentDate.getTimeInMillis() + TWO_YEARS_IN_MILLISECONDS);
+            events = getCalendarEvents(calendar, dateMin, dateMax, MAX_EVENT_RESULTS, calendarId);
         } catch (Exception e) {
             Event error = new Event();
             error.setStart(new EventDateTime().setDate(new DateTime(true, System.currentTimeMillis(), null)));

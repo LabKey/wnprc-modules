@@ -354,7 +354,9 @@
                             checkbox.type = 'checkbox';
                             checkbox.classList.add('form-check-input');
                             checkbox.id = data.rows[i].calendar_id;
-                            checkbox.checked = true;
+                            if (data.rows[i].show_by_default) {
+                                checkbox.checked = true;
+                            }
                             checkbox.value = '';
                             checkbox.addEventListener('change', function() {
                                 if (calendar) {
@@ -416,10 +418,13 @@
                         for (let i = 0; i < data.rows.length; i++) {
                             calendar.addEventSource(function(fetchInfo, successCallback, failureCallback) {
                                 let calId = data.rows[i].calendar_id;
+                                let defaultBgColor = data.rows[i].default_bg_color;
+                                let selectedBgColor = data.rows[i].selected_bg_color;
+
                                 LABKEY.Ajax.request({
                                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
                                         calendarId: data.rows[i].calendar_id,
-                                        folderId:   data.rows[i].folder_id
+                                        folderId:   data.rows[i].folder_id,
                                     }),
                                     success: LABKEY.Utils.getCallbackWrapper(function (response) {
                                         successCallback(JSON.parse(response.events).map(function (event) {
@@ -427,10 +432,11 @@
                                                 title: event.title,
                                                 start: event.start,
                                                 end: event.end,
-                                                calendarId: calId,//data.rows[i].calendar_id,
-                                                backgroundColor: event.defaultBgColor,
-                                                defaultBgColor: event.defaultBgColor,
-                                                selectedBgColor: event.selectedBgColor,
+                                                calendarId: calId,
+                                                eventId: event.eventId,
+                                                backgroundColor: defaultBgColor,
+                                                defaultBgColor: defaultBgColor,
+                                                selectedBgColor: selectedBgColor,
                                                 rawRowData: event.rawRowData
                                             }
                                         }));

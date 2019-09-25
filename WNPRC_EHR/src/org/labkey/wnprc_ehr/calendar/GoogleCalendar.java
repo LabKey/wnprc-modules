@@ -37,8 +37,6 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
 {
     private User user;
     private Container container;
-    private String eventDefaultBgColor = "#ADD8E6"; //lightblue
-    private String eventSelectedBgColor = "#ADFFFF"; //slightly lighter
 
     /** Application name. */
     private static final String APPLICATION_NAME =
@@ -78,37 +76,22 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         container = c;
     }
 
-    public String getEventDefaultBgColor() {
-        return eventDefaultBgColor;
-    }
-
-    public void setEventDefaultBgColor(String color) {
-        eventDefaultBgColor = color;
-    }
-
-    public String getEventSelectedBgColor() {
-        return eventSelectedBgColor;
-    }
-
-    public void setEventSelectedBgColor(String color) {
-        eventSelectedBgColor = color;
-    }
-
     private JSONArray getJsonEventList(List<Event> events) {
         JSONArray jsonEvents = new JSONArray();
 
+        for (int i = 0; i < events.size(); i++) {
+            Event event = events.get(i);
 
-        for(Event event : events) {
             JSONObject jsonEvent = new JSONObject();
             jsonEvent.put("title", event.getSummary());
             jsonEvent.put("start", event.getStart() != null ? event.getStart().getDate() : null);
             jsonEvent.put("end", event.getEnd() != null ? event.getEnd().getDate() : null);
             jsonEvent.put("htmlLink", event.getHtmlLink());
-            jsonEvent.put("defaultBgColor", getEventDefaultBgColor());
-            jsonEvent.put("selectedBgColor", getEventSelectedBgColor());
+            jsonEvent.put("eventId", i);
 
             jsonEvents.put(jsonEvent);
         }
+
         return jsonEvents;
     }
 

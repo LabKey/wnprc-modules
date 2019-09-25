@@ -72,8 +72,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private User user;
     private Container container;
-    private String eventDefaultBgColor = "#90EE90";
-    private String eventSelectedBgColor = "#50FF50";
     private boolean authenticated = false;
 
     public void setUser(User u)
@@ -84,22 +82,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     public void setContainer(Container c)
     {
         container = c;
-    }
-
-    public String getEventDefaultBgColor() {
-        return eventDefaultBgColor;
-    }
-
-    public void setEventDefaultBgColor(String color) {
-        eventDefaultBgColor = color;
-    }
-
-    public String getEventSelectedBgColor() {
-        return eventSelectedBgColor;
-    }
-
-    public void setEventSelectedBgColor(String color) {
-        eventSelectedBgColor = color;
     }
 
     public void authenticate()
@@ -283,8 +265,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
         try
         {
-            for (Appointment event : events)
-            {
+            for (int i = 0; i < events.size(); i++) {
+                Appointment event = events.get(i);
                 event.load(PropertySet.FirstClassProperties);
                 String requestId = event.getBody().toString();
                 JSONObject surgeryInfo = queryResults.get(requestId);
@@ -293,8 +275,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 jsonEvent.put("title", event.getSubject());
                 jsonEvent.put("start", df.format(event.getStart()));
                 jsonEvent.put("end", df.format(event.getEnd()));
-                jsonEvent.put("defaultBgColor", getEventDefaultBgColor());
-                jsonEvent.put("selectedBgColor", getEventSelectedBgColor());
+                jsonEvent.put("eventId", i);
 
                 //Add data for details panel on Surgery Schedule page
                 JSONObject rawRowData = new JSONObject();

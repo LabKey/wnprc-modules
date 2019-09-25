@@ -327,7 +327,7 @@
 </div>
 
 <script>
-    var previousCalendarEvent;
+    var selectedEvent;
     var calendar;
     //debugger
     (function() {
@@ -384,7 +384,7 @@
                             center: 'title',
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
                         },
-                        eventRender: function(event, element) {
+                        eventRender: function(info) {
                             let eventAcceptedClasses = [];
 
                             if (data.rows && data.rows.length > 0) {
@@ -395,22 +395,28 @@
                                     }
                                 }
                             }
-                            return eventAcceptedClasses.includes(event.event.extendedProps.calendarId, eventAcceptedClasses);
-                        },
-                        eventClick: function(calEvent) {
-                            if (previousCalendarEvent) {
-                                previousCalendarEvent.setProp('backgroundColor', previousCalendarEvent.extendedProps.defaultBgColor);
+
+                            if (info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId === selectedEvent) {
+                                info.el.style.backgroundColor = info.event.extendedProps.selectedBgColor;
+                            } else {
+                                info.el.style.backgroundColor = info.event.extendedProps.defaultBgColor;
                             }
-                            previousCalendarEvent = calEvent.event;
-                            calEvent.event.setProp('backgroundColor', calEvent.event.extendedProps.selectedBgColor);
-                            jQuery.each(calEvent.event.extendedProps.rawRowData, function(key, value) {
-                                if (key in WebUtils.VM.taskDetails) {
-                                    if (key === "date" || key === "enddate") { //TODO modified???
-                                        value = displayDate(value);
+
+                            return eventAcceptedClasses.includes(info.event.extendedProps.calendarId, eventAcceptedClasses);
+                        },
+                        eventClick: function(info) {
+                            selectedEvent = info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId;
+                            if (info.event.extendedProps && info.event.extendedProps.rawRowData) {
+                                jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
+                                    if (key in WebUtils.VM.taskDetails) {
+                                        if (key === "date" || key === "enddate") { //TODO modified???
+                                            value = displayDate(value);
+                                        }
+                                        WebUtils.VM.taskDetails[key](value);
                                     }
-                                    WebUtils.VM.taskDetails[key](value);
-                                }
-                            });
+                                });
+                            }
+                            calendar.rerenderEvents();
                         }
                     });
 

@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="totalResearchAssignmentsDuringRange" tableDbType="NOT_IN_DB">
+                <tableTitle>Animals Assigned to Research Projects During Given Date Range</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

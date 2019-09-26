@@ -28,7 +28,7 @@ BuildUtils.includeModules(this.settings, rootDir, [BuildUtils.SERVER_MODULES_DIR
 BuildUtils.includeModules(this.settings, [
          ":externalModules:labModules:GenotypeAssays"
         ,":externalModules:labModules:laboratory"
-        ,":externalModules:labModules:LDK"
+        ,":server:modules:LabDevKitModules:LDK"
         ,":externalModules:labModules:SequenceAnalysis"
         ,":externalModules:labModules:Viral_Load_Assay"
         ,":externalModules:DISCVR:OpenLdapSync"

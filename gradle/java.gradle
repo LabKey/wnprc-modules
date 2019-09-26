@@ -56,8 +56,8 @@ dependencies {
     compile "junit:junit:${junitVersion}"
     compile project(BuildUtils.getApiProjectPath(project.gradle))
     compile project(BuildUtils.getInternalProjectPath(project.gradle))
-    compile project(":externalModules:labModules:LDK")
-    compile project(":externalModules:DISCVR:OpenLdapSync")
+    compile project(":server:modules:LabDevKitModules:LDK")
+    compile project(":server:modules:DiscvrLabKeyModules:OpenLdapSync")
     compile project(":externalModules:wnprc-modules:java2ts")
 }
 

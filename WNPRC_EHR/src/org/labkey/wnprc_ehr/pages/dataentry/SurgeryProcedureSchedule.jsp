@@ -162,15 +162,6 @@
                 <div id="calendar-checklist"></div>
             </div>
         </div>
-
-        <div class="panel panel-primary">
-            <div class="panel-heading"><span>Test Selection</span></div>
-            <div class="panel-body">
-                <div id="test-section">
-                    <svg width="25px" height="15px"><rect width="25px" height="15px" style="fill: rgb(173, 216, 230);"></rect></svg>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="col-xs-12 col-md-8">

@@ -360,8 +360,8 @@
                             let checkbox = document.createElement('input');
                             let label = document.createElement('label');
                             let description = document.createTextNode(data.rows[i].display_name);
-                            let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                            let colorBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 
                             div.id = data.rows[i].calendar_id + '_checkbox';
 
@@ -384,15 +384,17 @@
                             label.style.marginTop = '3px';
                             label.appendChild(description);
 
-                            legend.setAttribute('width', '25px');
-                            legend.setAttribute('height', '15px');
-                            colorBox.style.fill = data.rows[i].default_bg_color;
-                            colorBox.setAttribute('width', '25px');
-                            colorBox.setAttribute('height', '15px');
-                            legend.appendChild(colorBox);
+                            svg.setAttribute('width', '25px');
+                            svg.setAttribute('height', '15px');
+                            svg.style.marginLeft = '5px';
+                            svg.style.marginRight = '5px';
+                            rect.style.fill = data.rows[i].default_bg_color;
+                            rect.setAttribute('width', '25px');
+                            rect.setAttribute('height', '15px');
+                            svg.appendChild(rect);
 
                             div.appendChild(checkbox);
-                            div.appendChild(legend);
+                            div.appendChild(svg);
                             div.appendChild(label);
 
                             calendarChecklist.appendChild(div);

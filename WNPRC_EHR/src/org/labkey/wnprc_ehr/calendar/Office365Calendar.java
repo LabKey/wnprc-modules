@@ -413,23 +413,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     public String getCalendarEventsAsJson(String calendarName)
     {
-        String events = "";
-        try
-        {
-            authenticate();
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.MONTH, -2);
-            Date startDate = cal.getTime();
-            cal.add(Calendar.MONTH, 23);
-            Date endDate = cal.getTime();
-            events = getCalendarEvents(startDate, endDate, getFolderIdFromCalendarName(calendarName));
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //FIXME add error handling
-        }
-        return events;
+        authenticate();
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -2);
+        Date startDate = cal.getTime();
+        cal.add(Calendar.MONTH, 23);
+        Date endDate = cal.getTime();
+        return getCalendarEvents(startDate, endDate, getFolderIdFromCalendarName(calendarName));
     }
 
     static class RedirectionUrlCallback implements IAutodiscoverRedirectionUrl

@@ -8,7 +8,7 @@
         <column name="viralLoadScientific" />
         <column name="qcflag" />
         <column name="sampleType" />
-        <column name="pooled" />
+        <column name="batched" />
         <column name="Run/RowId">
             <properties>
                 <property name="columnTitle" value="Run"/>

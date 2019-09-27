@@ -70,9 +70,6 @@ services:
       PG_NAME:
       PG_PASS:
       PG_USER:
-      MSQL_USER:
-      MSQL_PASS:
-      MSQL_URL:
       TZ: America/Chicago
 
   nginx:
@@ -98,19 +95,6 @@ services:
     environment:
       TZ: America/Chicago
 
-  perlscripts:
-    image: wnprcehr/ehrcron:latest
-    depends_on:
-      - "labkey"
-    volumes:
-      - "${BACKUP_DIR}:/backups"
-    networks:
-      - network1
-    environment:
-      LK_BACKGROUND_USER:
-      LK_BACKGROUND_USER_PASSWORD:
-      LK_BASE_URL:
-      TZ: America/Chicago
   cadvisor:
     image: google/cadvisor:latest
     depends_on:

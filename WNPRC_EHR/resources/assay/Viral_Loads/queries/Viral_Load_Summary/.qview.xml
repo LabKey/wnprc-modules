@@ -9,7 +9,7 @@
         <column name="replicates" />
         <column name="stdDeviation" />
         <column name="qcflags" />
-        <column name="pooled" />
+        <column name="batched" />
         <column name="comments" />
         <column name="Run/RowId">
             <properties>

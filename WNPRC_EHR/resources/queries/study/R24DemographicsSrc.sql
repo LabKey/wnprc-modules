@@ -15,6 +15,7 @@
  */
 SELECT
   d.participantid as animalId,
+  d.participantid.primateId.primateId AS primateId,
 --  ih.value as neprcId,
   d.birth,
   d.death,
@@ -38,7 +39,9 @@ SELECT
   'WNPRC' as currentColony,
   d.gender.code as gender,
   d.dam,
-  d.sire
+  d.sire,
+  d.modified as modified,
+  curdate() as date
 FROM study.demographics d
 
 LEFT OUTER JOIN study.demographics as ih on d.id = ih.id and ih.origin.code in

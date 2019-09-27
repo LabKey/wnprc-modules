@@ -7,7 +7,7 @@ const PrimateIDModule = (function () {
             const query = "select a.participantid"
                         +  " from (select d0.participantid participantid"
                         +          " from demographics d0"
-                        +         " where (d0.calculated_status = 'alive'"
+                        +         " where (d0.calculated_status = 'Alive'"
                         +            " or exists(select null"
                         +                        " from demographics d1"
                         +                       " where d1.dam = d0.participantid)"

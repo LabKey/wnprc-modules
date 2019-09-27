@@ -1,10 +1,8 @@
-<%@ page import="org.labkey.wnprc_ehr.calendar.GoogleCalendar" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.wnprc_ehr.calendar.Office365Calendar" %>
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="java.util.UUID" %>
 <%@ page import="java.util.ArrayList" %>
@@ -329,8 +327,9 @@
 </div>
 
 <script>
-    var selectedEvent;
-    var calendar;
+    var selectedEvent = {};
+    var calendarStatuses = {};
+    var calendar = {};
     //debugger
     (function() {
         var calendarEl = document.getElementById('calendar');
@@ -353,6 +352,7 @@
                             let description = document.createTextNode(data.rows[i].display_name);
                             let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                             let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            let loading = document.createElement('img');
 
                             div.id = data.rows[i].calendar_id + '_checkbox';
 
@@ -384,9 +384,14 @@
                             rect.setAttribute('height', '15px');
                             svg.appendChild(rect);
 
+                            loading.src = '<%=getContextPath()%>/_images/ajax-loading.gif';
+                            loading.id = data.rows[i].calendar_id + '_loading';
+                            loading.style.marginLeft = '5px';
+
                             div.appendChild(checkbox);
                             div.appendChild(svg);
                             div.appendChild(label);
+                            div.appendChild(loading);
 
                             calendarChecklist.appendChild(div);
                         }
@@ -402,6 +407,13 @@
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
                         },
                         eventRender: function(info) {
+                            for (let calId in calendarStatuses) {
+                                if (calendarStatuses.hasOwnProperty(calId) && !calendarStatuses[calId].render_status) {
+                                    document.getElementById(calId + '_loading').src = calendarStatuses[calId].img;
+                                    calendarStatuses[calId].render_status = true;
+                                }
+                            }
+
                             let eventAcceptedClasses = [];
 
                             if (data.rows && data.rows.length > 0) {
@@ -463,7 +475,17 @@
                                                 rawRowData: event.rawRowData
                                             }
                                         }));
-                                    }, this)
+                                        calendarStatuses[calId] = {};
+                                        calendarStatuses[calId].img = '<%=getContextPath()%>/_images/check.png';
+                                        calendarStatuses[calId].render_status = false;
+                                        calendar.rerenderEvents();
+                                    }, this),
+                                    failure: function(errorInfo) {
+                                        calendarStatuses[calId] = {};
+                                        calendarStatuses[calId].img = '<%=getContextPath()%>/_images/delete.png';
+                                        calendarStatuses[calId].render_status = false;
+                                        alert(errorInfo.responseText);
+                                    }
                                 });
                             });
                         }

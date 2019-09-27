@@ -22,10 +22,12 @@
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.css' />
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.css' />
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.css' />
+<link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css' />
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.js'></script>
+<script src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js'></script>
 
 <style type="text/css">
     /* Full Calendar heading */
@@ -156,8 +158,17 @@
         </div>
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Calendar Selection</span></div>
-            <div class="panel-body" data-bind="with: taskDetails">
+            <div class="panel-body">
                 <div id="calendar-checklist"></div>
+            </div>
+        </div>
+
+        <div class="panel panel-primary">
+            <div class="panel-heading"><span>Test Selection</span></div>
+            <div class="panel-body">
+                <div id="test-section">
+                    <svg width="25px" height="15px"><rect width="25px" height="15px" style="fill: rgb(173, 216, 230);"></rect></svg>
+                </div>
             </div>
         </div>
     </div>
@@ -344,15 +355,17 @@
                     if (data.rows && data.rows.length > 0) {
                         let calendarChecklist = document.getElementById('calendar-checklist');
                         for (let i = 0; i < data.rows.length; i++) {
+
                             let div = document.createElement('div');
                             let checkbox = document.createElement('input');
                             let label = document.createElement('label');
                             let description = document.createTextNode(data.rows[i].display_name);
+                            let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            let colorBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 
-                            div.classList.add('form-check');
+                            div.id = data.rows[i].calendar_id + '_checkbox';
 
                             checkbox.type = 'checkbox';
-                            checkbox.classList.add('form-check-input');
                             checkbox.id = data.rows[i].calendar_id;
                             if (data.rows[i].show_by_default) {
                                 checkbox.checked = true;
@@ -364,11 +377,22 @@
                                 }
                             });
 
-                            label.classList.add('form-check-label');
+                            checkbox.style.display = 'inline-block';
+                            checkbox.style.cssFloat = 'left';
+
                             label.for = checkbox.id;
+                            label.style.marginTop = '3px';
                             label.appendChild(description);
 
+                            legend.setAttribute('width', '25px');
+                            legend.setAttribute('height', '15px');
+                            colorBox.style.fill = data.rows[i].default_bg_color;
+                            colorBox.setAttribute('width', '25px');
+                            colorBox.setAttribute('height', '15px');
+                            legend.appendChild(colorBox);
+
                             div.appendChild(checkbox);
+                            div.appendChild(legend);
                             div.appendChild(label);
 
                             calendarChecklist.appendChild(div);

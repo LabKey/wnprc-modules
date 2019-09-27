@@ -14,7 +14,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     let breedingDataSaved = helper.getProperty('breedingEncountersSaved');
 
     if (row.reason) {
-        console.log(row.reason);
         let reasons = row.reason.split(',');
         let breeding = false;
         let breedingEnded = false;

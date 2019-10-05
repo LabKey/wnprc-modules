@@ -170,14 +170,9 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public NamedObjectList getSelectList(String columnName) {
-        return _tableInfo.getSelectList(columnName);
-    }
-
-    @Override
-    public @NotNull NamedObjectList getSelectList(String columnName, List<FilterType> filters, Integer maxRows)
+    @NotNull NamedObjectList getSelectList(String columnName, List<FilterType> filters, Integer maxRows, String titleColumn);
     {
-        return _tableInfo.getSelectList(columnName, filters, maxRows);
+        return _tableInfo.getSelectList(columnName, filters, maxRows, titleColumn);
     }
 
     @Override

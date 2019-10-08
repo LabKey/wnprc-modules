@@ -328,7 +328,6 @@
 
 <script>
     var selectedEvent = {};
-    var calendarStatuses = {};
     var calendar = {};
     //debugger
     (function() {
@@ -407,13 +406,6 @@
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
                         },
                         eventRender: function(info) {
-                            for (let calId in calendarStatuses) {
-                                if (calendarStatuses.hasOwnProperty(calId) && !calendarStatuses[calId].render_status) {
-                                    document.getElementById(calId + '_loading').src = calendarStatuses[calId].img;
-                                    calendarStatuses[calId].render_status = true;
-                                }
-                            }
-
                             let eventAcceptedClasses = [];
 
                             if (data.rows && data.rows.length > 0) {
@@ -462,30 +454,38 @@
                                         folderId:   data.rows[i].folder_id,
                                     }),
                                     success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                        successCallback(JSON.parse(response.events).map(function (event) {
-                                            return {
-                                                title: event.title,
-                                                start: event.start,
-                                                end: event.end,
-                                                calendarId: calId,
-                                                eventId: event.eventId,
-                                                backgroundColor: defaultBgColor,
-                                                defaultBgColor: defaultBgColor,
-                                                selectedBgColor: selectedBgColor,
-                                                rawRowData: event.rawRowData
-                                            }
-                                        }));
-                                        calendarStatuses[calId] = {};
-                                        calendarStatuses[calId].img = '<%=getContextPath()%>/_images/check.png';
-                                        calendarStatuses[calId].render_status = false;
-                                        calendar.rerenderEvents();
-                                    }, this),
-                                    failure: function(errorInfo) {
-                                        calendarStatuses[calId] = {};
-                                        calendarStatuses[calId].img = '<%=getContextPath()%>/_images/delete.png';
-                                        calendarStatuses[calId].render_status = false;
-                                        alert(errorInfo.responseText);
-                                    }
+                                        if (response.success) {
+                                            document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/check.png';
+                                            successCallback(JSON.parse(response.events).map(function (event) {
+                                                return {
+                                                    title: event.title,
+                                                    start: event.start,
+                                                    end: event.end,
+                                                    calendarId: calId,
+                                                    eventId: event.eventId,
+                                                    backgroundColor: defaultBgColor,
+                                                    defaultBgColor: defaultBgColor,
+                                                    selectedBgColor: selectedBgColor,
+                                                    rawRowData: event.rawRowData
+                                                }
+                                            }));
+                                        } else {
+                                            document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/delete.png';
+                                            successCallback(JSON.parse("[]").map(function (event) {
+                                                return {
+                                                    title: event.title,
+                                                    start: event.start,
+                                                    end: event.end,
+                                                    calendarId: calId,
+                                                    eventId: event.eventId,
+                                                    backgroundColor: defaultBgColor,
+                                                    defaultBgColor: defaultBgColor,
+                                                    selectedBgColor: selectedBgColor,
+                                                    rawRowData: event.rawRowData
+                                                }
+                                            }));
+                                        }
+                                    }, this)
                                 });
                             });
                         }

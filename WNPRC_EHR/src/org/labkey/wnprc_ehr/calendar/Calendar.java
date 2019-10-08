@@ -7,5 +7,5 @@ public interface Calendar
 {
     void setUser(User u);
     void setContainer(Container c);
-    String getCalendarEventsAsJson(String calendarId);
+    String getCalendarEventsAsJson(String calendarId) throws Exception;
 }

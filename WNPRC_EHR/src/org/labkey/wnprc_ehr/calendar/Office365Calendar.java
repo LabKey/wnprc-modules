@@ -84,97 +84,82 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         container = c;
     }
 
-    public void authenticate()
+    public void authenticate() throws Exception
     {
         if (!authenticated)
         {
             String emailAddress = null;
-            try
-            {
-                SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "0ddbf045-1cfc-4cc5-8571-4028a92a5011");
-                DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
-                TableInfo ti = schema.getTable("service_accounts");
-                TableSelector ts = new TableSelector(ti, filter, null);
-                Map map = ts.getMap();
-                emailAddress = (String) map.get("private_key_id");
+            SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "0ddbf045-1cfc-4cc5-8571-4028a92a5011");
+            DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("service_accounts");
+            TableSelector ts = new TableSelector(ti, filter, null);
+            Map map = ts.getMap();
+            emailAddress = (String) map.get("private_key_id");
 
-                byte[] passwordBytes = AES.base64StringToByteArray((String) map.get("private_key"));
-                byte[] keyBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file"))), StandardCharsets.UTF_8));
-                byte[] ivBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file"))), StandardCharsets.UTF_8));
+            byte[] passwordBytes = AES.base64StringToByteArray((String) map.get("private_key"));
+            byte[] keyBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_key.file"))), StandardCharsets.UTF_8));
+            byte[] ivBytes = AES.hexStringToByteArray(new String(Files.readAllBytes(Paths.get(System.getProperty("surgeries_iv.file"))), StandardCharsets.UTF_8));
 
-                byte[] decrypted = AES.decrypt(passwordBytes, keyBytes, ivBytes);
+            byte[] decrypted = AES.decrypt(passwordBytes, keyBytes, ivBytes);
 
-                ExchangeCredentials credentials = new WebCredentials(emailAddress, new String(decrypted, StandardCharsets.UTF_8));
-                service.setCredentials(credentials);
-                URI uri = new URI("https://outlook.office365.com/EWS/Exchange.asmx");
-                service.setUrl(uri);
-                authenticated = true;
-                //service.autodiscoverUrl(emailAddress, new RedirectionUrlCallback());
-            }
-            catch (Exception e)
-            {
-                int x = 3;
-            }
+            ExchangeCredentials credentials = new WebCredentials(emailAddress, new String(decrypted, StandardCharsets.UTF_8));
+            service.setCredentials(credentials);
+            URI uri = new URI("https://outlook.office365.com/EWS/Exchange.asmx");
+            service.setUrl(uri);
+            authenticated = true;
+            //service.autodiscoverUrl(emailAddress, new RedirectionUrlCallback());
         }
     }
 
-    public boolean isRoomAvailable(String roomEmailAddress, Date start, Date end)
+    public boolean isRoomAvailable(String roomEmailAddress, Date start, Date end) throws Exception
     {
         boolean isAvailable = true;
-        try
+        // Create a list of attendees for which to request availability
+        // information and meeting time suggestions.
+
+        List<AttendeeInfo> attendees = new ArrayList<>();
+        attendees.add(new AttendeeInfo(roomEmailAddress));
+
+        TimeWindow surgeryTimeWindow = new TimeWindow(start, end);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(start);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date d1 = new Date(cal.getTimeInMillis());
+        cal.setTime(end);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        Date d2 = new Date(cal.getTimeInMillis());
+
+        // Call the availability service.
+        GetUserAvailabilityResults results = service.getUserAvailability(
+                attendees,
+                new TimeWindow(d1, d2),
+                AvailabilityData.FreeBusy);
+
+        for (AttendeeAvailability attendeeAvailability : results.getAttendeesAvailability())
         {
-            // Create a list of attendees for which to request availability
-            // information and meeting time suggestions.
-
-            List<AttendeeInfo> attendees = new ArrayList<>();
-            attendees.add(new AttendeeInfo(roomEmailAddress));
-
-            TimeWindow surgeryTimeWindow = new TimeWindow(start, end);
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(start);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            Date d1 = new Date(cal.getTimeInMillis());
-            cal.setTime(end);
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            cal.set(Calendar.SECOND, 59);
-            cal.set(Calendar.MILLISECOND, 999);
-            Date d2 = new Date(cal.getTimeInMillis());
-
-            // Call the availability service.
-            GetUserAvailabilityResults results = service.getUserAvailability(
-                    attendees,
-                    new TimeWindow(d1, d2),
-                    AvailabilityData.FreeBusy);
-
-            for (AttendeeAvailability attendeeAvailability : results.getAttendeesAvailability())
+            if (attendeeAvailability.getErrorCode() == ServiceError.NoError)
             {
-                if (attendeeAvailability.getErrorCode() == ServiceError.NoError)
+                for (CalendarEvent calendarEvent : attendeeAvailability.getCalendarEvents())
                 {
-                    for (CalendarEvent calendarEvent : attendeeAvailability.getCalendarEvents())
+                    TimeWindow eventTimeWindow = new TimeWindow(calendarEvent.getStartTime(), calendarEvent.getEndTime());
+                    calendarEvent.getFreeBusyStatus();
+                    if (isOverlapping(surgeryTimeWindow, eventTimeWindow) && isBusy(calendarEvent))
                     {
-                        TimeWindow eventTimeWindow = new TimeWindow(calendarEvent.getStartTime(), calendarEvent.getEndTime());
-                        calendarEvent.getFreeBusyStatus();
-                        if (isOverlapping(surgeryTimeWindow, eventTimeWindow) && isBusy(calendarEvent))
-                        {
-                            isAvailable = false;
-                            break;
-                        }
+                        isAvailable = false;
+                        break;
                     }
                 }
-                else
-                {
-                    isAvailable = false;
-                }
             }
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //TODO fix this!
+            else
+            {
+                isAvailable = false;
+            }
         }
         return isAvailable;
     }
@@ -191,54 +176,31 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return status != LegacyFreeBusyStatus.Free || !cancelled;
     }
 
-    public String addEvent(Date start, Date end, String room, String subject, String requestId, List<String> categories, String calendarId)
+    public String addEvent(Date start, Date end, String room, String subject, String requestId, List<String> categories, String calendarId) throws Exception
     {
         authenticate();
         String apptId = null;
         FolderId folderId = getFolderIdFromCalendarName(calendarId);
-        try
+
+        SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
+        DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+        TableInfo ti = schema.getTable("surgery_procedure_rooms");
+        TableSelector ts = new TableSelector(ti, filter, null);
+        Map map = ts.getMap();
+        String roomEmailAddress = (String) map.get("email");
+        if (isRoomAvailable(roomEmailAddress, start, end))
         {
-            SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
-            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
-            TableInfo ti = schema.getTable("surgery_procedure_rooms");
-            TableSelector ts = new TableSelector(ti, filter, null);
-            Map map = ts.getMap();
-            String roomEmailAddress = (String) map.get("email");
-            if (isRoomAvailable(roomEmailAddress, start, end))
-            {
-                Appointment appt = new Appointment(service);
-                appt.setStart(start);
-                appt.setEnd(end);
-                appt.setSubject(subject);
-                appt.setBody(new MessageBody(BodyType.Text, requestId));
-                appt.setCategories(new StringList(categories));
-                appt.getRequiredAttendees().add(roomEmailAddress);
-                appt.save(folderId);
-                apptId = appt.getId().getUniqueId();
-            }
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //TODO DO NOTHING
+            Appointment appt = new Appointment(service);
+            appt.setStart(start);
+            appt.setEnd(end);
+            appt.setSubject(subject);
+            appt.setBody(new MessageBody(BodyType.Text, requestId));
+            appt.setCategories(new StringList(categories));
+            appt.getRequiredAttendees().add(roomEmailAddress);
+            appt.save(folderId);
+            apptId = appt.getId().getUniqueId();
         }
         return apptId;
-    }
-
-    public boolean confirmEvent(String apptId, String requestId) {
-        boolean updated = false;
-        try
-        {
-            Appointment appt = Appointment.bind(service, new ItemId(apptId));
-            appt.setBody(new MessageBody(BodyType.Text, requestId));
-            updated = true;
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //TODO error handling
-        }
-        return updated;
     }
 
     public void cancelEvent(String apptId) throws Exception
@@ -248,7 +210,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         appt.cancelMeeting();
     }
 
-    private JSONArray getJsonEventList(List<Appointment> events)
+    private JSONArray getJsonEventList(List<Appointment> events) throws Exception
     {
         JSONArray jsonEvents = new JSONArray();
 
@@ -263,74 +225,57 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             queryResults.put(o.getString("requestid"), o);
         }
 
-        try
-        {
-            for (int i = 0; i < events.size(); i++) {
-                Appointment event = events.get(i);
-                event.load(PropertySet.FirstClassProperties);
-                String requestId = event.getBody().toString();
-                JSONObject surgeryInfo = queryResults.get(requestId);
+        for (int i = 0; i < events.size(); i++) {
+            Appointment event = events.get(i);
+            event.load(PropertySet.FirstClassProperties);
+            String requestId = event.getBody().toString();
+            JSONObject surgeryInfo = queryResults.get(requestId);
 
-                JSONObject jsonEvent = new JSONObject();
-                jsonEvent.put("title", event.getSubject());
-                jsonEvent.put("start", df.format(event.getStart()));
-                jsonEvent.put("end", df.format(event.getEnd()));
-                jsonEvent.put("eventId", i);
+            JSONObject jsonEvent = new JSONObject();
+            jsonEvent.put("title", event.getSubject());
+            jsonEvent.put("start", df.format(event.getStart()));
+            jsonEvent.put("end", df.format(event.getEnd()));
+            jsonEvent.put("eventId", i);
+            jsonEvent.put("eventListSize", events.size());
 
-                //Add data for details panel on Surgery Schedule page
-                JSONObject rawRowData = new JSONObject();
-                if (surgeryInfo != null)
-                {
-                    rawRowData.put("lsid", surgeryInfo.get("lsid"));
-                    rawRowData.put("taskid", surgeryInfo.get("taskid"));
-                    rawRowData.put("objectid", surgeryInfo.get("objectid"));
-                    rawRowData.put("requestid", surgeryInfo.get("requestid"));
-                    rawRowData.put("proceduretype", surgeryInfo.get("proceduretype"));
-                    rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
-                    rawRowData.put("age", surgeryInfo.get("age"));
-                    rawRowData.put("animalid", surgeryInfo.get("animalid"));
-                    rawRowData.put("date", surgeryInfo.get("date"));
-                    rawRowData.put("account", surgeryInfo.get("account"));
-                    rawRowData.put("cur_room", surgeryInfo.get("cur_room"));
-                    rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
-                    rawRowData.put("cur_cond", surgeryInfo.get("cur_cond"));
-                    rawRowData.put("location", surgeryInfo.get("location"));
-                    rawRowData.put("medical", surgeryInfo.get("medical"));
-                    rawRowData.put("project", surgeryInfo.get("project"));
-                    rawRowData.put("protocol", surgeryInfo.get("protocol"));
-                    rawRowData.put("sex", surgeryInfo.get("sex"));
-                    rawRowData.put("weight", surgeryInfo.get("weight"));
-                    rawRowData.put("enddate", surgeryInfo.get("enddate"));
-                    rawRowData.put("comments", surgeryInfo.get("comments"));
-                    jsonEvent.put("rawRowData", rawRowData);
-                }
-
-                jsonEvents.put(jsonEvent);
+            //Add data for details panel on Surgery Schedule page
+            JSONObject rawRowData = new JSONObject();
+            if (surgeryInfo != null)
+            {
+                rawRowData.put("lsid", surgeryInfo.get("lsid"));
+                rawRowData.put("taskid", surgeryInfo.get("taskid"));
+                rawRowData.put("objectid", surgeryInfo.get("objectid"));
+                rawRowData.put("requestid", surgeryInfo.get("requestid"));
+                rawRowData.put("proceduretype", surgeryInfo.get("proceduretype"));
+                rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
+                rawRowData.put("age", surgeryInfo.get("age"));
+                rawRowData.put("animalid", surgeryInfo.get("animalid"));
+                rawRowData.put("date", surgeryInfo.get("date"));
+                rawRowData.put("account", surgeryInfo.get("account"));
+                rawRowData.put("cur_room", surgeryInfo.get("cur_room"));
+                rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
+                rawRowData.put("cur_cond", surgeryInfo.get("cur_cond"));
+                rawRowData.put("location", surgeryInfo.get("location"));
+                rawRowData.put("medical", surgeryInfo.get("medical"));
+                rawRowData.put("project", surgeryInfo.get("project"));
+                rawRowData.put("protocol", surgeryInfo.get("protocol"));
+                rawRowData.put("sex", surgeryInfo.get("sex"));
+                rawRowData.put("weight", surgeryInfo.get("weight"));
+                rawRowData.put("enddate", surgeryInfo.get("enddate"));
+                rawRowData.put("comments", surgeryInfo.get("comments"));
+                jsonEvent.put("rawRowData", rawRowData);
             }
+
+            jsonEvents.put(jsonEvent);
         }
-        catch (Exception e)
-        {
-            int x = 3;
-            //FIXME WHAT?
-        }
+
         return jsonEvents;
     }
 
-    private String getCalendarEvents(Date startDate, Date endDate, FolderId folderId)
+    private String getCalendarEvents(Date startDate, Date endDate, FolderId folderId) throws Exception
     {
-        String eventsString = null;
-
-        try
-        {
-            JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, folderId));
-            eventsString = jsonEvents.toString();
-        }
-        catch (Exception e)
-        {
-            int x = 3;
-            //TODO fix!
-        }
-        return eventsString;
+        JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, folderId));
+        return jsonEvents.toString();
     }
 
     private List<Appointment> getAppointments(Date startDate, Date endDate, FolderId folderId) throws Exception
@@ -340,7 +285,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return findResults.getItems();
     }
 
-    private FolderId getFolderIdFromCalendarName(String calendarName)
+    private FolderId getFolderIdFromCalendarName(String calendarName) throws Exception
     {
         FolderId folderId = null;
         String folderIdString = null;
@@ -404,14 +349,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         }
         catch (Exception e)
         {
-            //TODO Better error handling!
-            e.printStackTrace();
+            throw(e);
         }
 
         return folderId;
     }
 
-    public String getCalendarEventsAsJson(String calendarName)
+    public String getCalendarEventsAsJson(String calendarName) throws Exception
     {
         authenticate();
         Calendar cal = Calendar.getInstance();
@@ -424,8 +368,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     static class RedirectionUrlCallback implements IAutodiscoverRedirectionUrl
     {
-        public boolean autodiscoverRedirectionUrlValidationCallback(
-                String redirectionUrl)
+        public boolean autodiscoverRedirectionUrlValidationCallback(String redirectionUrl)
         {
             return redirectionUrl.toLowerCase().startsWith("https://");
         }

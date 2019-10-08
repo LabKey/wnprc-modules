@@ -1370,16 +1370,24 @@ public class WNPRC_EHRController extends SpringActionController
     public class FetchSurgeryProcedureOutlookEventsAction extends ApiAction<FetchCalendarEvent>
     {
         @Override
-        public Object execute(FetchCalendarEvent event, BindException errors) throws Exception
+        public Object execute(FetchCalendarEvent event, BindException errors)
         {
             JSONObject response = new JSONObject();
             response.put("success", false);
 
-            String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId());
-            response.put("events", office365EventsString);
-            if (office365EventsString != null && office365EventsString.trim().length() > 0)
+            try
             {
-                response.put("success", true);
+                String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId());
+                response.put("events", office365EventsString);
+                if (office365EventsString != null && office365EventsString.trim().length() > 0)
+                {
+                    response.put("success", true);
+                }
+            }
+            catch (Exception e)
+            {
+                //TODO add logging
+                response.put("success", false);
             }
 
             return response;
@@ -1392,23 +1400,31 @@ public class WNPRC_EHRController extends SpringActionController
     public class FetchSurgeryProcedureGoogleEventsAction extends ApiAction<FetchCalendarEvent>
     {
         @Override
-        public Object execute(FetchCalendarEvent event, BindException errors) throws Exception
+        public Object execute(FetchCalendarEvent event, BindException errors)
         {
             JSONObject response = new JSONObject();
             response.put("success", false);
 
-            String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId());
-            response.put("events", googleEventsString);
-            if (googleEventsString != null && googleEventsString.trim().length() > 0)
+            try
             {
-                response.put("success", true);
+                String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId());
+                response.put("events", googleEventsString);
+                if (googleEventsString != null && googleEventsString.trim().length() > 0)
+                {
+                    response.put("success", true);
+                }
+            }
+            catch (Exception e)
+            {
+                //TODO add logging
+                response.put("success", false);
             }
 
             return response;
         }
     }
 
-    private String fetchCalendarEvents(Calendar calendar, String calendarId)
+    private String fetchCalendarEvents(Calendar calendar, String calendarId) throws Exception
     {
         calendar.setUser(getUser());
         calendar.setContainer(getContainer());

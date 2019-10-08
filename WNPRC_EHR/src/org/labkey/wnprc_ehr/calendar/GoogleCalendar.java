@@ -9,7 +9,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -28,7 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -92,17 +90,12 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
             jsonEvent.put("end", event.getEnd().getDate() != null ? event.getEnd().getDate() : event.getEnd().getDateTime());
             jsonEvent.put("htmlLink", event.getHtmlLink());
             jsonEvent.put("eventId", i);
+            jsonEvent.put("eventListSize", events.size());
 
             jsonEvents.put(jsonEvent);
         }
 
         return jsonEvents;
-    }
-
-    private JSONArray getJsonEventList(Event event) {
-        List<Event> eventList = new ArrayList<>();
-        eventList.add(event);
-        return getJsonEventList(eventList);
     }
 
     private InputStream mapToInputStream(Map<String, Object> map) {
@@ -113,13 +106,7 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
             json.put(entry.getKey(), entry.getValue());
         }
 
-        try {
-            is = new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            //TODO fix!
-        }
-
-        return is;
+        return new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -127,7 +114,7 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
      * @return An authorized HttpRequestInitializer object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-    private HttpRequestInitializer getCredentials() throws IOException {
+    private HttpRequestInitializer getCredentials() throws Exception {
         // Load client secrets.
         SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "f5c49137-186d-41fb-9c93-9979b7f4c2ba");
         DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
@@ -141,13 +128,13 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return new HttpCredentialsAdapter(credentials);
     }
 
-    private Calendar getCalendar() throws IOException {
+    private Calendar getCalendar() throws Exception {
         return new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
 
-    private String getCalendarEvents(Calendar calendar, DateTime dateMin, DateTime dateMax, Integer maxResults, String calendarId) throws IOException {
+    private String getCalendarEvents(Calendar calendar, DateTime dateMin, DateTime dateMax, Integer maxResults, String calendarId) throws Exception {
         Events events = calendar.events().list(calendarId)
                 .setMaxResults(maxResults)
                 .setTimeMin(dateMin)
@@ -159,21 +146,11 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return getJsonEventList(events.getItems()).toString();
     }
 
-    public String getCalendarEventsAsJson(String calendarId) {
-        String events;
-        try {
-            Calendar calendar = getCalendar();
-            java.util.Calendar currentDate = java.util.Calendar.getInstance();
-            DateTime dateMin = new DateTime(currentDate.getTimeInMillis() - SIX_MONTHS_IN_MILLISECONDS);
-            DateTime dateMax = new DateTime(currentDate.getTimeInMillis() + TWO_YEARS_IN_MILLISECONDS);
-            events = getCalendarEvents(calendar, dateMin, dateMax, MAX_EVENT_RESULTS, calendarId);
-        } catch (Exception e) {
-            Event error = new Event();
-            error.setStart(new EventDateTime().setDate(new DateTime(true, System.currentTimeMillis(), null)));
-            error.setSummary("Error Loading Calendar!!");
-            events = getJsonEventList(error).toString();
-        }
-
-        return events;
+    public String getCalendarEventsAsJson(String calendarId) throws Exception {
+        Calendar calendar = getCalendar();
+        java.util.Calendar currentDate = java.util.Calendar.getInstance();
+        DateTime dateMin = new DateTime(currentDate.getTimeInMillis() - SIX_MONTHS_IN_MILLISECONDS);
+        DateTime dateMax = new DateTime(currentDate.getTimeInMillis() + TWO_YEARS_IN_MILLISECONDS);
+        return getCalendarEvents(calendar, dateMin, dateMax, MAX_EVENT_RESULTS, calendarId);
     }
 }

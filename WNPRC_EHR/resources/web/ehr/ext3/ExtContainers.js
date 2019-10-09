@@ -1642,6 +1642,56 @@ EHR.ext.StoreSorterPanel = Ext.extend(Ext.Panel, {
         this.targetStore.data.sort('ASC', EHR.Utils.sortStore(sortArray));
         this.targetStore.fireEvent('datachanged', this.targetStore);
 
+    },
+    /**
+     * A sorter function that can be used to sort an Ext store.  This is useful because it allows a store to be sorted on the displayValue of a field.
+     * @param {array} fieldList An ordered array of objects describing sorts to be applied to a store.  Each object has the following properties:
+     * <li>storeId: The Id of the lookup store</li>
+     * <li>displayField: The displayfield (ie. the field holding the value displayed to the user</li>
+     * <li>valueField: The field that corresponds to the value that is stored in the record</li>
+     * @returns {function} The sorter function that can be passed to the sort() method of an Ext.data.Store or subclass of this.
+
+     */
+    sortStore: function(fieldList){
+        return function(a, b){
+            var retVal = 0;
+            Ext4.each(fieldList, function(item){
+                var val1 = '';
+                var val2 = '';
+                if(!item.storeId){
+                    val1 = a.get(item.term) || '';
+                    val2 = b.get(item.term) || '';
+                }
+                else {
+                    var store = Ext.StoreMgr.get(item.storeId);
+                    var rec1;
+                    var rec2;
+                    rec1 = store.find(item.valueField, a.get(item.term));
+                    if(rec1 != -1){
+                        rec1 = store.getAt(rec1);
+                        val1 = rec1.get(item.displayField) || '';
+                    }
+                    rec2 = store.find(item.valueField, b.get(item.term));
+                    if(rec2 != -1){
+                        rec2 = store.getAt(rec2);
+                        val2 = rec2.get(item.displayField) || '';
+                    }
+                }
+
+                if(val1 < val2){
+                    retVal = -1;
+                    return false;
+                }
+                else if (val1 > val2){
+                    retVal = 1;
+                    return false;
+                }
+                else {
+                    retVal = 0;
+                }
+            }, this);
+            return retVal;
+        }
     }
 });
 Ext.reg('ehr-storesorterpanel', EHR.ext.StoreSorterPanel);

@@ -25,11 +25,10 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             //get invoice sent date
             var invoiceSentDate = EHR.Server.Utils.normalizeDate(row.invoiceSentOn);
 
-            // if payment received date is left empty, use today's date
-            if (!row.paymentReceivedOn)
-                row.paymentReceivedOn = new Date();
-
-            pmtReceivedDate = EHR.Server.Utils.normalizeDate(row.paymentReceivedOn);
+            if (row.paymentAmountReceived && !row.paymentReceivedOn) {
+                EHR.Server.Utils.addError(scriptErrors, 'paymentReceivedOn', "Payment Received On cannot be blank if there is Payment Amount Received amount", 'ERROR');
+                return false;
+            }
 
             //validations
 
@@ -42,12 +41,16 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                 return false;
             }
 
-            //error if payment received date is before billing run date
-            if (helper.getJavaHelper().dateCompare(billingRunDate, pmtReceivedDate, format) > 0) {
-                EHR.Server.Utils.addError(scriptErrors, 'paymentReceivedOn', "Payment received date" +
-                        " date (" + helper.getJavaHelper().formatDate(pmtReceivedDate, format, false) + ") is before " +
-                        " Billing Run Date (" + helper.getJavaHelper().formatDate(billingRunDate, format, false) + ").", 'ERROR');
-                return false;
+            if (row.paymentReceivedOn) {
+
+                pmtReceivedDate = EHR.Server.Utils.normalizeDate(row.paymentReceivedOn);
+
+                //error if payment received date is before billing run date
+                if (helper.getJavaHelper().dateCompare(billingRunDate, pmtReceivedDate, format) > 0) {
+                    EHR.Server.Utils.addError(scriptErrors, 'paymentReceivedOn', "Payment received date" +
+                            " date (" + helper.getJavaHelper().formatDate(pmtReceivedDate, format, false) + ") is before " +
+                            " Billing Run Date (" + helper.getJavaHelper().formatDate(billingRunDate, format, false) + ").", 'ERROR');
+                    return false;
             }
 
         },

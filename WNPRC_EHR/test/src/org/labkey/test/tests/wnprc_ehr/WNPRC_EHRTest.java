@@ -579,20 +579,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         clickAndWait(Locator.bodyLinkContainingText("View Charges and Adjustments Not Yet Billed"));
 
-        setFormElement(Locator.inputByNameContaining("StartDate"), "09/01/2011");
-        setFormElement(Locator.inputByNameContaining("EndDate"), "09/30/2011");
-
-        clickButtonContainingText("Submit");
-
-        waitForText("Charges and Adjustments Not Yet Billed");
-
         DataRegionTable notBilled = new DataRegionTable("query", getDriver());
-        assertEquals("Charge already billed: ", " ", notBilled.getDataAsText(0, "invoiceId"));//assertNull or using Null did not work, got "expected null, but was:< >"
-        assertEquals("Group Name not as expected: ", "Clinical Pathology", notBilled.getDataAsText(0, "groupName"));
-        assertEquals("Item not as expected: ", "vaccine supplies", notBilled.getDataAsText(0, "item"));
-        assertEquals("Quantity not as expected: ", "10.0", notBilled.getDataAsText(0, "quantity"));
-        assertEquals("Unit Cost not as expected: ", "$19.50", notBilled.getDataAsText(0, "unitCost"));
-        assertEquals("Total Cost not as expected: ", "$195.00", notBilled.getDataAsText(0, "totalcost"));
+
+        List<String> expectedRowData = Arrays.asList("test2312318", "2011-09-15", "640991", "40", "Clinical Pathology", "10.0", "$15.00", "charge 2 with animal id");
+        List<String> actualRowData = notBilled.getRowDataAsText(0, "Id", "date", "project", "chargeId", "chargetype", "quantity", "unitCost", "comment");
+        assertEquals("Wrong row data for misc charges not billed ", expectedRowData, actualRowData);
     }
 
     private void viewJET()

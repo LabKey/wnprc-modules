@@ -51,6 +51,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                             " date (" + helper.getJavaHelper().formatDate(pmtReceivedDate, format, false) + ") is before " +
                             " Billing Run Date (" + helper.getJavaHelper().formatDate(billingRunDate, format, false) + ").", 'ERROR');
                     return false;
+                }
             }
 
         },

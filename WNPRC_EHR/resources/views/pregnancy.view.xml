@@ -1,5 +1,0 @@
-<view xmlns="http://labkey.org/data/xml/view" title="Pregnancy Detail">
-    <dependencies>
-        <dependency path="/wnprc_ehr/breeding.lib.xml"/>
-    </dependencies>
-</view>

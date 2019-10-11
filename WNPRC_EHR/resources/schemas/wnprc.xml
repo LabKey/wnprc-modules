@@ -176,11 +176,23 @@
             <column columnName="dateapprovedordenied"/>
             <column columnName="dateordered"/>
             <column columnName="datearrival"/>
+            <column columnName="animalsorigin"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>
             <column columnName="modifiedby"/>
             <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="gestational_days" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="species"/>
+            <column columnName="gestational_day"/>
+            <column columnName="gest_sac_mm"/>
+            <column columnName="crown_rump_mm"/>
+            <column columnName="biparietal_diameter_mm"/>
+            <column columnName="femur_length_mm"/>
         </columns>
     </table>
 </tables>

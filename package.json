@@ -58,7 +58,7 @@
     "knockout": "3.4.0",
     "knockout.mapping": "~2.4.0",
     "knockout.punches": "~0.5.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.13",
     "markdown": "^0.5.0",
     "moment": "^2.0.0",
     "qunit": "^2.6.1",

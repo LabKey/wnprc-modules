@@ -19,6 +19,7 @@
                     <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
                   </column>
                   <column columnName="account">
+                    <displayWidth>80</displayWidth>
                     <!--<nullable>false</nullable>-->
                     <columnTitle>Account</columnTitle>
                     <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>

@@ -197,11 +197,48 @@ EHR.Ext3Utils = new function(){
                         panelCfg[row.destination].push(obj);
                 }, this);
 
-                return new EHR.ext.ImportPanel[config.panelType](panelCfg);
+                if (panelCfg.panelType === 'TaskDetailsPanel' && panelCfg.readOnly) {
+                    // Avoid creating ExtJS3 panel-wrapped QueryWebParts - just add them directly to the DOM via
+                    // the JavaScript API. See ticket 38440
+                    var index = 0;
+                    index = this.addQueryWebParts(panelCfg.formHeaders, panelCfg, index);
+                    index = this.addQueryWebParts(panelCfg.formSections, panelCfg, index);
+                }
+                else {
+                    return new EHR.ext.ImportPanel[config.panelType](panelCfg);
+                }
             }
 
         },
 
+        addQueryWebParts: function(sections, panelCfg, index) {
+            var rootElement = Ext.get(panelCfg.renderTo);
+            Ext.each(sections, function(section){
+                if (section.schemaName && section.queryName) {
+                    var targetId = panelCfg.renderTo + index;
+                    rootElement.createChild({id: targetId, tag: 'div'});
+                    var qwpConfig = {
+                        schemaName: section.schemaName,
+                        queryName: section.queryName,
+                        filters: [LABKEY.Filter.create('taskId', panelCfg.formUUID, LABKEY.Filter.Types.EQUAL)],
+                        allowChooseQuery: false,
+                        allowChooseView: true,
+                        showRecordSelectors: true,
+                        showDetailsColumn: false,
+                        showDeleteButton: false,
+                        timeout: 0,
+                        linkTarget: '_blank',
+                        renderTo: targetId,
+                        failure: EHR.Utils.onError,
+                        scope: this
+                    };
+                    var qwp = new LABKEY.QueryWebPart(qwpConfig);
+                    index++;
+                }
+
+            }, this);
+            return index;
+        },
 
         /**
          * A utility that will create an EHR.ext.ImportPanel.TaskPanel containing only a single section.

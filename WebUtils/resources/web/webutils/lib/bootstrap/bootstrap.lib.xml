@@ -4,6 +4,7 @@
         <script path="/webutils/lib/bootstrap/plugin/bootstrap-datetimepicker.min.css"/>
     </library>
     <dependencies>
+        <dependency path="/webutils/lib/bootstrap/bootstrap_core"/>
         <dependency path="/webutils/lib/webutils_core/webutils_core"/>
     </dependencies>
 </libraries>

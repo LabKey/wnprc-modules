@@ -34,6 +34,7 @@ function createNavMenu()
             ]},
             {header: 'Colony Records',
             items: [
+                {name: 'EHR Users and Initials', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Public/begin.view?'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Issue_Tracker/start.view?'},
                 {name: 'Colony Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/begin.view?'}
             ]},
@@ -95,7 +96,8 @@ function createNavMenu()
             ]},
             {header: 'ITSS',
             items: [
-                {name: 'Labkey Testing', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Public/begin.view?'},
+                {name: 'IT Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Public/begin.view?'},
+                {name: 'Request New User Account', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/IT/Public/insertQueryRow.view?schemaName=lists&query.queryName=New%20User%20Request&query.AccountCreated'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Issue_Tracker/start.view?'}
             ]},
             {header: 'Purchasing Services',
@@ -128,7 +130,7 @@ function createNavMenu()
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/Issue_Tracker/start.view?'},
                 {name: 'Virology Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/begin.view?'}
             ]},
-            {header: 'EHR Services',
+            {header: 'IDS Unit',
                 items: [
                     {name: 'Unit Updates', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/begin.view?'},
                     {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/start.view?'},
@@ -156,6 +158,7 @@ function createNavMenu()
         sections: [
             {header: 'Misc. Pages',
             items: [
+                {name: 'Request New User Account', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/IT/Public/insertQueryRow.view?schemaName=lists&query.queryName=New%20User%20Request&query.AccountCreated'},
                 {name: 'Change WNPRC Password', url: 'https://wprcfs.primate.wisc.edu/changepassword/'},
                 {name: 'Employee List', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=EmployeeList'},
                 {name: 'Guidelines for Protocols', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/page.view?name=ProtocolGuides'},

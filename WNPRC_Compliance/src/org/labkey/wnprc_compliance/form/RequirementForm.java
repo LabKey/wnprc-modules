@@ -12,4 +12,5 @@ public class RequirementForm {
     public Date dateCompleted;
     public String notes;
     public boolean pending = false;
+    public boolean required = false;
 }

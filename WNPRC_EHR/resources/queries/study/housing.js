@@ -17,15 +17,21 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         let reasons = row.reason.split(',');
         let breeding = false;
         let breedingEnded = false;
+        let none = false;
         for (let i = 0; i < reasons.length; i++) {
             if (reasons[i] === 'Breeding') {
                 breeding = true;
             } else if (reasons[i] === 'Breeding ended') {
                 breedingEnded = true;
+            } else if (reasons[i] === '') {
+                none = true;
             }
         }
         if (breeding && breedingEnded) {
             EHR.Server.Utils.addError(scriptErrors, 'reason', 'Reason For Move cannot contain both \'Breeding\' and \'Breeding ended\'.', 'ERROR');
+        }
+        if (none && reasons.length > 1) {
+            EHR.Server.Utils.addError(scriptErrors, 'reason', '\'[none]\' cannot be used in tandem with another reason.');
         }
     }
 

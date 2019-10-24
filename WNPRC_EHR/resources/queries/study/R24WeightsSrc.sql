@@ -20,4 +20,5 @@ select w.id as AnimalId,
        w.objectid,
        w.modified
 from study.weight as w
-inner join study.demographics as d on w.id = d.id and d.species.id_prefix = 'cj'
+INNER JOIN study.demographics as d on w.id = d.id and d.species.id_prefix = 'cj'
+WHERE NOT (d.participantid.primateId.primateId IS NULL OR w.weight IS NULL)

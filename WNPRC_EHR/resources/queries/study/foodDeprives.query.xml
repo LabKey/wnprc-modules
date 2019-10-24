@@ -54,7 +54,6 @@
                 </column>
 
                   <column columnName="account">
-                      <displayWidth>80</displayWidth>
                     <!--<nullable>false</nullable>-->
                       <isHidden>true</isHidden>
                     <columnTitle>Account</columnTitle>

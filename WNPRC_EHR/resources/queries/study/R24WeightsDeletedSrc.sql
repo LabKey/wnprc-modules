@@ -15,14 +15,17 @@
  */
 
 --Modifications to DeletedWeight for R24 project.
-SELECT
-  substring(dae.oldrecordmap, strpos(dae.oldrecordmap,'objectid=') + char_length('objectid='), 36) as objectid,
-  dae.date as modified
+SELECT * FROM
+    (SELECT
+      substring(dae.oldrecordmap, strpos(dae.oldrecordmap,'objectid=') + char_length('objectid='), 36) as objectid,
+      dae.date as modified
 
-FROM auditLog.DatasetAuditEvent as dae
+    FROM auditLog.DatasetAuditEvent as dae
 
-WHERE dae.comment = 'A dataset record was deleted'
-      AND DatasetId.Name = 'weight'
+    WHERE dae.comment = 'A dataset record was deleted'
+          AND DatasetId.Name = 'weight'
+    ) outSelect
+    WHERE  outSelect.objectid IS NOT NULL
 
 
 

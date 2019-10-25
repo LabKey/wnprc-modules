@@ -87,9 +87,6 @@
                     <item text="Print">
                         <originalText>Print</originalText>
                     </item>
-                    <item text="Page Size">
-                        <originalText>Paging</originalText>
-                    </item>
                     <item text="More Actions" insertPosition="end" requiresSelection="true">
                         <item text="Jump To History">
                             <onClick>

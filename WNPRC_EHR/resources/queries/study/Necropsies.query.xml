@@ -42,10 +42,13 @@
                     <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
                   </column>
                   <column columnName="performedby">
-                    <columnTitle>Pathologist</columnTitle>
+                    <columnTitle>Pathologist Gross</columnTitle>
                   </column>
-                  <column columnName="pathologyHistology">
+                  <column columnName="pathologistHistology">
                     <columnTitle>Pathologist Histology</columnTitle>
+                  </column>
+                  <column columnName="pathologistReview">
+                    <columnTitle>Pathologist Review</columnTitle>
                   </column>
                   <column columnName="assistant">
                     <columnTitle>Prosector</columnTitle>

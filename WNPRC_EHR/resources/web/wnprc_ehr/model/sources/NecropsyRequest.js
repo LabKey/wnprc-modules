@@ -105,7 +105,10 @@ EHR.model.DataModelManager.registerMetadata('NecropsyRequest', {
             performedby: {
                 hidden: true
             },
-            pathologist: {
+            pathologistHistology: {
+                hidden: true
+            },
+            pathologistReview: {
                 hidden: true
             },
             comments: {

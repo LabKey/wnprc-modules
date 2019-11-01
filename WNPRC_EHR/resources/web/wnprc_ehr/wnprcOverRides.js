@@ -370,6 +370,78 @@ EHR.Metadata.registerMetadata('Default', {
                 shownInGrid: true
             }
         },
+        'Irregular Observations':{
+            behavior: {
+                shownInGrid: false,
+                xtype: 'lovcombo',
+                hasOwnTpl: true,
+                //xtype: 'ehr-remotecheckboxgroup',
+                includeNullRecord: false,
+                lookup: {   filterArray: [LABKEY.Filter.create('date_disabled', null, LABKEY.Filter.Types.ISBLANK)],
+                    schemaName: 'ehr_lookups',
+                    queryName: 'obs_behavior',
+                    displayColumn: 'title',
+                    keyColumn: 'value',
+                    sort: 'sort_order'
+                },
+                formEditorConfig: {
+                    columns: 1,
+                    tpl: null,
+                    separator: ';',
+                    listeners: {
+                        select: function (field, val) {
+                            var theForm = this.ownerCt.getForm();
+
+                            if (theForm) {
+                                var remarkField = theForm.findField('otherbehavior');
+                                //show & hide fields as necessary
+                                //also clear values before hiding them
+                                var showRemark = false;
+                                if (field.value) {
+                                    let behavior = field.value.split(';');
+                                    for (let i = 0; i < behavior.length; i++) {
+                                        if (behavior[i] === 'NPR' || behavior[i] === 'NOB' ) {
+                                            showRemark = true;
+                                        }
+                                        else {
+                                            showRemark = false;
+                                        }
+                                    }
+                                }
+                                if (showRemark) {
+                                    remarkField.show();
+                                }
+                                else {
+                                    remarkField.setValue('');
+                                    remarkField.hide();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            ,otherbehavior: {
+                xtype: 'ehr-remark',
+                label: 'Other Behavior / Remarks',
+                isAutoExpandColumn: true,
+                printWidth: 550,
+                //disabled: false,
+                //setDisabled: true,
+                shownInGrid: false,
+                hidden: false,
+                formEditorConfig: {
+                    resizeDirections: 's',
+                    //disabled: false,
+                    listeners: {
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be unhidden later
+                        afterRender: function(field){
+                            field.hide();
+                        }
+                    }
+                }
+            }
+        },
         'Treatment Orders': {
             enddate: {
                 setInitialValue: function(v,rec) {

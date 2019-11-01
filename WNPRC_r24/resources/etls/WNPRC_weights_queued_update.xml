@@ -3,19 +3,32 @@
     <name>WNPRC queued weights update</name>
     <description>Queue up package related ETLs</description>
     <transforms>
-        <transform id="step 1" type="TaskrefTransformStep">
-            <taskref ref="org.labkey.di.steps.QueueJobTask">
-                <settings>
-                    <setting name="transformId" value="{wnprc_r24}/WNPRC_delete_weights"/>
-                </settings>
-            </taskref>
+        <transform type="RemoteQueryTransformStep" id="step1">
+            
+            <description>Copy weight rows to be deleted to local table</description>
+            <source remoteSource="Desktop" schemaName="study" queryName="R24WeightsDeletedSrc" timestampColumnName="modified">
+                <sourceColumns>
+                    <column>objectid</column>
+                    <column>modified</column>
+                </sourceColumns>
+            </source>
+            <destination schemaName="wnprc_r24" queryName="RowsToDelete" targetOption="merge"/>
         </transform>
-        <transform id="step 2" type="TaskrefTransformStep">
-            <taskref ref="org.labkey.di.steps.QueueJobTask">
-                <settings>
-                    <setting name="transformId" value="{wnprc_r24}/WNPRC_weights_staging"/>
-                </settings>
-            </taskref>
+        <transform type="RemoteQueryTransformStep" id="step2">
+
+            <description>Copy weights to local table</description>
+            <source remoteSource="Desktop" schemaName="study" queryName="R24WeightsSrc" timestampColumnName="modified">
+                <sourceColumns>
+                    <column>AnimalId</column>
+                    <column>primateId</column>
+                    <column>date</column>
+                    <column>weight</column>
+                    <column>objectid</column>
+                    <column>modified</column>
+                </sourceColumns>
+            </source>
+
+            <destination schemaName="wnprc_r24" queryName="WeightStaging" bulkLoad="true" batchSize="5000" targetOption="merge"/>
         </transform>
         <transform id="step 3" type="TaskrefTransformStep">
             <taskref ref="org.labkey.di.steps.QueueJobTask">
@@ -25,6 +38,9 @@
             </taskref>
         </transform>
     </transforms>
+
+    <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="modified" >
+    </incrementalFilter>
     <schedule>
         <poll interval="60m" />
     </schedule>

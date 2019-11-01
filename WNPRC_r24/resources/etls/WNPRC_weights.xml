@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<etl xmlns="http://labkey.org/etl/xml" standalone="false">
+<etl xmlns="http://labkey.org/etl/xml" standalone="true">
     <name>WNPRC weights third component (update)</name>
     <description>WNPRC weights third component (update)</description>
     <transforms>
         <transform id="step1" type="org.labkey.di.pipeline.TransformTask">
             <description>Copy to target</description>
             <source schemaName="wnprc_r24" queryName="WeightStaging"/>
-            <destination schemaName="study" queryName="weight" bulkLoad="true" batchSize="5000" targetOption="merge"/>
+            <destination schemaName="study" queryName="weight" targetOption="merge"/>
         </transform>
     </transforms>
 

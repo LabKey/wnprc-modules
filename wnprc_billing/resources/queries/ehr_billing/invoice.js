@@ -61,17 +61,13 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     });
 
     //calculate balanceDue
+    // This simple calculation will suffice. In most cases, payment will be received in full.
+    // In rare cases, there will be max of 2 checks - first check with a major amount, and second check with remaining
+    // missed amount. When the second check is received, paymentAmountReceived will be set to the invoiceAmount marking
+    // full payment received/zero balance due.
+    // See support Ticket 38821.
     if (row.paymentAmountReceived != null) {
-
-        if (oldRow.balanceDue != null) {
-            row.balanceDue = oldRow.balanceDue - row.paymentAmountReceived;
-        }
-        else {
-            row.balanceDue = row.invoiceAmount - row.paymentAmountReceived;
-        }
-    }
-    else {
-        row.balanceDue = row.invoiceAmount;
+        row.balanceDue = row.invoiceAmount - row.paymentAmountReceived;
     }
 
     if(row.balanceDue <= 0) {

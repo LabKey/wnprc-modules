@@ -32,6 +32,7 @@ import org.labkey.api.pipeline.AbstractSpecimenTransformTask;
 import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -46,6 +47,7 @@ import org.labkey.api.writer.ZipUtil;
 import org.labkey.wnprc_billing.domain.*;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
 import org.labkey.wnprc_billing.invoice.SummaryPDF;
+import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -100,7 +102,9 @@ public class WNPRC_BillingController extends SpringActionController
 
     private TierRate getTierRate(String tierRateType)
     {
-        TableInfo tableInfo = WNPRC_BillingSchema.getSchema().getTable(WNPRC_BillingSchema.TABLE_TIER_RATES);
+
+        UserSchema userSchema = QueryService.get().getUserSchema(getUser(), getContainer(), WNPRC_BillingSchema.NAME);
+        TableInfo tableInfo = userSchema.getTable(WNPRC_BillingSchema.TABLE_TIER_RATES);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("tierRateType"), tierRateType);
         filter.addCondition(FieldKey.fromString("isActive"), true, CompareType.EQUAL);

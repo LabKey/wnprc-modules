@@ -3,6 +3,23 @@
  *
  * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
+
+EHR.DataEntryUtils.registerGridButton('ADDANIMALS_BULK_DISABLED', function(config){
+    return Ext4.Object.merge({
+        text: 'Add Batch',
+        tooltip: 'Click to add a batch of animals, either as a list or by location',
+        handler: function(btn){
+            var grid = btn.up('gridpanel');
+
+            Ext4.create('EHR.window.AddAnimalsWindow', {
+                targetStore: grid.store,
+                formConfig: grid.formConfig,
+                bulkEditCheckDisabled: true
+            }).show();
+        }
+    }, config);
+});
+
 EHR.model.DataModelManager.registerMetadata('Charges', {
     byQuery: {
         'ehr_billing.miscCharges': {

@@ -2,6 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="tierRates" tableDbType="TABLE" useColumnOrder="true">
+                <javaCustomizer class="org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer" />
                 <tableTitle>Tier Rates</tableTitle>
                 <columns>
                     <column columnName="tierRateType">
@@ -12,9 +13,11 @@
                     </column>
                     <column columnName="startDate">
                         <columnTitle>Start Date</columnTitle>
+                        <formatString>Date</formatString>
                     </column>
                     <column columnName="endDate">
                         <columnTitle>End Date</columnTitle>
+                        <formatString>Date</formatString>
                     </column>
                 </columns>
             </table>

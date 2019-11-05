@@ -44,7 +44,6 @@
             <column columnName="tierRate"/>
             <column columnName="startDate"/>
             <column columnName="endDate"/>
-            <column columnName="isActive"/>
             <column columnName="container"/>
             <column columnName="createdBy"/>
             <column columnName="created"/>

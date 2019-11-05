@@ -81,7 +81,10 @@ function createNavMenu()
             {header: 'Financial Management',
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Issue_Tracker/start.view?'},
-                {name: 'Billing Module Development', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Billing_Module_Development/begin.view?'}
+                {name: 'Internal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Private/begin.view?'},
+                {name: 'PI Portal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/PI Portal/begin.view?'},
+                {name: 'Enter Charges with Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'Charges'})},
+                {name: 'Enter Charges without Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'NonAnimalCharges'})}
             ]},
             {header: 'Grants Management',
             items: [

@@ -35,6 +35,8 @@ public class ChargesFormSection extends SimpleFormSection
         // Remove the default buttons that don't make sense for charges with animal ids
         defaultButtons.remove("COPYFROMSECTION");
         defaultButtons.remove("TEMPLATE");
+        defaultButtons.remove("ADDANIMALS");
+        defaultButtons.add(1, "ADDANIMALS_BULK_DISABLED");
 
         return defaultButtons;
     }

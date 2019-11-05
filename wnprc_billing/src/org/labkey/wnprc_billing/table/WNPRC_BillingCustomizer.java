@@ -13,6 +13,9 @@ import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
 
 public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
 {
@@ -39,6 +42,37 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
             {
                 customizeMiscCharges((AbstractTableInfo) table);
             }
+            else if (matches(table, "wnprc_billing", "tierRates"))
+            {
+                customizeTierRates((AbstractTableInfo) table);
+            }
+        }
+    }
+
+    private SQLFragment getIsActiveSql(AbstractTableInfo ti)
+    {
+        return new SQLFragment("(CASE " +
+                // when the start is in the future, using whole-day increments, it is not active
+                " WHEN (CAST(" + ExprColumn.STR_TABLE_ALIAS + ".startDate as DATE) > {fn curdate()}) THEN " + ti.getSqlDialect().getBooleanFALSE() + "\n" +
+                // when enddate is null, it is active
+                " WHEN (" + ExprColumn.STR_TABLE_ALIAS + ".endDate IS NULL) THEN " + ti.getSqlDialect().getBooleanTRUE() + "\n" +
+                // if enddate is in the future (whole-day increments), then it is active
+                " WHEN (CAST(" + ExprColumn.STR_TABLE_ALIAS + ".endDate AS DATE) >= {fn curdate()}) THEN " + ti.getSqlDialect().getBooleanTRUE() + "\n" +
+                " ELSE " + ti.getSqlDialect().getBooleanFALSE() + "\n" +
+                " END)");
+    }
+
+    private void customizeTierRates(AbstractTableInfo ti)
+    {
+        String name = "isActive";
+        if (ti.getColumn(name) == null)
+        {
+            SQLFragment sql = getIsActiveSql(ti);
+            ExprColumn col = new ExprColumn(ti, name, sql, JdbcType.BOOLEAN, ti.getColumn("startDate"), ti.getColumn("endDate"));
+            col.setLabel("Is Active?");
+            col.setUserEditable(false);
+            col.setFormat("Y;N;");
+            ti.addColumn(col);
         }
     }
 
@@ -70,15 +104,6 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
             chargeId.setFk(new QueryForeignKey(us, us.getContainer(), "chargeableItems",
                     "rowid", null, true));
         }
-
-//        UserSchema wnprcBillingUS = getBillingUserSchema(table, "wnprc_billing");
-
-//        ColumnInfo chargeCategory = table.getColumn("chargeCategory");
-//        if (chargeCategory != null)
-//        {
-//            chargeCategory.setFk(new QueryForeignKey(wnprcBillingUS, wnprcBillingUS.getContainer(), "miscChargesType",
-//                    "category", null, true));
-//        }
     }
 
     private UserSchema getBillingUserSchema(AbstractTableInfo table, String schemaName)
@@ -99,16 +124,6 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
                 return us;
             }
         }
-
-//        //then a linked schema
-//        UserSchema us = QueryService.get().getUserSchema(table.getUserSchema().getUser(),
-//                table.getUserSchema().getContainer(), "wnprc_billing_public");
-//        if (us != null)
-//        {
-//            _billingUserSchema = us;
-//            return us;
-//        }
-
         return null;
     }
 }

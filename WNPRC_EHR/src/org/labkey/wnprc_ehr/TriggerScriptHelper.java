@@ -587,7 +587,8 @@ public class TriggerScriptHelper {
         _log.info("Using java helper to send email for project request record: "+key);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         ProjectRequestNotification notification = new ProjectRequestNotification(ehr,key,user,hostName);
-        notification.sendManually(container,user);
+        Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+        notification.sendManually(ehrContainer,user);
     }
 
     public void sendProjectNotification(String hostName){
@@ -595,6 +596,7 @@ public class TriggerScriptHelper {
         _log.info("Using java helper to send email for project request record: ");
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         ProjectRequestNotification notification = new ProjectRequestNotification(ehr,user,hostName);
-        notification.sendManually(container,user);
+        Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+        notification.sendManually(ehrContainer,user);
     }
 }

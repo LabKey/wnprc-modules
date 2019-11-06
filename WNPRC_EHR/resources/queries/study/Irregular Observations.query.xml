@@ -61,11 +61,12 @@
                     </column>
                     <column columnName="behavior">
                         <columnTitle>Behavior</columnTitle>
-                        <!--<fk>-->
-                            <!--<fkDbSchema>ehr_lookups</fkDbSchema>-->
-                            <!--<fkTable>obs_behavior</fkTable>-->
-                            <!--<fkColumnName>code</fkColumnName>-->
-                        <!--</fk>-->
+                        <!--<fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>obs_behavior</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>Title</fkDisplayColumnName>
+                        </fk>-->
                     </column>
                     <column columnName="breeding">
                         <columnTitle>Breeding</columnTitle>

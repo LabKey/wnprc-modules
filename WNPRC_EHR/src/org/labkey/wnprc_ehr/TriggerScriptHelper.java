@@ -256,9 +256,12 @@ public class TriggerScriptHelper {
 
     }
     //TODO: send notification once the vvc is requested
-    public void sendVvcNotification(String requestid){
+    public void sendVvcNotification(String requestid, String hostname){
+        _log.info("Using Java helper to send vvc request "+ requestid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        VvcNotification sendNotifcation = new VvcNotification(ehr, requestid);
+        VvcNotification notifcation = new VvcNotification(ehr, requestid, user, hostname);
+        notifcation.sendManually(container,user);
+
     }
 
     private List<Map<String, Object>> createNewBreedingEncounter(List<Map<String, Object>> group, int index) {

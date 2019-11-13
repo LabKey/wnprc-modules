@@ -31,7 +31,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     if (row.behavior && !row.otherbehavior){
         let behaviorList = row.behavior.split(';');
         for (let i=0; i<behaviorList.length; i++){
-            if (behaviorList[i] === 'NPR' || behaviorList[i] === 'NOB'){
+            if (behaviorList[i] === 'NPR' || behaviorList[i] === 'NOB' || behaviorList[i] === 'OSIB'){
                 EHR.Server.Utils.addError(scriptErrors, 'otherbehavior', 'Behavior selected needs a remark', 'ERROR');
             }
         }

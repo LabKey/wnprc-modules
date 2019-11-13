@@ -387,37 +387,7 @@ EHR.Metadata.registerMetadata('Default', {
                 formEditorConfig: {
                     columns: 1,
                     tpl: null,
-                    separator: ';',
-                    listeners: {
-                        select: function (field, val) {
-                            var theForm = this.ownerCt.getForm();
-
-                            if (theForm) {
-                                var remarkField = theForm.findField('otherbehavior');
-                                //show & hide fields as necessary
-                                //also clear values before hiding them
-                                var showRemark = false;
-                                if (field.value) {
-                                    let behavior = field.value.split(';');
-                                    for (let i = 0; i < behavior.length; i++) {
-                                        if (behavior[i] === 'NPR' || behavior[i] === 'NOB' ) {
-                                            showRemark = true;
-                                        }
-                                        else {
-                                            showRemark = false;
-                                        }
-                                    }
-                                }
-                                if (showRemark) {
-                                    remarkField.show();
-                                }
-                                else {
-                                    remarkField.setValue('');
-                                    remarkField.hide();
-                                }
-                            }
-                        }
-                    }
+                    separator: ';'
                 }
             }
             ,otherbehavior: {
@@ -425,20 +395,10 @@ EHR.Metadata.registerMetadata('Default', {
                 label: 'Other Behavior / Remarks',
                 isAutoExpandColumn: true,
                 printWidth: 550,
-                //disabled: false,
-                //setDisabled: true,
                 shownInGrid: false,
                 hidden: false,
                 formEditorConfig: {
                     resizeDirections: 's',
-                    //disabled: false,
-                    listeners: {
-                        //hide field on render because if it's never rendered
-                        //to the dom it won't be able to be unhidden later
-                        afterRender: function(field){
-                            field.hide();
-                        }
-                    }
                 }
             }
         },

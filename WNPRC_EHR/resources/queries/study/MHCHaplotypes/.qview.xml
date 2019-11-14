@@ -2,12 +2,8 @@
     <columns>
         <column name="Id" />
         <column name="date" />
-        <column name="MHCHaplotypesConcatenated" />
-        <column name="Status" />
-        <column name="mamuAHaplotype1"/>
-        <column name="mamuAHaplotype2"/>
-        <column name="mamuBHaplotype1"/>
-        <column name="mamuBHaplotype2"/>
+        <column name="ConcatenatedHaplotypes" />
+        <column name="Phased" />
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

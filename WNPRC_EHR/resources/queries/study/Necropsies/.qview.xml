@@ -9,6 +9,8 @@
        <column name="project" />
        <column name="account" />
        <column name="performedby" />
+       <column name="pathologistHistology"/>
+       <column name="pathologistReview"/>
        <column name="assistant" />
        <column name="timeofdeath" />
        <column name="tissue_distribution" />

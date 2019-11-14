@@ -22,6 +22,7 @@ import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
+import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
 import java.sql.Timestamp;
@@ -255,9 +256,12 @@ public class TriggerScriptHelper {
 
     }
     //TODO: send notification once the vvc is requested
-    public void sendVvcNotification(String requestid){
+    public void sendVvcNotification(String requestid, String hostname){
+        _log.info("Using Java helper to send vvc request "+ requestid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        VvcNotification sendNotifcation = new VvcNotification(ehr, requestid);
+        VvcNotification notifcation = new VvcNotification(ehr, requestid, user, hostname);
+        notifcation.sendManually(container,user);
+
     }
 
     private List<Map<String, Object>> createNewBreedingEncounter(List<Map<String, Object>> group, int index) {
@@ -405,170 +409,170 @@ public class TriggerScriptHelper {
 
         //female 1 - end
         JSONObject row4 = new JSONObject();
-        row4.put("Id", "r09048");
+        row4.put("Id", "testid1");
         row4.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
-        row4.put("room", "c420");
-        row4.put("cage", "0039");
+        row4.put("room", "room1");
+        row4.put("cage", "cage1");
         row4.put("remark", "female 1 end");
         row4.put("ejacConfirmed", false);
         row4.put("reason", "Breeding ended");
-        row4.put("performedby", "gg");
+        row4.put("performedby", "person1");
         row4.put("sex", "f");
         testData.add(row4);
 
         //male 1a - end
         JSONObject row5 = new JSONObject();
-        row5.put("Id", "r16080");
+        row5.put("Id", "testid2");
         row5.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
-        row5.put("room", "c420");
-        row5.put("cage", "0039");
+        row5.put("room", "room1");
+        row5.put("cage", "cage1");
         row5.put("remark", "male 1a end");
         row5.put("ejacConfirmed", true);
         row5.put("reason", "Breeding ended");
-        row5.put("performedby", "gg");
+        row5.put("performedby", "person1");
         row5.put("sex", "m");
         testData.add(row5);
 
         //male 1b - end
         JSONObject row6 = new JSONObject();
-        row6.put("Id", "r15020");
+        row6.put("Id", "testid3");
         row6.put("date", new Timestamp(118, 10, 20, 13, 15, 0, 0));
-        row6.put("room", "c420");
-        row6.put("cage", "0039");
+        row6.put("room", "room1");
+        row6.put("cage", "cage1");
         row6.put("remark", "male 1b end");
         row6.put("ejacConfirmed", false);
         row6.put("reason", "Breeding ended");
-        row6.put("performedby", "gg");
+        row6.put("performedby", "person1");
         row6.put("sex", "m");
         testData.add(row6);
 
         //female 1 - start
         JSONObject row1 = new JSONObject();
-        row1.put("Id", "r09048");
+        row1.put("Id", "testid1");
         row1.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
-        row1.put("room", "c420");
-        row1.put("cage", "0039");
+        row1.put("room", "room1");
+        row1.put("cage", "cage1");
         row1.put("remark", "female 1 start");
-        row1.put("project", "20150801");
+        row1.put("project", "project1");
         row1.put("reason", "Breeding");
-        row1.put("performedby", "gg");
+        row1.put("performedby", "person1");
         row1.put("sex", "f");
         testData.add(row1);
 
         //male 1a - start
         JSONObject row2 = new JSONObject();
-        row2.put("Id", "r16080");
+        row2.put("Id", "testid2");
         row2.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
-        row2.put("room", "c420");
-        row2.put("cage", "0039");
+        row2.put("room", "room1");
+        row2.put("cage", "cage1");
         row2.put("remark", "male 1a start");
-        row2.put("project", "20150801");
+        row2.put("project", "project1");
         row2.put("reason", "Breeding");
-        row2.put("performedby", "gg");
+        row2.put("performedby", "person1");
         row2.put("sex", "m");
         testData.add(row2);
 
         //male 1b - start
         JSONObject row3 = new JSONObject();
-        row3.put("Id", "r15020");
+        row3.put("Id", "testid3");
         row3.put("date", new Timestamp(118, 10, 20, 8, 15, 0, 0));
-        row3.put("room", "c420");
-        row3.put("cage", "0039");
+        row3.put("room", "room1");
+        row3.put("cage", "cage1");
         row3.put("remark", "male 1b start");
-        row3.put("project", "20150801");
+        row3.put("project", "project1");
         row3.put("reason", "Breeding");
-        row3.put("performedby", "gg");
+        row3.put("performedby", "person1");
         row3.put("sex", "m");
         testData.add(row3);
 
         //female 2a - start
         JSONObject row7 = new JSONObject();
-        row7.put("Id", "r15005");
+        row7.put("Id", "testid4");
         row7.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
-        row7.put("room", "cb11");
-        row7.put("cage", "0067");
+        row7.put("room", "room2");
+        row7.put("cage", "cage2");
         row7.put("remark", "female 2a start");
-        row7.put("project", "20150902");
+        row7.put("project", "project2");
         row7.put("reason", "Breeding");
-        row7.put("performedby", "gg");
+        row7.put("performedby", "person1");
         row7.put("sex", "f");
         testData.add(row7);
 
         //female 2b - start
         JSONObject row8 = new JSONObject();
-        row8.put("Id", "r14118");
+        row8.put("Id", "testid5");
         row8.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
-        row8.put("room", "cb11");
-        row8.put("cage", "0067");
+        row8.put("room", "room2");
+        row8.put("cage", "cage2");
         row8.put("remark", "female 2b start");
-        row8.put("project", "20150902");
+        row8.put("project", "project2");
         row8.put("reason", "Breeding");
-        row8.put("performedby", "gg");
+        row8.put("performedby", "person1");
         row8.put("sex", "f");
         testData.add(row8);
 
         //male 2 - start
         JSONObject row9 = new JSONObject();
-        row9.put("Id", "r14003");
+        row9.put("Id", "testid6");
         row9.put("date", new Timestamp(118, 10, 22, 8, 15, 0, 0));
-        row9.put("room", "cb11");
-        row9.put("cage", "0067");
+        row9.put("room", "room2");
+        row9.put("cage", "cage2");
         row9.put("remark", "male 2 start");
-        row9.put("project", "20150902");
+        row9.put("project", "project2");
         row9.put("reason", "Breeding");
-        row9.put("performedby", "gg");
+        row9.put("performedby", "person1");
         row9.put("sex", "m");
         testData.add(row9);
 
         //male 3 - start
         JSONObject row13 = new JSONObject();
-        row13.put("Id", "r14003");
+        row13.put("Id", "testid6");
         row13.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
-        row13.put("room", "ab110");
-        row13.put("cage", "0029");
+        row13.put("room", "room3");
+        row13.put("cage", "cage3");
         row13.put("remark", "male 3 start");
-        row13.put("project", "20180109");
+        row13.put("project", "project3");
         row13.put("reason", "Breeding");
-        row13.put("performedby", "gg");
+        row13.put("performedby", "person1");
         row13.put("sex", "m");
         testData.add(row13);
 
         //female 2b - end
         JSONObject row11 = new JSONObject();
-        row11.put("Id", "r14118");
+        row11.put("Id", "testid5");
         row11.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
-        row11.put("room", "cb11");
-        row11.put("cage", "0071");
+        row11.put("room", "room2");
+        row11.put("cage", "cage4");
         row11.put("remark", "female 2b end");
         row11.put("ejacConfirmed", true);
         row11.put("reason", "Breeding ended");
-        row11.put("performedby", "gg");
+        row11.put("performedby", "person1");
         row11.put("sex", "f");
         testData.add(row11);
 
         //male 2 - end
         JSONObject row12 = new JSONObject();
-        row12.put("Id", "r14003");
+        row12.put("Id", "testid6");
         row12.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
-        row12.put("room", "cb11");
-        row12.put("cage", "0067");
+        row12.put("room", "room2");
+        row12.put("cage", "cage2");
         row12.put("remark", "male 2 end");
         row12.put("ejacConfirmed", false);
         row12.put("reason", "Breeding ended");
-        row12.put("performedby", "gg");
+        row12.put("performedby", "person1");
         row12.put("sex", "m");
         testData.add(row12);
 
         //female 2a/3 - end/start
         JSONObject row10 = new JSONObject();
-        row10.put("Id", "r15005");
+        row10.put("Id", "testid4");
         row10.put("date", new Timestamp(118, 10, 22, 11, 15, 0, 0));
-        row10.put("room", "ab110");
-        row10.put("cage", "0029");
+        row10.put("room", "room3");
+        row10.put("cage", "cage3");
         row10.put("remark", "female 2a/3 start again");
-        row10.put("project", "20150902");
+        row10.put("project", "project2");
         row10.put("reason", "Breeding");
-        row10.put("performedby", "gg");
+        row10.put("performedby", "person1");
         row10.put("sex", "f");
         testData.add(row10);
 
@@ -580,5 +584,22 @@ public class TriggerScriptHelper {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
         notification.sendManually(container, user);
+    }
+
+    public void sendProjectNotification(Integer key, String hostName){
+        _log.info("Using java helper to send email for project request record: "+key);
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        ProjectRequestNotification notification = new ProjectRequestNotification(ehr,key,user,hostName);
+        Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+        notification.sendManually(ehrContainer,user);
+    }
+
+    public void sendProjectNotification(String hostName){
+
+        _log.info("Using java helper to send email for project request record: ");
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        ProjectRequestNotification notification = new ProjectRequestNotification(ehr,user,hostName);
+        Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+        notification.sendManually(ehrContainer,user);
     }
 }

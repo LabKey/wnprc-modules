@@ -370,6 +370,38 @@ EHR.Metadata.registerMetadata('Default', {
                 shownInGrid: true
             }
         },
+        'Irregular Observations':{
+            behavior: {
+                shownInGrid: false,
+                xtype: 'lovcombo',
+                hasOwnTpl: true,
+                //xtype: 'ehr-remotecheckboxgroup',
+                includeNullRecord: false,
+                lookup: {   filterArray: [LABKEY.Filter.create('date_disabled', null, LABKEY.Filter.Types.ISBLANK)],
+                    schemaName: 'ehr_lookups',
+                    queryName: 'obs_behavior',
+                    displayColumn: 'title',
+                    keyColumn: 'value',
+                    sort: 'sort_order'
+                },
+                formEditorConfig: {
+                    columns: 1,
+                    tpl: null,
+                    separator: ';'
+                }
+            }
+            ,otherbehavior: {
+                xtype: 'ehr-remark',
+                label: 'Other Behavior / Remarks',
+                isAutoExpandColumn: true,
+                printWidth: 550,
+                shownInGrid: false,
+                hidden: false,
+                formEditorConfig: {
+                    resizeDirections: 's',
+                }
+            }
+        },
         'Treatment Orders': {
             enddate: {
                 setInitialValue: function(v,rec) {

@@ -29,7 +29,7 @@ import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
@@ -1196,7 +1196,7 @@ public class WNPRC_EHRController extends SpringActionController
     @SuppressWarnings("unused")
     @RequiresLogin
     @ActionNames("manageWnprcTask")
-    public class ManageWnprcTaskAction extends RedirectAction<java.lang.Void>
+    public class ManageWnprcTaskAction extends SimpleRedirectAction<java.lang.Void>
     {
         // these constants are here to hopefully prevent us from mistyping the capitalization
         // later in the method. also, they should be different enough to avoid one-off typos
@@ -1205,7 +1205,7 @@ public class WNPRC_EHRController extends SpringActionController
         private static final String LOWERCASE_FORMTYPE = "formtype";
 
         @Override
-        public @Nullable URLHelper getURL(Void aVoid, Errors errors)
+        public @Nullable URLHelper getRedirectURL(Void aVoid)
         {
             ActionURL oldUrl = getViewContext().getActionURL();
             ActionURL newUrl;

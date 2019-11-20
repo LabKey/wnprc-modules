@@ -7,7 +7,7 @@ Ext4.namespace('EHR.Reports');
 
 EHR.reports.AnimalPortal =  function(panel2,tab) {
     if (tab.filters.subjects){
-        var animalIds = tab.filters.subjects;
+        var animalIds = tab.filters.subjects[0];
         renderFiles(animalIds,tab);
     }
 

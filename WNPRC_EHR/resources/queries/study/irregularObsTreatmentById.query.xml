@@ -16,7 +16,8 @@
                         </fk>
                     </column>
                     <column columnName="Room">
-                        <displayWidth>40</displayWidth>
+                        <displayWidth>100</displayWidth>
+                        <columnTitle>Room (current)</columnTitle>
                         <fk>
                           <fkDbSchema>ehr_lookups</fkDbSchema>
                           <fkTable>rooms_quick</fkTable>

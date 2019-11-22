@@ -9,5 +9,5 @@ SELECT id
 FROM study.assignment
 WHERE date <= END_DATE
   AND (enddate >= START_DATE OR enddate IS NULL)
-  AND (project.avail = 'r' OR project.avail = 'rr')
+  AND (project.avail = 'r' OR project.avail = 'rr' OR project.avail = 'n')
 GROUP BY id;

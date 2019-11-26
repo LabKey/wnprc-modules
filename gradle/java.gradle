@@ -57,7 +57,6 @@ dependencies {
     compile project(BuildUtils.getApiProjectPath(project.gradle))
     compile project(BuildUtils.getInternalProjectPath(project.gradle))
     compile project(":server:modules:LabDevKitModules:LDK")
-    compile project(":server:modules:DiscvrLabKeyModules:OpenLdapSync")
     compile project(":externalModules:wnprc-modules:java2ts")
 }
 
@@ -69,4 +68,3 @@ tasks.jar {
         attributes 'Sealed': 'true'
     }
 }
-

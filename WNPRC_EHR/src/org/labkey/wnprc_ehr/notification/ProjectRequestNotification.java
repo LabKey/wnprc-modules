@@ -20,24 +20,32 @@ import java.util.List;
 import static org.labkey.api.search.SearchService._log;
 import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
 
-
-public class VvcNotification extends AbstractEHRNotification
+public class ProjectRequestNotification extends AbstractEHRNotification
 {
-    public String requestId;
+    public Integer rowId;
     public User currentUser;
     public String hostName;
 
-    public VvcNotification(Module owner)
+    public ProjectRequestNotification(Module owner)
     {
         super(owner);
     }
 
-    public VvcNotification(Module owner, String requestid, User currentuser, String hostname)
+    public ProjectRequestNotification(Module owner, User currentuser, String hostname)
     {
         super(owner);
-        requestId = requestid;
-        currentuser = currentUser;
-        hostname = hostName;
+        //rowId = key;
+        currentUser = currentuser;
+        hostName = hostname;
+
+    }
+    public ProjectRequestNotification(Module owner, Integer key, User currentuser, String hostname)
+    {
+        super(owner);
+        rowId = key;
+        currentUser = currentuser;
+        hostName = hostname;
+
     }
 
     @Override
@@ -48,23 +56,49 @@ public class VvcNotification extends AbstractEHRNotification
 
     public String getName()
     {
-        return "VVC Notification";
+        return "Project Request Notification";
     }
 
     public String getScheduleDescription()
     {
-        return "As soon as VVC is submitted";
+        return "As soon as Project Request is submitted";
     }
 
     public String getDescription()
     {
-        return "This notification gets send every time there is a new VVC request";
+        return "This notification gets sent every time there is a new Project Request form submitted";
     }
 
     @Override
     public String getEmailSubject(Container c)
     {
-        return "New VVC Request Submitted on " + _dateTimeFormat.format(new Date());
+        return "[IDS Services] New Project Request Submitted on " + _dateTimeFormat.format(new Date());
+    }
+
+    @Override
+    public String getMessageBodyHTML(Container c, User u)
+    {
+        final StringBuilder msg = new StringBuilder();
+        Date now = new Date();
+        msg.append("<p>There was a new project request submitted on: " +
+                AbstractEHRNotification._dateFormat.format(now) +
+                " at " +
+                AbstractEHRNotification._timeFormat.format(now) +
+                ".</p>");
+
+        msg.append("<p>Click <a href=\"" +
+                hostName +
+                "/list/WNPRC/WNPRC_Units/IT/Public/details.view?listId=1679&pk=" +
+                rowId +
+                "\">here</a> to review the request.</p>");
+
+        msg.append("<p>View all of the project requests " +
+                "<a href=\"" +
+                hostName +
+                "/list/WNPRC/WNPRC_Units/IT/Public/grid.view?listId=1679\"" +
+                " >here</a>.</p>");
+
+        return msg.toString();
     }
 
     public void sendManually (Container container, User user)
@@ -79,21 +113,9 @@ public class VvcNotification extends AbstractEHRNotification
         return NotificationService.get().getRecipients(this, container);
     }
 
-    @Override
-    public String getMessageBodyHTML(Container c, User u)
-    {
-
-        final StringBuilder msg = new StringBuilder();
-        Date now = new Date();
-        msg.append("<p>There was a new VVC request submitted.  It was submitted on: " + AbstractEHRNotification._dateFormat.format(now) + " at " + AbstractEHRNotification._timeFormat.format(now) + ".</p>");
-        msg.append("<p>Click <a href =\"" + hostName + "/wnprc_ehr/WNPRC/EHR/dataEntry.view#topTab:Requests&activeReport:VVCRequests");
-
-        return msg.toString();
-    }
-
     public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, User currentUser)
     {
-        _log.info("VVCNotification.java: sending VVC request email...");
+        _log.info("ProjectRequestNotification.java: sending Project request email...");
         try
         {
             MailHelper.MultipartMessage msg = MailHelper.createMultipartMessage();
@@ -116,7 +138,7 @@ public class VvcNotification extends AbstractEHRNotification
 
             if (emails.size() == 0)
             {
-                _log.warn("VVCNotification.java: no emails, unable to send EHR trigger script email");
+                _log.warn("ProjectRequestNotification.java: no emails, unable to send EHR trigger script email");
                 return;
             }
 
@@ -127,7 +149,7 @@ public class VvcNotification extends AbstractEHRNotification
         }
         catch (Exception e)
         {
-            _log.error("VVCNotification.java: unable to send email from EHR trigger script", e);
+            _log.error("ProjectRequestNotification.java: unable to send email from EHR trigger script", e);
         }
     }
 

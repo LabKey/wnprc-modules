@@ -89,6 +89,7 @@ function createNavMenu()
             {header: 'Grants Management',
             items: [
                 {name: 'Per Diems Report', url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'PerDiems', LABKEY.moduleContext.ehr["EHRStudyContainer"]) },
+                {name: 'Animal Billable Days Report', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=animalBillableDaysReport'},
                 {name: 'P51 Base Grant 2016 Renewal', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/P51_Base_Grant_2016_Renewal/begin.view?'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/Issue_Tracker/start.view?'}
             ]},

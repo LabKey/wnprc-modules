@@ -457,6 +457,7 @@ EHR.reports.irregularObsTreatment = function(panel, tab){
     var config = panel.getQWPConfig({
         schemaName: 'study',
         queryName: queryName,
+        showReports: true,
         title: "Obs/Treatments" + title,
         titleField: 'Id',
         sort: 'room,cage,-date',

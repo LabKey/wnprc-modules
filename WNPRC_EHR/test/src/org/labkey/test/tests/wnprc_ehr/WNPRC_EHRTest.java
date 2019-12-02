@@ -1575,6 +1575,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     @Test
     public void testClinicalHistoryPanelOptions(){
+        pauseJsErrorChecker();
         beginAtAnimalHistoryTab();
         openClinicalHistoryForAnimal("TEST1020148");
         List<String> expectedLabels = new ArrayList<String>(

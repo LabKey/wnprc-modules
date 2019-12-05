@@ -69,6 +69,10 @@
     .form-control.knockout-bs-form {
         width: 100%;
     }
+    .input-group.date {
+        display: table;
+    }
+
 </style>
 
 <div class="col-xs-12 col-xl-8">

@@ -7,14 +7,18 @@ Ext4.namespace('WNPRC_EHR');
 
 EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
     var dataRegion = LABKEY.DataRegions[dataRegionName],
-        headerEl = Ext4.DomQuery.select('table[lk-region-name=' + dataRegion.name + ']'),
+        headerEl = Ext4.DomQuery.select('form[lk-region-form=' + dataRegion.name + ']'),
         menu_customized = false;
 
     if (headerEl) {
-        var btnEls = Ext4.DomQuery.select('.labkey-menu-button', headerEl);
+        var btnBarEls = Ext4.DomQuery.select('.labkey-button-bar', headerEl);
+        var btnEls = Ext4.DomQuery.select('.lk-menu-drop', btnBarEls);
         Ext4.each(btnEls, function(btnEl) {
             if (btnEl.innerHTML.indexOf('More Actions') > -1) {
-                var menu = Ext4.menu.MenuMgr.get(Ext4.get(btnEl).getAttribute('lk-menu-id'));
+                var dropDownEl = Ext4.DomQuery.select('.dropdown-menu.dropdown-menu-left', btnEl);
+                // var dropDownEl = Ext4.DomQuery.select('.labkey-button.labkey-down-arrow', btnEl);
+                var menu = Ext4.menu.MenuMgr.get(Ext4.get(dropDownEl));
+                // var menu = Ext4.menu.MenuMgr.get(Ext4.get(dropDownEl).getAttribute('data-toggle'));
                 if (menu) {
                     menu_customized = true;
                     var action = LABKEY.ActionURL.getAction();
@@ -32,13 +36,13 @@ EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
                         }
                     }
 
-                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
-                        if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
-                            WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
-                        }
-                    }
+                    // if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
+                    //     if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
+                    //         WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
+                    //     }
+                    // }
 
-                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^BloodDraws$/i)) {
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^blood$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Blood Draws', schemaName: 'study'})) {
                             WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Blood Draws'}], formType: 'Blood Draws'});
                             WNPRC_EHR.DatasetButtons.addChangeBloodQCStateBtn(dataRegion.name, menu);
@@ -57,7 +61,7 @@ EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
                     }
                     if (dataRegion.schemaName.match(/^wnprc$/i) && queryName.match(/^vvc$/i)) {
                         if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'vvc', schemaName: 'wnprc'})) {
-                            WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
+                            // WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
                             WNPRC_EHR.DatasetButtons.addVVCChangeQCStateBtn(dataRegion.name, menu);
                         }
                     }

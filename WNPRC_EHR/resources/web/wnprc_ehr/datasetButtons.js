@@ -159,7 +159,6 @@ WNPRC_EHR.DatasetButtons = new function(){
                         ref: '../submit',
                         scope: this,
                         handler: function(o){
-                            Ext4.Msg.wait('Loading...');
 
                             var assignedTo = o.ownerCt.ownerCt.theForm.assignedTo.getValue();
                             if (!assignedTo){
@@ -276,133 +275,114 @@ WNPRC_EHR.DatasetButtons = new function(){
         },
 
         /**
-         * Adds a button to a dataRegion that will allow the user to mark Clinpath Runs records as 'reviewed' (which means updating the reviewedBy field).
+         * Handler for Mark Reviewed button that will allow the user to mark Clinpath Runs records as 'reviewed' (which means updating the reviewedBy field).
          * This was intended as a mechanism for vets to indicate that they have viewed clinpath results.
          * @param dataRegionName
-         * @param menu
-         * @param schemaName
-         * @param queryName
-         * @param config
          */
-        addMarkReviewedBtn: function(dataRegionName, menu, schemaName, queryName, config){
-            config = config || {};
+        markReviewedButtonHandler: function(dataRegion){
+                var checked = dataRegion.getChecked();
+                if(!checked || !checked.length){
+                    alert('No records selected');
+                    return;
+                }
+                new Ext4.Window({
+                    title: 'Mark Reviewed',
+                    closeAction: 'destroy',
+                    width: 330,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        ref: 'theForm',
+                        bodyStyle: 'padding: 5px;',
+                        items: [{
+                            xtype: 'textfield',
+                            fieldLabel: 'Initials',
+                            id: 'initials-field',
+                            width: 200,
+                            value: LABKEY.Security.currentUser.displayName,
+                            ref: 'initials'
+                        }]
+                    }],
+                    buttons: [{
+                        text:'Submit',
+                        disabled:false,
+                        formBind: true,
+                        ref: '../submit',
+                        scope: this,
+                        handler: function(o){
+                            var win = o.up('window');
+                            var form = win.down('form');
+                            var initials = form.getForm().findField('initials-field').getValue();
+                            if(!initials){
+                                alert('Must enter initials');
+                                return;
+                            }
 
-            menu.add({
-                text: 'Mark Reviewed',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
+                            o.ownerCt.ownerCt.close();
+
+                            LABKEY.Query.selectRows({
+                                schemaName: 'study',
+                                queryName: 'clinpathRuns',
+                                filterArray: [
+                                    LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)
+                                ],
+                                scope: this,
+                                success: function(data){
+                                    var toUpdate = [];
+                                    var skipped = [];
+
+                                    if(!data.rows || !data.rows.length){
+                                        dataRegion.selectNone();
+                                        dataRegion.refresh();
+                                        return;
+                                    }
+
+                                    Ext4.each(data.rows, function(row){
+                                        if(!row.dateReviewed)
+                                            toUpdate.push({lsid: row.lsid, dateReviewed: new Date(), reviewedBy: initials});
+                                        else
+                                            skipped.push(row.lsid)
+                                    }, this);
+
+                                    if(toUpdate.length){
+                                        LABKEY.Query.updateRows({
+                                            schemaName: 'study',
+                                            queryName: 'clinpathRuns',
+                                            rows: toUpdate,
+                                            scope: this,
+                                            success: function(){
+                                                dataRegion.selectNone();
+                                                dataRegion.refresh();
+                                            },
+                                            failure: EHR.Utils.onError
+                                        });
+                                    }
+                                    else {
+                                        dataRegion.selectNone();
+                                        dataRegion.refresh();
+                                    }
+
+                                    if(skipped.length){
+                                        alert('One or more rows was skipped because it already has been reviewed');
+                                    }
+                                },
+                                failure: EHR.Utils.onError
+                            });
+                        }
+                    },{
+                        text: 'Close',
+                        handler: function(o){
+                            o.ownerCt.ownerCt.close();
+                        }
+                    }]
+                }).show();
+
+                function onSuccess(data){
+                    if(!data || !data.rows){
                         return;
                     }
-
-                    new Ext.Window({
-                        title: 'Mark Reviewed',
-                        closeAction: 'destory',
-                        width: 330,
-                        autoHeight: true,
-                        items: [{
-                            xtype: 'form',
-                            ref: 'theForm',
-                            bodyStyle: 'padding: 5px;',
-                            items: [{
-                                xtype: 'textfield',
-                                fieldLabel: 'Initials',
-                                width: 200,
-                                value: LABKEY.Security.currentUser.displayName,
-                                ref: 'initials'
-                            }]
-                        }],
-                        buttons: [{
-                            text:'Submit',
-                            disabled:false,
-                            formBind: true,
-                            ref: '../submit',
-                            scope: this,
-                            handler: function(o){
-                                Ext.Msg.wait('Loading...');
-                                var initials = o.ownerCt.ownerCt.theForm.initials.getValue();
-                                if(!initials){
-                                    alert('Must enter initials');
-                                    return;
-                                }
-
-                                o.ownerCt.ownerCt.close();
-
-                                LABKEY.Query.selectRows({
-                                    schemaName: 'study',
-                                    queryName: 'Clinpath Runs',
-                                    filterArray: [
-                                        LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)
-                                    ],
-                                    scope: this,
-                                    success: function(data){
-                                        var toUpdate = [];
-                                        var skipped = [];
-
-                                        if(!data.rows || !data.rows.length){
-                                            Ext.Msg.hide();
-                                            dataRegion.selectNone();
-                                            dataRegion.refresh();
-                                            return;
-                                        }
-
-                                        Ext.each(data.rows, function(row){
-                                            if(!row.dateReviewed)
-                                                toUpdate.push({lsid: row.lsid, dateReviewed: new Date(), reviewedBy: initials});
-                                            else
-                                                skipped.push(row.lsid)
-                                        }, this);
-
-                                        if(toUpdate.length){
-                                            LABKEY.Query.updateRows({
-                                                schemaName: 'study',
-                                                queryName: 'Clinpath Runs',
-                                                rows: toUpdate,
-                                                scope: this,
-                                                success: function(){
-                                                    Ext.Msg.hide();
-                                                    dataRegion.selectNone();
-                                                    dataRegion.refresh();
-                                                },
-                                                failure: EHR.Utils.onError
-                                            });
-                                        }
-                                        else {
-                                            Ext.Msg.hide();
-                                            dataRegion.selectNone();
-                                            dataRegion.refresh();
-                                        }
-
-                                        if(skipped.length){
-                                            alert('One or more rows was skipped because it already has been reviewed');
-                                        }
-                                    },
-                                    failure: EHR.Utils.onError
-                                });
-                            }
-                        },{
-                            text: 'Close',
-                            handler: function(o){
-                                o.ownerCt.ownerCt.close();
-                            }
-                        }]
-                    }).show();
-
-
-
-                    function onSuccess(data){
-                        if(!data || !data.rows){
-                            return;
-                        }
-
-                        Ext.Msg.hide();
-
-                    }
+                    Ext4.Msg.hide();
                 }
-            })
         },
 
         /**

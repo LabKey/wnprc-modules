@@ -7,18 +7,14 @@ Ext4.namespace('WNPRC_EHR');
 
 EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
     var dataRegion = LABKEY.DataRegions[dataRegionName],
-        headerEl = Ext4.DomQuery.select('form[lk-region-form=' + dataRegion.name + ']'),
-        menu_customized = false;
+            headerEl = Ext4.DomQuery.select('table[lk-region-name=' + dataRegion.name + ']'),
+            menu_customized = false;
 
     if (headerEl) {
-        var btnBarEls = Ext4.DomQuery.select('.labkey-button-bar', headerEl);
-        var btnEls = Ext4.DomQuery.select('.lk-menu-drop', btnBarEls);
+        var btnEls = Ext4.DomQuery.select('.labkey-menu-button', headerEl);
         Ext4.each(btnEls, function(btnEl) {
             if (btnEl.innerHTML.indexOf('More Actions') > -1) {
-                var dropDownEl = Ext4.DomQuery.select('.dropdown-menu.dropdown-menu-left', btnEl);
-                // var dropDownEl = Ext4.DomQuery.select('.labkey-button.labkey-down-arrow', btnEl);
-                var menu = Ext4.menu.MenuMgr.get(Ext4.get(dropDownEl));
-                // var menu = Ext4.menu.MenuMgr.get(Ext4.get(dropDownEl).getAttribute('data-toggle'));
+                var menu = Ext4.menu.MenuMgr.get(Ext4.get(btnEl).getAttribute('lk-menu-id'));
                 if (menu) {
                     menu_customized = true;
                     var action = LABKEY.ActionURL.getAction();

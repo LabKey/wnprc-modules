@@ -27,20 +27,12 @@ EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
 
                     if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
-                            // WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Clinpath Runs'}], formType: 'Clinpath'});
                             WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
                         }
                     }
 
-                    // if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
-                    //     if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
-                    //         WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
-                    //     }
-                    // }
-
                     if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^blood$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Blood Draws', schemaName: 'study'})) {
-                            // WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Blood Draws'}], formType: 'Blood Draws'});
                             WNPRC_EHR.DatasetButtons.addChangeBloodQCStateBtn(dataRegion.name, menu);
                         }
                     }
@@ -57,7 +49,6 @@ EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
                     }
                     if (dataRegion.schemaName.match(/^wnprc$/i) && queryName.match(/^vvc$/i)) {
                         if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'vvc', schemaName: 'wnprc'})) {
-                            // WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
                             WNPRC_EHR.DatasetButtons.addVVCChangeQCStateBtn(dataRegion.name, menu);
                         }
                     }

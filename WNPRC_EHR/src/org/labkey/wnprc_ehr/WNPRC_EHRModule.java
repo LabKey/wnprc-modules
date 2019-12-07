@@ -45,6 +45,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
+import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.MarkReviewedButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
@@ -265,6 +266,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerMoreActionsButton(new CreateTaskFromIdsButton(this, "Schedule Blood Draw For Selected", "Blood Draws", BloodDrawsForm.NAME, new String[]{"Blood Draws"}), "study", "demographics");
         EHRService.get().registerMoreActionsButton(new MarkReviewedButton(this), "study", "clinPathRuns");
         EHRService.get().registerMoreActionsButton(new MarkReviewedButton(this), "wnprc", "vvc");
+        EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Clinpath"), "study", "clinPathRuns");
+        EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Blood Draws"), "study", "blood");
 
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));

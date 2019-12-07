@@ -544,156 +544,133 @@ WNPRC_EHR.DatasetButtons = new function(){
         },
 
         /**
-         * This add a button that allows the user to create a task from requested records.  It was originally created to allow users to create Blood Draw or ClinPath
+         * Handler for scheduling task that allows the user to create a task from requested records.  It was originally created to allow users to create Blood Draw or ClinPath
          * tasks from requested records.
          * @param dataRegionName
          * @param menu
          * @param config
          * @param [config.formType]
          */
-        addCreateTaskBtn: function(dataRegionName, menu, config){
-            config = config || {};
+        createTaskButtonHandler: function(dataRegion, formType){
+            var checked = dataRegion.getChecked();
+                if(!checked || !checked.length){
+                    alert('No records selected');
+                    return;
+                }
+                new Ext4.Window({
+                    width: 400,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        title: 'Schedule ' + formType,
+                        bodyStyle: 'padding: 5px;',
+                        defaults: {
+                            border: false
+                        },
+                        items: [{
+                            html: 'Total Records: '+checked.length+'<br><br>',
+                            tag: 'div'
+                        },{
+                            xtype: 'textfield',
+                            fieldLabel: 'Title',
+                            width: 300,
+                            value: formType,
+                            ref: 'titleField',
+                            id: 'create-task-title'
+                        },{
+                            xtype: 'xdatetime',
+                            fieldLabel: 'Date',
+                            width: 300,
+                            value: new Date(),
+                            ref: 'date',
+                            id: 'create-task-date'
+                        },{
+                            xtype: 'combo',
+                            fieldLabel: 'Assigned To',
+                            id: 'create-task-assigned-to',
+                            width: 300,
+                            value: LABKEY.Security.currentUser.id,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            store: {
+                                type: 'labkey-store',
+                                schemaName: 'core',
+                                queryName: 'PrincipalsWithoutAdmin',
+                                columns: 'UserId,DisplayName',
+                                sort: 'Type,DisplayName',
+                                autoLoad: true
+                            },
+                            displayField: 'DisplayName',
+                            valueField: 'UserId',
+                            ref: 'assignedTo'
+                        }]
+                    }],
+                    buttons: [{
+                        text:'Submit',
+                        disabled:false,
+                        formBind: true,
+                        ref: '../submit',
+                        scope: this,
+                        handler: function(o){
+                            var win = o.up('window');
+                            var form = win.down('form');
 
-            menu.add({
-                text: 'Schedule '+config.formType+' Task',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
+                            var date = form.getForm().findField('create-task-date').getValue();
+                            date = date.toGMTString();
+                            if(!date){
+                                alert('Must enter a date');
+                                o.ownerCt.ownerCt.close();
+                            }
+
+                            var assignedTo = form.getForm().findField('create-task-assigned-to').getValue();
+                            if(!assignedTo){
+                                alert('Must assign to someone');
+                                o.ownerCt.ownerCt.close();
+                            }
+                            var title = form.getForm().findField('create-task-title').getValue();
+                            if(!title){
+                                alert('Must enter a title');
+                                o.ownerCt.ownerCt.close();
+                            }
+
+                            o.ownerCt.ownerCt.close();
+
+                            var existingRecords = {};
+                            existingRecords[dataRegion.queryName] = checked;
+
+                            EHR.Utils.createTask({
+                                initialQCState: 'Scheduled',
+                                childRecords: null,
+                                existingRecords: existingRecords,
+                                taskRecord: {date: date, assignedTo: assignedTo, category: 'task', title: title, formType: formType},
+                                success: function(response, options, config){
+                                    Ext4.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
+                                        if(btn == 'yes'){
+                                            window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
+                                        }
+                                        else {
+                                            dataRegion.refresh();
+                                        }
+                                    }, this)
+                                },
+                                failure: function(){
+                                    console.log('failure');
+                                }
+                            });
+                        }
+                    },{
+                        text: 'Close',
+                        handler: function(o){
+                            o.ownerCt.ownerCt.close();
+                        }
+                    }]
+                }).show();
+
+                function onSuccess(data){
+                    if(!data || !data.rows){
                         return;
                     }
-
-                    //NOTE: it might be a good idea to check that the dates match on input records and enforce this when making a task
-                    //            if(config.enforceDate){
-                    //
-                    //            }
-                    //            else {
-                    //                createWindow();
-                    //            }
-
-                    createWindow();
-
-                    function createWindow(){
-                        new Ext.Window({
-                            title: 'Schedule '+config.formType,
-                            width: 330,
-                            autoHeight: true,
-                            items: [{
-                                xtype: 'form',
-                                ref: 'theForm',
-                                bodyStyle: 'padding: 5px;',
-                                defaults: {
-                                    border: false
-                                },
-                                items: [{
-                                    html: 'Total Records: '+checked.length+'<br><br>',
-                                    tag: 'div'
-                                },{
-                                    xtype: 'textfield',
-                                    fieldLabel: 'Title',
-                                    width: 200,
-                                    value: config.formType,
-                                    ref: 'titleField'
-                                },{
-                                    xtype: 'xdatetime',
-                                    fieldLabel: 'Date',
-                                    width: 200,
-                                    value: new Date(),
-                                    ref: 'date'
-                                },{
-                                    xtype: 'combo',
-                                    fieldLabel: 'Assigned To',
-                                    width: 200,
-                                    value: LABKEY.Security.currentUser.id,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'core',
-                                        queryName: 'PrincipalsWithoutAdmin',
-                                        columns: 'UserId,DisplayName',
-                                        sort: 'Type,DisplayName',
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'DisplayName',
-                                    valueField: 'UserId',
-                                    ref: 'assignedTo'
-                                }]
-                            }],
-                            buttons: [{
-                                text:'Submit',
-                                disabled:false,
-                                formBind: true,
-                                ref: '../submit',
-                                scope: this,
-                                handler: function(o){
-                                    Ext.Msg.wait('Loading...');
-                                    var date = o.ownerCt.ownerCt.theForm.date.getValue();
-                                    date = date.toGMTString();
-                                    if(!date){
-                                        alert('Must enter a date');
-                                        o.ownerCt.ownerCt.close();
-                                    }
-
-                                    var assignedTo = o.ownerCt.ownerCt.theForm.assignedTo.getValue();
-                                    if(!assignedTo){
-                                        alert('Must assign to someone');
-                                        o.ownerCt.ownerCt.close();
-                                    }
-                                    var title = o.ownerCt.ownerCt.theForm.titleField.getValue();
-                                    if(!title){
-                                        alert('Must enter a title');
-                                        o.ownerCt.ownerCt.close();
-                                    }
-
-                                    o.ownerCt.ownerCt.close();
-
-                                    var existingRecords = {};
-                                    existingRecords[dataRegion.queryName] = checked;
-
-                                    EHR.Utils.createTask({
-                                        initialQCState: 'Scheduled',
-                                        childRecords: null,
-                                        existingRecords: existingRecords,
-                                        taskRecord: {date: date, assignedTo: assignedTo, category: 'task', title: title, formType: config.formType},
-                                        success: function(response, options, config){
-                                            Ext.Msg.hide();
-                                            Ext.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
-                                                if(btn == 'yes'){
-                                                    window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
-                                                }
-                                                else {
-                                                    dataRegion.refresh();
-                                                }
-                                            }, this)
-                                        },
-                                        failure: function(){
-                                            console.log('failure');
-                                            Ext.Msg.hide();
-                                        }
-                                    });
-                                }
-                            },{
-                                text: 'Close',
-                                handler: function(o){
-                                    o.ownerCt.ownerCt.close();
-                                }
-                            }]
-                        }).show();
-                    }
-
-                    function onSuccess(data){
-                        if(!data || !data.rows){
-                            return;
-                        }
-
-                        Ext.Msg.hide();
-
-                    }
                 }
-            });
         },
 
         /**

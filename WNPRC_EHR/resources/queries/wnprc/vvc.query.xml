@@ -86,6 +86,11 @@
                                 EHR.window.GetDistinctWindow.getDistinctHandler(dataRegionName, 'Assignment');
                             </onClick>
                         </item>
+                        <item text="Mark Reviewed">
+                            <onClick>
+                                WNPRC_EHR.DatasetButtons.markReviewedButtonHandler(dataRegion);
+                            </onClick>
+                        </item>
                     </item>
                 </buttonBarOptions>
             </table>

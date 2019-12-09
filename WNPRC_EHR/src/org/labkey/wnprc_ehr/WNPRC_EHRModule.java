@@ -268,6 +268,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerMoreActionsButton(new MarkReviewedButton(this), "wnprc", "vvc");
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Clinpath"), "study", "clinPathRuns");
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Blood Draws"), "study", "blood");
+        EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Weight"), "study", "demographics");
 
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));

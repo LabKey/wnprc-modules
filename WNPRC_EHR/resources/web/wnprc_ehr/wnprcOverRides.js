@@ -19,11 +19,6 @@ EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
                     menu_customized = true;
                     var action = LABKEY.ActionURL.getAction();
                     var queryName = dataRegion.queryName.replace(' ', '');
-                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^Demographics$/i)) {
-                        if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Weight', schemaName: 'study'})) {
-                            WNPRC_EHR.DatasetButtons.addCreateTaskFromIdsBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Weight'}], formType: 'Weight'});
-                        }
-                    }
 
                     if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
                         if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Clinpath Runs', schemaName: 'study'})) {

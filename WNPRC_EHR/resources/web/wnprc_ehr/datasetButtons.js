@@ -615,7 +615,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                             var win = o.up('window');
                             var form = win.down('form');
 
-                            var date = form.getForm().findField('create-task-date').getValue();
+                            var date = form.getForm().findField('create-task-date').getValue()
                             date = date.toGMTString();
                             if(!date){
                                 alert('Must enter a date');
@@ -997,135 +997,140 @@ WNPRC_EHR.DatasetButtons = new function(){
                 }
             });
         },
-        addVVCChangeQCStateBtn: function(dataRegionName, menu){
-            menu.add({
-                text: 'Approve VVC Request',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
-                        return;
-                    }
 
-                    Ext.Msg.wait('Loading...');
-                    LABKEY.Query.selectRows({
-                        schemaName: dataRegion.schemaName,
-                        queryName: dataRegion.queryName,
-                        columns: 'rowid,date,requestid,taskid',
-                        filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
-                        scope: this,
-                        success: onSuccess,
-                        failure: EHR.Utils.onError
-                    });
 
-                    function onSuccess(data){
-                        var records = data.rows;
+        /**
+         * This button will allow the user to basically change the status of the VVC request in batch.
+         * It is different than Change Request Status button in that it has more QC states listed.
+         * @param dataRegion
+         */
+        approveVVCButtonHandler: function (dataRegion){
 
-                        if(!records || !records.length){
-                            Ext.Msg.hide();
-                            alert('No records found');
-                            return;
-                        }
+            var checked = dataRegion.getChecked();
+            if(!checked || !checked.length){
+                alert('No records selected');
+                return;
+            }
 
-                        Ext.Msg.hide();
-                        new Ext.Window({
-                            title: 'Approve VVC Request',
-                            width: 330,
-                            autoHeight: true,
-                            items: [{
-                                xtype: 'form',
-                                ref: 'theForm',
-                                bodyStyle: 'padding: 5px;',
-                                defaults: {
-                                    border: false
-                                },
-                                items: [{
-                                    html: 'Total Records: '+checked.length+'<br><br>',
-                                    tag: 'div'
-                                },{
-                                    xtype: 'combo',
-                                    fieldLabel: 'Status',
-                                    width: 200,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'study',
-                                        queryName: 'qcstate',
-                                        columns: 'rowid,label',
-                                        sort: 'label',
-                                        //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'Label',
-                                    valueField: 'RowId',
-                                    ref: 'qcstate'
-                                }]
-                            }],
-                            buttons: [{
-                                text:'Submit',
-                                disabled:false,
-                                formBind: true,
-                                ref: '../submit',
-                                scope: this,
-                                handler: function(o){
-                                    var qc = o.ownerCt.ownerCt.theForm.qcstate.getValue();
+            Ext.Msg.wait('Loading...');
+            LABKEY.Query.selectRows({
+                schemaName: dataRegion.schemaName,
+                queryName: dataRegion.queryName,
+                columns: 'rowid,date,requestid,taskid',
+                filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+                scope: this,
+                success: onSuccess,
+                failure: EHR.Utils.onError
+            });
 
-                                    if(!qc){
-                                        alert('Must choose a status');
-                                        return;
-                                    }
+            function onSuccess(data) {
+                var records = data.rows;
+                Ext.Msg.hide();
 
-                                    Ext.Msg.wait('Loading...');
-
-                                    var multi = new LABKEY.MultiRequest();
-
-                                    var toUpdate = {};
-                                    var obj;
-                                    Ext.each(records, function(rec){
-                                        if(!toUpdate['vvc'])
-                                            toUpdate['vvc'] = [];
-
-                                        obj = {rowid: rec.rowid};
-                                        if(qc)
-                                        {
-                                            obj.QCState = qc;
-
-                                        }
-
-                                        toUpdate['vvc'].push(obj)
-                                    }, this);
-
-                                    for(var i in toUpdate){
-                                        multi.add(LABKEY.Query.updateRows, {
-                                            schemaName: 'wnprc',
-                                            queryName: i,
-                                            rows: toUpdate[i],
-                                            scope: this,
-                                            failure: EHR.Utils.onError
-                                        });
-                                    }
-
-                                    multi.send(function(){
-                                        Ext.Msg.hide();
-                                        dataRegion.selectNone();
-
-                                        o.ownerCt.ownerCt.close();
-                                        dataRegion.refresh();
-                                    }, this);
-                                }
-                            },{
-                                text: 'Close',
-                                handler: function(o){
-                                    o.ownerCt.ownerCt.close();
-                                }
-                            }]
-                        }).show();
-                    }
+                if (!records || !records.length) {
+                    Ext.Msg.hide();
+                    alert('No records found');
+                    return;
                 }
-            })
-        }
+
+                new Ext4.Window({
+                    title: 'Approve VVC Request',
+                    width: 430,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        ref: 'theForm',
+                        bodyStyle: 'padding: 5px;',
+                        defaults: {
+                            border: false
+                        },
+                        items: [{
+                            html: 'Total Records: ' + checked.length + '<br><br>',
+                            tag: 'div'
+                        }, {
+                            xtype: 'combo',
+                            fieldLabel: 'Status',
+                            width: 300,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            store: new LABKEY.ext4.Store({
+                                xtype: 'labkey-store',
+                                schemaName: 'study',
+                                queryName: 'qcstate',
+                                columns: 'rowid,label',
+                                sort: 'label',
+                                //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                autoLoad: true
+                            }),
+                            id: 'approve-request-qc',
+                            displayField: 'Label',
+                            valueField: 'RowId',
+                            ref: 'qcstate'
+                        }]
+                    }],
+                    buttons: [{
+                        text: 'Submit',
+                        disabled: false,
+                        formBind: true,
+                        ref: '../submit',
+                        scope: this,
+                        handler: function (o) {
+                            var win = o.up('window');
+                            var form = win.down('form');
+
+                            var qc = form.getForm().findField('approve-request-qc').getValue()
+
+                            if (!qc) {
+                                alert('Must choose a status');
+                                return;
+                            }
+
+                            Ext.Msg.wait('Loading...');
+
+                            var multi = new LABKEY.MultiRequest();
+
+                            var toUpdate = {};
+                            var obj;
+                            Ext.each(records, function (rec) {
+                                if (!toUpdate['vvc'])
+                                    toUpdate['vvc'] = [];
+
+                                obj = {rowid: rec.rowid};
+                                if (qc) {
+                                    obj.QCState = qc;
+
+                                }
+
+                                toUpdate['vvc'].push(obj)
+                            }, this);
+
+                            for (var i in toUpdate) {
+                                multi.add(LABKEY.Query.updateRows, {
+                                    schemaName: 'wnprc',
+                                    queryName: i,
+                                    rows: toUpdate[i],
+                                    scope: this,
+                                    failure: EHR.Utils.onError
+                                });
+                            }
+
+                            multi.send(function () {
+                                Ext.Msg.hide();
+                                dataRegion.selectNone();
+
+                                o.ownerCt.ownerCt.close();
+                                dataRegion.refresh();
+                            }, this);
+                        }
+                    }, {
+                        text: 'Close',
+                        handler: function (o) {
+                            o.ownerCt.ownerCt.close();
+                        }
+                    }]
+                }).show();
+            }
+
+        },
     }
 };

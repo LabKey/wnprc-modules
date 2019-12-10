@@ -91,6 +91,11 @@
                                 WNPRC_EHR.DatasetButtons.markReviewedButtonHandler(dataRegion);
                             </onClick>
                         </item>
+                        <item text="Approve VVC Request">
+                            <onClick>
+                                WNPRC_EHR.DatasetButtons.approveVVCButtonHandler(dataRegion);
+                            </onClick>
+                        </item>
                     </item>
                 </buttonBarOptions>
             </table>

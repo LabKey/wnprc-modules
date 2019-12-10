@@ -45,6 +45,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
+import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
 import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.MarkReviewedButton;
@@ -259,7 +260,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "Tasks_DataEntry");
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "my_tasks");
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
-        EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "blood");
+        //EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "blood");
         EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "foodDeprives");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Food Deprives", FoodDeprivesStartForm.NAME), "study", "foodDeprives");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Blood Draws", BloodDrawsForm.NAME), "study", "blood");
@@ -268,6 +269,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Clinpath"), "study", "clinPathRuns");
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Blood Draws"), "study", "blood");
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Weight"), "study", "demographics");
+        EHRService.get().registerMoreActionsButton(new ChangeBloodQCButton(this), "study", "blood");
 
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));

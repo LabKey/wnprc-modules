@@ -672,167 +672,163 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }
                 }
         },
-
         /**
-         * This add a button to a dataset that allows the user to change the QCState of the records, designed to approve or deny blood requests.
+         * This add a handler to a dataset that allows the user to change the QCState of the records, designed to approve or deny blood requests.
          * It also captures values for 'billedBy' and 'instructions'.
-         * @param dataRegionName
-         * @param menu
+         * @param dataRegion
          */
-        addChangeBloodQCStateBtn: function(dataRegionName, menu){
-            menu.add({
-                text: 'Change Request Status',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
-                        return;
-                    }
+        changeQCBloodStatusButtonHandler: function (dataRegion) {
+            var checked = dataRegion.getChecked();
+            if(!checked || !checked.length){
+                alert('No records selected');
+                return;
+            }
 
-                    Ext.Msg.wait('Loading...');
-                    LABKEY.Query.selectRows({
-                        schemaName: dataRegion.schemaName,
-                        queryName: dataRegion.queryName,
-                        columns: 'lsid,dataset/Label,Id,date,requestid,taskid',
-                        filterArray: [LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
-                        scope: this,
-                        success: onSuccess,
-                        failure: EHR.Utils.onError
-                    });
+            Ext4.Msg.wait('Loading...');
+            LABKEY.Query.selectRows({
+                schemaName: dataRegion.schemaName,
+                queryName: dataRegion.queryName,
+                columns: 'lsid,dataset/Label,Id,date,requestid,taskid',
+                filterArray: [LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+                scope: this,
+                success: onSuccess,
+                failure: EHR.Utils.onError
+            });
 
-                    function onSuccess(data){
-                        var records = data.rows;
+            function onSuccess(data){
+                var records = data.rows;
 
-                        if(!records || !records.length){
-                            Ext.Msg.hide();
-                            alert('No records found');
-                            return;
-                        }
-
-                        Ext.Msg.hide();
-                        new Ext.Window({
-                            title: 'Change Request Status',
-                            width: 330,
-                            autoHeight: true,
-                            items: [{
-                                xtype: 'form',
-                                ref: 'theForm',
-                                bodyStyle: 'padding: 5px;',
-                                defaults: {
-                                    border: false
-                                },
-                                items: [{
-                                    html: 'Total Records: '+checked.length+'<br><br>',
-                                    tag: 'div'
-                                },{
-                                    xtype: 'combo',
-                                    fieldLabel: 'Status',
-                                    width: 200,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'study',
-                                        queryName: 'qcstate',
-                                        columns: 'rowid,label',
-                                        sort: 'label',
-                                        filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'Label',
-                                    valueField: 'RowId',
-                                    ref: 'qcstate'
-                                },{
-                                    xtype: 'combo',
-                                    width: 200,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    fieldLabel: 'Billed By (for blood only)',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'ehr_lookups',
-                                        queryName: 'blood_billed_by',
-                                        columns: 'value,description',
-                                        sort: 'title',
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'description',
-                                    valueField: 'value',
-                                    ref: 'billedby'
-                                },{
-                                    xtype: 'textarea',
-                                    ref: 'instructions',
-                                    fieldLabel: 'Instructions',
-                                    width: 200
-                                }]
-                            }],
-                            buttons: [{
-                                text:'Submit',
-                                disabled:false,
-                                formBind: true,
-                                ref: '../submit',
-                                scope: this,
-                                handler: function(o){
-                                    var qc = o.ownerCt.ownerCt.theForm.qcstate.getValue();
-                                    var billedby = o.ownerCt.ownerCt.theForm.billedby.getValue();
-                                    var instructions = o.ownerCt.ownerCt.theForm.instructions.getValue();
-
-                                    if(!qc && !billedby && !instructions){
-                                        alert('Must enter either status, billed by or instructions');
-                                        return;
-                                    }
-
-                                    Ext.Msg.wait('Loading...');
-
-                                    var multi = new LABKEY.MultiRequest();
-
-                                    var toUpdate = {};
-                                    var obj;
-                                    Ext.each(records, function(rec){
-                                        if(!toUpdate[rec['dataset/Label']])
-                                            toUpdate[rec['dataset/Label']] = [];
-
-                                        obj = {lsid: rec.lsid};
-                                        if(qc)
-                                            obj.QCState = qc;
-                                        if(billedby)
-                                            obj.billedby = billedby;
-                                        if(instructions)
-                                            obj.instructions = instructions;
-
-                                        toUpdate[rec['dataset/Label']].push(obj)
-                                    }, this);
-
-                                    for(var i in toUpdate){
-                                        multi.add(LABKEY.Query.updateRows, {
-                                            schemaName: 'study',
-                                            queryName: i,
-                                            rows: toUpdate[i],
-                                            scope: this,
-                                            failure: EHR.Utils.onError
-                                        });
-                                    }
-
-                                    multi.send(function(){
-                                        Ext.Msg.hide();
-                                        dataRegion.selectNone();
-
-                                        o.ownerCt.ownerCt.close();
-                                        dataRegion.refresh();
-                                    }, this);
-                                }
-                            },{
-                                text: 'Close',
-                                handler: function(o){
-                                    o.ownerCt.ownerCt.close();
-                                }
-                            }]
-                        }).show();
-                    }
+                if(!records || !records.length){
+                    Ext4.Msg.hide();
+                    alert('No records found');
+                    return;
                 }
-            })
+
+                Ext4.Msg.hide();
+                new Ext4.Window({
+                    title: 'Change Request Status',
+                    width: 430,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        ref: 'theForm',
+                        bodyStyle: 'padding: 5px;',
+                        defaults: {
+                            border: false
+                        },
+                        items: [{
+                            html: 'Total Records: '+checked.length+'<br><br>',
+                            tag: 'div'
+                        },{
+                            xtype: 'combo',
+                            fieldLabel: 'Status',
+                            width: 300,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            store: new LABKEY.ext4.Store({
+                                xtype: 'labkey-store',
+                                schemaName: 'study',
+                                queryName: 'qcstate',
+                                columns: 'rowid,label',
+                                sort: 'label',
+                                filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                autoLoad: true
+                            }),
+                            displayField: 'Label',
+                            valueField: 'RowId',
+                            ref: 'qcstate',
+                            id: 'change-blood-qcstate'
+                        },{
+                            xtype: 'combo',
+                            width: 300,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            fieldLabel: 'Billed By (for blood only)',
+                            store: new LABKEY.ext4.Store({
+                                xtype: 'labkey-store',
+                                schemaName: 'ehr_lookups',
+                                queryName: 'blood_billed_by',
+                                columns: 'value,description',
+                                sort: 'title',
+                                autoLoad: true
+                            }),
+                            displayField: 'description',
+                            valueField: 'value',
+                            ref: 'billedby',
+                            id: 'change-blood-billedby'
+                        },{
+                            xtype: 'textarea',
+                            ref: 'instructions',
+                            fieldLabel: 'Instructions',
+                            width: 300,
+                            id: 'change-blood-instructions'
+                        }]
+                    }],
+                    buttons: [{
+                        text:'Submit',
+                        disabled:false,
+                        formBind: true,
+                        ref: '../submit',
+                        scope: this,
+                        handler: function(o){
+                            var win = o.up('window');
+                            var form = win.down('form');
+                            var qc = form.getForm().findField('change-blood-qcstate').getValue();
+                            var billedby = form.getForm().findField('change-blood-billedby').getValue();
+                            var instructions = form.getForm().findField('change-blood-instructions').getValue();
+
+                            if(!qc && !billedby && !instructions){
+                                alert('Must enter either status, billed by or instructions');
+                                return;
+                            }
+
+                            Ext4.Msg.wait('Loading...');
+
+                            var multi = new LABKEY.MultiRequest();
+
+                            var toUpdate = {};
+                            var obj;
+                            Ext.each(records, function(rec){
+                                if(!toUpdate[rec['dataset/Label']])
+                                    toUpdate[rec['dataset/Label']] = [];
+
+                                obj = {lsid: rec.lsid};
+                                if(qc)
+                                    obj.QCState = qc;
+                                if(billedby)
+                                    obj.billedby = billedby;
+                                if(instructions)
+                                    obj.instructions = instructions;
+
+                                toUpdate[rec['dataset/Label']].push(obj)
+                            }, this);
+
+                            for(var i in toUpdate){
+                                multi.add(LABKEY.Query.updateRows, {
+                                    schemaName: 'study',
+                                    queryName: i,
+                                    rows: toUpdate[i],
+                                    scope: this,
+                                    failure: EHR.Utils.onError
+                                });
+                            }
+
+                            multi.send(function(){
+                                Ext4.Msg.hide();
+                                dataRegion.selectNone();
+
+                                o.ownerCt.ownerCt.close();
+                                dataRegion.refresh();
+                            }, this);
+                        }
+                    },{
+                        text: 'Close',
+                        handler: function(o){
+                            o.ownerCt.ownerCt.close();
+                        }
+                    }]
+                }).show();
+            }
         },
 
         /**
@@ -1000,7 +996,7 @@ WNPRC_EHR.DatasetButtons = new function(){
 
 
         /**
-         * This button will allow the user to basically change the status of the VVC request in batch.
+         * This handler will allow the user to basically change the status of the VVC request in batch.
          * It is different than Change Request Status button in that it has more QC states listed.
          * @param dataRegion
          */
@@ -1012,7 +1008,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                 return;
             }
 
-            Ext.Msg.wait('Loading...');
+            Ext4.Msg.wait('Loading...');
             LABKEY.Query.selectRows({
                 schemaName: dataRegion.schemaName,
                 queryName: dataRegion.queryName,
@@ -1025,10 +1021,10 @@ WNPRC_EHR.DatasetButtons = new function(){
 
             function onSuccess(data) {
                 var records = data.rows;
-                Ext.Msg.hide();
+                Ext4.Msg.hide();
 
                 if (!records || !records.length) {
-                    Ext.Msg.hide();
+                    Ext4.Msg.hide();
                     alert('No records found');
                     return;
                 }
@@ -1085,7 +1081,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 return;
                             }
 
-                            Ext.Msg.wait('Loading...');
+                            Ext4.Msg.wait('Loading...');
 
                             var multi = new LABKEY.MultiRequest();
 
@@ -1115,7 +1111,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                             }
 
                             multi.send(function () {
-                                Ext.Msg.hide();
+                                Ext4.Msg.hide();
                                 dataRegion.selectNone();
 
                                 o.ownerCt.ownerCt.close();

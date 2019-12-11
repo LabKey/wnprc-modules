@@ -200,6 +200,23 @@ EHR.Ext3Utils = new function(){
                 if (panelCfg.panelType === 'TaskDetailsPanel' && panelCfg.readOnly) {
                     // Avoid creating ExtJS3 panel-wrapped QueryWebParts - just add them directly to the DOM via
                     // the JavaScript API. See ticket 38440
+                    // First add the tasks section see ticket 39076
+                    panelCfg.formHeaders.unshift({
+                        xtype: 'ehr-qwppanel',
+                        title: '',
+                        collapsible: false,
+                        formType: panelCfg.formType,
+                        schemaName: 'ehr',
+                        queryName: 'tasks',
+                        keyField: 'taskid',
+                        ref: 'importPanelHeader',
+                        formUUID: panelCfg.formUUID,
+                        importPanel: panelCfg,
+                        readOnly: panelCfg.readOnly,
+                        storeConfig: {
+                            canSaveInTemplate: false
+                        }
+                    });
                     var index = 0;
                     index = this.addQueryWebParts(panelCfg.formHeaders, panelCfg, index);
                     index = this.addQueryWebParts(panelCfg.formSections, panelCfg, index);

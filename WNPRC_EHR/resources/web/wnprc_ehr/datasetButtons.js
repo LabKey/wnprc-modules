@@ -557,6 +557,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                     alert('No records selected');
                     return;
                 }
+                Ext4.Msg.wait("Loading...");
                 new Ext4.Window({
                     width: 400,
                     autoHeight: true,
@@ -662,6 +663,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                         text: 'Close',
                         handler: function(o){
                             o.ownerCt.ownerCt.close();
+                            Ext4.Msg.hide();
                         }
                     }]
                 }).show();

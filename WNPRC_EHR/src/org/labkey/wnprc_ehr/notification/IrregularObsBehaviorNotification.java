@@ -71,10 +71,12 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
 
         msg = getBehavioralIrregularObs(c, u, notificationStartTime, notificationEndTime);
 
-        if (msg.length() ==0){
+        if (msg.length() == 0){
             return null;
         }
-        return "This email contains information regarding behavior related irregular obs across the center." + msg.toString();
+
+        msg.insert(0, "This email contains information regarding behavior related irregular obs across the center.<br><br>");
+        return msg.toString();
 
     }
 
@@ -139,7 +141,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                         }
                     }
 
-                    String behaviors = Stream.of(behaviorTitles, (String)row.get("otherbehavior")).filter(s -> s != null && ((CharSequence) s).length() > 0).collect(Collectors.joining(", "));
+                    String behaviors = Stream.of(behaviorTitles, (String)row.get("otherbehavior")).filter(s -> s != null && s.length() > 0).collect(Collectors.joining(", "));
 
                     msg.append("<tr>");
                     msg.append("<td>|</td><td>--------------</td><td>|</td><td>-------------</td><td>|</td><td>-------------</td><td>|</td>");

@@ -97,7 +97,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
         try {
             long count = ts.getRowCount();
             if (count > 0) {
-                msg.append("<p>There have been <strong>").append(count).append("</strong> behavior related irregular observations between " + startTime + " and " + endTime + ".</p>");
+                msg.append("<p>There have been <strong>").append(count).append("</strong> behavior related irregular observations between ").append(startTime).append(" and ").append(endTime).append(".</p>");
                 msg.append("<table>");
 
                 msg.append("<tr>");

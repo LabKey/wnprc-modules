@@ -382,6 +382,21 @@ Ext.onReady(function(){
                         queries: ['Necropsies']
                     },
                     {
+                        url:     makeExt4DataEntryURL("SurgeryProcedureRequest"),
+                        title:   'Request Surgery/Procedure',
+                        queries: ['surgery_procedure']
+                    },
+                    {
+                        url:     makeExt4DataEntryURL("SurgeryProcedureMultipleRequest"),
+                        title:   'Request Multiple Surgery/Procedure',
+                        queries: ['surgery_procedure']
+                    },
+                    {
+                        url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'SurgeryProcedureSchedule', ctx['EHRStudyContainer']),
+                        title:   'Schedule Surgery/Procedure',
+                        queries: ['surgery_procedure']
+                    },
+                    {
                         url:  makeExt4DataEntryURL("Food Deprive Request"),
                         title: 'Request Food Deprives',
                         queries: ['foodDeprives']
@@ -450,6 +465,11 @@ Ext.onReady(function(){
             if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
                 VVCUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
                 VVCDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
+            }
+
+            var SurgeryProcedureUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=surgery_procedure&keyField=lsid&key=${lsid}&update=1';
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
+                SurgeryProcedureUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=surgery_procedure&keyField=lsid&key=${lsid}&update=1';
             }
 
             var AnimalRequestUpdateURL = '';
@@ -691,6 +711,24 @@ Ext.onReady(function(){
                                                 }
                                             },
                                             {
+                                                title: 'Surgery/Procedure Requests',
+                                                ref: 'SurgeryProcedureRequests',
+                                                itemId: 'SurgeryProcedureRequests',
+                                                xtype: 'ehr-qwppanel',
+                                                queryConfig: {
+                                                    schemaName: 'study',
+                                                    queryName: 'SurgeryProcedureIndividualRequests',
+                                                    //viewName: 'Surgery/Procedure Requests',
+                                                    updateURL: SurgeryProcedureUpdateURL,
+                                                    deleteURL: '',
+                                                    scope: this,
+                                                    success: onSuccess
+                                                    /*filters: [
+                                                        LABKEY.Filter.create('qcstate', 7, LABKEY.Filter.Types.EQUAL)
+                                                    ]*/
+                                                }
+                                            },
+                                            {
                                                 title: 'Animal Requests',
                                                 ref: 'AnimalRequests',
                                                 itemId: 'AnimalRequests',
@@ -704,8 +742,7 @@ Ext.onReady(function(){
                                                     scope: this,
                                                     success: onSuccess
                                                 }
-                                            },
-
+                                            }
                                         ]
                                     }
                                 ]

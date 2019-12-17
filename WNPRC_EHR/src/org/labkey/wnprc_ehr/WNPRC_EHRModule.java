@@ -77,6 +77,8 @@ import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamOWM.PhysicalExamOWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProblemList.ProblemListForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProcedureRequest.ProcedureRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryProcedureMultipleRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryProcedureRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Treatments.TreatmentsForm;
@@ -395,6 +397,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 MPRForm.class,
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
+                SurgeryProcedureRequestForm.class,
+                SurgeryProcedureMultipleRequestForm.class,
                 PhysicalExamNWMForm.class,
                 PhysicalExamOWMForm.class,
                 ProblemListForm.class,

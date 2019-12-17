@@ -1,9 +1,11 @@
 package org.labkey.wnprc_ehr.encryption;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
@@ -96,8 +98,8 @@ public class AES
         return pw;
     }
 
-    public static byte[] hexStringToByteArray(String hexString) {
-        return DatatypeConverter.parseHexBinary(hexString);
+    public static byte[] hexStringToByteArray(String hexString) throws DecoderException {
+        return Hex.decodeHex(hexString.toCharArray());
     }
 
     public static byte[] base64StringToByteArray(String base64String) {

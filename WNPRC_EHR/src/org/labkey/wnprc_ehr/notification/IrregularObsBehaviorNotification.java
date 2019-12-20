@@ -112,31 +112,40 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                 msg.append(endTime.format(displayDateFormat));
                 msg.append(".</p>");
 
+                TableInfo behaviorCodesTableInfo = QueryService.get().getUserSchema(u, c, "ehr_lookups").getTable("obs_behavior");
+
+                int maxBehaviorsLength = 0;
+                while (rs.next()) {
+                    String behaviors = getBehaviorString(behaviorCodesTableInfo, rs.getRowMap());
+                    if (behaviors != null && behaviors.length() > maxBehaviorsLength) {
+                        maxBehaviorsLength = behaviors.length();
+                    }
+                }
+                int behaviorsDashLength = (int) (maxBehaviorsLength * 1.75);
+
                 msg.append("<table>");
 
-                msg.append("<tr>");
-                msg.append("<td>|</td><td>--------------</td><td>|</td><td>-------------</td><td>|</td><td>-------------</td><td>|</td>");
-                msg.append("<td>------------------------------------------</td><td>|</td><td>----------------------------------------------------------------------------------------------------</td><td>|</td>");
-                msg.append("</tr>");
+                msg.append(createTableBorder(behaviorsDashLength));
 
                 msg.append("<tr>");
-                msg.append("<th>|</th>");
+                msg.append("<td>|</td>");
                 msg.append("<th>").append("Id").append("</th>");
-                msg.append("<th>|</th>");
+                msg.append("<td>|</td>");
                 msg.append("<th>").append("Room").append("</th>");
-                msg.append("<th>|</th>");
+                msg.append("<td>|</td>");
                 msg.append("<th>").append("Cage").append("</th>");
-                msg.append("<th>|</th>");
+                msg.append("<td>|</td>");
                 msg.append("<th>").append("Date/Time").append("</th>");
-                msg.append("<th>|</th>");
+                msg.append("<td>|</td>");
                 msg.append("<th>").append("Observation(s)").append("</th>");
-                msg.append("<th>|</th>");
+                msg.append("<td>|</td>");
                 msg.append("</tr>");
 
-                TableInfo behaviorCodesTableInfo = QueryService.get().getUserSchema(u, c, "ehr_lookups").getTable("obs_behavior");
+                rs.beforeFirst();
+
                 while (rs.next()) {
-                    StringBuilder behaviorTitles = new StringBuilder();
                     Map<String, Object> row = rs.getRowMap();
+                    String behaviors = getBehaviorString(behaviorCodesTableInfo, rs.getRowMap());
 
                     StringBuilder hrefForAnimalAbstract = new StringBuilder();
                     hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view")).toString();
@@ -146,30 +155,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     animalId.append(row.get("Id"));
                     animalId.append("</a>");
 
-                    String behaviorCodes = (String) row.get("behavior");
-                    if (behaviorCodes != null && behaviorCodes.length() > 0) {
-                        String[] behaviorCodesArray = behaviorCodes.split(";");
-                        for(int i = 0; i < behaviorCodesArray.length; i++) {
-                            SimpleFilter filter = new SimpleFilter();
-                            String behaviorCode = behaviorCodesArray[i] != null ? behaviorCodesArray[i].trim() : null;
-                            filter.addCondition(FieldKey.fromString("value"), behaviorCode, CompareType.EQUAL);
-                            TableSelector behaviorCodesTableSelector = new TableSelector(behaviorCodesTableInfo, filter, null);
-                            Results results = behaviorCodesTableSelector.getResults();
-                            if (results.next()) {
-                                behaviorTitles.append((String) results.getRowMap().get("title"));
-                                if (i + 1 < behaviorCodesArray.length) {
-                                    behaviorTitles.append(", ");
-                                }
-                            }
-                        }
-                    }
-
-                    String behaviors = Stream.of(behaviorTitles, (String)row.get("otherbehavior")).filter(s -> s != null && s.length() > 0).collect(Collectors.joining(", "));
-
-                    msg.append("<tr>");
-                    msg.append("<td>|</td><td>--------------</td><td>|</td><td>-------------</td><td>|</td><td>-------------</td><td>|</td>");
-                    msg.append("<td>------------------------------------------</td><td>|</td><td>----------------------------------------------------------------------------------------------------</td><td>|</td>");
-                    msg.append("</tr>");
+                    msg.append(createTableBorder(behaviorsDashLength));
 
                     msg.append("<tr>");
                     msg.append("<td>|</td>");
@@ -186,10 +172,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     msg.append("</tr>");
                 }
 
-                msg.append("<tr>");
-                msg.append("<td>|</td><td>--------------</td><td>|</td><td>-------------</td><td>|</td><td>-------------</td><td>|</td>");
-                msg.append("<td>------------------------------------------</td><td>|</td><td>----------------------------------------------------------------------------------------------------</td><td>|</td>");
-                msg.append("</tr>");
+                msg.append(createTableBorder(behaviorsDashLength));
 
                 msg.append("</table>");
             }
@@ -205,5 +188,56 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
         msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "behaviorRelatedIrregularObs", null) + queryParams + "'>Click here to view this list in EHR</a></p>");
 
         return msg;
+    }
+
+    private String getBehaviorString(TableInfo behaviorCodesTableInfo, Map<String, Object> row) throws SQLException{
+        String behaviorCodes = (String) row.get("behavior");
+        StringBuilder behaviorTitles = new StringBuilder();
+
+        if (behaviorCodes != null && behaviorCodes.length() > 0) {
+            String[] behaviorCodesArray = behaviorCodes.split(";");
+            for(int i = 0; i < behaviorCodesArray.length; i++) {
+                SimpleFilter filter = new SimpleFilter();
+                String behaviorCode = behaviorCodesArray[i] != null ? behaviorCodesArray[i].trim() : null;
+                filter.addCondition(FieldKey.fromString("value"), behaviorCode, CompareType.EQUAL);
+                TableSelector behaviorCodesTableSelector = new TableSelector(behaviorCodesTableInfo, filter, null);
+                Results results = behaviorCodesTableSelector.getResults();
+                if (results.next()) {
+                    behaviorTitles.append((String) results.getRowMap().get("title"));
+                    if (i + 1 < behaviorCodesArray.length) {
+                        behaviorTitles.append(", ");
+                    }
+                }
+            }
+        }
+
+        return Stream.of(behaviorTitles, (String)row.get("otherbehavior")).filter(s -> s != null && s.length() > 0).collect(Collectors.joining(", "));
+    }
+
+    private CharSequence getNStrings(String string, int n) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            result.append(string);
+        }
+
+        return result;
+    }
+
+    private CharSequence createTableBorder(int behaviorsDashLength) {
+        StringBuilder border = new StringBuilder();
+        border.append("<tr>");
+        border.append("<td>|</td>");
+        border.append("<td>").append(getNStrings("-", 13)).append("</td>");
+        border.append("<td>|</td>");
+        border.append("<td>").append(getNStrings("-", 13)).append("</td>");
+        border.append("<td>|</td>");
+        border.append("<td>").append(getNStrings("-", 13)).append("</td>");
+        border.append("<td>|</td>");
+        border.append("<td>").append(getNStrings("-", 38)).append("</td>");
+        border.append("<td>|</td>");
+        border.append("<td>").append(getNStrings("-", behaviorsDashLength)).append("</td>");
+        border.append("<td>|</td>");
+        border.append("</tr>");
+        return border;
     }
 }

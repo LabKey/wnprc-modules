@@ -6,19 +6,22 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.wnprc_ehr.notification.AbstractEHRNotification;
+import org.labkey.api.util.Path;
+import org.labkey.api.view.ActionURL;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,10 +30,12 @@ import java.util.stream.Stream;
 
 public class IrregularObsBehaviorNotification extends AbstractEHRNotification
 {
+    private static DateTimeFormatter queryDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private static DateTimeFormatter displayDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     public IrregularObsBehaviorNotification(Module owner){
         super (owner);
     }
-
 
     public String getName() {
         return "Irregular Obs Behavior Notification";
@@ -42,7 +47,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
 
     @Override
     public String getEmailSubject(Container c) {
-        return "Behavior related irregular obs for "+ _dateTimeFormat.format(new Date());
+        return "Behavior related irregular obs for " + _dateTimeFormat.format(new Date());
     }
 
     public String getScheduleDescription() {
@@ -51,6 +56,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
 
     @Override
     public String getCronString() {
+
         return "0 0 10,15 * * ?";
     }
 
@@ -62,20 +68,21 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
     public String getMessageBodyHTML (Container c, User u){
         StringBuilder msg = null;
 
-        //LocalTime currentTime = LocalTime.now();
-        //LocalTime morningNotification = LocalTime.of(10,0,0);
-        //LocalTime afternoonNotification = LocalTime.of(15,0,0);
-
         LocalDateTime notificationStartTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
-        LocalDateTime notificationEndTime = LocalDateTime.now();
-
-        msg = getBehavioralIrregularObs(c, u, notificationStartTime, notificationEndTime);
-
-        if (msg.length() == 0){
-            return null;
+        LocalDateTime currentTime = LocalDateTime.now();
+        if (currentTime.getHour() == 10) {
+            notificationStartTime = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(15, 0, 0));
+        } else if (currentTime.getHour() == 15) {
+            notificationStartTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(10, 0, 0));
         }
 
-        msg.insert(0, "This email contains information regarding behavior related irregular obs across the center.<br><br>");
+        msg = getBehavioralIrregularObs(c, u, notificationStartTime, currentTime);
+
+        if (msg.length() == 0){
+            return "<p>There were no behavior related irregular obs between " + displayDateFormat.format(notificationStartTime) + " and " + displayDateFormat.format(currentTime) + ".</p>";
+        }
+
+        msg.insert(0, "<p>This email contains information regarding behavior related irregular obs across the center.</p>");
         return msg.toString();
 
     }
@@ -97,7 +104,14 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
         try {
             long count = ts.getRowCount();
             if (count > 0) {
-                msg.append("<p>There have been <strong>").append(count).append("</strong> behavior related irregular observations between ").append(startTime).append(" and ").append(endTime).append(".</p>");
+                msg.append("<p>There have been <strong>");
+                msg.append(count);
+                msg.append("</strong> behavior related irregular observations between ");
+                msg.append(startTime.format(displayDateFormat));
+                msg.append(" and ");
+                msg.append(endTime.format(displayDateFormat));
+                msg.append(".</p>");
+
                 msg.append("<table>");
 
                 msg.append("<tr>");
@@ -123,6 +137,15 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                 while (rs.next()) {
                     StringBuilder behaviorTitles = new StringBuilder();
                     Map<String, Object> row = rs.getRowMap();
+
+                    StringBuilder hrefForAnimalAbstract = new StringBuilder();
+                    hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view")).toString();
+                    hrefForAnimalAbstract.append("?#subjects:").append(row.get("Id")).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
+                    StringBuilder animalId = new StringBuilder();
+                    animalId.append("<a href='").append(hrefForAnimalAbstract).append("'>");
+                    animalId.append(row.get("Id"));
+                    animalId.append("</a>");
+
                     String behaviorCodes = (String) row.get("behavior");
                     if (behaviorCodes != null && behaviorCodes.length() > 0) {
                         String[] behaviorCodesArray = behaviorCodes.split(";");
@@ -150,7 +173,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
 
                     msg.append("<tr>");
                     msg.append("<td>|</td>");
-                    msg.append("<td>").append(row.get("Id")).append("</td>");
+                    msg.append("<td>").append(animalId).append("</td>");
                     msg.append("<td>|</td>");
                     msg.append("<td>").append(row.get("roomattime")).append("</td>");
                     msg.append("<td>|</td>");
@@ -174,8 +197,12 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
             return new StringBuilder("<strong>There was an error retrieving the data. Please alert the IDS team.</strong>");
         }
 
-
-        //msg.append("<a href='" + getExecuteQueryUrl(c, "study", "FoodDeprivesProblems", "Scheduled") + "&query.schedule~in="+ schedule + "&query.sort=-schedule/title'>Click here to view this list</a></p>\n");
+        StringBuilder queryParams = new StringBuilder();
+        queryParams.append("&query.param.START_DATE=");
+        queryParams.append(startTime.format(queryDateFormat));
+        queryParams.append("&query.param.END_DATE=");
+        queryParams.append(endTime.format(queryDateFormat));
+        msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "behaviorRelatedIrregularObs", null) + queryParams + "'>Click here to view this list in EHR</a></p>");
 
         return msg;
     }

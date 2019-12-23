@@ -838,7 +838,7 @@
 
                                             var $this = $(this);
                                             var thisPosition = $this.position();
-                                            var top = thisPosition.top - $tooltip.height() - 5;
+                                            var top = thisPosition.top - $tooltip.height() - 500;
                                             var left = thisPosition.left + ($this.attr('width') / 2) - ($tooltip.width() / 2);
 
                                             //Make sure the tooltip doesn't go off the left side of the graph:
@@ -1026,7 +1026,7 @@
 
                                             var $this = $(this);
                                             var thisPosition = $this.position();
-                                            var top = thisPosition.top - $tooltip.height() - 5;
+                                            var top = thisPosition.top - $tooltip.height() - 200;
                                             var left = thisPosition.left + ($this.attr('width') / 2) - ($tooltip.width() / 2);
 
                                             //Make sure the tooltip doesn't go off the left side of the graph:

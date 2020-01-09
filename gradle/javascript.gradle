@@ -1,4 +1,6 @@
-apply plugin: 'com.moowork.node'
+plugins {
+    id "com.moowork.node" version "1.2.0"
+}
 
 if (file("${project.projectDir}/src/java").exists())
 {

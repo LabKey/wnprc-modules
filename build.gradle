@@ -60,7 +60,9 @@ import org.labkey.gradle.util.BuildUtils
  **********************************************************************************************************************/
 
 // using this to manage our node_modules and package.json in the base directory rather than module by module
-apply plugin: 'com.moowork.node'
+plugins {
+    id "com.moowork.node" version "1.2.0"
+}
 
 // using this to ignore the node_modules and other "base" folders in IntelliJ IDEA
 apply plugin: 'idea'

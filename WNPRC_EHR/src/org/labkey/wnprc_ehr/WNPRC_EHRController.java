@@ -1311,12 +1311,12 @@ public class WNPRC_EHRController extends SpringActionController
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
-        Results rs = spQuery.select(columns, filter);
-
         List<Map<String, Object>> spRows = new ArrayList<>();
-        while (rs.next())
-        {
-            spRows.add(rs.getRowMap());
+        try (Results rs = spQuery.select(columns, filter)) {
+            while (rs.next())
+            {
+                spRows.add(rs.getRowMap());
+            }
         }
         return spRows;
     }

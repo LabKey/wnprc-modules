@@ -3,7 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <tableTitle>Surgery/Procedure</tableTitle>
             <table tableName="surgery_procedure" tableDbType="TABLE">
-                <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
+                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
                 <!--<tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>-->
                 <!--<insertUrl/>-->
                 <!--<importUrl/>-->

@@ -786,6 +786,14 @@
                 var form = ko.mapping.toJS(WebUtils.VM.form);
                 // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
                 // update the study.surgery_procedure, ehr.request, and ehr.task tables
+                let calendarId;
+                if (form.proceduretype === 'surgery') {
+                    calendarId = 'surgeries_scheduled';
+                } else if (form.proceduretype === 'procedure' || form.proceduretype === 'other') {
+                    calendarId = 'procedures_scheduled';
+                } else {
+                    //TODO handle the error!
+                }
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ScheduleSurgeryProcedure", null, {
                         requestId: form.requestid,
@@ -795,7 +803,7 @@
                         subject: form.animalid + ' ' + form.procedurename,
                         categories: 'Surgeries',
                         assignedTo: form.assignedto,
-                        hold: false
+                        calendarId: calendarId
                     }),
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {

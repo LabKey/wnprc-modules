@@ -23,6 +23,7 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
@@ -36,9 +37,13 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.ehr.EHRSchema;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -71,6 +76,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizePregnanciesTable((AbstractTableInfo) table);
             } else if (table.getName().equalsIgnoreCase("housing") && table.getSchema().getName().equalsIgnoreCase("study")) {
                 customizeHousingTable((AbstractTableInfo) table);
+            } else if (table.getName().equalsIgnoreCase("requests") && table.getSchema().getName().equalsIgnoreCase("ehr")) {
+                customizeRequestsTable((AbstractTableInfo) table);
             }
         }
     }
@@ -291,6 +298,60 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         customizeReasonForMoveColumn(ti);
     }
 
+    private void customizeRequestsTable(AbstractTableInfo ti) {
+        ColumnInfo requestId = ti.getColumn("rowId");
+        if (requestId != null)
+        {
+            UserSchema us = getUserSchema(ti, "ehr");
+            if (us != null)
+            {
+                requestId.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        ActionURL url = new ActionURL("ehr", "dataEntryFormDetails.view", us.getContainer());
+                        int rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+                        String reqId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "requestid"));
+                        String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+
+                        if (isExt4Form("request", formType))
+                        {
+                            String urlString = "";
+                            if (reqId != null)
+                            {
+                                url.replaceParameter("formType", formType);
+                                url.replaceParameter("requestid", reqId);
+                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                                urlString += PageFlowUtil.filter(rowId);
+                                urlString += "</a>";
+                                out.write(urlString);
+                            }
+                        }
+                        else
+                        {
+                            super.renderGridCellContents(ctx, out);
+                        }
+                    }
+
+                    @Override
+                    public void addQueryFieldKeys(Set<FieldKey> keys)
+                    {
+                        super.addQueryFieldKeys(keys);
+                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "requestid"));
+                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+                    }
+                });
+            }
+        }
+    }
+
     private void customizeSireIdColumn(AbstractTableInfo ti) {
         ColumnInfo sireid = ti.getColumn("sireid");
         if (sireid != null)
@@ -418,6 +479,24 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         return null;
+    }
+
+    protected boolean isExt4Form(String schemaName, String formType)
+    {
+        boolean isExt4Form = false;
+
+        SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, formType);
+        DbSchema schema = DbSchema.get("ehr", DbSchemaType.Module);
+        TableInfo ti = schema.getTable("form_framework_types");
+        TableSelector ts = new TableSelector(ti, filter, null);
+        String framework = ts.getMap() != null ? (String) ts.getMap().get("framework") : null;
+
+        if ("extjs4".equalsIgnoreCase(framework))
+        {
+            isExt4Form = true;
+        }
+
+        return isExt4Form;
     }
 
     //TODO: Look how to use another UI to allow for better support for virtual columns

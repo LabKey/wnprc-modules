@@ -27,7 +27,6 @@
 
                 initComponent: function() {
 
-                    this.items = this.getItems();
 
                     if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Clinpath Runs', schemaName: 'study'})){
                         this.clinpathUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&key=${lsid}&update=1';
@@ -50,6 +49,8 @@
                         this.animalRequestUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=${rowid}&update=1';
                         this.animalRequestDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=animal_requests';
                     }
+
+                    this.items = this.getItems();
 
                     this.callParent();
                 },

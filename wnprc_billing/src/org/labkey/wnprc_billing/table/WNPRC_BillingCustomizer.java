@@ -84,11 +84,11 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
             return;
         }
 
-        ColumnInfo chargeType = table.getColumn("chargeType");
-        if (chargeType != null)
+        ColumnInfo chargeGroup = table.getColumn("chargeGroup");
+        if (chargeGroup != null)
         {
-            chargeType.setFk(new QueryForeignKey(us, us.getContainer(), "chargeUnits",
-                    "chargeType", null, true));
+            chargeGroup.setFk(new QueryForeignKey(us, us.getContainer(), "chargeUnits",
+                    "groupName", null, true));
         }
 
         ColumnInfo debitedAcct = table.getColumn("debitedAccount");

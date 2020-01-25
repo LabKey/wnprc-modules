@@ -28,7 +28,7 @@
                     <nullable>false</nullable>
                     <fk>
                         <fkDbSchema>wnprc_billing</fkDbSchema>
-                        <fkTable>tierRates</fkTable>
+                        <fkTable>activeTierRates</fkTable>
                         <fkColumnName>tierRateType</fkColumnName>
                         <fkDisplayColumnName>tierRate</fkDisplayColumnName>
                     </fk>
@@ -50,8 +50,9 @@
                 <column columnName="investigatorId">
                     <fk>
                         <fkDbSchema>ehrLinked</fkDbSchema>
-                        <fkTable>investigators</fkTable>
+                        <fkTable>investigatorsWithName</fkTable>
                         <fkColumnName>rowid</fkColumnName>
+                        <fkDisplayColumnName>investigatorWithName</fkDisplayColumnName>
                     </fk>
                 </column>
                 <column columnName="fiscalAuthority">

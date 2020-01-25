@@ -1,0 +1,215 @@
+<div id="custom_data_access_form"></div>
+
+<script type="text/javascript">
+
+    Ext4.onReady(function() {
+
+        var rowid = LABKEY.ActionURL.getParameter("rowid");
+
+        //update existing row
+        if (rowid) {
+            LABKEY.Query.selectRows({
+                schemaName: 'ehr_billing',
+                queryName: 'dataAccess',
+                columns: 'userId, investigatorid, project, alldata',
+                filterArray: [
+                    LABKEY.Filter.create('rowid', rowid, LABKEY.Filter.Types.EQUAL)
+                ],
+                scope: this,
+                success: function (data) {
+                    if (data && data.rows.length === 1) {
+                        var userId = data.rows[0].userId;
+                        var project = data.rows[0].project;
+                        var investigatorId = data.rows[0].investigatorid;
+                        var accessToAllProjects = data.rows[0].alldata;
+                        createCustomDataAccessForm(updateHandler, userId, project, investigatorId, accessToAllProjects);
+                    }
+                },
+                failure: LDK.Utils.getErrorCallback()
+            });
+        }
+        //insert new row
+        else {
+            createCustomDataAccessForm(insertHandler);
+        }
+    });
+
+    var insertHandler = function (schema, query, rows) {
+
+        LABKEY.Query.insertRows({
+            method: 'POST',
+            schemaName: schema,
+            queryName: query,
+            rows: rows,
+            scope: this,
+            success: onSuccess(schema, query),
+            failure: LDK.Utils.getErrorCallback()
+        });
+    };
+
+    var updateHandler = function(schema, query, rows) {
+
+        var rowid = LABKEY.ActionURL.getParameter("rowid");
+        if (rowid) {
+            rows[0].rowid = rowid;
+
+            LABKEY.Query.updateRows({
+                method: 'POST',
+                schemaName: schema,
+                queryName: query,
+                rows: rows,
+                scope: this,
+                success: onSuccess(schema, query),
+                failure: LDK.Utils.getErrorCallback()
+            });
+        }
+    };
+
+    var onSuccess = function(schema, query) {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName:schema,'query.queryName':query});
+    };
+
+    var createCustomDataAccessForm = function(submitHandler, userId, project, investigatorId, accessToAllProjects) {
+        Ext4.create('Ext.form.Panel', {
+            renderTo: 'custom_data_access_form',
+            border: false,
+            bodyStyle: 'background-color: transparent;',
+            defaults: {
+                labelWidth: 125,
+                width: 350
+            },
+            items: [{
+                xtype: 'combo',
+                name: 'userId',
+                fieldLabel: 'User With Access',
+                allowBlank: false,
+                displayField: 'DisplayName',
+                valueField: 'UserId',
+                value: userId,
+                queryMode: 'local',
+                store: {
+                    type: 'labkey-store',
+                    schemaName: 'coreLinked',
+                    queryName: 'Users',
+                    columns: 'UserId, DisplayName',
+                    sort: 'DisplayName',
+                    autoLoad: true
+                }
+            },{
+                xtype: 'combo',
+                name: 'investigatorid',
+                fieldLabel: 'Investigator',
+                allowBlank: true,
+                displayField: 'investigatorWithName',
+                valueField: 'rowid',
+                value: investigatorId,
+                queryMode: 'local',
+                store: {
+                    type: 'labkey-store',
+                    schemaName: 'ehrLinked',
+                    queryName: 'investigatorsWithName',
+                    columns: 'rowid, investigatorWithName',
+                    sort: 'investigatorWithName',
+                    autoLoad: true
+                },
+                listeners: {
+                    change: function(field, newValue, oldValue, eOpts){
+                        var projectField = field.up("form").getForm().findField("project");
+                        projectField.setValue(null);
+                        var filter = LABKEY.Filter.create('investigatorId', newValue, LABKEY.Filter.Types.EQUAL);
+                        projectField.store.filterArray = [filter];
+                        projectField.store.load();
+                    }
+                }
+            }, {
+                xtype: 'combo',
+                fieldLabel: 'Project',
+                labelWidth: 125,
+                name: 'project',
+                displayField: 'project',
+                value: project,
+                queryMode: 'local',
+                store: {
+                    type: 'labkey-store',
+                    schemaName: 'ehrLinked',
+                    queryName: 'project',
+                    columns: 'project, investigatorId',
+                    sort: 'project',
+                    autoLoad: false
+                },
+                listeners : {
+                    scope: this,
+                    beforerender: function(field) {
+                        var invesVal = field.up("form").getForm().findField("investigatorid").value;
+                        if (invesVal) {
+                            var filter = LABKEY.Filter.create('investigatorId', invesVal, LABKEY.Filter.Types.EQUAL);
+                            field.store.filterArray = [filter];
+                            field.store.load();
+                        }
+                    }
+                }
+            }, {
+                xtype: 'checkbox',
+                fieldLabel: 'Access to all projects?',
+                labelWidth: 125,
+                name: 'alldata',
+                checked: (accessToAllProjects === true)
+            }],
+            dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'bottom',
+                ui: 'footer',
+                style: 'background-color: transparent; padding: 10px 0;',
+                items: [{
+                    text: 'Submit',
+                    formBind: true,
+                    handler: function (btn) {
+                        var values = btn.up('form').getForm().getValues();
+
+                        if (!values.project && !values.alldata) {
+                            Ext4.Msg.alert('Error', "Must choose a 'Project' or check 'Access to all projects'");
+                            return;
+                        }
+                        else if (values.project && values.alldata) {
+                            Ext4.Msg.alert('Error', "Must choose 'Project' or check 'Access to all projects' but not both.");
+                            return;
+                        }
+                        else {
+
+                            if (values.project && !values.alldata) {
+
+                                var projectField = btn.up('form').getForm().findField('project');
+
+                                //identify whether the project entered belongs to the investigator
+                                var isValidProject = projectField.getStore().data.items.map(function (val) {
+                                    return val.data.project;
+                                }).filter(function (prj) {
+                                    return prj === values.project;
+                                }).length === 1;
+
+                                if (!isValidProject) {
+                                    Ext4.Msg.alert('Error', "Project '" + values.project + "' is not associated with the selected Investigator. Please select a different project.");
+                                    return;
+                                }
+                            }
+
+                            var rows = [{
+                                userId: values.userId,
+                                project: values.project,
+                                investigatorid: values.investigatorid,
+                                alldata: values.alldata === "on" || values.alldata === 'true'|| values.alldata === '1' || values.alldata === true
+                            }];
+
+                            submitHandler.call(this, "ehr_billing", "dataAccess", rows);
+                        }
+                    }
+                }, {
+                    text: 'Cancel',
+                    handler: function(btn) {
+                        window.history.back();
+                    }
+                }]
+            }],
+        }, this);
+    }
+</script>

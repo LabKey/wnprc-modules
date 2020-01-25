@@ -11,6 +11,7 @@
         <column name="budgetEndDate"/>
         <column name="affiliate"/>
         <column name="investigatorName"/>
+        <column name="investigatorId"/>
         <column name="contact_name"/>
         <column name="contact_phone"/>
         <column name="contact_email"/>
@@ -35,7 +36,4 @@
     <sorts>
         <sort column="budgetEndDate" descending="true" />
     </sorts>
-    <filters>
-        <filter column="tier_rate/isActive" operator="neqornull" value="false"/>
-    </filters>
 </customView>

@@ -16,7 +16,7 @@
                 <column columnName="tier_rate">
                     <fk>
                         <fkDbSchema>wnprc_billingLinked</fkDbSchema>
-                        <fkTable>tierRates</fkTable>
+                        <fkTable>activeTierRates</fkTable>
                         <fkColumnName>tierRateType</fkColumnName>
                         <fkDisplayColumnName>tierRate</fkDisplayColumnName>
                     </fk>
@@ -34,8 +34,9 @@
                 <column columnName="investigatorId">
                     <fk>
                         <fkDbSchema>ehr</fkDbSchema>
-                        <fkTable>investigators</fkTable>
+                        <fkTable>investigatorsWithName</fkTable>
                         <fkColumnName>rowid</fkColumnName>
+                        <fkDisplayColumnName>investigatorWithName</fkDisplayColumnName>
                     </fk>
                 </column>
                 <column columnName="affiliate"/>

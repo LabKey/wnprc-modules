@@ -24,18 +24,6 @@
             <column columnName="category"/>
         </columns>
     </table>
-    <table tableName="groups" tableDbType="TABLE" useColumnOrder="true">
-        <columns>
-            <column columnName="rowid"/>
-            <column columnName="name"/>
-            <column columnName="active"/>
-            <column columnName="container"/>
-            <column columnName="createdBy"/>
-            <column columnName="created"/>
-            <column columnName="modifiedBy"/>
-            <column columnName="modified"/>
-        </columns>
-    </table>
     <table tableName="tierrates" tableDbType="TABLE" useColumnOrder="true">
         <tableTitle>Tier Rates</tableTitle>
         <columns>
@@ -44,6 +32,19 @@
             <column columnName="tierRate"/>
             <column columnName="startDate"/>
             <column columnName="endDate"/>
+            <column columnName="container"/>
+            <column columnName="createdBy"/>
+            <column columnName="created"/>
+            <column columnName="modifiedBy"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="groupCategoryAssociations" tableDbType="TABLE" useColumnOrder="true">
+        <tableTitle>Tier Rates</tableTitle>
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="chargeGroupName"/>
+            <column columnName="chargeCategoryId"/>
             <column columnName="container"/>
             <column columnName="createdBy"/>
             <column columnName="created"/>

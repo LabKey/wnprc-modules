@@ -5,6 +5,6 @@
                 xmlns:cv="http://labkey.org/data/xml/queryCustomView"
                 sourceSchemaName="wnprc_billing">
     <tables>
-        <tableName>tierRates</tableName>
+        <tableName>activeTierRates</tableName>
     </tables>
 </templateSchema>

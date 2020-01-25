@@ -1,7 +1,7 @@
-serviceCenter	chargeType	active
-5	Business Office	1
-14	Veterinary Services	1
-8	Immunology	1
-6	Scientific Protocol Implementation	1
-9	Clinical Pathology	1
-27	EHR Services	1
+groupName	active
+Business Office	1
+Veterinary Services	1
+Immunology	1
+Scientific Protocol Implementation	1
+Clinical Pathology	1
+EHR Services	1

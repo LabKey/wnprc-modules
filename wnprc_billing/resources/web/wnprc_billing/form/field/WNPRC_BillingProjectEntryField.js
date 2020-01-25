@@ -5,12 +5,27 @@ Ext4.define('WNPRC_Billing.form.field.ProjectEntryField', {
 
     initComponent: function(){
 
-        this.addListener({scope:this, select: function (combo, recs) {
-                //clear the investigator field if the project is changed
-                EHR.DataEntryUtils.setSiblingFields(combo, {
-                    investigator: null
-                });
-            }});
+        this.addListener({
+            scope:this,
+            select: function (field, newValue) {
+
+                //on project change, reset investigator
+                //for bulk edit window
+                if (field.up("form") && field.up("form").getForm()) {
+                    var invesField = field.up("form").getForm().findField("investigator");
+                    if (invesField) {
+                        invesField.disabled = false;
+                        invesField.setValue(null);
+                    }
+                }
+                //for data entry grid
+                else {
+                    EHR.DataEntryUtils.setSiblingFields(field, {
+                        investigator: null
+                    });
+                }
+            }
+        });
         this.callParent();
     }
 });

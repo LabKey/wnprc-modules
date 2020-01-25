@@ -13,11 +13,8 @@
                     <column columnName="category">
                         <columnTitle>category</columnTitle>
                     </column>
-                    <column columnName="serviceCode">
-                        <columnTitle>serviceCode</columnTitle>
-                    </column>
                     <column columnName="departmentCode">
-                        <columnTitle>departmentCode</columnTitle>
+                        <columnTitle>groupName</columnTitle>
                     </column>
                     <column columnName="chargeableItemStartDate">
                         <columnTitle>chargeableItemStartDate</columnTitle>

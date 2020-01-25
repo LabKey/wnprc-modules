@@ -36,7 +36,7 @@
                     header: 'Current Billing Period / Adjustments',
                     items: [
                         {name: 'Billing Period Summary / Discrepancy Report', url: LABKEY.ActionURL.buildURL('ldk', 'runNotification', ctx.EHRStudyContainer, {key: 'org.labkey.ehr_billing.notification.BillingNotification'})},
-                        {name: 'Estimated Charges By Project', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'invoiceEstimate', null)},
+                        {name: 'View Billing Queries', url: LABKEY.ActionURL.buildURL('wnprc_billing', 'viewBillingQuery', null)},
                         {name: 'View Charges and Adjustments Not Yet Billed', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', ctx.EHRStudyContainer, {schemaName: 'ehr_billing', 'query.queryName': 'miscCharges', 'query.viewName': 'Charges Not Billed'})},
                         {name: 'Perform Billing Run', url: LABKEY.ActionURL.buildURL('ehr_billing', 'billingPipeline', null)},
                         {name: 'Invoice Runs', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'invoiceRuns'})},
@@ -73,8 +73,9 @@
                 },{
                     header: 'Charge Category and Rates',
                     items: [
-                        {name: 'Charge Units', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeUnits', showImport: true})},
+                        {name: 'Groups', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeUnits', showImport: true})},
                         {name: 'Chargeable Item Categories', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeableItemCategories', showImport: true})},
+                        {name: 'Group Category Associations', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'groupCategoryAssociations', showImport: true})},
                         {name: 'Chargeable Items', url: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeableItems', showImport: true})},
                         {name: 'Standard Rates', url: LABKEY.ActionURL.buildURL("query", "executeQuery", null, {schemaName: 'ehr_billing', 'query.queryName': 'chargeRates', showImport: true})},
                         {name: 'Tier Rates', url: LABKEY.ActionURL.buildURL(queryController, queryAction, null, {schemaName: 'wnprc_billing', 'query.queryName': 'tierRates', showImport: true})},

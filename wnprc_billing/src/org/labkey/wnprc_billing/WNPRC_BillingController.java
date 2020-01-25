@@ -85,7 +85,7 @@ public class WNPRC_BillingController extends SpringActionController
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICED_ITEMS_FOR_PDF);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("invoiceNumber"), invoiceNumber);
-        TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort( "date,serviceCenter,id"));
+        TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort("date,groupName,id"));
         return tableSelector.getArrayList(InvoicedItem.class);
     }
 

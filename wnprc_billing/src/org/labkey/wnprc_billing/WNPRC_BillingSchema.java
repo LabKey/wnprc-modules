@@ -31,6 +31,7 @@ public class WNPRC_BillingSchema
     public static final String TABLE_INVOICE = "Invoice";
     public static final String TABLE_INVOICE_RUNS = "InvoiceRuns";
     public static final String TABLE_TIER_RATES = "tierrates";
+    public static final String TABLE_GROUP_CATEGORY_ASSOCIATIONS = "groupCategoryAssociations";
     public static final String TABLE_JET_INVOICE_ITEMS = "JetInvoiceItems";
     public static final String TABLE_ALIASES = "Aliases";
     public static final String TABLE_SUMMARIZED_ITEMS = "summarizedInvoicedItemsByCategory";
@@ -60,5 +61,10 @@ public class WNPRC_BillingSchema
     public TableInfo getTierRates()
     {
         return getSchema().getTable(TABLE_TIER_RATES);
+    }
+
+    public TableInfo getGroupCategoryAssociations()
+    {
+        return getSchema().getTable(TABLE_GROUP_CATEGORY_ASSOCIATIONS);
     }
 }

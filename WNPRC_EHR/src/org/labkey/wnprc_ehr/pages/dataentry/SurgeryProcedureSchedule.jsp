@@ -39,6 +39,10 @@
     .input-group.date {
         display: table;
     }
+
+    .event-selected {
+        border-color: #FF0000;
+    }
 </style>
 
 
@@ -424,9 +428,9 @@
                             }
 
                             if (info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId === selectedEvent) {
-                                info.el.style.backgroundColor = info.event.extendedProps.selectedBgColor;
+                                info.el.classList.add('event-selected');
                             } else {
-                                info.el.style.backgroundColor = info.event.extendedProps.defaultBgColor;
+                                info.el.classList.remove('event-selected');
                             }
 
                             return eventAcceptedClasses.includes(info.event.extendedProps.calendarId, eventAcceptedClasses);

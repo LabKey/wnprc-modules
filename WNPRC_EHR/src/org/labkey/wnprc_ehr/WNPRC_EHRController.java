@@ -1353,6 +1353,7 @@ public class WNPRC_EHRController extends SpringActionController
     public static class FetchCalendarEvent
     {
         private String calendarId;
+        private String calendarType;
 
         public String getCalendarId()
         {
@@ -1362,6 +1363,16 @@ public class WNPRC_EHRController extends SpringActionController
         public void setCalendarId(String calendarId)
         {
             this.calendarId = calendarId;
+        }
+
+        public String getCalendarType()
+        {
+            return calendarType;
+        }
+
+        public void setCalendarType(String calendarType)
+        {
+            this.calendarType = calendarType;
         }
     }
 
@@ -1378,7 +1389,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId());
+                String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId(), event.getCalendarType());
                 response.put("events", office365EventsString);
                 if (office365EventsString != null && office365EventsString.trim().length() > 0)
                 {
@@ -1408,7 +1419,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId());
+                String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId(), event.getCalendarType());
                 response.put("events", googleEventsString);
                 if (googleEventsString != null && googleEventsString.trim().length() > 0)
                 {
@@ -1425,11 +1436,20 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    private String fetchCalendarEvents(Calendar calendar, String calendarId) throws Exception
+    private String fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType) throws Exception
     {
         calendar.setUser(getUser());
         calendar.setContainer(getContainer());
-        return calendar.getCalendarEventsAsJson(calendarId);
+        String eventsString = null;
+        if (calendarType.equalsIgnoreCase("Office365Resource"))
+        {
+            eventsString = calendar.getRoomEventsAsJson(calendarId);
+        }
+        else
+        {
+            eventsString = calendar.getCalendarEventsAsJson(calendarId);
+        }
+        return eventsString;
     }
 
     @ActionNames("PathologyCaseList")

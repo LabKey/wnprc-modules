@@ -22,6 +22,7 @@ import microsoft.exchange.webservices.data.misc.availability.GetUserAvailability
 import microsoft.exchange.webservices.data.misc.availability.TimeWindow;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
+import microsoft.exchange.webservices.data.property.complex.Mailbox;
 import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import microsoft.exchange.webservices.data.property.complex.StringList;
 import microsoft.exchange.webservices.data.property.complex.availability.CalendarEvent;
@@ -93,7 +94,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
             TableInfo ti = schema.getTable("service_accounts");
             TableSelector ts = new TableSelector(ti, filter, null);
-            Map map = ts.getMap();
+            Map<String, Object> map = ts.getMap();
             emailAddress = (String) map.get("private_key_id");
 
             byte[] passwordBytes = AES.base64StringToByteArray((String) map.get("private_key"));
@@ -186,7 +187,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
         TableInfo ti = schema.getTable("surgery_procedure_rooms");
         TableSelector ts = new TableSelector(ti, filter, null);
-        Map map = ts.getMap();
+        Map<String, Object> map = ts.getMap();
         String roomEmailAddress = (String) map.get("email");
         if (isRoomAvailable(roomEmailAddress, start, end))
         {
@@ -216,7 +217,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
         SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
         SimpleQuery requests = sqf.makeQuery("study", "SurgeryProcedureSchedule");
-        //JSONObject bar = requests.getResults();
         List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
 
         Map<String, JSONObject> queryResults = new HashMap<>();
@@ -274,15 +274,29 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     private String getCalendarEvents(Date startDate, Date endDate, FolderId folderId) throws Exception
     {
-        JSONArray jsonEvents = getJsonEventList(getAppointments(startDate, endDate, folderId));
+        JSONArray jsonEvents = getJsonEventList(getCalendarAppointments(startDate, endDate, folderId));
         return jsonEvents.toString();
     }
 
-    private List<Appointment> getAppointments(Date startDate, Date endDate, FolderId folderId) throws Exception
+    private String getRoomEvents(Date startDate, Date endDate, String roomId) throws Exception
     {
+        JSONArray jsonEvents = getJsonEventList(getRoomAppointments(startDate, endDate, roomId));
+        return jsonEvents.toString();
+    }
+
+    private List<Appointment> getCalendarAppointments(Date startDate, Date endDate, FolderId folderId) throws Exception
+    {
+        CalendarView cv = new CalendarView(startDate, endDate);
         CalendarFolder cf = CalendarFolder.bind(service, folderId);
-        FindItemsResults<Appointment> findResults = cf.findAppointments(new CalendarView(startDate, endDate));
+        FindItemsResults<Appointment> findResults = cf.findAppointments(cv);
         return findResults.getItems();
+    }
+
+    public List<Appointment> getRoomAppointments(Date startDate, Date endDate, String roomId) throws Exception {
+        CalendarView cv = new CalendarView(startDate, endDate);
+        FolderId calFolderId = new FolderId(WellKnownFolderName.Calendar, new Mailbox(roomId));
+        FindItemsResults<Appointment> fapts = service.findAppointments(calFolderId, cv);
+        return fapts.getItems();
     }
 
     private FolderId getFolderIdFromCalendarName(String calendarName) throws Exception
@@ -358,12 +372,24 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     public String getCalendarEventsAsJson(String calendarName) throws Exception
     {
         authenticate();
+        //test();
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -2);
         Date startDate = cal.getTime();
         cal.add(Calendar.MONTH, 23);
         Date endDate = cal.getTime();
         return getCalendarEvents(startDate, endDate, getFolderIdFromCalendarName(calendarName));
+    }
+
+    public String getRoomEventsAsJson(String roomId) throws Exception
+    {
+        authenticate();
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -2);
+        Date startDate = cal.getTime();
+        cal.add(Calendar.MONTH, 23);
+        Date endDate = cal.getTime();
+        return getRoomEvents(startDate, endDate, roomId);
     }
 
     static class RedirectionUrlCallback implements IAutodiscoverRedirectionUrl

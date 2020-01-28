@@ -153,4 +153,8 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         DateTime dateMax = new DateTime(currentDate.getTimeInMillis() + TWO_YEARS_IN_MILLISECONDS);
         return getCalendarEvents(calendar, dateMin, dateMax, MAX_EVENT_RESULTS, calendarId);
     }
+
+    public String getRoomEventsAsJson(String roomId) throws Exception {
+        return null;
+    }
 }

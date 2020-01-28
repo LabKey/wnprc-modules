@@ -40,9 +40,29 @@
         display: table;
     }
 
-    .event-selected {
-        border-color: #FF0000;
+    .fc-day-grid-event {
+        margin: 4px 4px 0;
     }
+
+    .event-selected {
+        border: 1px solid black;
+        border-radius: 3px;
+    }
+
+    .event-selected:before {
+        border: 3px solid red;
+        border-radius: 6px;
+        background: none;
+        content: "";
+        display: block;
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        pointer-events: none;
+    }
+
 </style>
 
 
@@ -347,8 +367,8 @@
 
             LABKEY.Query.selectRows({
                 schemaName: 'wnprc',
-                queryName: 'surgery_procedure_calendars',
-                columns: 'calendar_id,calendar_type,display_name,api_action,folder_id,show_by_default,default_bg_color,selected_bg_color',
+                queryName: 'surgery_procedure_calendars_and_rooms',
+                columns: 'calendar_id,calendar_type,display_name,api_action,folder_id,show_by_default,default_bg_color',
                 scope: this,
                 success: function(data){
                     if (data.rows && data.rows.length > 0) {
@@ -456,12 +476,12 @@
                             calendar.addEventSource(function(fetchInfo, successCallback, failureCallback) {
                                 let calId = data.rows[i].calendar_id;
                                 let defaultBgColor = data.rows[i].default_bg_color;
-                                let selectedBgColor = data.rows[i].selected_bg_color;
 
                                 LABKEY.Ajax.request({
                                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
-                                        calendarId: data.rows[i].calendar_id,
-                                        folderId:   data.rows[i].folder_id,
+                                        calendarId:     data.rows[i].calendar_id,
+                                        folderId:       data.rows[i].folder_id,
+                                        calendarType:   data.rows[i].calendar_type
                                     }),
                                     success: LABKEY.Utils.getCallbackWrapper(function (response) {
                                         if (response.success) {
@@ -474,8 +494,6 @@
                                                     calendarId: calId,
                                                     eventId: event.eventId,
                                                     backgroundColor: defaultBgColor,
-                                                    defaultBgColor: defaultBgColor,
-                                                    selectedBgColor: selectedBgColor,
                                                     rawRowData: event.rawRowData
                                                 }
                                             }));
@@ -489,8 +507,6 @@
                                                     calendarId: calId,
                                                     eventId: event.eventId,
                                                     backgroundColor: defaultBgColor,
-                                                    defaultBgColor: defaultBgColor,
-                                                    selectedBgColor: selectedBgColor,
                                                     rawRowData: event.rawRowData
                                                 }
                                             }));

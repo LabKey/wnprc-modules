@@ -489,35 +489,35 @@
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
                         },
                         eventRender: function(info) {
-                            let eventAcceptedClasses = [];
+                            let checkedCalendars = [];
 
                             if (data.rows && data.rows.length > 0) {
                                 for (let i = 0; i < data.rows.length; i++) {
 
                                     if (document.getElementById(data.rows[i].calendar_id).checked) {
-                                        eventAcceptedClasses.push(data.rows[i].calendar_id);
+                                        checkedCalendars.push(data.rows[i].calendar_id);
                                     }
                                 }
                             }
 
-                            let backgroundLuminosity = lightOrDark(info.el.style.backgroundColor);
+                            let backgroundBrightness = lightOrDark(info.el.style.backgroundColor);
                             if (info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId === selectedEvent) {
-                                if (backgroundLuminosity === 'light') {
+                                if (backgroundBrightness === 'light') {
                                     info.el.classList.add('event-text-light');
-                                } else if (backgroundLuminosity === 'dark') {
+                                } else if (backgroundBrightness === 'dark') {
                                     info.el.classList.add('event-text-dark');
                                 }
                                 info.el.classList.add('event-selected');
                             } else {
-                                if (backgroundLuminosity === 'light') {
+                                if (backgroundBrightness === 'light') {
                                     info.el.classList.add('event-text-light');
-                                } else if (backgroundLuminosity === 'dark') {
+                                } else if (backgroundBrightness === 'dark') {
                                     info.el.classList.add('event-text-dark');
                                 }
                                 info.el.classList.remove('event-selected');
                             }
 
-                            return eventAcceptedClasses.includes(info.event.extendedProps.calendarId, eventAcceptedClasses);
+                            return checkedCalendars.includes(info.event.extendedProps.calendarId, checkedCalendars);
                         },
                         eventClick: function(info) {
                             selectedEvent = info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId;

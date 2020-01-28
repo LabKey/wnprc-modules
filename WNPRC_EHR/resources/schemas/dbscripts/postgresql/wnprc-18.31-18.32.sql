@@ -1,16 +1,18 @@
 DROP TABLE IF EXISTS wnprc.surgery_procedure_rooms;
 CREATE TABLE wnprc.surgery_procedure_rooms
 (
-    room        VARCHAR(50),
-    displayname VARCHAR(100),
-    type        VARCHAR(50),
-    email       VARCHAR(50),
+    room                VARCHAR(50),
+    displayname         VARCHAR(100),
+    type                VARCHAR(50),
+    email               VARCHAR(50),
+    show_by_default     BOOLEAN DEFAULT TRUE,
+    default_bg_color    VARCHAR(20),
     -- Default fields for LabKey.
-    container   entityid NOT NULL,
-    createdby   userid,
-    created     TIMESTAMP,
-    modifiedby  userid,
-    modified    TIMESTAMP,
+    container           entityid NOT NULL,
+    createdby           userid,
+    created             TIMESTAMP,
+    modifiedby          userid,
+    modified            TIMESTAMP,
 
     CONSTRAINT pk_surgery_procedure_rooms PRIMARY KEY (room)
 );
@@ -56,7 +58,6 @@ CREATE TABLE wnprc.surgery_procedure_calendars
     folder_id         VARCHAR(200),
     show_by_default   BOOLEAN DEFAULT TRUE,
     default_bg_color  VARCHAR(20),
-    selected_bg_color VARCHAR(20),
 
     -- Default fields for LabKey.
     container         entityid NOT NULL,

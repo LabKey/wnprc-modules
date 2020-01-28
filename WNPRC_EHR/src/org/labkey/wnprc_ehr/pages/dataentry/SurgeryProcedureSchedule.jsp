@@ -44,13 +44,21 @@
         margin: 4px 4px 0;
     }
 
+    .event-text-light {
+        color: black !important;
+    }
+
+    .event-text-dark {
+        color: white !important;
+    }
+
     .event-selected {
-        border: 1px solid black;
+        border: 1px solid white;
         border-radius: 3px;
     }
 
     .event-selected:before {
-        border: 3px solid red;
+        border: 3px solid black;
         border-radius: 6px;
         background: none;
         content: "";
@@ -62,8 +70,53 @@
         bottom: -4px;
         pointer-events: none;
     }
-
 </style>
+
+<script>
+    function lightOrDark(color) {
+
+        // Variables for red, green, blue values
+        let r, g, b, hsp;
+
+        // Check the format of the color, HEX or RGB?
+        if (color.match(/^rgb/)) {
+
+            // If HEX --> store the red, green, blue values in separate variables
+            color = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/);
+
+            r = color[1];
+            g = color[2];
+            b = color[3];
+        }
+        else {
+
+            // If RGB --> Convert it to HEX: http://gist.github.com/983661
+            color = +("0x" + color.slice(1).replace(
+                    color.length < 5 && /./g, '$&$&'));
+
+            r = color >> 16;
+            g = color >> 8 & 255;
+            b = color & 255;
+        }
+
+        // HSP equation from http://alienryderflex.com/hsp.html
+        hsp = Math.sqrt(
+                0.299 * (r * r) +
+                0.587 * (g * g) +
+                0.114 * (b * b)
+        );
+
+        // Using the HSP value, determine whether the color is light or dark
+        if (hsp>127.5) {
+
+            return 'light';
+        }
+        else {
+
+            return 'dark';
+        }
+    }
+</script>
 
 
 <%
@@ -357,8 +410,8 @@
 </div>
 
 <script>
-    var selectedEvent = {};
-    var calendar = {};
+    let selectedEvent = {};
+    let calendar = {};
     //debugger
     (function() {
         var calendarEl = document.getElementById('calendar');
@@ -447,9 +500,20 @@
                                 }
                             }
 
+                            let backgroundLuminosity = lightOrDark(info.el.style.backgroundColor);
                             if (info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId === selectedEvent) {
+                                if (backgroundLuminosity === 'light') {
+                                    info.el.classList.add('event-text-light');
+                                } else if (backgroundLuminosity === 'dark') {
+                                    info.el.classList.add('event-text-dark');
+                                }
                                 info.el.classList.add('event-selected');
                             } else {
+                                if (backgroundLuminosity === 'light') {
+                                    info.el.classList.add('event-text-light');
+                                } else if (backgroundLuminosity === 'dark') {
+                                    info.el.classList.add('event-text-dark');
+                                }
                                 info.el.classList.remove('event-selected');
                             }
 

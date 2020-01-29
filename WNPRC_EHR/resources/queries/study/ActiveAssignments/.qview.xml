@@ -26,7 +26,7 @@
                 <property name="columnTitle" value="Cage"/>
             </properties>
         </column>
-        <column name="Id/birth">
+        <column name="Id/birth/date">
             <properties>
                 <property name="columnTitle" value="Birth Date"/>
             </properties>

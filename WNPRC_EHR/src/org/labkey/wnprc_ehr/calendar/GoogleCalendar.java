@@ -78,7 +78,7 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         container = c;
     }
 
-    private JSONArray getJsonEventList(List<Event> events) {
+    private JSONArray getJsonEventList(List<Event> events, String calendarId, String backgroundColor) {
         JSONArray jsonEvents = new JSONArray();
 
         for (int i = 0; i < events.size(); i++) {
@@ -89,6 +89,8 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
             jsonEvent.put("start", event.getStart().getDate() != null ? event.getStart().getDate() : event.getStart().getDateTime());
             jsonEvent.put("end", event.getEnd().getDate() != null ? event.getEnd().getDate() : event.getEnd().getDateTime());
             jsonEvent.put("htmlLink", event.getHtmlLink());
+            jsonEvent.put("calendarId", calendarId);
+            jsonEvent.put("backgroundColor", backgroundColor);
             jsonEvent.put("eventId", i);
             jsonEvent.put("eventListSize", events.size());
 
@@ -134,7 +136,7 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 .build();
     }
 
-    private String getCalendarEvents(Calendar calendar, DateTime dateMin, DateTime dateMax, Integer maxResults, String calendarId) throws Exception {
+    private String getCalendarEvents(Calendar calendar, DateTime dateMin, DateTime dateMax, Integer maxResults, String calendarId, String backgroundColor) throws Exception {
         Events events = calendar.events().list(calendarId)
                 .setMaxResults(maxResults)
                 .setTimeMin(dateMin)
@@ -143,18 +145,18 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 .setSingleEvents(true)
                 .execute();
 
-        return getJsonEventList(events.getItems()).toString();
+        return getJsonEventList(events.getItems(), calendarId, backgroundColor).toString();
     }
 
-    public String getCalendarEventsAsJson(String calendarId) throws Exception {
+    public String getCalendarEventsAsJson(String calendarId, String backgroundColor) throws Exception {
         Calendar calendar = getCalendar();
         java.util.Calendar currentDate = java.util.Calendar.getInstance();
         DateTime dateMin = new DateTime(currentDate.getTimeInMillis() - SIX_MONTHS_IN_MILLISECONDS);
         DateTime dateMax = new DateTime(currentDate.getTimeInMillis() + TWO_YEARS_IN_MILLISECONDS);
-        return getCalendarEvents(calendar, dateMin, dateMax, MAX_EVENT_RESULTS, calendarId);
+        return getCalendarEvents(calendar, dateMin, dateMax, MAX_EVENT_RESULTS, calendarId, backgroundColor);
     }
 
-    public String getRoomEventsAsJson(String roomId) throws Exception {
+    public String getRoomEventsAsJson(String roomId, String backgroundColor) throws Exception {
         return null;
     }
 }

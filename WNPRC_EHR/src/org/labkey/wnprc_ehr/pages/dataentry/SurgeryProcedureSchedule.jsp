@@ -412,7 +412,7 @@
 <script>
     let selectedEvent = {};
     let calendar = {};
-    //debugger
+
     (function() {
         var calendarEl = document.getElementById('calendar');
         $(document).ready(function() {
@@ -527,56 +527,36 @@
                         }
                     });
 
+                    calendar.render();
+
+                    let calendarEvents = {};
                     if (data.rows && data.rows.length > 0) {
                         for (let i = 0; i < data.rows.length; i++) {
-                            calendar.addEventSource(function(fetchInfo, successCallback, failureCallback) {
-                                let calId = data.rows[i].calendar_id;
-                                let defaultBgColor = data.rows[i].default_bg_color;
+                            let calId = data.rows[i].calendar_id;
 
-                                LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
-                                        calendarId:     data.rows[i].calendar_id,
-                                        folderId:       data.rows[i].folder_id,
-                                        calendarType:   data.rows[i].calendar_type
-                                    }),
-                                    success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                        if (response.success) {
-                                            document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/check.png';
-                                            successCallback(JSON.parse(response.events).map(function (event) {
-                                                return {
-                                                    title: event.title,
-                                                    start: event.start,
-                                                    end: event.end,
-                                                    calendarId: calId,
-                                                    eventId: event.eventId,
-                                                    backgroundColor: defaultBgColor,
-                                                    rawRowData: event.rawRowData
-                                                }
-                                            }));
-                                        } else {
-                                            document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/delete.png';
-                                            successCallback(JSON.parse("[]").map(function (event) {
-                                                return {
-                                                    title: event.title,
-                                                    start: event.start,
-                                                    end: event.end,
-                                                    calendarId: calId,
-                                                    eventId: event.eventId,
-                                                    backgroundColor: defaultBgColor,
-                                                    rawRowData: event.rawRowData
-                                                }
-                                            }));
-                                        }
-                                    }, this)
-                                });
+                            LABKEY.Ajax.request({
+                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
+                                    calendarId:         data.rows[i].calendar_id,
+                                    calendarType:       data.rows[i].calendar_type,
+                                    backgroundColor:    data.rows[i].default_bg_color
+                                }),
+                                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                    if (response.success) {
+                                        document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/check.png';
+                                        let calEvents = JSON.parse(response.events);
+                                        calendarEvents[calId] = calEvents;
+                                        calendar.addEventSource(calEvents);
+                                    } else {
+                                        document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/delete.png';
+                                    }
+                                }, this)
                             });
                         }
-                        calendar.render();
                     }
                 }
             });
         });
-        //debugger
+
         // Build a lookup index of requests.
         var pendingRequestsIndex = {};
         var pendingRequests = <%= pendingRequests %>;

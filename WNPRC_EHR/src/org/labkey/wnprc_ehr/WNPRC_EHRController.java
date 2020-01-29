@@ -1354,6 +1354,7 @@ public class WNPRC_EHRController extends SpringActionController
     {
         private String calendarId;
         private String calendarType;
+        private String backgroundColor;
 
         public String getCalendarId()
         {
@@ -1374,6 +1375,16 @@ public class WNPRC_EHRController extends SpringActionController
         {
             this.calendarType = calendarType;
         }
+
+        public String getBackgroundColor()
+        {
+            return backgroundColor;
+        }
+
+        public void setBackgroundColor(String backgroundColor)
+        {
+            this.backgroundColor = backgroundColor;
+        }
     }
 
     @ActionNames("FetchSurgeryProcedureOutlookEvents")
@@ -1389,7 +1400,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId(), event.getCalendarType());
+                String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor());
                 response.put("events", office365EventsString);
                 if (office365EventsString != null && office365EventsString.trim().length() > 0)
                 {
@@ -1419,7 +1430,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId(), event.getCalendarType());
+                String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor());
                 response.put("events", googleEventsString);
                 if (googleEventsString != null && googleEventsString.trim().length() > 0)
                 {
@@ -1436,18 +1447,18 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    private String fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType) throws Exception
+    private String fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType, String backgroundColor) throws Exception
     {
         calendar.setUser(getUser());
         calendar.setContainer(getContainer());
         String eventsString = null;
         if (calendarType.equalsIgnoreCase("Office365Resource"))
         {
-            eventsString = calendar.getRoomEventsAsJson(calendarId);
+            eventsString = calendar.getRoomEventsAsJson(calendarId, backgroundColor);
         }
         else
         {
-            eventsString = calendar.getCalendarEventsAsJson(calendarId);
+            eventsString = calendar.getCalendarEventsAsJson(calendarId, backgroundColor);
         }
         return eventsString;
     }

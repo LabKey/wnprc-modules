@@ -502,22 +502,14 @@
 
                             let backgroundBrightness = lightOrDark(info.el.style.backgroundColor);
                             if (info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId === selectedEvent) {
-                                if (backgroundBrightness === 'light') {
-                                    info.el.classList.add('event-text-light');
-                                } else if (backgroundBrightness === 'dark') {
-                                    info.el.classList.add('event-text-dark');
-                                }
+                                info.el.classList.add('event-text-' + backgroundBrightness);
                                 info.el.classList.add('event-selected');
                             } else {
-                                if (backgroundBrightness === 'light') {
-                                    info.el.classList.add('event-text-light');
-                                } else if (backgroundBrightness === 'dark') {
-                                    info.el.classList.add('event-text-dark');
-                                }
+                                info.el.classList.add('event-text-' + backgroundBrightness);
                                 info.el.classList.remove('event-selected');
                             }
 
-                            return checkedCalendars.includes(info.event.extendedProps.calendarId, checkedCalendars);
+                            return checkedCalendars.includes(info.event.extendedProps.calendarId);
                         },
                         eventClick: function(info) {
                             selectedEvent = info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId;

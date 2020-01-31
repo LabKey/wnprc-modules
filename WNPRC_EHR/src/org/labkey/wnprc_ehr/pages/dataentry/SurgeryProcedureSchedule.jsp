@@ -228,9 +228,9 @@
                 <%--<!-- /ko -->--%>
                 <%--<!-- ko if: hold() -->--%>
                 <div style="text-align: right;">
-                    <button class="btn btn-danger" data-bind="click: $root.cancelHeldEvent">Cancel</button>
+                    <button class="btn btn-danger" data-bind="click: $root.cancelEvent">Cancel</button>
                 </div>
-                <%--<a class="btn btn-default" href="{{$parent.cancelHeldEvent}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>--%>
+                <%--<a class="btn btn-default" href="{{$parent.cancelEvent}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>--%>
                 <%--<!-- /ko -->--%>
                 <%--<a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>--%>
                 <%--<a class="btn btn-default" href="{{$parent.viewNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">View Record</a>--%>
@@ -792,7 +792,7 @@
                     }, this)
                 });
             },
-            cancelHeldEvent: function() {
+            cancelEvent: function() {
                 let eventId = selectedEvent.id;
                 let eventSourceId = selectedEvent.source.id;
                 let eventRequestId = selectedEvent.extendedProps.rawRowData.requestid;

@@ -72,7 +72,7 @@
     }
 </style>
 
-<script>
+<script type="text/javascript">
     function lightOrDark(color) {
 
         // Variables for red, green, blue values
@@ -115,6 +115,75 @@
 
             return 'dark';
         }
+    }
+
+    function createRequestObj(action, calendarIdSuffix) {
+        let form = ko.mapping.toJS(WebUtils.VM.form);
+
+        let requestObj;
+        if (action === 'addToCalendar') {
+            let calendarId;
+            if (form.proceduretype === 'surgery') {
+                calendarId = 'surgeries_' + calendarIdSuffix;
+            }
+            else if (form.proceduretype === 'procedure' || form.proceduretype === 'other') {
+                calendarId = 'procedures_' + calendarIdSuffix;
+            }
+            requestObj = {
+                requestId: form.requestid,
+                start: form.date,
+                end: form.enddate,
+                room: form.location,
+                subject: form.animalid + ' ' + form.procedurename,
+                categories: 'Surgeries',
+                assignedTo: form.assignedto,
+                calendarId: calendarId
+            };
+        } else if (action === 'denyRequest') {
+            requestObj = {
+                requestId: form.requestid,
+                QCStateLabel: 'Request: Denied',
+                statusChangeReason: form.statuschangereason
+            }
+        }
+        return requestObj;
+    }
+
+    function scheduleSurgeryProcedure(apiAction, requestObj) {
+        $('#scheduleRequestForm').block({
+            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Processing...',
+            css: {
+                border: 'none',
+                padding: '15px',
+                backgroundColor: '#000',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .5,
+                color: '#fff'
+            }
+        });
+
+        // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
+        // update the study.surgery_procedure, ehr.request, and ehr.task tables
+        LABKEY.Ajax.request({
+            url: LABKEY.ActionURL.buildURL("wnprc_ehr", apiAction, null, requestObj),
+            success: LABKEY.Utils.getCallbackWrapper(function (response)
+            {
+                if (response.success) {
+                    WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
+                    location.reload(true);
+                } else {
+                    alert('There was an error processing your request.');
+                }
+                // Clear the form
+                WebUtils.VM.clearForm();
+                $('#scheduleRequestForm').unblock();
+            }, this),
+            failure: LABKEY.Utils.getCallbackWrapper(function (response)
+            {
+                $('#scheduleRequestForm').unblock();
+            }, this)
+        });
     }
 </script>
 
@@ -503,7 +572,7 @@
                             }
 
                             let backgroundBrightness = lightOrDark(info.el.style.backgroundColor);
-                            if (info.event.extendedProps.id === selectedId) {
+                            if (info.event.id === selectedId) {
                                 info.el.classList.add('event-text-' + backgroundBrightness);
                                 info.el.classList.add('event-selected');
                             } else {
@@ -514,12 +583,12 @@
                             return checkedCalendars.includes(info.event.extendedProps.calendarId);
                         },
                         eventClick: function(info) {
-                            selectedId = info.event.extendedProps.id;
+                            selectedId = info.event.id;
                             selectedEvent = info.event;
                             if (info.event.extendedProps && info.event.extendedProps.rawRowData) {
                                 jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
                                     if (key in WebUtils.VM.taskDetails) {
-                                        if (key === "date" || key === "enddate") { //TODO modified???
+                                        if (key === "date" || key === "enddate") {
                                             value = displayDate(value);
                                         }
                                         WebUtils.VM.taskDetails[key](value);
@@ -701,96 +770,17 @@
                     }
                 });
             },
+            submitForm: function() {
+                let requestObj = createRequestObj('addToCalendar', 'scheduled');
+                scheduleSurgeryProcedure('ScheduleSurgeryProcedure', requestObj);
+            },
             holdForm: function() {
-                $('#scheduleRequestForm').block({
-                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Scheduling...',
-                    css: {
-                        border: 'none',
-                        padding: '15px',
-                        backgroundColor: '#000',
-                        '-webkit-border-radius': '10px',
-                        '-moz-border-radius': '10px',
-                        opacity: .5,
-                        color: '#fff'
-                    }
-                });
-                var form = ko.mapping.toJS(WebUtils.VM.form);
-                // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
-                // update the study.surgery_procedure, ehr.request, and ehr.task tables
-                let calendarId;
-                if (form.proceduretype === 'surgery') {
-                    calendarId = 'surgeries_on_hold';
-                } else if (form.proceduretype === 'procedure' || form.proceduretype === 'other') {
-                    calendarId = 'procedures_on_hold';
-                } else {
-                    //TODO handle the error!
-                }
-                LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ScheduleSurgeryProcedure", null, {
-                        requestId: form.requestid,
-                        start: form.date,
-                        end: form.enddate,
-                        room: form.location,
-                        subject: form.animalid + ' ' + form.procedurename,
-                        categories: 'Surgeries',
-                        assignedTo: form.assignedto,
-                        calendarId: calendarId
-                    }),
-                    success: LABKEY.Utils.getCallbackWrapper(function (response)
-                    {
-                        if (response.success) {
-                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
-                            location.reload(true);
-                        } else {
-                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
-                        }
-                        // Clear the form
-                        WebUtils.VM.clearForm();
-                        $('#scheduleRequestForm').unblock();
-                    }, this),
-                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
-                    {
-                        $('#scheduleRequestForm').unblock();
-                    }, this)
-                });
+                let requestObj = createRequestObj('addToCalendar', 'on_hold');
+                scheduleSurgeryProcedure('ScheduleSurgeryProcedure', requestObj);
             },
             denyForm: function() {
-                $('#scheduleRequestForm').block({
-                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Scheduling...',
-                    css: {
-                        border: 'none',
-                        padding: '15px',
-                        backgroundColor: '#000',
-                        '-webkit-border-radius': '10px',
-                        '-moz-border-radius': '10px',
-                        opacity: .5,
-                        color: '#fff'
-                    }
-                });
-                var form = ko.mapping.toJS(WebUtils.VM.form);
-                LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
-                        requestId: form.requestid,
-                        QCStateLabel: 'Request: Denied',
-                        statusChangeReason: form.statuschangereason
-                    }),
-                    success: LABKEY.Utils.getCallbackWrapper(function (response)
-                    {
-                        if (response.success) {
-                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
-                            location.reload(true);
-                        } else {
-                            alert('There was an error denying the request.');
-                        }
-                        // Clear the form
-                        WebUtils.VM.clearForm();
-                        $('#scheduleRequestForm').unblock();
-                    }, this),
-                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
-                    {
-                        $('#scheduleRequestForm').unblock();
-                    }, this)
-                });
+                let requestObj = createRequestObj('denyRequest', null);
+                scheduleSurgeryProcedure('SurgeryProcedureChangeStatus', requestObj);
             },
             cancelEvent: function() {
                 let eventId = selectedEvent.id;
@@ -875,60 +865,7 @@
                     formType: 'Necropsy',
                     taskid: WebUtils.VM.taskDetails.lsid()
                 });
-            }),
-            submitForm: function() {
-                $('#scheduleRequestForm').block({
-                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Scheduling...',
-                    css: {
-                        border: 'none',
-                        padding: '15px',
-                        backgroundColor: '#000',
-                        '-webkit-border-radius': '10px',
-                        '-moz-border-radius': '10px',
-                        opacity: .5,
-                        color: '#fff'
-                    }
-                });
-                var form = ko.mapping.toJS(WebUtils.VM.form);
-                // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
-                // update the study.surgery_procedure, ehr.request, and ehr.task tables
-                let calendarId;
-                if (form.proceduretype === 'surgery') {
-                    calendarId = 'surgeries_scheduled';
-                } else if (form.proceduretype === 'procedure' || form.proceduretype === 'other') {
-                    calendarId = 'procedures_scheduled';
-                } else {
-                    //TODO handle the error!
-                }
-                LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "ScheduleSurgeryProcedure", null, {
-                        requestId: form.requestid,
-                        start: form.date,
-                        end: form.enddate,
-                        room: form.location,
-                        subject: form.animalid + ' ' + form.procedurename,
-                        categories: 'Surgeries',
-                        assignedTo: form.assignedto,
-                        calendarId: calendarId
-                    }),
-                    success: LABKEY.Utils.getCallbackWrapper(function (response)
-                    {
-                        if (response.success) {
-                            WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
-                            location.reload(true);
-                        } else {
-                            alert('There is already a surgery or procedure scheduled in room ' + form.location + ' during the selected time.');
-                        }
-                        // Clear the form
-                        WebUtils.VM.clearForm();
-                        $('#scheduleRequestForm').unblock();
-                    }, this),
-                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
-                    {
-                        $('#scheduleRequestForm').unblock();
-                    }, this)
-                });
-            }
+            })
         });
         WebUtils.VM.disableForm();
         WebUtils.VM.form.requestid.subscribe(function(val) {

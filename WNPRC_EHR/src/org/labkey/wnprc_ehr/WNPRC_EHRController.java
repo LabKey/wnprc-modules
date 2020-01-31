@@ -1029,6 +1029,7 @@ public class WNPRC_EHRController extends SpringActionController
         private Date start;
         private Date end;
         private String room;
+        private List<String> rooms;
         private String subject;
         private List<String> categories;
         private String assignedTo;
@@ -1052,6 +1053,11 @@ public class WNPRC_EHRController extends SpringActionController
         public String getRoom()
         {
             return room;
+        }
+
+        public List<String> getRooms()
+        {
+            return rooms;
         }
 
         public String getSubject()
@@ -1090,6 +1096,11 @@ public class WNPRC_EHRController extends SpringActionController
         public void setRoom(String room)
         {
             this.room = room;
+        }
+
+        public void setRooms(List<String> rooms)
+        {
+            this.rooms = rooms;
         }
 
         public void setSubject(String title)
@@ -1183,6 +1194,32 @@ public class WNPRC_EHRController extends SpringActionController
                 } finally {
 
                 }
+            }
+            return response;
+        }
+    }
+
+    @ActionNames("SurgeryProcedureDeleteRoomEvent")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class SurgeryProcedureDeleteRoomEventAction extends ApiAction<SurgeryProcedureEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+            Office365Calendar calendar = new Office365Calendar();
+            calendar.setUser(getUser());
+            calendar.setContainer(getContainer());
+            try
+            {
+                calendar.deleteCanceledRoomEvent(event.getRooms(), event.getStart(), event.getEnd());
+                response.put("success", true);
+            }
+            catch (Exception e)
+            {
+                //TODO error logging?
             }
             return response;
         }
@@ -1287,7 +1324,7 @@ public class WNPRC_EHRController extends SpringActionController
                         apptid = (String) spRows.get(0).get("apptid");
                     }
                     Office365Calendar calendar = new Office365Calendar();
-                    calendar.cancelEvent(apptid);
+                    calendar.cancelEvent(apptid, response);
                 }
 
                 transaction.commit();

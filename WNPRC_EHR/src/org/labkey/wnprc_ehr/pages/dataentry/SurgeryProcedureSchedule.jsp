@@ -410,8 +410,10 @@
 </div>
 
 <script>
+    let selectedId;
     let selectedEvent = {};
     let calendar = {};
+    let calendarEvents = {};
 
     (function() {
         var calendarEl = document.getElementById('calendar');
@@ -501,7 +503,7 @@
                             }
 
                             let backgroundBrightness = lightOrDark(info.el.style.backgroundColor);
-                            if (info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId === selectedEvent) {
+                            if (info.event.extendedProps.id === selectedId) {
                                 info.el.classList.add('event-text-' + backgroundBrightness);
                                 info.el.classList.add('event-selected');
                             } else {
@@ -512,7 +514,8 @@
                             return checkedCalendars.includes(info.event.extendedProps.calendarId);
                         },
                         eventClick: function(info) {
-                            selectedEvent = info.event.extendedProps.calendarId + '_' + info.event.extendedProps.eventId;
+                            selectedId = info.event.extendedProps.id;
+                            selectedEvent = info.event;
                             if (info.event.extendedProps && info.event.extendedProps.rawRowData) {
                                 jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
                                     if (key in WebUtils.VM.taskDetails) {
@@ -529,7 +532,6 @@
 
                     calendar.render();
 
-                    let calendarEvents = {};
                     if (data.rows && data.rows.length > 0) {
                         for (let i = 0; i < data.rows.length; i++) {
                             let calId = data.rows[i].calendar_id;
@@ -544,6 +546,7 @@
                                     if (response.success) {
                                         document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/check.png';
                                         let calEvents = JSON.parse(response.events);
+                                        calEvents.id = calId;
                                         calendarEvents[calId] = calEvents;
                                         calendar.addEventSource(calEvents);
                                     } else {
@@ -790,6 +793,9 @@
                 });
             },
             cancelHeldEvent: function() {
+                let eventId = selectedEvent.id;
+                let eventSourceId = selectedEvent.source.id;
+                let eventRequestId = selectedEvent.extendedProps.rawRowData.requestid;
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: WebUtils.VM.taskDetails.requestid(),
@@ -799,8 +805,52 @@
                     success: LABKEY.Utils.getCallbackWrapper(function (response)
                     {
                         if (response.success) {
+                            let eventRooms = response.rooms;
+                            let eventToRemove = calendar.getEventById(eventId);
+                            if (eventToRemove) {
+                                eventToRemove.remove();
+                            }
 
-                            //location.reload(true);
+                            if (eventSourceId !== response.calendar) {
+                                for (let i = calendarEvents[response.calendar].length - 1; i >= 0; i--) {
+                                    if (calendarEvents[response.calendar][i].rawRowData.requestid === eventRequestId) {
+                                        let calEventToRemove = calendar.getEventById(calendarEvents[response.calendar][i].id);
+                                        calendarEvents[response.calendar].splice(i, 1);
+                                        if (calEventToRemove) {
+                                            calEventToRemove.remove();
+                                        }
+                                    }
+                                }
+                            }
+
+                            LABKEY.Ajax.request({
+                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureDeleteRoomEvent", null, {
+                                    rooms: response.rooms,
+                                    start: response.start,
+                                    end: response.end
+                                }),
+                                success: LABKEY.Utils.getCallbackWrapper(function (response)
+                                {
+                                    if (response.success) {
+                                        for (let i = 0; i < eventRooms.length; i++) {
+                                            for (let j = calendarEvents[eventRooms[i]].length - 1; j >= 0 ; j--) {
+                                                if (calendarEvents[eventRooms[i]][j].rawRowData.requestid === eventRequestId) {
+                                                    let roomEventToRemove = calendar.getEventById(calendarEvents[eventRooms[i]][j].id)
+                                                    calendarEvents[eventRooms[i]].splice(j, 1);
+                                                    if (roomEventToRemove) {
+                                                        roomEventToRemove.remove();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        alert('There was an error while trying to cancel the event.');
+                                    }
+                                }, this)
+                            });
+
+                            //TODO refresh Pending Requests section here!!
+
                         } else {
                             alert('There was an error while trying to cancel the event.');
                         }

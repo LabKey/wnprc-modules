@@ -10,6 +10,7 @@ import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
 import microsoft.exchange.webservices.data.core.enumeration.property.LegacyFreeBusyStatus;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import microsoft.exchange.webservices.data.core.enumeration.search.FolderTraversal;
+import microsoft.exchange.webservices.data.core.enumeration.service.DeleteMode;
 import microsoft.exchange.webservices.data.core.response.AttendeeAvailability;
 import microsoft.exchange.webservices.data.core.service.folder.CalendarFolder;
 import microsoft.exchange.webservices.data.core.service.folder.Folder;
@@ -20,6 +21,8 @@ import microsoft.exchange.webservices.data.credential.WebCredentials;
 import microsoft.exchange.webservices.data.misc.availability.AttendeeInfo;
 import microsoft.exchange.webservices.data.misc.availability.GetUserAvailabilityResults;
 import microsoft.exchange.webservices.data.misc.availability.TimeWindow;
+import microsoft.exchange.webservices.data.property.complex.Attendee;
+import microsoft.exchange.webservices.data.property.complex.AttendeeCollection;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
 import microsoft.exchange.webservices.data.property.complex.Mailbox;
@@ -206,9 +209,49 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     public void cancelEvent(String apptId) throws Exception
     {
+        JSONObject response = new JSONObject();
+        response.put("success", false);
+        cancelEvent(apptId, response);
+    }
+
+    public void cancelEvent(String apptId, JSONObject response) throws Exception
+    {
         authenticate();
         Appointment appt = Appointment.bind(service, new ItemId(apptId));
-        appt.cancelMeeting();
+
+        String calendarName = CalendarFolder.bind(service, new FolderId(appt.getParentFolderId().getUniqueId())).getDisplayName();
+
+        AttendeeCollection attendeeCollection = appt.getRequiredAttendees();
+        List<Attendee> attendees = attendeeCollection.getItems();
+        List<String> rooms = new ArrayList<>(attendees.size());
+        for (Attendee attendee: attendees)
+        {
+            rooms.add(attendee.getAddress());
+        }
+        response.put("rooms", rooms);
+        response.put("start", appt.getStart());
+        response.put("end", appt.getEnd());
+        response.put("calendar", calendarName);
+        appt.delete(DeleteMode.MoveToDeletedItems);
+    }
+
+    public void deleteCanceledRoomEvent(List<String> rooms, Date start, Date end) throws Exception
+    {
+        authenticate();
+        CalendarView cv = new CalendarView(start, end);
+        for(String room : rooms)
+        {
+            FolderId calFolderId = new FolderId(WellKnownFolderName.Calendar, new Mailbox(room));
+            FindItemsResults<Appointment> fapts = service.findAppointments(calFolderId, cv);
+            List<Appointment> appts = fapts.getItems();
+            for (Appointment roomAppt : appts)
+            {
+                if (roomAppt.getIsCancelled())
+                {
+                    roomAppt.delete(DeleteMode.MoveToDeletedItems);
+                }
+            }
+        }
     }
 
     private JSONArray getJsonEventList(List<Appointment> events, String calendarName, String backgroundColor) throws Exception
@@ -237,6 +280,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             jsonEvent.put("end", df.format(event.getEnd()));
             jsonEvent.put("calendarId", calendarName);
             jsonEvent.put("backgroundColor", backgroundColor);
+            jsonEvent.put("id", calendarName + "_" + i);
             jsonEvent.put("eventId", i);
             jsonEvent.put("eventListSize", events.size());
 
@@ -299,13 +343,31 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         CalendarView cv = new CalendarView(startDate, endDate);
         FolderId calFolderId = new FolderId(WellKnownFolderName.Calendar, new Mailbox(roomId));
         FindItemsResults<Appointment> fapts = service.findAppointments(calFolderId, cv);
-        return fapts.getItems();
+        List<Appointment> appointments = cleanupCancelledAppointments(fapts.getItems());
+        return appointments;
+    }
+
+    private List<Appointment> cleanupCancelledAppointments(List<Appointment> appts) throws Exception
+    {
+        List<Appointment> filteredAppointments = new ArrayList<>();
+        for (Appointment appt : appts)
+        {
+            if (appt.getIsCancelled())
+            {
+                appt.delete(DeleteMode.MoveToDeletedItems);
+            }
+            else
+            {
+                filteredAppointments.add(appt);
+            }
+        }
+        return filteredAppointments;
     }
 
     private FolderId getFolderIdFromCalendarName(String calendarName) throws Exception
     {
-        FolderId folderId = null;
-        String folderIdString = null;
+        FolderId folderId;
+        String folderIdString;
         try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
         {
             //Check if folder_id is already in the database

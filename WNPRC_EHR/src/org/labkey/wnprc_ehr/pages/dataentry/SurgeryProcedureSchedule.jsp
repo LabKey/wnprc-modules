@@ -220,10 +220,8 @@
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
     SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryProcedureSchedule", "pending");
-    System.out.println("Requests: " + requests);
     JSONArray jsonRequests = requests.getResults().getJSONArray("rows");
     ArrayList<Integer> positionsToRemove = new ArrayList<>();
-    System.out.println("JSON Requests: " + jsonRequests);
     for(int i = 0; i < jsonRequests.length(); i++)
     {
         JSONObject row1 = jsonRequests.getJSONObject(i);
@@ -264,7 +262,7 @@
             try {
                 result = formatter.parse(o1.getString("date")).compareTo(formatter.parse(o2.getString("date")));
             } catch (ParseException pe) {
-                System.out.println("ERROR: " + pe.getStackTrace());
+                System.err.println("ERROR: " + pe.getStackTrace());
                 //Silently fail.... (not a big deal, they just won't be sorted)
             }
             return result;

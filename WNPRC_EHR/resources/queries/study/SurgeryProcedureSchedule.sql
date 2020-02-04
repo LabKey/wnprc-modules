@@ -1,32 +1,29 @@
 /* This query feeds the Surgery Schedule JSP page/calendar. */
 SELECT lsid
-     ,objectid
-     ,requestid
-     ,requestid.rowid AS rowid
-     ,requestid.priority
-     ,createdby.displayname AS requestor
-     ,taskid
-     ,Id                              AS animalid
-     ,Id.Demographics.gender    AS sex
-     ,Id.age.ageFriendly        AS age
-     ,Id.Demographics.weight    AS weight
-     ,Id.Demographics.medical   AS medical
-     ,Id.curLocation.room       AS cur_room
-     ,Id.curLocation.cage       AS cur_cage
-     ,Id.curLocation.cond.title AS cur_cond
-     ,date
-     ,enddate
-     ,proceduretype
-     ,procedurename
-     ,created
-     ,project
-     ,project.protocol          AS protocol
-     ,account
-     ,location
-     ,requestid.qcstate               AS qcstate
-     ,statuschangereason
-     ,comments
+     , objectid
+     , requestid
+     , requestid.rowid           AS rowid
+     , requestid.priority
+     , createdby.displayname     AS requestor
+     , taskid
+     , Id                        AS animalid
+     , Id.Demographics.gender    AS sex
+     , Id.age.ageFriendly        AS age
+     , Id.Demographics.weight    AS weight
+     , Id.Demographics.medical   AS medical
+     , Id.curLocation.room       AS cur_room
+     , Id.curLocation.cage       AS cur_cage
+     , Id.curLocation.cond.title AS cur_cond
+     , date
+     , enddate
+     , proceduretype
+     , procedurename
+     , created
+     , project
+     , project.protocol          AS protocol
+     , account
+     , location
+     , requestid.qcstate         AS qcstate
+     , statuschangereason
+     , comments
 FROM study.surgery_procedure
-
---TODO continue changing to use this sql instead of SurgeryProcedureRequests.sql
---TODO create views for filtering based on qcstate of request/task ids

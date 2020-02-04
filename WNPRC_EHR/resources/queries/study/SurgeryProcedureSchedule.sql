@@ -1,42 +1,32 @@
 /* This query feeds the Surgery Schedule JSP page/calendar. */
 SELECT lsid
-  ,objectid
-  ,requestid
-  ,a.taskid                        AS taskid
-  ,animalid
-  ,animalid.Demographics.gender    AS sex
-  ,animalid.age.ageFriendly        AS age
-  ,animalid.Demographics.weight    AS weight
-  ,animalid.Demographics.medical   AS medical
-  ,animalid.curLocation.room       AS cur_room
-  ,animalid.curLocation.cage       AS cur_cage
-  ,animalid.curLocation.cond.title AS cur_cond
-  ,date
-  ,enddate
-  ,proceduretype
-  ,procedurename
-  ,created
-  ,project
-  ,protocol
-  ,account
-  ,location
-  ,state
-  ,statuschangereason
-FROM (SELECT lsid
-        ,objectid
-        ,requestid
-        ,taskid           AS taskid
-        ,Id               AS animalid
-        ,date
-        ,enddate
-        ,proceduretype
-        ,procedurename
-        ,created
-        ,project
-        ,project.protocol AS protocol
-        ,account
-        ,location
-        ,taskid.qcstate   AS state
-        ,statuschangereason
-      FROM study.surgery_procedure
-      WHERE taskid IS NOT NULL) a
+     ,objectid
+     ,requestid
+     ,requestid.rowid AS rowid
+     ,requestid.priority
+     ,createdby.displayname AS requestor
+     ,taskid
+     ,Id                              AS animalid
+     ,Id.Demographics.gender    AS sex
+     ,Id.age.ageFriendly        AS age
+     ,Id.Demographics.weight    AS weight
+     ,Id.Demographics.medical   AS medical
+     ,Id.curLocation.room       AS cur_room
+     ,Id.curLocation.cage       AS cur_cage
+     ,Id.curLocation.cond.title AS cur_cond
+     ,date
+     ,enddate
+     ,proceduretype
+     ,procedurename
+     ,created
+     ,project
+     ,project.protocol          AS protocol
+     ,account
+     ,location
+     ,requestid.qcstate               AS qcstate
+     ,statuschangereason
+     ,comments
+FROM study.surgery_procedure
+
+--TODO continue changing to use this sql instead of SurgeryProcedureRequests.sql
+--TODO create views for filtering based on qcstate of request/task ids

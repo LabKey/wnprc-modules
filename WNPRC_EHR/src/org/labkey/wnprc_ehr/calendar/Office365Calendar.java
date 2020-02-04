@@ -254,8 +254,9 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         }
     }
 
-    private JSONArray getJsonEventList(List<Appointment> events, String calendarName, String backgroundColor) throws Exception
+    private JSONObject getJsonEventList(List<Appointment> events, String calendarName, String backgroundColor) throws Exception
     {
+        JSONObject eventSourceObject = new JSONObject();
         JSONArray jsonEvents = new JSONArray();
 
         SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
@@ -282,7 +283,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             jsonEvent.put("backgroundColor", backgroundColor);
             jsonEvent.put("id", calendarName + "_" + i);
             jsonEvent.put("eventId", i);
-            jsonEvent.put("eventListSize", events.size());
 
             //Add data for details panel on Surgery Schedule page
             JSONObject rawRowData = new JSONObject();
@@ -292,11 +292,16 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 rawRowData.put("taskid", surgeryInfo.get("taskid"));
                 rawRowData.put("objectid", surgeryInfo.get("objectid"));
                 rawRowData.put("requestid", surgeryInfo.get("requestid"));
+                rawRowData.put("rowid", surgeryInfo.get("rowid"));
+                rawRowData.put("priority", surgeryInfo.get("priority"));
+                rawRowData.put("requestor", surgeryInfo.get("requestor"));
                 rawRowData.put("proceduretype", surgeryInfo.get("proceduretype"));
                 rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
                 rawRowData.put("age", surgeryInfo.get("age"));
                 rawRowData.put("animalid", surgeryInfo.get("animalid"));
+                rawRowData.put("created", surgeryInfo.get("created"));
                 rawRowData.put("date", surgeryInfo.get("date"));
+                rawRowData.put("enddate", surgeryInfo.get("enddate"));
                 rawRowData.put("account", surgeryInfo.get("account"));
                 rawRowData.put("cur_room", surgeryInfo.get("cur_room"));
                 rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
@@ -307,27 +312,29 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 rawRowData.put("protocol", surgeryInfo.get("protocol"));
                 rawRowData.put("sex", surgeryInfo.get("sex"));
                 rawRowData.put("weight", surgeryInfo.get("weight"));
-                rawRowData.put("enddate", surgeryInfo.get("enddate"));
                 rawRowData.put("comments", surgeryInfo.get("comments"));
                 jsonEvent.put("rawRowData", rawRowData);
             }
 
             jsonEvents.put(jsonEvent);
         }
+        eventSourceObject.put("events", jsonEvents);
+        eventSourceObject.put("backgroundColor", backgroundColor);
+        eventSourceObject.put("id", calendarName);
 
-        return jsonEvents;
+        return eventSourceObject;
     }
 
     private String getCalendarEvents(Date startDate, Date endDate, String calendarName, String backgroundColor) throws Exception
     {
         FolderId folderId = getFolderIdFromCalendarName(calendarName);
-        JSONArray jsonEvents = getJsonEventList(getCalendarAppointments(startDate, endDate, folderId), calendarName, backgroundColor);
+        JSONObject jsonEvents = getJsonEventList(getCalendarAppointments(startDate, endDate, folderId), calendarName, backgroundColor);
         return jsonEvents.toString();
     }
 
     private String getRoomEvents(Date startDate, Date endDate, String roomId, String backgroundColor) throws Exception
     {
-        JSONArray jsonEvents = getJsonEventList(getRoomAppointments(startDate, endDate, roomId), roomId, backgroundColor);
+        JSONObject jsonEvents = getJsonEventList(getRoomAppointments(startDate, endDate, roomId), roomId, backgroundColor);
         return jsonEvents.toString();
     }
 

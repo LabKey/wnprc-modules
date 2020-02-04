@@ -117,6 +117,27 @@
         }
     }
 
+    function getCalendarNameFromRoom(room) {
+        return room + '@primate.wisc.edu';
+    }
+
+    function getEventSubject(form) {
+        return form.animalid + ' ' + form.procedurename;
+    }
+
+    function createJSONEvent(requestObj, isRoomEvent) {
+        let event = {};
+        event.title = requestObj.subject;
+        event.start = requestObj.start;
+        event.end = requestObj.end;
+        event.calendarId = isRoomEvent ? getCalendarNameFromRoom(requestObj.room) : requestObj.calendarId;
+        event.backgroundColor = '';
+        event.id = event.calendarId + '_' + calendarEvents[event.calendarId].events.length;
+        event.eventId = calendarEvents[event.calendarId].events.length;
+        event.rawRowData = pendingRequestsIndex[requestObj.requestId];
+        return event;
+    }
+
     function createRequestObj(action, calendarIdSuffix) {
         let form = ko.mapping.toJS(WebUtils.VM.form);
 
@@ -134,7 +155,7 @@
                 start: form.date,
                 end: form.enddate,
                 room: form.location,
-                subject: form.animalid + ' ' + form.procedurename,
+                subject: getEventSubject(form),
                 categories: 'Surgeries',
                 assignedTo: form.assignedto,
                 calendarId: calendarId
@@ -165,13 +186,21 @@
 
         // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
         // update the study.surgery_procedure, ehr.request, and ehr.task tables
+        let mainEventToAdd = createJSONEvent(requestObj, false);
+        let roomEventToAdd = createJSONEvent(requestObj, true);
+        let eventSource = calendar.getEventSourceById(requestObj.calendarId);
+        let roomCalendarName = getCalendarNameFromRoom(requestObj.room);
+        let roomEventSource = calendar.getEventSourceById(roomCalendarName);
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("wnprc_ehr", apiAction, null, requestObj),
             success: LABKEY.Utils.getCallbackWrapper(function (response)
             {
                 if (response.success) {
                     WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
-                    location.reload(true);
+                    calendarEvents[requestObj.calendarId].events.push(mainEventToAdd);
+                    calendar.addEvent(mainEventToAdd, eventSource);
+                    calendarEvents[roomCalendarName].events.push(roomEventToAdd);
+                    calendar.addEvent(roomEventToAdd, roomEventSource);
                 } else {
                     alert('There was an error processing your request.');
                 }
@@ -190,7 +219,7 @@
 
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
-    SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryProcedureRequests", "pending");
+    SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryProcedureSchedule", "pending");
     System.out.println("Requests: " + requests);
     JSONArray jsonRequests = requests.getResults().getJSONArray("rows");
     ArrayList<Integer> positionsToRemove = new ArrayList<>();
@@ -483,6 +512,7 @@
     let selectedEvent = {};
     let calendar = {};
     let calendarEvents = {};
+    let pendingRequestsIndex = {};
 
     (function() {
         var calendarEl = document.getElementById('calendar');
@@ -615,7 +645,6 @@
                                     if (response.success) {
                                         document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/check.png';
                                         let calEvents = JSON.parse(response.events);
-                                        calEvents.id = calId;
                                         calendarEvents[calId] = calEvents;
                                         calendar.addEventSource(calEvents);
                                     } else {
@@ -630,7 +659,6 @@
         });
 
         // Build a lookup index of requests.
-        var pendingRequestsIndex = {};
         var pendingRequests = <%= pendingRequests %>;
         jQuery.each(pendingRequests, function(i, request) {
             pendingRequestsIndex[request.requestid] = request;
@@ -786,6 +814,8 @@
                 let eventId = selectedEvent.id;
                 let eventSourceId = selectedEvent.source.id;
                 let eventRequestId = selectedEvent.extendedProps.rawRowData.requestid;
+                selectedEvent = {};
+                selectedId = null;
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: WebUtils.VM.taskDetails.requestid(),
@@ -802,10 +832,10 @@
                             }
 
                             if (eventSourceId !== response.calendar) {
-                                for (let i = calendarEvents[response.calendar].length - 1; i >= 0; i--) {
-                                    if (calendarEvents[response.calendar][i].rawRowData.requestid === eventRequestId) {
-                                        let calEventToRemove = calendar.getEventById(calendarEvents[response.calendar][i].id);
-                                        calendarEvents[response.calendar].splice(i, 1);
+                                for (let i = calendarEvents[response.calendar].events.length - 1; i >= 0; i--) {
+                                    if (calendarEvents[response.calendar].events[i].rawRowData.requestid === eventRequestId) {
+                                        let calEventToRemove = calendar.getEventById(calendarEvents[response.calendar].events[i].id);
+                                        calendarEvents[response.calendar].events.splice(i, 1);
                                         if (calEventToRemove) {
                                             calEventToRemove.remove();
                                         }
@@ -821,26 +851,44 @@
                                 }),
                                 success: LABKEY.Utils.getCallbackWrapper(function (response)
                                 {
+                                    let removedEventArray = [];
                                     if (response.success) {
                                         for (let i = 0; i < eventRooms.length; i++) {
-                                            for (let j = calendarEvents[eventRooms[i]].length - 1; j >= 0 ; j--) {
-                                                if (calendarEvents[eventRooms[i]][j].rawRowData.requestid === eventRequestId) {
-                                                    let roomEventToRemove = calendar.getEventById(calendarEvents[eventRooms[i]][j].id)
-                                                    calendarEvents[eventRooms[i]].splice(j, 1);
+                                            for (let j = calendarEvents[eventRooms[i]].events.length - 1; j >= 0 ; j--) {
+                                                if (calendarEvents[eventRooms[i]].events[j].rawRowData.requestid === eventRequestId) {
+                                                    let roomEventToRemove = calendar.getEventById(calendarEvents[eventRooms[i]].events[j].id)
+                                                    removedEventArray = calendarEvents[eventRooms[i]].events.splice(j, 1);
                                                     if (roomEventToRemove) {
                                                         roomEventToRemove.remove();
                                                     }
                                                 }
                                             }
                                         }
+                                        let removedEvent = removedEventArray.length > 0 ? removedEventArray[0] : null;
+                                        if (removedEvent) {
+                                            let newPendingRequestRow = new WebUtils.Models.TableRow({
+                                                data: [
+                                                        removedEvent.rawRowData.rowid,
+                                                        removedEvent.rawRowData.priority,
+                                                        removedEvent.rawRowData.animalid,
+                                                        removedEvent.rawRowData.requestor,
+                                                        displayDate(removedEvent.rawRowData.created),
+                                                        displayDateTime(removedEvent.rawRowData.date),
+                                                        displayDateTime(removedEvent.rawRowData.enddate)
+                                                ],
+                                                otherData: removedEvent.rawRowData,
+                                                warn: (removedEvent.rawRowData.priority === 'ASAP'),
+                                                err:  (removedEvent.rawRowData.priority === 'Stat'),
+                                                success: (removedEvent.rawRowData.priority === 'Routine')
+                                            });
+                                            WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
+                                            pendingRequestsIndex[removedEvent.rawRowData.requestid] = removedEvent.rawRowData;
+                                        }
                                     } else {
                                         alert('There was an error while trying to cancel the event.');
                                     }
                                 }, this)
                             });
-
-                            //TODO refresh Pending Requests section here!!
-
                         } else {
                             alert('There was an error while trying to cancel the event.');
                         }

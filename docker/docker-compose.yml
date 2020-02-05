@@ -45,7 +45,7 @@ services:
       - network1
 
   labkey:
-    image: wnprcehr/labkey:17.2
+    image: wnprcehr/labkey:18.3
     depends_on:
       - "mailserver"
       - "postgres"

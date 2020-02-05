@@ -1,4 +1,4 @@
-FROM store/oracle/serverjre:8
+FROM openjdk:12.0.1-jdk-oraclelinux7
 
 ENV LANG en_US.utf8
 

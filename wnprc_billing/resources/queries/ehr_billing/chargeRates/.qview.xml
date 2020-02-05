@@ -4,7 +4,6 @@
         <column name="unitCost"/>
         <column name="startDate"/>
         <column name="endDate"/>
-        <column name="serviceCode"/>
         <column name="description"/>
         <column name="genCredits"/>
         <column name="groupName"/>

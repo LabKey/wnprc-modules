@@ -1,0 +1,15 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="chargeableItemCategories" tableDbType="TABLE">
+                <tableTitle>Chargeable Item Categories</tableTitle>
+                <auditLogging>DETAILED</auditLogging>
+                <columns>
+                    <column columnName="name">
+                        <columnTitle>Category</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

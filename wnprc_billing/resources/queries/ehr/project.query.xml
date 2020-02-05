@@ -7,8 +7,9 @@
                         <isHidden>false</isHidden>
                         <fk>
                             <fkDbSchema>ehr</fkDbSchema>
-                            <fkTable>investigators</fkTable>
+                            <fkTable>investigatorsWithName</fkTable>
                             <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>investigatorWithName</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="account">

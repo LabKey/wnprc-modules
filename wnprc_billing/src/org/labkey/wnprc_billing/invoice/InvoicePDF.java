@@ -73,8 +73,8 @@ public class InvoicePDF extends FPDF
         List<FormattedLineItem> items = new ArrayList<>();
         Calendar calendarCurrent = Calendar.getInstance();
         Calendar calendarItem = Calendar.getInstance();
-        boolean isFirstItem =true;
-        String currentServiceCenter=null;
+        boolean isFirstItem = true;
+        String currentGroup = null;
         float subTotal = 0;
 
         for (InvoicedItem invoicedItem : invoicedItems)
@@ -83,16 +83,16 @@ public class InvoicePDF extends FPDF
 
             calendarItem.setTime(invoicedItem.getDate());
             boolean isDateChange = isFirstItem || calendarCurrent.get(Calendar.DAY_OF_MONTH) != calendarItem.get(Calendar.DAY_OF_MONTH);
-            boolean isServiceCenterChange = false;
-            if(invoicedItem.getServicecenter()== null){
-                isServiceCenterChange = currentServiceCenter != null;
+            boolean isGroupChange = false;
+            if(invoicedItem.getGroupName()== null){
+                isGroupChange = currentGroup != null;
             }
             else {
-                isServiceCenterChange = !invoicedItem.getServicecenter().equals(currentServiceCenter);
+                isGroupChange = !invoicedItem.getGroupName().equals(currentGroup);
             }
 
             if(includeSubtotal) {
-                if((isDateChange || isServiceCenterChange) && !isFirstItem ){
+                if((isDateChange || isGroupChange) && !isFirstItem ){
                     items.add(new FormattedLineItem(null,"Sub total:", null,   null, subTotal, true));
                     subTotal = 0;
                 }
@@ -100,14 +100,14 @@ public class InvoicePDF extends FPDF
 
             if (isDateChange){
                 items.add(new FormattedLineItem(invoicedItem.getDate(), groupHeader, null, null, null, true));
-                currentServiceCenter = invoicedItem.getServicecenter();
+                currentGroup = invoicedItem.getGroupName();
                 calendarCurrent.setTime(invoicedItem.getDate());
                 isFirstItem = false;
             }
 
-            if (!isDateChange && isServiceCenterChange){
+            if (!isDateChange && isGroupChange){
                 items.add(new FormattedLineItem(null, groupHeader, null, null, null, true));
-                currentServiceCenter = invoicedItem.getServicecenter();
+                currentGroup = invoicedItem.getGroupName();
             }
 
             subTotal += invoicedItem.getTotalCost();

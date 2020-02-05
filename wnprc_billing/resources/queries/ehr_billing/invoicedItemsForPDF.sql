@@ -11,6 +11,5 @@ SELECT
        date,
        invoiceDate,
        category,
-       servicecenter,
        invoiceNumber
 FROM ehr_billing.invoicedItems

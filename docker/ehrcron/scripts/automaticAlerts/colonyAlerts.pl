@@ -355,21 +355,21 @@ $results = Labkey::Query::selectRows(
     -viewName => 'No Active Assignments',
     -sort => 'Id',
     -requiredVersion => 8.3,
-    #-debug => 1,
+    -debug => 1,
 );
 
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." living animals without any active assignments:</b><br>";
-	
+
 	my @ids;
 
     foreach my $row (@{$results->{rows}}){
-    	push(@ids, $row->{'Id'});   	
+    	push(@ids, $row->{'Id'});
         $email_html .= $row->{'Id'}."<br>";
     };
 
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assignments'>Click here to view these animals</a></p>\n";    
+    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assignments'>Click here to view these animals</a></p>\n";
     $email_html .= '<hr>';
 }
 

@@ -28,7 +28,7 @@ public abstract class AbstractMiscChargesFormType extends TaskForm
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/ChargeItemField.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/InvestigatorField.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/MiscChargesDateField.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/ChargeTypeField.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/ChargeGroupField.js"));
         addClientDependency(ClientDependency.fromPath("ehr_billing/data/sources/EHR_BillingDefault.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/MiscChargesDebitAcctEntryField.js"));
 

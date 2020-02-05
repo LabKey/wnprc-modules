@@ -313,6 +313,7 @@ EHR.reports.breeding_encounters = function(panel, tab) {
 //function to directly add qwp to dom see ticket 38440
 addQueryWebPart = function(parentElement, config) {
  var targetElement = parentElement.getEl().createChild({tag: 'div'});
+ targetElement.addCls('labkeyQueryWebPartToRemove');
  config.renderTo = Ext4.id(targetElement, "queryWebPart");
 
  new LABKEY.QueryWebPart(config);
@@ -1042,6 +1043,7 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
 
     };
 })();
+
 
 (function() {
     var abstractReport = EHR.reports['abstract'];

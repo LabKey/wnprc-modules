@@ -31,21 +31,13 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                 columnConfig: {
                     width: 250
                 },
-                xtype: 'ehr_billingRowObserverEntryField',
+                xtype: 'wnprc_billing-investigatorfield',
                 lookup: {
-                    schemaName: 'ehr_billing',
-                    queryName: 'aliases',
-                    keyColumn: 'investigatorName',
-                    displayColumn: 'investigatorName',
-                    columns: 'alias, investigatorName'
-                },
-                editorConfig: {
-                    caseSensitive: false,
-                    id: 'wnprc_billing-debitAcct-investigator',
-                    valueField: 'investigatorName',
-                    displayField: 'investigatorName',
-                    observedField: 'debitedaccount',
-                    observerLookupField: 'alias'
+                    schemaName: 'ehr',
+                    queryName: 'aliasesWithInvestigators',
+                    keyColumn: 'investigatorWithName',
+                    columns: 'investigatorWithName',
+                    displayColumn: 'investigatorWithName'
                 }
             },
             chargeId: {
@@ -57,14 +49,6 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                 },
                 lookup: {
                     columns: 'rowId, name, chargeCategoryId, departmentCode, startDate, endDate'
-                },
-                editorConfig: {
-                    caseSensitive: false,
-                    id: 'ehr_billing-nonAnimalCharges-chargeId',
-                    valueField: 'rowId',
-                    displayField: 'name',
-                    observedField: 'chargetype',
-                    observerLookupField: 'departmentCode'
                 }
             },
             date: {
@@ -74,9 +58,9 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                     width: 125
                 }
             },
-            chargetype: {
+            chargeGroup: {
                 hidden: false,
-                xtype: 'wnprc_billing-chargetypeentryfield',
+                xtype: 'wnprc_billing-chargegroupentryfield',
                 columnConfig: {
                     width: 175
                 }
@@ -90,13 +74,15 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                     width: 200
                 }
             },
-            chargeCategory: {
+            chargetype: {
                 hidden: false,
                 columnConfig: {
                     width: 125
                 }
             },
-
+            chargeCategory: {
+                hidden: true
+            }
         }
     }
 });

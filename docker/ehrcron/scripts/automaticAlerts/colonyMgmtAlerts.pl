@@ -34,7 +34,7 @@ my $from = 'ehr-no-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -61,7 +61,7 @@ my $email_html = "This email contains a series of automatic alerts about the WNP
 my $results;
 
 #first we find all living animals without a weight:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -88,7 +88,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all occupied cages without dimensions:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -112,7 +112,7 @@ if(@{$results->{rows}}){
 }
 
 #then we list all animals in pc:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -163,7 +163,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all records with potential housing condition problems
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -193,7 +193,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all animals with cage size problems
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -216,7 +216,7 @@ if(@{$results->{rows}}){
 }
 
 #then we find all animals lacking any assignments
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -243,7 +243,7 @@ if(@{$results->{rows}}){
 
 
 #we find any active assignment where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -263,7 +263,7 @@ if(@{$results->{rows}}){
 }	
 
 #we find any active assignment where the project lacks a valid protocol
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -284,7 +284,7 @@ if(@{$results->{rows}}){
 }
 
 #we find any duplicate active assignments
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -302,7 +302,7 @@ if(@{$results->{rows}}){
 
 
 #we find animals with hold codes, but not on pending 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -327,7 +327,7 @@ if(@{$results->{rows}}){
 
 
 #we find protocols nearing the animal limit
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -355,7 +355,7 @@ if(@{$results->{rows}}){
 }
 
 #we find protocols nearing the animal limit
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -390,7 +390,7 @@ if(@{$results->{rows}}){
 #close HTML;
 #die;
 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -requiredVersion => 8.3,
     -containerPath => $studyContainer,

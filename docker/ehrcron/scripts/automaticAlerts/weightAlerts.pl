@@ -34,7 +34,7 @@ my $from = 'ehr-no-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use LabKey::Query;
+use Labkey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -63,7 +63,7 @@ my $results;
 
 
 #first we find all living animals without a weight:
-$results = LabKey::Query::selectRows(
+$results = Labkey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -111,7 +111,7 @@ sub processWeights {
 	my $pctFilter = shift;
 	my $pct = shift;
 	
-	$results = LabKey::Query::selectRows(
+	$results = Labkey::Query::selectRows(
 	    -baseUrl => $baseUrl,
 	    -containerPath => $studyContainer,
 	    -schemaName => 'study',
@@ -171,7 +171,7 @@ sub processWeights {
 #print HTML $email_html;
 #close HTML;
 
-$results = LabKey::Query::selectRows(
+$results = Labkey::Query::selectRows(
     -baseUrl => $baseUrl,
     -requiredVersion => 8.3,
     -containerPath => $studyContainer,

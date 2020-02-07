@@ -133,7 +133,7 @@ $email_html .= "<b>Data Entry Stats:</b><p>";
 #);
 
 #if(@{$results->{rows}}){	
-#	$email_html .= "Number of Records Created Yesterday Through LabKey: <br>\n";
+#	$email_html .= "Number of Records Created Yesterday Through Labkey: <br>\n";
 #    foreach my $row (@{$results->{rows}}){
 #        $email_html .= $row->{'label'}.": ".$row->{'total'}."<br>\n";
 #    };

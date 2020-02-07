@@ -33,7 +33,7 @@ my $from = 'ehr-no-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use LabKey::Query;
+use Labkey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -66,7 +66,7 @@ $lastRun = sprintf("%04d-%02d-%02d %02d:%02d", $lastRun->year+1900, ($lastRun->m
 
 
 #we find any record requested since the last email
-$results = LabKey::Query::selectRows(
+$results = Labkey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -93,7 +93,7 @@ $email_html .= "<hr>\n";
 
 
 #we find any requests not yet approved
-$results = LabKey::Query::selectRows(
+$results = Labkey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -118,7 +118,7 @@ $email_html .= "<hr>\n";
 
 
 #we find any record not completed where the date requested is today
-$results = LabKey::Query::selectRows(
+$results = Labkey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -143,7 +143,7 @@ if(@{$results->{rows}}){
 #close HTML;
 #die;
 
-$results = LabKey::Query::selectRows(
+$results = Labkey::Query::selectRows(
     -baseUrl => $baseUrl,
     -requiredVersion => 8.3,
     -containerPath => $studyContainer,

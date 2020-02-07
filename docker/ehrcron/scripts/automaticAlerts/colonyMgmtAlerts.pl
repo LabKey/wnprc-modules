@@ -216,31 +216,30 @@ if(@{$results->{rows}}){
 }
 
 #then we find all animals lacking any assignments
-#temporarily disbling this per IDS ticket 7267 and LK ticket 39601
-#$results = Labkey::Query::selectRows(
-#    -baseUrl => $baseUrl,
-#    -containerPath => $studyContainer,
-#    -schemaName => 'study',
-#    -queryName => 'Demographics',
-#    -viewName => 'No Active Assigns',
-#    -requiredVersion => 8.3,
-    #-debug => 1,
-#);
+$results = Labkey::Query::selectRows(
+    -baseUrl => $baseUrl,
+    -containerPath => $studyContainer,
+    -schemaName => 'study',
+    -queryName => 'Demographics',
+    -viewName => 'No Active Assigns',
+    -requiredVersion => 8.3,
+    -debug => 1,
+);
 
 
-#if(@{$results->{rows}}){
-#	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." living animals without any active assignments:</b><br>";
-#	
-#	my @ids;
-#
-#    foreach my $row (@{$results->{rows}}){
-#    	push(@ids, $row->{'Id'});   	
-#        $email_html .= $row->{'Id'}."<br>";
-#    };
-#
-#    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns'>Click here to view these animals</a></p>\n";    
-#    $email_html .= '<hr>';
-#}
+if(@{$results->{rows}}){
+	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." living animals without any active assignments:</b><br>";
+
+	my @ids;
+
+    foreach my $row (@{$results->{rows}}){
+    	push(@ids, $row->{'Id'});
+        $email_html .= $row->{'Id'}."<br>";
+    };
+
+    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns'>Click here to view these animals</a></p>\n";
+    $email_html .= '<hr>';
+}
 
 
 #we find any active assignment where the animal is not alive

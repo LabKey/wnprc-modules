@@ -122,7 +122,7 @@ exports.init = function (EHR) {
      */
     EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, function (helper, scriptErrors, row) {
         var species;
-        if (row.Id && !helper.isQuickValidation() && !helper.isETL()) {
+        if (row.Id && !helper.isETL()) {
             if (row.Id.match(/(^rh([0-9]{4})$)|(^r([0-9]{5})$)|(^rh-([0-9]{3})$)|(^rh[a-z]{2}([0-9]{2})$)/))
                 species = 'Rhesus';
             else if (row.Id.match(/(^cy?([0-9]{4,5})$)|(^c([0-9]{5})$)/))

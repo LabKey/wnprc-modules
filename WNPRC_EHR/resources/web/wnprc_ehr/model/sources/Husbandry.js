@@ -111,6 +111,345 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             }
 
         },
+        'study.waterGiven':{
+            Id: {
+                hidden :true,
+                shownInGrid: false
+            },
+            date: {
+                hidden :true,
+                shownInGrid: false
+            },
+            project:{
+                hidden: true
+                //allowBlank: false
+            },
+            volume: {
+                allowBlank: false
+            },
+            vol_units: {
+                defaultValue: 'mL'
+
+            },
+            route: {
+                defaultValue : 'oral'
+            },
+            location:{
+                defaultValue: 'lab',
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'water_location',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+                    sort: 'sort_order'
+                }
+            },
+            assignTo:{
+                defaultValue: 'researchstaff',
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'husbandry_assigned',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+                    sort: 'sort_order'
+                }
+            },
+            remarks :{
+                xtype: 'ehr-remarkfield'
+            },
+            performedby:{
+                allowBlank: false
+            }
+        },
+        'study.weight':{
+            project: {
+                xtype: 'wnprc-projectentryfield',
+                editable : true,
+                hidden: false,
+                disable: false,
+                shownInGrid: true,
+                useNull: true,
+                lookup: {
+                    columns: 'project,name,displayName,protocol'
+                },
+                columnConfig: {
+                    width: 120
+                }
+            },
+            date: {
+                xtype: 'xdatetime',
+                noSaveInTemplateByDefault: true,
+                columnConfig: {
+                    fixed: true,
+                    width: 130
+                }
+            },
+            weight:{
+                allowBlank :true
+            }
+
+        },
+        'study.chairing':{
+            Id: {
+                hidden : true
+            },
+            date: {
+                hidden : true
+            },
+            location: {
+                editorConfig : {
+                    id: 'chairingLocation',
+                    listeners: {
+                        select: function (field, val) {
+                            if (field) {
+                                var chairingStartTime = Ext4.getCmp('chairingStartTime');
+                                chairingStartTime.setValue((new Date()).format('Y-m-d H:i'));
+                            }
+                        }
+                    }
+                }
+
+            },
+            /*restraintType: {
+
+                editorConfig :{
+                    id: 'restraintType',
+                    listeners:{
+                        select: function(field, val){
+
+
+                            if (field) {
+                                var restraintStartTime = Ext4.getCmp('restraintStartTime');
+                                var restraintEndTime = Ext4.getCmp('restraintEndTime');
+                                var locationField = Ext4.getCmp('location');
+
+                                switch (field.value){
+                                    case 'Long Term Chairing':
+                                        restraintStartTime.show();
+                                        restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
+                                        restraintEndTime.show();
+                                        restraintEndTime.setValue(new Date());
+                                        locationField.show();
+
+                                    break;
+
+                                    case 'Short Term Chairing':
+                                        var starTime = new Date();
+                                       // var endTime = new Date (starTime);
+                                       // endTime.setMinutes(starTime.getMinutes()+30);
+                                        restraintStartTime.show();
+                                        restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
+                                        restraintEndTime.show();
+                                        //restraintEndTime.setValue(endTime);
+                                        locationField.setValue('');
+                                        locationField.hide();
+                                    break;
+                                    default :
+                                        restraintStartTime.setValue('');
+                                        restraintEndTime.setValue('');
+                                        locationField.setValue('');
+                                        restraintStartTime.hide();
+                                        restraintEndTime.hide();
+                                        locationField.hide();
+
+
+
+
+
+                                }
+
+
+                                /!*if(field.value === 'Long Term Chairing') {
+                                    restraintStartTime.show();
+                                    restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
+                                    restraintEndTime.show();
+                                    restraintEndTime.setValue(new Date());
+                                    locationField.show();
+
+                                } else {
+                                    restraintStartTime.setValue('');
+                                    restraintEndTime.setValue('');
+                                    locationField.setValue('');
+                                    restraintStartTime.hide();
+                                    restraintEndTime.hide();
+                                    locationField.hide();
+                                }
+                                if(field.value === 'Short Term Chairing') {
+                                    var starTime = new Date();
+                                    var endTime = new Date (starTime);
+                                    endTime.setMinutes(starTime.getMinutes()+30);
+                                    restraintStartTime.show();
+                                    restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
+                                    restraintEndTime.show();
+                                    restraintEndTime.setValue(endTime);
+                                } else {
+                                    restraintStartTime.setValue('');
+                                    restraintEndTime.setValue('');
+                                    restraintStartTime.hide();
+                                    restraintEndTime.hide();
+
+                                }*!/
+                            }
+
+                        }
+                    }
+                }
+            },*/
+            chairingStartTime: {
+                xtype: 'xdatetime',
+                extFormat:'Y-m-d H:i',
+                hidden: false,
+               // hideMode: 'offsets',
+                editorConfig : {
+                    id : 'chairingStartTime',
+                    listeners: {
+                        change :function(field, val){
+                            var restraintEndTime = Ext4.getCmp('chairingEndTime');
+                            var startTime = new Date(val);
+                            var endTime = new Date (startTime);
+                            endTime.setMinutes(startTime.getMinutes()+30);
+                            restraintEndTime.setValue(endTime);
+                        }
+                    }
+                },
+                setInitialValue: function(v) {
+                    var date = (new Date());
+                    return v || date;
+                }
+
+
+            },
+            chairingEndTime: {
+                xtype: 'xdatetime',
+                extFormat:'Y-m-d H:i',
+                hidden: false,
+                hideMode: 'offsets',
+                editorConfig : {
+                    id : 'chairingEndTime',
+                    listeners: {
+
+                    }
+                }
+
+
+            },
+            location: {
+                helpPopup : 'Location of longest chairing',
+                hidden: false,
+                editorConfig : {
+                    id : 'location',
+                    listeners: {
+                        render: function (field) {
+                            //field.hide();
+
+                        }
+                    }
+                }
+
+
+            }
+
+        },
+        'study.restraints':{
+            Id:{
+                hidden : true
+            },
+            date: {
+                hidden :true
+            }
+
+        },
+        'study.waterOrders':{
+            date:{
+                xtype: 'datefield',
+                header: 'Start Date',
+                extFormat: 'Y-m-d',
+                allowBlank: false,
+                editable: true,
+                columnConfig: {
+                    width:110
+                },
+                editorConfig: {
+                    minValue: new Date()
+                }
+            },
+            enddate:{
+                xtype: 'datefield',
+                header: 'End Date',
+                extFormat: 'Y-m-d',
+              //  allowBlank: false,
+                editable: true,
+                columnConfig: {
+                    width:110
+                },
+                editorConfig: {
+                    minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
+                }
+            },
+            waterSource:{
+                defaultValue: 'regulated',
+                allowBlank: 'false'
+
+            },
+            volume:{
+                xtype: 'textfield',
+                header: 'Volume'
+
+
+            },
+            assignedTo:{
+                allowBlank: false
+            },
+            frequency:{
+                allowBlank: false,
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'husbandry_frequency',
+                    keyColumn: 'rowid',
+                    displayColumn: 'meaning',
+                    sort: 'sort_order'
+                }
+            }
+
+
+
+        },
+        'study.waterAmount':{
+            Id:{
+                hidden: true,
+                shownInGrid: false
+            },
+            date:{
+                    xtype: 'datefield',
+                    header: 'Date',
+                    extFormat: 'Y-m-d',
+                    allowBlank: false,
+                    editable: true,
+                    columnConfig: {
+                        width:110
+                    },
+                    editorConfig: {
+                        minValue: new Date()
+                    }
+            },
+            project:{
+                hidden: true,
+                shownInGrid: false
+            },
+            assignedTo:{
+                allowBlank: false
+            },
+            frequency:{
+                allowBlank: false,
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'husbandry_frequency',
+                    keyColumn: 'rowid',
+                    displayColumn: 'meaning',
+                    sort: 'sort_order'
+                }
+            }
+        },
         'ehr.requests':{
             priority:{
                 hidden: true

@@ -12,6 +12,7 @@
 <%
     JspPage view = (JspPage) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
+    Integer numberOfRenders =view.publicNumberOfRenders;
 %>
 
 <style type="text/css">
@@ -52,6 +53,12 @@
 </style>
 
 <script type="application/javascript">
+    console.log ("numberofRenders" + "<%=numberOfRenders %>");
+    let $numberOfRenders = "<%=numberOfRenders %>";
+    if ($numberOfRenders>0){
+       // ko.cleanNode($element[0]);
+
+    }
     var WebUtils = WebUtils || {};
     WebUtils.VM = {};
     var $ = jQuery;

@@ -1,0 +1,27 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="restraints" tableDbType="TABLE">
+                <tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <titleColumn>caseno</titleColumn>
+                <columns>
+                    <column columnName="restraintType">
+                        <columnTitle>Restraint Type</columnTitle>
+                        <description>Restraint Type</description>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+
+                </columns>
+                <tableTitle>restraints</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

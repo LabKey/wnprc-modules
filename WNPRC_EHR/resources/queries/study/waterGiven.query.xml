@@ -1,0 +1,75 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="waterGiven" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="project">
+
+                    </column>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="volume">
+                    </column>
+                    <column columnName="vol_units">
+                        <columnTitle>Volume Units</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>volume_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="location">
+                        <columnTitle>Location</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>location</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+
+                    </column>
+                    <column columnName="route">
+                        <columnTitle>Route</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>routes</fkTable>
+                            <fkColumnName>route</fkColumnName>
+                        </fk>
+
+                    </column>
+                    <column columnName="assignto">
+                        <columnTitle>Assign To</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>assign_to</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+
+                    </column>
+                    <column columnName="room">
+                        <columnTitle>Room</columnTitle>
+                    </column>
+                    <column columnName="MostRecentWeight">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>demographicsMostRecentWeight</fkTable>
+                            <fkColumnName>MostRecentWeight</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

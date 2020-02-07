@@ -23,12 +23,15 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
@@ -72,6 +75,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             } else if (table.getName().equalsIgnoreCase("housing") && table.getSchema().getName().equalsIgnoreCase("study")) {
                 customizeHousingTable((AbstractTableInfo) table);
             }
+            else if (table.getName().equalsIgnoreCase("waterOrders"))
+                appendEnddateFuture((AbstractTableInfo) table, "enddate");
+
         }
     }
 
@@ -418,6 +424,34 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         return null;
+    }
+
+    private  void appendEnddateFuture(AbstractTableInfo ti, String sourceColName)
+    {
+        ColumnInfo sourceCol = ti.getColumn(sourceColName);
+        if (sourceCol == null)
+        {
+            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            return;
+        }
+
+        String name = sourceCol.getName();
+        if (ti.getColumn(name + "CoalescedFuture") == null)
+        {
+            SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn timestampadd(SQL_TSI_DAY, 365, {fn curdate()})}) as date)");
+            //SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn curdate()} + integer '365')  as date)");
+            ExprColumn col = new ExprColumn(ti, name + "CoalescedFuture", sql, JdbcType.DATE);
+            col.setCalculated(true);
+            col.setUserEditable(false);
+            col.setHidden(true);
+            col.setLabel(col.getLabel() + ", CoalescedFuture");
+
+            if (sourceCol.getFormat() != null)
+                col.setFormat(sourceCol.getFormat());
+
+            ti.addColumn(col);
+        }
+
     }
 
     //TODO: Look how to use another UI to allow for better support for virtual columns

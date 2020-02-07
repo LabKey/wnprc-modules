@@ -1,0 +1,25 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Water Amount" tableDbType="TABLE">
+
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="amount">
+
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd</formatString>
+                        <!--<columnTitle>Date</columnTitle>-->
+                        <!--<nullable>false</nullable>-->
+                        <!--<propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>-->
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

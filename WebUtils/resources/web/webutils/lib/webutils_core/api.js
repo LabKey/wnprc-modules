@@ -127,13 +127,15 @@ WebUtils.API = (function(){
             params['query.columns'] = columns;
         }
 
+        /*
          if (config.parameters) {
-             for (var propName in config.parameters) {
-                 if (config.parameters.hasOwnProperty(propName)) {
-                    params['query.param.' + propName] = config.parameters[propName];
-                 }
-             }
+         for (var propName in config.parameters) {
+         if (config.parameters.hasOwnProperty(propName)) {
+         dataObject[config.dataRegionName + '.param.' + propName] = config.parameters[propName];
          }
+         }
+         }
+         */
 
 
         params = $.param(params);

@@ -525,6 +525,42 @@
                 success: function(data){
                     if (data.rows && data.rows.length > 0) {
                         let calendarChecklist = document.getElementById('calendar-checklist');
+
+                        let div = document.createElement('div');
+                        let checkbox = document.createElement('input');
+                        let label = document.createElement('label');
+                        let description = document.createTextNode('Select All');
+                        div.id = 'select_all_div';
+                        checkbox.type = 'checkbox';
+                        checkbox.id = 'select_all_checkbox';
+                        checkbox.checked = false;
+                        checkbox.value = '';
+                        checkbox.addEventListener('change', function() {
+                            let isChecked = document.getElementById('select_all_checkbox').checked;
+                            if (calendarEvents) {
+                                for (let cal in calendarEvents) {
+                                    if (calendarEvents.hasOwnProperty(cal)) {
+                                        document.getElementById(cal).checked = isChecked;
+                                    }
+                                }
+                            }
+
+                            if (calendar) {
+                                calendar.rerenderEvents();
+                            }
+                        });
+
+                        checkbox.style.display = 'inline-block';
+                        checkbox.style.cssFloat = 'left';
+                        label.for = checkbox.id;
+                        label.style.marginTop = '3px';
+                        label.appendChild(description);
+
+                        div.appendChild(checkbox);
+                        div.appendChild(label);
+
+                        calendarChecklist.appendChild(div);
+
                         for (let i = 0; i < data.rows.length; i++) {
 
                             let div = document.createElement('div');

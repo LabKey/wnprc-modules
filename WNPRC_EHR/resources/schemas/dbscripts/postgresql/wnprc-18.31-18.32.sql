@@ -69,7 +69,7 @@ CREATE TABLE wnprc.surgery_procedure_calendars
     CONSTRAINT pk_surgery_procedure_calendars PRIMARY KEY (calendar_id)
 );
 
-DELETE FROM study.qcstate WHERE label = 'Request: On Hold';
-
-INSERT INTO study.qcstate (label, description, container, publicdata)
-VALUES ('Request: On Hold', 'Request has been put on hold', '29e3860b-02b5-102d-b524-493dbd27b599', FALSE);
+-- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';
+--
+-- INSERT INTO study.qcstate (label, description, container, publicdata)
+-- VALUES ('Request: On Hold', 'Request has been put on hold', '29e3860b-02b5-102d-b524-493dbd27b599', FALSE);

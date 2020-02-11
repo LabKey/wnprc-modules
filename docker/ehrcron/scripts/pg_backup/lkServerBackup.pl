@@ -100,11 +100,14 @@ use Config::Abstract::Ini;
 use Archive::Tar;
 use Log::Rolling;
 use Data::Dumper;
-use Labkey::Query;
+use LabKey::Query;
 use File::Touch;
 use File::Path qw(make_path);
 use Cwd;
 use Cwd qw(chdir);
+
+# ignore warning from LWP see ticket 39659
+local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
 
 # get INI file.  this should allow a filepath relative to this script
 my @fileparse = fileparse($0, qr/\.[^.]*/);
@@ -488,7 +491,7 @@ lk_log() will add a record to the specified labkey list summarizing the backup s
 
 sub lk_log {
     my $date = sprintf("%04d-%02d-%02d %02d:%02d", $tm->year + 1900, ($tm->mon) + 1, $tm->mday, $tm->hour, $tm->min);
-    Labkey::Query::insertRows(
+    LabKey::Query::insertRows(
         -baseUrl       => $lk_config{'baseURL'},
         -containerPath => $lk_config{'containerPath'} || "shared",
         -schemaName    => "auditLog",

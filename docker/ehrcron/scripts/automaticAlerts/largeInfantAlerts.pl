@@ -4,11 +4,14 @@
 
 
 use strict;
-use Labkey::Query;
+use LabKey::Query;
 use Time::localtime;
 use Net::SMTP;
 use MIME::Lite;
 use List::MoreUtils qw(uniq);
+
+# ignore warning from LWP see ticket 39659
+local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
 
 # Create string for currentDate
 my $tm = localtime;
@@ -29,7 +32,7 @@ if ($dataExists) {
  sendEmail();	
 }
 sub getHeavyInfants {
-	$results = Labkey::Query::selectRows(
+	$results = LabKey::Query::selectRows(
 		-baseUrl => $baseUrl,
 		-containerPath => $default_container,
 		-schemaName => 'study',

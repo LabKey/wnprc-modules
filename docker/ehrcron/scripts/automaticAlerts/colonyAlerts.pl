@@ -355,7 +355,7 @@ $results = LabKey::Query::selectRows(
     -containerPath => $studyContainer,
     -schemaName => 'study',
     -queryName => 'Demographics',
-    -viewName => 'No Active Assignments',
+    -viewName => 'No Active Assigns',
     -sort => 'Id',
     -requiredVersion => 8.3,
     -debug => 1,
@@ -372,7 +372,7 @@ if(@{$results->{rows}}){
         $email_html .= $row->{'Id'}."<br>";
     };
 
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assignments'>Click here to view these animals</a></p>\n";
+    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns'>Click here to view these animals</a></p>\n";
     $email_html .= '<hr>';
 }
 

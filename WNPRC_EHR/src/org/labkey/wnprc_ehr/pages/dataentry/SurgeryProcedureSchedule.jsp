@@ -132,8 +132,9 @@
         event.end = requestObj.end;
         event.calendarId = isRoomEvent ? getCalendarNameFromRoom(requestObj.room) : requestObj.calendarId;
         event.backgroundColor = '';
-        event.id = event.calendarId + '_' + calendarEvents[event.calendarId].events.length;
-        event.eventId = calendarEvents[event.calendarId].events.length;
+        let eventId = calendarEvents[event.calendarId].nextAvailableId++;
+        event.id = event.calendarId + '_' + eventId;
+        event.eventId = eventId;
         event.rawRowData = pendingRequestsIndex[requestObj.requestId];
         return event;
     }

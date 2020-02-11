@@ -321,6 +321,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         eventSourceObject.put("events", jsonEvents);
         eventSourceObject.put("backgroundColor", backgroundColor);
         eventSourceObject.put("id", calendarName);
+        eventSourceObject.put("nextAvailableId", jsonEvents.length());
 
         return eventSourceObject;
     }

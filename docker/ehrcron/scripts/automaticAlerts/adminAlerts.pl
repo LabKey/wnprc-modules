@@ -20,7 +20,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
-my $studyContainer = 'ehr/WNPRC/';
+my $studyContainer = 'WNRPC/EHR/';
 
 my $notificationtypes = 'Admin Alerts';
 my $mail_server = $ENV{'MAIL_SERVER'};

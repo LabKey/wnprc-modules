@@ -49,11 +49,11 @@
                         </fk>
 
                     </column>
-                    <column columnName="assignto">
-                        <columnTitle>Assign To</columnTitle>
+                    <column columnName="assignedto">
+                        <columnTitle>Assigned To</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>assign_to</fkTable>
+                            <fkTable>husbandry_assigned</fkTable>
                             <fkColumnName>value</fkColumnName>
                         </fk>
 

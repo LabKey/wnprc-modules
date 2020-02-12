@@ -27,7 +27,7 @@
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("clientapi/ext4");
-        dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.js");
+//        dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.js");
         //dependencies.add("/mypath/mydependency.js");
     }
 %>
@@ -379,6 +379,7 @@
                                     "date~lte": endMoment.format('Y-MM-DD'),
                                     "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)}
                                 }).then(function (data) {
+                                    debugger;
                                     var events = data.rows;
 
                                     callback(events.map(function (row) {

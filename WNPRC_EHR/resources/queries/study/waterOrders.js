@@ -22,6 +22,15 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 }
             }
         });
+        var animalRestricted = false;
+        animalRestricted = WNPRC.Utils.getJavaHelper().checkIfAnimalIsRestricted(row.Id, row.date);
+
+        if (!animalRestricted){
+            EHR.Server.Utils.addError(scriptErrors,'animalId', 'Animal not assigned to water restriction protocol', 'ERROR');
+        }
+
+
+
     }
 
     var today = new Date();
@@ -50,25 +59,25 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }*/
 
-    console.log ("value of ObjectId "+oldRow.objectid + " Value of new objectId "+ row.objectid);
+    //console.log ("value of ObjectId "+oldRow.objectid + " Value of new objectId "+ row.objectid);
 
-    if ( row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid) ){
-        console.log ("frequency sent to server " + row.frequency);
-        console.log ("frequency sent to server " + row.frequency.meaning);
+    if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
+        //&& (oldRow.objectid != row.objectid)
+        console.log("frequency sent to server " + row.frequency);
+        console.log("frequency sent to server " + row.frequency.meaning);
 
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.objectid);
-        if ( jsonArray != null){
-            for (var i = 0; i < jsonArray.length; i++){
+        if (jsonArray != null) {
+            for (var i = 0; i < jsonArray.length; i++) {
                 var errorObject = JSON.parse(jsonArray[i]);
                 console.log(i + " " + errorObject.message);
                 EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
             }
 
 
-
-
         }
     }
+
 
 
 }

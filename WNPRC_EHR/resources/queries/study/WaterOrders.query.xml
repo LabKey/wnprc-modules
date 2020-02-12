@@ -13,11 +13,11 @@
                     </column>
                     <column columnName="date">
                         <columntitle>Start Date</columntitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="enddate">
                         <columntitle>End Date</columntitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="frequency">
                         <columnTitle>Frequency</columnTitle>
@@ -42,7 +42,7 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>Title</fkDisplayColumn>
+                            <fkDisplayColumn>title</fkDisplayColumn>
                         </fk>
                     </column>
 

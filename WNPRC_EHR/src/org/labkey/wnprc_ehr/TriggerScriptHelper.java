@@ -1501,6 +1501,35 @@ public class TriggerScriptHelper {
         return returnMeaning;
     }
 
+    public boolean checkIfAnimalIsRestricted (String animalId, Date clientDate){
+        boolean isAnimalRestricted = false;
+
+        Calendar filterDate = Calendar.getInstance();
+        filterDate.setTime(clientDate);
+        
+        TableInfo waterGiven = getTableInfo("study","waterRestrictedAnimals");
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
+        filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_LTE);
+        TableSelector rawAnimals = new TableSelector(waterGiven, PageFlowUtil.set("id", "date", "condition"),filter, null);
+        Map<String, Object>[] animalsFromServer = rawAnimals.getMapArray();
+
+        //updating and adding waters from server, objectid will take are of any duplicates
+
+        if (animalsFromServer.length>0){
+            for (Map<String, Object> animalRestricted : animalsFromServer)
+            {
+                String condition = ConvertHelper.convert(animalRestricted.get("condition"), String.class);
+                if (condition.equals("restricted")){
+                    isAnimalRestricted = true;
+                }
+            }
+
+        }
+
+        
+        return  isAnimalRestricted;
+    }
+
 
     public void sendProjectNotification(String hostName){
 

@@ -264,9 +264,7 @@ sub onExit {
     $log->commit;
 
     # touch a file to indicate success.  can be used /w monit
-    if ($status eq "Success") {
-        touch(File::Spec->catfile($config{backup_dest}, ".last_backup"));
-    }
+    touch(File::Spec->catfile($config{backup_dest}, ".last_backup")) if ($status eq "Success");
 
     exit $msg;
 }

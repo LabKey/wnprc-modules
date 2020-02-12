@@ -22,7 +22,7 @@ Ben Bimber
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
 
-my $studyContainer = 'ehr/WNPRC/EHR/';
+my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Blood Admin Alerts';
 my $mail_server = $ENV{'MAIL_SERVER'};

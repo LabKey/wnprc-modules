@@ -8,7 +8,7 @@ import java.util.List;
 public class SurgeryProcedureRequestSection extends SimpleFormSection
 {
     public SurgeryProcedureRequestSection() {
-        super("study", "surgery_procedure", "Surgery/Procedure");
+        super("study", "surgery_procedure", "Surgery or Procedure");
         //setTemplateMode(TEMPLATE_MODE.NONE);
 
         this.maxItemsPerColumn = 14;

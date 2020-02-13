@@ -25,30 +25,30 @@ public class SurgeryProcedureRequestForm extends SimpleRequestForm
     public static final String NAME = "SurgeryProcedureRequest";
 
     public SurgeryProcedureRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Request Surgery/Procedure", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Request Surgery or Procedure", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
                 new RequestFormSection(),
+                new AnimalDetailsPanel(),
                 new SurgeryProcedureRequestSection(),
-                //new SimpleFormSection("study", "Drug Administration", "Treatments", "ehr-gridpanel"),
-                new SlaveGridSection("study", "Drug Administration", "Drugs")
-                {
-                    @Override
-                    public Set<String> getSlaveFields() {
-                        Set<String> fields = new HashSet<>();
-
-                        fields.add("Id");
-                        fields.add("date");
-
-                        return fields;
-                    }
-
-                    @Override
-                    protected List<String> getFieldNames() {
-                        return Arrays.asList("Id", "date", "tissue", "qualifier", "weight", "remark");
-                    }
-                },
-                new FoodDeprivesRequestFormSections(),
+                new SimpleFormSection("study", "Drug Administration", "Treatments", "ehr-gridpanel"),
+//                new SlaveGridSection("study", "Drug Administration", "Drugs")
+//                {
+//                    @Override
+//                    public Set<String> getSlaveFields() {
+//                        Set<String> fields = new HashSet<>();
+//
+//                        fields.add("Id");
+//                        fields.add("date");
+//
+//                        return fields;
+//                    }
+//
+//                    @Override
+//                    protected List<String> getFieldNames() {
+//                        return Arrays.asList("Id", "date", "tissue", "qualifier", "weight", "remark");
+//                    }
+//                },
+                new FoodDeprivesRequestFormSections()
                 //new SimpleFormPanelSection("wnprc", "surgeries", "Surgery Request"),
-                new AnimalDetailsPanel()
         ));
 
         for(FormSection section: this.getFormSections()) {

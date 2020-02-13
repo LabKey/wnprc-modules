@@ -9,7 +9,7 @@ import java.util.List;
 public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
 {
     public SurgeryProcedureMultipleRequestSection() {
-        super("study", "surgery_procedure", "Surgery/Procedure");
+        super("study", "surgery_procedure", "Surgeries or Procedures");
         //setTemplateMode(TEMPLATE_MODE.NONE);
 
         //this.maxItemsPerColumn = 14;

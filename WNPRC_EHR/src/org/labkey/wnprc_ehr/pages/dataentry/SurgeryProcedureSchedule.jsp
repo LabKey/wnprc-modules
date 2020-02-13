@@ -16,15 +16,16 @@
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.css' />
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.css' />
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.css' />
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.css' />
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.js'></script>
+
+<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.css' />
+<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.css' />
+<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.css' />
+<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.css' />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.js'></script>
+<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.js'></script>
+<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.js'></script>
+<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.js'></script>
 
 <style type="text/css">
     /* Full Calendar heading */
@@ -413,10 +414,22 @@
                     <!-- /ko -->
 
                     <div class="form-group">
-                        <label class="col-xs-4 control-label">Date</label>
+                        <label class="col-xs-4 control-label">Start Time</label>
                         <div class="col-xs-8">
                             <div class='input-group date' id='datetimepicker1'>
                                 <input type='text' class="form-control" data-bind="dateTimePicker: date"/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-xs-4 control-label">End Time</label>
+                        <div class="col-xs-8">
+                            <div class='input-group date' id='datetimepicker2'>
+                                <input type='text' class="form-control" data-bind="dateTimePicker: enddate"/>
                                 <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </span>

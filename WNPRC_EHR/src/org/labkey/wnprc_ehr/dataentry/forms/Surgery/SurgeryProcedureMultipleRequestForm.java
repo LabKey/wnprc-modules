@@ -21,7 +21,7 @@ public class SurgeryProcedureMultipleRequestForm extends SimpleRequestForm
     public static final String NAME = "SurgeryProcedureMultipleRequest";
 
     public SurgeryProcedureMultipleRequestForm(DataEntryFormContext ctx, Module owner) {
-        super(ctx, owner, NAME, "Request Multiple Surgery/Procedure", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+        super(ctx, owner, NAME, "Request Multiple Surgeries and Procedures", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
                 new RequestFormSection(),
                 new SurgeryProcedureMultipleRequestSection(),
                 new AnimalDetailsPanel()

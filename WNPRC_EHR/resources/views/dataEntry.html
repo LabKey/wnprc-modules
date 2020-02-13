@@ -247,14 +247,13 @@
                     }]
                 },
                 {
-                    title: 'Surgery/Procedure Requests',
+                    title: 'Surgery and Procedure Requests',
                     ref: 'SurgeryProcedureRequests',
                     itemId: 'SurgeryProcedureRequests',
                     xtype: 'ehr-qwppanel',
                     queryConfig: {
                         schemaName: 'study',
                         queryName: 'SurgeryProcedureIndividualRequests',
-                        //viewName: 'Surgery/Procedure Requests',
                         updateURL: SurgeryProcedureUpdateURL,
                         deleteURL: '',
                         scope: this,
@@ -670,17 +669,17 @@
                         },
                         {
                             url:     makeExt4DataEntryURL("SurgeryProcedureRequest"),
-                            title:   'Request Surgery/Procedure',
+                            title:   'Request Surgery or Procedure',
                             queries: ['surgery_procedure']
                         },
                         {
                             url:     makeExt4DataEntryURL("SurgeryProcedureMultipleRequest"),
-                            title:   'Request Multiple Surgery/Procedure',
+                            title:   'Request Multiple Surgeries or Procedures',
                             queries: ['surgery_procedure']
                         },
                         {
                             url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'SurgeryProcedureSchedule', ctx['EHRStudyContainer']),
-                            title:   'Schedule Surgery/Procedure',
+                            title:   'Schedule Surgeries and Procedures',
                             queries: ['surgery_procedure']
                         },
                         {

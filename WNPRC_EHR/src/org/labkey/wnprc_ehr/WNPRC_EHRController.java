@@ -1019,7 +1019,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getTitle()
         {
-            return "Surgery/Procedure Schedule";
+            return "Surgery and Procedure Schedule";
         }
     }
 

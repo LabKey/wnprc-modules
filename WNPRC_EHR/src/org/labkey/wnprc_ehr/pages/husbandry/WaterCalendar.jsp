@@ -27,7 +27,7 @@
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("clientapi/ext4");
-//        dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.js");
+        dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.js");
         //dependencies.add("/mypath/mydependency.js");
     }
 %>

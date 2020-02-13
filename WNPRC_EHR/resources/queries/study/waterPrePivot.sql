@@ -12,7 +12,7 @@ voGi.TotalWater AS volume,
 voGi.RecentWeight,
 voGi.InnerWeight,
 TRUNCATE(ROUND(CAST(voGi.TotalWater /voGi.InnerWeight AS NUMERIC),2),2) AS mlsPerKg,
-voGi.InnerWeight*20 - voGi.TotalWater AS WaterReamining,
+voGi.InnerWeight*20 - voGi.TotalWater AS WaterRemaining,
 'waterGiven' AS dataSource
 --voGi.Innerweight*20 - voGi.TotalSub AS waterRemaining
 --COALESCE ((SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.water_given iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0 AND iwg.assignto LIKE 'animalcare'),0) AS volumeGivenInCage,

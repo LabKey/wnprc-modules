@@ -132,7 +132,7 @@
         event.start = requestObj.start;
         event.end = requestObj.end;
         event.calendarId = isRoomEvent ? getCalendarNameFromRoom(requestObj.room) : requestObj.calendarId;
-        event.backgroundColor = '';
+        event.backgroundColor = calendarEvents[event.calendarId].backgroundColor;
         let eventId = calendarEvents[event.calendarId].nextAvailableId++;
         event.id = event.calendarId + '_' + eventId;
         event.eventId = eventId;
@@ -149,7 +149,7 @@
             if (form.proceduretype === 'surgery') {
                 calendarId = 'surgeries_' + calendarIdSuffix;
             }
-            else if (form.proceduretype === 'procedure' || form.proceduretype === 'other') {
+            else if (form.proceduretype === 'imaging' || form.proceduretype === 'other') {
                 calendarId = 'procedures_' + calendarIdSuffix;
             }
             requestObj = {

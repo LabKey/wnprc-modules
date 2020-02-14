@@ -1,7 +1,7 @@
 FROM perl:5.24
 
 RUN cpanm LabKey::Query         \
-          Labkey::Query         \
+          LabKey::Query         \
           MIME::Lite            \
           File::Touch           \
           List::MoreUtils       \

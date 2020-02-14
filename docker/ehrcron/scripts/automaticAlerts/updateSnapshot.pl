@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Data::Dumper;
 use File::Spec;
 use File::Path qw(make_path);
@@ -9,9 +9,12 @@ use Time::localtime;
 use File::Copy;
 use strict;
 
+# ignore warning from LWP see ticket 39659
+local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
+
 my $baseUrl = $ENV{'LK_BASE_URL'};
 
-my $lk_config = Labkey::Query::_readrc();
+my $lk_config = LabKey::Query::_readrc();
 
 #Fetch the actual data from the query
 my $request = HTTP::Request->new( "GET" => $baseUrl."/query/WNPRC/EHR/updateSnapshot.view?schemaName=study&snapshotName=ActiveHousing");

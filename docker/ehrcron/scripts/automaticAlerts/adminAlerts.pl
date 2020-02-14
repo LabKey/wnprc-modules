@@ -20,7 +20,7 @@ Ben Bimber
 
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
-my $studyContainer = 'ehr/WNPRC/';
+my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Admin Alerts';
 my $mail_server = $ENV{'MAIL_SERVER'};
@@ -42,6 +42,9 @@ use File::Spec;
 use File::Basename;
 use Cwd 'abs_path';
 use List::MoreUtils qw/ uniq /;
+
+# ignore warning from LWP see ticket 39659
+local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
 
 # Find today's date
 my $tm = localtime;
@@ -133,7 +136,7 @@ $email_html .= "<b>Data Entry Stats:</b><p>";
 #);
 
 #if(@{$results->{rows}}){	
-#	$email_html .= "Number of Records Created Yesterday Through Labkey: <br>\n";
+#	$email_html .= "Number of Records Created Yesterday Through LabKey: <br>\n";
 #    foreach my $row (@{$results->{rows}}){
 #        $email_html .= $row->{'label'}.": ".$row->{'total'}."<br>\n";
 #    };

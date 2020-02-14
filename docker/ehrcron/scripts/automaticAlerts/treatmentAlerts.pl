@@ -33,7 +33,7 @@ my $from = 'ehr-do-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -44,6 +44,12 @@ use File::Spec;
 use File::Basename;
 use Cwd 'abs_path';
 use List::MoreUtils qw/ uniq /;
+
+# this is mostly safe since a lot of times some strings are left blank (from data entry)
+no warnings 'uninitialized';
+
+# ignore warning from LWP see ticket 39659
+local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
 
 # Find today's date
 my $tm = localtime;
@@ -57,7 +63,7 @@ my $results;
 my $send_email = 0;
 
 #we find any rooms lacking obs for today
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -82,7 +88,7 @@ if(@{$results->{rows}}){
 
 
 #we find any treatments where the animal is not assigned to that project
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -117,7 +123,7 @@ sub processTreatments {
 	my $minTime = shift;
 	my $noSendUnlessTreatments = shift;
 
-	$results = Labkey::Query::selectRows(
+	$results = LabKey::Query::selectRows(
 	    -baseUrl => $baseUrl,
 	    -containerPath => $studyContainer,
 	    -schemaName => 'study',
@@ -212,7 +218,7 @@ sub processTreatments {
 
 
 #then any treatments from today that different from the order:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -295,7 +301,7 @@ else {
 
 
 #we find any treatments where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -315,7 +321,7 @@ if(@{$results->{rows}}){
 }
 
 #we find any problems where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -339,7 +345,7 @@ if(@{$results->{rows}}){
 my $hour = $tm->hour;
 my $minute = $tm->min;
 if ($hour > 14 || (($hour == 14) && ($minute >= 30))) {
-	$results =  Labkey::Query::selectRows(
+	$results =  LabKey::Query::selectRows(
         -baseUrl => $baseUrl,
         -containerPath => $studyContainer,
         -schemaName => 'study',
@@ -366,7 +372,7 @@ if($send_email){
 #	close HTML;
 #	die;
 
-	$results = Labkey::Query::selectRows(
+	$results = LabKey::Query::selectRows(
 	    -baseUrl => $baseUrl,
 	    -requiredVersion => 8.3,
 	    -containerPath => $studyContainer,

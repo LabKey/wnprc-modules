@@ -59,7 +59,6 @@ EHR.reports.viralLoads = function(panel, tab){
                         itemId: 'tabArea'
 
                     });
-                    //addQueryWebPart(tab, config);
                     var panelOrder = 0;
                     var target = tab.down('#tabArea');
 
@@ -119,7 +118,7 @@ EHR.reports.viralLoads = function(panel, tab){
                                 panelOrder++;
                                 //filterArray.nonRemovable.push(LABKEY.Filter.create('SampleType', 'Tissue', LABKEY.Filter.Types.EQUAL));
                                 target.insert(panelOrder, {
-                                    xtype: 'ldk-querypanel',
+                                    xtype: 'ldk-querycmp',
                                     style: 'margin-bottom:20px;',
                                     title: 'Viral Load: ' + subj + ' '+key,
                                     queryConfig: panel.getQWPConfig({
@@ -141,7 +140,7 @@ EHR.reports.viralLoads = function(panel, tab){
                                 panelOrder++;
                                 //filterArray.nonRemovable.push(LABKEY.Filter.create('SampleType', 'Tissue', LABKEY.Filter.Types.EQUAL));
                                 target.insert(panelOrder, {
-                                    xtype: 'ldk-querypanel',
+                                    xtype: 'ldk-querycmp',
                                     style: 'margin-bottom:20px;',
                                     title: 'Viral Load: ' + subj + ' '+key,
                                     queryConfig: panel.getQWPConfig({
@@ -190,7 +189,7 @@ EHR.reports.viralLoads = function(panel, tab){
                                  if(virusType.rows.length>0) {
 
                                      target.insert(panelOrder, {
-                                         xtype: 'ldk-querypanel',
+                                         xtype: 'ldk-querycmp',
                                          style: 'margin-bottom:20px;',
                                          title: 'Viral Load: ' + subj + ' ' + arrayFilter[0],
                                          queryConfig: panel.getQWPConfig({
@@ -267,11 +266,15 @@ EHR.reports.viralLoads = function(panel, tab){
     });
 
     /*tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });*/
-    addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 };
 
 EHR.reports.breeding_encounters = function(panel, tab) {
@@ -301,23 +304,13 @@ EHR.reports.breeding_encounters = function(panel, tab) {
                 });
 
                 tab.add({
-                    xtype: 'ldk-querypanel',
+                    xtype: 'ldk-querycmp',
                     style: 'margin-bottom:20px;',
                     queryConfig: breeding_encounters
                 })
             }
         }
     });
-};
-
-//function to directly add qwp to dom see ticket 38440
-addQueryWebPart = function(parentElement, config) {
- var targetElement = parentElement.getEl().createChild({tag: 'div'});
- targetElement.addCls('labkeyQueryWebPartToRemove');
- config.renderTo = Ext4.id(targetElement, "queryWebPart");
-
- new LABKEY.QueryWebPart(config);
-
 };
 
 EHR.reports.hematology = function(panel, tab){
@@ -334,7 +327,11 @@ EHR.reports.hematology = function(panel, tab){
         sort: '-date'
     });
 
-    addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 
     config = panel.getQWPConfig({
         schemaName: 'study',
@@ -346,7 +343,11 @@ EHR.reports.hematology = function(panel, tab){
         removeableFilters: filterArray.removable
     });
 
-  addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 
     config = panel.getQWPConfig({
         schemaName: 'study',
@@ -358,7 +359,11 @@ EHR.reports.hematology = function(panel, tab){
         removeableFilters: filterArray.removable
     });
 
-  addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 
     config = panel.getQWPConfig({
         schemaName: 'study',
@@ -371,7 +376,11 @@ EHR.reports.hematology = function(panel, tab){
         removeableFilters: filterArray.removable
     });
 
-  addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 };
 
 EHR.reports.immunology = function(panel, tab){
@@ -387,7 +396,11 @@ EHR.reports.immunology = function(panel, tab){
         removeableFilters: filterArray.removable
     });
 
-    addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 
     config = panel.getQWPConfig({
         schemaName: 'study',
@@ -399,7 +412,11 @@ EHR.reports.immunology = function(panel, tab){
         removeableFilters: filterArray.removable
     });
 
-    addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 
     config = panel.getQWPConfig({
         schemaName: 'study',
@@ -412,7 +429,11 @@ EHR.reports.immunology = function(panel, tab){
         removeableFilters: filterArray.removable
     });
 
-    addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 };
 
 EHR.reports.irregularObs = function(panel, tab){
@@ -440,7 +461,11 @@ EHR.reports.irregularObs = function(panel, tab){
     if(tab.report.viewName)
         config.viewName = tab.report.viewName;
 
-    addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 };
 
 EHR.reports.irregularObsTreatment = function(panel, tab){
@@ -458,7 +483,6 @@ EHR.reports.irregularObsTreatment = function(panel, tab){
     var config = panel.getQWPConfig({
         schemaName: 'study',
         queryName: queryName,
-        showReports: true,
         title: "Obs/Treatments" + title,
         titleField: 'Id',
         sort: 'room,cage,-date',
@@ -466,7 +490,11 @@ EHR.reports.irregularObsTreatment = function(panel, tab){
         removeableFilters: filterArray.removable
     });
 
-    addQueryWebPart(tab, config);
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
 };
 
 EHR.reports.diagnostics = function(panel, tab){
@@ -484,7 +512,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -500,7 +528,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;min-height:500px',
         queryConfig: config
     });
@@ -516,7 +544,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -533,7 +561,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -549,7 +577,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -565,7 +593,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -580,7 +608,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -595,7 +623,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -610,7 +638,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -625,7 +653,7 @@ EHR.reports.diagnostics = function(panel, tab){
     });
 
     tab.add({
-        xtype: 'ldk-querypanel',
+        xtype: 'ldk-querycmp',
         style: 'margin-bottom:20px;',
         queryConfig: config
     });
@@ -662,7 +690,7 @@ EHR.reports.weightGraph = function(panel, tab){
                 frame: true
             });
             toAdd.push( {
-                xtype: 'ldk-querypanel',
+                xtype: 'ldk-querycmp',
                 style: 'margin-bottom:20px;',
                 queryConfig: configWeights
             });
@@ -959,7 +987,7 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
                                 /*xtype: 'tabpanel',
                                  style: 'margin-bottom: 20px',
                                  items: [{*/
-                                xtype: 'ldk-querypanel',
+                                xtype: 'ldk-querycmp',
                                 title: 'Raw Data',
                                 style: 'margin: 5px;',
                                 queryConfig: panel.getQWPConfig({
@@ -1038,12 +1066,14 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
             filters: [LABKEY.Filter.create('Id', animalList.join(';'), LABKEY.Filter.Types.IN)],
             frame: true
         });
-        addQueryWebPart(tab, calendar);
-
+        tab.add( {
+            xtype: 'ldk-querycmp',
+            style: 'margin-bottom:20px;',
+            queryConfig: calendar
+        });
 
     };
 })();
-
 
 (function() {
     var abstractReport = EHR.reports['abstract'];
@@ -1116,7 +1146,11 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
                             frame: true
                         });
 
-                        addQueryWebPart(tab, pregnancies);
+                        tab.add({
+                            xtype: 'ldk-querycmp',
+                            style: 'margin-bottom:20px;',
+                            queryConfig: pregnancies
+                        });
                     }
                 }
             },

@@ -17,6 +17,7 @@
 package org.labkey.wnprc_billing;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
@@ -60,9 +61,9 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
-        return 18.30;
+        return 20.000;
     }
 
     @Override

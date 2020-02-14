@@ -17,6 +17,7 @@ package org.labkey.wnprc_ehr;
 
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -146,8 +147,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         return NAME;
     }
 
-    public double getVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 18.31;
+    @Override
+    public @Nullable Double getSchemaVersion() {
+        return forceUpdate ? Double.POSITIVE_INFINITY : 20.000;
     }
 
     public boolean hasScripts() {

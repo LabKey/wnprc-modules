@@ -529,7 +529,7 @@ EHR.reports.diagnostics = function(panel, tab){
 
     tab.add({
         xtype: 'ldk-querycmp',
-        style: 'margin-bottom:20px;min-height:500px',
+        style: 'margin-bottom:20px;',
         queryConfig: config
     });
 

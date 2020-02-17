@@ -26,7 +26,7 @@ Ben Bimber
 =cut
 
 use strict;
-use Labkey::Query;
+use LabKey::Query;
 use Data::Dumper;
 use Time::localtime;
 use File::Touch;
@@ -34,6 +34,9 @@ use Cwd;
 use File::Spec;
 use File::Copy;
 use File::Basename;
+
+# ignore warning from LWP see ticket 39659
+local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
 
 
 my @fileparse = fileparse($0, qr/\.[^.]*/);
@@ -82,7 +85,7 @@ sub doDelete {
     my $columns = shift;
 
 	#we delete all rows with QCstate of "Delete Requested"
-	my $results = Labkey::Query::selectRows(
+	my $results = LabKey::Query::selectRows(
 		-baseUrl => $baseUrl,
 		-containerPath => $default_container,
 		-schemaName => $schema,
@@ -95,7 +98,7 @@ sub doDelete {
 	handleResults($results, $schema, $query, $pk);	
 
 	#and delete anything with a QCState of "Request: Denied" modified more than 1 day ago.
-	$results = Labkey::Query::selectRows(
+	$results = LabKey::Query::selectRows(
 		-baseUrl => $baseUrl,
 		-containerPath => $default_container,
 		-schemaName => $schema,
@@ -141,7 +144,7 @@ sub handleResults {
 	}
 			
 	if(@$toDelete){
-		my $results = Labkey::Query::deleteRows(
+		my $results = LabKey::Query::deleteRows(
 			-baseUrl => $baseUrl,
 			-containerPath => $default_container,
 		    	-schemaName => $schema,
@@ -157,7 +160,7 @@ sub handleResults {
 }
  
 sub findDatasets {
-	my $results = Labkey::Query::selectRows(
+	my $results = LabKey::Query::selectRows(
 		-baseUrl => $baseUrl,
 		-containerPath => $default_container,
 		-schemaName => 'study',

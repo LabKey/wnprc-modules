@@ -34,7 +34,7 @@ my $from = 'ehr-no-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -44,6 +44,9 @@ use File::Spec;
 use File::Basename;
 use Cwd 'abs_path';
 use List::MoreUtils qw/ uniq /;
+
+# ignore warning from LWP see ticket 39659
+local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
 
 # Find today's date
 # Find today's date
@@ -63,7 +66,7 @@ my $results;
 
 
 #first we find all living animals without a weight:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -111,7 +114,7 @@ sub processWeights {
 	my $pctFilter = shift;
 	my $pct = shift;
 	
-	$results = Labkey::Query::selectRows(
+	$results = LabKey::Query::selectRows(
 	    -baseUrl => $baseUrl,
 	    -containerPath => $studyContainer,
 	    -schemaName => 'study',
@@ -171,7 +174,7 @@ sub processWeights {
 #print HTML $email_html;
 #close HTML;
 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -requiredVersion => 8.3,
     -containerPath => $studyContainer,

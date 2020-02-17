@@ -1,8 +1,7 @@
 FROM perl:5.24
 
-# There really are two LabKey Modules (Labkey and LabKey), and we need them both; it’s not a mistake.  
 RUN cpanm LabKey::Query         \
-          Labkey::Query         \
+          LabKey::Query         \
           MIME::Lite            \
           File::Touch           \
           List::MoreUtils       \

@@ -1,19 +1,18 @@
 import org.labkey.gradle.util.BuildUtils
 
 dependencies {
-    compile project(BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"))
-    compile project(path: ":server:modules:ehrModules:ehr", configuration: "apiCompile")
-    compile project(":server:modules:ehrModules:ehr")
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiCompile")
-    compile project(path: "${project.parent.path}:DBUtils", configuration: "apiCompile")
-    compile project("${project.parent.path}:WebUtils")
-    compile project(path: "${project.parent.path}:GoogleDrive", configuration: "apiCompile")
+    implementation project(BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"))
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiJarFile")
+    implementation project(path: "${project.parent.path}:DBUtils", configuration: "apiJarFile")
+    implementation project("${project.parent.path}:WebUtils")
+    implementation project(path: "${project.parent.path}:GoogleDrive", configuration: "apiJarFile")
     external "joda-time:joda-time:2.8.1"
     external "org.jsoup:jsoup:1.10.3"
     external "org.reflections:reflections:0.9.10"
-    jspCompile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
-    jspCompile project("${project.parent.path}:WebUtils")
-    jspCompile "joda-time:joda-time:2.8.1"
+    jspImplementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")
+    jspImplementation project("${project.parent.path}:WebUtils")
+    jspImplementation "joda-time:joda-time:2.8.1"
 }
 configurations.all {
     Configuration config ->

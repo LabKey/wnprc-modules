@@ -79,6 +79,13 @@ WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'or
   AND p.Name = 'enabled'
 ;
 
+--disable ldap sync
+UPDATE    prop.Properties p
+SET       Value = 'false'
+WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'ldk.ldapConfig'
+  AND p.Name = 'enabled'
+;
+
 UPDATE    ehr.module_properties p
 SET       stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu'
 WHERE     p.prop_name = 'site_email'

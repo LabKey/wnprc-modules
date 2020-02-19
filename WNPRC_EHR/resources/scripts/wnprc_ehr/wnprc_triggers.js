@@ -147,6 +147,8 @@ exports.init = function (EHR) {
                 species = 'Rhesus';
             else if (row.Id.match(/(^rh-([a-z])([0-9]{2}))$/))
                 species = 'Rhesus';
+            else if (row.Id.match(/(^rh([0-9,a-z]{4})$)|(^rh\+([0-9]{3})$)/))
+                species = 'Rhesus';
             else if (row.Id.match(/^cja([0-9]{3})$/))
                 species = 'Marmoset';
             else if (row.Id.match(/^m([0-9]{5})$/))

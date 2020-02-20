@@ -514,7 +514,7 @@ package org.labkey.wnprc_ehr;
             forceUpdate = false; // let the version report correctly from now on
             loadOnStart = true;  // indicate that we should load the study metadata on startup
             super.versionUpdate(moduleContext);
-
+            ModuleUpdate.doVersionUpdate(moduleContext);
         }
 
         @Override

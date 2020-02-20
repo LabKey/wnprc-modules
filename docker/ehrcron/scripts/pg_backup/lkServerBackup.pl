@@ -106,9 +106,6 @@ use File::Path qw(make_path);
 use Cwd;
 use Cwd qw(chdir);
 
-# ignore warning from LWP see ticket 39659
-local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
-
 # get INI file.  this should allow a filepath relative to this script
 my @fileparse = fileparse($0, qr/\.[^.]*/);
 my $settings = new Config::Abstract::Ini(File::Spec->catfile($fileparse[1], 'lkbackup.ini'));

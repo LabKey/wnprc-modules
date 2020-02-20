@@ -45,9 +45,6 @@ use File::Basename;
 use File::Spec;
 use List::MoreUtils qw/ uniq /;
 
-# ignore warning from LWP see ticket 39659
-local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
-
 
 # Find today's date
 my $tm = localtime;

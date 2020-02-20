@@ -35,9 +35,6 @@ use File::Spec;
 use File::Copy;
 use File::Basename;
 
-# ignore warning from LWP see ticket 39659
-local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
-
 
 my @fileparse = fileparse($0, qr/\.[^.]*/);
 my $folder = $fileparse[1];

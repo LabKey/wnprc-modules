@@ -1,4 +1,4 @@
-Ext4.define('wnprc.ext.data.HusbandryServerStore'), {
+Ext4.define('wnprc.ext.data.HusbandryServerStore', {
     extend: 'EHR.data.DataEntryServerStore',
     //alias: 'store.wnprc-HusbandryServerStore',
 
@@ -107,4 +107,4 @@ Ext4.define('wnprc.ext.data.HusbandryServerStore'), {
     }
 
 
-}
+});

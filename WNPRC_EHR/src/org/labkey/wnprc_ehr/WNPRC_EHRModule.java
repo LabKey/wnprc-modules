@@ -219,7 +219,7 @@ package org.labkey.wnprc_ehr;
 
         public double getVersion()
         {
-        return 18.31;
+        return 18.32;
         }
 
         public boolean hasScripts()

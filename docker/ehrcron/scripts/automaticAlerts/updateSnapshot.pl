@@ -9,9 +9,6 @@ use Time::localtime;
 use File::Copy;
 use strict;
 
-# ignore warning from LWP see ticket 39659
-local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
-
 my $baseUrl = $ENV{'LK_BASE_URL'};
 
 my $lk_config = LabKey::Query::_readrc();

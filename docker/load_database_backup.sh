@@ -41,6 +41,11 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --port)       ## port that postgresql is running on
+            pgport="$2"
+            shift
+            shift
+            ;;
         --tmppath)
             tmppath="$2"
             shift
@@ -57,7 +62,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 set -- "${args[@]}"
-
 #-------------------------------------------------------------------------------
 # Determining location for temporary folder
 #-------------------------------------------------------------------------------
@@ -155,9 +159,9 @@ if [[ -z $dock ]]; then
   echo -e '\033[0;32mdone\033[0m'
 else
   echo -n 'Preparing database and roles ... '
-  ${pgpath}psql -U postgres -c "drop database if exists ${dbname};" &>/dev/null
-  ${pgpath}psql -U postgres -c "create database ${dbname};" &>/dev/null
-  ${pgpath}psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
+  ${pgpath}psql -U postgres -p "${pgport#*:}" -c "drop database if exists ${dbname};" &>/dev/null
+  ${pgpath}psql -U postgres -p "${pgport#*:}" -c "create database ${dbname};" &>/dev/null
+  ${pgpath}psql -U postgres -p "${pgport#*:}" -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
 

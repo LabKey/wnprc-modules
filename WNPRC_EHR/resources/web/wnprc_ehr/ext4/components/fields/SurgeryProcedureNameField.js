@@ -68,7 +68,7 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
                     LDK.Assert.assertNotEmpty('Unable to find form or grid', target);
                     if (target) {
                         field.mon(target, 'procedurechange', field.getProcedureName, field);
-                        field.mon(target, 'animalchange', field.getProcedureName, field);
+                        field.mon(target, 'animalchange', field.getProcedureNameFromAnimalChange, field);
                     }
                     else {
                         console.error('Unable to find target');
@@ -135,6 +135,21 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
         return sql;
     },
 
+    getProcedureNameFromAnimalChange: function() {
+        let boundRecord = EHR.DataEntryUtils.getBoundRecord(this);
+        if (!boundRecord) {
+            console.warn('no bound record found');
+        }
+
+        if (boundRecord && boundRecord.store) {
+            LDK.Assert.assertNotEmpty('SurgeryProcedureNameField is being used on a store that lacks an Id field: ' + boundRecord.store.storeId, boundRecord.fields.get('Id'));
+        }
+
+        let procedureType = boundRecord.get('procedureType');
+
+        this.getProcedureName(procedureType);
+    },
+
     getProcedureName: function(procedure_type) {
         let boundRecord = EHR.DataEntryUtils.getBoundRecord(this);
         if (!boundRecord) {
@@ -145,7 +160,9 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
             LDK.Assert.assertNotEmpty('SurgeryProcedureNameField is being used on a store that lacks an Id field: ' + boundRecord.store.storeId, boundRecord.fields.get('Id'));
         }
 
-        procedure_type = boundRecord.get('procedureType');
+        if (!procedure_type && boundRecord) {
+            procedure_type = boundRecord.get('procedureType');
+        }
 
         this.emptyText = 'Select procedure...';
 

@@ -33,13 +33,6 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
             displayField: 'displayname',
             valueField: 'name',
             queryMode: 'local',
-            //forceSelection: true,
-            //matchFieldWidth: true,
-            //anyMatch: true,
-            //caseSensitive: false,
-            //plugins: [Ext4.create('LDK.plugin.UserEditableCombo', {
-            //    allowChooseOther: false,
-            //})],
             validationDelay: 500,
             //NOTE: unless i have this empty store an error is thrown
             store: {

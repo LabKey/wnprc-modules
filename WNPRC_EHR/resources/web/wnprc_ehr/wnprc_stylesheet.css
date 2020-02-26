@@ -3,3 +3,7 @@
     background-repeat: repeat-x;
     background-position: bottom;
 }
+
+a.point:hover {
+    cursor: pointer;
+}

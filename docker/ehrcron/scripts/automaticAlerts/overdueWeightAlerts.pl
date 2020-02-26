@@ -43,10 +43,6 @@ use File::Basename;
 use Cwd 'abs_path';
 use List::MoreUtils qw/ uniq /;
 
-# ignore warning from LWP see ticket 39659
-local $SIG{'__WARN__'} = sub {warn $_[0] unless (caller eq "LWP::Protocol::http");};
-
-# Find today's date
 # Find today's date
 my $tm = localtime;
 my $datetimestr=sprintf("%04d-%02d-%02d at %02d:%02d", $tm->year+1900, ($tm->mon)+1, $tm->mday, $tm->hour, $tm->min);

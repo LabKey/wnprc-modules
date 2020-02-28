@@ -254,10 +254,10 @@
                     queryConfig: {
                         schemaName: 'study',
                         queryName: 'SurgeryProcedureIndividualRequests',
-                        updateURL: SurgeryProcedureUpdateURL,
+                        updateURL: this.surgeryProcedureUpdateURL,
                         deleteURL: '',
                         scope: this,
-                        success: onSuccess
+                        success: this.onSuccessResize
                         /*filters: [
                             LABKEY.Filter.create('qcstate', 7, LABKEY.Filter.Types.EQUAL)
                         ]*/

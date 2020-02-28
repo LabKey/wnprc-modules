@@ -249,19 +249,21 @@
                 {
                     title: 'Surgery and Procedure Requests',
                     ref: 'SurgeryProcedureRequests',
-                    itemId: 'SurgeryProcedureRequests',
-                    xtype: 'ehr-qwppanel',
-                    queryConfig: {
-                        schemaName: 'study',
-                        queryName: 'SurgeryProcedureIndividualRequests',
-                        updateURL: this.surgeryProcedureUpdateURL,
-                        deleteURL: '',
-                        scope: this,
-                        success: this.onSuccessResize
-                        /*filters: [
-                            LABKEY.Filter.create('qcstate', 7, LABKEY.Filter.Types.EQUAL)
-                        ]*/
-                    }
+                    items: [{
+                        itemId: 'SurgeryProcedureRequests',
+                        xtype: 'ldk-querycmp',
+                        queryConfig: {
+                            schemaName: 'study',
+                            queryName: 'SurgeryProcedureIndividualRequests',
+                            updateURL: this.surgeryProcedureUpdateURL,
+                            deleteURL: this.surgeryProcedureDeleteURL,
+                            scope: this,
+                            success: this.onSuccessResize,
+                            filters: [
+                                LABKEY.Filter.create('qcstate/label', 'Request: Pending;Request: Denied', LABKEY.Filter.Types.IN)
+                            ]
+                        }
+                    }]
                 },
                 {
                     title: 'Animal Requests',

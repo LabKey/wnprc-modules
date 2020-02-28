@@ -29,24 +29,21 @@ public class SurgeryProcedureRequestForm extends SimpleRequestForm
                 new RequestFormSection(),
                 new AnimalDetailsPanel(),
                 new SurgeryProcedureRequestSection(),
-                new SimpleFormSection("study", "Drug Administration", "Treatments", "ehr-gridpanel"),
-//                new SlaveGridSection("study", "Drug Administration", "Drugs")
-//                {
-//                    @Override
-//                    public Set<String> getSlaveFields() {
-//                        Set<String> fields = new HashSet<>();
-//
-//                        fields.add("Id");
-//                        fields.add("date");
-//
-//                        return fields;
-//                    }
-//
-//                    @Override
-//                    protected List<String> getFieldNames() {
-//                        return Arrays.asList("Id", "date", "tissue", "qualifier", "weight", "remark");
-//                    }
-//                },
+                //new SimpleFormSection("study", "drug", "Treatments", "ehr-gridpanel"),
+                new SlaveGridSection("study", "drug", "Drugs")
+                {
+                    @Override
+                    public Set<String> getSlaveFields() {
+                        Set<String> fields = new HashSet<>();
+                        fields.add("Id");
+                        return fields;
+                    }
+
+                    @Override
+                    protected List<String> getFieldNames() {
+                        return Arrays.asList("code", "qualifier", "route", "concentration", "conc_units", "dosage", "dosage_units", "volume", "vol_units", "amount", "amount_units", "remark");
+                    }
+                },
                 new FoodDeprivesRequestFormSections()
                 //new SimpleFormPanelSection("wnprc", "surgeries", "Surgery Request"),
         ));

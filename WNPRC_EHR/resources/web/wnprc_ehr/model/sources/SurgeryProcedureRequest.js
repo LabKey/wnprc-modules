@@ -104,15 +104,6 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
             statuschangereason: {
                 hidden: true
             }
-        },
-        'study.drug': {
-            code: {
-                //shownInGrid: false,
-                editorConfig: {
-                    xtype: 'ehr-snomedcombo',
-                    defaultSubset: 'Drugs and Procedures'
-                }
-            }
         }
     }
 });

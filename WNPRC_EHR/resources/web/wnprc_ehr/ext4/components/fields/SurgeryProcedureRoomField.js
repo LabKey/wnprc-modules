@@ -43,7 +43,7 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
         this.callParent(arguments);
     },
 
-    updateDropdown: function (procedure_type) {
+    updateDropdown: function (procedure_category) {
         var boundRecord = EHR.DataEntryUtils.getBoundRecord(this);
         if (!boundRecord){
             console.warn('no bound record found');
@@ -53,20 +53,20 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureRoomField', {
             LDK.Assert.assertNotEmpty('SurgeryProcedureRoomField is being used on a store that lacks an Id field: ' + boundRecord.store.storeId, boundRecord.fields.get('Id'));
         }
 
-        if (!procedure_type && boundRecord)
-            procedure_type = boundRecord.get('procedureType');
+        if (!procedure_category && boundRecord)
+            procedure_category = boundRecord.get('procedureCategory');
 
         this.emptyText = 'Select room...';
 
 
-        var sql = this.makeSql(procedure_type);
+        var sql = this.makeSql(procedure_category);
         this.store.sql = sql;
         this.store.removeAll();
         this.store.load();
     },
 
     makeSql: function (room_type) {
-        var sql = 'select room,displayname from wnprc.surgery_procedure_rooms';
+        var sql = 'select room,displayname from wnprc.procedure_rooms';
         if (room_type && room_type.length > 0) {
             if (room_type === 'surgery') {
                 sql += ' where type = \'' + room_type.toLowerCase() + '\'';

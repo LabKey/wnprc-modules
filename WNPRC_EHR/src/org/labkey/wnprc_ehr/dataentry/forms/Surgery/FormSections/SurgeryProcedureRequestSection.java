@@ -22,7 +22,7 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
                 "Id",
                 "date",
                 "enddate",
-                "proceduretype",
+                "procedurecategory",
                 "procedurename",
                 "location",
                 "project",

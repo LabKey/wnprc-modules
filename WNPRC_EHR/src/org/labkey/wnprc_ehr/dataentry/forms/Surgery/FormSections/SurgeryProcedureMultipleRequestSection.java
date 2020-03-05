@@ -23,7 +23,7 @@ public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
                 "Id",
                 "date",
                 "enddate",
-                "proceduretype",
+                "procedurecategory",
                 "procedurename",
                 "location",
                 "project",

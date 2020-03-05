@@ -16,7 +16,7 @@ SELECT lsid
      , Id.curLocation.cond.title AS cur_cond
      , date
      , enddate
-     , proceduretype
+     , procedurecategory
      , procedurename
      , created
      , project

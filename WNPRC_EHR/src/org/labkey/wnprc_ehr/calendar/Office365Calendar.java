@@ -188,7 +188,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
         SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
         DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
-        TableInfo ti = schema.getTable("surgery_procedure_rooms");
+        TableInfo ti = schema.getTable("procedure_rooms");
         TableSelector ts = new TableSelector(ti, filter, null);
         Map<String, Object> map = ts.getMap();
         String roomEmailAddress = (String) map.get("email");
@@ -295,7 +295,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 rawRowData.put("rowid", surgeryInfo.get("rowid"));
                 rawRowData.put("priority", surgeryInfo.get("priority"));
                 rawRowData.put("requestor", surgeryInfo.get("requestor"));
-                rawRowData.put("proceduretype", surgeryInfo.get("proceduretype"));
+                rawRowData.put("procedurecategory", surgeryInfo.get("procedurecategory"));
                 rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
                 rawRowData.put("age", surgeryInfo.get("age"));
                 rawRowData.put("animalid", surgeryInfo.get("animalid"));
@@ -381,7 +381,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             //Check if folder_id is already in the database
             SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
             SimpleFilter filter = new SimpleFilter(FieldKey.fromString("calendar_id"), calendarName);
-            JSONArray rowArray = sqf.selectRows("wnprc", "surgery_procedure_calendars", filter);
+            JSONArray rowArray = sqf.selectRows("wnprc", "procedure_calendars", filter);
             if (rowArray.length() > 0 && rowArray.getJSONObject(0) != null)
             {
                 JSONObject calendar = rowArray.getJSONObject(0);
@@ -413,12 +413,12 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(calendarRecord);
 
                     //Get the query service object based on schema/table
-                    TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("surgery_procedure_calendars");
+                    TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("procedure_calendars");
                     QueryUpdateService service = ti.getUpdateService();
 
                     List<Map<String, Object>> updatedRows = service.updateRows(user, container, rowsToUpdate, rowsToUpdate, null, null);
                     if (updatedRows.size() != rowsToUpdate.size()) {
-                        throw new QueryUpdateServiceException("Not all wnprc.surgery_procedure_calendars rows updated properly");
+                        throw new QueryUpdateServiceException("Not all wnprc.procedure_calendars rows updated properly");
                     }
 
                     transaction.commit();

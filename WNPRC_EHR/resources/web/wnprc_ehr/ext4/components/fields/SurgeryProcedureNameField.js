@@ -19,10 +19,10 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
             type: 'labkey-store',
             containerPath: ctx ? ctx['EHRStudyContainer'] : null,
             schemaName: 'wnprc',
-            queryName: 'surgery_procedure_name',
-            columns: 'displayname,name,type',
+            queryName: 'procedure_names',
+            columns: 'displayname,name,category',
             sort: 'displayname',
-            storeId: ['wnprc', 'surgery_procedure_name', 'name', 'type'].join('||'),
+            storeId: ['wnprc', 'procedure_names', 'name', 'category'].join('||'),
             autoLoad: true
         });
 
@@ -98,32 +98,32 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
             return;
         }
 
-        let procedureType = boundRecord.get('procedureType');
-        if (!procedureType) {
+        let procedureCategory = boundRecord.get('procedureCategory');
+        if (!procedureCategory) {
             Ext4.Msg.alert('Error', 'No Animal Id Provided');
             return;
         }
 
-        this.getProcedureName(procedureType);
+        this.getProcedureName(procedureCategory);
     },
 
-    makeSql: function(procedure_type) {
-        if (!procedure_type) {
+    makeSql: function(procedure_category) {
+        if (!procedure_category) {
             return;
         }
 
         //avoid unnecessary reloading
-        let key = procedure_type;
+        let key = procedure_category;
         if (this.loadedKey === key) {
             return;
         }
         this.loadedKey = key;
 
-        let sql = 'select name,displayname from wnprc.surgery_procedure_name';
-        if (procedure_type && procedure_type.length > 0) {
-            sql += ' where type = \'' + procedure_type.toLowerCase() + '\'';
+        let sql = 'select name,displayname from wnprc.procedure_names';
+        if (procedure_category && procedure_category.length > 0) {
+            sql += ' where category = \'' + procedure_category.toLowerCase() + '\'';
         } else {
-            sql += ' where type = \'\'';
+            sql += ' where category = \'\'';
         }
         return sql;
     },
@@ -138,12 +138,12 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
             LDK.Assert.assertNotEmpty('SurgeryProcedureNameField is being used on a store that lacks an Id field: ' + boundRecord.store.storeId, boundRecord.fields.get('Id'));
         }
 
-        let procedureType = boundRecord.get('procedureType');
+        let procedureCategory = boundRecord.get('procedureCategory');
 
-        this.getProcedureName(procedureType);
+        this.getProcedureName(procedureCategory);
     },
 
-    getProcedureName: function(procedure_type) {
+    getProcedureName: function(procedure_category) {
         let boundRecord = EHR.DataEntryUtils.getBoundRecord(this);
         if (!boundRecord) {
             console.warn('no bound record found');
@@ -153,13 +153,13 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
             LDK.Assert.assertNotEmpty('SurgeryProcedureNameField is being used on a store that lacks an Id field: ' + boundRecord.store.storeId, boundRecord.fields.get('Id'));
         }
 
-        if (!procedure_type && boundRecord) {
-            procedure_type = boundRecord.get('procedureType');
+        if (!procedure_category && boundRecord) {
+            procedure_category = boundRecord.get('procedureCategory');
         }
 
         this.emptyText = 'Select procedure...';
 
-        let sql = this.makeSql(procedure_type);
+        let sql = this.makeSql(procedure_category);
         if (sql) {
             this.store.loading = true;
             this.store.sql = sql;

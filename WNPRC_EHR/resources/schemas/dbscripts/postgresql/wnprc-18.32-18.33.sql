@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS wnprc.surgery_procedure_rooms;
-CREATE TABLE wnprc.surgery_procedure_rooms
+DROP TABLE IF EXISTS wnprc.procedure_rooms;
+CREATE TABLE wnprc.procedure_rooms
 (
     room                VARCHAR(50),
     displayname         VARCHAR(100),
@@ -14,14 +14,14 @@ CREATE TABLE wnprc.surgery_procedure_rooms
     modifiedby          userid,
     modified            TIMESTAMP,
 
-    CONSTRAINT pk_surgery_procedure_rooms PRIMARY KEY (room)
+    CONSTRAINT pk_procedure_room PRIMARY KEY (room)
 );
 
-DROP TABLE IF EXISTS wnprc.surgery_procedure_type;
-CREATE TABLE wnprc.surgery_procedure_type
+DROP TABLE IF EXISTS wnprc.procedure_categories;
+CREATE TABLE wnprc.procedure_categories
 (
     displayname VARCHAR(50),
-    type        VARCHAR(50),
+    category    VARCHAR(50),
     -- Default fields for LabKey.
     container   entityid NOT NULL,
     createdby   userid,
@@ -29,15 +29,15 @@ CREATE TABLE wnprc.surgery_procedure_type
     modifiedby  userid,
     modified    TIMESTAMP,
 
-    CONSTRAINT pk_surgery_procedure_type PRIMARY KEY (type)
+    CONSTRAINT pk_procedure_category PRIMARY KEY (category)
 );
 
-DROP TABLE IF EXISTS wnprc.surgery_procedure_name;
-CREATE TABLE wnprc.surgery_procedure_name
+DROP TABLE IF EXISTS wnprc.procedure_names;
+CREATE TABLE wnprc.procedure_names
 (
     displayname VARCHAR(50),
     name        VARCHAR(50),
-    type        VARCHAR(50),
+    category    VARCHAR(50),
     -- Default fields for LabKey.
     container   entityid NOT NULL,
     createdby   userid,
@@ -45,11 +45,11 @@ CREATE TABLE wnprc.surgery_procedure_name
     modifiedby  userid,
     modified    TIMESTAMP,
 
-    CONSTRAINT pk_surgery_procedure_name PRIMARY KEY (name)
+    CONSTRAINT pk_procedure_name PRIMARY KEY (name)
 );
 
-DROP TABLE IF EXISTS wnprc.surgery_procedure_calendars;
-CREATE TABLE wnprc.surgery_procedure_calendars
+DROP TABLE IF EXISTS wnprc.procedure_calendars;
+CREATE TABLE wnprc.procedure_calendars
 (
     calendar_id       VARCHAR(100),
     calendar_type     VARCHAR(100),
@@ -66,7 +66,7 @@ CREATE TABLE wnprc.surgery_procedure_calendars
     modifiedby        userid,
     modified          TIMESTAMP,
 
-    CONSTRAINT pk_surgery_procedure_calendars PRIMARY KEY (calendar_id)
+    CONSTRAINT pk_procedure_calendar_id PRIMARY KEY (calendar_id)
 );
 
 -- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';

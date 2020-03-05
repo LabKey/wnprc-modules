@@ -1,4 +1,4 @@
-SELECT 'EDIT' as editLink,participantid,date,enddate,proceduretype,procedurename,location,project,account,
+SELECT 'EDIT' as editLink,participantid,date,enddate,procedurecategory,procedurename,location,project,account,
       surgeon,consultRequest,biopsyNeeded,surgerytechneeded,spineeded,vetneeded,statuschangereason,qcstate,
       requestid,(select formtype from ehr.requests where requestid = sp.requestid) as formtype
 FROM study.surgery_procedure sp

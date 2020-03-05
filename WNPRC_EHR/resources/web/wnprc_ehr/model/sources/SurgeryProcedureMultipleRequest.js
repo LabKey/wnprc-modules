@@ -16,7 +16,7 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureMultipleRequest', {
                     plugins: ['wnprc-animalfield']
                 }
             },
-            proceduretype: {
+            procedurecategory: {
                 editorConfig: {
                     plugins: ['wnprc-procedurefield']
                 }

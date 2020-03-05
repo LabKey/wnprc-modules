@@ -146,10 +146,10 @@
         let requestObj;
         if (action === 'addToCalendar') {
             let calendarId;
-            if (form.proceduretype === 'surgery') {
+            if (form.procedurecategory === 'surgery') {
                 calendarId = 'surgeries_' + calendarIdSuffix;
             }
-            else if (form.proceduretype === 'imaging' || form.proceduretype === 'other') {
+            else if (form.procedurecategory === 'imaging' || form.procedurecategory === 'other') {
                 calendarId = 'procedures_' + calendarIdSuffix;
             }
             requestObj = {
@@ -284,7 +284,7 @@
     for(JSONObject routineRequest : routineRequests) {
         pendingRequests.put(routineRequest);
     }
-    List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "surgery_procedure_rooms"));
+    List<JSONObject> surgeryRooms = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "procedure_rooms"));
     Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
     Group spiGroup = GroupManager.getGroup(getContainer(), "spi (LDAP)", GroupEnumType.SITE);
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
@@ -302,7 +302,7 @@
                 <%--<!-- ko if: taskid() != '' -->--%>
                 <dl class="dl-horizontal">
                     <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
-                    <dt>Procedure Type:     </dt> <dd>{{proceduretype}}</dd>
+                    <dt>Procedure Type:     </dt> <dd>{{procedurecategory}}</dd>
                     <dt>Procedure Name:     </dt> <dd>{{procedurename}}</dd>
                     <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalid}}</a></dd>
                     <dt>Sex:                </dt> <dd>{{sex}}</dd>
@@ -533,7 +533,7 @@
 
             LABKEY.Query.selectRows({
                 schemaName: 'wnprc',
-                queryName: 'surgery_procedure_calendars_and_rooms',
+                queryName: 'procedure_calendars_and_rooms',
                 columns: 'calendar_id,calendar_type,display_name,api_action,folder_id,show_by_default,default_bg_color',
                 scope: this,
                 success: function(data){
@@ -730,7 +730,7 @@
                 objectid:             ko.observable(),
                 requestid:            ko.observable(),
                 taskid:               ko.observable(''),
-                proceduretype:        ko.observable(),
+                procedurecategory:    ko.observable(),
                 procedurename:        ko.observable(),
                 age:                  ko.observable(),
                 animalid:             ko.observable(),
@@ -759,7 +759,7 @@
                 priority:           '',
                 date:               '',
                 enddate:            '',
-                proceduretype:      '',
+                procedurecategory:  '',
                 procedurename:      '',
                 comments:           '',
                 statuschangereason: ''

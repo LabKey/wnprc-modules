@@ -19,7 +19,7 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
             apptid: {
                 hidden: true
             },
-            proceduretype: {
+            procedurecategory: {
                 editorConfig: {
                     plugins: ['wnprc-procedurefield']
                 }

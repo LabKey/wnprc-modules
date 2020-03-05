@@ -107,6 +107,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1449,6 +1450,11 @@ public class WNPRC_EHRController extends SpringActionController
             {
                 //TODO add logging
                 response.put("success", false);
+                response.put("exception", e.toString());
+                System.out.println(Arrays.toString(e.getStackTrace()));
+                System.out.println(e.getMessage());
+                System.out.println(e.getCause().getMessage());
+                e.printStackTrace();
             }
 
             return response;

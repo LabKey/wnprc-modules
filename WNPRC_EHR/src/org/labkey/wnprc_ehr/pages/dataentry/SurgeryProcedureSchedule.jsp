@@ -14,7 +14,14 @@
 <%@ page import="org.labkey.api.security.Group" %>
 <%@ page import="org.labkey.api.security.GroupManager" %>
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies) {
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0");
+    }
+%>
 
 
 <link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.css' />

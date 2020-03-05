@@ -19,20 +19,18 @@
 <%!
     @Override
     public void addClientDependencies(ClientDependencies dependencies) {
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.css");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.css");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.css");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.css");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.js");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.js");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.js");
+        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.js");
     }
 %>
 
-
-<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.css' />
-<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.css' />
-<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.css' />
-<link rel='stylesheet' href='/labkey/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.css' />
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
-<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.js'></script>
-<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.js'></script>
-<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.js'></script>
-<script src='/labkey/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.js'></script>
 
 <style type="text/css">
     /* Full Calendar heading */

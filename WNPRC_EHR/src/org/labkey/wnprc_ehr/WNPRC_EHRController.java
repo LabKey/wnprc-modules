@@ -1453,7 +1453,6 @@ public class WNPRC_EHRController extends SpringActionController
                 response.put("exception", e.toString());
                 System.out.println(Arrays.toString(e.getStackTrace()));
                 System.out.println(e.getMessage());
-                System.out.println(e.getCause().getMessage());
                 e.printStackTrace();
             }
 

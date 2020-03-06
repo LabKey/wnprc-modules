@@ -210,9 +210,9 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
             let newRec = this.store.createModel({})
             newRec.set({
                 displayname: rec.data.displayname,
-                name: rec.data.name,
-                type: rec.data.type,
-                fromClient: true
+                name:        rec.data.name,
+                category:    rec.data.category,
+                fromClient:  true
             });
 
             this.store.insert(0, newRec);

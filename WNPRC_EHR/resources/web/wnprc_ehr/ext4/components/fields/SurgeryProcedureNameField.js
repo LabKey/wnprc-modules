@@ -207,7 +207,7 @@ Ext4.define('WNPRC.ext.components.SurgeryProcedureNameField', {
 
         rec = this.allSurgeryProcedureNameStore.findRecord('procedurename', val);
         if (rec) {
-            let newRec = this.store.createModel({})
+            let newRec = this.store.createModel({});
             newRec.set({
                 displayname: rec.data.displayname,
                 name:        rec.data.name,

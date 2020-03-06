@@ -16,7 +16,7 @@ import java.util.List;
 
 public class EnterWaterOrder extends SimpleTaskForm
 {
-    public static final String NAME = "Enter Water Daily Amount";
+    public static final String NAME = "Enter Water Orders";
 
     public EnterWaterOrder(DataEntryFormContext ctx, Module owner)
     {

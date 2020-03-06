@@ -21,6 +21,7 @@
 
                     </column>
                     <column columnName="volume">
+                        <columnTitle>Water Vol (mls)</columnTitle>
                     </column>
                     <column columnName="vol_units">
                         <columnTitle>Volume Units</columnTitle>

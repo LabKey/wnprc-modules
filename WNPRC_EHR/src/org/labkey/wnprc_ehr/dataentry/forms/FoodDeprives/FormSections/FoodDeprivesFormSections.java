@@ -1,9 +1,12 @@
 package org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FormSections;
 
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,6 +57,9 @@ public class FoodDeprivesFormSections extends SimpleGridSection
     {
         List<String> defaultButtons = super.getTbarButtons();
 
+
+        //List<FieldKey> listOfColumns = super.getFieldKeys();
+
         if (formName.contains("Start")){
             defaultButtons.add(0,"ADDDEPRIVES");
             defaultButtons.add(1,"ADDSTARTTIME");
@@ -62,6 +68,8 @@ public class FoodDeprivesFormSections extends SimpleGridSection
         if (formName.contains("Complete")){
             defaultButtons.add(0,"ADDSTARTEDDEPRIVES");
             defaultButtons.add(1,"ADDRESTORETIME");
+            defaultButtons.remove("ADDRECORD");
+
 
         }
 
@@ -72,6 +80,47 @@ public class FoodDeprivesFormSections extends SimpleGridSection
         defaultButtons.remove("DELETERECORD");
 
         return defaultButtons;
+    }
+
+    public List<String> getFieldNames()
+    {
+        if (formName.contains("Start")){
+            List<String> gridColumns = new ArrayList<String>();
+            gridColumns.add("Id/curLocation/location");
+            gridColumns.add("Id");
+            gridColumns.add("date");
+            gridColumns.add("project");
+            gridColumns.add("schedule");
+            gridColumns.add("separated");
+            gridColumns.add("remarks");
+            gridColumns.add("assignedTo");
+            gridColumns.add("protocolContact");
+            gridColumns.add("depriveStartTime");
+            gridColumns.add("depriveStartedBy");
+
+
+            return gridColumns;
+        }
+        if (formName.contains("Complete")){
+            List<String> gridColumns = new ArrayList<String>();
+            gridColumns.add("Id/curLocation/location");
+            gridColumns.add("Id");
+            gridColumns.add("date");
+            gridColumns.add("project");
+            gridColumns.add("schedule");
+            gridColumns.add("separated");
+            gridColumns.add("remarks");
+            gridColumns.add("assignedTo");
+            gridColumns.add("protocolContact");
+            gridColumns.add("restoredTime");
+            gridColumns.add("foodRestoredBy");
+            gridColumns.add("startedTaskId");
+
+            return gridColumns;
+        }
+        return null;
+
+        
     }
 
 }

@@ -41,6 +41,11 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --port)       ## port that postgresql is running on
+            pgport="$2"
+            shift
+            shift
+            ;;
         --tmppath)
             tmppath="$2"
             shift
@@ -57,7 +62,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 set -- "${args[@]}"
-
 #-------------------------------------------------------------------------------
 # Determining location for temporary folder
 #-------------------------------------------------------------------------------
@@ -155,9 +159,9 @@ if [[ -z $dock ]]; then
   echo -e '\033[0;32mdone\033[0m'
 else
   echo -n 'Preparing database and roles ... '
-  ${pgpath}psql -U postgres -c "drop database if exists ${dbname};" &>/dev/null
-  ${pgpath}psql -U postgres -c "create database ${dbname};" &>/dev/null
-  ${pgpath}psql -U postgres -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
+  ${pgpath}psql -U postgres -p "${pgport#*:}" -c "drop database if exists ${dbname};" &>/dev/null
+  ${pgpath}psql -U postgres -p "${pgport#*:}" -c "create database ${dbname};" &>/dev/null
+  ${pgpath}psql -U postgres -p "${pgport#*:}" -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
 
@@ -202,9 +206,12 @@ if [[ -z $prod ]]; then
         update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'UserPreferencesMap' and p.name = 'RReport.RExe';
         update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
         update prop.properties p set value = 'ldap://ldap.primate.wisc.edu' where (select s.category from prop.propertysets s where s.set = p.set) = 'LDAPAuthentication' and p.name = 'Servers';
+        update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ehr.geneticcalculations' and p.name = 'enabled';
+        update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'ldk.ldapConfig' and p.name = 'enabled';
         update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';
         update exp.propertydescriptor set scale = 64 where name in ('FirstName', 'LastName', 'Phone', 'Mobile', 'Pager', 'IM') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
         update exp.propertydescriptor set scale = 255 where name in ('Description') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
+        delete from googledrive.service_accounts where id = '8c4a933c-2f8e-4094-9f43-46e80f14e163';
         delete from ehr.notificationrecipients;
 XXX
 fi

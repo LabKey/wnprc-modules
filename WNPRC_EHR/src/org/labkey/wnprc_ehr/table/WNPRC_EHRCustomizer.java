@@ -356,7 +356,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             url.addParameter("query.queryName", "housing_reason");
                             url.addParameter("keyField", "value");
 
-                            String urlString = "";
+                            StringBuilder urlString = new StringBuilder();
                             for (int i = 0; i < reasons.length; i++)
                             {
                                 String reasonForMoveValue = reasons[i];
@@ -364,18 +364,25 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                                 DbSchema schema = DbSchema.get("ehr_lookups", DbSchemaType.Module);
                                 TableInfo ti = schema.getTable("lookups");
                                 TableSelector ts = new TableSelector(ti, filter, null);
-                                String reasonForMoveTitle = (String) ts.getMap().get("title");
-
-                                url.replaceParameter("key", reasonForMoveValue);
-                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
-                                urlString += PageFlowUtil.filter(reasonForMoveTitle);
-                                urlString += "</a>";
+                                String reasonForMoveTitle;
+                                if (ts.getMap() != null && ts.getMap().get("title") != null)
+                                {
+                                    reasonForMoveTitle = (String) ts.getMap().get("title");
+                                    url.replaceParameter("key", reasonForMoveValue);
+                                    urlString.append("<a href=\"").append(PageFlowUtil.filter(url)).append("\">");
+                                    urlString.append(PageFlowUtil.filter(reasonForMoveTitle));
+                                    urlString.append("</a>");
+                                }
+                                else
+                                {
+                                    urlString.append(PageFlowUtil.filter("<" + reasonForMoveValue + ">"));
+                                }
                                 if (i + 1 < reasons.length)
                                 {
-                                    urlString += ", ";
+                                    urlString.append(", ");
                                 }
                             }
-                            out.write(urlString);
+                            out.write(urlString.toString());
                         }
                     }
 

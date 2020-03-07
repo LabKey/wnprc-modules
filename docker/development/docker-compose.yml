@@ -6,7 +6,7 @@ networks:
 
 services:
   labkeydev:
-    image: wnprcehr/labkey:17.2
+    image: wnprcehr/labkeydev:18.3
     volumes:
       - "${LABKEY_FILES_DIR}:/backups/new_files_dir"
       - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"

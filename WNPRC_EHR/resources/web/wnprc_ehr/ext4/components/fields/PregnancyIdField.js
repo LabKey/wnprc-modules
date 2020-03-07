@@ -107,7 +107,7 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         this.getPregnancies(id);
     },
 
-    makeSql: function(id){
+    makeSql: function(id, newRecord = true){
         if (!id && !this.includeDefaultProjects)
             return;
 
@@ -118,17 +118,25 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         }
         this.loadedKey = key;
 
-        var sql = 'select lsid,to_char(date_conception, \'yyyy-MM-dd\') as date_conception,sireid,to_char(date_conception, \'yyyy-MM-dd\') || \' (Sire: \' || sireid || \')\' as displayString \
-               from (select p.lsid \
-                           ,p.date_conception \
-                           ,p.sireid \
-                       from pregnancies p \
-                      where p.Id = \'' + id + '\' \
-                        and not exists (select * \
-                                          from pregnancy_outcomes po \
-                                         where po.pregnancyid = p.lsid) \
-                                      order by date_conception desc) \
-              current_pregnancies order by date_conception desc'.replace(/\s+/g, ' ');
+        let sql = 'select lsid, \
+                   to_char(date_conception, \'yyyy-MM-dd\') as date_conception, \
+                   sireid, \
+                   to_char(date_conception, \'yyyy-MM-dd\') || \' (Sire: \' || sireid || \')\' as displayString \
+                   from (select p.lsid \
+                               ,p.date_conception \
+                               ,p.sireid \
+                         from pregnancies p \
+                         where p.Id = \'' + id + '\'';
+
+        if (newRecord) {
+            sql += 'and not exists (select * \
+                                    from pregnancy_outcomes po \
+                                    where po.pregnancyid = p.lsid)'
+        }
+        sql +=          'order by date_conception desc) \
+                   current_pregnancies order by date_conception desc';
+
+        sql = sql.replace(/\s+/g, ' ');
 
         return sql;
     },
@@ -148,7 +156,12 @@ Ext4.define('WNPRC.form.field.PregnancyIdField', {
         }
 
         this.emptyText = 'Select pregnancy...';
-        var sql = this.makeSql(id);
+        let sql;
+        if (boundRecord) {
+            sql = this.makeSql(id, boundRecord.phantom);
+        } else {
+            sql = this.makeSql(id, true);
+        }
         if (sql){
             this.store.loading = true;
             this.store.sql = sql;

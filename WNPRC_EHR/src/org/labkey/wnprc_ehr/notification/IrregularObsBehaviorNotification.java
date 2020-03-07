@@ -100,8 +100,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
         TableSelector ts = new TableSelector(ti);
         ts.setNamedParameters(parameters);
 
-        Results rs = ts.getResults();
-        try {
+        try (Results rs = ts.getResults()) {
             long count = ts.getRowCount();
             if (count > 0) {
                 msg.append("<p>There have been <strong>");

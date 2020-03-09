@@ -1,30 +1,23 @@
-require("babel-polyfill");
-const path = require("path");
-const webpack = require("webpack");
+require("@babel/polyfill");
+var webpack = require("webpack");
+var path = require("path");
+
+var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
+  mode: process.env.NODE_ENV,
+
   context: path.resolve(__dirname, ".."),
 
-  devtool: "eval",
+  devtool: "source-map",
 
   entry: {
     app: [
-      "babel-polyfill",
-      "webpack-hot-middleware/client?path=http://localhost:3000/__webpack_hmr",
+      "@babel/polyfill",
+      "./src/client/theme/style.js",
       "./src/client/app.tsx"
     ]
-  },
-
-  output: {
-    path: path.resolve(__dirname, "../resources/web/enterweights/app/"),
-    publicPath: "http://localhost:3000/",
-    filename: "[name].js"
-  },
-
-  externals: {
-    "react/addons": true,
-    "react/lib/ExecutionEnvironment": true,
-    "react/lib/ReactContext": true
   },
 
   module: {
@@ -32,16 +25,37 @@ module.exports = {
       {
         test: /\.tsx?$/,
         loaders: ["babel-loader", "ts-loader"]
+      },
+      {
+        test: /\.css$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      },
+      {
+        test: /style.js/,
+        loaders: [
+          {
+            loader: "babel-loader",
+            options: {
+              cacheDirectory: true
+            }
+          }
+        ]
       }
     ]
   },
 
-  plugins: [
-    new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.HotModuleReplacementPlugin()
-  ],
+  output: {
+    path: path.resolve(__dirname, "../resources/web/EnterWeights/app/"),
+    publicPath: "./", // allows context path to resolve in both js/css
+    filename: "[name].js"
+  },
 
   resolve: {
     extensions: [".jsx", ".js", ".tsx", ".ts"]
-  }
+  },
+
+  plugins: [
+    new MiniCssExtractPlugin(),
+    //new BundleAnalyzerPlugin()
+  ]
 };

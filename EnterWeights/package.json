@@ -6,7 +6,7 @@
   "scripts": {
     "build": "better-npm-run build-prod",
     "build-prod": "better-npm-run build-prod",
-    "build-style": "npm run build:style",
+    "build-dev": "better-npm-run build-dev",
     "start": "better-npm-run build:style && better-npm-run build:watch",
     "clean": "better-npm-run clean",
     "reallyClean": "better-npm-run reallyClean",
@@ -49,7 +49,7 @@
     "eslint-plugin-react-hooks": "2.3.0",
     "express": "4.16.4",
     "express-http-proxy": "1.5.1",
-    "extract-text-webpack-plugin": "3.0.0",
+    "mini-css-extract-plugin": "0.9.0",
     "jest": "24.5.0",
     "jest-transform-css": "2.0.0",
     "prettier": "^1.19.1",
@@ -58,10 +58,11 @@
     "rimraf": "2.6.1",
     "style-loader": "0.18.2",
     "ts-jest": "24.0.0",
-    "ts-loader": "3.5.0",
+    "ts-loader": "4.5.0",
     "typedoc": "0.16.8",
     "typescript": "3.7.5",
-    "webpack": "3.4.1",
+    "webpack": "4.42.0",
+    "webpack-cli": "3.3.11",
     "webpack-dev-middleware": "1.11.0",
     "webpack-hot-middleware": "2.18.2",
     "source-map-explorer": "2.3.1",
@@ -88,6 +89,12 @@
       "command": "webpack --config webpack/prod.config.js",
       "env": {
         "NODE_ENV": "production"
+      }
+    },
+    "build-dev": {
+      "command": "webpack --config webpack/dev.config.js",
+      "env": {
+        "NODE_ENV": "development"
       }
     },
     "build:style": {

@@ -1,11 +1,10 @@
 require("@babel/polyfill");
-var webpack = require("webpack");
 var path = require("path");
-
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
-var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
+  mode: process.env.NODE_ENV,
+
   context: path.resolve(__dirname, ".."),
 
   devtool: "source-map",
@@ -24,18 +23,8 @@ module.exports = {
         loaders: ["babel-loader", "ts-loader"]
       },
       {
-        test: /\.css$/,
-        loader: ExtractTextPlugin.extract({
-          use: [
-            {
-              loader: "css-loader",
-              options: {
-                sourceMap: true
-              }
-            }
-          ],
-          fallback: "style-loader"
-        })
+        test: /\.css$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /style.js/,
@@ -62,13 +51,6 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.DefinePlugin({
-      "process.env.NODE_ENV": '"development"'
-    }),
-    //new BundleAnalyzerPlugin(),
-    new ExtractTextPlugin({
-      allChunks: true,
-      filename: "[name].css"
-    })
+    new MiniCssExtractPlugin()
   ]
 };

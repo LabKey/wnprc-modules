@@ -206,6 +206,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       );
     }
 
+    
+
     //TODO what if the url is complete rubbish?
 
     let config: ConfigProps = {

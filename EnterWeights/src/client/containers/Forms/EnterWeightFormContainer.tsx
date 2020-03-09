@@ -94,6 +94,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   const [saving, setSaving] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<string>();
   const [errorLevel, setErrorLevel] = useState<errorLevels>("no-action");
+  const [singleEditMode, setSingleEditMode] = useState(false);
 
   const formEl = useRef(null);
 
@@ -206,7 +207,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       );
     }
 
-    
+    //if we have an lsid but no taskid, this probably means we are editing an individual record,
+    //we should not try to insert into taskid table in this case
+    if (LABKEY.ActionURL.getParameter("taskid") == null &&
+      LABKEY.ActionURL.getParameter("lsid") != null){
+      setSingleEditMode(true);
+    }
 
     //TODO what if the url is complete rubbish?
 
@@ -214,11 +220,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       schemaName: "study",
       queryName: LABKEY.ActionURL.getParameter("formtype"),
       filterArray: filter,
-      columns: "Id,date,weight,remark,objectid,lsid,QCState"
+      columns: "Id,date,weight,remark,objectid,lsid,QCState,taskid"
     };
 
     let newformdata: RowObj[] = [];
     let newformdatarestraints: RowObj[] = [];
+    let tempid = '';
     labkeyActionSelectWithPromise(config).then(data => {
 
       if (data["rows"].length == 0){
@@ -241,8 +248,22 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           visibility: { value: "visible", error: "" },
           restraint: {value: "", error: "", objectid: "", weight_objectid: ""}
         });
+        setTaskId(row.taskid);
+        tempid = row.objectid;
       });
     }).then(()=> {
+
+      //if theres no lsid/taskid, then we have to get the restraint record using weight objectid
+      let filter = [];
+      if (LABKEY.ActionURL.getParameter("taskid") == null){
+        filter.push(
+          LABKEY.Filter.create(
+            "weight_objectid",
+            tempid,
+            LABKEY.Filter.EQUAL
+          )
+        )
+      }
 
       let config: ConfigProps = {
         schemaName: "study",
@@ -610,6 +631,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           variant="primary"
           className="wnprc-secondary-btn"
           id="add-record"
+          disabled={singleEditMode}
           onClick={() => {
             let newform = addRecord();
             let index = formdata.length;
@@ -631,6 +653,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           variant="primary"
           className="wnprc-secondary-btn"
           id="add-batch"
+          disabled={singleEditMode}
           onClick={handleShowRewrite}
         >
           Add Batch
@@ -639,6 +662,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           variant="primary"
           className="wnprc-secondary-btn"
           id="delete-record"
+          disabled={singleEditMode}
           onClick={() => {
             setFormData([]);
             setAnimalInfo(null);

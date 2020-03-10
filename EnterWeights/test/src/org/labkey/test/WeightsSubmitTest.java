@@ -84,6 +84,7 @@ public class WeightsSubmitTest extends BaseWebDriverTest
     /*
     protected static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
     protected static final Double WEIGHT_VAL = 12.12;
+    protected static final Double NEW_WEIGHT_VAL = 12.13;
     protected static final Double LOW_VAL = 0.1;
     protected static final Double HIGH_VAL = 0.12;
     protected static final String[] ANIMAL_ID_LOCAL = {"cj2078","r18051"};
@@ -446,10 +447,42 @@ public class WeightsSubmitTest extends BaseWebDriverTest
 
     }
 
+    public void navigateToWeightsTable()
+    {
+        beginAt(buildURL("ehr", getContainerPath(), "updateQuery.view?schemaName=study&queryName=weight"));
+    }
+
+    @Test
+    public void testUpdateSingleRecordThroughEHR() throws IOException, CommandException
+    {
+        navigateToWeightsTable();
+        DataRegionTable table = new DataRegionTable("query", getDriver());
+        String id = table.getDataAsText(0, "Id");
+        table.clickEditRow(0);
+        waitForText(id);
+        WebElement we = Locator.inputById("weight_0").findElement(getDriver());
+        for (int i = 0; i < 10; i++){
+            we.sendKeys(Keys.BACK_SPACE);
+            sleep(100);
+        }
+        fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
+
+    }
+    */
+
     public String getContainerPath()
     {
         return FOLDER_PATH_LOCAL;
     }
-     */
+
 
 }

@@ -134,6 +134,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static int BILLING_RUN_COUNT = 0;
 
     protected static final Double WEIGHT_VAL = 12.12;
+    protected static final Double NEW_WEIGHT_VAL = 12.13;
     protected static final Double LOW_VAL = 0.1;
     protected static final Double HIGH_VAL = 0.12;
     protected static final String ROOM_ID_LOCAL = "ab160";
@@ -2292,6 +2293,37 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse c = fetchRestraintDataGivenWeightObjectId(objectid.get("value").toString());
         JSONObject rt = (JSONObject) c.getRows().get(0).get("restraintType");
         Assert.assertEquals(null, "Table-Top", rt.get("value"));
+
+    }
+
+    public void navigateToWeightsTable()
+    {
+        beginAt(buildURL("ehr", getContainerPath(), "updateQuery.view?schemaName=study&queryName=weight"));
+    }
+
+    @Test
+    public void testUpdateSingleRecordThroughEHR() throws IOException, CommandException
+    {
+        navigateToWeightsTable();
+        DataRegionTable table = new DataRegionTable("query", getDriver());
+        String id = table.getDataAsText(0, "Id");
+        table.clickEditRow(0);
+        waitForText(id);
+        WebElement we = Locator.inputById("weight_0").findElement(getDriver());
+        for (int i = 0; i < 10; i++){
+            we.sendKeys(Keys.BACK_SPACE);
+            sleep(100);
+        }
+        fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
 
     }
 

@@ -117,7 +117,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     copyformdata.forEach(item => {
       item["weight"] = vals["weight"] ? vals["weight"] : item["weight"];
       item["date"] = vals["date"] ? vals["date"] : item["date"];
-      item["restraint"] = vals["restraint"] ? vals["restraint"] : item["restraint"];
+      item["restraint"]["value"] = vals["restraint"]["value"] ? vals["restraint"]["value"] : item["restraint"]["value"];
       item["remark"] = vals["remark"] ? vals["remark"] : item["remark"];
     });
 
@@ -156,7 +156,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
               command: { value: "insert", error: "" },
               collapsed: { value: true, error: "" },
               visibility: { value: "visible", error: "" },
-              restraint: {value: "", error: "", weight_objectid: "", objectid:""}
+              restraint: {value: "", error: "", weight_objectid: "", objectid: LABKEY.Utils.generateUUID().toUpperCase()}
             });
           });
         }
@@ -430,10 +430,13 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       setSaving(false);
       //need to set each record to update
       changeActionToUpdate();
+      window.scrollTo(0,0);
     }).catch(()=>{
       setWasError(true);
       setErrorText("Error during operation.");
+      window.scrollTo(0,0);
     });
+
   };
 
   const wait = time => {
@@ -516,7 +519,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         command: { value: "insert", error: "" },
         collapsed: { value: false, error: "" },
         visibility: { value: "visible", error: "" },
-        restraint: {value: "None", error: "", objectid: "", weight_objectid: ""}
+        restraint: {value: "", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""}
       });
     });
     setFormData(t);

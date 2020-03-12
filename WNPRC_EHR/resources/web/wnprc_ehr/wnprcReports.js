@@ -340,7 +340,8 @@ EHR.reports.hematology = function(panel, tab){
         titleField: 'Id',
         sort: '-date',
         filters: filterArray.nonRemovable,
-        removeableFilters: filterArray.removable
+        removeableFilters: filterArray.removable,
+        maxRows: 20
     });
 
     tab.add({
@@ -524,7 +525,7 @@ EHR.reports.diagnostics = function(panel, tab){
         queryName: 'chemPivot',
         sort: '-date',
         filters: filterArray.nonRemovable,
-        removeableFilters: filterArray.removable
+        removeableFilters: filterArray.removable,
     });
 
     tab.add({
@@ -658,6 +659,61 @@ EHR.reports.diagnostics = function(panel, tab){
         queryConfig: config
     });
 };
+
+EHR.reports.bloodChemistry = function(panel, tab){
+    var filterArray = panel.getFilterArray(tab);
+    var title = panel.getTitleSuffix();
+
+    var config = panel.getQWPConfig({
+        schemaName: 'study',
+        queryName: 'chemPivot',
+        title: "By Panel:",
+        titleField: 'Id',
+        sort: '-date',
+        filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable
+    });
+
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
+
+    config = panel.getQWPConfig({
+        schemaName: 'study',
+        queryName: 'chemMisc',
+        title: "Misc Tests:",
+        titleField: 'Id',
+        sort: '-date',
+        filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable,
+        maxRows: 20
+    });
+
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
+
+    config = panel.getQWPConfig({
+        schemaName: 'study',
+        queryName: 'chemistryRefRange',
+        //viewName: 'Plus Ref Range',
+        title: "Reference Ranges:",
+        titleField: 'Id',
+        sort: '-date',
+        filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable
+    });
+
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
+}
 
 EHR.reports.weightGraph = function(panel, tab){
     if (tab.filters.subjects){

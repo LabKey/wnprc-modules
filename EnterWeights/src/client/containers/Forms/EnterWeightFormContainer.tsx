@@ -556,7 +556,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       command: { value: "insert", error: "" },
       collapsed: { value: false, error: "" },
       visibility: { value: "visible", error: "" },
-      restraint: {value: "None", error: "", objectid: "", weight_objectid: ""}
+      restraint: {value: "None", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""}
     });
     return copyformdata;
   };

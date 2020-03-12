@@ -225,6 +225,7 @@ public class WeightsSubmitTest extends BaseWebDriverTest
         Assert.assertEquals(null, "In Progress", qc.get("displayValue"));
 
     }
+    */
 
     @Test
     public void testWeightWarning() throws IOException, CommandException
@@ -477,7 +478,21 @@ public class WeightsSubmitTest extends BaseWebDriverTest
         Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
 
     }
-    */
+
+    @Test
+    public void testAddBulkThenSave() throws IOException, CommandException
+    {
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        navigateToWeights();
+        addBatchByLocation();
+        // look that the error text DOES NOT exist
+        waitUntilElementIsClickable("save-draft-btn");
+        clickNewButton("save-draft-btn");
+        sleep(2000);
+        clickNewButton("save-draft-btn");
+        sleep(2000);
+        assertTextNotPresent("Error during operation");
+    }
 
     public String getContainerPath()
     {

@@ -225,7 +225,7 @@ public class WeightsSubmitTest extends BaseWebDriverTest
         Assert.assertEquals(null, "In Progress", qc.get("displayValue"));
 
     }
-    */
+
 
     @Test
     public void testWeightWarning() throws IOException, CommandException
@@ -494,6 +494,7 @@ public class WeightsSubmitTest extends BaseWebDriverTest
         assertTextNotPresent("Error during operation");
     }
 
+    */
     public String getContainerPath()
     {
         return FOLDER_PATH_LOCAL;

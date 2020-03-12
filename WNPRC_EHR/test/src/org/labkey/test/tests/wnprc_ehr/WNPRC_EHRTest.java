@@ -2327,6 +2327,21 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
+    @Test
+    public void testAddBulkThenSave() throws IOException, CommandException
+    {
+        //beginAt(buildURL("project", getContainerPath(), "begin"));
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        navigateToWeights();
+        addBatchByLocation();
+        // look that the error text DOES NOT exist
+        waitUntilElementIsClickable("save-draft-btn");
+        clickNewButton("save-draft-btn");
+        sleep(2000);
+        clickNewButton("save-draft-btn");
+        sleep(2000);
+        assertTextNotPresent("Error during operation");
+    }
 
     @Override
     protected String getModuleDirectory()

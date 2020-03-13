@@ -337,20 +337,21 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const onValidate = () => {
-    //e.preventDefault();
-    //formEl.current.reportValidity();
-    //TODO check all the fields
     let copyformdata = [...formdata];
-    let checkdata = true;
     copyformdata.forEach(item => {
-      //trigger validation in child?
-      if (item["weight"]["value"] == ""){
-        checkdata = false;
+      //don't validate against deleted / hidden items
+      if (item["visibility"]["value"] != "hide-record"){
+        if ((typeof item["weight"]["value"] == 'undefined' ||  item["weight"]["value"] == '') && item["animalid"]["value"] == ""){
+          setErrorLevel("no-action")
+        }
+        if ((typeof item["weight"]["value"] == 'undefined' ||  item["weight"]["value"] == '' ) && item["animalid"]["value"] != ""){
+          setErrorLevel("saveable")
+        }
+        if ((typeof item["weight"]["value"] != 'undefined' &&  item["weight"]["value"] != '') && item["animalid"]["value"] != ""){
+          setErrorLevel("submittable")
+        }
       }
     });
-    if (checkdata){
-      setErrorLevel("submittable");
-    }
 
   };
 
@@ -791,7 +792,9 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                             } else {
                               copyformdata.splice(i, 1);
                             }
+                            //the validity of this record is no longer valid, so set the error level to whatever it was
                             setFormData(copyformdata);
+                            onValidate();
                           });
                         }}
                       >

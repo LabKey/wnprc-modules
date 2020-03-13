@@ -1507,7 +1507,7 @@ public class TriggerScriptHelper {
         Calendar filterDate = Calendar.getInstance();
         filterDate.setTime(clientDate);
         
-        TableInfo waterGiven = getTableInfo("study","waterRestrictedAnimals");
+        TableInfo waterGiven = getTableInfo("study","waterScheduledAnimals");
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
         filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_LTE);
         TableSelector rawAnimals = new TableSelector(waterGiven, PageFlowUtil.set("id", "date", "condition"),filter, null);
@@ -1519,7 +1519,7 @@ public class TriggerScriptHelper {
             for (Map<String, Object> animalRestricted : animalsFromServer)
             {
                 String condition = ConvertHelper.convert(animalRestricted.get("condition"), String.class);
-                if (condition.equals("restricted")){
+                if (condition.equals("scheduled")){
                     isAnimalRestricted = true;
                 }
             }

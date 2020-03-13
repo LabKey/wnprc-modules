@@ -144,7 +144,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     sort: 'sort_order'
                 }
             },
-            assignTo:{
+            assignedTo:{
                 defaultValue: 'researchstaff',
                 lookup:{
                     schemaName: 'ehr_lookups',
@@ -159,7 +159,14 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             performedby:{
                 allowBlank: false
+            },
+            treatmentid: {
+                hidden: true
+            },
+            dateordered:{
+                hidden: true
             }
+            
         },
         'study.weight':{
             project: {
@@ -360,6 +367,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
         },
         'study.waterOrders':{
+            project:{
+                allowBlank: false
+            },
             date:{
                 xtype: 'datefield',
                 header: 'Start Date',
@@ -409,6 +419,15 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     displayColumn: 'meaning',
                     sort: 'sort_order'
                 }
+            },
+            provideFruit:{
+                xtype: 'ehr-booleanField',
+                editorConfig: {
+                    trueText: 'Yes',
+                    falseText: 'No'
+                },
+                defaultValue: 'No',
+                allowBlank: false
             }
 
 

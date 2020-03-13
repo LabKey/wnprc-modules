@@ -45,6 +45,9 @@
                             <fkDisplayColumn>title</fkDisplayColumn>
                         </fk>
                     </column>
+                    <column columnName="provideFruit">
+                        <columnTitle>Provide Fruit</columnTitle>
+                    </column>
 
             </columns>
         </table>

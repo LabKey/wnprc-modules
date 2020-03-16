@@ -89,7 +89,6 @@ function createNavMenu()
                 {name: 'Population Summary', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/populationOverview.view?'},
                 {name: 'Colony Census', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/colonyCensus.view?'},
                 {name: 'Pregnancies', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/breeding.view?'},
-                {name: 'Gestational Day Calculator', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/gestation_calculator.view?'},
                 {name: 'Room Utilization', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=roomUtilization'},
                 {name: 'Time Chart', url: '<%=contextPath%>/visualization' + ctx['EHRStudyContainer'] + '/timeChartWizard.view?edit=true'},
                 {name: 'Viral Challenges', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=ViralChallenges'},
@@ -126,7 +125,8 @@ function createNavMenu()
                 {name: 'Compare Lists of Animals', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/utilities.view?'},
                 {name: 'Run SQL Directly', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/executeSql.view?'},
                 {name: 'Search WNPRC SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=snomed'},
-                {name: 'Search ALL SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=full_snomed'}
+                {name: 'Search ALL SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=full_snomed'},
+                {name: 'Gestational Day Calculator', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/gestation_calculator.view?'}
             ]},
             {header: 'Data Entry',
             items: [

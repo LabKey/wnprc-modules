@@ -468,10 +468,10 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           "executeQuery.view?schemaName=study&query.queryName=weight",
           LABKEY.ActionURL.getContainer()
         );
-      }).catch(e => {
-          setSubmitBoxText(e);
-        });
+      });
       submit();
+    }).catch(e => {
+      setSubmitBoxText(e.exception);
     });
 
   };

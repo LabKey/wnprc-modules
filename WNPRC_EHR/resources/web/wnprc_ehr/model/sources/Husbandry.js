@@ -396,6 +396,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                 }
             },
+            frequency:{
+                defaultValue: '2',
+                allowBlank: 'true'
+            },
             waterSource:{
                 defaultValue: 'regulated',
                 allowBlank: 'false'

@@ -8,7 +8,7 @@ import java.util.List;
 public class WaterOrderFormSection extends SimpleGridSection
 {
     public WaterOrderFormSection(){
-        super ("study", "waterOrders", "Water Daily Amount");
+        super ("study", "waterOrders", "Water Orders");
         this.setAllowBulkAdd(true);
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/HusbandryClientStore.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddWaterWindow.js"));

@@ -254,6 +254,7 @@ package org.labkey.wnprc_ehr;
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcCoreUtils.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcOverRides.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcReports.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcHusbandryReports.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/datasetButtons.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/animalPortal.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/animalWaterCalendar.js"), this);

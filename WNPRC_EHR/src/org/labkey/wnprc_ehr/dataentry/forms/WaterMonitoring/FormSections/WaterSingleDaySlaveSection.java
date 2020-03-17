@@ -10,7 +10,7 @@ import java.util.Set;
 public class WaterSingleDaySlaveSection extends SlaveGridSection
 {
     public WaterSingleDaySlaveSection(){
-        super ("study", "waterAmount", "Order Additional Future Water");
+        super ("study", "waterAmount", "Order Additional Water for Today");
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
        // setAllowBulkAdd(true);
     }

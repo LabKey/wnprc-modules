@@ -397,7 +397,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             frequency:{
-                defaultValue: '2',
+                defaultValue: 'Daily - PM',
                 allowBlank: 'true'
             },
             waterSource:{

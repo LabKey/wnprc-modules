@@ -235,7 +235,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
         <div className="col-xs-9">
           <input
             type="number"
-            step=".01"
+            step="any"
             name="weight"
             id={`weight_${index}`}
             className="form-control"

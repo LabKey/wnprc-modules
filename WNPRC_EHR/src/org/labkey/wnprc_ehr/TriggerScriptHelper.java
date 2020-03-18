@@ -23,6 +23,7 @@ import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
+import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
 import java.sql.Timestamp;
@@ -602,4 +603,13 @@ public class TriggerScriptHelper {
         Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
         notification.sendManually(ehrContainer,user);
     }
+
+    public void sendViralLoadQueueNotification(Integer key, String animalid, String email, String hostName){
+        _log.info("Using java helper to send email for viral load queue record: "+key);
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, animalid, email, hostName);
+        Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+        notification.sendManually(ehrContainer,user);
+    }
+
 }

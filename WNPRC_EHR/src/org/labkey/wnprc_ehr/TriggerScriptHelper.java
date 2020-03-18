@@ -26,6 +26,7 @@ import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -604,7 +605,8 @@ public class TriggerScriptHelper {
         notification.sendManually(ehrContainer,user);
     }
 
-    public void sendViralLoadQueueNotification(Integer key, String animalid, String email, String hostName){
+    public void sendViralLoadQueueNotification(Integer key, String animalid, String email, String hostName) throws SQLException
+    {
         _log.info("Using java helper to send email for viral load queue record: "+key);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, animalid, email, hostName);

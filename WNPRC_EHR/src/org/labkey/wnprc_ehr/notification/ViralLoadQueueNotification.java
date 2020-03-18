@@ -1,17 +1,26 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.Results;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
+import org.labkey.dbutils.api.SimpleQuery;
+import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
 import javax.mail.Address;
 import javax.mail.Message;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -27,13 +36,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String animalId;
     public String hostName;
     public String email;
+    public String createdBy;
 
     public ViralLoadQueueNotification(Module owner)
     {
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, Integer rowid, User currentuser, String animalid, String useremail, String hostname)
+    public ViralLoadQueueNotification(Module owner, Integer rowid, User currentuser, String animalid, String useremail, String hostname) throws SQLException
     {
         super(owner);
         rowId = rowid;
@@ -41,7 +51,38 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         hostName = hostname;
         animalId = animalid;
         email = useremail;
+        this.setUserEmail(rowid);
 
+    }
+
+    public void setCreatedByField(Integer key)
+    {
+
+    }
+
+    public void setUserEmail(Integer key) throws SQLException
+    {
+        SimpleQueryFactory qf = new SimpleQueryFactory(currentUser, getContainer());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), rowId);
+        JSONArray ja = qf.selectRows("lists", "vl_sample_queue");
+
+        Results rs;
+        /*QueryHelper viralLoadQuery = new QueryHelper(getContainer(), currentUser, "lists", "vl_sample_queue");
+
+        // Define columns to get
+        List<FieldKey> columns = new ArrayList<FieldKey>();
+        columns.add(FieldKey.fromString("Key"));
+
+        // Execute the query
+        Results rs;
+        rs = viralLoadQuery.select(columns, filter);
+        String id = null;
+
+        // Now, execute it to get our list of Ids
+        if (rs.next()){
+            id = rs.getString(FieldKey.fromString("CreatedBy"));
+        }
+        this.createdBy = id;*/
     }
 
     @Override

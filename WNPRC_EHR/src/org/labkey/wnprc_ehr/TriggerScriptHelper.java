@@ -605,11 +605,12 @@ public class TriggerScriptHelper {
         notification.sendManually(ehrContainer,user);
     }
 
-    public void sendViralLoadQueueNotification(Integer key, String animalid, String email, String hostName) throws SQLException
+    public void sendViralLoadQueueNotification(Integer key, String hostName) throws SQLException
     {
         _log.info("Using java helper to send email for viral load queue record: "+key);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, animalid, email, hostName);
+        Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
+        ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, viralLoadContainer, hostName);
         Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
         notification.sendManually(ehrContainer,user);
     }

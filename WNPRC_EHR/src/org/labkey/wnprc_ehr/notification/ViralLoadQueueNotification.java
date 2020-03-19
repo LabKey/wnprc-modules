@@ -1,21 +1,18 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
-import org.labkey.dbutils.api.SimpleQuery;
-import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
 import javax.mail.Address;
@@ -36,53 +33,50 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String animalId;
     public String hostName;
     public String email;
-    public String createdBy;
+    public Container container;
 
     public ViralLoadQueueNotification(Module owner)
     {
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, Integer rowid, User currentuser, String animalid, String useremail, String hostname) throws SQLException
+    public ViralLoadQueueNotification(Module owner, Integer rowid, User currentuser, Container c, String hostname) throws SQLException
     {
         super(owner);
         rowId = rowid;
         currentUser = currentuser;
         hostName = hostname;
-        animalId = animalid;
-        email = useremail;
-        this.setUserEmail(rowid);
-
+        container = c;
+        this.setUp();
     }
 
-    public void setCreatedByField(Integer key)
+    public void setUp() throws SQLException
     {
-
-    }
-
-    public void setUserEmail(Integer key) throws SQLException
-    {
-        SimpleQueryFactory qf = new SimpleQueryFactory(currentUser, getContainer());
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), rowId);
-        JSONArray ja = qf.selectRows("lists", "vl_sample_queue");
-
-        Results rs;
-        /*QueryHelper viralLoadQuery = new QueryHelper(getContainer(), currentUser, "lists", "vl_sample_queue");
+        QueryHelper viralLoadQuery = new QueryHelper(container, currentUser, "lists", "vl_sample_queue");
 
         // Define columns to get
-        List<FieldKey> columns = new ArrayList<FieldKey>();
+        List<FieldKey> columns = new ArrayList<>();
         columns.add(FieldKey.fromString("Key"));
+        columns.add(FieldKey.fromString("CreatedBy"));
+        columns.add(FieldKey.fromString("Status"));
+        columns.add(FieldKey.fromString("Id"));
 
         // Execute the query
-        Results rs;
-        rs = viralLoadQuery.select(columns, filter);
-        String id = null;
+        Results rs = viralLoadQuery.select(columns, filter);
+        Integer id = null;
+        String animalid = null;
 
-        // Now, execute it to get our list of Ids
         if (rs.next()){
-            id = rs.getString(FieldKey.fromString("CreatedBy"));
+            id = rs.getInt(FieldKey.fromString("CreatedBy"));
+            animalid = rs.getString(FieldKey.fromString("Id"));
         }
-        this.createdBy = id;*/
+        rs.close();
+        User u = UserManager.getUser(id);
+        u.getEmail();
+        this.email = u.getEmail();
+        this.animalId = animalid;
+
     }
 
     @Override
@@ -117,7 +111,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     {
         final StringBuilder msg = new StringBuilder();
         Date now = new Date();
-        msg.append("<p>There was a viral load sample completed on: " +
+        msg.append("<p>There was a viral load sample completed on " +
                 AbstractEHRNotification._dateFormat.format(now) +
                 " at " +
                 AbstractEHRNotification._timeFormat.format(now) +
@@ -138,7 +132,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         msg.append("<p>View the animal abstract " +
                 "<a href=\"" +
                 hostName +
-                "https://ehr.primate.wisc.edu/ehr/WNPRC/EHR/participantView.view?participantId=" +
+                "/ehr/WNPRC/EHR/participantView.view?participantId=" +
                 animalId +
                 "#subjects:" +
                 animalId +
@@ -183,6 +177,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                     }
                 }
             }
+            //also add to the list of recipients the person who created the record
             emails.add(email);
 
             if (emails.size() == 0)

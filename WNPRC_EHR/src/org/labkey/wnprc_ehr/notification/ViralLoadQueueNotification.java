@@ -157,7 +157,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, User currentUser)
     {
-        _log.info("ViralLoadNotification.java: sending animal request email...");
+        _log.info("ViralLoadNotification.java: sending viral sample queue update email...");
         try
         {
             MailHelper.MultipartMessage msg = MailHelper.createMultipartMessage();

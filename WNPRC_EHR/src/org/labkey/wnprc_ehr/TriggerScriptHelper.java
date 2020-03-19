@@ -7,11 +7,15 @@ import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Results;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.study.security.SecurityEscalator;
@@ -605,14 +609,22 @@ public class TriggerScriptHelper {
         notification.sendManually(ehrContainer,user);
     }
 
-    public void sendViralLoadQueueNotification(Integer key, String hostName) throws SQLException
+    public boolean isVLStatusComplete(User user, Container container, Integer status) throws SQLException
     {
-        _log.info("Using java helper to send email for viral load queue record: "+key);
+        //implement this
+        return true;
+    }
+
+    public void sendViralLoadQueueNotification(Integer key, Integer status, String hostName) throws SQLException
+    {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
         ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, viralLoadContainer, hostName);
         Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-        notification.sendManually(ehrContainer,user);
+        if (isVLStatusComplete(user, viralLoadContainer, status)){
+            _log.info("Using java helper to send email for viral load queue record: "+key);
+            notification.sendManually(ehrContainer,user);
+        }
     }
 
 }

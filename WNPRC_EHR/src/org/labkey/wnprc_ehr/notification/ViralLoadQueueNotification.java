@@ -32,7 +32,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public User currentUser;
     public String animalId;
     public String hostName;
-    public String email;
+    public String email = "";
     public Container container;
 
     public ViralLoadQueueNotification(Module owner)
@@ -62,20 +62,24 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("Status"));
         columns.add(FieldKey.fromString("Id"));
 
-        // Execute the query
-        Results rs = viralLoadQuery.select(columns, filter);
-        Integer id = null;
+        Integer userid = null;
         String animalid = null;
 
-        if (rs.next()){
-            id = rs.getInt(FieldKey.fromString("CreatedBy"));
-            animalid = rs.getString(FieldKey.fromString("Id"));
+        // Execute the query
+        try (Results rs = viralLoadQuery.select(columns, filter)){
+            if (rs.next()){
+                userid = rs.getInt(FieldKey.fromString("CreatedBy"));
+                animalid = rs.getString(FieldKey.fromString("Id"));
+            }
         }
-        rs.close();
-        User u = UserManager.getUser(id);
-        u.getEmail();
-        this.email = u.getEmail();
-        this.animalId = animalid;
+        if (userid != null){
+            User u = UserManager.getUser(userid);
+            if (u != null){
+                u.getEmail();
+                this.email = u.getEmail();
+                this.animalId = animalid;
+            }
+        }
 
     }
 
@@ -129,14 +133,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 "/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/begin.view?\"" +
                 " >here</a>.</p>");
 
-        msg.append("<p>View the animal abstract " +
+        msg.append("<p>View the animal virology results " +
                 "<a href=\"" +
                 hostName +
                 "/ehr/WNPRC/EHR/participantView.view?participantId=" +
                 animalId +
                 "#subjects:" +
                 animalId +
-                "&inputType:singleSubject&showReport:0&activeReport:abstract\"" +
+                "&inputType:singleSubject&showReport:0&activeReport:virology\"" +
                 " >here</a>.</p>");
 
 
@@ -178,7 +182,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 }
             }
             //also add to the list of recipients the person who created the record
-            emails.add(email);
+            if (email != null) emails.add(email);
 
             if (emails.size() == 0)
             {

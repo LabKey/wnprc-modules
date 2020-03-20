@@ -609,20 +609,37 @@ public class TriggerScriptHelper {
         notification.sendManually(ehrContainer,user);
     }
 
-    public boolean isVLStatusComplete(User user, Container container, Integer status) throws SQLException
+    public String getVLStatus(User user, Container container, Integer status) throws SQLException
     {
-        //implement this
-        return true;
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
+        QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
+
+        // Define columns to get
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("Key"));
+        columns.add(FieldKey.fromString("Status"));
+
+        // Execute the query
+        String thestatus = null;
+        try ( Results rs = viralLoadQuery.select(columns, filter) )
+        {
+            if (rs.next()){
+                thestatus = rs.getString(FieldKey.fromString("Status"));
+            }
+        }
+        return thestatus;
     }
 
     public void sendViralLoadQueueNotification(Integer key, Integer status, String hostName) throws SQLException
     {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
-        ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, viralLoadContainer, hostName);
-        Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-        if (isVLStatusComplete(user, viralLoadContainer, status)){
+        String recordStatus = getVLStatus(user, viralLoadContainer, status);
+        if ("05-complete".equals(recordStatus)){
             _log.info("Using java helper to send email for viral load queue record: "+key);
+            ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, viralLoadContainer, hostName);
+            Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
             notification.sendManually(ehrContainer,user);
         }
     }

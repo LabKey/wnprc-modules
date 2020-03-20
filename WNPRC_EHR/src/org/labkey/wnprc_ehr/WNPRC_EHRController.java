@@ -1497,11 +1497,11 @@ public class WNPRC_EHRController extends SpringActionController
         String eventsString = null;
         if (calendarType.equalsIgnoreCase("Office365Resource"))
         {
-            eventsString = calendar.getRoomEventsAsJson(calendarId, backgroundColor);
+            eventsString = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.ROOM);
         }
         else
         {
-            eventsString = calendar.getCalendarEventsAsJson(calendarId, backgroundColor);
+            eventsString = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.CALENDAR);
         }
         return eventsString;
     }

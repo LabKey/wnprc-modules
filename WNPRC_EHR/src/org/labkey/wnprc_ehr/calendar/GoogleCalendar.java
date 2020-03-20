@@ -148,7 +148,7 @@ public class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return getJsonEventList(events.getItems(), calendarId, backgroundColor).toString();
     }
 
-    public String getCalendarEventsAsJson(String calendarId, String backgroundColor) throws Exception {
+    public String getEventsAsJson(String calendarId, String backgroundColor, EventType eventType) throws Exception {
         Calendar calendar = getCalendar();
         java.util.Calendar currentDate = java.util.Calendar.getInstance();
         DateTime dateMin = new DateTime(currentDate.getTimeInMillis() - SIX_MONTHS_IN_MILLISECONDS);

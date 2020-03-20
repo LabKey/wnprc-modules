@@ -125,7 +125,8 @@ function createNavMenu()
                 {name: 'Compare Lists of Animals', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/utilities.view?'},
                 {name: 'Run SQL Directly', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/executeSql.view?'},
                 {name: 'Search WNPRC SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=snomed'},
-                {name: 'Search ALL SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=full_snomed'}
+                {name: 'Search ALL SNOMED Codes', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=full_snomed'},
+                {name: 'Gestational Day Calculator', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/gestation_calculator.view?'}
             ]},
             {header: 'Data Entry',
             items: [

@@ -23,7 +23,9 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
                 }
             },
             debitedaccount: {
-                hidden: true
+                hidden: false,
+                xtype: 'wnprc_billing-miscchargesdebitacctfield',
+                userEditable: false
             },
             investigator: {
                 xtype: 'wnprc_billing-investigatorfield',
@@ -82,6 +84,16 @@ EHR.model.DataModelManager.registerMetadata('Charges', {
             },
             chargeCategory: {
                 hidden: true
+            },
+            quantity: {
+                xtype: 'wnprc_billing-quantityfield'
+            },
+            unitCost: {
+                xtype: 'wnprc_billing-unitcostfield'
+            },
+            totalCost: {
+                userEditable: false,
+                xtype: 'wnprc_billing-totalcostfield'
             }
         }
     }

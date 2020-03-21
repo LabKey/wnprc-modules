@@ -77,16 +77,35 @@ Ext4.define('WNPRC_Billing.form.field.ChargeItemField', {
                         scope: this,
                         success: function (results) {
 
+                            var unitCost = results.rows[0].unitCost;
                             // for bulk edit window
                             if (form) {
                                 var unitCostField = this.up("form").getForm().findField("unitCost");
-                                unitCostField.disabled = false;
-                                unitCostField.setValue(results.rows[0] != null ? results.rows[0].unitCost : null);
+                                if (unitCostField)
+                                {
+                                    unitCostField.disabled = false;
+                                    unitCostField.setValue(results.rows[0] != null ? unitCost : null);
+                                }
+                                var quantity = this.up("form").getForm().findField("quantity");
+                                if (quantity && quantity.getValue())
+                                {
+                                    var totalCostField = this.up("form").getForm().findField("totalCost");
+                                    if (totalCostField)
+                                    {
+                                        var val = results.rows[0] != null ? (quantity.getValue() * unitCost) : null;
+                                        totalCostField.disabled = false;
+                                        totalCostField.setValue(val);
+                                    }
+                                }
+
+
                             }
                             //for data entry grid
                             else {
+                                var quantity = EHR.DataEntryUtils.getSiblingValue(this, "quantity");
                                 EHR.DataEntryUtils.setSiblingFields(combo, {
-                                    unitCost: (results.rows[0] != null ? results.rows[0].unitCost : null)
+                                    unitCost: (results.rows[0] != null ? unitCost : null),
+                                    totalCost: (results.rows[0] != null && quantity != null ? unitCost * quantity : null)
                                 });
                             }
                         }

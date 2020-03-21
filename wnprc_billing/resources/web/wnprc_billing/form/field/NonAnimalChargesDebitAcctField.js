@@ -1,13 +1,13 @@
-Ext4.define('WNPRC_Billing.form.field.MiscChargesDebitAcctEntryField', {
+Ext4.define('WNPRC_Billing.form.field.NonAnimalChargesDebitAcctField', {
     extend: 'Ext.form.field.ComboBox',
-    alias: 'widget.wnprc_billing-miscchargesdebitacctentryfield',
+    alias: 'widget.wnprc_billing-nonanimalchargesdebitacctfield',
 
     initComponent: function() {
 
         this.addListener({
             scope:this,
             select: function(field, newValue) {
-                //on alias (labeled as 'Debited Account') changed, reset investigator
+                //on alias (labeled as 'Debited Account') change, reset investigator
                 //for bulk edit window
                 if (this.up("form") && this.up("form").getForm()) {
 
@@ -15,9 +15,6 @@ Ext4.define('WNPRC_Billing.form.field.MiscChargesDebitAcctEntryField', {
                     if (invesField) {
                         invesField.disabled = false;
                         invesField.setValue(null);
-                        // var filter = LABKEY.Filter.create('alias', this.value, LABKEY.Filter.Types.EQUAL);
-                        // invesField.store.filterArray = [filter];
-                        // invesField.store.load();
                     }
                 }
                 else {

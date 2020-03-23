@@ -7,6 +7,5 @@ function afterUpdate(row, oldRow, errors){
     var status = row.Status;
     var hostName =  'https://' + LABKEY.serverName;
     WNPRC.Utils.getJavaHelper().sendViralLoadQueueNotification(key, status, hostName);
-
 }
 

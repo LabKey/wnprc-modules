@@ -32,7 +32,8 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public User currentUser;
     public String animalId;
     public String hostName;
-    public String email = "";
+    public String requestorEmail = "";
+    public String notifyEmails = "";
     public Container container;
 
     public ViralLoadQueueNotification(Module owner)
@@ -61,24 +62,30 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("CreatedBy"));
         columns.add(FieldKey.fromString("Status"));
         columns.add(FieldKey.fromString("Id"));
+        columns.add(FieldKey.fromString("emails"));
 
         Integer userid = null;
         String animalid = null;
+        String notifyEmails = null;
 
         // Execute the query
         try (Results rs = viralLoadQuery.select(columns, filter)){
             if (rs.next()){
                 userid = rs.getInt(FieldKey.fromString("CreatedBy"));
                 animalid = rs.getString(FieldKey.fromString("Id"));
+                notifyEmails = rs.getString(FieldKey.fromString("emails"));
             }
         }
         if (userid != null){
             User u = UserManager.getUser(userid);
             if (u != null){
                 u.getEmail();
-                this.email = u.getEmail();
+                this.requestorEmail = u.getEmail();
                 this.animalId = animalid;
             }
+        }
+        if (notifyEmails != null){
+            this.notifyEmails = notifyEmails;
         }
 
     }
@@ -182,7 +189,17 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 }
             }
             //also add to the list of recipients the person who created the record
-            if (email != null) emails.add(email);
+            if (requestorEmail != null) emails.add(requestorEmail);
+
+            if (notifyEmails != null){
+                //we should split by comma, semicolon, or new line
+                String[] emailArray = notifyEmails.split(";|,|\n|\r\n|\r");
+                for (String e : emailArray)
+                {
+                    e = e.trim();
+                    emails.add(e);
+                }
+            }
 
             if (emails.size() == 0)
             {

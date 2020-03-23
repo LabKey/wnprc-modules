@@ -1944,9 +1944,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         //WebElement modeElement = Locator.tagWithText("a", "Enter Data").findElement(getDriver());
         //modeElement.click();
-        waitForElement(Locator.linkContainingText("Enter Weights"));
-        WebElement modeElement2 = Locator.tagWithText("a", "Enter Weights").findElement(getDriver());
-        modeElement2.click();
+        //waitForElement(Locator.linkContainingText("Enter Weights"));
+        //WebElement modeElement2 = Locator.tagWithText("a", "Enter Weights").findElement(getDriver());
+        //modeElement2.click();
+        beginAt(buildURL("enterweights", getContainerPath(), "app"));
     }
 
     public WebElement fillAnInput(String inputId, String value)
@@ -1978,7 +1979,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testWeightWarning() throws IOException, CommandException
     {
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         fillWeightForm(LOW_VAL.toString(),0);
         waitUntilElementIsClickable("submit-all-btn");
@@ -1990,7 +1991,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, LOW_VAL, wt.get("value"));
 
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         //beginAt(buildURL("project", getContainerPath(), "begin"));
         navigateToWeights();
         fillWeightForm(HIGH_VAL.toString(),0);
@@ -2005,7 +2006,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         //navigate to weights form and fill it out
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
         waitUntilElementIsClickable("submit-all-btn");
@@ -2050,7 +2051,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testWeightSubmitForReview() throws IOException, CommandException
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
         waitUntilElementIsClickable("submit-review-btn");
@@ -2095,7 +2096,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testSaveWeightDraft() throws IOException, CommandException
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         fillWeightForm(LOW_VAL.toString(),0);
         waitUntilElementIsClickable("save-draft-btn");
@@ -2127,7 +2128,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testEditAndDelete() throws IOException, CommandException
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
         clickNewButton("add-record");
@@ -2215,7 +2216,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBatchIds()
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         addBatchByIds();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
@@ -2227,7 +2228,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testEditBatch() throws IOException, CommandException
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         addBatchByLocation();
         clickNewButton("edit-batch");
@@ -2251,7 +2252,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBatch()
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         addBatchByLocation();
         for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
@@ -2264,7 +2265,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testDisplayAnimalInfo() throws IOException, CommandException
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         WebElement f = fillAnInput("animalid_0", ANIMAL_SUBSET_EHR_TEST[0]);
         f.sendKeys(Keys.TAB);
@@ -2276,7 +2277,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddRestraint() throws IOException, CommandException
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         fillWeightForm(WEIGHT_VAL.toString(),0);
         WebElement el2 = fillAnInput("restraint_0", "T");
@@ -2331,7 +2332,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testAddBulkThenSave() throws IOException, CommandException
     {
         //beginAt(buildURL("project", getContainerPath(), "begin"));
-        beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
         navigateToWeights();
         addBatchByLocation();
         // look that the error text DOES NOT exist

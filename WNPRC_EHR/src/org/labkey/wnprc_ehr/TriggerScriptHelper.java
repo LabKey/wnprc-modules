@@ -636,7 +636,7 @@ public class TriggerScriptHelper {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
         String recordStatus = getVLStatus(user, viralLoadContainer, status);
-        if ("05-complete".equals(recordStatus)){
+        if ("08-complete-send-email".equals(recordStatus)){
             _log.info("Using java helper to send email for viral load queue record: "+key);
             ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, viralLoadContainer, hostName);
             Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");

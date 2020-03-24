@@ -35,6 +35,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String requestorEmail = "";
     public String notifyEmails = "";
     public Container container;
+    public final String openResearchPortal = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
     public ViralLoadQueueNotification(Module owner)
     {
@@ -134,20 +135,11 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 rowId +
                 "\">here</a> to review the request.</p>");
 
-        msg.append("<p>View the viral load queue " +
-                "<a href=\"" +
-                hostName +
-                "/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/begin.view?\"" +
-                " >here</a>.</p>");
-
         msg.append("<p>View the animal virology results " +
                 "<a href=\"" +
-                hostName +
-                "/ehr/WNPRC/EHR/participantView.view?participantId=" +
+                openResearchPortal +
+                "&Dataset.ParticipantId~eq=" +
                 animalId +
-                "#subjects:" +
-                animalId +
-                "&inputType:singleSubject&showReport:0&activeReport:virology\"" +
                 " >here</a>.</p>");
 
 

@@ -35,6 +35,8 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String requestorEmail = "";
     public String notifyEmails = "";
     public Container container;
+    public String fullName = "";
+    public String modifiedByEmail = "";
     public final String openResearchPortal = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
     public ViralLoadQueueNotification(Module owner)
@@ -64,29 +66,44 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("Status"));
         columns.add(FieldKey.fromString("Id"));
         columns.add(FieldKey.fromString("emails"));
+        columns.add(FieldKey.fromString("ModifiedBy"));
 
         Integer userid = null;
         String animalid = null;
         String notifyEmails = null;
+        Integer modifiedBy = null;
 
         // Execute the query
-        try (Results rs = viralLoadQuery.select(columns, filter)){
+        try (Results rs = viralLoadQuery.select(columns, filter))
+        {
             if (rs.next()){
                 userid = rs.getInt(FieldKey.fromString("CreatedBy"));
                 animalid = rs.getString(FieldKey.fromString("Id"));
                 notifyEmails = rs.getString(FieldKey.fromString("emails"));
+                modifiedBy = rs.getInt(FieldKey.fromString("ModifiedBy"));
             }
         }
-        if (userid != null){
+        if (userid != null)
+        {
             User u = UserManager.getUser(userid);
-            if (u != null){
-                u.getEmail();
+            if (u != null)
+            {
+                this.fullName = u.getFullName();
                 this.requestorEmail = u.getEmail();
                 this.animalId = animalid;
             }
         }
-        if (notifyEmails != null){
+        if (notifyEmails != null)
+        {
             this.notifyEmails = notifyEmails;
+        }
+        if (modifiedBy != null)
+        {
+         User mod = UserManager.getUser(modifiedBy);
+         if (mod != null)
+         {
+             this.modifiedByEmail = mod.getEmail();
+         }
         }
 
     }
@@ -115,7 +132,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     @Override
     public String getEmailSubject(Container c)
     {
-        return "[EHR Services] Viral load request has been completed as of " + _dateTimeFormat.format(new Date());
+        return "[EHR Server] Viral load results completed on " + _dateTimeFormat.format(new Date());
     }
 
     @Override
@@ -123,24 +140,23 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     {
         final StringBuilder msg = new StringBuilder();
         Date now = new Date();
-        msg.append("<p>There was a viral load sample completed on " +
-                AbstractEHRNotification._dateFormat.format(now) +
-                " at " +
-                AbstractEHRNotification._timeFormat.format(now) +
-                ".</p>");
-
-        msg.append("<p>Click <a href=\"" +
-                hostName +
-                "/list/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/details.view?listId=3&pk=" +
-                rowId +
-                "\">here</a> to review the request.</p>");
-
-        msg.append("<p>View the animal virology results " +
+        msg.append("<p>Hello " +
+                fullName +
+                ",</p>");
+        msg.append("<p>Good news - Virology Services has completed viral load testing on a sample(s) you submitted. " +
+                "The results can be found in the Zika portal, and using the following " +
                 "<a href=\"" +
                 openResearchPortal +
                 "&Dataset.ParticipantId~eq=" +
                 animalId +
-                " >here</a>.</p>");
+                "\">link</a>. ");
+        msg.append("Please feel free to contact " +
+                "<a href=\"mailto:" +
+                modifiedByEmail +
+                "\">" +
+                modifiedByEmail +
+                "</a> " +
+                "if you have any questions or concerns. We look forward to serving you again in the future.</p>");
 
 
         return msg.toString();

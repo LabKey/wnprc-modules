@@ -24,7 +24,7 @@ public class EnterWeightsModule extends DefaultModule
     @Override
     public double getVersion()
     {
-        return 18.31;
+        return 18.32;
     }
 
     @Override

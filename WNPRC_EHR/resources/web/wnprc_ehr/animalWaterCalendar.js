@@ -40,6 +40,7 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
             var parentId = tab.getEl().id;
             var child = Ext4.get(parentId + '-innerCt');
 
+            //TODO: not remove child everytime 
             // Remove any old tab content from previous animal selections
             var childToRemove = child.down('.labkeyWaterMonitoringDiv');
             if (childToRemove) {
@@ -52,6 +53,7 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
             var id = Ext4.id(targetElement, "waterMonitoring");
 
             // Render the web part to the div
+            //TODO: add condition to check to request webpart only the first time
             var waterCalendar = new LABKEY.WebPart({
                 partName: 'Water Calendar',
                 renderTo: id,

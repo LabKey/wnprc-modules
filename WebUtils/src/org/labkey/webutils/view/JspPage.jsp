@@ -8,15 +8,17 @@
 <%@ page import="org.labkey.webutils.WebUtilsModule" %>
 <%@ page import="org.labkey.api.module.ModuleProperty" %>
 <%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
+<%@ page import="org.labkey.api.util.GUID" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspPage view = (JspPage) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
     Integer numberOfRenders =view.publicNumberOfRenders;
+    String sufix = GUID.makeGUID();
 %>
 
 <style type="text/css">
-    #bootstrap-box {
+    #bootstrap-box<%=sufix%> {
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -27,12 +29,12 @@
         /* background-color: #fff; */ /* panels will include this, so it's not necessary to set here, and this way, it matches the outer divs */
     }
 
-    #bootstrap-box input[type="button"] {
+    #bootstrap-box<%=sufix%> input[type="button"] {
         -webkit-appearance: button;
         cursor: pointer;
     }
 
-    #bootstrap-box input[disabled] {
+    #bootstrap-box<%=sufix%> input[disabled] {
         cursor: default;
     }
 
@@ -53,9 +55,14 @@
 </style>
 
 <script type="application/javascript">
-    console.log ("numberofRenders" + "<%=numberOfRenders %>");
+    console.log ("numberofRenders " + "<%=numberOfRenders %>");
+    console.log ("print webUtils "+ WebUtils.VM);
     let $numberOfRenders = "<%=numberOfRenders %>";
+    debugger;
     if ($numberOfRenders>0){
+        ko.cleanNode(document.getElementById('bootstrap-box<%=sufix%>'));
+        /*ko.cleanNode(document.getElementById('waterInfoPanel'));
+        ko.cleanNode(document.getElementById('calendar'));*/
        // ko.cleanNode($element[0]);
 
     }
@@ -126,6 +133,7 @@
 
     boolean QUnitOn = (QUnitOnPropertyValue != null) && QUnitOnPropertyValue.toLowerCase().equals("true");
 
+
     if (QUnitOn) {
 %>
 <div id="qunit"></div>
@@ -138,7 +146,7 @@
 
 <!-- Use a div to hide the content until Knockout bindings have been applied.-->
 <div class="hiddenDiv" style="display: none;">
-    <div id="bootstrap-box">
+    <div id="bootstrap-box<%=sufix%>">
         <!-- Templates -->
         <%
             try {
@@ -162,10 +170,25 @@
 <script type="application/javascript">
     (function() {
         var koSuccessfullyLoaded = true;
+       // var applied = false;
 
         // Use a try block to ensure that we always show the hidden div.
         try {
+            console.log ("print webUtils "+ WebUtils.VM);
+           // console.log ("print document "+ document.getElementById('bootstrap-box'));
+            debugger;
             ko.applyBindings(WebUtils.VM);
+            /*ko.cleanNode(document.getElementById('bootstrap-box'));
+            ko.cleanNode(document.getElementById('waterInfoPanel'));
+            ko.cleanNode(document.getElementById('calendar'));*/
+            /*var koNode = document.getElementById('bootstrap-box<%=sufix%>');
+            var hasDataBinding = !!ko.dataFor(koNode);
+            console.log ('has data binding', hasDataBinding);
+            if (!hasDataBinding){
+                ko.applyBindings(WebUtils.VM);
+            }*/
+            
+
         }
         catch (e) {
             koSuccessfullyLoaded = false;

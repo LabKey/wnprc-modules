@@ -350,6 +350,8 @@
 
 <script>
     (function() {
+        ko.cleanNode(document.getElementById('waterInfoPanel'));
+        ko.cleanNode(document.getElementById('calendar'));
         var previousCalendarEvent;
         var previousCalendarColor;
 

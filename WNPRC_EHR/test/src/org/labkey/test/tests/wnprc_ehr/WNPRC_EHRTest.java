@@ -2146,6 +2146,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String taskid = taskidob.get("value").toString();
         SelectRowsResponse t = fetchTaskData(taskid);
         JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
+        TestLogger.log("testEditAndDelete: Navigating to task id...");
+        TestLogger.log(id.get("value").toString());
         waitAndClick(Locator.linkContainingText(id.get("value").toString()));
         waitForText("Task Details");
         //waitAndClick(Locator.linkWithText("Weight"));

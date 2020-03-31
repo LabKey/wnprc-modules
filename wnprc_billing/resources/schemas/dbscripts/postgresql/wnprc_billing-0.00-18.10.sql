@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- /* wnprc_billing-17.20-17.21.sql */
+/* wnprc_billing-17.20-17.30.sql */
 
 /*
   * Background:
@@ -28,11 +28,7 @@
   * Additionally, recent-ish (from 2016) changes from onprc_billing are also included.
   */
 
- /* wnprc_billing-12.30-12.301.sql */
-
 CREATE SCHEMA wnprc_billing;
-
-/* wnprc_billing-12.301-12.302.sql */
 
 --this table contains one row each time a billing run is performed, which gleans items to be charged from a variety of sources
 --and snapshots them into invoicedItems
@@ -242,8 +238,6 @@ CREATE TABLE wnprc_billing.clinicalFeeDefinition (
     CONSTRAINT PK_clinicalFeeDefinition PRIMARY KEY (rowId)
 );
 
-/* wnprc_billing-12.302-12.303.sql */
-
 ALTER TABLE wnprc_billing.chargeRates drop column unit;
 ALTER TABLE wnprc_billing.chargeRateExemptions drop column unit;
 
@@ -326,8 +320,6 @@ CREATE TABLE wnprc_billing.accounts (
     CONSTRAINT PK_accounts PRIMARY KEY (account)
 );
 
-/* wnprc_billing-12.303-12.304.sql */
-
 drop table wnprc_billing.financialContacts;
 
 CREATE TABLE wnprc_billing.fiscalAuthorities (
@@ -353,8 +345,6 @@ CREATE TABLE wnprc_billing.fiscalAuthorities (
     CONSTRAINT pk_fiscalAuthorities PRIMARY KEY (rowId)
 );
 
-/* wnprc_billing-12.304-12.305.sql */
-
 CREATE TABLE wnprc_billing.projectAccountHistory (
   rowid serial,
   project int,
@@ -367,8 +357,6 @@ CREATE TABLE wnprc_billing.projectAccountHistory (
   modifiedby userid,
   modified timestamp
 );
-
-/* wnprc_billing-12.305-12.306.sql */
 
 DROP TABLE wnprc_billing.chargableItems;
 
@@ -389,11 +377,7 @@ CREATE TABLE wnprc_billing.chargeableItems (
     CONSTRAINT PK_chargeableItems PRIMARY KEY (rowId)
 );
 
-/* wnprc_billing-12.307-12.308.sql */
-
 ALTER TABLE wnprc_billing.projectAccountHistory ADD CONSTRAINT PK_projectAccountHistory PRIMARY KEY  (rowid);
-
-/* wnprc_billing-12.309-12.310.sql */
 
 DROP TABLE wnprc_billing.grants ;
 
@@ -482,11 +466,7 @@ CREATE TABLE wnprc_billing.iacucFundingSources (
   CONSTRAINT PK_iacucFundingSources PRIMARY KEY (rowid)
 );
 
-/* wnprc_billing-12.310-12.311.sql */
-
 alter table wnprc_billing.leaseFeeDefinition drop column project;
-
-/* wnprc_billing-12.315-12.316.sql */
 
 ALTER Table wnprc_billing.invoicedItems DROP COLUMN flag;
 
@@ -506,32 +486,20 @@ ALTER Table wnprc_billing.invoicedItems ADD objectId entityid;
 
 ALTER Table wnprc_billing.invoiceRuns ADD runDate timestamp;
 
-/* wnprc_billing-12.316-12.317.sql */
-
 ALTER Table wnprc_billing.invoiceRuns ADD billingPeriodStart timestamp;
 ALTER Table wnprc_billing.invoiceRuns ADD billingPeriodEnd timestamp;
-
-/* wnprc_billing-12.317-12.318.sql */
 
 ALTER Table wnprc_billing.chargeableItems ADD itemCode varchar(100);
 ALTER Table wnprc_billing.chargeableItems ADD departmentCode varchar(100);
 ALTER Table wnprc_billing.invoicedItems ADD itemCode varchar(100);
 
-/* wnprc_billing-12.318-12.319.sql */
-
 ALTER Table wnprc_billing.procedureFeeDefinition DROP COLUMN chargeType;
 ALTER Table wnprc_billing.procedureFeeDefinition ADD billedby varchar(100);
 
-/* wnprc_billing-12.319-12.320.sql */
-
 ALTER Table wnprc_billing.invoiceRuns ADD objectid entityid;
-
-/* wnprc_billing-12.320-12.321.sql */
 
 ALTER Table wnprc_billing.procedureFeeDefinition DROP COLUMN billedby;
 ALTER Table wnprc_billing.procedureFeeDefinition ADD chargetype varchar(100);
-
-/* wnprc_billing-12.321-12.322.sql */
 
 ALTER TABLE wnprc_billing.invoiceRuns ALTER COLUMN objectid SET NOT NULL;
 
@@ -541,8 +509,6 @@ ALTER TABLE wnprc_billing.invoiceRuns ADD CONSTRAINT pk_invoiceRuns PRIMARY KEY 
 
 ALTER TABLE wnprc_billing.invoicedItems ADD creditAccountId int;
 ALTER TABLE wnprc_billing.invoicedItems ADD invoiceId entityid;
-
-/* wnprc_billing-12.322-12.323.sql */
 
 CREATE TABLE wnprc_billing.labworkFeeDefinition (
   rowid serial,
@@ -560,16 +526,10 @@ CREATE TABLE wnprc_billing.labworkFeeDefinition (
   CONSTRAINT PK_labworkFeeDefinition PRIMARY KEY (rowId)
 );
 
-/* wnprc_billing-12.323-12.324.sql */
-
 ALTER TABLE wnprc_billing.invoicedItems ADD servicecenter varchar(200);
-
-/* wnprc_billing-12.324-12.325.sql */
 
 ALTER TABLE wnprc_billing.labworkFeeDefinition DROP COLUMN chargeType;
 ALTER TABLE wnprc_billing.labworkFeeDefinition ADD chargeType varchar(100);
-
-/* wnprc_billing-12.325-12.326.sql */
 
 ALTER TABLE wnprc_billing.invoicedItems ADD transactionNumber int;
 
@@ -579,12 +539,8 @@ ALTER TABLE wnprc_billing.miscCharges ADD invoiceId entityid;
 ALTER TABLE wnprc_billing.miscCharges ADD description varchar(4000);
 ALTER TABLE wnprc_billing.miscCharges DROP COLUMN descrption;
 
-/* wnprc_billing-12.326-12.327.sql */
-
 ALTER TABLE wnprc_billing.invoicedItems DROP COLUMN transactionNumber;
 ALTER TABLE wnprc_billing.invoicedItems ADD transactionNumber varchar(100);
-
-/* wnprc_billing-12.327-12.328.sql */
 
 ALTER TABLE wnprc_billing.miscCharges ADD objectid entityid NOT NULL;
 
@@ -592,11 +548,7 @@ SELECT core.fn_dropifexists('miscCharges', 'wnprc_billing', 'CONSTRAINT', 'pk_mi
 
 ALTER TABLE wnprc_billing.miscCharges ADD CONSTRAINT pk_miscCharges PRIMARY KEY (objectid);
 
-/* wnprc_billing-12.328-12.329.sql */
-
 ALTER TABLE wnprc_billing.miscCharges DROP COLUMN rowid;
-
-/* wnprc_billing-12.329-12.330.sql */
 
 ALTER TABLE wnprc_billing.invoiceRuns DROP COLUMN runBy;
 ALTER TABLE wnprc_billing.invoiceRuns DROP COLUMN date;
@@ -606,15 +558,9 @@ ALTER TABLE wnprc_billing.invoiceRuns ADD invoiceNumber varchar(200);
 ALTER TABLE wnprc_billing.miscCharges ADD invoicedItemId entityid;
 ALTER TABLE wnprc_billing.miscCharges DROP COLUMN description;
 
-/* wnprc_billing-12.330-12.331.sql */
-
 ALTER TABLE wnprc_billing.invoicedItems ADD investigatorId int;
 
-/* wnprc_billing-12.331-12.332.sql */
-
 ALTER TABLE wnprc_billing.miscCharges ADD item varchar(500);
-
-/* wnprc_billing-12.332-12.333.sql */
 
 CREATE TABLE wnprc_billing.dataAccess (
   rowId serial NOT NULL,
@@ -631,8 +577,6 @@ CREATE TABLE wnprc_billing.dataAccess (
 
   CONSTRAINT PK_dataAccess PRIMARY KEY (rowId)
 );
-
-/* wnprc_billing-12.334-12.335.sql */
 
 ALTER TABLE wnprc_billing.grantProjects ADD protocolNumber Varchar(100);
 ALTER TABLE wnprc_billing.grantProjects ADD projectStatus Varchar(100);
@@ -658,8 +602,6 @@ ALTER TABLE wnprc_billing.grants ADD ogaAwardId int;
 
 ALTER TABLE wnprc_billing.fiscalAuthorities ADD employeeId varchar(100);
 
-/* wnprc_billing-12.335-12.336.sql */
-
 ALTER TABLE wnprc_billing.grants ADD rowid serial;
 ALTER TABLE wnprc_billing.grants ADD container entityid;
 
@@ -670,26 +612,16 @@ ALTER TABLE wnprc_billing.grants ADD CONSTRAINT UNIQUE_grants UNIQUE (container,
 ALTER TABLE wnprc_billing.grants DROP COLUMN totalDCBudget;
 ALTER TABLE wnprc_billing.grants DROP COLUMN totalFABudget;
 
-/* wnprc_billing-12.336-12.337.sql */
-
 ALTER TABLE wnprc_billing.grants ADD investigatorName varchar(200);
 ALTER TABLE wnprc_billing.grantProjects ADD investigatorName varchar(200);
 
-/* wnprc_billing-12.337-12.338.sql */
-
 ALTER TABLE wnprc_billing.invoiceRuns ADD status varchar(200);
-
-/* wnprc_billing-12.338-12.339.sql */
 
 ALTER TABLE wnprc_billing.miscCharges DROP COLUMN chargeType;
 ALTER TABLE wnprc_billing.miscCharges ADD chargeType varchar(200);
 ALTER TABLE wnprc_billing.miscCharges ADD sourceInvoicedItem entityid;
 
-/* wnprc_billing-12.339-12.340.sql */
-
 ALTER TABLE wnprc_billing.miscCharges ADD creditaccount varchar(100);
-
-/* wnprc_billing-12.340-12.341.sql */
 
 ALTER TABLE wnprc_billing.grantProjects DROP COLUMN alias;
 ALTER TABLE wnprc_billing.grantProjects DROP COLUMN aliasEnabled;
@@ -715,51 +647,31 @@ CREATE TABLE wnprc_billing.aliases (
   CONSTRAINT PK_aliases PRIMARY KEY (rowid)
 );
 
-/* wnprc_billing-12.341-12.342.sql */
-
 ALTER TABLE wnprc_billing.miscCharges ADD debitedaccount varchar(200);
 ALTER TABLE wnprc_billing.miscCharges rename creditaccount to creditedaccount;
 
-/* wnprc_billing-12.342-12.343.sql */
-
 ALTER TABLE wnprc_billing.miscCharges ADD qcstate int;
-
-/* wnprc_billing-12.343-12.344.sql */
 
 ALTER TABLE wnprc_billing.perDiemFeeDefinition ADD tier varchar(100);
 
-/* wnprc_billing-12.344-12.345.sql */
-
 ALTER TABLE wnprc_billing.aliases ADD fiscalAuthorityName varchar(200);
-
-/* wnprc_billing-12.345-12.346.sql */
 
 ALTER TABLE wnprc_billing.chargeableItems ADD allowsCustomUnitCost boolean DEFAULT false;
 
 UPDATE wnprc_billing.chargeableItems SET allowsCustomUnitCost = false;
 
-/* wnprc_billing-12.346-12.347.sql */
-
 ALTER TABLE wnprc_billing.aliases ADD category varchar(100);
-
-/* wnprc_billing-12.347-12.348.sql */
 
 ALTER TABLE wnprc_billing.miscCharges ADD parentid entityid;
 
 ALTER TABLE wnprc_billing.perDiemFeeDefinition DROP COLUMN releaseCondition;
 ALTER TABLE wnprc_billing.perDiemFeeDefinition DROP COLUMN startDate;
 
-/* wnprc_billing-12.349-12.350.sql */
-
 ALTER TABLE wnprc_billing.invoicedItems ADD chargetype varchar(100);
-
-/* wnprc_billing-12.350-12.351.sql */
 
 ALTER TABLE wnprc_billing.invoicedItems ADD sourcerecord2 varchar(100);
 ALTER TABLE wnprc_billing.invoicedItems ADD issueId int;
 ALTER TABLE wnprc_billing.miscCharges ADD issueId int;
-
-/* wnprc_billing-12.351-12.352.sql */
 
 ALTER TABLE wnprc_billing.chargeRateExemptions ADD remark varchar(4000);
 ALTER TABLE wnprc_billing.chargeRateExemptions ADD subsidy double precision;
@@ -779,25 +691,17 @@ CREATE TABLE wnprc_billing.projectFARates (
   modified timestamp
 );
 
-/* wnprc_billing-12.352-12.353.sql */
-
 ALTER TABLE wnprc_billing.chargeRateExemptions DROP COLUMN subsidy;
 ALTER TABLE wnprc_billing.chargeRates ADD subsidy double precision;
-
-/* wnprc_billing-12.353-12.354.sql */
 
 DROP TABLE wnprc_billing.projectFARates;
 ALTER TABLE wnprc_billing.aliases ADD faRate double precision;
 ALTER TABLE wnprc_billing.aliases ADD faSchedule varchar(200);
 
-/* wnprc_billing-12.354-12.355.sql */
-
 ALTER TABLE wnprc_billing.aliases ADD budgetStartDate timestamp;
 ALTER TABLE wnprc_billing.aliases ADD budgetEndDate timestamp;
 
 CREATE INDEX IDX_aliases ON wnprc_billing.aliases (container, alias);
-
-/* wnprc_billing-12.355-12.356.sql */
 
 ALTER TABLE wnprc_billing.invoicedItems DROP CONSTRAINT PK_billedItems;
 
@@ -831,8 +735,6 @@ INSERT INTO wnprc_billing.aliasCategories (category) VALUES ('OGA');
 INSERT INTO wnprc_billing.aliasCategories (category) VALUES ('Other');
 INSERT INTO wnprc_billing.aliasCategories (category) VALUES ('GL');
 
-/* wnprc_billing-12.356-12.357.sql */
-
 ALTER TABLE wnprc_billing.creditAccount ADD COLUMN tempaccount varchar(100);
 UPDATE wnprc_billing.creditAccount SET tempaccount = cast(account as varchar(100));
 ALTER TABLE wnprc_billing.creditAccount DROP COLUMN account;
@@ -840,13 +742,9 @@ ALTER TABLE wnprc_billing.creditAccount ADD COLUMN account varchar(100);
 UPDATE wnprc_billing.creditAccount SET account = tempaccount;
 ALTER TABLE wnprc_billing.creditAccount DROP COLUMN tempaccount;
 
-/* wnprc_billing-12.357-12.358.sql */
-
 ALTER TABLE wnprc_billing.aliases ADD COLUMN projectTitle varchar(1000);
 ALTER TABLE wnprc_billing.aliases ADD COLUMN projectDescription varchar(1000);
 ALTER TABLE wnprc_billing.aliases ADD COLUMN projectStatus varchar(200);
-
-/* wnprc_billing-12.358-12.359.sql */
 
 CREATE TABLE wnprc_billing.bloodDrawFeeDefinition (
     rowid serial,
@@ -863,25 +761,17 @@ CREATE TABLE wnprc_billing.bloodDrawFeeDefinition (
     CONSTRAINT PK_bloodDrawFeeDefinition PRIMARY KEY (rowId)
 );
 
-/* wnprc_billing-12.359-12.360.sql */
-
 ALTER TABLE wnprc_billing.bloodDrawFeeDefinition DROP COLUMN chargetype;
 ALTER TABLE wnprc_billing.bloodDrawFeeDefinition ADD chargetype varchar(100);
 ALTER TABLE wnprc_billing.bloodDrawFeeDefinition ADD creditalias varchar(100);
 
-/* wnprc_billing-12.360-12.361.sql */
-
 ALTER TABLE wnprc_billing.miscCharges DROP COLUMN account;
 ALTER TABLE wnprc_billing.miscCharges DROP COLUMN totalcost;
-
-/* wnprc_billing-12.361-12.362.sql */
 
 ALTER TABLE wnprc_billing.aliases ADD aliasType VARCHAR(100);
 
 DELETE FROM wnprc_billing.aliasCategories WHERE category = 'Non-Syncing';
 INSERT INTO wnprc_billing.aliasCategories (category) VALUES ('Non-Syncing');
-
-/* wnprc_billing-12.362-12.363.sql */
 
 CREATE TABLE wnprc_billing.aliasTypes (
     aliasType varchar(500),
@@ -895,8 +785,6 @@ CREATE TABLE wnprc_billing.aliasTypes (
 
     CONSTRAINT PK_aliasTypes PRIMARY KEY (aliasType)
 );
-
-/* wnprc_billing-12.363-12.364.sql */
 
 CREATE TABLE wnprc_billing.projectMultipliers (
     rowid serial,
@@ -918,8 +806,6 @@ CREATE TABLE wnprc_billing.projectMultipliers (
 
 ALTER TABLE wnprc_billing.chargeableItems ADD canRaiseFA bool;
 
-/* wnprc_billing-12.364-12.365.sql */
-
 ALTER TABLE wnprc_billing.miscCharges ADD formSort integer;
 
 CREATE TABLE wnprc_billing.miscChargesType (
@@ -937,8 +823,6 @@ UPDATE wnprc_billing.miscCharges SET chargeCategory = chargetype;
 UPDATE wnprc_billing.miscCharges SET chargetype = null;
 
 ALTER TABLE wnprc_billing.invoicedItems RENAME COLUMN chargetype TO chargeCategory;
-
-/* wnprc_billing-12.365-12.366.sql */
 
 DROP TABLE wnprc_billing.bloodDrawFeeDefinition;
 DROP TABLE wnprc_billing.clinicalFeeDefinition;
@@ -994,12 +878,8 @@ CREATE TABLE wnprc_billing.chargeUnitAccounts (
     CONSTRAINT PK_chargeUnitAccounts PRIMARY KEY (rowid)
 );
 
-/* wnprc_billing-12.366-12.367.sql */
-
 ALTER TABLE wnprc_billing.chargeableItems ADD allowBlankId bool;
 UPDATE wnprc_billing.chargeableItems SET allowBlankId = false;
-
-/* wnprc_billing-12.367-12.368.sql */
 
 ALTER TABLE wnprc_billing.projectMultipliers ADD account varchar(100);
 
@@ -1012,17 +892,11 @@ UPDATE wnprc_billing.projectMultipliers SET account = (
 
 ALTER TABLE wnprc_billing.projectMultipliers DROP COLUMN project;
 
-/* wnprc_billing-12.368-12.369.sql */
-
 ALTER TABLE wnprc_billing.chargeUnits ADD servicecenter varchar(100);
 
 ALTER TABLE wnprc_billing.leaseFeeDefinition ADD chargeunit varchar(100);
 
-/* wnprc_billing-12.369-12.370.sql */
-
 CREATE INDEX IDX_projectAccountHistory_project_enddate ON wnprc_billing.projectAccountHistory (project, enddate);
-
-/* wnprc_billing-12.370-12.371.sql */
 
 ALTER TABLE wnprc_billing.medicationFeeDefinition ADD code VARCHAR(100);
 
@@ -1056,8 +930,6 @@ CREATE TABLE wnprc_billing.AnnualRateChange (
     modifiedBy int,
     modified timestamp
 );
-
-/* wnprc_billing-17.21-17.22.sql */
 
 CREATE TABLE wnprc_billing.tierRates(
 
@@ -1116,7 +988,46 @@ INSERT INTO wnprc_billing.affiliates (affiliate) VALUES ('Exception_N/C');
 
 TRUNCATE TABLE wnprc_billing.aliasCategories;
 
-/* wnprc_billing-17.22-17.23.sql */
-
 DROP TABLE wnprc_billing.chargeRates;
 DROP TABLE wnprc_billing.aliases;
+
+/* wnprc_billing-17.30-18.10.sql */
+
+DROP TABLE IF EXISTS wnprc_billing.miscCharges;
+DROP TABLE IF EXISTS wnprc_billing.invoiceRuns;
+DROP TABLE IF EXISTS wnprc_billing.invoicedItems;
+
+DROP TABLE IF EXISTS wnprc_billing.chargeableItems;
+
+DROP TABLE IF EXISTS wnprc_billing.tierRates;
+
+CREATE TABLE wnprc_billing.tierRates(
+
+  rowId SERIAL NOT NULL,
+  tierRateType varchar(2),
+  tierRate double precision,
+  startDate timestamp,
+  endDate timestamp,
+  isActive boolean,
+
+  container ENTITYID NOT NULL,
+  createdBy USERID,
+  created timestamp,
+  modifiedBy USERID,
+  modified timestamp,
+
+  CONSTRAINT PK_WNPRC_BILLING_TIERRATES PRIMARY KEY (rowId),
+  CONSTRAINT FK_WNPRC_BILLING_TIERRATES_CONTAINER FOREIGN KEY (Container) REFERENCES core.Containers (EntityId)
+
+);
+CREATE INDEX WNPRC_BILLING_TIERRATES_CONTAINER_INDEX ON wnprc_billing.tierRates (Container);
+
+ALTER TABLE wnprc_billing.affiliates ADD CONSTRAINT PK_WNPRC_BILLING_AFFILIATES PRIMARY KEY (rowId);
+
+DROP TABLE IF EXISTS wnprc_billing.chargeRateExemptions;
+DROP TABLE IF EXISTS wnprc_billing.chargeUnits;
+
+INSERT INTO wnprc_billing.chargeableItemCategories (category) VALUES ('Animal Replacement');
+INSERT INTO wnprc_billing.chargeableItemCategories (category) VALUES ('Blood Draws');
+
+ALTER TABLE wnprc_billing.tierrates DROP COLUMN CONTAINER;

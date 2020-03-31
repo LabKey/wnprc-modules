@@ -2148,7 +2148,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
         TestLogger.log("testEditAndDelete: Navigating to task id...");
         TestLogger.log(id.get("value").toString());
-        waitAndClick(Locator.linkContainingText(id.get("value").toString()));
+        waitAndClick(Locator.linkWithText(id.get("value").toString()));
         waitForText("Task Details");
         //waitAndClick(Locator.linkWithText("Weight"));
         //since clicking the link directly opens a new tab and loses focus, go to url directly

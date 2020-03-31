@@ -314,7 +314,7 @@ public class WeightsSubmitTest extends BaseWebDriverTest
         String taskid = taskidob.get("value").toString();
         SelectRowsResponse t = fetchTaskData(taskid);
         JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
-        waitAndClick(Locator.linkContainingText(id.get("value").toString()));
+        waitAndClick(Locator.linkWithText(id.get("value").toString()));
         waitForText("Task Details");
         //waitAndClick(Locator.linkWithText("Weight"));
         //since clicking the link directly opens a new tab and loses focus, go to url directly

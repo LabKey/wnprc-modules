@@ -174,6 +174,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
 
+        initTest.updateEHRFormFrameworkTypes();
+
         initTest.createFinanceManagementFolders();
         initTest.clickFolder("Private");
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
@@ -359,6 +361,25 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         msgWindow.clickButton(buttonText, 0);
     }
 
+    // this mocks the behavior of enterweights sql update script
+    public void updateEHRFormFrameworkTypes() throws IOException, CommandException
+    {
+        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+
+        log("Inserting weight as a reactjs form type into ehr.form_framework_types");
+
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("schemaname", "study");
+        rowMap.put("queryname", "weight");
+        rowMap.put("framework", "reactjs");
+        rowMap.put("container", getContainerId());
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+        log("Inserted weight as a reactjs form type into ehr.form_framework_types");
+    }
     public void importStudy()
     {
         goToManageStudy();
@@ -2307,6 +2328,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testUpdateSingleRecordThroughEHR() throws IOException, CommandException
     {
+        navigateToWeights();
+        fillWeightForm(WEIGHT_VAL.toString(),0);
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
         navigateToWeightsTable();
         DataRegionTable table = new DataRegionTable("query", getDriver());
         String id = table.getDataAsText(0, "Id");
@@ -2315,7 +2343,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         WebElement we = Locator.inputById("weight_0").findElement(getDriver());
         for (int i = 0; i < 10; i++){
             we.sendKeys(Keys.BACK_SPACE);
-            sleep(100);
+            sleep(500);
         }
         fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
         waitUntilElementIsClickable("submit-all-btn");

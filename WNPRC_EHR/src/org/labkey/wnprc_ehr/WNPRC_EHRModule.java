@@ -159,6 +159,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     protected void init() {
         TissueSampleTable.registerProperties();
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
+
+        registerRoles();
+        registerPermissions();
     }
 
     @Override
@@ -224,8 +227,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
         EHRService.get().registerLabworkType(new WNPRCUrinalysisLabworkType(this));
 
-        this.registerRoles();
-        this.registerPermissions();
 
         BCReportRunner.schedule();
 

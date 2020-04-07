@@ -176,12 +176,12 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         Resource r = getModuleResource("/scripts/wnprc_ehr/wnprc_triggers.js");
         assert r != null;
         EHRService.get().registerTriggerScript(this, r);
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcCoreUtils.js", ModeTypeEnum.BOTH), this);
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcOverRides.js", ModeTypeEnum.BOTH), this);
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcReports.js", ModeTypeEnum.BOTH), this);
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/datasetButtons.js", ModeTypeEnum.BOTH), this);
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalPortal.js", ModeTypeEnum.BOTH), this);
-        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js", ModeTypeEnum.BOTH), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcCoreUtils.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcOverRides.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcReports.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/datasetButtons.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalPortal.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "View Roommate History for Animals", this, DetailsURL.fromString("/ehr/animalHistory.view#inputType:singleSubject&activeReport:roommateHistory"), "Commonly Used Queries");

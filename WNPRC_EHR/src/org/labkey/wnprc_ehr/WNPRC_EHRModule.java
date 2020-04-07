@@ -34,6 +34,7 @@ import org.labkey.api.ehr.security.EHRStartedInsertPermission;
 import org.labkey.api.ehr.security.EHRStartedUpdatePermission;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.ldk.notification.Notification;
+import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleLoader;
@@ -48,15 +49,6 @@ import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
-import org.labkey.wnprc_ehr.dataentry.forms.Breeding.BreedingEncounterForm;
-import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
-import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
-import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
-import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDeprivesStartForm;
-import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprivesRequest.FoodDeprivesRequestForm;
-import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
-import org.labkey.wnprc_ehr.demographics.MedicalFieldDemographicsProvider;
-import org.labkey.wnprc_ehr.demographics.MostRecentObsDemographicsProvider;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.Assignment.AssignmentForm;
 import org.labkey.wnprc_ehr.dataentry.forms.BehaviorAbstract.BehaviorAbstractForm;
@@ -64,15 +56,20 @@ import org.labkey.wnprc_ehr.dataentry.forms.Biopsy.BiopsyForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Birth.BirthFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.BloodDrawRequest.BloodDrawRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.BloodDraws.BloodDrawsForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Breeding.BreedingEncounterForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Clinpath.ClinpathForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ClinpathRequest.ClinpathRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Death.DeathForm;
+import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
+import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDeprivesStartForm;
+import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprivesRequest.FoodDeprivesRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Housing.HousingForm;
 import org.labkey.wnprc_ehr.dataentry.forms.HousingRequest.HousingRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.InRooms.InRoomsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.IrregularObservations.IrregularObservationsFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.MPR.MPRForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Necropsy.NecropsyRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamNWM.PhysicalExamNWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamOWM.PhysicalExamOWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProblemList.ProblemListForm;
@@ -81,7 +78,11 @@ import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Treatments.TreatmentsForm;
+import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
+import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Weight.WeightForm;
+import org.labkey.wnprc_ehr.demographics.MedicalFieldDemographicsProvider;
+import org.labkey.wnprc_ehr.demographics.MostRecentObsDemographicsProvider;
 import org.labkey.wnprc_ehr.history.DefaultAlopeciaDataSource;
 import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
@@ -104,7 +105,6 @@ import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
-import org.labkey.api.ldk.notification.NotificationService;
 import org.reflections.Reflections;
 
 import java.io.File;
@@ -113,7 +113,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -297,9 +297,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
 
     @Override
     public @NotNull
-    LinkedHashSet<Supplier<ClientDependency>> getClientDependencies(Container c) {
+    List<Supplier<ClientDependency>> getClientDependencies(Container c) {
         // allow other modules to register with EHR service, and include them when the module is turned on
-        LinkedHashSet<Supplier<ClientDependency>> ret = new LinkedHashSet<>();
+        List<Supplier<ClientDependency>> ret = new LinkedList<>();
         ret.addAll(super.getClientDependencies(c));
         ret.addAll(EHRService.get().getRegisteredClientDependencies(c));
 

@@ -29,12 +29,12 @@ public final class BreedingEncounterForm extends TaskForm
         // add the dependencies from the module, including the breeding-specific store collection (which
         // overrides some of the defaults to set the participant id on the child records based on the parent)
         WNPRC_EHRModule.getDataEntryClientDependencies().forEach(this::addClientDependency);
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/BreedingStoreCollection.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/data/BreedingStoreCollection.js"));
 
         setStoreCollectionClass("WNPRC_EHR.data.BreedingStoreCollection");
 
         // load the metadata configuration for the dependent records sections (to hide the id)
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Breeding.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Breeding.js"));
         getFormSections().stream().skip(3).forEach(fs -> fs.addConfigSource("BreedingChildRecord"));
     }
 }

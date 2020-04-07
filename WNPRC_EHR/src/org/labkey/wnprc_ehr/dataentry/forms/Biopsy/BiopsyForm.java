@@ -33,6 +33,6 @@ public class BiopsyForm extends TaskForm {
             section.addConfigSource("Biopsy");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Biopsy.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Biopsy.js"));
     }
 }

@@ -27,6 +27,6 @@ public class TreatmentOrdersForm extends TaskForm {
             section.addConfigSource("Treatments");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Treatments.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Treatments.js"));
     }
 }

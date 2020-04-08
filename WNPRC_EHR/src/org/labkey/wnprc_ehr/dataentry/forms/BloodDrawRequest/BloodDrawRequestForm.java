@@ -21,6 +21,6 @@ public class BloodDrawRequestForm extends RequestForm {
                 new BloodDrawRequestFormSection()
         ));
 
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Request.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Request.js"));
     }
 }

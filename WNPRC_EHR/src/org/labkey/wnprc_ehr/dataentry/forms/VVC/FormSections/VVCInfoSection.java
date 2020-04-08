@@ -10,7 +10,7 @@ public class VVCInfoSection extends SimpleFormSection{
     public VVCInfoSection(){
         super("wnprc", "vvc", "Veterinary Verification and Consultation");
         this.addConfigSource("Default");
-       // addClientDependency(ClientDependency.fromPath("/ehr/panel/EnterDataPanel.js"));
+       // addClientDependency(ClientDependency.supplierFromPath("/ehr/panel/EnterDataPanel.js"));
         setTemplateMode(TEMPLATE_MODE.NONE);
 
         fieldNamesAtStartInOrder = Arrays.asList(

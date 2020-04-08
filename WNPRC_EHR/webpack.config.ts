@@ -12,8 +12,7 @@ interface Configuration extends Webpack.Configuration {
     };
 }
 
-declare const module: any;
-module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
+var breedingConfig = function wp(env: { BUILD_DIR: string }): Configuration {
 
     return {
         devtool: 'source-map',
@@ -24,7 +23,7 @@ module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
         },
         module: {
             rules: [
-                { loader: 'awesome-typescript-loader', test: /\.tsx?$/ },
+                { loader: 'ts-loader', test: /\.tsx?$/ },
                 { loader: 'source-map-loader', options: { enforce: 'pre' }, test: /\.js$/ },
             ],
         },
@@ -40,3 +39,40 @@ module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
         },
     };
 };
+
+var testConfig = function wp(env: { BUILD_DIR: string }): Configuration {
+
+    return {
+        devtool: 'source-map',
+        entry: './src/ts/test.tsx',
+        externals: {
+            jquery: 'jQuery',
+            urijs: 'URI',
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    loader: "ts-loader"
+                },
+
+            ],
+        },
+        output: {
+            filename: 'test.js',
+            library: 'Test',
+            libraryExport: 'default',
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json'],
+        },
+    };
+};
+
+declare const module: any;
+module.exports = [
+    breedingConfig, testConfig
+];
+

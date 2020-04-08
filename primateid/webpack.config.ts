@@ -20,7 +20,7 @@ module.exports = function wp(env: { BUILD_DIR: string, PROJECT_DIR: string }): C
         },
         module: {
             rules: [
-                {loader: 'awesome-typescript-loader', test: /\.tsx?$/},
+                {loader: 'ts-loader', test: /\.tsx?$/},
             ],
         },
         output: {

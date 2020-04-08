@@ -12,6 +12,7 @@
         <column name="creditedaccount"/>
         <column name="quantity"/>
         <column name="unitCost"/>
+        <column name="totalCost"/>
         <column name="comment"/>
         <column name="invoiceId"/>
     </columns>

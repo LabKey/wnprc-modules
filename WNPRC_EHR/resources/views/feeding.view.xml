@@ -3,6 +3,6 @@
         <permission name="login"/>
     </permissions>
     <dependencies>
-        <dependency path="wnprc_ehr/gen/test.js"/>
+        <dependency path="wnprc_ehr/gen/feeding.js"/>
     </dependencies>
 </view>

@@ -1,18 +1,8 @@
 // noinspection TsLint: webpack is in the dev dependencies
 import * as Webpack from 'webpack';
 
-// IntelliJ and TsLint get very angry when faced with ambiguity, so this
-// interface constrains our configuration object to using a certain type
-// of loader rule to load modules
-interface Configuration extends Webpack.Configuration
-{
-    module: {
-        rules: Webpack.NewLoaderRule[];
-    };
-}
-
 declare const module: any;
-module.exports = function wp(env: { BUILD_DIR: string, PROJECT_DIR: string }): Configuration[] {
+module.exports = function wp(env: { BUILD_DIR: string, PROJECT_DIR: string }) {
     const base = {
         entry: './src/ts/primateid.ts',
         externals: {
@@ -27,9 +17,6 @@ module.exports = function wp(env: { BUILD_DIR: string, PROJECT_DIR: string }): C
             filename: 'primateid.webpack.js',
             library: 'PrimateID',
         },
-        plugins: [
-            new Webpack.optimize.UglifyJsPlugin()
-        ],
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.json'],
         },

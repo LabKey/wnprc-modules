@@ -3,16 +3,7 @@ import * as Webpack from 'webpack';
 
 const path = require('path');
 
-// IntelliJ and TsLint get very angry when faced with ambiguity, so this
-// interface constrains our configuration object to using a certain type
-// of loader rule to load modules
-interface Configuration extends Webpack.Configuration {
-    module: {
-        rules: Webpack.NewLoaderRule[];
-    };
-}
-
-var breedingConfig = function wp(env: { BUILD_DIR: string }): Configuration {
+var breedingConfig = function wp(env: { BUILD_DIR: string }){
 
     return {
         devtool: 'source-map',
@@ -40,7 +31,7 @@ var breedingConfig = function wp(env: { BUILD_DIR: string }): Configuration {
     };
 };
 
-var testConfig = function wp(env: { BUILD_DIR: string }): Configuration {
+var testConfig = function wp(env: { BUILD_DIR: string }) {
 
     return {
         devtool: 'source-map',
@@ -70,9 +61,40 @@ var testConfig = function wp(env: { BUILD_DIR: string }): Configuration {
         },
     };
 };
+var feedingConfig = function wp(env: { BUILD_DIR: string }) {
+
+    return {
+        mode: process.env.NODE_ENV,
+        devtool: 'source-map',
+        entry: './src/feeding/base/App.tsx',
+        externals: {
+            jquery: 'jQuery',
+            urijs: 'URI',
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    loader: "ts-loader"
+                },
+
+            ],
+        },
+        output: {
+            filename: 'feeding.js',
+            library: 'Feeding',
+            libraryExport: 'default',
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json'],
+        },
+    };
+};
 
 declare const module: any;
 module.exports = [
-    breedingConfig, testConfig
+    breedingConfig, testConfig, feedingConfig
 ];
 

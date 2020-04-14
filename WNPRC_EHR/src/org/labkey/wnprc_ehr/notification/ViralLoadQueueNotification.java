@@ -36,6 +36,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String notifyEmails = "";
     public Container container;
     public String fullName = "";
+    public String modifiedByFullName = "";
     public String modifiedByEmail = "";
     public final String openResearchPortal = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
@@ -103,6 +104,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
          if (mod != null)
          {
              this.modifiedByEmail = mod.getEmail();
+             String fullName = mod.getFullName();
+             if ("".equals(fullName))
+             {
+                 this.modifiedByFullName = "Virology Services";
+             } else
+             {
+                 this.modifiedByFullName = fullName;
+             }
          }
         }
 
@@ -157,6 +166,9 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 modifiedByEmail +
                 "</a> " +
                 "if you have any questions or concerns. We look forward to serving you again in the future.</p>");
+
+        msg.append("Best,<br>" +
+                modifiedByFullName);
 
 
         return msg.toString();

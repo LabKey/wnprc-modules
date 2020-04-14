@@ -323,8 +323,22 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     if (formEl.current.checkValidity()) {
       handleShowRewrite(e);
     } else {
-      formEl.current.reportValidity();
+      //before reporting validity, expand all entries??
+      expandAllItems();
+      //formEl.current.reportValidity();
     }
+  };
+
+  const expandAllItems = () => {
+    const copyformdata: RowObj[] = [...formdata];
+
+    copyformdata.forEach(item => {
+      item["collapsed"]["value"] = false;
+      setAnimalId(item.animalid.value);
+    });
+
+    setFormData(copyformdata);
+
   };
 
   const onSubmitForReview = e => {
@@ -632,6 +646,16 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           <h3>Weights</h3>
         </div>
         <Button
+            variant="primary"
+            className="wnprc-secondary-btn"
+            id="expand-all"
+            onClick={() => {
+              expandAllItems();
+            }}
+        >
+          Expand
+        </Button>
+        <Button
           variant="primary"
           className="wnprc-secondary-btn"
           id="add-record"
@@ -753,6 +777,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                           }`}
                           aria-labelledby={`heading${i}`}
                           data-parent="#accordionExample"
+                          area-expanded={item.collapsed.value ? "false" : "true"}
                         >
                           <div className="card-body">
                             <EnterWeightForm

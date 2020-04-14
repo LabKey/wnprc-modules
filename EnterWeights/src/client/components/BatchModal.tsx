@@ -60,6 +60,9 @@ const BatchModal: React.FunctionComponent<PropTypes> = props => {
     if (e.target.value.indexOf(";") > 0) {
       setIds(e.target.value.split(";"));
     }
+    if (e.target.value.indexOf(" ") > 0) {
+      setIds(e.target.value.split(" "));
+    }
   };
 
   useEffect(() => {

@@ -46,7 +46,10 @@ var testConfig = function wp(env: { BUILD_DIR: string }) {
                     test: /\.tsx?$/,
                     loader: "ts-loader"
                 },
-
+                {
+                    test: /\.css$/,
+                    loaders: ['style-loader', 'css-loader', 'sass-loader']
+                }
             ],
         },
         output: {
@@ -77,7 +80,10 @@ var feedingConfig = function wp(env: { BUILD_DIR: string }) {
                     test: /\.tsx?$/,
                     loader: "ts-loader"
                 },
-
+                {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader']
+                }
             ],
         },
         output: {
@@ -88,7 +94,7 @@ var feedingConfig = function wp(env: { BUILD_DIR: string }) {
             path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
         },
         resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.json'],
+            extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
         },
     };
 };

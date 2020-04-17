@@ -1,5 +1,11 @@
 import * as React from "react";
 
+interface DateInputProps {
+    opendate: any;
+    iconpath: string;
+    inputprops: any
+}
+
 /**
  * Meant to use as a custom date input for react-datepicker
  */

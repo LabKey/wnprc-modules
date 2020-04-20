@@ -46,6 +46,10 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             }
         }
     }
+
+    if (!row.breedingencounterid) {
+        EHR.Server.Utils.addError(scriptErrors, 'breedingencounterid', 'Field should ALWAYS be filled in unless actually unknown', 'WARN');
+    }
 }
 
 function onComplete(event, errors, helper){
@@ -55,7 +59,9 @@ function onComplete(event, errors, helper){
     if (pregnancyRows){
         for (let i = 0; i < pregnancyRows.length; i++) {
             var updateRow = {};
-            updateRows.push(pregnancyRows[i].row.breedingencounterid);
+            if (pregnancyRows[i].row.breedingencounterid) {
+                updateRows.push(pregnancyRows[i].row.breedingencounterid);
+            }
         }
         WNPRC.Utils.getJavaHelper().updateBreedingOutcome(updateRows);
     }

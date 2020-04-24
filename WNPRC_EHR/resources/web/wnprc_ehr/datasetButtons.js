@@ -997,5 +997,116 @@ WNPRC_EHR.DatasetButtons = new function(){
             }
 
         },
+        bulkSendEmail: function (dataRegionName) {
+            var dataRegion = LABKEY.DataRegions[dataRegionName];
+            var checked = dataRegion.getChecked();  //TODO: update to getSelected with callback
+            var checkedJoin = checked.join(";");
+            console.log(checkedJoin);
+            if (!checked || !checked.length) {
+                Ext4.Msg.alert('Error', 'No records selected');
+                return;
+            }
+            var filt = [];
+            filt.push(LABKEY.Filter.create('key', checkedJoin, LABKEY.Filter.Types.IN));
+            var uniq = [];
+            LABKEY.Query.selectRows({
+                schemaName: 'lists',
+                queryName: 'vl_sample_queue',
+                filterArray: filt,
+                success: function (d) {
+                    //check that all records are the same animal id
+                    d["rows"].forEach(function(item){
+                        uniq.push(item.Id);
+                    });
+                    var sett = [...new Set(uniq)];
+                    if (sett.length > 1){
+                        Ext4.Msg.alert('Error', 'Animal Id is not unique');
+                        return;
+                    } else {
+                        new Ext4.Window({
+                            title: 'Change Request Status',
+                            width: 430,
+                            autoHeight: true,
+                            items: [{
+                                xtype: 'form',
+                                ref: 'theForm',
+                                bodyStyle: 'padding: 5px;',
+                                defaults: {
+                                    border: false
+                                },
+                                items: [{
+                                    html: 'Total Records: '+checked.length+'<br><br>',
+                                    tag: 'div'
+                                },{
+                                    xtype: 'combo',
+                                    fieldLabel: 'Status',
+                                    width: 300,
+                                    triggerAction: 'all',
+                                    mode: 'local',
+                                    store: new LABKEY.ext4.Store({
+                                        xtype: 'labkey-store',
+                                        schemaName: 'lists',
+                                        queryName: 'status',
+                                        columns: 'Key,Status',
+                                        sort: 'Key',
+                                        //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                        autoLoad: true
+                                    }),
+                                    displayField: 'Status',
+                                    valueField: 'Key',
+                                    ref: 'qcstate',
+                                    id: 'change-vl-qcstate'
+                                }
+                                ]
+                            }],
+                            buttons: [{
+                                text:'Submit',
+                                disabled:false,
+                                formBind: true,
+                                ref: '../submit',
+                                scope: this,
+                                handler: function(o){
+                                    var win = o.up('window');
+                                    var form = win.down('form');
+                                    var qc = form.getForm().findField('change-vl-qcstate').getValue();
+                                    Ext4.Msg.wait('Loading...');
+
+
+                                }
+                            },{
+                                text: 'Close',
+                                handler: function(o){
+                                    o.ownerCt.ownerCt.close();
+                                }
+                            }]
+                        }).show();
+
+
+                        /*Ext4.Msg.confirm('Bulk Send Emails', 'You are about to bulk complete and email notify the submitter for the selected records.  Do you want to do this?', function (val) {
+                            if (val == 'yes') {
+                                Ext4.Msg.wait('Completing...');
+                                LABKEY.Ajax.request({
+                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'bulkCompleteZikaAndSendEmail', null, {
+                                        schemaName: dataRegion.schemaName,
+                                        'query.queryName': dataRegion.queryName,
+                                        dataRegionSelectionKey: dataRegion.selectionKey
+                                    }),
+                                    method: 'post',
+                                    jsonData: {test: checked},
+                                    success: function() {
+                                        Ext4.Msg.hide();
+                                        return;
+                                    }
+                                });
+                            }
+                        }, this);*/
+                    }
+                },
+                failure: function() {
+
+                }
+            });
+
+        },
     }
 };

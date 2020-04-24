@@ -27,6 +27,8 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
@@ -1242,6 +1244,25 @@ public class WNPRC_EHRController extends SpringActionController
         public boolean doAction(java.lang.Void aVoid, BindException errors)
         {
             return true;
+        }
+    }
+
+    public static class FormData {
+        public String[] test;
+    }
+    @RequiresLogin
+    @Marshal(Marshaller.Jackson)
+    @CSRF(CSRF.Method.POST)
+    @ActionNames("bulkCompleteZikaAndSendEmail")
+    public class BulkCompleteZikaAndSendEmailAction extends MutatingApiAction<FormData> {
+        private static final String CAMELCASE_FORMTYPE = "formType";
+        @Override
+        public Object execute(FormData form, BindException errors) throws Exception {
+
+            JSONObject returnJSON = new JSONObject();
+
+
+            return returnJSON;
         }
     }
 }

@@ -38,6 +38,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String fullName = "";
     public String modifiedByFullName = "";
     public String modifiedByEmail = "";
+    public String sampleDate = "";
     public final String openResearchPortal = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
 
     public ViralLoadQueueNotification(Module owner)
@@ -68,11 +69,13 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("Id"));
         columns.add(FieldKey.fromString("emails"));
         columns.add(FieldKey.fromString("ModifiedBy"));
+        columns.add(FieldKey.fromString("Sample_date"));
 
         Integer userid = null;
         String animalid = null;
         String notifyEmails = null;
         Integer modifiedBy = null;
+        String sampleDate = null;
 
         // Execute the query
         try (Results rs = viralLoadQuery.select(columns, filter))
@@ -82,6 +85,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 animalid = rs.getString(FieldKey.fromString("Id"));
                 notifyEmails = rs.getString(FieldKey.fromString("emails"));
                 modifiedBy = rs.getInt(FieldKey.fromString("ModifiedBy"));
+                sampleDate = rs.getString(FieldKey.fromString("Sample_date"));
             }
         }
         if (userid != null)
@@ -92,6 +96,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 this.fullName = u.getFullName();
                 this.requestorEmail = u.getEmail();
                 this.animalId = animalid;
+                this.sampleDate = sampleDate;
             }
         }
         if (notifyEmails != null)
@@ -158,6 +163,8 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 openResearchPortal +
                 "&Dataset.ParticipantId~eq=" +
                 animalId +
+                "&Dataset.Date~dateeq=" +
+                sampleDate +
                 "\">link</a>. ");
         msg.append("Please feel free to contact " +
                 "<a href=\"mailto:" +

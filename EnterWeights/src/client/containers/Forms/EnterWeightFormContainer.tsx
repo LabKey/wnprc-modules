@@ -853,7 +853,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
             </button>
             {errorLevel !== "submittable" &&
             <div>
-              <span id="invalid-tooltip" data-tooltip={"Fill in missing information for boxes outliend in red."}>⚠️</span>
+              <span id="invalid-tooltip" data-tooltip={"Fill in missing information for boxes outlined in red."}>⚠️</span>
             </div>
             }
           </div>

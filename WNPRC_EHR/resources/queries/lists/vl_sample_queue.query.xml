@@ -23,6 +23,10 @@
                             WNPRC_EHR.DatasetButtons.bulkSendEmail(dataRegion.name);
                         </onClick>
                     </item>
+
+                    <item hidden="true">
+                        <originalText>Delete All Rows</originalText>
+                    </item>
                 </buttonBarOptions>
             </table>
         </tables>

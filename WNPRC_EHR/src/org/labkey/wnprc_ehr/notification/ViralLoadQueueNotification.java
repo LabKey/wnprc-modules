@@ -29,6 +29,7 @@ import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
 public class ViralLoadQueueNotification extends AbstractEHRNotification
 {
     public Integer rowId;
+    public Integer[] rowIds;
     public User currentUser;
     public String animalId;
     public String hostName;
@@ -45,10 +46,10 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, Integer rowid, User currentuser, Container c, String hostname) throws SQLException
+    public ViralLoadQueueNotification(Module owner, Integer[] rowids, User currentuser, Container c, String hostname) throws SQLException
     {
         super(owner);
-        rowId = rowid;
+        rowIds = rowids;
         currentUser = currentuser;
         hostName = hostname;
         container = c;
@@ -57,6 +58,8 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public void setUp() throws SQLException
     {
+
+        //for each rowId lookup the record and find emails field?
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), rowId);
         QueryHelper viralLoadQuery = new QueryHelper(container, currentUser, "lists", "vl_sample_queue");
 

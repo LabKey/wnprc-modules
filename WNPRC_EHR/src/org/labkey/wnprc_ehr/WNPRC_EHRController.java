@@ -33,6 +33,7 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
@@ -52,6 +53,7 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
@@ -80,6 +82,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectExcepti
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
+import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
 
@@ -1247,8 +1250,33 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+    public String getVLStatus(User user, Container container, Integer status) throws SQLException
+    {
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
+        QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
+
+        // Define columns to get
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("Key"));
+        columns.add(FieldKey.fromString("Status"));
+
+        // Execute the query
+        String thestatus = null;
+        try ( Results rs = viralLoadQuery.select(columns, filter) )
+        {
+            if (rs.next()){
+                thestatus = rs.getString(FieldKey.fromString("Status"));
+            }
+        }
+        return thestatus;
+    }
+
     public static class FormData {
-        public String[] test;
+        public Integer[] keys;
+        public Integer status;
+        public Integer userid;
+        public String hostname;
     }
     @RequiresLogin
     @Marshal(Marshaller.Jackson)
@@ -1260,7 +1288,18 @@ public class WNPRC_EHRController extends SpringActionController
         public Object execute(FormData form, BindException errors) throws Exception {
 
             JSONObject returnJSON = new JSONObject();
-
+            Module ehr = ModuleLoader.getInstance().getModule("EHR");
+            Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
+            User u = UserManager.getUser(form.userid);
+            String recordStatus = getVLStatus(u, viralLoadContainer, form.status);
+            Integer[] keys = form.keys;
+            String hostName = form.hostname;
+            if ("08-complete-email-Zika_portal".equals(recordStatus)){
+                //_log.info("Using java helper to send email for viral load queue record: "+key);
+                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, u, viralLoadContainer, hostName);
+                Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+                notification.sendManually(ehrContainer,u);
+            }
 
             return returnJSON;
         }

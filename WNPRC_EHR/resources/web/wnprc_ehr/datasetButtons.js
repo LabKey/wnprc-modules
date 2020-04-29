@@ -1000,6 +1000,9 @@ WNPRC_EHR.DatasetButtons = new function(){
         bulkSendEmail: function (dataRegionName) {
             var dataRegion = LABKEY.DataRegions[dataRegionName];
             var checked = dataRegion.getChecked();  //TODO: update to getSelected with callback
+            var checkedInt = checked.map(function(item) {
+                return parseInt(item, 10);
+            });
             var checkedJoin = checked.join(";");
             console.log(checkedJoin);
             if (!checked || !checked.length) {
@@ -1015,7 +1018,8 @@ WNPRC_EHR.DatasetButtons = new function(){
                 filterArray: filt,
                 success: function (d) {
                     //check that all records are the same animal id
-                    d["rows"].forEach(function(item){
+                    var toUpdate = d["rows"];
+                    toUpdate.forEach(function(item){
                         uniq.push(item.Id);
                     });
                     var sett = [...new Set(uniq)];
@@ -1065,13 +1069,59 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 formBind: true,
                                 ref: '../submit',
                                 scope: this,
-                                handler: function(o){
+                                handler: function(o) {
                                     var win = o.up('window');
                                     var form = win.down('form');
                                     var qc = form.getForm().findField('change-vl-qcstate').getValue();
                                     Ext4.Msg.wait('Loading...');
 
+                                    //update qc status
+                                    Ext4.each(toUpdate, function (row) {
+                                        row.Status = qc;
+                                        //do I need an actual new list value here..?
+                                        row.bulk = true;
+                                    }, this);
 
+                                    if (toUpdate.length) {
+                                        LABKEY.Query.updateRows({
+                                            schemaName: 'lists',
+                                            queryName: 'vl_sample_queue',
+                                            rows: toUpdate,
+                                            scope: this,
+                                            success: function () {
+                                                /*dataRegion.selectNone();
+                                                dataRegion.refresh();*/
+                                                Ext4.Msg.hide();
+                                                if (qc == 8) {
+                                                    Ext4.Msg.confirm('Bulk Send Emails', 'You are about to bulk complete and email notify the submitter for the selected records.  Do you want to do this?', function (val) {
+                                                        if (val == 'yes') {
+                                                            Ext4.Msg.wait('Completing...');
+                                                            LABKEY.Ajax.request({
+                                                                url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'bulkCompleteZikaAndSendEmail', null, {
+                                                                    schemaName: dataRegion.schemaName,
+                                                                    'query.queryName': dataRegion.queryName,
+                                                                    dataRegionSelectionKey: dataRegion.selectionKey
+                                                                }),
+                                                                method: 'post',
+                                                                jsonData: {keys: checkedInt, status: qc, userid: LABKEY.Security.currentUser.Id, hostname: 'https://' + LABKEY.serverName;},
+                                                                success: function () {
+                                                                    dataRegion.selectNone();
+                                                                    dataRegion.refresh();
+                                                                    Ext4.Msg.hide();
+                                                                    //return;
+                                                                }
+                                                            });
+                                                        }
+                                                    }, this);
+                                                } else {
+                                                    dataRegion.selectNone();
+                                                    dataRegion.refresh();
+                                                }
+                                            },
+                                            failure: EHR.Utils.onError
+                                        });
+
+                                    }
                                 }
                             },{
                                 text: 'Close',
@@ -1082,24 +1132,6 @@ WNPRC_EHR.DatasetButtons = new function(){
                         }).show();
 
 
-                        /*Ext4.Msg.confirm('Bulk Send Emails', 'You are about to bulk complete and email notify the submitter for the selected records.  Do you want to do this?', function (val) {
-                            if (val == 'yes') {
-                                Ext4.Msg.wait('Completing...');
-                                LABKEY.Ajax.request({
-                                    url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'bulkCompleteZikaAndSendEmail', null, {
-                                        schemaName: dataRegion.schemaName,
-                                        'query.queryName': dataRegion.queryName,
-                                        dataRegionSelectionKey: dataRegion.selectionKey
-                                    }),
-                                    method: 'post',
-                                    jsonData: {test: checked},
-                                    success: function() {
-                                        Ext4.Msg.hide();
-                                        return;
-                                    }
-                                });
-                            }
-                        }, this);*/
                     }
                 },
                 failure: function() {

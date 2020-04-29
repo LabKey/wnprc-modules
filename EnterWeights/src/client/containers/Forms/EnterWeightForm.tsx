@@ -28,6 +28,7 @@ interface WeightFormProps {
   liftUpVal?: (name: string, value: any, index: number) => void;
   liftUpAnimalInfo: (animalInfo: any) => void;
   liftUpErrorLevel: (errorLevel: string) => void;
+  liftUpValidation: (name: string, value: any, index: number) => void;
 }
 
 /**
@@ -46,7 +47,8 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     infoState,
     liftUpAnimalInfo,
     liftUpVal,
-    liftUpErrorLevel
+    liftUpErrorLevel,
+    liftUpValidation
   } = props;
   const [prevweight, setPrevWeight] = useState<any>("");
   const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
@@ -85,6 +87,10 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   useEffect(() => {
     liftUpErrorLevel(errorLevel);
   }, [errorLevel]);
+
+  useEffect(() => {
+    liftUpValidation("validated", !anyErrors, index);
+  },[anyErrors]);
 
 
   //validate items to set error levels which determine which buttons are disabled

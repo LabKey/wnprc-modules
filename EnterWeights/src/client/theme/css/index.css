@@ -62,6 +62,20 @@
   background-color: #e0e0e0;
 }
 
+.card-header.invalid {
+  border: 1px solid rgba(255, 0, 30, 0.33);
+}
+
+.card-header.valid {
+  border: none;
+}
+
+#invalid-tooltip {
+  float:right;
+  margin: 4px;
+  z-index: 0;
+}
+
 .card-body {
   padding: 1rem;
   border: 1px solid;

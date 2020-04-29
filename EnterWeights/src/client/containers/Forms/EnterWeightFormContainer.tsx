@@ -47,6 +47,7 @@ interface RowObj {
   collapsed: RowMemberObj;
   visibility: RowMemberObj;
   restraint: RestraintObj;
+  validated: RowMemberObj;
 }
 
 //TODO add everything thats in the setupRestraintValues (date, taskid)
@@ -156,7 +157,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
               command: { value: "insert", error: "" },
               collapsed: { value: true, error: "" },
               visibility: { value: "visible", error: "" },
-              restraint: {value: "", error: "", weight_objectid: "", objectid: LABKEY.Utils.generateUUID().toUpperCase()}
+              restraint: {value: "", error: "", weight_objectid: "", objectid: LABKEY.Utils.generateUUID().toUpperCase()},
+              validated: {value: false, error: ""}
             });
           });
         }
@@ -246,7 +248,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           command: { value: "update", error: "" },
           collapsed: { value: i != 0, error: "" },
           visibility: { value: "visible", error: "" },
-          restraint: {value: "", error: "", objectid: "", weight_objectid: ""}
+          restraint: {value: "", error: "", objectid: "", weight_objectid: ""},
+          validated: {value: false, error: ""}
         });
         setTaskId(row.taskid);
         tempid = row.objectid;
@@ -313,6 +316,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormData(newValues);
     console.log(errorLevel);
   };
+  const liftUpValidationState = (name, value, index) => {
+    let newValues = [...formdata];
+    newValues[index][name]["value"] = value;
+    setFormData(newValues);
+    console.log(errorLevel);
+  };
 
   const liftUpInfoState = (state: infoStates) => {
     setInfoState(state);
@@ -323,22 +332,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     if (formEl.current.checkValidity()) {
       handleShowRewrite(e);
     } else {
-      //before reporting validity, expand all entries??
-      expandAllItems();
-      //formEl.current.reportValidity();
+      formEl.current.reportValidity();
     }
-  };
-
-  const expandAllItems = () => {
-    const copyformdata: RowObj[] = [...formdata];
-
-    copyformdata.forEach(item => {
-      item["collapsed"]["value"] = false;
-      setAnimalId(item.animalid.value);
-    });
-
-    setFormData(copyformdata);
-
   };
 
   const onSubmitForReview = e => {
@@ -506,7 +501,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       command: { value: "insert", error: "" },
       collapsed: { value: false, error: "" },
       visibility: { value: "visible", error: "" },
-      restraint: {value: "None", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""}
+      restraint: {value: "None", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""},
+      validated: {value: false, error: ""}
     });
     setFormData(initialdata);
     getQCStateMap().then(map => {
@@ -534,7 +530,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         command: { value: "insert", error: "" },
         collapsed: { value: false, error: "" },
         visibility: { value: "visible", error: "" },
-        restraint: {value: "", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""}
+        restraint: {value: "", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""},
+        validated: {value: false, error: ""}
       });
     });
     setFormData(t);
@@ -571,7 +568,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       command: { value: "insert", error: "" },
       collapsed: { value: false, error: "" },
       visibility: { value: "visible", error: "" },
-      restraint: {value: "None", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""}
+      restraint: {value: "None", error: "", objectid: LABKEY.Utils.generateUUID().toUpperCase(), weight_objectid: ""},
+      validated: {value: false, error: ""}
     });
     return copyformdata;
   };
@@ -645,16 +643,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         <div className="panel-heading">
           <h3>Weights</h3>
         </div>
-        <Button
-            variant="primary"
-            className="wnprc-secondary-btn"
-            id="expand-all"
-            onClick={() => {
-              expandAllItems();
-            }}
-        >
-          Expand
-        </Button>
         <Button
           variant="primary"
           className="wnprc-secondary-btn"
@@ -744,7 +732,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                     <div className="col-xs-10">
                       <div className="row card" key={i}>
                         <div
-                          className="card-header"
+                          className={`card-header ${item.validated.value ? "valid" : "invalid"}`}
                           data-toggle="collapse"
                           aria-controls={`#collapse${i}`}
                           aria-expanded="true"
@@ -792,6 +780,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                               liftUpVal={liftUpVal}
                               infoState={liftUpInfoState}
                               liftUpErrorLevel={triggerUpAnyErrors}
+                              liftUpValidation={liftUpValidationState}
                             />
                           </div>
                         </div>
@@ -862,6 +851,11 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
             >
               Submit for Review
             </button>
+            {errorLevel !== "submittable" &&
+            <div>
+              <span id="invalid-tooltip" data-tooltip={"Fill in missing information for boxes outliend in red."}>⚠️</span>
+            </div>
+            }
           </div>
         </form>
       </div>

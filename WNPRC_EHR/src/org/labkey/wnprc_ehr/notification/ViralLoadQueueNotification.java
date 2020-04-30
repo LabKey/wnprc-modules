@@ -29,7 +29,7 @@ import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
 public class ViralLoadQueueNotification extends AbstractEHRNotification
 {
     public Integer rowId;
-    public Integer[] rowIds;
+    public String[] rowIds;
     public User currentUser;
     public String animalId;
     public String hostName;
@@ -46,7 +46,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, Integer[] rowids, User currentuser, Container c, String hostname) throws SQLException
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, String hostname) throws SQLException
     {
         super(owner);
         rowIds = rowids;
@@ -59,8 +59,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public void setUp() throws SQLException
     {
 
-        //for each rowId lookup the record and find emails field?
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), rowId);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), Integer.parseInt(rowIds[0]));
         QueryHelper viralLoadQuery = new QueryHelper(container, currentUser, "lists", "vl_sample_queue");
 
         // Define columns to get
@@ -155,7 +154,9 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         msg.append("<p>Hello " +
                 fullName +
                 ",</p>");
-        msg.append("<p>Good news - Virology Services has completed viral load testing on a sample(s) you submitted. " +
+        msg.append("<p>Good news - Virology Services has completed viral load testing on " +
+                rowIds.length +
+                " sample(s) you submitted. " +
                 "The results can be found in the Zika portal, and using the following " +
                 "<a href=\"" +
                 openResearchPortal +

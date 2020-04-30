@@ -997,7 +997,7 @@ WNPRC_EHR.DatasetButtons = new function(){
             }
 
         },
-        bulkSendEmail: function (dataRegionName) {
+        bulkCompleteAndSendEmail: function (dataRegionName) {
             var dataRegion = LABKEY.DataRegions[dataRegionName];
             var checked = dataRegion.getChecked();  //TODO: update to getSelected with callback
             var checkedInt = checked.map(function(item) {
@@ -1024,7 +1024,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                     });
                     var sett = [...new Set(uniq)];
                     if (sett.length > 1){
-                        Ext4.Msg.alert('Error', 'Animal Id is not unique');
+                        Ext4.Msg.alert('Error', 'You can only batch complete records with the same animal id.');
                         return;
                     } else {
                         new Ext4.Window({
@@ -1078,8 +1078,6 @@ WNPRC_EHR.DatasetButtons = new function(){
                                     //update qc status
                                     Ext4.each(toUpdate, function (row) {
                                         row.Status = qc;
-                                        //do I need an actual new list value here..?
-                                        row.bulk = true;
                                     }, this);
 
                                     if (toUpdate.length) {
@@ -1089,34 +1087,9 @@ WNPRC_EHR.DatasetButtons = new function(){
                                             rows: toUpdate,
                                             scope: this,
                                             success: function () {
-                                                /*dataRegion.selectNone();
-                                                dataRegion.refresh();*/
+                                                dataRegion.selectNone();
+                                                dataRegion.refresh();
                                                 Ext4.Msg.hide();
-                                                if (qc == 8) {
-                                                    Ext4.Msg.confirm('Bulk Send Emails', 'You are about to bulk complete and email notify the submitter for the selected records.  Do you want to do this?', function (val) {
-                                                        if (val == 'yes') {
-                                                            Ext4.Msg.wait('Completing...');
-                                                            LABKEY.Ajax.request({
-                                                                url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'bulkCompleteZikaAndSendEmail', null, {
-                                                                    schemaName: dataRegion.schemaName,
-                                                                    'query.queryName': dataRegion.queryName,
-                                                                    dataRegionSelectionKey: dataRegion.selectionKey
-                                                                }),
-                                                                method: 'post',
-                                                                jsonData: {keys: checkedInt, status: qc, userid: LABKEY.Security.currentUser.Id, hostname: 'https://' + LABKEY.serverName;},
-                                                                success: function () {
-                                                                    dataRegion.selectNone();
-                                                                    dataRegion.refresh();
-                                                                    Ext4.Msg.hide();
-                                                                    //return;
-                                                                }
-                                                            });
-                                                        }
-                                                    }, this);
-                                                } else {
-                                                    dataRegion.selectNone();
-                                                    dataRegion.refresh();
-                                                }
                                             },
                                             failure: EHR.Utils.onError
                                         });

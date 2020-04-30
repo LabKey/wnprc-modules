@@ -18,9 +18,9 @@
                         </onClick>
                     </item>
 
-                    <item text="Complete Zika Results XXX" requiresSelection="true" requiresSelectionMinCount="2">
+                    <item text="Batch Complete Samples" requiresSelection="true" requiresSelectionMinCount="2">
                         <onClick>
-                            WNPRC_EHR.DatasetButtons.bulkSendEmail(dataRegion.name);
+                            WNPRC_EHR.DatasetButtons.bulkCompleteAndSendEmail(dataRegion.name);
                         </onClick>
                     </item>
 

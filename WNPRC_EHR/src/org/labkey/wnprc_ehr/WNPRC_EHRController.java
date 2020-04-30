@@ -1271,37 +1271,4 @@ public class WNPRC_EHRController extends SpringActionController
         }
         return thestatus;
     }
-
-    public static class FormData {
-        public Integer[] keys;
-        public Integer status;
-        public Integer userid;
-        public String hostname;
-    }
-    @RequiresLogin
-    @Marshal(Marshaller.Jackson)
-    @CSRF(CSRF.Method.POST)
-    @ActionNames("bulkCompleteZikaAndSendEmail")
-    public class BulkCompleteZikaAndSendEmailAction extends MutatingApiAction<FormData> {
-        private static final String CAMELCASE_FORMTYPE = "formType";
-        @Override
-        public Object execute(FormData form, BindException errors) throws Exception {
-
-            JSONObject returnJSON = new JSONObject();
-            Module ehr = ModuleLoader.getInstance().getModule("EHR");
-            Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
-            User u = UserManager.getUser(form.userid);
-            String recordStatus = getVLStatus(u, viralLoadContainer, form.status);
-            Integer[] keys = form.keys;
-            String hostName = form.hostname;
-            if ("08-complete-email-Zika_portal".equals(recordStatus)){
-                //_log.info("Using java helper to send email for viral load queue record: "+key);
-                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, u, viralLoadContainer, hostName);
-                Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-                notification.sendManually(ehrContainer,u);
-            }
-
-            return returnJSON;
-        }
-    }
 }

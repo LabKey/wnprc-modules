@@ -129,7 +129,7 @@ public class InvoicePDF extends FPDF
         String participantId = invoicedItem.getId() == null? "": " - " + invoicedItem.getId();
 
         FormattedLineItem itemLine = null;
-        FormattedLineItem commentLine = null;
+        List<FormattedLineItem> commentLines = new ArrayList<>();
 
         if(invoicedItem.getItem() != null || showDetailsWithItem){
             itemLine = new FormattedLineItem();
@@ -139,11 +139,21 @@ public class InvoicePDF extends FPDF
         }
 
         if(invoicedItem.getComment() != null){
-            commentLine = new FormattedLineItem();
-            if (invoicedItem.getComment().length() > 60)
-                commentLine._description = indent + invoicedItem.getComment().substring(0, 59) + participantId;
-            else
+            if (invoicedItem.getComment().length() > 60) {
+                for (int i = 0; i < invoicedItem.getComment().length(); i+= 59) {
+                    FormattedLineItem commentLine = new FormattedLineItem();
+                    if (i + 59 >= invoicedItem.getComment().length()) {
+                        commentLine._description = indent + invoicedItem.getComment().substring(i) + participantId;
+                    } else {
+                        commentLine._description = indent + invoicedItem.getComment().substring(i, i + 59);
+                    }
+                    commentLines.add(commentLine);
+                }
+            } else {
+                FormattedLineItem commentLine = new FormattedLineItem();
                 commentLine._description = indent + invoicedItem.getComment() + participantId;
+                commentLines.add(commentLine);
+            }
         }
 
 
@@ -151,14 +161,16 @@ public class InvoicePDF extends FPDF
             addDetailsToLineItem(itemLine, invoicedItem);
         }
         else{
-            addDetailsToLineItem(commentLine,invoicedItem);
+            addDetailsToLineItem(commentLines.get(commentLines.size() - 1), invoicedItem);
         }
         if(itemLine != null){
             formattedLineItems.add(itemLine);
         }
 
-        if(commentLine != null){
-            formattedLineItems.add(commentLine);
+        if(commentLines.size() > 0){
+            for (FormattedLineItem commentLine : commentLines) {
+                formattedLineItems.add(commentLine);
+            }
         }
         return formattedLineItems;
     }

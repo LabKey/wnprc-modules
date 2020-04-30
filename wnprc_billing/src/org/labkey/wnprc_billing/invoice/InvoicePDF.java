@@ -149,7 +149,7 @@ public class InvoicePDF extends FPDF
                 for (int i = 60; i < invoicedItem.getComment().length(); i+= 58) {
                     commentLine = new FormattedLineItem();
                     //only add participantId to the last line of the comment
-                    if (i + 60 >= invoicedItem.getComment().length()) {
+                    if (i + 58 >= invoicedItem.getComment().length()) {
                         commentLine._description = indent + indent + invoicedItem.getComment().substring(i) + participantId;
                     } else {
                         commentLine._description = indent + indent + invoicedItem.getComment().substring(i, i + 58);

@@ -140,8 +140,11 @@ public class InvoicePDF extends FPDF
 
         if(invoicedItem.getComment() != null){
             if (invoicedItem.getComment().length() > 60) {
+                //break the comment up into multiple lines of 60 characters (or less) each
+                //TODO consider making line breaks at word boundaries instead of 60 characters
                 for (int i = 0; i < invoicedItem.getComment().length(); i+= 59) {
                     FormattedLineItem commentLine = new FormattedLineItem();
+                    //only add participantId to the last line of the comment
                     if (i + 59 >= invoicedItem.getComment().length()) {
                         commentLine._description = indent + invoicedItem.getComment().substring(i) + participantId;
                     } else {
@@ -159,8 +162,8 @@ public class InvoicePDF extends FPDF
 
         if(showDetailsWithItem){
             addDetailsToLineItem(itemLine, invoicedItem);
-        }
-        else{
+        } else {
+            //only add details to the last line of the comment so they're not duplicated for each line
             addDetailsToLineItem(commentLines.get(commentLines.size() - 1), invoicedItem);
         }
         if(itemLine != null){

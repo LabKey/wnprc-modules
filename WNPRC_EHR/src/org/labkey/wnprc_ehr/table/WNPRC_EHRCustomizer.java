@@ -58,7 +58,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeColumns(AbstractTableInfo ti)
     {
-        BaseColumnInfo project = ti.getMutableColumn("project");
+        var project = ti.getMutableColumn("project");
         if (project != null)
         {
             project.setFormat("00000000");
@@ -71,7 +71,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeRoomCol(AbstractTableInfo ti, String columnName)
     {
-        BaseColumnInfo room = ti.getMutableColumn(columnName);
+        var room = ti.getMutableColumn(columnName);
         if (room != null)
         {
             if (!ti.getName().equalsIgnoreCase("rooms"))
@@ -98,7 +98,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeBirthTable(AbstractTableInfo ti)
     {
-        BaseColumnInfo cond = ti.getMutableColumn("cond");
+        var cond = ti.getMutableColumn("cond");
         if (cond != null)
         {
             cond.setLabel("Housing Condition");
@@ -206,7 +206,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         ColumnInfo protocolCol = table.getColumn("protocol");
         if (protocolCol != null && table.getColumn("pdf") == null)
         {
-            BaseColumnInfo col = table.addColumn(new WrappedColumn(protocolCol, "pdf"));
+            var col = table.addColumn(new WrappedColumn(protocolCol, "pdf"));
             col.setLabel("PDF");
             col.setURL(StringExpressionFactory.create("/query/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/Protocol_PDFs/executeQuery.view?schemaName=lists&query.queryName=ProtocolPDFs&query.protocol~eq=${pdf}", true));
         }
@@ -216,7 +216,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                BaseColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "totalProjects"));
+                var col2 = table.addColumn(new WrappedColumn(protocolCol, "totalProjects"));
                 col2.setLabel("Total Projects");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);

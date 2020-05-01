@@ -1,8 +1,6 @@
 package org.labkey.wnprc_billing.table;
 
 import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.BaseColumnInfo;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.TableInfo;
@@ -51,7 +49,7 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
             return;
         }
 
-        BaseColumnInfo chargeType = table.getMutableColumn("chargeType");
+        var chargeType = table.getMutableColumn("chargeType");
         if (chargeType != null)
         {
             chargeType.setFk(QueryForeignKey.from(us, table.getContainerFilter())
@@ -61,7 +59,7 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
                     .raw(true));
         }
 
-        BaseColumnInfo debitedAcct = table.getMutableColumn("debitedAccount");
+        var debitedAcct = table.getMutableColumn("debitedAccount");
         if (debitedAcct != null)
         {
             debitedAcct.setFk(QueryForeignKey.from(us, table.getContainerFilter())
@@ -71,7 +69,7 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
                     .raw(true));
         }
 
-        BaseColumnInfo chargeId= table.getMutableColumn("chargeId");
+        var chargeId= table.getMutableColumn("chargeId");
         if (chargeId != null)
         {
             chargeId.setFk(QueryForeignKey.from(us, table.getContainerFilter())

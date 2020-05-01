@@ -997,7 +997,7 @@ WNPRC_EHR.DatasetButtons = new function(){
             }
 
         },
-        bulkCompleteAndSendEmail: function (dataRegionName) {
+        batchCompleteRecords: function (dataRegionName) {
             var dataRegion = LABKEY.DataRegions[dataRegionName];
             var checked = dataRegion.getChecked();  //TODO: update to getSelected with callback
             var checkedInt = checked.map(function(item) {

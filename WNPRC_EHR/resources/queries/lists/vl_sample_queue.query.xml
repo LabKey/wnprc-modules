@@ -20,7 +20,7 @@
 
                     <item text="Batch Complete Samples" requiresSelection="true" requiresSelectionMinCount="2">
                         <onClick>
-                            WNPRC_EHR.DatasetButtons.bulkCompleteAndSendEmail(dataRegion.name);
+                            WNPRC_EHR.DatasetButtons.batchCompleteRecords(dataRegion.name);
                         </onClick>
                     </item>
 

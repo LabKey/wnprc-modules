@@ -129,7 +129,7 @@ public class InvoicePDF extends FPDF
         String participantId = invoicedItem.getId() == null? "": " - " + invoicedItem.getId();
 
         FormattedLineItem itemLine = null;
-        FormattedLineItem commentLine = null;
+        List<FormattedLineItem> commentLines = new ArrayList<>();
 
         if(invoicedItem.getItem() != null || showDetailsWithItem){
             itemLine = new FormattedLineItem();
@@ -139,26 +139,45 @@ public class InvoicePDF extends FPDF
         }
 
         if(invoicedItem.getComment() != null){
-            commentLine = new FormattedLineItem();
-            if (invoicedItem.getComment().length() > 60)
-                commentLine._description = indent + invoicedItem.getComment().substring(0, 59) + participantId;
-            else
+            if (invoicedItem.getComment().length() > 60) {
+                //break the comment up into multiple lines of 60 characters (or less) each
+                //and indent any line after the first
+                //TODO consider making line breaks at word boundaries instead of 60 characters
+                FormattedLineItem commentLine = new FormattedLineItem();
+                commentLine._description = indent + invoicedItem.getComment().substring(0, 60);
+                commentLines.add(commentLine);
+                for (int i = 60; i < invoicedItem.getComment().length(); i+= 58) {
+                    commentLine = new FormattedLineItem();
+                    //only add participantId to the last line of the comment
+                    if (i + 58 >= invoicedItem.getComment().length()) {
+                        commentLine._description = indent + indent + invoicedItem.getComment().substring(i) + participantId;
+                    } else {
+                        commentLine._description = indent + indent + invoicedItem.getComment().substring(i, i + 58);
+                    }
+                    commentLines.add(commentLine);
+                }
+            } else {
+                FormattedLineItem commentLine = new FormattedLineItem();
                 commentLine._description = indent + invoicedItem.getComment() + participantId;
+                commentLines.add(commentLine);
+            }
         }
 
 
         if(showDetailsWithItem){
             addDetailsToLineItem(itemLine, invoicedItem);
-        }
-        else{
-            addDetailsToLineItem(commentLine,invoicedItem);
+        } else {
+            //only add details to the first line of the comment so they're not duplicated for each line
+            addDetailsToLineItem(commentLines.get(0), invoicedItem);
         }
         if(itemLine != null){
             formattedLineItems.add(itemLine);
         }
 
-        if(commentLine != null){
-            formattedLineItems.add(commentLine);
+        if(commentLines.size() > 0){
+            for (FormattedLineItem commentLine : commentLines) {
+                formattedLineItems.add(commentLine);
+            }
         }
         return formattedLineItems;
     }

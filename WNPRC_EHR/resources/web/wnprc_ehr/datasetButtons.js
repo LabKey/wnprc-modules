@@ -1059,7 +1059,15 @@ WNPRC_EHR.DatasetButtons = new function(){
                                     displayField: 'Status',
                                     valueField: 'Key',
                                     ref: 'qcstate',
-                                    id: 'change-vl-qcstate'
+                                    id: 'change-vl-qcstate',
+                                    allowBlank: false
+                                }, {
+                                    xtype: 'numberfield',
+                                    ref: 'experiment',
+                                    fieldLabel: 'Experiment #',
+                                    width: 300,
+                                    id: 'enter-experiment-number',
+                                    allowBlank: false
                                 }
                                 ]
                             }],

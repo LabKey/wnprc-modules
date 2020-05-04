@@ -11,7 +11,8 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "build": "better-npm-run build",
-    "build-prod": "webpack --config webpack.config.ts"
+    "build-prod": "webpack --config webpack.config.ts",
+    "clean": "rm -rf node_modules; rm -rf resources/web/gen/"
   },
   "keywords": [],
   "author": "",

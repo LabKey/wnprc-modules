@@ -15,14 +15,22 @@ public class WaterWeightSection extends SimpleFormSection
     public WaterWeightSection() {
 
         super("study", "Weight", "Weight");
+        fieldNamesAtStartInOrder = Arrays.asList(
+                "Id",
+                "date",
+                "project",
+                "weight",
+                "remarks"
 
-        maxItemsPerColumn = 1;
+        );
+
+        maxItemsPerColumn = 3;
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
         //setClientStoreClass("wnprc.ext.data.HusbandryServerStore");
        //this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/HusbandryServerStore.js"));
     }
 
-    @Override
-    protected List<String> getFieldNames(){return Arrays.asList("Id", "date","project", "weight", "remark");}
+    //@Override
+    //protected List<String> getFieldNames(){return Arrays.asList("Id","date","weight","project","remark");}
 
 }

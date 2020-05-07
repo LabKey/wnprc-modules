@@ -18,7 +18,9 @@
                     <column columnName="project"></column>
 
 
-                    <column columnName="volume"></column>
+                    <column columnName="volume">
+                        <columnTitle>Volume (mL)</columnTitle>
+                    </column>
                     <column columnName="assignedTo">
                         <columnTitle>Assigned To</columnTitle>
                         <fk>

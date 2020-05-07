@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections;
 
+import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 
@@ -9,6 +10,14 @@ public class WaterOrderFormSection extends SimpleGridSection
 {
     public WaterOrderFormSection(){
         super ("study", "waterOrders", "Water Orders");
+        /*fieldNamesAtStartInOrder = Arrays.asList(
+                "Id",
+                "date",
+                "enddate",
+                "volume",
+                "provideFruit"
+        );*/
+
         this.setAllowBulkAdd(true);
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/HusbandryClientStore.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddWaterWindow.js"));

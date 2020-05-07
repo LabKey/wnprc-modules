@@ -21,17 +21,9 @@
 
                     </column>
                     <column columnName="volume">
-                        <columnTitle>Water Vol (mls)</columnTitle>
+                        <columnTitle>Volume (mL)</columnTitle>
                     </column>
-                    <column columnName="vol_units">
-                        <columnTitle>Volume Units</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>volume_units</fkTable>
-                            <fkColumnName>unit</fkColumnName>
-                            <fkDisplayColumnName useRawValue="true"/>
-                        </fk>
-                    </column>
+
                     <column columnName="location">
                         <columnTitle>Location</columnTitle>
                         <fk>

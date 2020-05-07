@@ -111,63 +111,6 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             }
 
         },
-        'study.waterGiven':{
-            Id: {
-                hidden :true,
-                shownInGrid: false
-            },
-            date: {
-                hidden :true,
-                shownInGrid: false
-            },
-            project:{
-                hidden: true
-                //allowBlank: false
-            },
-            volume: {
-                allowBlank: false
-            },
-            vol_units: {
-                defaultValue: 'mL'
-
-            },
-            route: {
-                defaultValue : 'oral'
-            },
-            location:{
-                defaultValue: 'lab',
-                lookup:{
-                    schemaName: 'ehr_lookups',
-                    queryName: 'water_location',
-                    keyColumn: 'value',
-                    displayColumn: 'title',
-                    sort: 'sort_order'
-                }
-            },
-            assignedTo:{
-                defaultValue: 'researchstaff',
-                lookup:{
-                    schemaName: 'ehr_lookups',
-                    queryName: 'husbandry_assigned',
-                    keyColumn: 'value',
-                    displayColumn: 'title',
-                    sort: 'sort_order'
-                }
-            },
-            remarks :{
-                xtype: 'ehr-remarkfield'
-            },
-            performedby:{
-                allowBlank: false
-            },
-            treatmentid: {
-                hidden: true
-            },
-            dateordered:{
-                hidden: true
-            }
-            
-        },
         'study.weight':{
             project: {
                 xtype: 'wnprc-projectentryfield',
@@ -189,7 +132,16 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 columnConfig: {
                     fixed: true,
                     width: 130
-                }
+                },
+                editorConfig: {
+                    id: 'weightDateTime',
+                    defaultHour: 10,
+                    defaultMinutes: 0,
+                    dateConfig: {
+                        maxValue: new Date(),
+                        minValue: new Date(),
+                    }
+                },
             },
             weight:{
                 allowBlank :true
@@ -204,6 +156,22 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 hidden : true
             },
             location: {
+                helpPopup : 'Location of longest chairing',
+                hidden: false,
+                editorConfig : {
+                    id : 'location',
+                    listeners: {
+                        change: function (field, val) {
+                            var weightStartTime = Ext4.getCmp('weightDateTime');
+                            var chairingStartTime = Ext4.getCmp('chairingStartTime');
+                            var startTime = new Date(weightStartTime.getValue());
+                            chairingStartTime.setValue(startTime);
+                        }
+                    }
+                }
+            } ,
+
+            /*location: {
                 editorConfig : {
                     id: 'chairingLocation',
                     listeners: {
@@ -216,7 +184,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     }
                 }
 
-            },
+            },*/
             /*restraintType: {
 
                 editorConfig :{
@@ -306,29 +274,20 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 xtype: 'xdatetime',
                 extFormat:'Y-m-d H:i',
                 hidden: false,
+                allowBlank: false,
                // hideMode: 'offsets',
                 editorConfig : {
                     id : 'chairingStartTime',
-                    listeners: {
-                        change :function(field, val){
-                            var restraintEndTime = Ext4.getCmp('chairingEndTime');
-                            var startTime = new Date(val);
-                            var endTime = new Date (startTime);
-                            endTime.setMinutes(startTime.getMinutes()+30);
-                            restraintEndTime.setValue(endTime);
-                        }
-                    }
-                },
-                setInitialValue: function(v) {
-                    var date = (new Date());
-                    return v || date;
+
                 }
+
 
 
             },
             chairingEndTime: {
                 xtype: 'xdatetime',
                 extFormat:'Y-m-d H:i',
+                allowBlank: false,
                 hidden: false,
                 hideMode: 'offsets',
                 editorConfig : {
@@ -339,23 +298,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
 
 
-            },
-            location: {
-                helpPopup : 'Location of longest chairing',
-                hidden: false,
-                editorConfig : {
-                    id : 'location',
-                    listeners: {
-                        render: function (field) {
-                            //field.hide();
-
-                        }
-                    }
-                }
-
-
             }
-
         },
         'study.restraints':{
             Id:{
@@ -365,6 +308,107 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 hidden :true
             }
 
+        },
+        'study.waterGiven':{
+            Id: {
+                hidden :true,
+                shownInGrid: false
+            },
+            date: {
+                hidden :true,
+                shownInGrid: false
+            },
+            project:{
+                hidden: true
+                //allowBlank: false
+            },
+            volume: {
+                xtype: 'numberfield',
+                //header: 'Volume(mL)',
+                fieldLabel: 'Volume(mL)',
+                allowBlank: false,
+
+            },
+            route: {
+                defaultValue : 'oral'
+            },
+            location:{
+                defaultValue: 'lab',
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'water_location',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+                    sort: 'sort_order'
+                }
+            },
+            assignedTo:{
+                defaultValue: 'researchstaff',
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'husbandry_assigned',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+                    sort: 'sort_order'
+                }
+            },
+            remarks :{
+                xtype: 'ehr-remarkfield'
+            },
+            performedby:{
+                allowBlank: false
+            },
+            treatmentid: {
+                hidden: true
+            },
+            dateordered:{
+                hidden: true
+            }
+
+        },
+        'study.waterAmount':{
+            Id:{
+                hidden: true,
+                shownInGrid: false
+            },
+            date:{
+                xtype: 'datefield',
+                header: 'Date',
+                extFormat: 'Y-m-d',
+                allowBlank: false,
+                editable: true,
+                columnConfig: {
+                    width:110
+                },
+                editorConfig: {
+                    maxValue: new Date(),
+                    minValue: new Date(),
+
+                }
+            },
+            volume:{
+                header: 'Volume(mL)',
+                allowBlank:false
+            },
+            project:{
+                hidden: true,
+                shownInGrid: false
+            },
+            assignedTo:{
+                allowBlank: false
+            },
+            frequency:{
+                allowBlank: false,
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'husbandry_frequency',
+                    keyColumn: 'rowid',
+                    displayColumn: 'altmeaning',
+                    sort: 'sort_order',
+                    filterArray: [LABKEY.Filter.create('altmeaning', null, LABKEY.Filter.Types.NONBLANK)]
+                }
+
+            }
         },
         'study.waterOrders':{
             project:{
@@ -407,9 +451,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             volume:{
                 xtype: 'textfield',
-                header: 'Volume'
-
-
+                header: 'Volume(mL)',
+                allowBlank:false
+                
             },
             assignedTo:{
                 allowBlank: false
@@ -437,42 +481,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
 
         },
-        'study.waterAmount':{
-            Id:{
-                hidden: true,
-                shownInGrid: false
-            },
-            date:{
-                    xtype: 'datefield',
-                    header: 'Date',
-                    extFormat: 'Y-m-d',
-                    allowBlank: false,
-                    editable: true,
-                    columnConfig: {
-                        width:110
-                    },
-                    editorConfig: {
-                        minValue: new Date()
-                    }
-            },
-            project:{
-                hidden: true,
-                shownInGrid: false
-            },
-            assignedTo:{
-                allowBlank: false
-            },
-            frequency:{
-                allowBlank: false,
-                lookup:{
-                    schemaName: 'ehr_lookups',
-                    queryName: 'husbandry_frequency',
-                    keyColumn: 'rowid',
-                    displayColumn: 'meaning',
-                    sort: 'sort_order'
-                }
-            }
-        },
+
         'ehr.requests':{
             priority:{
                 hidden: true

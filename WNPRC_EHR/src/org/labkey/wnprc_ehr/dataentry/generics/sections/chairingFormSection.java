@@ -6,7 +6,7 @@ import java.util.Set;
 public class chairingFormSection extends SlaveFormSection
 {
     public chairingFormSection(){
-        super("study", "chairing", "Chairing");
+        super("study", "chairing", "Chair Restraint");
     }
 
     @Override

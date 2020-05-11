@@ -50,14 +50,14 @@ tasks.compileJava {
 dependencies {
     apiCompile 'org.jetbrains:annotations:15.0'
     apiCompile project(BuildUtils.getApiProjectPath(project.gradle))
-    apiCompile project(":externalModules:wnprc-modules:java2ts")
+    apiCompile project(":server:modules:wnprc-modules:java2ts")
 
     compile 'org.jetbrains:annotations:15.0'
     compile "junit:junit:${junitVersion}"
     compile project(BuildUtils.getApiProjectPath(project.gradle))
     compile project(BuildUtils.getInternalProjectPath(project.gradle))
     compile project(":server:modules:LabDevKitModules:LDK")
-    compile project(":externalModules:wnprc-modules:java2ts")
+    compile project(":server:modules:wnprc-modules:java2ts")
 }
 
 project.evaluationDependsOn(BuildUtils.getInternalProjectPath(project.gradle))

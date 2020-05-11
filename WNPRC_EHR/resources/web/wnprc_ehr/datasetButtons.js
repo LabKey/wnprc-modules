@@ -1019,101 +1019,94 @@ WNPRC_EHR.DatasetButtons = new function(){
                 success: function (d) {
                     //check that all records are the same animal id
                     var toUpdate = d["rows"];
-                    toUpdate.forEach(function(item){
-                        uniq.push(item.Id);
-                    });
-                    var sett = [...new Set(uniq)];
-                    if (sett.length > 1){
-                        Ext4.Msg.alert('Error', 'You can only batch complete records with the same animal id.');
-                        return;
-                    } else {
-                        new Ext4.Window({
-                            title: 'Change Request Status',
-                            width: 430,
-                            autoHeight: true,
+                    new Ext4.Window({
+                        title: 'Change Request Status',
+                        width: 430,
+                        autoHeight: true,
+                        items: [{
+                            xtype: 'form',
+                            ref: 'theForm',
+                            bodyStyle: 'padding: 5px;',
+                            defaults: {
+                                border: false
+                            },
                             items: [{
-                                xtype: 'form',
-                                ref: 'theForm',
-                                bodyStyle: 'padding: 5px;',
-                                defaults: {
-                                    border: false
-                                },
-                                items: [{
-                                    html: 'Total Records: '+checked.length+'<br><br>',
-                                    tag: 'div'
-                                },{
-                                    xtype: 'combo',
-                                    fieldLabel: 'Status',
-                                    width: 300,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    store: new LABKEY.ext4.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'lists',
-                                        queryName: 'status',
-                                        columns: 'Key,Status',
-                                        sort: 'Key',
-                                        //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'Status',
-                                    valueField: 'Key',
-                                    ref: 'qcstate',
-                                    id: 'change-vl-qcstate',
-                                    allowBlank: false
-                                }, {
-                                    xtype: 'numberfield',
-                                    ref: 'experiment',
-                                    fieldLabel: 'Experiment #',
-                                    width: 300,
-                                    id: 'enter-experiment-number',
-                                    allowBlank: false
-                                }
-                                ]
-                            }],
-                            buttons: [{
-                                text:'Submit',
-                                disabled:false,
-                                formBind: true,
-                                ref: '../submit',
-                                scope: this,
-                                handler: function(o) {
-                                    var win = o.up('window');
-                                    var form = win.down('form');
-                                    var qc = form.getForm().findField('change-vl-qcstate').getValue();
-                                    Ext4.Msg.wait('Loading...');
-
-                                    //update qc status
-                                    Ext4.each(toUpdate, function (row) {
-                                        row.Status = qc;
-                                    }, this);
-
-                                    if (toUpdate.length) {
-                                        LABKEY.Query.updateRows({
-                                            schemaName: 'lists',
-                                            queryName: 'vl_sample_queue',
-                                            rows: toUpdate,
-                                            scope: this,
-                                            success: function () {
-                                                dataRegion.selectNone();
-                                                dataRegion.refresh();
-                                                Ext4.Msg.hide();
-                                            },
-                                            failure: EHR.Utils.onError
-                                        });
-
-                                    }
-                                }
+                                html: 'Total Records: '+checked.length+'<br><br>',
+                                tag: 'div'
                             },{
-                                text: 'Close',
-                                handler: function(o){
-                                    o.ownerCt.ownerCt.close();
+                                xtype: 'combo',
+                                fieldLabel: 'Status',
+                                width: 300,
+                                triggerAction: 'all',
+                                mode: 'local',
+                                store: new LABKEY.ext4.Store({
+                                    xtype: 'labkey-store',
+                                    schemaName: 'lists',
+                                    queryName: 'status',
+                                    columns: 'Key,Status',
+                                    sort: 'Key',
+                                    //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                    autoLoad: true
+                                }),
+                                displayField: 'Status',
+                                valueField: 'Key',
+                                ref: 'qcstate',
+                                id: 'change-vl-qcstate',
+                                allowBlank: false
+                            }, {
+                                xtype: 'numberfield',
+                                ref: 'experiment',
+                                fieldLabel: 'Experiment #',
+                                width: 300,
+                                id: 'enter-experiment-number',
+                                allowBlank: false
+                            }
+                            ]
+                        }],
+                        buttons: [{
+                            text:'Submit',
+                            disabled:false,
+                            formBind: true,
+                            ref: '../submit',
+                            scope: this,
+                            handler: function(o) {
+                                var win = o.up('window');
+                                var form = win.down('form');
+                                var qc = form.getForm().findField('change-vl-qcstate').getValue();
+                                var num = form.getForm().findField('enter-experiment-number').getValue();
+                                Ext4.Msg.wait('Loading...');
+
+                                //update qc status
+                                Ext4.each(toUpdate, function (row) {
+                                    row.Status = qc;
+                                    row.experimentNumber = parseInt(num);
+                                }, this);
+
+                                if (toUpdate.length) {
+                                    LABKEY.Query.updateRows({
+                                        schemaName: 'lists',
+                                        queryName: 'vl_sample_queue',
+                                        rows: toUpdate,
+                                        scope: this,
+                                        success: function () {
+                                            dataRegion.selectNone();
+                                            dataRegion.refresh();
+                                            Ext4.Msg.hide();
+                                        },
+                                        failure: EHR.Utils.onError
+                                    });
+
                                 }
-                            }]
-                        }).show();
+                            }
+                        },{
+                            text: 'Close',
+                            handler: function(o){
+                                o.ownerCt.ownerCt.close();
+                            }
+                        }]
+                    }).show();
 
 
-                    }
                 },
                 failure: function() {
 

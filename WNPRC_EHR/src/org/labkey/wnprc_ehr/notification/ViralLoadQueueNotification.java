@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.notification;
 
 import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
@@ -19,9 +20,16 @@ import javax.mail.Address;
 import javax.mail.Message;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.labkey.api.search.SearchService._log;
 import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
@@ -40,26 +48,52 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String modifiedByFullName = "";
     public String modifiedByEmail = "";
     public final String openResearchPortal = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
+    public Map<Integer, List<String>> emails = new HashMap<Integer,List<String>>();
+    public Map<String, Integer> recordCount = new HashMap<>();
+    public Integer experimentNumber;
 
     public ViralLoadQueueNotification(Module owner)
     {
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, String hostname) throws SQLException
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, String hostname, Integer number) throws SQLException
     {
         super(owner);
         rowIds = rowids;
         currentUser = currentuser;
         hostName = hostname;
         container = c;
+        experimentNumber = number;
         this.setUp();
+    }
+
+    public List<String> getEmailArray(String emails)
+    {
+        List<String> emailList = new ArrayList<>();
+        if (emails != null){
+            //we should split by comma, semicolon, or new line
+            String[] emailArray = notifyEmails.split(";|,|\n|\r\n|\r");
+            for (String e : emailArray)
+            {
+                e = e.trim();
+                emailList.add(e);
+            }
+        }
+        return emailList;
     }
 
     public void setUp() throws SQLException
     {
 
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), Integer.parseInt(rowIds[0]));
+        Set<Integer> ids = new HashSet<Integer>();
+        Integer arr[] = new Integer[rowIds.length];
+        for (int i = 0; i < rowIds.length; i++){
+            arr[i] = Integer.parseInt(rowIds[i]);
+        }
+        Collections.addAll(ids, arr);
+        SimpleFilter filter = new SimpleFilter();
+        filter.addInClause(FieldKey.fromString("Key"), ids);
         QueryHelper viralLoadQuery = new QueryHelper(container, currentUser, "lists", "vl_sample_queue");
 
         // Define columns to get
@@ -71,50 +105,64 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("emails"));
         columns.add(FieldKey.fromString("ModifiedBy"));
 
-        Integer userid = null;
+        Integer createdByUserId = null;
         String animalid = null;
         String notifyEmails = null;
         Integer modifiedBy = null;
 
         // Execute the query
+        //could have a sumbmitter -> modifiedBy -> NotifyList<String>
         try (Results rs = viralLoadQuery.select(columns, filter))
         {
-            if (rs.next()){
-                userid = rs.getInt(FieldKey.fromString("CreatedBy"));
+            User createdByUser = null;
+            User mod = null;
+            while (rs.next()){
+                createdByUserId = rs.getInt(FieldKey.fromString("CreatedBy"));
                 animalid = rs.getString(FieldKey.fromString("Id"));
                 notifyEmails = rs.getString(FieldKey.fromString("emails"));
                 modifiedBy = rs.getInt(FieldKey.fromString("ModifiedBy"));
+
+                if (createdByUserId != null)
+                {
+                    createdByUser = UserManager.getUser(createdByUserId);
+                    if (createdByUser != null)
+                    {
+                        this.fullName = createdByUser.getFullName();
+                        this.requestorEmail = createdByUser.getEmail();
+                        this.animalId = animalid;
+                    }
+                }
+                if (notifyEmails != null)
+                {
+                    this.notifyEmails = notifyEmails;
+                }
+                if (modifiedBy != null)
+                {
+                    mod = UserManager.getUser(modifiedBy);
+                    if (mod != null)
+                    {
+                        this.modifiedByEmail = mod.getEmail();
+                        String fullName = mod.getFullName();
+                        if ("".equals(fullName))
+                        {
+                            this.modifiedByFullName = "Virology Services";
+                        } else
+                        {
+                            this.modifiedByFullName = fullName;
+                        }
+                    }
+                }
+                emails.put(createdByUserId, getEmailArray(notifyEmails));
+                if (recordCount.containsKey(createdByUser.getEmail()))
+                {
+                    Integer val = recordCount.get(createdByUser.getEmail());
+                    val++;
+                    recordCount.replace(createdByUser.getEmail(),val);
+                }else {
+                    recordCount.put(createdByUser.getEmail(),1);
+                }
+
             }
-        }
-        if (userid != null)
-        {
-            User u = UserManager.getUser(userid);
-            if (u != null)
-            {
-                this.fullName = u.getFullName();
-                this.requestorEmail = u.getEmail();
-                this.animalId = animalid;
-            }
-        }
-        if (notifyEmails != null)
-        {
-            this.notifyEmails = notifyEmails;
-        }
-        if (modifiedBy != null)
-        {
-         User mod = UserManager.getUser(modifiedBy);
-         if (mod != null)
-         {
-             this.modifiedByEmail = mod.getEmail();
-             String fullName = mod.getFullName();
-             if ("".equals(fullName))
-             {
-                 this.modifiedByFullName = "Virology Services";
-             } else
-             {
-                 this.modifiedByFullName = fullName;
-             }
-         }
         }
 
     }
@@ -152,16 +200,16 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         final StringBuilder msg = new StringBuilder();
         Date now = new Date();
         msg.append("<p>Hello " +
-                fullName +
+                u.getFullName() +
                 ",</p>");
         msg.append("<p>Good news - Virology Services has completed viral load testing on " +
-                rowIds.length +
+                recordCount.get(u.getEmail()) +
                 " sample(s) you submitted. " +
                 "The results can be found in the Zika portal, and using the following " +
                 "<a href=\"" +
                 openResearchPortal +
-                "&Dataset.ParticipantId~eq=" +
-                animalId +
+                "&Dataset.experiment_number ~eq=" +
+                experimentNumber.toString() +
                 "\">link</a>. ");
         msg.append("Please feel free to contact " +
                 "<a href=\"mailto:" +
@@ -180,8 +228,19 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
     public void sendManually (Container container, User user)
     {
-        Collection<UserPrincipal> recipients = getRecipients(container);
-        sendMessage(getEmailSubject(container),getMessageBodyHTML(container,user),recipients,user);
+        Collection<UserPrincipal> subscribedRecipients = getRecipients(container);
+        Iterator it =emails.entrySet().iterator();
+        while (it.hasNext()){
+            List<String> extraRecipients = new ArrayList<String>();
+            Map.Entry pair = (Map.Entry)it.next();
+            User u = UserManager.getUser((Integer) pair.getKey());
+            extraRecipients.add(u.getEmail());
+            for (String s: (List<String>)pair.getValue()){
+                extraRecipients.add(s);
+            }
+            it.remove(); // avoids a ConcurrentModificationException
+            sendMessage(getEmailSubject(container),getMessageBodyHTML(container,u),subscribedRecipients, extraRecipients, user, u.getFullName());
+        }
 
     }
 
@@ -190,7 +249,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         return NotificationService.get().getRecipients(this, container);
     }
 
-    public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, User currentUser)
+    public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, List<String> extraRecipients, User currentUser, String fullName)
     {
         _log.info("ViralLoadNotification.java: sending viral sample queue update email...");
         try
@@ -212,15 +271,10 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                     }
                 }
             }
-            //also add to the list of recipients the person who created the record
-            if (requestorEmail != null) emails.add(requestorEmail);
 
-            if (notifyEmails != null){
-                //we should split by comma, semicolon, or new line
-                String[] emailArray = notifyEmails.split(";|,|\n|\r\n|\r");
-                for (String e : emailArray)
+            if (extraRecipients != null){
+                for (String e : extraRecipients)
                 {
-                    e = e.trim();
                     emails.add(e);
                 }
             }

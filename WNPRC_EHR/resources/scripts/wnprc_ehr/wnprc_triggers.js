@@ -122,18 +122,18 @@ exports.init = function (EHR) {
      */
     EHR.Server.TriggerManager.registerHandler(EHR.Server.TriggerManager.Events.BEFORE_UPSERT, function (helper, scriptErrors, row) {
         var species;
-        if (row.Id && !helper.isQuickValidation() && !helper.isETL()) {
+        if (row.Id && !helper.isETL()) {
             if (row.Id.match(/(^rh([0-9]{4})$)|(^r([0-9]{5})$)|(^rh-([0-9]{3})$)|(^rh[a-z]{2}([0-9]{2})$)/))
                 species = 'Rhesus';
             else if (row.Id.match(/(^cy?([0-9]{4,5})$)|(^c([0-9]{5})$)/))
                 species = 'Cynomolgus';
-            else if (row.Id.match(/^ag([0-9]{4})$/))
+            else if (row.Id.match(/(^ag([0-9]{4})$)|(^v([0-9]{5})$)/))
                 species = 'Vervet';
             else if (row.Id.match(/^cj([0-9]{4})$/))
                 species = 'Marmoset';
             else if (row.Id.match(/^so([0-9]{4})$/))
                 species = 'Cotton-top Tamarin';
-            else if (row.Id.match(/^pt([0-9]{4})$/))
+            else if (row.Id.match(/(^pt([0-9,a-z]{4})$)|(^p[0-9]{5})/))
                 species = 'Pigtail';
             else if (row.Id.match(/^pd([0-9]{4})$/)) {
                 if (row.species)
@@ -147,6 +147,11 @@ exports.init = function (EHR) {
                 species = 'Rhesus';
             else if (row.Id.match(/(^rh-([a-z])([0-9]{2}))$/))
                 species = 'Rhesus';
+            else if (row.Id.match(/(^rh([0-9,a-z]{4})$)|(^rh\+([0-9]{3})$)/))
+                species = 'Rhesus';
+            //Special naming for a rhesus and stump tail monkey from the 70s.
+            else if (row.Id.match(/(^sr-n([0-9]{2})$)/))
+                species = 'Rhesus';
             else if (row.Id.match(/^cja([0-9]{3})$/))
                 species = 'Marmoset';
             else if (row.Id.match(/^m([0-9]{5})$/))
@@ -156,6 +161,12 @@ exports.init = function (EHR) {
             //and this is to handle automated tests
             else if (row.Id.match(/^test[0-9]+$/))
                 species = 'Rhesus';
+            else if (row.Id.match(/(^st([0-9]{4})$)|(^s([0-9]{5})$)|(^st([0-9,a-z]{4})$)|(^st-([0-9,a-z]{3})$)/))
+                species = 'Stump Tailed';
+            else if (row.id.match(/(^ca([0-9]{4})$)|(^a([0-9]{5})$)/))
+                species = 'Capuchin';
+            else if (row.id.match(/(^gc([0-9]{4})$)/))
+                species = 'Galago Crassicaudatus';
             else
                 species = 'Unknown';
         }

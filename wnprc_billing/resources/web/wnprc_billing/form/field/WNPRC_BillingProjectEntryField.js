@@ -7,7 +7,14 @@ Ext4.define('WNPRC_Billing.form.field.ProjectEntryField', {
 
         this.addListener({
             scope:this,
-            select: function (field, newValue) {
+            select: function (field, val) {
+
+                //get debit acct value
+                var projectRec = field.store.getAt(field.store.find('project', field.getValue()));
+                var acct = null;
+                if(projectRec) {
+                    acct = projectRec.get('account');
+                }
 
                 //on project change, reset investigator
                 //for bulk edit window
@@ -17,11 +24,19 @@ Ext4.define('WNPRC_Billing.form.field.ProjectEntryField', {
                         invesField.disabled = false;
                         invesField.setValue(null);
                     }
+
+                    var debitedacct = field.up("form").getForm().findField("debitedaccount");
+                    if (debitedacct) {
+                        debitedacct.disabled = false;
+                        debitedacct.setValue(acct);
+                    }
                 }
                 //for data entry grid
                 else {
+
                     EHR.DataEntryUtils.setSiblingFields(field, {
-                        investigator: null
+                        investigator: null,
+                        debitedaccount: acct
                     });
                 }
             }

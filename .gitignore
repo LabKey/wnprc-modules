@@ -20,3 +20,5 @@ docker/nginx/key.pem
 **/app.css.map
 **/app.js
 **/app.js.map
+
+WNPRC_EHR/resources/web/wnprc_ehr/gen/

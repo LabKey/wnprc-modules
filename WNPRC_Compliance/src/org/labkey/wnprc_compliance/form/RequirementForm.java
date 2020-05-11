@@ -8,7 +8,7 @@ import java.util.Date;
  * Created by jmrichar on 2/8/2017.
  */
 public class RequirementForm {
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ssXXX")
     public Date dateCompleted;
     public String notes;
     public boolean pending = false;

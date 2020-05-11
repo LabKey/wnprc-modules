@@ -100,7 +100,7 @@ WNPRC_EHR.ProjectField2 = Ext.extend(LABKEY.ext.ComboBox, {
 
 Ext.reg('ehr-project_2', WNPRC_EHR.ProjectField2);
 
-EHR.Metadata.Columns['Irregular Observations'] = 'id/curlocation/location,id,id/curlocation/cond,date,enddate,inRoom,feces,menses,other,tlocation,behavior,otherbehavior,other,breeding,'+EHR.Metadata.bottomCols;
+EHR.Metadata.Columns['Irregular Observations'] = 'id/curlocation/location,id,id/curlocation/cond,date,enddate,inRoom,feces,menses,other,tlocation,other,breeding,' + EHR.Metadata.bottomCols + ',behavior,otherbehavior';
 EHR.Metadata.Columns['Treatment Orders']       = EHR.Metadata.topCols+',account,meaning,code,qualifier,route,frequency,concentration,conc_units,dosage,dosage_units,volume,vol_units,amount,amount_units,remark,nocharge,project_2,account_2,billedby,performedBy,qcstate,'+EHR.Metadata.hiddenCols;
 EHR.Metadata.Columns['Behavior Remarks']       = EHR.Metadata.topCols+',so,a,p,,behatype,category, behatreatment, followup,'+EHR.Metadata.bottomCols;
 EHR.Metadata.Columns['Behavior Abstract']      = EHR.Metadata.topCols+',behavior,performedby,'+EHR.Metadata.bottomCols;

@@ -74,6 +74,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizePregnanciesTable((AbstractTableInfo) table);
             } else if (table.getName().equalsIgnoreCase("housing") && table.getSchema().getName().equalsIgnoreCase("study")) {
                 customizeHousingTable((AbstractTableInfo) table);
+            } else if (matches(table, "ehr", "project")) {
+                customizeProjectTable((AbstractTableInfo) table);
             }
             else if (table.getName().equalsIgnoreCase("waterOrders"))
                 appendEnddateFuture((AbstractTableInfo) table, "enddate");
@@ -114,6 +116,24 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 }
             }
         }
+    }
+
+    private void customizeProjectTable(AbstractTableInfo ti)
+    {
+        String investigatorName = "investigatorName";
+        SQLFragment sql = new SQLFragment("COALESCE((SELECT " +
+                "(CASE WHEN lastName IS NOT NULL AND firstName IS NOT NULL " +
+                            "THEN (lastName ||', '|| firstName) " +
+                        "WHEN lastName IS NOT NULL AND firstName IS NULL " +
+                            "THEN lastName " +
+                        "ELSE " +
+                            "firstName " +
+                        "END) AS investigatorWithName " +
+                "from ehr.investigators where rowid = " + ExprColumn.STR_TABLE_ALIAS + ".investigatorId), " + ExprColumn.STR_TABLE_ALIAS + ".inves)");
+        ExprColumn newCol = new ExprColumn(ti, investigatorName, sql, JdbcType.VARCHAR);
+        newCol.setLabel("Investigator");
+        newCol.setDescription("This column shows the name of the investigator on the project. It first checks if there is an investigatorId, and if not defaults to the old inves column.");
+        ti.addColumn(newCol);
     }
 
     private void customizeBirthTable(AbstractTableInfo ti)
@@ -362,7 +382,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             url.addParameter("query.queryName", "housing_reason");
                             url.addParameter("keyField", "value");
 
-                            String urlString = "";
+                            StringBuilder urlString = new StringBuilder();
                             for (int i = 0; i < reasons.length; i++)
                             {
                                 String reasonForMoveValue = reasons[i];
@@ -370,18 +390,25 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                                 DbSchema schema = DbSchema.get("ehr_lookups", DbSchemaType.Module);
                                 TableInfo ti = schema.getTable("lookups");
                                 TableSelector ts = new TableSelector(ti, filter, null);
-                                String reasonForMoveTitle = (String) ts.getMap().get("title");
-
-                                url.replaceParameter("key", reasonForMoveValue);
-                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
-                                urlString += PageFlowUtil.filter(reasonForMoveTitle);
-                                urlString += "</a>";
+                                String reasonForMoveTitle;
+                                if (ts.getMap() != null && ts.getMap().get("title") != null)
+                                {
+                                    reasonForMoveTitle = (String) ts.getMap().get("title");
+                                    url.replaceParameter("key", reasonForMoveValue);
+                                    urlString.append("<a href=\"").append(PageFlowUtil.filter(url)).append("\">");
+                                    urlString.append(PageFlowUtil.filter(reasonForMoveTitle));
+                                    urlString.append("</a>");
+                                }
+                                else
+                                {
+                                    urlString.append(PageFlowUtil.filter("<" + reasonForMoveValue + ">"));
+                                }
                                 if (i + 1 < reasons.length)
                                 {
-                                    urlString += ", ";
+                                    urlString.append(", ");
                                 }
                             }
-                            out.write(urlString);
+                            out.write(urlString.toString());
                         }
                     }
 

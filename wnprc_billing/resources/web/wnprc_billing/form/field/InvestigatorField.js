@@ -28,10 +28,6 @@ Ext4.define('WNPRC_BILLING.form.field.InvestigatorField', {
                     if (projectVal) {
                         filter = LABKEY.Filter.create('project', projectVal, LABKEY.Filter.Types.EQUAL)
                     }
-                    var debitedAcctVal = EHR.DataEntryUtils.getSiblingValue(this, "debitedaccount");
-                    if (debitedAcctVal) {
-                       filter = LABKEY.Filter.create('alias', debitedAcctVal, LABKEY.Filter.Types.EQUAL);
-                    }
                 }
 
                 //for bulk edit window
@@ -43,12 +39,6 @@ Ext4.define('WNPRC_BILLING.form.field.InvestigatorField', {
 
                     if (projectField) {
                         filter = LABKEY.Filter.create('project', projectField.value, LABKEY.Filter.Types.EQUAL);
-                    }
-                    var debitedAcctField = form.findField("debitedaccount");
-
-                    //for charges form without animal Ids, get investigator based on debited account selection
-                    if (debitedAcctField) {
-                        filter = LABKEY.Filter.create('alias', debitedAcctField.value, LABKEY.Filter.Types.EQUAL);
                     }
                 }
 

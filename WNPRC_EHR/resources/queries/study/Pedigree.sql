@@ -76,11 +76,7 @@ CAST(p.departdate AS SQL_VARCHAR) as status_code,
 --'Rhesus' as Species
 --null as qcstate
 
-CASE
-  WHEN (p.id LIKE 'r%') THEN 'Rhesus'
-  WHEN (p.id LIKE 'cy%') THEN 'Marmoset'
-  ELSE 'other'
-END AS Species
+p.species AS species
 
 FROM ehr.supplemental_pedigree p
 LEFT JOIN study.demographics d ON (d.id=p.id)

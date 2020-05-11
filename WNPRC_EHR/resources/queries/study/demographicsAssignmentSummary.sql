@@ -74,16 +74,16 @@ LEFT JOIN
     ON (T4.Id = d.Id)
 
 --we find the number of active stock project assignments
---spf stock animals (20020201)
---conventional stock animals (20070202)
---marmoset stock animals (20070801)
+--spf stock animals (20150902)
+--conventional stock animals (20150903)
+--marmoset stock animals (20150904)
 LEFT JOIN
     (select id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects, group_concat(DISTINCT category) AS categories FROM (
       SELECT Id, project,
         case
-          when project = 20020201 then 'SPF'
-          when project = 20070202 then 'Conventional'
-          when project = 20070801 then 'Marmoset Stock'
+          when project = 20150902 then 'SPF'
+          when project = 20150903 then 'Conventional'
+          when project = 20150904 then 'Marmoset Stock'
           else null
         end as category
       FROM study.Assignment

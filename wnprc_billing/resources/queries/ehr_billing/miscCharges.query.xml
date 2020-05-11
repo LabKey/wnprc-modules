@@ -49,6 +49,7 @@
                     </column>
                     <column columnName="quantity"/>
                     <column columnName="unitCost"/>
+                    <column columnName="totalCost"/>
                     <column columnName="chargetype">
                         <columnTitle>Adjustment</columnTitle>
                         <fk>

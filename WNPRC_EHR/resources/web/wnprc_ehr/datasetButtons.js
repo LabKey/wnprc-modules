@@ -224,7 +224,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                                     existingRecords: null,
                                     taskRecord: {duedate: duedate, assignedTo: assignedTo, category: 'task', title: title, formType: row.formtype},
                                     success: function(response, options, config){
-                                        Ext4.Msg.hide();
+                                        //Ext4.Msg.hide();
                                         Ext4.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
                                             if (btn == 'yes'){
                                                 window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});

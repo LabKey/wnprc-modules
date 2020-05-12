@@ -640,7 +640,7 @@ public class TriggerScriptHelper {
             //_log.info("Using java helper to send email for viral load queue record: "+key);
             ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, user, viralLoadContainer, hostName, number);
             Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-            notification.sendManually(ehrContainer,user);
+            notification.sendManually(ehrContainer);
         }
     }
 

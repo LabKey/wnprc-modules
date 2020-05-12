@@ -12,6 +12,7 @@ public class Alias
     String _city;
     String _state;
     String _zip;
+    String _billing_contact_info;
     String _contact_email;
     private String _grantNumber;
     private String _uw_account;
@@ -100,6 +101,16 @@ public class Alias
     public void setZip(String zip)
     {
         _zip = zip;
+    }
+
+    public String getBilling_contact_info()
+    {
+        return _billing_contact_info;
+    }
+
+    public void setBilling_contact_info(String billing_contact_info)
+    {
+        _billing_contact_info = billing_contact_info;
     }
 
     public String getContact_email()

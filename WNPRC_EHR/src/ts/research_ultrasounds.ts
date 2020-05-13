@@ -52,6 +52,14 @@ export class ResearchUltrasounds
                             pregnancyid: objectId,
                         }),
                     },
+                    {
+                        text: 'edit records',
+                        url: LABKEY.ActionURL.buildURL('ehr', 'updateQuery', LABKEY.ActionURL.getContainer(), {
+                            schemaName: 'study',
+                            'query.queryName': 'ultrasound_measurements',
+                            'query.ultrasound_id~eq': objectId
+                        }),
+                    }
                 ],
             },
         }

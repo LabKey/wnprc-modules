@@ -77,6 +77,7 @@ import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamOWM.PhysicalExamOWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProblemList.ProblemListForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProcedureRequest.ProcedureRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsForm;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsTaskForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
@@ -416,7 +417,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
                 ProtocolForm.class,
-                ResearchUltrasoundsForm.class
+                ResearchUltrasoundsForm.class,
+                ResearchUltrasoundsTaskForm.class
         );
         for (Class<? extends DataEntryForm> form : forms)
         {

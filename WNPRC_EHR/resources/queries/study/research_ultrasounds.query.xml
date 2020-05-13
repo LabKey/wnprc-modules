@@ -21,15 +21,12 @@
                     <column columnName="fetal_heartbeat"/>
                     <column columnName="beats_per_minute"/>
                     <column columnName="crown_rump_mm"/>
-                    <column columnName="crown_rump_gest_day"/>
                     <column columnName="biparietal_diameter_mm"/>
-                    <column columnName="biparietal_diameter_gest_day"/>
                     <column columnName="head_circumference_mm"/>
 
                     <column columnName="abdominal_circumference_mm"/>
 
                     <column columnName="femur_length_mm"/>
-                    <column columnName="femur_length_gest_day"/>
 
                     <column columnName="ua_systolic_velocity_cms"/>
                     <column columnName="ua_end_diastolic_velocity_cms"/>
@@ -51,7 +48,6 @@
                     <column columnName="estimated_fetal_weight_g"/>
 
                     <column columnName="gest_sac_mm"/>
-                    <column columnName="gest_sac_gest_day"/>
                     <column columnName="yolk_sac_diameter_mm"/>
                     <column columnName="code">
                         <columnTitle>SNOMED</columnTitle>
@@ -61,11 +57,19 @@
                             <fkColumnName>code</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="remark"/>
                     <column columnName="performedby">
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="followup_required"/>
+                    <column columnName="remark"/>
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>tasks</fkTable>
+                          <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/dataEntryFormDetails.view?formtype=Research%20Ultrasounds%20Task&amp;taskid=${taskid}</url>
+                    </column>
                 </columns>
             </table>
         </tables>

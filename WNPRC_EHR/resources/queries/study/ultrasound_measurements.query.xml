@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="ultrasounds" tableDbType="TABLE">
+                <columns>
+                    <column columnName="Id"/>
+                    <column columnName="date"/>
+                    <column columnName="measurement_label"/>
+                    <column columnName="measurement_value"/>
+                    <column columnName="measurement_unit"/>
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>tasks</fkTable>
+                          <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/dataEntryFormDetails.view?formtype=Research%20Ultrasounds%20Task&amp;taskid=${taskid}</url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -48,9 +48,6 @@
                     <column columnName="remark">
                         <columnTitle>Remark</columnTitle>
                     </column>
-                    <column columnName="Id">
-                        <columnTitle>Id</columnTitle>
-                    </column>
                     <column columnName="taskid">
                         <columnTitle>Task Id</columnTitle>
                         <fk>
@@ -58,6 +55,7 @@
                           <fkTable>tasks</fkTable>
                           <fkColumnName>taskid</fkColumnName>
                         </fk>
+                        <url>/ehr/dataEntryFormDetails.view?formtype=Research%20Ultrasounds%20Task&amp;taskid=${taskid}</url>
                     </column>
                 </columns>
             </table>

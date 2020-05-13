@@ -113,7 +113,7 @@
       "command": "rimraf resources/web/enterweights/app/"
     },
     "reallyClean": {
-      "command": "rimraf resources/web/enterweights/app/ ; rimraf node_modules"
+      "command": "rimraf resources/web/enterweights/app/app* ; rimraf node_modules"
     },
     "build:jest-test": {
       "command": "jest",

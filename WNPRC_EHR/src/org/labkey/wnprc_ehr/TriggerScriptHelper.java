@@ -14,8 +14,11 @@ import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.study.security.SecurityEscalator;
@@ -95,6 +98,34 @@ public class TriggerScriptHelper {
 //            pregnancyNotification.setParam(PregnancyNotification.idParamName, ids.get(i));
 //            pregnancyNotification.setParam(PregnancyNotification.objectidsParamName, objectids.get(i));
 //            pregnancyNotification.sendManually(container, user);
+//        }
+    }
+
+    public void insertUltrasoundMeasurements(List<Map<String, Object>> insertRows) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException {
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasound_measurements");
+        queryUpdater.insert(insertRows);
+    }
+
+    public void updateUltrasoundMeasurements(List<Map<String, Object>> updateRows)  {
+//        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+//        SimplerFilter filter = new SimplerFilter("Id", CompareType.EQUAL, id);
+//        filter.addCondition("date", CompareType.DATE_LTE, date);
+//        filter.addCondition("followup_required", CompareType.EQUAL, true);
+//
+//        JSONArray encounters = queryFactory.selectRows("study", "ultrasounds", filter);
+//        List<JSONObject> ultrasounds = JsonUtils.getListFromJSONArray(encounters);
+//
+//        List<Map<String, Object>> updateRows = new ArrayList<>();
+//        for (JSONObject row : ultrasounds) {
+//            row.put("followup_required", false);
+//            updateRows.add(row);
+//        }
+//
+//        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasounds");
+//        try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that ultrasound followup_required field can be changed to false")) {
+//            queryUpdater.update(updateRows);
+//        } catch (Exception e) {
+//            _log.error(e);
 //        }
     }
 

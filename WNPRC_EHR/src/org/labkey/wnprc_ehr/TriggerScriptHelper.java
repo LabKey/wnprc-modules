@@ -7,11 +7,15 @@ import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Results;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.study.security.SecurityEscalator;
@@ -23,8 +27,10 @@ import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
+import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -602,4 +608,40 @@ public class TriggerScriptHelper {
         Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
         notification.sendManually(ehrContainer,user);
     }
+
+    public String getVLStatus(User user, Container container, Integer status) throws SQLException
+    {
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
+        QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
+
+        // Define columns to get
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("Key"));
+        columns.add(FieldKey.fromString("Status"));
+
+        // Execute the query
+        String thestatus = null;
+        try ( Results rs = viralLoadQuery.select(columns, filter) )
+        {
+            if (rs.next()){
+                thestatus = rs.getString(FieldKey.fromString("Status"));
+            }
+        }
+        return thestatus;
+    }
+
+    public void sendViralLoadQueueNotification(Integer key, Integer status, String hostName) throws SQLException
+    {
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
+        String recordStatus = getVLStatus(user, viralLoadContainer, status);
+        if ("08-complete-email-Zika_portal".equals(recordStatus)){
+            _log.info("Using java helper to send email for viral load queue record: "+key);
+            ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, viralLoadContainer, hostName);
+            Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+            notification.sendManually(ehrContainer,user);
+        }
+    }
+
 }

@@ -130,9 +130,7 @@ EHR.Metadata.registerMetadata('Request', {
                     }
                 },
                 setInitialValue: function(v){
-                    var date = (new Date()).add(Date.DAY, 2);
-                    date.setHours(9);
-                    date.setMinutes(30);
+                    var date = (null);
                     return v || date;
                 }
             },

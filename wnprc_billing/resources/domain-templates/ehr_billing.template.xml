@@ -123,15 +123,6 @@
         </table>
     </template>
     <template xsi:type="EHRBillingTemplateType">
-        <table tableName="miscCharges" tableDbType="NOT_IN_DB">
-            <dat:columns>
-                <dat:column columnName="unitCostDirect">
-                    <dat:rangeURI>double</dat:rangeURI>
-                </dat:column>
-            </dat:columns>
-        </table>
-    </template>
-    <template xsi:type="EHRBillingTemplateType">
         <table tableName="invoicedItems" tableDbType="NOT_IN_DB">
             <dat:columns>
                 <dat:column columnName="unitCostDirect">

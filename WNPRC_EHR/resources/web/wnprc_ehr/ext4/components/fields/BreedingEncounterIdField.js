@@ -178,9 +178,10 @@ Ext4.define('WNPRC.form.field.BreedingEncounterIdField', {
 
         var sql = 'select lsid,sireid,to_char(date, \'yyyy-MM-dd HH24:MI\') as date,enddate,coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as enddate_coalesced,to_char(date, \'yyyy-MM-dd HH24:MI\') || \' to \' ||  coalesce(to_char(enddate, \'yyyy-MM-dd HH24:MI\'), \'Ongoing\') as daterange \
                     from breeding_encounters be \
-                    where be.Id = \'' + id + '\' \
-                    and (be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) or be.enddate is null) \
-                    order by date desc'.replace(/\s+/g, ' ');
+                    where be.Id = \'' + id + '\''
+
+                    // and (be.enddate >= timestampadd(SQL_TSI_MONTH, -6, curdate()) or be.enddate is null) \
+                    + 'order by date desc'.replace(/\s+/g, ' ');
         return sql;
     },
 

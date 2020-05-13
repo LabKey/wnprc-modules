@@ -3,7 +3,7 @@ package org.labkey.wnprc_billing.dataentry;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.TaskForm;
-import org.labkey.api.ehr_billing.security.EHR_BillingAdminPermission;
+import org.labkey.api.ehr.security.EHR_BillingAdminPermission;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 
@@ -27,10 +27,15 @@ public abstract class AbstractMiscChargesFormType extends TaskForm
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/WNPRC_BillingProjectEntryField.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/ChargeItemField.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/InvestigatorField.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/InvestigatorFieldFromAlias.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/MiscChargesDateField.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/ChargeGroupField.js"));
         addClientDependency(ClientDependency.fromPath("ehr_billing/data/sources/EHR_BillingDefault.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/MiscChargesDebitAcctEntryField.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/NonAnimalChargesDebitAcctField.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/MiscChargesDebitAcctField.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/QuantityField.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/UnitCostField.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_billing/form/field/TotalCostField.js"));
 
     }
 
@@ -45,6 +50,7 @@ public abstract class AbstractMiscChargesFormType extends TaskForm
     {
         List<String> defaultButtons = new ArrayList<String>();
         defaultButtons.add("FINANCESUBMIT");
+        defaultButtons.add("SUBMITANDRELOAD");
 
         return defaultButtons;
     }

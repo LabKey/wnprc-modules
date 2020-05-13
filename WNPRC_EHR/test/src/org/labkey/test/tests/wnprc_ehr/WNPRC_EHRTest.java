@@ -386,7 +386,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         testInvestigatorFacingLinks();
 
         log("View Charges and adjustments Not Yet Billed");
-        List<String> expectedRowData = Arrays.asList("test2312318", "2011-09-15", "640991", " ", "vaccine supplies", "Misc. Fees", "Clinical Pathology", " ", " ", "10.0", "$15.00", "charge 2 with animal id");
+        List<String> expectedRowData = Arrays.asList("test2312318", "2011-09-15", "640991", " ", "vaccine supplies", "Misc. Fees", "Clinical Pathology", " ", "acct101", "10.0", "$15.00", "charge 2 with animal id");
         viewChargesAdjustmentsNotYetBilled(1, "comment", "charge 2 with animal id", expectedRowData);
 
         log("Download Multiple Invoices");
@@ -400,7 +400,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void testBulkEditChargesWithAnimalIds() throws IOException, CommandException
     {
         String comment = "Charges with Animal Ids added via bulk edit.";
-        String msg = "You are about to set values for 1 fields on 5 records. Do you want to do this?";
+        String msg = "You are about to set values for 2 fields on 5 records. Do you want to do this?";
 
         log ("Animals with Charge Ids - Bulk Edit via Add Batch");
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
@@ -413,6 +413,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClick(Ext4Helper.Locators.window("Choose Animals").append(Ext4Helper.Locators.ext4Button("Submit")));
         Locator.XPathLocator bulkEditWindow = Ext4Helper.Locators.window("Bulk Edit");
         fillBulkEditForm(bulkEditWindow, miscChargesGrid, true);
+
+        assertEquals("Debit account derived in Bulk Edit does not match the Data Entry Grid:", "acct100", miscChargesGrid.getFieldValue(1, "debitedAccount"));
+        assertEquals("Total Cost calculated in Bulk Edit does not match the Data Entry Grid:", "50", miscChargesGrid.getFieldValue(1, "totalCost").toString());
+
         assertEquals("Animals added via Add Batch and rows in Data Entry grid do not match:", miscChargesGrid.getRowCount(), MORE_ANIMAL_IDS.length);
 
         log ("Add comment via More Options --> Bulk Edit");
@@ -422,7 +426,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         submitForm();
 
         log ("Verify entered charges in Misc Charges table");
-        List<String> expectedRowData = Arrays.asList("test1020148", LocalDateTime.now().format(_dateTimeFormatter), "795644", "Snow, Jon", "Blood draws", "Blood Draws", "Business Office", " ", " ", "5.0", "$10.00", comment);
+        List<String> expectedRowData = Arrays.asList("test1020148", LocalDateTime.now().format(_dateTimeFormatter), "795644", "Snow, Jon", "Blood draws", "Blood Draws", "Business Office", " ", "acct100", "5.0", "$10.00", comment);
         viewChargesAdjustmentsNotYetBilled(MORE_ANIMAL_IDS.length, "comment", comment, expectedRowData);
     }
 
@@ -533,7 +537,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testBulkEditChargesWithoutAnimalIds() throws IOException, CommandException
     {
-        String msg = "You are about to set values for 1 fields on 2 records. Do you want to do this?";
+        String msg = "You are about to set values for 2 fields on 2 records. Do you want to do this?";
         String comment = "Charges without Animal Ids added via bulk edit.";
 
         log ("Animals without Charge Ids - Bulk Edit via More Options --> Bulk Edit");
@@ -550,6 +554,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Set Values").waitFor();
         msgWindow.clickButton("Yes", 0);
 
+        assertEquals("Total Cost calculated in Bulk Edit does not match the Data Entry Grid:", "50", miscChargesGrid.getFieldValue(1, "totalCost").toString());
         assertEquals("Animals added via More Actions --> Add Batch and rows in Data Entry grid do not match:", miscChargesGrid.getRowCount(), 2);
 
         log ("Add comment via More Options --> Bulk Edit");
@@ -718,9 +723,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable projects = new DataRegionTable("query", getDriver());
         projects.setSort("project", SortDirection.ASC);
         log("Update Project with Investigator 'Stark'");
-        updateRecordsAndVerify(projects, 0, "Project Coordinator:", "Stark, Sansa", "investigatorId");
+        updateRecordsAndVerify(projects, 0, "Investigator:", "Stark, Sansa", "investigatorId");
         log("Update Project with Investigator 'Snow'");
-        updateRecordsAndVerify(projects, 1, "Project Coordinator:", "Snow, Jon", "investigatorId");
+        updateRecordsAndVerify(projects, 1, "Investigator:", "Snow, Jon", "investigatorId");
     }
 
     private void updateRecordsAndVerify(DataRegionTable table, int rowNum, String inputLabel, String inputValue, String inputName)
@@ -898,6 +903,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         enterChargesInGrid(1, mapWithAnimalId);
 
+        log("Submit & Reload Form");
+        sleep(5000);
+        submitAndReloadForm();
+
+        log("Enter another Misc. Charges with animal Id");
+        enterChargesInGrid(1, mapWithAnimalId2);
+
         log("Submit the form");
         sleep(5000);
         submitForm();
@@ -906,21 +918,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         enterChargesInGrid(1, mapWithDebitAcct);
 
-        log("Submit the form");
+        log("Submit & Reload");
         sleep(5000);
-        submitForm();
+        submitAndReloadForm();
 
         log("Enter another Misc. Charges with debit account");
-        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         enterChargesInGrid(1, mapWithDebitAcct2);
-
-        log("Submit the form");
-        sleep(5000);
-        submitForm();
-
-        log("Enter another Misc. Charges with animal Id");
-        clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
-        enterChargesInGrid(1, mapWithAnimalId2);
 
         log("Submit the form");
         sleep(5000);
@@ -944,6 +947,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             else
                 addComboBoxRecord(rowIndex, colName, colValue, miscChargesGrid, CONTAINS);
         }
+    }
+
+    private void submitAndReloadForm()
+    {
+        sleep(2000);
+        clickButton("Submit And Reload", 0);
+        _extHelper.waitForExtDialog("Finalize Form");
+        click(Ext4Helper.Locators.ext4Button("Yes"));
+        waitForTextToDisappear("Saving Changes", 5000);
     }
 
     private void submitForm()

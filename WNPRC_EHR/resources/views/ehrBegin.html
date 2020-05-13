@@ -52,7 +52,7 @@ function createNavMenu()
                 {name: 'Browse All Datasets', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/datasets.view?'},
                 {name: 'Clinical Remarks', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=Clinical%20Remarks'},
                 {name: 'Housing Queries', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/housingQueries.view?'},
-                {name: 'Protocol and Project Queries', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/projectQueries.view?'}
+                {name: 'Protocol and Project Queries', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/projectQueries.view?'}
             ]},
             {header: 'By Location',
             items: [

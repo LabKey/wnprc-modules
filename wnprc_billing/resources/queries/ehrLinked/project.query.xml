@@ -4,6 +4,7 @@
             <table tableName="project" tableDbType="TABLE">
                 <columns>
                     <column columnName="investigatorId">
+                        <columnTitle>Investigator</columnTitle>
                         <fk>
                             <fkDbSchema>ehrLinked</fkDbSchema>
                             <fkTable>investigatorsWithName</fkTable>

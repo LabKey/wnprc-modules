@@ -74,7 +74,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         }
     }
 
-    public void countEmailsAndPut(String emails)
+    public void countEmailsAndPut(String emails, String createdyByEmail)
     {
         if (emails != null){
             //we should split by comma, semicolon, or new line
@@ -82,7 +82,10 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             for (String e : emailArray)
             {
                 e = e.trim();
-                addEmail(e);
+                if (!createdyByEmail.equals(e))
+                {
+                    addEmail(e);
+                }
             }
         }
 
@@ -182,7 +185,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
                 //add the submitter email and also the rest in the "emails" column
                 addEmail(createdByUserEmail);
-                countEmailsAndPut(notifyEmails);
+                countEmailsAndPut(notifyEmails, createdByUserEmail);
             }
         }
 

@@ -16,7 +16,7 @@ public class WaterFormSections extends SlaveFormSection
 {
     public WaterFormSections ()
     {
-        super ("study", "watergiven", "Water Given");
+        super ("study", "waterGiven", "Water Given");
 
 
 

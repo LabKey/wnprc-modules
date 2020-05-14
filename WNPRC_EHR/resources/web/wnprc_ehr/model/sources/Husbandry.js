@@ -324,10 +324,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             volume: {
                 xtype: 'numberfield',
-                //header: 'Volume(mL)',
-                fieldLabel: 'Volume(mL)',
-                allowBlank: false,
-
+                compositeField: 'Volume (mL)',
+                allowBlank: false
             },
             route: {
                 defaultValue : 'oral'
@@ -387,7 +385,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             volume:{
-                header: 'Volume(mL)',
+                //todo increase size of field for column
+                header: 'Volume (mL)',
                 allowBlank:false
             },
             project:{

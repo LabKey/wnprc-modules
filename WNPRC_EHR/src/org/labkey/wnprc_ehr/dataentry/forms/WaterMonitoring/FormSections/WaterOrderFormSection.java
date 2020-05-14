@@ -4,19 +4,20 @@ import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WaterOrderFormSection extends SimpleGridSection
 {
     public WaterOrderFormSection(){
         super ("study", "waterOrders", "Water Orders");
-        /*fieldNamesAtStartInOrder = Arrays.asList(
+        /*fieldNamesAtStartInOrder = new ArrayList<>().addAll(Arrays.asList(
                 "Id",
                 "date",
                 "enddate",
                 "volume",
                 "provideFruit"
-        );*/
+        ));*/
 
         this.setAllowBulkAdd(true);
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/HusbandryClientStore.js"));

@@ -3,7 +3,7 @@ package org.labkey.wnprc_billing.dataentry;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.api.ehr.dataentry.TaskForm;
-import org.labkey.api.ehr_billing.security.EHR_BillingAdminPermission;
+import org.labkey.api.ehr.security.EHR_BillingAdminPermission;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 

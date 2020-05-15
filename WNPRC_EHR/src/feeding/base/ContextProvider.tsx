@@ -8,6 +8,10 @@ interface ContextProps {
   queryDetails: any;
   setFormDataExternal: any;
   formData: any;
+  animalInfo: any;
+  setAnimalInfoExternal: any;
+  animalInfoState: any;
+  setAnimalInfoStateExternal: any;
   editMode: any;
   setEditMode: any;
 }
@@ -26,6 +30,8 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     command: {value: "insert"}
   }]);
   const [editMode, setEditMode] = useState(false);
+  const [animalInfo, setAnimalInfo] = useState(null);
+  const [animalInfoState, setAnimalInfoState] = useState("waiting");
 
   const setQueryDetailsExternal = (qd) => {
     setQueryDetails(qd);
@@ -33,14 +39,24 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const setFormDataExternal = (fd) => {
     setFormData(fd);
   };
+  const setAnimalInfoExternal = (ai) => {
+    setAnimalInfo(ai);
+  };
+  const setAnimalInfoStateExternal = (ais) => {
+    setAnimalInfoState(ais);
+  };
 
   const defaultContext = {
     setQueryDetailsExternal,
     queryDetails,
     setFormDataExternal,
     formData,
+    setAnimalInfoExternal,
+    animalInfo,
     editMode,
-    setEditMode
+    setEditMode,
+    setAnimalInfoStateExternal,
+    animalInfoState
   };
 
   useEffect( () => {

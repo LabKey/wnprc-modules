@@ -2,13 +2,19 @@ import * as React from 'react';
 import TextInput from '../../components/TextInput';
 import InputLabel from '../../components/InputLabel';
 import DateInput from '../../components/DateInput';
-import {useContext, useRef} from "react";
+import {useContext, useEffect, useRef} from "react";
 import {AppContext} from "./ContextProvider";
 import DatePicker from 'react-datepicker';
+import * as webpack from "webpack";
+import {labkeyActionSelectWithPromise} from "../../query/helpers";
+import {Filter} from "@labkey/api";
 
 const FeedingForm: React.FunctionComponent<any> = props => {
 
-    const {setQueryDetailsExternal, queryDetails, setFormDataExternal, formData} = useContext(AppContext);
+    const {setQueryDetailsExternal, queryDetails, setFormDataExternal, formData,setAnimalInfoExternal,
+        animalInfo,
+        setAnimalInfoStateExternal,
+        animalInfoState} = useContext(AppContext);
 
     let calendarEl = useRef(null);
 
@@ -36,6 +42,36 @@ const FeedingForm: React.FunctionComponent<any> = props => {
         //@ts-ignore
         calendarEl.setOpen(true);
     };
+    useEffect(() => {
+        if (props.values.animalid.value == ""){
+            return;
+        }
+        console.log('setting animalid');
+        let config = {
+            schemaName: "study",
+            queryName: "demographics",
+            sort: "-date",
+            filterArray: [
+                Filter.create("Id", props.values.animalid.value, Filter.Types.EQUAL)
+            ]
+        };
+        console.log(config);
+        labkeyActionSelectWithPromise(config).then(data => {
+            //cache animal info
+            if (data["rows"][0]) {
+                setAnimalInfoExternal(data["rows"][0]);
+                setAnimalInfoStateExternal("loading-success");
+                /*validateItems("animalid", animalid);
+                setAnimalError("");*/
+            } else {
+                //TODO propagate up animal not found issue?
+                setAnimalInfoStateExternal("loading-unsuccess");
+                /*setAnimalError("Animal Not Found");
+                validateItems("animalid", animalid)*/
+            }
+        });
+
+    },[props.values.animalid.value]);
 
     return (
         <>

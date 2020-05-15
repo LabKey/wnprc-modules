@@ -16,13 +16,17 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     queryDetails,
     setFormDataExternal,
     formData,
+    setAnimalInfoExternal,
+    animalInfo,
+    setAnimalInfoStateExternal,
+    animalInfoState
+
   } = useContext(AppContext);
   const [columnData, setColumnData] = useState([]);
   const [columnDataTransformed, setColumnDataTransformed] = useState([]);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
   const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
-  const [animalInfo, setAnimalInfo] = useState(null);
 
   //mutate the array
   const liftUpVal = (name, value) => {
@@ -100,33 +104,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     });
   };
 
-  useEffect(() => {
-    let config = {
-      schemaName: "study",
-      queryName: "demographics",
-      sort: "-date",
-      filterArray: [
-        Filter.create("Id", formData[0]["animalid"]["value"], Filter.Types.EQUAL)
-      ]
-    };
-    console.log(config);
-    labkeyActionSelectWithPromise(config).then(data => {
-      //cache animal info
-      if (data["rows"][0]) {
-        setAnimalInfo(data["rows"][0]);
-        /*setPrevWeight(data["rows"][0]["Id/MostRecentWeight/MostRecentWeight"]);
-        infoState("loading-success");
-        validateItems("animalid", animalid);
-        setAnimalError("");*/
-      } else {
-        //TODO propagate up animal not found issue?
-        /*infoState("loading-unsuccess");
-        setAnimalError("Animal Not Found");
-        validateItems("animalid", animalid)*/
-      }
-    });
-
-  },[formData[0]["animalid"]["value"]])
 
   return (
     <div className={`content-wrapper-body ${false ? "saving" : ""}`}>
@@ -181,7 +158,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         <div className="panel-heading">
           <h3>Animal Info</h3>
         </div>
-        {animalInfo && <AnimalInfoPane animalInfo={animalInfo} infoState={"loading-success"} />}
+        <AnimalInfoPane animalInfo={animalInfo} infoState={animalInfoState} />
       </div>
       <div className="clear"></div>
     </div>

@@ -43,6 +43,8 @@ FROM
 
    ON dr.dateOnly between x.adate AND x.edate) pbd
 
+--don't charge a per diem for an animal for any day that it's on
+--a project with a 'ph' availability code (ehr.project.avail)
 WHERE NOT EXISTS(
     SELECT 1
     FROM studyLinked.assignment asgnmt

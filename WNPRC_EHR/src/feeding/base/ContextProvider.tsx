@@ -21,13 +21,14 @@ const AppContext = createContext({} as ContextProps);
 const ContextProvider: React.FunctionComponent = ({ children }) => {
   const [queryDetails, setQueryDetails] = useState(null);
   const [formData, setFormData] = useState([{
-    animalid: { value: "" },
+    Id: { value: "" },
     date: { value: new Date() },
     type: { value: "" },
     amount: { value: "" },
     remark: { value: "" },
     lsid: { value: "" },
-    command: {value: "insert"}
+    command: {value: "insert"},
+    QCStateLabel: {value: "Completed"}
   }]);
   const [editMode, setEditMode] = useState(false);
   const [animalInfo, setAnimalInfo] = useState(null);
@@ -96,7 +97,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
 
       data["rows"].forEach((row, i) => {
         newformdata.push({
-          animalid: { value: row.Id, error: "" },
+          Id: { value: row.Id, error: "" },
           date: { value: new Date(row.date), error: "" },
           type: { value: row.type, error: "" },
           remark: { value: row.remark || "", error: "" },

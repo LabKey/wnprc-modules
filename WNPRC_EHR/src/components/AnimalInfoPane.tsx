@@ -27,7 +27,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
   const { animalInfo, infoState } = props;
 
   if (infoState == "waiting") {
-    return <div id="animal-info-empty">Select a record.</div>;
+    return <div id="animal-info-empty">Select a record with a valid animal id.</div>;
   }
 
   if (infoState == "loading-unsuccess") {

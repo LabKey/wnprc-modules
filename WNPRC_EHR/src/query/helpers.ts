@@ -14,32 +14,24 @@ export const groupCommands = (values: Array<any>) => {
   }, {});
 };
 
-//TODO generalize this
-export const setupValues = (values: any[], QCStateLabel: string) => {
-  let valuesToInsert = [];
-  for (let value of values){
-
-    valuesToInsert.push({
-      Id: value.animalid.value,
-      QCStateLabel: QCStateLabel,
-      date: value.date.value,
-      type: value.type.value,
-      remark: value.remark.value,
-      amount: value.amount.value,
-      lsid: value.lsid.value
-      /*taskid: taskId,*/
-      /*objectid: value.objectid.value*/
-      //lsid: value.lsid.value || ""
-    })
+export const setupValues = (formdata: any[], QCStateLabel: string, valuekey: string) => {
+  let newarray = [];
+  for (let item of formdata){
+    let newobj = {};
+    for (let [key, entry] of Object.entries(item)){
+      let pair = {[key]: entry[valuekey]};
+      newobj = {...newobj, ...pair}
+    }
+    newarray.push(newobj);
   }
-  return valuesToInsert;
+  return newarray;
 };
 
 export const setupJsonData = (values: any[], schemaName: string, queryName: string) => {
   //for each grouped item (insert, update, delete), set up commands for each diff set.
   let commands =[];
   Object.keys(values).forEach(function(key,index) {
-    let rowsToInsert = setupValues(values[key],'Completed');
+    let rowsToInsert = setupValues(values[key],'Completed', "value");
     commands.push({
       schemaName: schemaName,
       queryName: queryName,

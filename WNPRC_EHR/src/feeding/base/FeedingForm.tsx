@@ -15,6 +15,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
         animalInfo,
         setAnimalInfoStateExternal,
         animalInfoState} = useContext(AppContext);
+    const {values} = props;
 
     let calendarEl = useRef(null);
 
@@ -42,17 +43,18 @@ const FeedingForm: React.FunctionComponent<any> = props => {
         //@ts-ignore
         calendarEl.setOpen(true);
     };
-    useEffect(() => {
-        if (props.values.animalid.value == ""){
+    const lookupAnimalInfo = () => {
+        if (values.Id.value == ""){
+            setAnimalInfoStateExternal("waiting");
             return;
         }
-        console.log('setting animalid');
+        console.log('setting Id');
         let config = {
             schemaName: "study",
             queryName: "demographics",
             sort: "-date",
             filterArray: [
-                Filter.create("Id", props.values.animalid.value, Filter.Types.EQUAL)
+                Filter.create("Id", values.Id.value, Filter.Types.EQUAL)
             ]
         };
         console.log(config);
@@ -61,33 +63,36 @@ const FeedingForm: React.FunctionComponent<any> = props => {
             if (data["rows"][0]) {
                 setAnimalInfoExternal(data["rows"][0]);
                 setAnimalInfoStateExternal("loading-success");
-                /*validateItems("animalid", animalid);
+                /*validateItems("Id", Id);
                 setAnimalError("");*/
             } else {
                 //TODO propagate up animal not found issue?
                 setAnimalInfoStateExternal("loading-unsuccess");
                 /*setAnimalError("Animal Not Found");
-                validateItems("animalid", animalid)*/
+                validateItems("Id", Id)*/
             }
+        }).catch(data => {
+            console.log(values.Id.value);
+            console.log(data);
         });
 
-    },[props.values.animalid.value]);
+    };
 
     return (
         <>
             <div className="row">
                 <div className="col-xs-3">
-                    {/*queryDetails && <InputLabel labelFor="animalid" label={queryDetails.Id.shortCaption}/>*/}
-                    <InputLabel labelFor="animalid" label="Id"/>
+                    {/*queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>*/}
+                    <InputLabel labelFor="Id" label="Id"/>
                 </div>
                 <div className="col-xs-9">
                     <TextInput
-                        name="animalid"
-                        id="animalid-id"
-                        className="form-control animalid"
-                        value={props.values.animalid.value}
+                        name="Id"
+                        id="Id-id"
+                        className="form-control Id"
+                        value={values.Id.value}
                         onChange={handleValueChange}
-                        onBlur={()=>{console.log('blur')}}
+                        onBlur={()=>{lookupAnimalInfo()}}
                         onFocus={()=>{console.log('focus')}}
                         required={true}
                         autoFocus={true}
@@ -105,18 +110,18 @@ const FeedingForm: React.FunctionComponent<any> = props => {
                         onChangeRaw={handleRawDateChange}
                         dateFormat="yyyy-MM-dd HH:mm"
                         todayButton="Today"
-                        selected={props.values.date.value}
+                        selected={values.date.value}
                         className="form-control"
                         name="date"
                         onFocus={()=> {console.log("Focused!")}}
                         onChange={handleDateChange}
-                        customInput={<DateInput value={props.values.date.value} opendate={openDatepicker} />}
+                        customInput={<DateInput value={values.date.value} opendate={openDatepicker} />}
                     />
                 </div>
             </div>
             <div className="row">
                 <div className="col-xs-3">
-                    {/*queryDetails && <InputLabel labelFor="animalid" label={queryDetails.Id.shortCaption}/>*/}
+                    {/*queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>*/}
                     <InputLabel labelFor="type" label="Chow"/>
                 </div>
                 <div className="col-xs-9">
@@ -124,7 +129,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
                         name="type"
                         id="type-id"
                         className="form-control type"
-                        value={props.values.type.value}
+                        value={values.type.value}
                         onChange={handleValueChange}
                         onBlur={()=>{console.log('blur')}}
                         onFocus={()=>{console.log('focus')}}
@@ -135,7 +140,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
             </div>
             <div className="row">
                 <div className="col-xs-3">
-                    {/*queryDetails && <InputLabel labelFor="animalid" label={queryDetails.Id.shortCaption}/>*/}
+                    {/*queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>*/}
                     <InputLabel labelFor="amount" label="Amount"/>
                 </div>
                 <div className="col-xs-9">
@@ -143,7 +148,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
                         name="amount"
                         id="amount-id"
                         className="form-control  amount"
-                        value={props.values.amount.value}
+                        value={values.amount.value}
                         onChange={handleValueChange}
                         onBlur={()=>{console.log('blur')}}
                         onFocus={()=>{console.log('focus')}}
@@ -154,7 +159,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
             </div>
             <div className="row">
                 <div className="col-xs-3">
-                    {/*queryDetails && <InputLabel labelFor="animalid" label={queryDetails.Id.shortCaption}/>*/}
+                    {/*queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>*/}
                     <InputLabel labelFor="remark" label="Remark"/>
                 </div>
                 <div className="col-xs-9">
@@ -163,7 +168,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
                         id="remark-id"
                         className="form-control remark"
                         rows={3}
-                        value={props.values.remark.value}
+                        value={values.remark.value}
                         onChange={handleValueChange}
                         onBlur={()=>{console.log('blur')}}
                         onFocus={()=>{console.log('focus')}}

@@ -26,6 +26,8 @@ import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
+import org.labkey.remoteapi.query.TruncateTableCommand;
+import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.SortDirection;
@@ -437,6 +439,23 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log ("Verify entered charges in Misc Charges table");
         List<String> expectedRowData = Arrays.asList("test1020148", LocalDateTime.now().format(_dateTimeFormatter), "795644", "Snow, Jon", "Blood draws", "Blood Draws", "Business Office", " ", "acct100", "5.0", "$10.00", comment);
         viewChargesAdjustmentsNotYetBilled(MORE_ANIMAL_IDS.length, "comment", comment, expectedRowData);
+    }
+
+    @Test
+    public void testDebitAccountFiltering()
+    {
+        log("Verify Debit Account drop down with list of account(s) active on the date of charge");
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+
+        Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
+        _helper.addRecordToGrid(miscChargesGrid);
+
+        miscChargesGrid.setGridCell(1, "date", "1997-05-16");
+        Locator comboCol = miscChargesGrid.getCell(1, "debitedAccount");
+        click(comboCol);
+        Locator.XPathLocator comboColLocator = Ext4Helper.Locators.formItemWithInputNamed("debitedAccount");
+        _ext4Helper.selectComboBoxItem(comboColLocator, CONTAINS, "acct101");
     }
 
     @Test
@@ -1026,17 +1045,18 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         click(Ext4Helper.Locators.ext4Button("Yes"));
         waitForTextToDisappear("Saving Changes", 5000);
     }
+
     private void addComboBoxRecord(int rowIndex, String colName, String comboBoxSelectionValue, Ext4GridRef miscChargesGrid,
                                    @Nullable Ext4Helper.TextMatchTechnique matchTechnique)
     {
-        Locator chargetype = miscChargesGrid.getCell(rowIndex, colName);
-        click(chargetype);
-        Locator.XPathLocator chargetypeLocator = Ext4Helper.Locators.formItemWithInputNamed(colName);
+        Locator comboCol = miscChargesGrid.getCell(rowIndex, colName);
+        click(comboCol);
+        Locator.XPathLocator comboColLocator = Ext4Helper.Locators.formItemWithInputNamed(colName);
 
         if (matchTechnique != null)
-            _ext4Helper.selectComboBoxItem(chargetypeLocator, matchTechnique, comboBoxSelectionValue);
+            _ext4Helper.selectComboBoxItem(comboColLocator, matchTechnique, comboBoxSelectionValue);
         else
-            _ext4Helper.selectComboBoxItem(chargetypeLocator, comboBoxSelectionValue);
+            _ext4Helper.selectComboBoxItem(comboColLocator, comboBoxSelectionValue);
 
     }
 
@@ -1205,60 +1225,69 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertEquals(itemRows, drt.getDataRowCount());
     }
 
+    private void truncateBillingTables(Connection connection) throws IOException, CommandException
+    {
+        truncateTable(connection, "wnprc_billing", "tierRates");
+        truncateTable(connection, "ehr_billing", "aliases");
+        truncateTable(connection, "ehr_billing", "chargeUnits");
+        truncateTable(connection, "ehr_billing", "chargeRates");
+        truncateTable(connection, "ehr_billing", "chargeableItems");
+        truncateTable(connection, "ehr_billing", "chargeableItemCategories");
+        truncateTable(connection, "wnprc_billing", "groupCategoryAssociations");
+
+    }
+
     private void uploadData() throws IOException, CommandException
     {
+        Connection connection = createDefaultConnection(true);
+        Map<String, Object> responseMap = new HashMap<>();
+
+        truncateBillingTables(connection);
+
         //upload Tier Rates
-        importBulkDataFromFile(TIER_RATES_TSV, "Tier Rates", TIER_RATES_NUM_ROWS);
-        testExpectedRowCount(TIER_RATES_NUM_ROWS);
+        List<Map<String, Object>> tsv = loadTsv(TIER_RATES_TSV);
+        insertTsvData(connection, "wnprc_billing", "tierrates", tsv)
+                .forEach(row -> responseMap.put(row.get("tierRateType").toString(),row.get("rowid")));
 
         //upload Grant Accounts
-        importBulkDataFromFile(ALIASES_TSV, "Grant Accounts - ALL", ALIASES_NUM_ROWS);
-        testExpectedRowCount(ALIASES_NUM_ROWS);
+        tsv = loadTsv(ALIASES_TSV);
+        insertTsvData(connection, "ehr_billing", "aliases", tsv)
+                .forEach(row -> responseMap.put(row.get("alias").toString(),row.get("rowid")));
 
         //upload Charge Units
-        importBulkDataFromFile(CHARGE_UNITS_TSV, "Groups", CHARGE_UNITS_NUM_ROWS);
-        testExpectedRowCount(CHARGE_UNITS_NUM_ROWS);
+        tsv = loadTsv(CHARGE_UNITS_TSV);
+        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv)
+                .forEach(row -> responseMap.put(row.get("groupName").toString(),row.get("active")));
 
         //upload Chargeable Item Categories
-        importBulkDataFromFile(CHARGEABLE_ITEM_CATEGORIES_TSV, "Chargeable Item Categories", CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS);
-        testExpectedRowCount(CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS);
+        tsv = loadTsv(CHARGEABLE_ITEM_CATEGORIES_TSV);
+        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv)
+                .forEach(row -> responseMap.put(row.get("name").toString(),row.get("rowId")));
 
         //upload Group-Category Associations
-        importBulkDataFromFile(GROUP_CATEGORY_ASSOCIATIONS_TSV, "Group Category Associations", GROUP_CATEGORY_ASSOCIATIONS_NUM_ROWS);
-        testExpectedRowCount(GROUP_CATEGORY_ASSOCIATIONS_NUM_ROWS);
+        tsv = loadTsv(GROUP_CATEGORY_ASSOCIATIONS_TSV);
+        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv)
+                .forEach(row -> responseMap.put(row.get("chargeGroupName").toString(),row.get("rowid")));
 
         //upload Chargeable Items and Charge Rates
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_TSV, CHARGE_RATES_NUM_ROWS, CHARGEABLE_ITEMS_NUM_ROWS);
 
     }
 
-    private void testExpectedRowCount(int expectedNumRows)
+    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv) throws IOException, CommandException
     {
-        DataRegionTable results = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong row count", expectedNumRows, results.getDataRowCount());
+        log("Loading tsv data: " + schemaName + "." + queryName);
+        InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
+        command.setRows(tsv);
+        SaveRowsResponse response = command.execute(connection, PRIVATE_FOLDER_PATH);
+        return response.getRows();
     }
 
-    private void importBulkDataFromFile(File file, String linkText, int numRows)
+    private void truncateTable(Connection connection, String schemaName, String queryName) throws IOException, CommandException
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-
-        clickAndWait(Locator.bodyLinkContainingText(linkText));
-
-        DataRegionTable drt = new DataRegionTable("query", getDriver());
-        drt.clickHeaderButton("Import bulk data");
-
-        waitForText("Import Data");
-
-        _ext4Helper.clickTabContainingText("Import Spreadsheet");
-        waitForText("Upload From File");
-        RadioButton().withLabel("Upload From File").find(this.getDriver()).check();
-
-        Ext4FileFieldRef fileField = Ext4FileFieldRef.create(this);
-        fileField.setToFile(file);
-
-        waitAndClick(Ext4Helper.Locators.ext4ButtonContainingText("Upload"));
-
-        checkMessageWindow("Success", "Success! " + numRows + " rows inserted.", "OK");
+        log("Truncating table: " + schemaName + "." + queryName);
+        TruncateTableCommand command = new TruncateTableCommand(schemaName, queryName);
+        command.execute(connection, PRIVATE_FOLDER_PATH);
     }
 
     private void performBillingRun(String startDate, String endDate, int billingRunCount)

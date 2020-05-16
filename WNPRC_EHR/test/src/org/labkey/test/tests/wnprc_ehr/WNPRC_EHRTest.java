@@ -100,7 +100,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");
-    private static final int ALIASES_NUM_ROWS = 2;
+    private static final int ALIASES_NUM_ROWS = 4;
 
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
@@ -131,6 +131,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
 
     protected DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public static final String NON_GEN_CREDIT_ACCOUNT_ID = "acct102";
+    public static final String GEN_CREDIT_ACCT_ID = "acct103";
 
     @Nullable
     @Override
@@ -361,8 +364,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Enter misc charges via data entry form.");
         enterCharges();
 
-        log("Perform Billing Run.");
-        performBillingPeriodRun();
+        log("Perform Billing Run for period 10/01/2010-10/31/2010");
+        performBillingRun("10/01/2010", "10/31/2010", ++BILLING_RUN_COUNT);
+
+        log("Test Invoiced Items");
+        testInvoicedItems();
+
+        log("Test Summary Reports");
+        testSummaryReports();
 
         log("View and download JET");
         viewJET();
@@ -428,6 +437,56 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log ("Verify entered charges in Misc Charges table");
         List<String> expectedRowData = Arrays.asList("test1020148", LocalDateTime.now().format(_dateTimeFormatter), "795644", "Snow, Jon", "Blood draws", "Blood Draws", "Business Office", " ", "acct100", "5.0", "$10.00", comment);
         viewChargesAdjustmentsNotYetBilled(MORE_ANIMAL_IDS.length, "comment", comment, expectedRowData);
+    }
+
+    @Test
+    private void testJETWithNonGenCreditAccount()
+    {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+
+        String startDate = LocalDateTime.now().minusDays(45).format(_dateTimeFormatter);
+        String endDate = LocalDateTime.now().minusDays(16).format(_dateTimeFormatter);
+
+        Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
+        mapWithDebitAcct.put("debitedaccount", NON_GEN_CREDIT_ACCOUNT_ID);
+        mapWithDebitAcct.put("date", startDate);
+        mapWithDebitAcct.put("chargeGroup", "Business Office");
+        mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
+        mapWithDebitAcct.put("quantity", "8");
+        mapWithDebitAcct.put("chargetype", "Adjustment");
+        mapWithDebitAcct.put("comment", "charge without non gen credit acct");
+
+        Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
+        mapWithDebitAcct2.put("debitedaccount", GEN_CREDIT_ACCT_ID);
+        mapWithDebitAcct2.put("date", startDate);
+        mapWithDebitAcct2.put("chargeGroup", "Clinical Pathology");
+        mapWithDebitAcct2.put("chargeId", "vaccine supplies");
+        mapWithDebitAcct2.put("quantity", "5");
+        mapWithDebitAcct2.put("comment", "charge with gen credit acct");
+
+        log("Enter Misc. Charges with debit account " + NON_GEN_CREDIT_ACCOUNT_ID + " in grid row 1");
+        enterChargesInGrid(1, mapWithDebitAcct2);
+
+        log("Enter Misc. Charges with debit account " + GEN_CREDIT_ACCT_ID + " in grid row 2");
+        enterChargesInGrid(2, mapWithDebitAcct2);
+
+        log("Submit the form");
+        sleep(5000);
+        submitForm();
+
+        performBillingRun(startDate, endDate, ++BILLING_RUN_COUNT);
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+
+        DataRegionTable invoiceRunsDataRegionTable = getInvoiceRunsDataRegionTable();
+        invoiceRunsDataRegionTable.link(0, "viewJETInvoice").click();
+
+        DataRegionTable jetRegionTable  = new DataRegionTable("query", this);
+        assertEquals("Wrong jet item count: ", 1, jetRegionTable.getDataRowCount());
+
+        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "8");
+        List<String> actualRowData = jetRegionTable.getRowDataAsText(0, "Project", "Amount");
+        assertEquals("Wrong row data for CSV to JET Preview report ", expectedRowData, actualRowData);
     }
 
     private void addCommentViaBulkEdit(Locator.XPathLocator bulkEditWindow, Ext4GridRef grid, String comment, int numRows, String msg)
@@ -1202,17 +1261,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         checkMessageWindow("Success", "Success! " + numRows + " rows inserted.", "OK");
     }
 
-    private void performBillingPeriodRun()
-    {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-
-        performBillingRun("10/01/2010", "10/31/2010",++BILLING_RUN_COUNT);
-        testInvoicedItems();
-        testSummaryReports();
-    }
-
     private void performBillingRun(String startDate, String endDate, int billingRunCount)
     {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         waitAndClickAndWait(Locator.linkContainingText("Perform Billing Run"));
         Ext4FieldRef.waitForField(this, "Start Date");
         Ext4FieldRef.getForLabel(this, "Start Date").setValue(startDate);

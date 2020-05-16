@@ -440,7 +440,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    private void testJETWithNonGenCreditAccount()
+    public void testJETWithNonGenCreditAccount()
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 

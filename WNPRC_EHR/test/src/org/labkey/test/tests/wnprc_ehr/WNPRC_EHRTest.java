@@ -760,6 +760,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private void addInvestigators() throws IOException, CommandException
     {
         log("Add investigators to ehr.investigators table.");
+        String inves1 = "Snow, Jon";
+        String inves2 = "Stark, Sansa";
 
         navigateToFolder(PROJECT_NAME, EHR_FOLDER);
 
@@ -791,29 +793,50 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Grant Accounts - ALL"));
         DataRegionTable aliases = new DataRegionTable("query", getDriver());
         aliases.setSort("alias", SortDirection.ASC);
+
         log("Update Grant Account with Investigator 'Stark'");
-        updateRecordsAndVerify(aliases, 0, "Investigator:", "Stark, Sansa", "investigatorId");
+        updateRecords(aliases, 0, inves2, "quf_investigatorId", false);
+        verifyUpdatedRecord(aliases, 0, inves2, "investigatorId");
+
         log("Update Grant Account with Investigator 'Snow'");
-        updateRecordsAndVerify(aliases, 1, "Investigator:", "Snow, Jon", "investigatorId");
+        updateRecords(aliases, 1, inves1, "quf_investigatorId", false);
+        verifyUpdatedRecord(aliases, 1, inves1, "investigatorId");
 
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         clickAndWait(Locator.bodyLinkContainingText("WNPRC Projects"));
         DataRegionTable projects = new DataRegionTable("query", getDriver());
         projects.setSort("project", SortDirection.ASC);
+
         log("Update Project with Investigator 'Stark'");
-        updateRecordsAndVerify(projects, 0, "Investigator:", "Stark, Sansa", "investigatorId");
+        updateRecords(projects, 0, inves2, "investigatorId", true);
+        verifyUpdatedRecord(projects, 0, inves2, "investigatorId");
+
         log("Update Project with Investigator 'Snow'");
-        updateRecordsAndVerify(projects, 1, "Investigator:", "Snow, Jon", "investigatorId");
+        updateRecords(projects, 1, inves1, "investigatorId", true);
+        verifyUpdatedRecord(projects, 1, inves1, "investigatorId");
     }
 
-    private void updateRecordsAndVerify(DataRegionTable table, int rowNum, String inputLabel, String inputValue, String inputName)
+    private void updateRecords(DataRegionTable table, int rowNum, String inputValue, String inputName, boolean editIsViaMoreActions)
     {
-        table.clickEditRow(rowNum);
-        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining(inputLabel), Ext4Helper.TextMatchTechnique.CONTAINS, inputValue);
+        if (editIsViaMoreActions)
+        {
+            table.clickHeaderMenu("More Actions", true, "Edit Records");
+            table.clickEditRow(rowNum);
+            waitForText(inputName);
+            sleep(5000);
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithInputNamed(inputName), Ext4Helper.TextMatchTechnique.CONTAINS, inputValue);
+        }
+        else
+        {
+            table.clickEditRow(rowNum);
+            selectOptionByText(Locator.name(inputName), inputValue);
+        }
         clickButton("Submit",0);
-        checkMessageWindow("Success", "Your upload was successful!", "OK");
+    }
 
-        log("Verify '" + inputLabel + "' value '" + inputValue + "' was inserted.");
+    private void verifyUpdatedRecord(DataRegionTable table, int rowNum, String inputValue, String inputName)
+    {
+        log("Verify '" + inputName + "' value '" + inputValue + "' was inserted.");
         List<String> actualRowData = table.getRowDataAsText(rowNum, inputName);
         List<String> expectedRowData = Arrays.asList(inputValue);
         assertEquals(inputName + " value not found: ", expectedRowData, actualRowData);

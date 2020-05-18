@@ -20,6 +20,7 @@ const AppContext = createContext({} as ContextProps);
 
 const ContextProvider: React.FunctionComponent = ({ children }) => {
   const [queryDetails, setQueryDetails] = useState(null);
+  //introduce type of field here?
   const [formData, setFormData] = useState([{
     Id: { value: "" },
     date: { value: new Date() },
@@ -87,6 +88,16 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
 
     let newformdata = [];
 
+    let struct =  {
+      0: "Id",
+      1: "date",
+      2: "type",
+      3: "remark",
+      4: "amount",
+      5: "lsid",
+      6: "QCState"
+    };
+
     labkeyActionSelectWithPromise(options).then(data => {
 
       if (data["rows"].length == 0){
@@ -96,6 +107,8 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
       }
 
       data["rows"].forEach((row, i) => {
+
+        /*
         newformdata.push({
           Id: { value: row.Id, error: "" },
           date: { value: new Date(row.date), error: "" },
@@ -106,6 +119,22 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
           QCState: { value: row.QCState, error: "" },
           command: { value: "update", error: "" }
         });
+         */
+
+        //build up correct form data... need special command here though.
+        let obj = {};
+        for (let [key, entry] of Object.entries(struct) ) {
+          let add;
+          if (entry == "date"){
+            add = {[entry]: {value: new Date(row[entry])}};
+          }else{
+            add = {[entry]: {value: row[entry]}};
+          }
+          obj = {...obj, ...add};
+        }
+        let add = {"command": {value: "update"}};
+        obj = {...obj, ...add};
+        newformdata.push(obj);
       });
       setFormDataExternal(newformdata);
     })

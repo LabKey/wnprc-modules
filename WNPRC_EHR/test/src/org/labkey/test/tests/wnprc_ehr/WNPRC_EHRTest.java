@@ -25,6 +25,7 @@ import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.remoteapi.query.TruncateTableCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
@@ -136,6 +137,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     public static final String NON_GEN_CREDIT_ACCOUNT_ID = "acct102";
     public static final String GEN_CREDIT_ACCT_ID = "acct103";
+
+    private Map<String, Object> aliasesMap = new HashMap<>();
 
     @Nullable
     @Override
@@ -759,16 +762,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void addInvestigators() throws IOException, CommandException
     {
+        Map<String,Object> investigatorsMap = new HashMap<>();
+
         log("Add investigators to ehr.investigators table.");
-        String inves1 = "Snow, Jon";
-        String inves2 = "Stark, Sansa";
 
         navigateToFolder(PROJECT_NAME, EHR_FOLDER);
 
         Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 
         log("Inserting Principal Investigator Jon Snow.");
-
         InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "investigators");
         Map<String,Object> rowMap = new HashMap<>();
         rowMap.put("firstName", "Jon");
@@ -785,61 +787,37 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap.put("userid", getUserId(INVESTIGATOR.getEmail()));
         insertCmd.addRow(rowMap);
 
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
-
+        insertCmd.execute(cn, EHR_FOLDER_PATH).getRows().forEach(row -> investigatorsMap.put(row.get("emailAddress").toString(), row.get("rowid")));
         log("Investigators inserted in to ehr.investigators table.");
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        clickAndWait(Locator.bodyLinkContainingText("Grant Accounts - ALL"));
-        DataRegionTable aliases = new DataRegionTable("query", getDriver());
-        aliases.setSort("alias", SortDirection.ASC);
+        log("Update ehr_billing.aliases with investigators.");
+        UpdateRowsCommand cmdUpd = new UpdateRowsCommand("ehr_billing", "aliases");
+        Map<String,Object> aliasesRowMap = new HashMap<>();
+        aliasesRowMap.put("rowid", aliasesMap.get(ACCOUNT_ID_1));
+        aliasesRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR.getEmail()));
+        cmdUpd.addRow(aliasesRowMap);
 
-        log("Update Grant Account with Investigator 'Stark'");
-        updateRecords(aliases, 0, inves2, "quf_investigatorId", false);
-        verifyUpdatedRecord(aliases, 0, inves2, "investigatorId");
+        aliasesRowMap = new HashMap<>();
+        aliasesRowMap.put("rowid", aliasesMap.get(ACCOUNT_ID_2));
+        aliasesRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR_PRINCIPAL.getEmail()));
+        cmdUpd.addRow(aliasesRowMap);
 
-        log("Update Grant Account with Investigator 'Snow'");
-        updateRecords(aliases, 1, inves1, "quf_investigatorId", false);
-        verifyUpdatedRecord(aliases, 1, inves1, "investigatorId");
+        cmdUpd.execute(cn, PRIVATE_FOLDER_PATH);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        clickAndWait(Locator.bodyLinkContainingText("WNPRC Projects"));
-        DataRegionTable projects = new DataRegionTable("query", getDriver());
-        projects.setSort("project", SortDirection.ASC);
+        log("Update ehr_billing.project with investigators.");
+        cmdUpd = new UpdateRowsCommand("ehr", "project");
+        Map<String,Object> projRowMap = new HashMap<>();
+        projRowMap.put("project", Integer.valueOf(PROJECT_ID));
+        projRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR.getEmail()));
+        cmdUpd.addRow(projRowMap);
 
-        log("Update Project with Investigator 'Stark'");
-        updateRecords(projects, 0, inves2, "investigatorId", true);
-        verifyUpdatedRecord(projects, 0, inves2, "investigatorId");
+        projRowMap = new HashMap<>();
+        projRowMap.put("project", Integer.valueOf(PROTOCOL_PROJECT_ID));
+        projRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR_PRINCIPAL.getEmail()));
+        cmdUpd.addRow(projRowMap);
 
-        log("Update Project with Investigator 'Snow'");
-        updateRecords(projects, 1, inves1, "investigatorId", true);
-        verifyUpdatedRecord(projects, 1, inves1, "investigatorId");
-    }
+        cmdUpd.execute(cn, EHR_FOLDER_PATH);
 
-    private void updateRecords(DataRegionTable table, int rowNum, String inputValue, String inputName, boolean editIsViaMoreActions)
-    {
-        if (editIsViaMoreActions)
-        {
-            table.clickHeaderMenu("More Actions", true, "Edit Records");
-            table.clickEditRow(rowNum);
-            waitForText(inputName);
-            sleep(5000);
-            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithInputNamed(inputName), Ext4Helper.TextMatchTechnique.CONTAINS, inputValue);
-        }
-        else
-        {
-            table.clickEditRow(rowNum);
-            selectOptionByText(Locator.name(inputName), inputValue);
-        }
-        clickButton("Submit",0);
-    }
-
-    private void verifyUpdatedRecord(DataRegionTable table, int rowNum, String inputValue, String inputName)
-    {
-        log("Verify '" + inputName + "' value '" + inputValue + "' was inserted.");
-        List<String> actualRowData = table.getRowDataAsText(rowNum, inputName);
-        List<String> expectedRowData = Arrays.asList(inputValue);
-        assertEquals(inputName + " value not found: ", expectedRowData, actualRowData);
     }
 
     private void provideBillingDataAccess() throws IOException, CommandException
@@ -1275,7 +1253,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //upload Grant Accounts
         tsv = loadTsv(ALIASES_TSV);
         insertTsvData(connection, "ehr_billing", "aliases", tsv)
-                .forEach(row -> responseMap.put(row.get("alias").toString(),row.get("rowid")));
+                .forEach(row -> aliasesMap.put(row.get("alias").toString(),row.get("rowid")));
 
         //upload Charge Units
         tsv = loadTsv(CHARGE_UNITS_TSV);

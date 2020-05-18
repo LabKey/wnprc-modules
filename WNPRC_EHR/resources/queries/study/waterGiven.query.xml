@@ -25,7 +25,7 @@
                     </column>
 
                     <column columnName="location">
-                        <columnTitle>Location</columnTitle>
+                        <columnTitle>Water Location</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>location</fkTable>

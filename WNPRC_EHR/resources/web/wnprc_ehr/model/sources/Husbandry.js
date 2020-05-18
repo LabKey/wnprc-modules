@@ -325,6 +325,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             volume: {
                 xtype: 'numberfield',
                 compositeField: 'Volume (mL)',
+                header: 'Volume (ml)',
                 allowBlank: false
             },
             route: {
@@ -338,6 +339,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     keyColumn: 'value',
                     displayColumn: 'title',
                     sort: 'sort_order'
+                },
+                columnConfig: {
+                    width:130
                 }
             },
             assignedTo:{
@@ -387,7 +391,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             volume:{
                 //todo increase size of field for column
                 header: 'Volume (mL)',
-                allowBlank:false
+                allowBlank:false,
+                columnConfig: {
+                    width:140
+                }
             },
             project:{
                 hidden: true,
@@ -450,9 +457,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             volume:{
                 xtype: 'textfield',
-                header: 'Volume(mL)',
-                allowBlank:false
-                
+                header: 'Water Volume (mL)',
+                allowBlank:false,
+                columnConfig: {
+                    width:140
+                }
             },
             assignedTo:{
                 allowBlank: false

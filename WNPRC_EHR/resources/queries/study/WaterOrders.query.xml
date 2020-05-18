@@ -19,6 +19,9 @@
                         <columntitle>End Date</columntitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
+                    <column columnName="volume">
+                        <columnTitle>Water Volume (mL)</columnTitle>
+                    </column>
                     <column columnName="frequency">
                         <columnTitle>Frequency</columnTitle>
                         <fk>

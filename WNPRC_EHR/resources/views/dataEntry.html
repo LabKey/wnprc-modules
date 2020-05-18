@@ -428,7 +428,7 @@
                             queries: ['Treatment Orders']
                         },
                         {
-                            url: "<%=contextPath%>/enterweights" + ctx['EHRStudyContainer'] + "/app.view",
+                            url: makeTaskDataEntryURL("Weight"),
                             title: 'Enter Weights',
                             queries: ['Weight']
                         },
@@ -654,6 +654,17 @@
                         }
                     ],
                     requests: true
+                },
+                {
+                    header: 'New Forms in Test',
+                    items: [
+                        {
+                            url:     LABKEY.ActionURL.buildURL('enterweights', 'app', ctx['EHRStudyContainer']),
+                            title:   'Enter Weights',
+                            queries:['weight']
+                        },
+
+                    ]
                 }
             ];
 

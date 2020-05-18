@@ -9,6 +9,5 @@
         <column name="performedby"/>
         <column name="remark"/>
         <column name="taskid"/>
-        <column name="QCState"/>
     </columns>
 </customView>

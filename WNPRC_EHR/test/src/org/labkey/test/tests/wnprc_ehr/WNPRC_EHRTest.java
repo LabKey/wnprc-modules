@@ -450,28 +450,31 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Verify Debit Account drop down with list of account(s) active on the date of charge");
 
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
 
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
         _helper.addRecordToGrid(miscChargesGrid);
 
         miscChargesGrid.setGridCell(1, "date", "1997-05-16");
-        Locator comboCol = miscChargesGrid.getCell(1, "debitedAccount");
+        Locator comboCol = miscChargesGrid.getCell(1, "debitedaccount");
         click(comboCol);
-        Locator.XPathLocator comboColLocator = Ext4Helper.Locators.formItemWithInputNamed("debitedAccount");
-        _ext4Helper.selectComboBoxItem(comboColLocator, CONTAINS, "acct101");
+        List<String> options = _ext4Helper.getComboBoxOptions(Ext4Helper.Locators.formItemWithInputNamed("debitedaccount"));
+        assertEquals("There should be only one account listed in Debited Account drop down: ", 1, options.size());
+        assertEquals("Account not found: ", ACCOUNT_ID_1, options.get(0));
     }
 
     @Test
     public void testJETWithNonGenCreditAccount()
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
 
         String startDate = LocalDateTime.now().minusDays(45).format(_dateTimeFormatter);
         String endDate = LocalDateTime.now().minusDays(16).format(_dateTimeFormatter);
 
         Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
-        mapWithDebitAcct.put("debitedaccount", NON_GEN_CREDIT_ACCOUNT_ID);
         mapWithDebitAcct.put("date", startDate);
+        mapWithDebitAcct.put("debitedaccount", NON_GEN_CREDIT_ACCOUNT_ID);
         mapWithDebitAcct.put("chargeGroup", "Business Office");
         mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
         mapWithDebitAcct.put("quantity", "8");
@@ -479,15 +482,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithDebitAcct.put("comment", "charge without non gen credit acct");
 
         Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
-        mapWithDebitAcct2.put("debitedaccount", GEN_CREDIT_ACCT_ID);
         mapWithDebitAcct2.put("date", startDate);
+        mapWithDebitAcct2.put("debitedaccount", GEN_CREDIT_ACCT_ID);
         mapWithDebitAcct2.put("chargeGroup", "Clinical Pathology");
         mapWithDebitAcct2.put("chargeId", "vaccine supplies");
         mapWithDebitAcct2.put("quantity", "5");
         mapWithDebitAcct2.put("comment", "charge with gen credit acct");
 
         log("Enter Misc. Charges with debit account " + NON_GEN_CREDIT_ACCOUNT_ID + " in grid row 1");
-        enterChargesInGrid(1, mapWithDebitAcct2);
+        enterChargesInGrid(1, mapWithDebitAcct);
 
         log("Enter Misc. Charges with debit account " + GEN_CREDIT_ACCT_ID + " in grid row 2");
         enterChargesInGrid(2, mapWithDebitAcct2);
@@ -506,7 +509,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable jetRegionTable  = new DataRegionTable("query", this);
         assertEquals("Wrong jet item count: ", 1, jetRegionTable.getDataRowCount());
 
-        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "8");
+        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "8.00");
         List<String> actualRowData = jetRegionTable.getRowDataAsText(0, "Project", "Amount");
         assertEquals("Wrong row data for CSV to JET Preview report ", expectedRowData, actualRowData);
     }
@@ -1052,6 +1055,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         Locator comboCol = miscChargesGrid.getCell(rowIndex, colName);
         click(comboCol);
+        sleep(2000);
         Locator.XPathLocator comboColLocator = Ext4Helper.Locators.formItemWithInputNamed(colName);
 
         if (matchTechnique != null)

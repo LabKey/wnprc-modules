@@ -473,8 +473,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     saveWeightActionSaveRowsDirect(jsonData).then(()=> {
       wait(3).then(() => {
         window.location = LABKEY.ActionURL.buildURL(
-          "ehr",
-          "executeQuery.view?schemaName=study&query.queryName=weight",
+          "wnprc_ehr",
+          "dataEntry.view",
           LABKEY.ActionURL.getContainer()
         );
       });

@@ -60,6 +60,7 @@ import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -532,6 +533,42 @@ public class WNPRC_BillingController extends SpringActionController
                     catch (IOException e)
                     {
                        throw new RuntimeException(e);
+                    }
+                });
+            }
+
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class DownloadSummaryInvoicesAction extends ExportAction<InvoicePdfForm>
+    {
+        @Override
+        public void export(InvoicePdfForm invoicePdfForm, HttpServletResponse response, BindException errors) throws Exception
+        {
+            Set<String> selectedInvoices = DataRegionSelection.getSelected(HttpView.currentContext(), null, true, true);
+
+            String currentDate = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
+            String headerString = "attachment; filename=Invoices "+ currentDate+ ".zip";
+
+            response.reset();
+            response.setContentType("application/zip");
+            response.setHeader("Content-Disposition", headerString);
+
+            try(ZipOutputStream zout = new ZipOutputStream(response.getOutputStream()))
+            {
+                selectedInvoices.forEach(invoiceNumber-> {
+                    try
+                    {
+                        PDFFile pdfFile = getInvoicePDF(invoiceNumber, "Download Summary Invoices");
+                        ZipEntry entry = new ZipEntry(pdfFile.getFileName());
+                        zout.putNextEntry(entry);
+                        pdfFile.getInvoicePDF().output(zout);
+                        zout.closeEntry();
+                    }
+                    catch (IOException e)
+                    {
+                        throw new RuntimeException(e);
                     }
                 });
             }

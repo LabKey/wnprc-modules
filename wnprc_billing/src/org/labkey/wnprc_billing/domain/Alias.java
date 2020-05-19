@@ -7,7 +7,12 @@ public class Alias
     String _alias;
     String _type;
     String _po_number;
+    String _institution;
     String _address;
+    String _city;
+    String _state;
+    String _zip;
+    String _billing_contact_info;
     String _contact_email;
     private String _grantNumber;
     private String _uw_account;
@@ -48,6 +53,16 @@ public class Alias
         _po_number = po_number;
     }
 
+    public String getInstitution()
+    {
+        return _institution;
+    }
+
+    public void setInstitution(String institution)
+    {
+        _institution = institution;
+    }
+
     public String getAddress()
     {
         return _address;
@@ -56,6 +71,46 @@ public class Alias
     public void setAddress(String address)
     {
         _address = address;
+    }
+
+    public String getCity()
+    {
+        return _city;
+    }
+
+    public void setCity(String city)
+    {
+        _city = city;
+    }
+
+    public String getState()
+    {
+        return _state;
+    }
+
+    public void setState(String state)
+    {
+        _state = state;
+    }
+
+    public String getZip()
+    {
+        return _zip;
+    }
+
+    public void setZip(String zip)
+    {
+        _zip = zip;
+    }
+
+    public String getBilling_contact_info()
+    {
+        return _billing_contact_info;
+    }
+
+    public void setBilling_contact_info(String billing_contact_info)
+    {
+        _billing_contact_info = billing_contact_info;
     }
 
     public String getContact_email()

@@ -536,6 +536,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         waitForElement(bulkEditWindow);
 
+        if (Ext4FieldRef.getForLabel(this, "Date of Charge").getValue() == null)
+        {
+            Ext4FieldRef.getForLabel(this, "Date of Charge").setValue(LocalDateTime.now().format(_dateTimeFormatter));
+        }
+
         log ("Toggle fields");
         if (hasAnimalId)
         {
@@ -547,10 +552,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         }
         _helper.toggleBulkEditField("Date of Charge");
 
-        if (Ext4FieldRef.getForLabel(this, "Date of Charge").getValue() == null)
-        {
-            Ext4FieldRef.getForLabel(this, "Date of Charge").setValue(LocalDateTime.now().format(_dateTimeFormatter));
-        }
 
         _helper.toggleBulkEditField("Investigator");
         _helper.toggleBulkEditField("Group");

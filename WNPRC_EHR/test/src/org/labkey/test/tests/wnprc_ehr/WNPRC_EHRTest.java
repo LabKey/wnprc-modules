@@ -954,8 +954,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("comment", "charge 1 with animal id");
 
         Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
-        mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct.put("date", "2010-10-23");
+        mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct.put("chargeGroup", "Business Office");
         mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
         mapWithDebitAcct.put("quantity", "8");
@@ -963,8 +963,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithDebitAcct.put("comment", "charge 1 without animal id");
 
         Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
-        mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct2.put("date", "2010-10-22");
+        mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct2.put("chargeGroup", "Clinical Pathology");
         mapWithDebitAcct2.put("chargeId", "vaccine supplies");
         mapWithDebitAcct2.put("quantity", "5");

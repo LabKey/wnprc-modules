@@ -536,6 +536,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         waitForElement(bulkEditWindow);
 
+        _helper.toggleBulkEditField("Date of Charge");
         if (Ext4FieldRef.getForLabel(this, "Date of Charge").getValue() == null)
         {
             Ext4FieldRef.getForLabel(this, "Date of Charge").setValue(LocalDateTime.now().format(_dateTimeFormatter));
@@ -550,8 +551,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         {
             _helper.toggleBulkEditField("Debit Account");
         }
-        _helper.toggleBulkEditField("Date of Charge");
-
 
         _helper.toggleBulkEditField("Investigator");
         _helper.toggleBulkEditField("Group");

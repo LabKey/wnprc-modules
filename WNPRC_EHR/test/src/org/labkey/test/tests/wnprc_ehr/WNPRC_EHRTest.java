@@ -1994,15 +1994,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Invoice"));
         DataRegionTable invoice = new DataRegionTable("query", getDriver());
         invoice.clickEditRow(0);
-        setFormElement(Locator.input("invoiceSentOn"), date);
-        setFormElement(Locator.input("paymentReceivedOn"), date);
-        setFormElement(Locator.input("paymentAmountReceived"), amount);
+        setFormElement(Locator.inputByNameContaining("invoiceSentOn"), date);
+        setFormElement(Locator.inputByNameContaining("paymentReceivedOn"), date);
+        setFormElement(Locator.inputByNameContaining("paymentAmountReceived"), amount);
 
         clickButton("Submit",0);
-
-        Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Success").waitFor();
-        assertEquals("Your upload was successful!", "Success", msgWindow.getTitle());
-        msgWindow.clickButton("OK", 0);
 
         invoice = new DataRegionTable("query", getDriver());
         String balance = invoice.getDataAsText(0,"balanceDue");

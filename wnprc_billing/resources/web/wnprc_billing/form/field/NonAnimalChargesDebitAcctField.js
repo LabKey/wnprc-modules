@@ -1,7 +1,6 @@
 Ext4.define('WNPRC_Billing.form.field.NonAnimalChargesDebitAcctField', {
     extend: 'Ext.form.field.ComboBox',
     alias: 'widget.wnprc_billing-nonanimalchargesdebitacctfield',
-    containerPath: LABKEY.moduleContext.ehr['EHRStudyContainer'],
 
     initComponent: function() {
 

@@ -38,6 +38,16 @@ Ext4.define('WNPRC_Billing.form.field.MiscChargesDateField', {
                         chargeGroupField.setValue(null);
                     }
 
+                    var projectField = this.up("form").getForm().findField("project");
+                    if (projectField) {
+                        projectField.setValue(null);
+                    }
+
+                    var debitedAccount = this.up("form").getForm().findField("debitedAccount");
+                    if (debitedAccount) {
+                        debitedAccount.setValue(null);
+                    }
+
                 }
                 //for data entry grid
                 else {
@@ -45,7 +55,9 @@ Ext4.define('WNPRC_Billing.form.field.MiscChargesDateField', {
                     EHR.DataEntryUtils.setSiblingFields(field, {
                         chargeGroup: null,
                         chargeId: null,
-                        unitCost: null
+                        unitCost: null,
+                        project: null,
+                        debitedAccount: null
                     });
                 }
             }});

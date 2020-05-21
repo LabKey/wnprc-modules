@@ -19,7 +19,7 @@ FROM
   left join ehr_billing.aliases a
     on ii.debitedAccount = a.alias
   WHERE
-    a.type like '%internal%'
+    lcase(a.type) like '%internal%' AND a.gencredits IS FALSE
 GROUP BY
      ii.invoiceId.rowId,
      a.uw_udds,

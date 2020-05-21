@@ -1,5 +1,5 @@
-tierRateType	tierRate	startDate	endDate	isActive
-1	1	1/1/2005	12/31/2050	TRUE
-2	0.2	1/1/2005	12/31/2050	TRUE
-2A	0.25	1/1/2005	12/31/2050	TRUE
-3	0.3	1/1/2005	12/31/2050	TRUE
+tierRateType	tierRate	startDate	endDate
+1	1	1/1/2005	12/31/2050
+2	0.2	1/1/2005	12/31/2050
+2A	0.25	1/1/2005	12/31/2050
+3	0.3	1/1/2005	12/31/2050

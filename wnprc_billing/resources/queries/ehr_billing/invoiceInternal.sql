@@ -14,4 +14,4 @@ SELECT
 FROM ehr_billing.invoice inv
   RIGHT JOIN ehr_billing.invoiceRuns ir
   ON inv.invoiceRunId = ir.objectid
-  AND inv.accountNumber.type NOT LIKE '%external%'
+  AND lcase(inv.accountNumber.type) NOT LIKE '%external%'

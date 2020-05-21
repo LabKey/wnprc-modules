@@ -1,7 +1,6 @@
 Ext4.define('WNPRC_Billing.form.field.NonAnimalChargesDebitAcctField', {
     extend: 'Ext.form.field.ComboBox',
     alias: 'widget.wnprc_billing-nonanimalchargesdebitacctfield',
-    containerPath: LABKEY.moduleContext.ehr['EHRStudyContainer'],
 
     initComponent: function() {
 
@@ -23,6 +22,31 @@ Ext4.define('WNPRC_Billing.form.field.NonAnimalChargesDebitAcctField', {
                     EHR.DataEntryUtils.setSiblingFields(this, {
                         investigator: null
                     });
+                }
+            },
+
+            focus: function() {
+
+                var dateEntered = undefined;
+                //for bulk edit window
+                if (this.up("form") && this.up("form").getForm()) {
+                    var dateFieldVal = this.up("form").getForm().findField("date");
+
+                    if (dateFieldVal && dateFieldVal.getValue()) {
+                        dateEntered = dateFieldVal.getValue();
+                    }
+                }
+                else {
+                    if (this.up("grid")) {
+                        dateEntered = EHR.DataEntryUtils.getSiblingValue(this, "date");
+                    }
+                }
+
+                //filter debitedAccount based on alias.budgetStartDate and alias.budgetEndDate w.r.t the date entered
+                if (dateEntered) {
+                    this.store.filterArray = [LABKEY.Filter.create('budgetStartDate', Ext4.Date.format(dateEntered, 'Y-m-d'), LABKEY.Filter.Types.DATE_LESS_THAN_OR_EQUAL),
+                                        LABKEY.Filter.create('budgetEndDate', Ext4.Date.format(dateEntered, 'Y-m-d'), LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL)];
+                    this.store.load();
                 }
             }
         });

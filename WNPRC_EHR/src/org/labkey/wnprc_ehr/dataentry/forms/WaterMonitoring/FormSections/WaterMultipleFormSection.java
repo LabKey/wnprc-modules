@@ -3,6 +3,7 @@ package org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WaterMultipleFormSection extends SimpleGridSection
@@ -15,6 +16,9 @@ public class WaterMultipleFormSection extends SimpleGridSection
 
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduleWaterWindow.js"));
         _showLocation = true;
+        setAllowBulkAdd(false);
+        setTemplateMode(TEMPLATE_MODE.NONE);
+       // _templateMode = TEMPLATE_MODE.NONE;
 
 
     }
@@ -23,8 +27,18 @@ public class WaterMultipleFormSection extends SimpleGridSection
 
         List<String> defaultButtons = super.getTbarButtons();
 
-        defaultButtons.add("ADDSCHEDULEDWATERS");
+        defaultButtons.add(0,"ADDSCHEDULEDWATERS");
+        defaultButtons.remove("ADDRECORD");
+       
+        return defaultButtons;
+    }
 
+    @Override
+    public List<String> getTbarMoreActionButtons()
+    {
+        List<String> defaultButtons = new ArrayList<>();
+        defaultButtons.addAll(super.getTbarMoreActionButtons());
+        defaultButtons.remove("COPY_IDS");
         return defaultButtons;
     }
 }

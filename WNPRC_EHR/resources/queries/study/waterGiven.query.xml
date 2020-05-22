@@ -23,15 +23,19 @@
                     <column columnName="volume">
                         <columnTitle>Volume (mL)</columnTitle>
                     </column>
+                    <column columnName="performedby">
+                        <columnTitle>Performed By</columnTitle>
+                        
+                    </column>
 
                     <column columnName="location">
                         <columnTitle>Water Location</columnTitle>
+                        <displayWidth>250</displayWidth>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>location</fkTable>
+                            <fkTable>water_location</fkTable>
                             <fkColumnName>value</fkColumnName>
                         </fk>
-
                     </column>
                     <column columnName="route">
                         <columnTitle>Route</columnTitle>
@@ -60,6 +64,9 @@
                             <fkTable>demographicsMostRecentWeight</fkTable>
                             <fkColumnName>MostRecentWeight</fkColumnName>
                         </fk>
+                    </column>
+                    <column columnName="treatmentId">
+                        <isHidden>true</isHidden>          
                     </column>
                 </columns>
             </table>

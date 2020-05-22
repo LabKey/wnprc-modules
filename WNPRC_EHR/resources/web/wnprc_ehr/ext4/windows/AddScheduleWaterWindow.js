@@ -53,7 +53,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             },{
                 xtype: 'checkcombo',
                 itemId: 'assigned',
-                fieldLabel: 'Assignment',
+                fieldLabel: 'Assigned To',
                 displayField: 'title',
                 valueField: 'title',
                 store: {
@@ -70,7 +70,11 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 store: {
                     type: 'labkey-store',
                     schemaName: 'ehr_lookups',
-                    queryName: 'husbandry_frequency'
+                    queryName: 'husbandry_frequency',
+                    keyColumn: 'rowid',
+                    displayColumn: 'altmeaning',
+                    sort: 'sort_order',
+                    filterArray: [LABKEY.Filter.create('altmeaning', null, LABKEY.Filter.Types.NONBLANK)]
                 }
             }, {
                 buttons: [{
@@ -131,7 +135,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             queryName: 'waterScheduleCoalesced',
             parameters: {NumDays: 1, StartDate: new Date()},
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
-            columns: 'animalid,date,project,assignedTo,frequency,volume,objectid,dateCreated',
+            columns: 'animalid,date,project,assignedTo,frequency,volume,provideFruit,objectid,dateCreated',
             filterArray: filtersArray,
             scope: this,
             success: this.loadWater,
@@ -218,6 +222,21 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             });
             tempModel.phantom = false;
             records.push(tempModel);
+            if (row.getValue('provideFruit') != null){
+                var fruitModel = this.targetStore.createModel({
+                    Id:                 row.getValue('animalid'),
+                    date:               row.getValue('date'),
+                    provideFruit:       row.getValue('provideFruit'),
+                    project:            row.getValue('project'),
+                    assignedTo:         row.getValue('assignedTo'),
+                    treatmentid:        row.getValue('objectid'),
+                    dateordered:        row.getValue('date')
+
+                });
+                fruitModel.phantom = false;
+                records.push(fruitModel);
+
+            }
         }, this);
 
         this.targetStore.add(records);

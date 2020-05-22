@@ -53,6 +53,7 @@ JOIN (
           t1.enddateCoalescedFuture,    --debug column
           t1.frequency AS frequency,
           t1.frequency.meaning AS freqMeaning,
+          t1.provideFruit AS provideFruit,
           t1.assignedTo,
           t1.assignedTo.title AS assignedToTittle,
           t1.waterSource,

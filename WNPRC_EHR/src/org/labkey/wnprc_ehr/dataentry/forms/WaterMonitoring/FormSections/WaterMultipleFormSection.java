@@ -28,7 +28,7 @@ public class WaterMultipleFormSection extends SimpleGridSection
         List<String> defaultButtons = super.getTbarButtons();
 
         defaultButtons.add(0,"ADDSCHEDULEDWATERS");
-        defaultButtons.remove("ADDRECORD");
+        //defaultButtons.remove("ADDRECORD");
        
         return defaultButtons;
     }

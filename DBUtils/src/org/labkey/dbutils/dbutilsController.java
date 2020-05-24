@@ -26,9 +26,8 @@ public class dbutilsController extends SpringActionController {
             return new JspView("/org/labkey/dbutils/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 }

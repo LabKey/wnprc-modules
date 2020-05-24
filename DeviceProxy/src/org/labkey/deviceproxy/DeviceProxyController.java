@@ -38,9 +38,8 @@ public class DeviceProxyController extends SpringActionController {
             return new JspView("/org/labkey/deviceproxy/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 

@@ -35,9 +35,8 @@ public class GoogleDriveController extends SpringActionController {
             return new JspView("/org/labkey/googledrive/view/begin.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 

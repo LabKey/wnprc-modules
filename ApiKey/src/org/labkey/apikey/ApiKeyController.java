@@ -36,9 +36,8 @@ public class ApiKeyController extends SpringActionController {
             return new JspView("/org/labkey/apikey/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 

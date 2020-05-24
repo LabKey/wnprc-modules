@@ -54,9 +54,8 @@ public class WebUtilsController extends SpringActionController
             return new JspView("/org/labkey/webutils/view/begin.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 

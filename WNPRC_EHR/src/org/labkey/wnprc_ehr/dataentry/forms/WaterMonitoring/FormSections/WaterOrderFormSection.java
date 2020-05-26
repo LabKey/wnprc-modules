@@ -1,6 +1,6 @@
 package org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections;
 
-import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
+
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 

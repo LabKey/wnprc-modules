@@ -177,6 +177,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.addBillingPublicWebParts();
     }
 
+    @Override
     public void goToProjectHome()
     {
         goToProjectHome(PROJECT_NAME);
@@ -316,6 +317,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         msgWindow.clickButton(buttonText, 0);
     }
 
+    @Override
     public void importStudy()
     {
         goToManageStudy();

@@ -35,10 +35,12 @@ public class ItemWrapperImpl implements Shareable {
 
     }
 
+    @Override
     public void shareWithGroup(String groupName, DriveSharePermission permission) throws IOException {
         this.share(groupName, permission, "group");
     }
 
+    @Override
     public void shareWithUser(String userName, DriveSharePermission permission) throws IOException {
         this.share(userName, permission, "user");
     }

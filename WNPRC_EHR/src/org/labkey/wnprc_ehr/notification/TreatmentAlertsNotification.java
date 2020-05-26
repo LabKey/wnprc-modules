@@ -61,11 +61,13 @@ public class TreatmentAlertsNotification extends AbstractEHRNotification
         super(owner);
     }
 
+    @Override
     public String getName()
     {
         return "WNPRC Treatment Alerts";
     }
 
+    @Override
     public String getDescription()
     {
         return "This runs every day at 10AM, 1PM, 3PM, and 5PM if there are treatments scheduled that have not yet been marked complete";
@@ -83,6 +85,7 @@ public class TreatmentAlertsNotification extends AbstractEHRNotification
         return "0 0 10,13,15,17 * * ?";
     }
 
+    @Override
     public String getScheduleDescription()
     {
         return "daily at 10AM, 1PM, 3PM, 5PM";

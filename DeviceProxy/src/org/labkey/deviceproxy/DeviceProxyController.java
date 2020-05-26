@@ -34,10 +34,12 @@ public class DeviceProxyController extends SpringActionController {
 
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception {
             return new JspView("/org/labkey/deviceproxy/view/hello.jsp");
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }

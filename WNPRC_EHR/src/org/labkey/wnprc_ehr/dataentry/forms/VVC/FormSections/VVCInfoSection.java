@@ -19,11 +19,13 @@ public class VVCInfoSection extends SimpleFormSection{
         );
 
     }
+    @Override
     public String getClientModelClass()
     {
         return _clientModelClass;
     }
 
+    @Override
     protected void setClientModelClass(String clientModelClass)
     {
         _clientModelClass = clientModelClass;

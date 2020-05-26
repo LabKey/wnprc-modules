@@ -398,6 +398,7 @@ public class InvoicePDF extends FPDF
         _out(String.format("%.2f %.2f %.2f %.2f %.2f %.2f c ", x1 * k, (h - y1) * k, x2 * k, (h - y2) * k, x3 * k, (h - y3) * k));
     }
 
+    @Override
     protected void _endpage()
     {
         if (angle != 0)

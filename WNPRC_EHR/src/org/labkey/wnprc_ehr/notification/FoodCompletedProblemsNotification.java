@@ -32,8 +32,10 @@ public class FoodCompletedProblemsNotification extends AbstractEHRNotification
     }
 
 
+    @Override
     public String getName(){return "Food Deprive Completed with problems";}
 
+    @Override
     public String getDescription(){
         return "This notification looks for food deprives that have been completed but ran more than 24 hours.";
     }
@@ -43,6 +45,7 @@ public class FoodCompletedProblemsNotification extends AbstractEHRNotification
         return "Husbandry Alerts for "+ _dateTimeFormat.format(new Date());
     }
 
+    @Override
     public String getScheduleDescription(){
         return "Food Deprive Notification sent once a day at 8:00 AM";
     }
@@ -50,6 +53,7 @@ public class FoodCompletedProblemsNotification extends AbstractEHRNotification
     @Override
     public String getCronString(){ return this.cronString;}
 
+    @Override
     public String getCategory(){
         return "Husbandry";
     }

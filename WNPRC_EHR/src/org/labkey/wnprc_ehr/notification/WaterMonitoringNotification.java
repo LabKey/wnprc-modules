@@ -51,6 +51,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         super(owner);
     }
 
+    @Override
     public String getName()
     {
         return "Water Monitoring";
@@ -73,6 +74,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         return "every day at 1PM";
     }
 
+    @Override
     public String getDescription()
     {
         return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.";

@@ -49,11 +49,13 @@ public class WebUtilsController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             return new JspView("/org/labkey/webutils/view/begin.jsp");
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }

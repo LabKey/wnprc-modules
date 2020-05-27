@@ -108,6 +108,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
      *
      * @return The id of the newly created service account.
      */
+    @Override
     public String registerServiceAccount(String displayName, ServiceAccountForm form, User user) throws  QueryUpdateServiceException, DuplicateKeyException, SQLException, InvalidKeyException, BatchValidationException {
         SimpleQueryUpdater queryUpdater = getQueryUpdater(user);
 
@@ -136,6 +137,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
         queryUpdater.upsert(row);
     }
 
+    @Override
     public void deleteAccount(String accountId, User user) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, InvalidKeyException, BatchValidationException {
         SimpleQueryUpdater queryUpdater = getQueryUpdater(user);
 

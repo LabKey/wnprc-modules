@@ -32,13 +32,14 @@ public class ApiKeyController extends SpringActionController {
 
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception {
             return new JspView("/org/labkey/apikey/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 

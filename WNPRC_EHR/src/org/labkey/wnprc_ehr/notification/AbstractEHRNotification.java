@@ -56,6 +56,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
 
     protected NotificationService _ns = NotificationService.get();
 
+    @Override
     public boolean isAvailable(Container c)
     {
         if (!super.isAvailable(c))
@@ -84,6 +85,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
         return StudyService.get().getStudy(c);
     }
 
+    @Override
     public String getCategory()
     {
         return "EHR";
@@ -94,6 +96,7 @@ abstract public class AbstractEHRNotification extends AbstractNotification
         return rs.getString(FieldKey.fromString(name)) == null ? "" : rs.getString(FieldKey.fromString(name));
     }
 
+    @Override
     public String getCronString()
     {
         return null;//"0 0/5 * * * ?";

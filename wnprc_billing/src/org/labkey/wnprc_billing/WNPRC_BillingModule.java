@@ -105,6 +105,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     {
         DefaultSchema.registerProvider(WNPRC_BillingSchema.NAME, new DefaultSchema.SchemaProvider(this)
         {
+            @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module)
             {
                 return new WNPRC_BillingUserSchema(WNPRC_BillingSchema.NAME, null, schema.getUser(), schema.getContainer(), WNPRC_BillingSchema.getInstance().getSchema());

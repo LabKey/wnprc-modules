@@ -41,6 +41,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     }
 
+    @Override
     public void customize(TableInfo table)
     {
         if (table instanceof AbstractTableInfo)
@@ -260,6 +261,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         return getUserSchema(ds, "study");
     }
 
+    @Override
     public UserSchema getUserSchema(AbstractTableInfo ds, String name)
     {
         UserSchema us = ds.getUserSchema();

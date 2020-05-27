@@ -30,16 +30,19 @@ public class VvcNotification extends AbstractEHRNotification
         return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class).getName();
     }
 
+    @Override
     public String getName()
     {
         return "VVC Notification";
     }
 
+    @Override
     public String getScheduleDescription()
     {
         return "As soon as VVC is submitted";
     }
 
+    @Override
     public String getDescription()
     {
         return "This notification gets send every time there is a new VVC request";

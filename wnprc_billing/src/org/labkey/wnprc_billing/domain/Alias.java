@@ -7,6 +7,7 @@ public class Alias
     String _alias;
     String _type;
     String _po_number;
+    String _investigatorName;
     String _institution;
     String _address;
     String _city;
@@ -51,6 +52,16 @@ public class Alias
     public void setPo_number(String po_number)
     {
         _po_number = po_number;
+    }
+
+    public String getInvestigatorName()
+    {
+        return _investigatorName;
+    }
+
+    public void setInvestigatorName(String investigatorName)
+    {
+        _investigatorName = investigatorName;
     }
 
     public String getInstitution()

@@ -87,3 +87,5 @@ export function labkeyActionSelectWithPromise(
     Query.selectRows(options);
   });
 }
+
+export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));

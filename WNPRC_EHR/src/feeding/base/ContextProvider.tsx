@@ -1,39 +1,28 @@
 import * as React from "react";
 import {createContext, useEffect, useState} from "react";
 import {checkEditMode, labkeyActionSelectWithPromise} from "../../query/helpers";
-import {Query, ActionURL, Filter} from "@labkey/api";
-
-interface ContextProps {
-  setQueryDetailsExternal: any;
-  queryDetails: any;
-  setFormDataExternal: any;
-  formData: any;
-  animalInfo: any;
-  setAnimalInfoExternal: any;
-  animalInfoState: any;
-  setAnimalInfoStateExternal: any;
-  editMode: any;
-  setEditMode: any;
-}
+import {ActionURL, Filter} from "@labkey/api";
+import {ConfigProps, ContextProps, InfoProps, infoStates, RowObj} from "../typings/main";
 
 const AppContext = createContext({} as ContextProps);
 
 const ContextProvider: React.FunctionComponent = ({ children }) => {
+
   const [queryDetails, setQueryDetails] = useState(null);
   //introduce type of field here?
-  const [formData, setFormData] = useState([{
-    Id: { value: "" },
-    date: { value: new Date() },
-    type: { value: "" },
-    amount: { value: "" },
-    remark: { value: "" },
-    lsid: { value: "" },
-    command: {value: "insert"},
-    QCStateLabel: {value: "Completed"}
+  const [formData, setFormData] = useState<Array<RowObj>>([{
+    Id: { value: "", error: "" },
+    date: { value: new Date() , error: ""},
+    type: { value: "", error: "" },
+    amount: { value: "", error: "" },
+    remark: { value: "", error: "" },
+    lsid: { value: "", error: "" },
+    command: {value: "insert", error: ""},
+    QCStateLabel: {value: "Completed", error: ""}
   }]);
-  const [editMode, setEditMode] = useState(false);
-  const [animalInfo, setAnimalInfo] = useState(null);
-  const [animalInfoState, setAnimalInfoState] = useState("waiting");
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
+  const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
 
   const setQueryDetailsExternal = (qd) => {
     setQueryDetails(qd);
@@ -46,6 +35,16 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   };
   const setAnimalInfoStateExternal = (ais) => {
     setAnimalInfoState(ais);
+  };
+
+  const constructObject = (key, val) => {
+    let add;
+    if (key == "date") {
+      add = {[key]: {value: new Date(val)}};
+    }else{
+      add = {[key]: {value: val}};
+    }
+    return add;
   };
 
   const defaultContext = {
@@ -79,24 +78,14 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
       );
     }
 
-    let options = {
+    let options: ConfigProps = {
       schemaName: "study",
       queryName: "feeding",
       filterArray: filter,
       columns: "Id,date,type,amount,remark,lsid,QCState"
     };
 
-    let newformdata = [];
-
-    let struct =  {
-      0: "Id",
-      1: "date",
-      2: "type",
-      3: "remark",
-      4: "amount",
-      5: "lsid",
-      6: "QCState"
-    };
+    let newformdata:Array<RowObj> = [];
 
     labkeyActionSelectWithPromise(options).then(data => {
 
@@ -108,7 +97,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
 
       data["rows"].forEach((row, i) => {
 
-        /*
+
         newformdata.push({
           Id: { value: row.Id, error: "" },
           date: { value: new Date(row.date), error: "" },
@@ -119,22 +108,29 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
           QCState: { value: row.QCState, error: "" },
           command: { value: "update", error: "" }
         });
-         */
 
-        //build up correct form data... need special command here though.
-        let obj = {};
+
+        /*build up correct form data... need special command here though.
+
+        let struct =  {
+          0: "Id",
+          1: "date",
+          2: "type",
+          3: "remark",
+          4: "amount",
+          5: "lsid",
+          6: "QCState"
+        };
+        let obj:RowObj;
         for (let [key, entry] of Object.entries(struct) ) {
-          let add;
-          if (entry == "date"){
-            add = {[entry]: {value: new Date(row[entry])}};
-          }else{
-            add = {[entry]: {value: row[entry]}};
-          }
+          let add = constructObject(entry, row[entry]);
           obj = {...obj, ...add};
         }
-        let add = {"command": {value: "update"}};
-        obj = {...obj, ...add};
-        newformdata.push(obj);
+        let addCommand = constructObject("command", "update");
+        obj = {...obj, ...addCommand};
+        let addQC = constructObject("QCStateLabel", "Completed");
+        obj = {...obj, ...addQC};
+        newformdata.push(obj);*/
       });
       setFormDataExternal(newformdata);
     })

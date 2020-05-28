@@ -1,12 +1,20 @@
 import * as React from "react";
 import { useEffect, useState, useContext, useRef } from "react";
+import {Button} from "react-bootstrap";
 import FeedingForm from "./FeedingForm";
 import { Query, Security, Filter } from "@labkey/api";
 import { AppContext } from "./ContextProvider";
 import "../../theme/css/react-datepicker.css";
 import "../../theme/css/index.css";
 import SubmitModal from "../../components/SubmitModal";
-import {groupCommands, labkeyActionSelectWithPromise, saveRowsDirect, setupJsonData, wait} from "../../query/helpers";
+import {
+  checkEditMode,
+  groupCommands,
+  labkeyActionSelectWithPromise,
+  saveRowsDirect,
+  setupJsonData, sleep,
+  wait
+} from "../../query/helpers";
 import {ActionURL} from '@labkey/api';
 import AnimalInfoPane from "../../components/AnimalInfoPane";
 
@@ -22,8 +30,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     animalInfoState
 
   } = useContext(AppContext);
-  const [columnData, setColumnData] = useState([]);
-  const [columnDataTransformed, setColumnDataTransformed] = useState([]);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
   const [submitTextBody, setSubmitTextBody] = useState("Submit values?");
@@ -40,27 +46,24 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       schemaName: "study",
       queryName: "feeding",
       success: (result) => {
-        setColumnData(result.columns);
+        let columnData = result.columns;
+        if (columnData.length > 0) {
+          //make an object whos keys are the column names
+          let newDataArr = columnData.reduce((acc, item) => {
+            if (item.required && !item.autoIncrement){
+              console.log(item.name);
+            }
+            if (!acc[item.name]) {
+              acc[item.name] = [];
+            }
+            acc[item.name] = item;
+            return acc;
+          }, {});
+          setQueryDetailsExternal(newDataArr);
+        }
       },
     });
   }, []);
-
-  useEffect(() => {
-    let newDataArr = [];
-    if (columnData.length > 0) {
-      //what do i want to here, store in global state?
-      newDataArr = columnData.reduce((acc, item) => {
-        if (!acc[item.name]) {
-          acc[item.name] = [];
-        }
-        acc[item.name] = item;
-        return acc;
-      }, {});
-      setQueryDetailsExternal(newDataArr);
-      console.log(newDataArr["Id"]);
-    }
-  }, [columnData]);
-
 
   const onSubmit = e => {
     e.preventDefault();
@@ -79,7 +82,42 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     setShowModal("none");
   };
 
+  const addRecord = () => {
+    let copyFormData = [...formData];
+    copyFormData.push({
+      Id: { value: "", error: "" },
+      date: { value: new Date() , error: ""},
+      type: { value: "", error: "" },
+      amount: { value: "", error: "" },
+      remark: { value: "", error: "" },
+      lsid: { value: "", error: "" },
+      command: {value: "insert", error: ""},
+      QCStateLabel: {value: "Completed", error: ""}
+    });
+    return copyFormData;
+  };
 
+  const removeRecord = (i) => {
+    let copyformdata = [...formData];
+    //TODO
+    //copyformdata[i]["visibility"]["value"] ="hide-record";
+    setFormDataExternal(copyformdata);
+    sleep(750).then(() => {
+      let copyformdata = [...formData];
+      //only need to do this part if we are in wasSaved or editMode, otherwise we can splice.
+      //TODO
+      /*if (wasSaved || editMode) {
+        copyformdata[i]["command"]["value"] = "delete";
+      } else {
+        copyformdata.splice(i, 1);
+      }*/
+      copyformdata.splice(i, 1);
+      //the validity of this record is no longer valid, so set the error level to whatever it was
+      setFormDataExternal(copyformdata);
+      //TODO
+      //onValidate();
+    });
+  };
 
   const triggerSubmit = () => {
     /*let command = wasSaved || editMode ? "update" : "insert";*/
@@ -109,8 +147,22 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     <div className={`content-wrapper-body ${false ? "saving" : ""}`}>
       <div className="col-xs-6 panel panel-portal panel-portal-left">
         <div className="panel-heading">
-          <h3>Feeding</h3>
+          <h3>Data entry</h3>
         </div>
+        <Button
+            variant="primary"
+            className="wnprc-secondary-btn"
+            id="add-record"
+            disabled={checkEditMode()}
+            onClick={() => {
+              let newFormData = addRecord();
+              setFormDataExternal(newFormData);
+              //let index = formdata.length;
+              //setCurrent(index);
+            }}
+        >
+          Add record
+        </Button>
         {showModal == "submit-all-btn" && (
             <SubmitModal
                 name="final"
@@ -125,7 +177,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         <form className="feeding-form" ref={formEl}>
           {formData.map((item, i) => (
             <div>
-              <div className="row">
+              <div className="row" key={i}>
                 <div className="col-xs-10">
                   <div className="row card">
                     <div className="card-header">
@@ -136,10 +188,32 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                           liftUpValue={liftUpVal}
                           values={item}
                           index={i}
+                          key={i}
                         />
                       </div>
                     </div>
                   </div>
+                </div>
+                <div className="col-xs-2">
+                  <button
+                      className="remove-record-button"
+                      id={`remove-record-btn_${i}`}
+                      type="button"
+                      title="Remove Record"
+                      aria-label="Close"
+                      onClick={e => {
+                        removeRecord(i);
+                      }}
+                  >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                    >
+                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>

@@ -15,6 +15,7 @@ public class WaterMultipleFormSection extends SimpleGridSection
         setAllowBulkAdd(true);
 
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduleWaterWindow.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
         _showLocation = true;
         setAllowBulkAdd(false);
         setTemplateMode(TEMPLATE_MODE.NONE);
@@ -28,6 +29,7 @@ public class WaterMultipleFormSection extends SimpleGridSection
         List<String> defaultButtons = super.getTbarButtons();
 
         defaultButtons.add(0,"ADDSCHEDULEDWATERS");
+        defaultButtons.add(1,"CHANGETIME");
         //defaultButtons.remove("ADDRECORD");
        
         return defaultButtons;

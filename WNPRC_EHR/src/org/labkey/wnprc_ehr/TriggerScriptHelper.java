@@ -903,6 +903,7 @@ public class TriggerScriptHelper {
                 TableInfo waterGiven = getTableInfo("study","WaterRecentWeight");
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
                 filter.addCondition(FieldKey.fromString("date"), limitTime.getTime(),CompareType.DATE_GTE);
+                filter.addCondition(FieldKey.fromString("volume"), "null", CompareType.NONBLANK);
                 TableSelector rawPreviousWater = new TableSelector(waterGiven, PageFlowUtil.set("id", "date", "volume", "InnerWeight", "objectid"),filter, null);
                 Map<String, Object>[] waterFromServer = rawPreviousWater.getMapArray();
 

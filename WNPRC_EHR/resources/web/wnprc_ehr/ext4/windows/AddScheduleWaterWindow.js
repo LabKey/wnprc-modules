@@ -135,7 +135,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             queryName: 'waterScheduleCoalesced',
             parameters: {NumDays: 1, StartDate: new Date()},
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
-            columns: 'animalid,date,project,assignedTo,frequency,volume,provideFruit,objectid,dateCreated',
+            columns: 'animalid,date,project,assignedTo,assignedToTitle,frequency,volume,provideFruit,objectid,dateCreated',
             filterArray: filtersArray,
             scope: this,
             success: this.loadWater,
@@ -209,15 +209,19 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
         Ext4.Array.each(results.rows, function(sr){
             var row = new LDK.SelectRowsRow(sr);
+            var dateCurrentTime = new Date();
+            var modelDate = new Date (row.getValue('date'));
+            modelDate.setHours(dateCurrentTime.getHours());
+            modelDate.setMinutes(dateCurrentTime.getMinutes());
 
             var tempModel = this.targetStore.createModel({
                 Id:                 row.getValue('animalid'),
-                date:               row.getValue('date'),
+                date:               modelDate,
                 volume:             row.getValue('volume'),
                 project:            row.getValue('project'),
-                assignedTo:         row.getValue('assignedTo'),
+                assignedto:         row.getValue('assignedTo'),
                 treatmentid:        row.getValue('objectid'),
-                dateordered:        row.getValue('date')
+                dateordered:        row.getValue('dateCreated')
 
             });
             tempModel.phantom = false;
@@ -225,12 +229,12 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             if (row.getValue('provideFruit') != null){
                 var fruitModel = this.targetStore.createModel({
                     Id:                 row.getValue('animalid'),
-                    date:               row.getValue('date'),
+                    date:               modelDate,
                     provideFruit:       row.getValue('provideFruit'),
                     project:            row.getValue('project'),
-                    assignedTo:         row.getValue('assignedTo'),
+                    assignedto:         row.getValue('assignedTo'),
                     treatmentid:        row.getValue('objectid'),
-                    dateordered:        row.getValue('date')
+                    dateordered:        row.getValue('dateCreated')
 
                 });
                 fruitModel.phantom = false;
@@ -381,7 +385,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 EHR.DataEntryUtils.registerGridButton('ADDSCHEDULEDWATERS', function(config){
     return Ext4.Object.merge({
         text: 'Add Scheduled Waters',
-        tooltip: 'Click to add a batch of animals, either as a list or by location',
+        tooltip: 'Click to add animals by location',
         handler: function(btn){
             var grid = btn.up('gridpanel');
 

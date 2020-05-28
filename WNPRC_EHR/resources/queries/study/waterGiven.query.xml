@@ -14,19 +14,22 @@
                     <column columnName="date">
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
-                    <column columnName="project">
-
-                    </column>
-                    <column columnName="Id">
+                    <column columnName="performedby">
+                        <columnTitle>Performed By</columnTitle>
 
                     </column>
                     <column columnName="volume">
                         <columnTitle>Volume (mL)</columnTitle>
                     </column>
-                    <column columnName="performedby">
-                        <columnTitle>Performed By</columnTitle>
-                        
+                    
+                    <column columnName="provideFruit">
+                        <columnTitle>Provide Fruit</columnTitle>
                     </column>
+
+                    
+
+
+
 
                     <column columnName="location">
                         <columnTitle>Water Location</columnTitle>
@@ -53,6 +56,12 @@
                             <fkTable>husbandry_assigned</fkTable>
                             <fkColumnName>value</fkColumnName>
                         </fk>
+
+                    </column>
+                    <column columnName="remarks">
+                        
+                    </column>
+                    <column columnName="project">
 
                     </column>
                     <column columnName="room">

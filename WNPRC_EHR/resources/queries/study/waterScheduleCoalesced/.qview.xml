@@ -11,7 +11,7 @@
         <column name="taskid" />
     </columns>
     <sorts>
-        <sort column="date" descending="true"/>
+        <sort column="date" descending="false"/>
     </sorts>
     <!--<filters>-->
     <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->

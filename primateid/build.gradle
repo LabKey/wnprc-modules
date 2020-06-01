@@ -1,7 +1,5 @@
 import org.labkey.gradle.util.BuildUtils
 
-apply plugin: 'org.labkey.npmRun'
-
 dependencies {
     implementation project(":server:modules:ehrModules:ehr")
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")

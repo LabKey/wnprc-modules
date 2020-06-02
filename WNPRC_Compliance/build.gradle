@@ -1,16 +1,16 @@
 import org.labkey.gradle.util.BuildUtils
 
 dependencies {
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiCompile")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
 
-    compile project(path: "${project.parent.path}:DBUtils", configuration: "apiCompile")
-    compile project("${project.parent.path}:DBUtils")
-    compile project("${project.parent.path}:WebUtils")
-    compile "javax.servlet:jsp-api:2.0"
+    implementation project(path: "${project.parent.path}:DBUtils", configuration: "apiJarFile")
+    implementation project("${project.parent.path}:DBUtils")
+    implementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
+    implementation "javax.servlet:jsp-api:2.0"
     external "org.jooq:jooq:3.8.4"
     external "org.apache.pdfbox:pdfbox:${pdfboxVersion}"
-    jspCompile project("${project.parent.path}:WebUtils")
-    jspCompile project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"))
+    jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
+    jspImplementation project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"))
 }
 
 sourceSets {

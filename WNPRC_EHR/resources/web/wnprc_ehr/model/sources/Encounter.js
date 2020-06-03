@@ -14,6 +14,7 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 xtype: 'numberfield',
                 compositeField: 'Volume (mL)',
                 header: 'Volume (ml)',
+                editable: false,
                 allowBlank: true
             },
             provideFruit:{
@@ -39,9 +40,9 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
 
             },
             remarks :{
-                //xtype: 'ehr-remarkfield',
+                xtype: 'ehr-remarkfield',
                 //hidden : true,
-                showInGrid: false
+                shownInGrid: false
             },
             performedby:{
                 allowBlank: false

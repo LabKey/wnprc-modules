@@ -18,5 +18,9 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
     }
 
+    if (endChairing < startChairing){
+        EHR.Server.Utils.addError(scriptErrors,'chairingEndTime', 'End time cannot be before the Start time', 'ERROR');
+    }
+
 
 }

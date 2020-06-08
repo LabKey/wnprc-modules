@@ -4,7 +4,7 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
 
     implementation "javax.servlet:jsp-api:2.0"
-    implementation project(path: "${project.parent.path}:ApiKey", configuration: "apiCompile")
+    implementation project(path: "${project.parent.path}:ApiKey", configuration: "apiJarFile")
     external "org.jooq:jooq:3.8.4"
     external "javax.xml.bind:jaxb-api:${jaxbVersion}"
 }

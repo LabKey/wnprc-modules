@@ -24,6 +24,11 @@
                     
                     <column columnName="provideFruit">
                         <columnTitle>Provide Fruit</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_fruit</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
                     </column>
 
                     

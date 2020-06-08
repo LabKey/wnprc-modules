@@ -1488,10 +1488,10 @@ public class WNPRC_EHRController extends SpringActionController
 
                     String taskId = UUID.randomUUID().toString();
                     taskRecord.put("taskid", taskId);
-                    taskRecord.put("title", "Enter Water Daily Amount");
+                    taskRecord.put("title", "Enter Water Orders");
                     taskRecord.put("category", "task");
                     taskRecord.put("qcstate", 1);
-                    taskRecord.put("formType","Enter Water Daily Amount");
+                    taskRecord.put("formType","Enter Water Orders");
                     taskRecord.put("assignedTo",getUser().getUserId());
 
 

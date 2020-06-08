@@ -164,8 +164,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                         change: function (field, val) {
                             var weightStartTime = Ext4.getCmp('weightDateTime');
                             var chairingStartTime = Ext4.getCmp('chairingStartTime');
+                            var chairingEndTime = Ext4.getCmp('chairingEndTime');
                             var startTime = new Date(weightStartTime.getValue());
                             chairingStartTime.setValue(startTime);
+                            chairingEndTime.setValue(startTime);
                         }
                     }
                 }
@@ -185,7 +187,43 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
 
             },*/
-            /*restraintType: {
+
+            chairingStartTime: {
+                xtype: 'xdatetime',
+                extFormat:'Y-m-d H:i',
+                hidden: false,
+                allowBlank: false,
+               // hideMode: 'offsets',
+                editorConfig : {
+                    id : 'chairingStartTime',
+
+                }
+
+
+
+            },
+            chairingEndTime: {
+                xtype: 'xdatetime',
+                extFormat:'Y-m-d H:i',
+                allowBlank: false,
+                hidden: false,
+                hideMode: 'offsets',
+                editorConfig : {
+                    id : 'chairingEndTime',
+
+                }
+
+
+            }
+        },
+        'study.restraints':{
+            Id:{
+                hidden : true
+            },
+            date: {
+                hidden :true
+            },
+            restraintType: {
 
                 editorConfig :{
                     id: 'restraintType',
@@ -194,47 +232,26 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
 
                             if (field) {
-                                var restraintStartTime = Ext4.getCmp('restraintStartTime');
-                                var restraintEndTime = Ext4.getCmp('restraintEndTime');
-                                var locationField = Ext4.getCmp('location');
+                                var restraintRemarks = Ext4.getCmp('restraintRemarks');
 
-                                switch (field.value){
-                                    case 'Long Term Chairing':
-                                        restraintStartTime.show();
-                                        restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                                        restraintEndTime.show();
-                                        restraintEndTime.setValue(new Date());
-                                        locationField.show();
-
-                                    break;
-
-                                    case 'Short Term Chairing':
-                                        var starTime = new Date();
-                                       // var endTime = new Date (starTime);
-                                       // endTime.setMinutes(starTime.getMinutes()+30);
-                                        restraintStartTime.show();
-                                        restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                                        restraintEndTime.show();
-                                        //restraintEndTime.setValue(endTime);
-                                        locationField.setValue('');
-                                        locationField.hide();
-                                    break;
-                                    default :
-                                        restraintStartTime.setValue('');
-                                        restraintEndTime.setValue('');
-                                        locationField.setValue('');
-                                        restraintStartTime.hide();
-                                        restraintEndTime.hide();
-                                        locationField.hide();
-
-
-
-
-
+                                debugger; 
+                                if (field.value != null){
+                                    restraintRemarks.show();
+                                    var remarkText = restraintRemarks.getRawValue();
+                                    if (remarkText == ''){
+                                        restraintRemarks.setActiveError("need a remark");
+                                        //restraintRemarks.markInvalid("Need a remark");
+                                    }
                                 }
 
+                                else{
+                                    restraintRemarks.setValue('');
+                                    restraintRemarks.hide();
+                                }
+                            }
 
-                                /!*if(field.value === 'Long Term Chairing') {
+
+                                /*if(field.value === 'Long Term Chairing') {
                                     restraintStartTime.show();
                                     restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
                                     restraintEndTime.show();
@@ -263,53 +280,43 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                                     restraintStartTime.hide();
                                     restraintEndTime.hide();
 
-                                }*!/
-                            }
+                                }*/
+
 
                         }
                     }
                 }
-            },*/
-            chairingStartTime: {
-                xtype: 'xdatetime',
-                extFormat:'Y-m-d H:i',
-                hidden: false,
-                allowBlank: false,
-               // hideMode: 'offsets',
-                editorConfig : {
-                    id : 'chairingStartTime',
-
-                }
-
-
-
             },
-            chairingEndTime: {
-                xtype: 'xdatetime',
-                extFormat:'Y-m-d H:i',
-                allowBlank: false,
-                hidden: false,
-                hideMode: 'offsets',
-                editorConfig : {
-                    id : 'chairingEndTime',
-                    listeners: {
-
+            remarks:{
+                allowBlank: true,
+                //xtype:  'ehr-remarkfield',
+                editorConfig:{
+                    autoRender: true,
+                    id:     'restraintRemarks',
+                    listeners:{
+                        //hide field on render because if it's never rendered
+                        //to the dom it won't be able to be changed while hidden
+                        render: function(field){
+                            field.hide();
+                        }
+                    }
+                },
+                validator: function (value){
+                    if (value == ''){
+                        return 'Need to add a remark'
+                    }else {
+                        return true;
                     }
                 }
-
-
-            }
-        },
-        'study.restraints':{
-            Id:{
-                hidden : true
-            },
-            date: {
-                hidden :true
             }
 
         },
         'study.waterGiven':{
+            performedby: {
+                allowBlank: false,
+                hidden: false,
+                defaultValue: LABKEY.Security.currentUser.displayName
+            },
             Id: {
                 hidden :true,
                 shownInGrid: false
@@ -357,9 +364,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             remarks :{
                 xtype: 'ehr-remarkfield'
             },
-            performedby:{
-                allowBlank: false
-            },
+
             treatmentid: {
                 hidden: true
             },
@@ -389,7 +394,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             volume:{
-                //todo increase size of field for column
+                xtype: 'numberfield',
                 header: 'Volume (mL)',
                 allowBlank:false,
                 columnConfig: {
@@ -424,6 +429,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 xtype: 'datefield',
                 header: 'Start Date',
                 extFormat: 'Y-m-d',
+                defaultHour: 0,
+                defaultMinutes: 0,
                 allowBlank: false,
                 editable: true,
                 columnConfig: {
@@ -431,6 +438,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 },
                 editorConfig: {
                     minValue: new Date()
+                },
+                setInitialValue: function(v) {
+                    var date = (new Date());
+                    date.setHours(0);
+                    date.setMinutes(0);
+                    return v || date;
                 }
             },
             enddate:{
@@ -477,12 +490,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             provideFruit:{
-                xtype: 'ehr-booleanField',
+                /*xtype: 'ehr-booleanField',
                 editorConfig: {
                     trueText: 'Yes',
                     falseText: 'No'
-                },
-                defaultValue: 'No',
+                }, */
+                defaultValue: 'none',
                 allowBlank: false
             }
 

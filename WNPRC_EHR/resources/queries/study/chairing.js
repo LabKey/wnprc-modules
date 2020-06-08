@@ -1,4 +1,5 @@
 require("ehr/triggers").initScript(this);
+require ("labkey");
 
 function onInit(event, helper){
 
@@ -17,6 +18,12 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors, 'chairingEndTime', 'An animal cannot be chaired for longer than 12 hours', 'ERROR');
 
     }
+    if (timeDifference == 0){
+        EHR.Server.Utils.addError(scriptErrors, 'chairingEndTime', 'Chairing End time cannot be the same as Start time', 'ERROR');
+    }
+
+    console.log ('chairing start time: '+ startChairing);
+    console.log ('chairing end time: '+ endChairing);
 
     if (endChairing < startChairing){
         EHR.Server.Utils.addError(scriptErrors,'chairingEndTime', 'End time cannot be before the Start time', 'ERROR');

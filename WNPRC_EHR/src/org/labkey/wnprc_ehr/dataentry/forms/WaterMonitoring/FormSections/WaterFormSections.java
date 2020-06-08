@@ -18,11 +18,7 @@ public class WaterFormSections extends SlaveFormSection
     {
         super ("study", "waterGiven", "Water Given");
 
-
-
-
-       /* this.addConfigSource("Task");
-        _showLocation = true;*/
+        
 
     }
     @Override

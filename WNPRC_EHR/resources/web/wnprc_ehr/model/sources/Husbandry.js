@@ -145,6 +145,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             weight:{
                 allowBlank :true
+            },
+            remark:{
+                hidden: true
+
             }
 
         },
@@ -162,12 +166,15 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     id : 'location',
                     listeners: {
                         change: function (field, val) {
+                            debugger;
                             var weightStartTime = Ext4.getCmp('weightDateTime');
                             var chairingStartTime = Ext4.getCmp('chairingStartTime');
                             var chairingEndTime = Ext4.getCmp('chairingEndTime');
+                            var waterLocation = Ext4.getCmp('waterLocation');
                             var startTime = new Date(weightStartTime.getValue());
                             chairingStartTime.setValue(startTime);
                             chairingEndTime.setValue(startTime);
+                            waterLocation.setValue(val);
                         }
                     }
                 }
@@ -214,7 +221,17 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
 
 
+            },
+            remarks:{
+                xtype:  'ehr-remarkfield',
+                allowBlank: false,
+                editorConfig: {
+                    width:  400,
+                    height: 100,
+                    //resizable: true
+                }
             }
+
         },
         'study.restraints':{
             Id:{
@@ -339,7 +356,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 defaultValue : 'oral'
             },
             location:{
-                defaultValue: 'lab',
+              //  defaultValue: 'lab',
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'water_location',
@@ -349,6 +366,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 },
                 columnConfig: {
                     width:130
+                },
+                editorConfig :{
+                    id: 'waterLocation'
                 }
             },
             assignedTo:{

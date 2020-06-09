@@ -168,3 +168,17 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 
 
 }
+
+function setDescription(row, helper){
+    var description = new Array();
+
+    if (row.volume)
+        description.push('Volume: ' +EHR.Server.Utils.nullToString(row.volume));
+    if (row.provideFruit)
+        description.push('Provide Fruit: ' +EHR.Server.Utils.nullToString(row.provideFruit));
+    if (row.remarks)
+        description.push('Remarks: ' +EHR.Server.Utils.nullToString(row.remarks));
+
+    return description;
+
+}

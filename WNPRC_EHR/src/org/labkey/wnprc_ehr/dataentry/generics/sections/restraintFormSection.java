@@ -6,7 +6,7 @@ import java.util.Set;
 public class restraintFormSection extends SlaveFormSection
 {
     public restraintFormSection(){
-        super("study","restraints","Other Restraints");
+        super("study","restraints","Other Restraint");
     }
     @Override
     public Set<String> getSlaveFields(){

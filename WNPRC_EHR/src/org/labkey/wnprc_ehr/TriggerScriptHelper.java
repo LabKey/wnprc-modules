@@ -106,28 +106,33 @@ public class TriggerScriptHelper {
         queryUpdater.insert(insertRows);
     }
 
-    public void updateUltrasoundMeasurements(List<Map<String, Object>> updateRows)  {
-//        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
-//        SimplerFilter filter = new SimplerFilter("Id", CompareType.EQUAL, id);
-//        filter.addCondition("date", CompareType.DATE_LTE, date);
-//        filter.addCondition("followup_required", CompareType.EQUAL, true);
+//    public void updateUltrasoundMeasurements(List<Map<String, Object>> updateRows)  {
+//        if (updateRows != null && updateRows.size() > 0) {
+//            String id = (String) updateRows.get(0).get("Id");
+//            String objectId = (String) updateRows.get(0).get("ultrasound_id");
 //
-//        JSONArray encounters = queryFactory.selectRows("study", "ultrasounds", filter);
-//        List<JSONObject> ultrasounds = JsonUtils.getListFromJSONArray(encounters);
+//            SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+//            SimplerFilter filter = new SimplerFilter("Id", CompareType.EQUAL, id);
+//            filter.addCondition("date", CompareType.DATE_LTE, date);
+//            filter.addCondition("followup_required", CompareType.EQUAL, true);
 //
-//        List<Map<String, Object>> updateRows = new ArrayList<>();
-//        for (JSONObject row : ultrasounds) {
-//            row.put("followup_required", false);
-//            updateRows.add(row);
+//            JSONArray encounters = queryFactory.selectRows("study", "ultrasound_measurements", filter);
+//            List<JSONObject> ultrasounds = JsonUtils.getListFromJSONArray(encounters);
+//
+//            List<Map<String, Object>> updateRows = new ArrayList<>();
+//            for (JSONObject row : ultrasounds) {
+//                row.put("followup_required", false);
+//                updateRows.add(row);
+//            }
+//
+//            SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasounds");
+//            try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that ultrasound followup_required field can be changed to false")) {
+//                queryUpdater.update(updateRows);
+//            } catch (Exception e) {
+//                _log.error(e);
+//            }
 //        }
-//
-//        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasounds");
-//        try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that ultrasound followup_required field can be changed to false")) {
-//            queryUpdater.update(updateRows);
-//        } catch (Exception e) {
-//            _log.error(e);
-//        }
-    }
+//    }
 
     public void updateBreedingOutcome(final List<String> lsids) {
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "breeding_encounters");

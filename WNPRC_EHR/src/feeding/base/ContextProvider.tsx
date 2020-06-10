@@ -14,6 +14,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     Id: { value: "", error: "" },
     date: { value: new Date() , error: ""},
     type: { value: "", error: "" },
+    type_lookup: {value: "", error: ""},
     amount: { value: "", error: "" },
     remark: { value: "", error: "" },
     lsid: { value: "", error: "" },
@@ -23,6 +24,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
   const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
+  const [feedingTypes, setFeedingTypes] = useState<Array<any>>();
 
   const setQueryDetailsExternal = (qd) => {
     setQueryDetails(qd);
@@ -57,12 +59,23 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     editMode,
     setEditMode,
     setAnimalInfoStateExternal,
-    animalInfoState
+    animalInfoState,
+    feedingTypes
   };
 
   useEffect( () => {
     setEditMode(checkEditMode);
   },[]);
+
+  useEffect(() => {
+    let options: ConfigProps = {
+      schemaName: "ehr_lookups",
+      queryName: "feeding_types"
+    };
+    labkeyActionSelectWithPromise(options).then((res) => {
+      setFeedingTypes(res.rows);
+    })
+  });
 
   useEffect( () => {
     if (!editMode) return;
@@ -82,7 +95,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
       schemaName: "study",
       queryName: "feeding",
       filterArray: filter,
-      columns: "Id,date,type,amount,remark,lsid,QCState"
+      columns: "Id,date,type,type_lookup,amount,remark,lsid,QCState"
     };
 
     let newformdata:Array<RowObj> = [];
@@ -102,6 +115,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
           Id: { value: row.Id, error: "" },
           date: { value: new Date(row.date), error: "" },
           type: { value: row.type, error: "" },
+          type_lookup: {value: row.type_lookup, error: ""},
           remark: { value: row.remark || "", error: "" },
           amount: { value: row.amount, error: "" },
           lsid: { value: row.lsid, error: "" },

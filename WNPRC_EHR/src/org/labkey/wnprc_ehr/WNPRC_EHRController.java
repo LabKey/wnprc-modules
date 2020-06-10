@@ -1212,6 +1212,11 @@ public class WNPRC_EHRController extends SpringActionController
 
             switch (formType)
             {
+
+                case "feeding":
+                    newUrl = new ActionURL(String.format("/wnprc_ehr%s/feeding.view",
+                            getContainer().getPath()));
+                    newUrl.addParameters(params);
                 // this is the list of things that need redirected to the dataEntryForm.view in the EHR
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
                 case "Necropsy":

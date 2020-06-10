@@ -149,20 +149,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         <div className="panel-heading">
           <h3>Data entry</h3>
         </div>
-        <Button
-            variant="primary"
-            className="wnprc-secondary-btn"
-            id="add-record"
-            disabled={checkEditMode()}
-            onClick={() => {
-              let newFormData = addRecord();
-              setFormDataExternal(newFormData);
-              //let index = formdata.length;
-              //setCurrent(index);
-            }}
-        >
-          Add record
-        </Button>
         {showModal == "submit-all-btn" && (
             <SubmitModal
                 name="final"
@@ -178,7 +164,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
           {formData.map((item, i) => (
             <div>
               <div className="row" key={i}>
-                <div className="col-xs-10">
+                <div className="col-xs-12">
                   <div className="row card">
                     <div className="card-header">
                     </div>
@@ -193,27 +179,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="col-xs-2">
-                  <button
-                      className="remove-record-button"
-                      id={`remove-record-btn_${i}`}
-                      type="button"
-                      title="Remove Record"
-                      aria-label="Close"
-                      onClick={e => {
-                        removeRecord(i);
-                      }}
-                  >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
-                    >
-                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                    </svg>
-                  </button>
                 </div>
               </div>
             </div>

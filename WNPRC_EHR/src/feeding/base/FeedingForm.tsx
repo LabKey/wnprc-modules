@@ -8,13 +8,15 @@ import DatePicker from 'react-datepicker';
 import * as webpack from "webpack";
 import {labkeyActionSelectWithPromise} from "../../query/helpers";
 import {Filter} from "@labkey/api";
+import DropdownOptions from "../../components/DropdownOptions";
 
 const FeedingForm: React.FunctionComponent<any> = props => {
 
     const {setQueryDetailsExternal, queryDetails, setFormDataExternal, formData,setAnimalInfoExternal,
         animalInfo,
         setAnimalInfoStateExternal,
-        animalInfoState} = useContext(AppContext);
+        animalInfoState,
+    feedingTypes} = useContext(AppContext);
     const {values} = props;
 
     let calendarEl = useRef(null);
@@ -28,6 +30,11 @@ const FeedingForm: React.FunctionComponent<any> = props => {
     const handleValueChange = (e) => {
         updateFormValues(e.currentTarget.name, e.currentTarget.value, props.index)
     };
+
+    const handleTypeChange = val => {
+        updateFormValues("type_lookup", val, props.index);
+    };
+
 
     const handleRawDateChange = e => {
         if (e.currentTarget.value instanceof Date && !isNaN(e.currentTarget.value)){
@@ -121,19 +128,19 @@ const FeedingForm: React.FunctionComponent<any> = props => {
             <div className="row">
                 <div className="col-xs-3">
                     {/*queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>*/}
-                    <InputLabel labelFor="type" label="Chow"/>
+                    <InputLabel labelFor="type_lookup" label="Chow"/>
                 </div>
                 <div className="col-xs-9">
-                    <TextInput
-                        name="type"
-                        id="type-id"
-                        className="form-control type"
-                        value={values.type.value}
-                        onChange={handleValueChange}
-                        onBlur={()=>{console.log('blur')}}
-                        onFocus={()=>{console.log('focus')}}
-                        required={true}
-                        autoFocus={false}
+                    <DropdownOptions
+                        options={feedingTypes}
+                        initialvalue={values.type_lookup.value}
+                        value={handleTypeChange}
+                        name="type_lookup"
+                        /*id={`restraint_${index}`}*/
+                        id={'feedingtype'}
+                        classname="form-control"
+                        valuekey="rowid"
+                        displaykey="value"
                     />
                 </div>
             </div>
@@ -145,8 +152,8 @@ const FeedingForm: React.FunctionComponent<any> = props => {
                 <div className="col-xs-9">
                     <TextInput
                         name="amount"
-                        id="amount-id"
-                        className="form-control  amount"
+                        id="type-id"
+                        className="form-control type"
                         value={values.amount.value}
                         onChange={handleValueChange}
                         onBlur={()=>{console.log('blur')}}
@@ -154,6 +161,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
                         required={true}
                         autoFocus={false}
                     />
+
                 </div>
             </div>
             <div className="row">
@@ -171,7 +179,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
                         onChange={handleValueChange}
                         onBlur={()=>{console.log('blur')}}
                         onFocus={()=>{console.log('focus')}}
-                        required={true}
+                        required={false}
                         autoFocus={false}
                     />
                 </div>

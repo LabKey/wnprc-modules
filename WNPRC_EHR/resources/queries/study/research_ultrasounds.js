@@ -33,34 +33,34 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     }
 }
 
-// function onUpdate(helper, scriptErrors, row, oldRow) {
-//     let validMeasurements = getValidMeasurements();
-//     let updateRows = [];
-//
-//     let measurementsToUpdate = false;
-//     for (let measurementName in validMeasurements) {
-//         if (validMeasurements.hasOwnProperty(measurementName)) {
-//             if (row[measurementName] != oldRow[measurementName]) {
-//                 row[measurementName] = formatMeasurements(row[measurementName]);
-//                 updateRows.push({
-//                     Id: row.Id,
-//                     date: row.date,
-//                     measurement_name: measurementName,
-//                     measurement_label: validMeasurements[measurementName].label,
-//                     measurements_string: row[measurementName],
-//                     measurement_unit: validMeasurements[measurementName].unit,
-//                     ultrasound_id: row.objectid,
-//                     taskid: row.taskid
-//                 });
-//                 measurementsToUpdate = true;
-//             }
-//         }
-//     }
-//
-//     if (measurementsToUpdate) {
-//         WNPRC.Utils.getJavaHelper().updateUltrasoundMeasurements(insertRows);
-//     }
-// }
+function onUpdate(helper, scriptErrors, row, oldRow) {
+    let validMeasurements = getValidMeasurements();
+    let updateRows = [];
+
+    let measurementsToUpdate = false;
+    for (let measurementName in validMeasurements) {
+        if (validMeasurements.hasOwnProperty(measurementName)) {
+            if (row[measurementName] != oldRow[measurementName]) {
+                row[measurementName] = formatMeasurements(row[measurementName]);
+                updateRows.push({
+                    Id: row.Id,
+                    date: row.date,
+                    measurement_name: measurementName,
+                    measurement_label: validMeasurements[measurementName].label,
+                    measurements_string: row[measurementName],
+                    measurement_unit: validMeasurements[measurementName].unit,
+                    ultrasound_id: row.objectid,
+                    taskid: row.taskid
+                });
+                measurementsToUpdate = true;
+            }
+        }
+    }
+
+    if (measurementsToUpdate && !helper.isValidateOnly()) {
+        WNPRC.Utils.getJavaHelper().updateUltrasoundMeasurements(updateRows);
+    }
+}
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
     if (row && row.Id){

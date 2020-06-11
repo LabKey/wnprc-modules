@@ -442,8 +442,16 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             }
         },
         'study.waterOrders':{
+            id :{
+                columnConfig: {
+                    width:70
+                }
+            },
             project:{
-                allowBlank: false
+                allowBlank: false,
+                columnConfig: {
+                    width:90
+                },
             },
             date:{
                 xtype: 'datefield',
@@ -454,7 +462,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 allowBlank: false,
                 editable: true,
                 columnConfig: {
-                    width:110
+                    width:90
                 },
                 editorConfig: {
                     minValue: new Date()
@@ -473,7 +481,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
               //  allowBlank: false,
                 editable: true,
                 columnConfig: {
-                    width:110
+                    width:90
                 },
                 editorConfig: {
                     minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
@@ -497,7 +505,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             assignedTo:{
-                allowBlank: false
+                allowBlank: false,
+                columnConfig: {
+                    width:120
+                }
             },
             frequency:{
                 allowBlank: false,
@@ -510,13 +521,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             provideFruit:{
-                /*xtype: 'ehr-booleanField',
-                editorConfig: {
-                    trueText: 'Yes',
-                    falseText: 'No'
-                }, */
                 defaultValue: 'none',
-                allowBlank: false
+                allowBlank: false,
+                lookup:{
+                    sort: 'sort_order'
+                }
             }
 
 

@@ -26,7 +26,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         animalRestricted = WNPRC.Utils.getJavaHelper().checkIfAnimalIsRestricted(row.Id, row.date);
 
         if (!animalRestricted){
-            EHR.Server.Utils.addError(scriptErrors,'animalId', 'Animal not assigned to water restriction protocol or condition as Lixit/Ad lib', 'ERROR');
+            EHR.Server.Utils.addError(scriptErrors,'Id', 'Animal not assigned to water restriction protocol or condition as Lixit/Ad lib', 'ERROR');
         }
 
 

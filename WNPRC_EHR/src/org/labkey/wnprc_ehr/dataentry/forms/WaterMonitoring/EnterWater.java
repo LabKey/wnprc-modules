@@ -3,8 +3,6 @@ package org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring;
 import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.FormSection;
-import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterOrderFormSection;
-import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterSingleDaySection;
 import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterSingleDaySlaveSection;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.TaskFormSection;
 import org.labkey.api.module.Module;

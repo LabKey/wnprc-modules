@@ -35,6 +35,7 @@ public class WaterOrderFormSection extends SimpleGridSection
         List<String> defaultButtons = super.getTbarButtons();
 
         defaultButtons.add("ADDWATERS");
+        defaultButtons.add("DUPLICATE");
 
         return defaultButtons;
 

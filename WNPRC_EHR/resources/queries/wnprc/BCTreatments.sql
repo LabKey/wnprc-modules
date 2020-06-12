@@ -15,7 +15,7 @@ code.meaning as treatment,
 meaning as shortName,
 qualifier,
 route.meaning as route,
-remark
+remark,
 
 volume,
 vol_units as volumeUnits,
@@ -30,7 +30,7 @@ date as startdate,
 enddate,
 project,
 project.account as account,
-code as treatmentCode,
+code as treatmentCode
 
 FROM study.treatment_order treatments
 

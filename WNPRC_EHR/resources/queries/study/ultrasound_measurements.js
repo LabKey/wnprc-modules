@@ -6,10 +6,10 @@ function onInsert(helper, scriptErrors, row, oldRow){
 }
 
 function onUpdate(helper, scriptErrors, row, oldRow){
-    console.log('onUpsert');
-    WNPRC.Utils.getJavaHelper().updateUltrasoundMeasurements(row.taskid);
+    console.log('onUpdate');
+    //WNPRC.Utils.getJavaHelper().updateUltrasoundMeasurements(row.taskid);
 }
 
 function onUpdate(helper, scriptErrors, row, oldRow){
-    console.log('onUpdate');
+    console.log('onUpsert');
 }

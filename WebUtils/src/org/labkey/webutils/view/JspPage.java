@@ -1,5 +1,6 @@
 package org.labkey.webutils.view;
 
+import org.json.JSONArray;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.webutils.WebUtilsServiceImpl;
@@ -13,48 +14,35 @@ import java.util.List;
  */
 public class JspPage extends JspView<JspPageModel> {
     static private String _packagePathDir = WebUtilsServiceImpl.getPackageDirFromClass(JspPage.class);
-    public Integer publicNumberOfRenders =0 ;
+    private Integer publicNumberOfRenders =0 ;
+    private JSONArray publicUnBindComponents = new JSONArray();
 
     public JspPage(JspView view) {
         this(view, new JspPageModel());
     }
 
-    public JspPage(JspView view, Integer numberOfRenders){
+    //Adding second constructor to allow rendering JSP under a LabKey webPart
+    //numberofRenders check if it is not the first time the page renders
+    //unBindComponents components in the page to rebind to ko.observables.
+    public JspPage(JspView view, Integer numberOfRenders, JSONArray unBindComponents){
         super(_packagePathDir + "JspPage.jsp", new JspPageModel());
 
         publicNumberOfRenders = numberOfRenders;
+        publicUnBindComponents = unBindComponents;
 
-        if (numberOfRenders>0){
+        this.setBody(view);
 
-            // Set the body to the passed in view
-            this.setBody(view);
+        // Add universal client dependencies.
+        List<String> dependencyPaths = Arrays.asList(
+                "/webutils/lib/webutils",
+                "/webutils/models/models"
+        );
+        for(String path : dependencyPaths) {
+            this.addClientDependency(ClientDependency.fromPath(path));
+        }
 
-            // Add universal client dependencies.
-            List<String> dependencyPaths = Arrays.asList(
-                    "/webutils/lib/webutils",
-                    "/webutils/models/models"
-            );
-            for(String path : dependencyPaths) {
-                this.addClientDependency(ClientDependency.fromPath(path));
-            }
 
-            //verify all dependencies are present
-            //List<String> clientDependencies = this.getClientDependencies();
-            //this.getModelBean().getTemplates();
-
-        }else{
-
-            // Set the body to the passed in view
-            this.setBody(view);
-
-            // Add universal client dependencies.
-            List<String> dependencyPaths = Arrays.asList(
-                    "/webutils/lib/webutils",
-                    "/webutils/models/models"
-            );
-            for(String path : dependencyPaths) {
-                this.addClientDependency(ClientDependency.fromPath(path));
-            }
+        if (numberOfRenders == 0){
 
             // Add some Knockout templates.
             List<String> templates = Arrays.asList(
@@ -106,5 +94,8 @@ public class JspPage extends JspView<JspPageModel> {
     public Integer getNumberOfRenders(){
         return publicNumberOfRenders;
 
+    }
+    public JSONArray getUnbindComponents(){
+        return publicUnBindComponents;
     }
 }

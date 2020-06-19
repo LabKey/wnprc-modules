@@ -9,11 +9,15 @@
 <%@ page import="org.labkey.api.module.ModuleProperty" %>
 <%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
 <%@ page import="org.labkey.api.util.GUID" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspPage view = (JspPage) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
-    Integer numberOfRenders =view.publicNumberOfRenders;
+    Integer numberOfRenders = view.getNumberOfRenders();
+    JSONArray unBindComponents = view.getUnbindComponents();
+
+
     String sufix = GUID.makeGUID();
 %>
 
@@ -55,17 +59,6 @@
 </style>
 
 <script type="application/javascript">
-    console.log ("numberofRenders " + "<%=numberOfRenders %>");
-    console.log ("print webUtils "+ WebUtils.VM);
-    let $numberOfRenders = "<%=numberOfRenders %>";
-    debugger;
-    if ($numberOfRenders>0){
-        ko.cleanNode(document.getElementById('bootstrap-box<%=sufix%>'));
-        /*ko.cleanNode(document.getElementById('waterInfoPanel'));
-        ko.cleanNode(document.getElementById('calendar'));*/
-       // ko.cleanNode($element[0]);
-
-    }
     var WebUtils = WebUtils || {};
     WebUtils.VM = {};
     var $ = jQuery;
@@ -170,25 +163,22 @@
 <script type="application/javascript">
     (function() {
         var koSuccessfullyLoaded = true;
+        //variables use for rendering the JSP a second time under a LabKey WebPart
+        let $numberOfRenders = "<%=numberOfRenders %>";
+        let unBindComponents  = <%=unBindComponents%>;
        // var applied = false;
 
         // Use a try block to ensure that we always show the hidden div.
         try {
-            console.log ("print webUtils "+ WebUtils.VM);
-           // console.log ("print document "+ document.getElementById('bootstrap-box'));
-            debugger;
-            ko.applyBindings(WebUtils.VM);
-            /*ko.cleanNode(document.getElementById('bootstrap-box'));
-            ko.cleanNode(document.getElementById('waterInfoPanel'));
-            ko.cleanNode(document.getElementById('calendar'));*/
-            /*var koNode = document.getElementById('bootstrap-box<%=sufix%>');
-            var hasDataBinding = !!ko.dataFor(koNode);
-            console.log ('has data binding', hasDataBinding);
-            if (!hasDataBinding){
+            if ($numberOfRenders == 0){
                 ko.applyBindings(WebUtils.VM);
-            }*/
-            
-
+            }else{
+                for(var i =0; i<unBindComponents.length; i++){
+                    var nodeComponent = document.getElementById(unBindComponents[i]);
+                    ko.cleanNode(nodeComponent);
+                    ko.applyBindings(WebUtils.VM, nodeComponent);
+                }
+            }
         }
         catch (e) {
             koSuccessfullyLoaded = false;

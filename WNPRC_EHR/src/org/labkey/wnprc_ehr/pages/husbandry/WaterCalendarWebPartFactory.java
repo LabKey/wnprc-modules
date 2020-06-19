@@ -1,5 +1,6 @@
 package org.labkey.wnprc_ehr.pages.husbandry;
 
+import org.json.JSONArray;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.Portal;
@@ -31,6 +32,16 @@ public class WaterCalendarWebPartFactory extends BaseWebPartFactory{
         String animalIds = webpart.getPropertyMap().get("animalIds");
         Integer numberOfRenders  = Integer.parseInt(webpart.getPropertyMap().get("numberOfRenders"));
 
+        String[] unBindComponents = webpart.getPropertyMap().get("unbindComponents").split(",");
+        //String[] unBindComponents = {"waterInfoPanel","calendarLegend","waterExceptionPanel"};
+        //JSONArray unBindJSON = new JSONArray(Arrays.asList(unBindComponents));
+        JSONArray unBindJSON = new JSONArray();
+        for (int i = 0; i < unBindComponents.length; i++){
+            unBindJSON.put(unBindComponents[i]);
+        }
+
+
+
 
         JspView view = new JspView("/org/labkey/wnprc_ehr/pages/husbandry/WaterCalendar.jsp");
         view.setTitle("Water Calendar");
@@ -38,7 +49,7 @@ public class WaterCalendarWebPartFactory extends BaseWebPartFactory{
 
 
 
-        JspPage page = new JspPage(view, numberOfRenders);
+        JspPage page = new JspPage(view, numberOfRenders,unBindJSON);
         page.setFrame(WebPartView.FrameType.PORTAL);
 
 

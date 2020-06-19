@@ -57,13 +57,14 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
             var waterCalendar = new LABKEY.WebPart({
                 partName: 'Water Calendar',
                 renderTo: id,
-                partConfig: {animalIds : concatAnimals,numberOfRenders: calendarRender}
+                //partConfig: {animalIds : concatAnimals,numberOfRenders: calendarRender}
+                partConfig: {animalIds : concatAnimals,numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,calendarLegend,waterExceptionPanel'}
             });
             waterCalendar.render();
 
             // We know the height of the component, so just set it explicitly instead of making ExtJS get the layout
             // and sizing correct
-            tab.setHeight(600);
+            tab.setHeight(800);
         }
 
 

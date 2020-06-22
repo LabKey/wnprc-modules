@@ -40,7 +40,7 @@
     <div class="panel-heading"><span>On Call Schedule</span></div>
 
     <div class="panel-body">
-        <form onsubmit="loadRequestedWeek()">
+        <form>
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-2">
@@ -56,7 +56,7 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-2">
-                        <button type="submit" class="btn btn-primary">Fetch Schedule</button>
+                        <button onclick="loadRequestedWeek()" type="button" class="btn btn-primary">Fetch Schedule</button>
                     </div>
                 </div>
             </div>

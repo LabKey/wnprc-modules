@@ -189,7 +189,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
           onClick={e => onSubmit(e)}
           /*disabled={errorLevel !== "submittable"}*/
         >
-          Submit all
+          Submit
         </button>
         </form>
       </div>

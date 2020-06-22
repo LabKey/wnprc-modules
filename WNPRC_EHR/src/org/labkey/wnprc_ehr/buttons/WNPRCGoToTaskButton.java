@@ -29,7 +29,7 @@ public class WNPRCGoToTaskButton extends SimpleButtonConfigFactory
 {
     public WNPRCGoToTaskButton(Module owner, String formType)
     {
-        super(owner, "Add Batch of Records", "window.location = LABKEY.ActionURL.buildURL('ehr', 'manageTask', null, {formtype: '" + formType +"'})");
+        super(owner, "Add Record", "window.location = LABKEY.ActionURL.buildURL('wnprc_ehr', 'feeding', null, {formtype: '" + formType +"'})");
     }
 
     public boolean isAvailable(TableInfo ti)

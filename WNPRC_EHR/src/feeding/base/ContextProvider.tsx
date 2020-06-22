@@ -75,7 +75,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     labkeyActionSelectWithPromise(options).then((res) => {
       setFeedingTypes(res.rows);
     })
-  });
+  },[]);
 
   useEffect( () => {
     if (!editMode) return;

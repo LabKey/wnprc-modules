@@ -89,7 +89,8 @@ const FeedingForm: React.FunctionComponent<any> = props => {
         <>
             <div className="row">
                 <div className="col-xs-3">
-                    {queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>}
+                    {/*queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>*/}
+                    <InputLabel labelFor="Id" label="Id"/>
                 </div>
                 <div className="col-xs-9">
                     <TextInput

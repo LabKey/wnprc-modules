@@ -858,7 +858,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                 text: 'Add Batch of Records',
                 dataRegionName: dataRegionName,
                 handler: function(){
-                    window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {formtype: 'Feeding'});
+                    window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "feeding", null, {formtype: 'Feeding'});
                 }
             });
         },

@@ -45,11 +45,11 @@
                 <div class="row">
                     <div class="col-sm-2">
                         <label for="startDate">Start Date</label>
-                        <input type="date" class="form-control" id="startDate" placeholder="">
+                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="startDate" placeholder="">
                     </div>
                     <div class="col-sm-2">
                         <label for="endDate">End Date</label>
-                        <input type="date" class="form-control" id="endDate" placeholder="Password">
+                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="endDate" placeholder="Password">
                     </div>
                 </div>
             </div>
@@ -147,10 +147,56 @@
     }
 
     function loadRequestedWeek() {
-        let start = new Date(document.getElementById("startDate").value + "T12:00:00Z");
-        let end = new Date(document.getElementById("endDate").value + "T12:00:00Z");
+        let startDatePh = document.getElementById("startDate").placeholder;
+        let endDatePh = document.getElementById("endDate").placeholder;
+        let startDateString = startDatePh.substring(6, 10) + "-" + startDatePh.substring(0, 2) + "-" + startDatePh.substring(3, 5) + "T12:00:00Z";
+        let endDateString = endDatePh.substring(6, 10) + "-" + endDatePh.substring(0, 2) + "-" + endDatePh.substring(3, 5) + "T12:00:00Z";
+
+        startDateOfSchedule = new Date(startDateString);
+        endDateOfSchedule = new Date(endDateString);
         setLoadingMessage();
-        loadOnCallSchedule(start, end);
+        loadOnCallSchedule(startDateOfSchedule, endDateOfSchedule);
+    }
+
+    function setPlaceholderDates(startDate, endDate) {
+        let startDateEl = document.getElementById("startDate");
+        let endDateEl = document.getElementById("endDate");
+
+        let startYear = startDate.getFullYear();
+        let startMonth = startDate.getMonth() + 1;
+        let startDay = startDate.getDate();
+        let endYear = endDate.getFullYear();
+        let endMonth = endDate.getMonth() + 1;
+        let endDay = endDate.getDate();
+
+        startDateEl.value = "";
+        startDateEl.placeholder = String(startMonth).padStart(2, "0") + "/" + String(startDay).padStart(2, "0") + "/" + startYear;
+        startDateEl.type = "text";
+        endDateEl.value = "";
+        endDateEl.placeholder = String(endMonth).padStart(2, "0") + "/" + String(endDay).padStart(2, "0") + "/" + endYear;
+        endDateEl.type = "text";
+    }
+
+    function setPlaceholderOnBlur(dateEl) {
+        let dateString = dateEl.value;
+        if (dateString) {
+            let year = dateString.substring(0, 4);
+            let month = dateString.substring(5, 7);
+            let day = dateString.substring(8, 10);
+            dateEl.value = "";
+            dateEl.placeholder = month + "/" + day + "/" + year;
+        } else {
+            dateEl.placeholder = "";
+        }
+        dateEl.type = "text";
+    }
+
+    function setDateOnFocus(dateEl) {
+        let year = dateEl.placeholder.substring(6, 10);
+        let month = dateEl.placeholder.substring(0, 2);
+        let day = dateEl.placeholder.substring(3, 5);
+        dateEl.value = year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+        dateEl.type = "date";
     }
 
     function createOnCallTable(onCallSchedule) {
@@ -177,6 +223,7 @@
     }
 
     function loadOnCallSchedule(startDateOfSchedule, endDateOfSchedule) {
+        setPlaceholderDates(startDateOfSchedule, endDateOfSchedule);
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchOnCallScheduleGoogleEvents", null, {
                 startDate: startDateOfSchedule,

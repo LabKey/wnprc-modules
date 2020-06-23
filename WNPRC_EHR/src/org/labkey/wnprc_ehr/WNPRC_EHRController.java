@@ -1027,7 +1027,7 @@ public class WNPRC_EHRController extends SpringActionController
                 final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
 
                 TableSelector ts = new TableSelector(ti, colMap.values(), null, sort);
-                Map<String, Object>[] jsonOnCallCalendars = ts.getMapArray();
+                Map<String, Object>[] onCallCalendars = ts.getMapArray();
 
                 //Calculate how many days to show on the schedule
                 java.time.LocalDate startDate = java.time.LocalDate.ofInstant(event.getStartDate().toInstant(), ZoneId.systemDefault());
@@ -1035,11 +1035,11 @@ public class WNPRC_EHRController extends SpringActionController
                 long daysBetween = DAYS.between(startDate, endDate);
 
                 //Set the headers for the on call schedule html table
-                JSONObject[][] onCallSchedule = new JSONObject[(int)daysBetween + 2][jsonOnCallCalendars.length + 2];
+                JSONObject[][] onCallSchedule = new JSONObject[(int)daysBetween + 2][onCallCalendars.length + 2];
                 onCallSchedule[0][0] = new JSONObject().put("html", "Date");
                 onCallSchedule[0][1] = new JSONObject().put("html", "Day");
-                for (int i = 0; i < jsonOnCallCalendars.length; i++) {
-                    onCallSchedule[0][i + 2] = new JSONObject().put("html", jsonOnCallCalendars[i].get("display_name"));
+                for (int i = 0; i < onCallCalendars.length; i++) {
+                    onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name"));
                 }
                 //Set the dates in the html table
                 for (int i = 0; i <= daysBetween; i++) {
@@ -1051,8 +1051,8 @@ public class WNPRC_EHRController extends SpringActionController
                 }
 
                 //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
-                for (int i = 0; i < jsonOnCallCalendars.length; i++) {
-                    Map<String, Object> row = jsonOnCallCalendars[i];
+                for (int i = 0; i < onCallCalendars.length; i++) {
+                    Map<String, Object> row = onCallCalendars[i];
                     JSONArray events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
 
                     organizeOnCallEvents(onCallSchedule, events, startDate, endDate, i + 2);

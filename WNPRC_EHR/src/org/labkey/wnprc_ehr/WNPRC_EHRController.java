@@ -34,17 +34,22 @@ import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.Resource;
@@ -106,9 +111,11 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -1009,9 +1016,18 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
-                SimpleQuery onCallCalendarsQuery = queryFactory.makeQuery("wnprc", "on_call_calendars");
-                JSONArray jsonOnCallCalendars = onCallCalendarsQuery.getResults().getJSONArray("rows");
+                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "wnprc").getTable("on_call_calendars");
+                Sort sort = new Sort("-display_name");
+
+                Set<FieldKey> columns = new HashSet<>();
+                columns.add(FieldKey.fromString("display_name"));
+                columns.add(FieldKey.fromString("calendar_id"));
+                columns.add(FieldKey.fromString("calendar_type"));
+                columns.add(FieldKey.fromString("default_bg_color"));
+                final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
+
+                TableSelector ts = new TableSelector(ti, colMap.values(), null, sort);
+                Map<String, Object>[] jsonOnCallCalendars = ts.getMapArray();
 
                 //Calculate how many days to show on the schedule
                 java.time.LocalDate startDate = java.time.LocalDate.ofInstant(event.getStartDate().toInstant(), ZoneId.systemDefault());
@@ -1019,11 +1035,11 @@ public class WNPRC_EHRController extends SpringActionController
                 long daysBetween = DAYS.between(startDate, endDate);
 
                 //Set the headers for the on call schedule html table
-                JSONObject[][] onCallSchedule = new JSONObject[(int)daysBetween + 2][jsonOnCallCalendars.length() + 2];
+                JSONObject[][] onCallSchedule = new JSONObject[(int)daysBetween + 2][jsonOnCallCalendars.length + 2];
                 onCallSchedule[0][0] = new JSONObject().put("html", "Date");
                 onCallSchedule[0][1] = new JSONObject().put("html", "Day");
-                for (int i = 0; i < jsonOnCallCalendars.length(); i++) {
-                    onCallSchedule[0][i + 2] = new JSONObject().put("html", jsonOnCallCalendars.getJSONObject(i).getString("display_name"));
+                for (int i = 0; i < jsonOnCallCalendars.length; i++) {
+                    onCallSchedule[0][i + 2] = new JSONObject().put("html", jsonOnCallCalendars[i].get("display_name"));
                 }
                 //Set the dates in the html table
                 for (int i = 0; i <= daysBetween; i++) {
@@ -1035,9 +1051,9 @@ public class WNPRC_EHRController extends SpringActionController
                 }
 
                 //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
-                for (int i = 0; i < jsonOnCallCalendars.length(); i++) {
-                    JSONObject row = jsonOnCallCalendars.getJSONObject(i);
-                    JSONArray events = fetchCalendarEvents(new OnCallCalendar(), row.getString("calendar_id"), row.getString("calendar_type"), row.getString("default_bg_color"), event.getStartDate(), event.getEndDate());
+                for (int i = 0; i < jsonOnCallCalendars.length; i++) {
+                    Map<String, Object> row = jsonOnCallCalendars[i];
+                    JSONArray events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
 
                     organizeOnCallEvents(onCallSchedule, events, startDate, endDate, i + 2);
                 }

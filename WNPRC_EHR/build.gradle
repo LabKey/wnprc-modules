@@ -6,7 +6,7 @@ dependencies {
     compile project("${project.parent.path}:WebUtils")
     compile project(path: "${project.parent.path}:GoogleDrive", configuration: "apiCompile")
     external "joda-time:joda-time:2.8.1"
-    external "org.jsoup:jsoup:1.10.3"
+    external "org.jsoup:jsoup:1.13.1"
     external "org.reflections:reflections:0.9.10"
     jspCompile project(path: "${project.parent.path}:DBUtils",  configuration: "apiCompile")
     jspCompile project("${project.parent.path}:WebUtils")

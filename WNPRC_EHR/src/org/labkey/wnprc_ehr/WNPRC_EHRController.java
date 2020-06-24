@@ -1082,9 +1082,11 @@ public class WNPRC_EHRController extends SpringActionController
                         onCallSchedule[i + 1][column] = new JSONObject();
                     }
                     String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
-                    title = title.replaceAll("(?i)<br */?>", "\n").trim().replaceAll("\\R", "<br>");
+                    title = title.replaceAll("(?i)<br */?>", "\n").trim();
+                    title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
                     String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
-                    description = description.replaceAll("(?i)<br */?>", "\n").trim().replaceAll("\\R", "<br>");
+                    description = description.replaceAll("(?i)<br */?>", "\n").trim();
+                    description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
                     if (onCallSchedule[i + 1][column].getString("html") == null) {
                         onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
                     } else {

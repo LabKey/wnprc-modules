@@ -24,6 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -1080,8 +1081,10 @@ public class WNPRC_EHRController extends SpringActionController
                     if (onCallSchedule[i + 1][column] == null) {
                         onCallSchedule[i + 1][column] = new JSONObject();
                     }
-                    String title = event.getString("title") != null ? event.getString("title").replaceAll("\\R", "<br>") : "NO NAME";
-                    String description = event.getString("description") != null ? event.getString("description").replaceAll("\\R", "<br>") : "NO PHONE NUMBER";
+                    String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
+                    title = title.replaceAll("(?i)<br */?>", "\n").trim().replaceAll("\\R", "<br>");
+                    String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
+                    description = description.replaceAll("(?i)<br */?>", "\n").trim().replaceAll("\\R", "<br>");
                     if (onCallSchedule[i + 1][column].getString("html") == null) {
                         onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
                     } else {

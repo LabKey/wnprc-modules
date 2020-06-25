@@ -140,60 +140,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
 
-    public static String BC_GOOGLE_DRIVE_PROPERTY_NAME = "BCGoogleDriveAccount";
-
-    static public LinkedHashSet<ClientDependency> getDataEntryClientDependencies()
-    {
-        LinkedHashSet<ClientDependency> dataEntryClientDependencies = new LinkedHashSet<>();
-
-        List<String> paths = Arrays.asList(
-                "/wnprc_ehr/wnprc_ext4",
-                "/wnprc_ehr/dataentry"
-        );
-
-        for (String path : paths)
-        {
-            dataEntryClientDependencies.add(ClientDependency.fromPath(path));
-        }
-
-        return dataEntryClientDependencies;
-    }
-
-    public static Set<Container> getAllContainers()
-    {
-        return new HashSet<>(getChildContainers(ContainerManager.getRoot()));
-    }
-
-    public static Set<Container> getChildContainers(Container parentContainer)
-    {
-        Set<Container> containers = new HashSet<>();
-
-        for (Container container : parentContainer.getChildren())
-        {
-            containers.add(container);
-            containers.addAll(getChildContainers(container));
-        }
-
-        return containers;
-    }
-
-    public static Container getDefaultContainer()
-    {
-        if (ContainerManager.getForPath("/WNPRC") == null)
-        {
-            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC");
-        }
-        Container wnprcContainer = ContainerManager.getForPath("/WNPRC");
-
-        Container ehrContainer = wnprcContainer.getChild("EHR");
-        if (ehrContainer == null)
-        {
-            ContainerManager.createContainer(wnprcContainer, "EHR");
-            ehrContainer = wnprcContainer.getChild("EHR");
-        }
-
-        return ehrContainer;
-    }
     /**
      * Logger for logging the logs
      */
@@ -219,18 +165,19 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     @Override
     public @Nullable Double getSchemaVersion() {
         return forceUpdate ? Double.POSITIVE_INFINITY : 20.000;
+    }
 
     @Override
-    public boolean hasScripts()
-    {
+    public boolean hasScripts() {
         return true;
     }
+
     @Override
-    protected void init()
-    {
+    protected void init() {
         TissueSampleTable.registerProperties();
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
         addController(TEST_CONTROLLER_NAME, WNPRC_EHRTestController.class);
+        
         registerRoles();
         registerPermissions();
     }
@@ -310,8 +257,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         EHRService.get().registerLabworkType(new WNPRCUrinalysisLabworkType(this));
 
-        this.registerRoles();
-        this.registerPermissions();
 
         BCReportRunner.schedule();
 
@@ -459,8 +404,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         Breeding.registerSingleFormOverrides(EHRService.get(), this);
     }
 
-    public void registerRoles()
-    {
+    public void registerRoles() {
         RoleManager.registerRole(new WNPRCFullSubmitterWithReviewerRole());
         RoleManager.registerRole(new BehaviorServiceWorker());
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());

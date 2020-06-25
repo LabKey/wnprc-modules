@@ -6,5 +6,6 @@ compileJava {
 }
 
 dependencies {
-    compile project(":externalModules:wnprc-modules:WNPRC_EHR")
+//    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:wnprc-modules:WNPRC_EHR", depProjectConfig: "apiCompile")
+    compile project(":server:modules:wnprc-modules:WNPRC_EHR")
 }

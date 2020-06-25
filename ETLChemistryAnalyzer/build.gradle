@@ -6,5 +6,5 @@ compileJava {
 }
 
 dependencies {
-    compile project(":externalModules:wnprc-modules:WNPRC_EHR")
+    compile project(":server:modules:wnprc-modules:WNPRC_EHR")
 }

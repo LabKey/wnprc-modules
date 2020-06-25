@@ -32,7 +32,6 @@ export interface RowObj {
   Id: RowMemberObj;
   date: RowMemberObj;
   type?: RowMemberObj;
-  type_lookup?: RowMemberObj;
   remark: RowMemberObj;
   amount: RowMemberObj;
   lsid: RowMemberObj;

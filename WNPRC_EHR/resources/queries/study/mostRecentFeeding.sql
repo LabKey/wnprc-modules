@@ -8,7 +8,7 @@ SELECT
     w.Room,
     w.Cage,
     w.id,
-    w.type_lookup as TypeOfChow,
+    w.type as TypeOfChow,
     cast((
         SELECT round(cast(AVG(w2.amount) as double), 2) AS _expr
         FROM study.feeding w2
@@ -20,7 +20,7 @@ SELECT
 
 FROM (
 
-         SELECT m.Id, m.type_lookup, m.remark, m.Id.curLocation.Room as Room, m.Id.curLocation.Cage as Cage, t.DateChanged
+         SELECT m.Id, m.type, m.remark, m.Id.curLocation.Room as Room, m.Id.curLocation.Cage as Cage, t.DateChanged
          FROM (
                   SELECT
                       w.Id AS Id,

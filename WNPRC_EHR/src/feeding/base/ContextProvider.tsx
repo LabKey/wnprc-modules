@@ -14,7 +14,6 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     Id: { value: "", error: "" },
     date: { value: new Date() , error: ""},
     type: { value: "", error: "" },
-    type_lookup: {value: "", error: ""},
     amount: { value: "", error: "" },
     remark: { value: "", error: "" },
     lsid: { value: "", error: "" },
@@ -103,7 +102,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
       schemaName: "study",
       queryName: "feeding",
       filterArray: filter,
-      columns: "Id,date,type,type_lookup,amount,remark,lsid,QCState"
+      columns: "Id,date,type,type,amount,remark,lsid,QCState"
     };
 
     let newformdata:Array<RowObj> = [];
@@ -123,7 +122,6 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
           Id: { value: row.Id, error: "" },
           date: { value: new Date(row.date), error: "" },
           type: { value: row.type, error: "" },
-          type_lookup: {value: row.type_lookup, error: ""},
           remark: { value: row.remark || "", error: "" },
           amount: { value: row.amount, error: "" },
           lsid: { value: row.lsid, error: "" },

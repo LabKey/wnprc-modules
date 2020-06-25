@@ -32,7 +32,7 @@ const FeedingForm: React.FunctionComponent<any> = props => {
     };
 
     const handleTypeChange = val => {
-        updateFormValues("type_lookup", val, props.index);
+        updateFormValues("type", val, props.index);
     };
 
 
@@ -129,14 +129,14 @@ const FeedingForm: React.FunctionComponent<any> = props => {
             <div className="row">
                 <div className="col-xs-3">
                     {/*queryDetails && <InputLabel labelFor="Id" label={queryDetails.Id.shortCaption}/>*/}
-                    <InputLabel labelFor="type_lookup" label="Chow"/>
+                    <InputLabel labelFor="type" label="Chow"/>
                 </div>
                 <div className="col-xs-9">
                     <DropdownOptions
                         options={feedingTypes}
-                        initialvalue={values.type_lookup.value}
+                        initialvalue={values.type.value}
                         value={handleTypeChange}
-                        name="type_lookup"
+                        name="type"
                         /*id={`restraint_${index}`}*/
                         id={'feedingtype'}
                         classname="form-control"

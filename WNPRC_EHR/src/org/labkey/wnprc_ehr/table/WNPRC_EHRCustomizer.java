@@ -140,9 +140,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         String investigatorName = "investigatorName";
         SQLFragment sql = new SQLFragment("(SELECT " +
-               " (CASE WHEN type_lookup IS NOT NULL " +
+               " (CASE WHEN type IS NOT NULL " +
                 "THEN 'test' " +
-                "WHEN type_lookup IS NULL " +
+                "WHEN type IS NULL " +
                 "THEN 'test2' " +
                 "END) as TypeTest)");
         ExprColumn newCol = new ExprColumn(ti, investigatorName, sql, JdbcType.VARCHAR);

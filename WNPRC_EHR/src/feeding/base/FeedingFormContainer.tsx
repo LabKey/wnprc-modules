@@ -89,7 +89,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     copyFormData.push({
       Id: { value: "", error: "" },
       date: { value: new Date() , error: ""},
-      type_lookup: { value: "", error: "" },
+      type: { value: "", error: "" },
       amount: { value: "", error: "" },
       remark: { value: "", error: "" },
       lsid: { value: "", error: "" },
@@ -157,7 +157,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
           Id: { value: id, error: "" },
           date: { value: new Date() , error: ""},
           type: { value: "", error: "" },
-          type_lookup: { value: "", error: "" },
           amount: { value: "", error: "" },
           remark: { value: "", error: "" },
           lsid: { value: "", error: "" },

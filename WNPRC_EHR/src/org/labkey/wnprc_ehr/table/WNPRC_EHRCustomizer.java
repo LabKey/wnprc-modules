@@ -137,17 +137,18 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeFeedingTable(AbstractTableInfo ti)
     {
-
-        String investigatorName = "investigatorName";
+        Double conv = new Double(.667);
+        Double invconv = new Double(1/conv);
+        String chowConversion = "chowConversion";
         SQLFragment sql = new SQLFragment("(SELECT " +
-               " (CASE WHEN type IS NOT NULL " +
-                "THEN 'test' " +
-                "WHEN type IS NULL " +
-                "THEN 'test2' " +
-                "END) as TypeTest)");
-        ExprColumn newCol = new ExprColumn(ti, investigatorName, sql, JdbcType.VARCHAR);
-        newCol.setLabel("Investigator");
-        newCol.setDescription("This column shows the name of the investigator on the project. It first checks if there is an investigatorId, and if not defaults to the old inves column.");
+               " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log') " +
+                "THEN ROUND(amount*"+ conv.toString() + ")" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower') " +
+                "THEN ROUND(amount*" + invconv.toString() + ")" +
+                "END) as ChowConversion)");
+        ExprColumn newCol = new ExprColumn(ti, chowConversion, sql, JdbcType.VARCHAR);
+        newCol.setLabel("Chow Conversion");
+        newCol.setDescription("This column shows the calculated conversion amount between log and flower chows. The current conversion is 12g log <=> 18g flower.");
         ti.addColumn(newCol);
     }
 

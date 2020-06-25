@@ -82,7 +82,7 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
         {
             return;
         }
-      var chargeType = table.getMutableColumn("chargeType");
+      var chargeType = table.getMutableColumn("chargeGroup");
       if (chargeType != null)
       {
           chargeType.setFk(QueryForeignKey.from(us, table.getContainerFilter())

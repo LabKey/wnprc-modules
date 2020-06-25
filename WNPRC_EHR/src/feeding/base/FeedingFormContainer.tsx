@@ -2,13 +2,13 @@ import * as React from "react";
 import { useEffect, useState, useContext, useRef } from "react";
 import {Button} from "react-bootstrap";
 import FeedingForm from "./FeedingForm";
-import { Query, Security, Filter } from "@labkey/api";
+import { Query, Security, Filter, Utils} from "@labkey/api";
 import { AppContext } from "./ContextProvider";
 import "../../theme/css/react-datepicker.css";
 import "../../theme/css/index.css";
 import SubmitModal from "../../components/SubmitModal";
 import {
-  checkEditMode,
+  checkEditMode, getAnimalIdsFromLocation,
   groupCommands,
   labkeyActionSelectWithPromise,
   saveRowsDirect,
@@ -17,6 +17,7 @@ import {
 } from "../../query/helpers";
 import {ActionURL} from '@labkey/api';
 import AnimalInfoPane from "../../components/AnimalInfoPane";
+import BatchModal from "../../components/BatchModal";
 
 const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   const {
@@ -27,8 +28,9 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     setAnimalInfoExternal,
     animalInfo,
     setAnimalInfoStateExternal,
-    animalInfoState
-
+    animalInfoState,
+    setAnimalIdsExternal,
+      animalIds
   } = useContext(AppContext);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
@@ -87,7 +89,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     copyFormData.push({
       Id: { value: "", error: "" },
       date: { value: new Date() , error: ""},
-      type: { value: "", error: "" },
+      type_lookup: { value: "", error: "" },
       amount: { value: "", error: "" },
       remark: { value: "", error: "" },
       lsid: { value: "", error: "" },
@@ -142,6 +144,37 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     });
   };
 
+  /*const triggerLocation = (loc: Array<any>) => {
+    setLocation(loc);
+  };*/
+
+  const setFormIds = (ids: any) => {
+    setFormDataExternal([]);
+    setAnimalIdsExternal(ids);
+      let t = [];
+      ids.forEach((id, i) => {
+        t.push({
+          Id: { value: id, error: "" },
+          date: { value: new Date() , error: ""},
+          type: { value: "", error: "" },
+          type_lookup: { value: "", error: "" },
+          amount: { value: "", error: "" },
+          remark: { value: "", error: "" },
+          lsid: { value: "", error: "" },
+          command: {value: "insert", error: ""},
+          QCStateLabel: {value: "Completed", error: ""}
+        });
+      });
+    setFormDataExternal(t);
+  };
+
+  const passLocationAndSetIds = (location) => {
+    const e = getAnimalIdsFromLocation(location).then((f)=>{
+      console.log(f);
+      setFormIds(f);
+    });
+  }
+
 
   return (
     <div className={`content-wrapper-body ${false ? "saving" : ""}`}>
@@ -149,6 +182,30 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         <div className="panel-heading">
           <h3>Data entry</h3>
         </div>
+        <Button
+            variant="primary"
+            className="wnprc-secondary-btn"
+            id="add-record"
+            /*disabled={singleEditMode}*/
+            onClick={() => {
+              let newForm = addRecord();
+              setFormDataExternal(newForm)
+              /*let index = formdata.length;
+              setCurrent(index);*/
+            }}
+        >
+          Add record
+        </Button>
+        <Button
+            variant="primary"
+            className="wnprc-secondary-btn"
+            id="add-batch"
+            /*disabled={singleEditMode}*/
+            onClick={handleShowRewrite}
+        >
+          Add Batch
+        </Button>
+
         {showModal == "submit-all-btn" && (
             <SubmitModal
                 name="final"
@@ -160,11 +217,18 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                 flipState={flipModalState}
             />
         )}
+        {showModal == "add-batch" && (
+            <BatchModal
+                setLocation={passLocationAndSetIds}
+                setIds={setFormIds}
+                flipState={flipModalState}
+            />
+        )}
         <form className="feeding-form" ref={formEl}>
           {formData.map((item, i) => (
             <div>
               <div className="row" key={i}>
-                <div className="col-xs-12">
+                <div className="col-xs-10">
                   <div className="row card">
                     <div className="card-header">
                     </div>
@@ -179,6 +243,39 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                       </div>
                     </div>
                   </div>
+                </div>
+                <div className="col-xs-2">
+                  <button
+                      className="remove-record-button"
+                      id={`remove-record-btn_${i}`}
+                      type="button"
+                      title="Remove Record"
+                      aria-label="Close"
+                      onClick={e => {
+                        let copyformdata = [...formData];
+                        /*copyformdata[i]["visibility"]["value"] =
+                            "hide-record";*/
+                        setFormDataExternal(copyformdata);
+                        sleep(100).then(() => {
+                          let copyformdata = [...formData];
+                          //only need to do this part if we are in wasSaved or editMode, otherwise we can splice.
+                          //TODO cover edit mode
+                          copyformdata.splice(i, 1);
+                          //the validity of this record is no longer valid, so set the error level to whatever it was
+                          setFormDataExternal(copyformdata);
+                          /*onValidate();*/
+                        });
+                      }}
+                  >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                    >
+                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>

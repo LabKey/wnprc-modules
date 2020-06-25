@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "jsx": "react",
+    "lib": ["esnext", "dom"],
     "sourceMap": false,
     "experimentalDecorators": true,
     "moduleResolution": "node",

@@ -76,6 +76,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeHousingTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "project")) {
                 customizeProjectTable((AbstractTableInfo) table);
+            } else if (matches(table, "study", "feeding")) {
+                customizeFeedingTable((AbstractTableInfo) table);
             }
         }
     }
@@ -127,6 +129,22 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             "firstName " +
                         "END) AS investigatorWithName " +
                 "from ehr.investigators where rowid = " + ExprColumn.STR_TABLE_ALIAS + ".investigatorId), " + ExprColumn.STR_TABLE_ALIAS + ".inves)");
+        ExprColumn newCol = new ExprColumn(ti, investigatorName, sql, JdbcType.VARCHAR);
+        newCol.setLabel("Investigator");
+        newCol.setDescription("This column shows the name of the investigator on the project. It first checks if there is an investigatorId, and if not defaults to the old inves column.");
+        ti.addColumn(newCol);
+    }
+
+    private void customizeFeedingTable(AbstractTableInfo ti)
+    {
+
+        String investigatorName = "investigatorName";
+        SQLFragment sql = new SQLFragment("(SELECT " +
+               " (CASE WHEN type_lookup IS NOT NULL " +
+                "THEN 'test' " +
+                "WHEN type_lookup IS NULL " +
+                "THEN 'test2' " +
+                "END) as TypeTest)");
         ExprColumn newCol = new ExprColumn(ti, investigatorName, sql, JdbcType.VARCHAR);
         newCol.setLabel("Investigator");
         newCol.setDescription("This column shows the name of the investigator on the project. It first checks if there is an investigatorId, and if not defaults to the old inves column.");

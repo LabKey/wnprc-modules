@@ -79,6 +79,7 @@
     "react-data-grid-addons": "^2.0.78",
     "react-dom": "^16.13.1",
     "react-tabs": "^1.0.0",
+    "react-select": "^3.1.0",
     "rsvp": "~3.3.0",
     "simplefilter": "^1.0.0",
     "toastr": "^2.0.0",

@@ -10,6 +10,8 @@ export interface ContextProps {
   editMode: any;
   setEditMode: any;
   feedingTypes: any;
+  animalIds: any;
+  setAnimalIdsExternal: any;
 }
 
 export interface ConfigProps {

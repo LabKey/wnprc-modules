@@ -25,6 +25,8 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
   const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
   const [feedingTypes, setFeedingTypes] = useState<Array<any>>();
+  const [animalIds, setAnimalIds] = useState<Array<any>>();
+  const [locations, setLocations] = useState<Array<any>>();
 
   const setQueryDetailsExternal = (qd) => {
     setQueryDetails(qd);
@@ -38,6 +40,10 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const setAnimalInfoStateExternal = (ais) => {
     setAnimalInfoState(ais);
   };
+
+  const setAnimalIdsExternal = (ids) => {
+    setAnimalIds(ids);
+  }
 
   const constructObject = (key, val) => {
     let add;
@@ -60,7 +66,9 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     setEditMode,
     setAnimalInfoStateExternal,
     animalInfoState,
-    feedingTypes
+    feedingTypes,
+    setAnimalIdsExternal,
+    animalIds
   };
 
   useEffect( () => {
@@ -149,6 +157,8 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
       setFormDataExternal(newformdata);
     })
   },[editMode]);
+
+
 
   return (
     <AppContext.Provider value={defaultContext}>{children}</AppContext.Provider>

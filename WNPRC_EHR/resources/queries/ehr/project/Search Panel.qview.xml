@@ -7,14 +7,9 @@
                <property name="columnTitle" value="Account"/>
            </properties>
        </column>
-       <column name="investigatorId/investigatorWithName">
+       <column name="investigatorName">
             <properties>
-               <property name="columnTitle" value="New Investigator"/>
-           </properties>
-       </column>
-       <column name="inves">
-           <properties>
-               <property name="columnTitle" value="Legacy Investigator"/>
+               <property name="columnTitle" value="Investigator"/>
            </properties>
        </column>
        <column name="avail"/>
@@ -29,20 +24,7 @@
        <column name="shortname"/>
        <column name="container"/>
        <column name="displayName"/>
-       <!--<column name="activeAssignments/activeAssignments">-->
-           <!--<properties>-->
-               <!--<property name="columnTitle" value="Animals Assigned"/>-->
-           <!--</properties>-->
-       <!--</column>-->
-       <!--<column name="lastAssignment/lastAssignmentDate">-->
-           <!--<properties>-->
-               <!--<property name="columnTitle" value="Last Assignment Date"/>-->
-           <!--</properties>-->
-       <!--</column>-->
    </columns>
-   <!--<filters>-->
-       <!--<filter column="totalAssigned/ActiveAssignments" operator="gt" value="0"/>-->
-   <!--</filters>-->
    <sorts>
        <sort column="project" descending="true"/>
    </sorts>

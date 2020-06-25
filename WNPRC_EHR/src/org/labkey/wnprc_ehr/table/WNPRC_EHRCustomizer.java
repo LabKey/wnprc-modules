@@ -22,13 +22,16 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
+import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
@@ -78,6 +81,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeHousingTable((AbstractTableInfo) table);
 //            } else if (table.getName().equalsIgnoreCase("requests") && table.getSchema().getName().equalsIgnoreCase("ehr")) {
 //                customizeRequestsTable((AbstractTableInfo) table);
+            } else if (matches(table, "ehr", "project")) {
+                customizeProjectTable((AbstractTableInfo) table);
             }
         }
     }
@@ -163,6 +168,24 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 }
             }
         }
+    }
+
+    private void customizeProjectTable(AbstractTableInfo ti)
+    {
+        String investigatorName = "investigatorName";
+        SQLFragment sql = new SQLFragment("COALESCE((SELECT " +
+                "(CASE WHEN lastName IS NOT NULL AND firstName IS NOT NULL " +
+                            "THEN (lastName ||', '|| firstName) " +
+                        "WHEN lastName IS NOT NULL AND firstName IS NULL " +
+                            "THEN lastName " +
+                        "ELSE " +
+                            "firstName " +
+                        "END) AS investigatorWithName " +
+                "from ehr.investigators where rowid = " + ExprColumn.STR_TABLE_ALIAS + ".investigatorId), " + ExprColumn.STR_TABLE_ALIAS + ".inves)");
+        ExprColumn newCol = new ExprColumn(ti, investigatorName, sql, JdbcType.VARCHAR);
+        newCol.setLabel("Investigator");
+        newCol.setDescription("This column shows the name of the investigator on the project. It first checks if there is an investigatorId, and if not defaults to the old inves column.");
+        ti.addColumn(newCol);
     }
 
     private void customizeBirthTable(AbstractTableInfo ti)

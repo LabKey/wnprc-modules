@@ -16,12 +16,14 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
-//import com.google.common.base.MoreObjects;
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -30,12 +32,15 @@ import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.module.Module;
@@ -64,7 +69,6 @@ import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
@@ -73,13 +77,13 @@ import org.labkey.googledrive.api.GoogleDriveService;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
-import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
 import org.labkey.wnprc_ehr.calendar.Calendar;
-import org.labkey.wnprc_ehr.calendar.GoogleCalendar;
 import org.labkey.wnprc_ehr.calendar.Office365Calendar;
+import org.labkey.wnprc_ehr.calendar.OnCallCalendar;
+import org.labkey.wnprc_ehr.calendar.SurgeryCalendarGoogle;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -106,14 +110,18 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 /**
  * User: bbimber
@@ -123,6 +131,7 @@ import java.util.UUID;
 public class WNPRC_EHRController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_EHRController.class);
+    private static Logger _log = Logger.getLogger(WNPRC_EHRController.class);
 
     public WNPRC_EHRController()
     {
@@ -972,6 +981,145 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+    public static class DateRangeEvent
+    {
+        private Date startDate;
+        private Date endDate;
+
+        public Date getStartDate()
+        {
+            return startDate;
+        }
+
+        public void setStartDate(Date startDate)
+        {
+            this.startDate = startDate;
+        }
+
+        public Date getEndDate()
+        {
+            return endDate;
+        }
+
+        public void setEndDate(Date endDate)
+        {
+            this.endDate = endDate;
+        }
+    }
+
+    @ActionNames("FetchOnCallScheduleGoogleEvents")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class FetchOnCallScheduleGoogleEventsAction extends ApiAction<DateRangeEvent>
+    {
+        @Override
+        public Object execute(DateRangeEvent event, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try
+            {
+                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "wnprc").getTable("on_call_calendars");
+                Sort sort = new Sort("-display_name");
+
+                Set<FieldKey> columns = new HashSet<>();
+                columns.add(FieldKey.fromString("display_name"));
+                columns.add(FieldKey.fromString("calendar_id"));
+                columns.add(FieldKey.fromString("calendar_type"));
+                columns.add(FieldKey.fromString("default_bg_color"));
+                final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
+
+                TableSelector ts = new TableSelector(ti, colMap.values(), null, sort);
+                Map<String, Object>[] onCallCalendars = ts.getMapArray();
+
+                //Calculate how many days to show on the schedule
+                java.time.LocalDate startDate = java.time.LocalDate.ofInstant(event.getStartDate().toInstant(), ZoneId.systemDefault());
+                java.time.LocalDate endDate = java.time.LocalDate.ofInstant(event.getEndDate().toInstant(), ZoneId.systemDefault());
+                long daysBetween = DAYS.between(startDate, endDate);
+
+                //Set the headers for the on call schedule html table
+                JSONObject[][] onCallSchedule = new JSONObject[(int)daysBetween + 2][onCallCalendars.length + 2];
+                onCallSchedule[0][0] = new JSONObject().put("html", "Date");
+                onCallSchedule[0][1] = new JSONObject().put("html", "Day");
+                for (int i = 0; i < onCallCalendars.length; i++) {
+                    onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name"));
+                }
+                //Set the dates in the html table
+                for (int i = 0; i <= daysBetween; i++) {
+                    onCallSchedule[i + 1][0] = new JSONObject().put("html", startDate.plusDays(i).toString());
+                }
+                //Set the days of the week in the html table
+                for (int i = 0; i <= daysBetween; i++) {
+                    onCallSchedule[i + 1][1] = new JSONObject().put("html", WordUtils.capitalizeFully(startDate.plusDays(i).getDayOfWeek().toString()));
+                }
+
+                //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
+                for (int i = 0; i < onCallCalendars.length; i++) {
+                    Map<String, Object> row = onCallCalendars[i];
+                    JSONObject events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
+                    JSONArray eventsArray = events.getJSONArray("events");
+
+                    organizeOnCallEvents(onCallSchedule, eventsArray, startDate, endDate, i + 2);
+                }
+
+                response.put("success", true);
+                response.put("onCallSchedule", onCallSchedule);
+            }
+            catch (Exception e)
+            {
+                _log.error("Error fetching/organizing on-call schedule", e);
+                response.put("success", false);
+            }
+
+            return response;
+        }
+    }
+
+    private void organizeOnCallEvents(JSONObject[][] onCallSchedule, JSONArray events, java.time.LocalDate startDate, java.time.LocalDate endDate, int column) {
+        long daysBetween = DAYS.between(startDate, endDate);
+        for (int i = 0; i <= daysBetween; i++) {
+            for (int j = 0; j < events.length(); j++) {
+                JSONObject event = events.getJSONObject(j);
+                if (startDate.plusDays(i).equals(event.get("date"))) {
+                    if (onCallSchedule[i + 1][column] == null) {
+                        onCallSchedule[i + 1][column] = new JSONObject();
+                    }
+                    String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
+                    title = title.replaceAll("(?i)<br */?>", "\n").trim();
+                    title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
+                    String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
+                    description = description.replaceAll("(?i)<br */?>", "\n").trim();
+                    description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
+                    if (onCallSchedule[i + 1][column].getString("html") == null) {
+                        onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
+                    } else {
+                        onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");
+                    }
+                }
+            }
+            if (onCallSchedule[i + 1][column] == null) {
+                onCallSchedule[i + 1][column] = new JSONObject().put("html", "<strong>NO DATA</strong>");
+            }
+        }
+    }
+
+    private JSONObject fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType, String backgroundColor, Date startDate, Date endDate) throws Exception
+    {
+        calendar.setUser(getUser());
+        calendar.setContainer(getContainer());
+        JSONObject events = null;
+        if (calendarType.equalsIgnoreCase("Office365Resource"))
+        {
+            events = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.ROOM, startDate, endDate);
+        }
+        else
+        {
+            events = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.CALENDAR, startDate, endDate);
+        }
+        return events;
+    }
+
     public abstract class WNPRCJspPageAction extends SimpleJspPageAction
     {
         @Override
@@ -1007,7 +1155,7 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    @ActionNames("SurgeryProcedureSchedule")
+        @ActionNames("SurgeryProcedureSchedule")
     @RequiresLogin()
     public class SurgeryProcedureScheduleAction extends WNPRCJspPageAction
     {
@@ -1439,20 +1587,15 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                String office365EventsString = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor());
-                response.put("events", office365EventsString);
-                if (office365EventsString != null && office365EventsString.trim().length() > 0)
-                {
-                    response.put("success", true);
-                }
+                JSONObject office365Events = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor(), null, null);
+                String office365EventsString = office365Events.toString();
+                response = generateSurgeryProcedureEventsResponse(response, office365EventsString);
             }
             catch (Exception e)
             {
                 //TODO add logging
                 response.put("success", false);
                 response.put("exception", e.toString());
-                System.out.println(Arrays.toString(e.getStackTrace()));
-                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
 
@@ -1473,12 +1616,9 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                String googleEventsString = fetchCalendarEvents(new GoogleCalendar(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor());
-                response.put("events", googleEventsString);
-                if (googleEventsString != null && googleEventsString.trim().length() > 0)
-                {
-                    response.put("success", true);
-                }
+                JSONObject googleEvents = fetchCalendarEvents(new SurgeryCalendarGoogle(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor(), null, null);
+                String googleEventsString = googleEvents.toString();
+                response = generateSurgeryProcedureEventsResponse(response, googleEventsString);
             }
             catch (Exception e)
             {
@@ -1490,20 +1630,14 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    private String fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType, String backgroundColor) throws Exception
+    private JSONObject generateSurgeryProcedureEventsResponse(JSONObject response, String eventString)
     {
-        calendar.setUser(getUser());
-        calendar.setContainer(getContainer());
-        String eventsString = null;
-        if (calendarType.equalsIgnoreCase("Office365Resource"))
+        response.put("events", eventString);
+        if (eventString != null && eventString.trim().length() > 0)
         {
-            eventsString = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.ROOM);
+            response.put("success", true);
         }
-        else
-        {
-            eventsString = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.CALENDAR);
-        }
-        return eventsString;
+        return response;
     }
 
     @ActionNames("PathologyCaseList")
@@ -1554,6 +1688,23 @@ public class WNPRC_EHRController extends SpringActionController
         public String getTitle()
         {
             return "Necropsy Collection List";
+        }
+    }
+
+    @ActionNames("OnCallCalendar")
+    @RequiresLogin()
+    public class OnCallCalendarAction extends WNPRCJspPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/calendars/OnCallCalendar.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "On Call Calendar";
         }
     }
 
@@ -1759,5 +1910,27 @@ public class WNPRC_EHRController extends SpringActionController
         {
             return true;
         }
+    }
+
+    public String getVLStatus(User user, Container container, Integer status) throws SQLException
+    {
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
+        QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
+
+        // Define columns to get
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("Key"));
+        columns.add(FieldKey.fromString("Status"));
+
+        // Execute the query
+        String thestatus = null;
+        try ( Results rs = viralLoadQuery.select(columns, filter) )
+        {
+            if (rs.next()){
+                thestatus = rs.getString(FieldKey.fromString("Status"));
+            }
+        }
+        return thestatus;
     }
 }

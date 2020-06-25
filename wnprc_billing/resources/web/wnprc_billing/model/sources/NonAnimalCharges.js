@@ -18,9 +18,7 @@ EHR.model.DataModelManager.registerMetadata('NonAnimalCharges', {
                 hidden: false,
                 xtype: 'wnprc_billing-nonanimalchargesdebitacctfield',
                 lookup: {
-                    schemaName: 'ehr_billing',
-                    queryName: 'aliases',
-                    filterArray: [LABKEY.Filter.create('isAcceptingCharges', 'N', LABKEY.Filter.Types.NEQ_OR_NULL)]
+                    columns:"alias,budgetStartDate,budgetEndDate"
                 },
                 columnConfig: {
                     width: 125

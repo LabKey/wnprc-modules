@@ -1,6 +1,5 @@
 package org.labkey.wnprc_ehr.calendar;
 
-import jdk.jfr.Event;
 import microsoft.exchange.webservices.data.autodiscover.IAutodiscoverRedirectionUrl;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import microsoft.exchange.webservices.data.core.PropertySet;
@@ -327,17 +326,17 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return eventSourceObject;
     }
 
-    private String getCalendarEvents(Date startDate, Date endDate, String calendarName, String backgroundColor) throws Exception
+    private JSONObject getCalendarEvents(Date startDate, Date endDate, String calendarName, String backgroundColor) throws Exception
     {
         FolderId folderId = getFolderIdFromCalendarName(calendarName);
         JSONObject jsonEvents = getJsonEventList(getCalendarAppointments(startDate, endDate, folderId), calendarName, backgroundColor);
-        return jsonEvents.toString();
+        return jsonEvents;
     }
 
-    private String getRoomEvents(Date startDate, Date endDate, String roomId, String backgroundColor) throws Exception
+    private JSONObject getRoomEvents(Date startDate, Date endDate, String roomId, String backgroundColor) throws Exception
     {
         JSONObject jsonEvents = getJsonEventList(getRoomAppointments(startDate, endDate, roomId), roomId, backgroundColor);
-        return jsonEvents.toString();
+        return jsonEvents;
     }
 
     private List<Appointment> getCalendarAppointments(Date startDate, Date endDate, FolderId folderId) throws Exception
@@ -443,14 +442,18 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return folderId;
     }
 
-    public String getEventsAsJson(String calendarName, String backgroundColor, EventType eventType) throws Exception
+    public JSONObject getEventsAsJson(String calendarName, String backgroundColor, EventType eventType, Date startDate, Date endDate) throws Exception
     {
         authenticate();
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -2);
-        Date startDate = cal.getTime();
+        if (startDate == null) {
+            startDate = cal.getTime();
+        }
         cal.add(Calendar.MONTH, 23);
-        Date endDate = cal.getTime();
+        if (endDate == null) {
+            endDate = cal.getTime();
+        }
         if (eventType == EventType.CALENDAR)
         {
             return getCalendarEvents(startDate, endDate, calendarName, backgroundColor);
@@ -459,7 +462,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         {
             return getRoomEvents(startDate, endDate, calendarName, backgroundColor);
         }
-        return new JSONObject().toString();
+        return new JSONObject();
     }
 
     static class RedirectionUrlCallback implements IAutodiscoverRedirectionUrl

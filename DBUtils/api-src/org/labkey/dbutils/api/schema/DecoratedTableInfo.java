@@ -15,7 +15,6 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainKind;
-import org.labkey.api.gwt.client.AuditBehaviorType;
 import org.labkey.api.query.AggregateRowConfig;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
@@ -35,6 +34,7 @@ import org.labkey.api.util.StringExpression;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.data.xml.TableType;
+import org.labkey.data.xml.queryCustomView.FilterType;
 
 import java.util.Collection;
 import java.util.List;
@@ -169,13 +169,9 @@ public class DecoratedTableInfo implements TableInfo {
     }
 
     @Override
-    public NamedObjectList getSelectList() {
-        return _tableInfo.getSelectList();
-    }
-
-    @Override
-    public NamedObjectList getSelectList(String columnName) {
-        return _tableInfo.getSelectList(columnName);
+    public @NotNull NamedObjectList getSelectList(String columnName, List<FilterType> filters, Integer maxRows, String titleColumn)
+    {
+        return _tableInfo.getSelectList(columnName, filters, maxRows, titleColumn);
     }
 
     @Override

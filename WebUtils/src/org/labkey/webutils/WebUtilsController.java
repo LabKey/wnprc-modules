@@ -16,12 +16,8 @@
 
 package org.labkey.webutils;
 
-import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
-import org.labkey.api.action.ApiResponse;
-import org.labkey.api.action.ApiResponseWriter;
 import org.labkey.api.action.ApiSimpleResponse;
-import org.labkey.api.action.SimpleApiJsonForm;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.Module;
@@ -53,20 +49,22 @@ public class WebUtilsController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             return new JspView("/org/labkey/webutils/view/begin.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 
     @RequiresNoPermission
     @ActionNames("loginStatus")
-    public class getLoginStatus extends ApiAction<Void> {
+    public class getLoginStatus extends ReadOnlyApiAction<Void>
+    {
         @Override
         public Object execute(Void v, BindException errors) throws Exception {
             Map<String, Object> json = new HashMap<>();

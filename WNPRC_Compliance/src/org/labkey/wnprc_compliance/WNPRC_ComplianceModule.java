@@ -47,8 +47,10 @@ public class WNPRC_ComplianceModule extends ExtendedSimpleModule {
         return Collections.singleton(WNPRC_ComplianceSchema.NAME);
     }
 
+    @Override
     public void registerSchemas() {
         DefaultSchema.registerProvider(WNPRC_ComplianceSchema.NAME, new DefaultSchema.SchemaProvider(this) {
+            @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module) {
                 return (QuerySchema) new WNPRC_ComplianceSchema(schema.getUser(), schema.getContainer());
             }

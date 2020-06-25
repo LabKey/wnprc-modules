@@ -1,7 +1,7 @@
 package org.labkey.apikey;
 
 import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.Module;
@@ -32,18 +32,20 @@ public class ApiKeyController extends SpringActionController {
 
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception {
             return new JspView("/org/labkey/apikey/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 
     @RequiresNoPermission
-    public class ExecuteServiceAction extends ApiAction<Void> {
+    public class ExecuteServiceAction extends ReadOnlyApiAction<Void>
+    {
         @Override
         public Object execute(Void v, BindException errors) throws Exception {
             HttpServletRequest req = getViewContext().getRequest();
@@ -72,7 +74,7 @@ public class ApiKeyController extends SpringActionController {
     }
 
     @RequiresNoPermission
-    public class GetKeyInfoAction extends ApiAction<Void> {
+    public class GetKeyInfoAction extends ReadOnlyApiAction<Void> {
         @Override
         public Object execute(Void v, BindException errors) throws Exception {
             HttpServletRequest req = getViewContext().getRequest();

@@ -55,7 +55,7 @@
     }
 
     Group pathologyGroup = GroupManager.getGroup(getContainer(), "pathology (LDAP)", GroupEnumType.SITE);
-    boolean isPathologist = getUser().isInGroup(pathologyGroup.getUserId()) || getUser().isSiteAdmin();
+    boolean isPathologist = getUser().isInGroup(pathologyGroup.getUserId()) || getUser().hasSiteAdminPermission();
 %>
 
 <style type="text/css">

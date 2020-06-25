@@ -38,6 +38,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
         return null;
     }
 
+    @Override
     public String getMessageBodyHTML(Container c, User u) {
         WNPRC_EHREmail email = new WNPRC_EHREmail(getPathToJsp());
 
@@ -53,6 +54,7 @@ abstract public class AbstractJspEmailNotification implements Notification {
         return emailContents;
     }
 
+    @Override
     public boolean isAvailable(Container c) {
         if (!c.getActiveModules().contains(ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class))) {
             return false;

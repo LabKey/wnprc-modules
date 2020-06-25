@@ -42,7 +42,7 @@ public abstract class PhysicalExamForm extends TaskForm {
             section.addConfigSource("PhysicalExam");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Encounter.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/PhysicalExam.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Encounter.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/PhysicalExam.js"));
     }
 }

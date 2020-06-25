@@ -14,7 +14,7 @@ public class TreatmentOrdersSection extends SimpleFormSection {
     public TreatmentOrdersSection() {
 
         super("study", "Treatment Orders", "Treatments", "ehr-gridpanel");
-        addClientDependency(ClientDependency.fromPath("ehr/window/AddScheduledTreatmentWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("ehr/window/AddScheduledTreatmentWindow.js"));
 
     }
     @Override

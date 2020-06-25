@@ -1,6 +1,11 @@
+import org.labkey.gradle.util.BuildUtils
+
 dependencies {
+
+    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiCompile")
+
     apiCompile "com.google.guava:guava:17.0"
-    compile project(":server:modules:query")
+    compile project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"))
     external "org.jooq:jooq:3.8.4"
     external "javax.xml.bind:jaxb-api:${jaxbVersion}"
 }

@@ -159,6 +159,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                         ref: '../submit',
                         scope: this,
                         handler: function(o){
+                            Ext4.Msg.wait('Loading...');
 
                             var assignedTo = o.ownerCt.ownerCt.theForm.assignedTo.getValue();
                             if (!assignedTo){
@@ -279,7 +280,11 @@ WNPRC_EHR.DatasetButtons = new function(){
          * This was intended as a mechanism for vets to indicate that they have viewed clinpath results.
          * @param dataRegionName
          */
-        markReviewedButtonHandler: function(dataRegion){
+        addMarkReviewedBtn: function(dataRegionName, menu, schemaName, queryName, config){
+            config = config || {};
+
+            this.addMenuItem(menu, 'Mark Reviewed', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                 var checked = dataRegion.getChecked();
                 if(!checked || !checked.length){
                     alert('No records selected');
@@ -383,6 +388,16 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }
                     Ext4.Msg.hide();
                 }
+                });
+        },
+
+        addMenuItem: function(menu, text, handler) {
+            var el = document.createElement('li');
+            var a = document.createElement('a');
+            a.innerText = text;
+            a.onclick = handler;
+            el.appendChild(a);
+            menu.appendChild(el);
         },
 
         /**
@@ -394,11 +409,8 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param [config.formType]
          */
         addCreateTaskFromIdsBtn: function(dataRegionName, menu, config){
-            menu.add({
-                text: 'Schedule '+config.formType,
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Schedule ' + config.formType, function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -539,8 +551,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                         Ext.Msg.hide();
 
                     }
-                }
-            });
+                });
         },
 
         /**
@@ -551,7 +562,11 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param config
          * @param [config.formType]
          */
-        createTaskButtonHandler: function(dataRegion, formType){
+        addCreateTaskBtn: function(dataRegionName, menu, config){
+            config = config || {};
+
+            this.addMenuItem(menu, 'Schedule '+config.formType+' Task', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
             var checked = dataRegion.getChecked();
                 if(!checked || !checked.length){
                     alert('No records selected');
@@ -672,14 +687,20 @@ WNPRC_EHR.DatasetButtons = new function(){
                     if(!data || !data.rows){
                         return;
                     }
-                }
+
+                        Ext.Msg.hide();
+
+                    }
+                });
         },
         /**
          * This add a handler to a dataset that allows the user to change the QCState of the records, designed to approve or deny blood requests.
          * It also captures values for 'billedBy' and 'instructions'.
          * @param dataRegion
          */
-        changeQCBloodStatusButtonHandler: function (dataRegion) {
+        addChangeBloodQCStateBtn: function(dataRegionName, menu){
+            this.addMenuItem(menu, 'Change Request Status', function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
             var checked = dataRegion.getChecked();
             if(!checked || !checked.length){
                 alert('No records selected');
@@ -831,6 +852,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                     }]
                 }).show();
             }
+                });
         },
 
         /**
@@ -854,173 +876,43 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param menu
          */
         addFeedingTaskBtn: function(dataRegionName, menu){
-            menu.add({
-                text: 'Add Batch of Records',
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {formtype: 'Feeding'});
-                }
+            this.addMenuItem(menu, 'Add Batch of Records', function() {
+                window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {formtype: 'Feeding'});
             });
         },
 
-
-        /**
-         * This handler will allow the user to basically change the status of the VVC request in batch.
-         * It is different than Change Request Status button in that it has more QC states listed.
-         * @param dataRegion
-         */
-        approveVVCButtonHandler: function (dataRegion){
-
-            var checked = dataRegion.getChecked();
-            if(!checked || !checked.length){
-                alert('No records selected');
-                return;
-            }
-
-            Ext4.Msg.wait('Loading...');
-            LABKEY.Query.selectRows({
-                schemaName: dataRegion.schemaName,
-                queryName: dataRegion.queryName,
-                columns: 'rowid,date,requestid,taskid',
-                filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
-                scope: this,
-                success: onSuccess,
-                failure: EHR.Utils.onError
-            });
-
-            function onSuccess(data) {
-                var records = data.rows;
-                Ext4.Msg.hide();
-
-                if (!records || !records.length) {
-                    Ext4.Msg.hide();
-                    alert('No records found');
+        addChangeQCStateBtn: function(dataRegionName, menu){
+            this.addMenuItem(menu, 'Change Request Status', function() {
+                var dataRegion = LABKEY.DataRegions[dataRegionName];
+                var checked = dataRegion.getChecked();
+                if (!checked || !checked.length) {
+                    alert('No records selected');
                     return;
                 }
 
-                new Ext4.Window({
-                    title: 'Approve VVC Request',
-                    width: 430,
-                    autoHeight: true,
-                    items: [{
-                        xtype: 'form',
-                        ref: 'theForm',
-                        bodyStyle: 'padding: 5px;',
-                        defaults: {
-                            border: false
-                        },
-                        items: [{
-                            html: 'Total Records: ' + checked.length + '<br><br>',
-                            tag: 'div'
-                        }, {
-                            xtype: 'combo',
-                            fieldLabel: 'Status',
-                            width: 300,
-                            triggerAction: 'all',
-                            mode: 'local',
-                            store: new LABKEY.ext4.Store({
-                                xtype: 'labkey-store',
-                                schemaName: 'study',
-                                queryName: 'qcstate',
-                                columns: 'rowid,label',
-                                sort: 'label',
-                                //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
-                                autoLoad: true
-                            }),
-                            id: 'approve-request-qc',
-                            displayField: 'Label',
-                            valueField: 'RowId',
-                            ref: 'qcstate'
-                        }]
-                    }],
-                    buttons: [{
-                        text: 'Submit',
-                        disabled: false,
-                        formBind: true,
-                        ref: '../submit',
-                        scope: this,
-                        handler: function (o) {
-                            var win = o.up('window');
-                            var form = win.down('form');
+                Ext4.Msg.wait('Loading...');
+                LABKEY.Query.selectRows({
+                    schemaName: dataRegion.schemaName,
+                    queryName: dataRegion.queryName,
+                    columns: 'rowid,date,requestid,taskid',
+                    filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+                    scope: this,
+                    success: onSuccess,
+                    failure: EHR.Utils.onError
+                });
 
-                            var qc = form.getForm().findField('approve-request-qc').getValue()
+                function onSuccess(data) {
+                    var records = data.rows;
+                    Ext4.Msg.hide();
 
-                            if (!qc) {
-                                alert('Must choose a status');
-                                return;
-                            }
+                    if (!records || !records.length) {
+                        Ext4.Msg.hide();
+                        alert('No records found');
+                        return;
+                    }
 
-                            Ext4.Msg.wait('Loading...');
-
-                            var multi = new LABKEY.MultiRequest();
-
-                            var toUpdate = {};
-                            var obj;
-                            Ext.each(records, function (rec) {
-                                if (!toUpdate['vvc'])
-                                    toUpdate['vvc'] = [];
-
-                                obj = {rowid: rec.rowid};
-                                if (qc) {
-                                    obj.QCState = qc;
-
-                                }
-
-                                toUpdate['vvc'].push(obj)
-                            }, this);
-
-                            for (var i in toUpdate) {
-                                multi.add(LABKEY.Query.updateRows, {
-                                    schemaName: 'wnprc',
-                                    queryName: i,
-                                    rows: toUpdate[i],
-                                    scope: this,
-                                    failure: EHR.Utils.onError
-                                });
-                            }
-
-                            multi.send(function () {
-                                Ext4.Msg.hide();
-                                dataRegion.selectNone();
-
-                                o.ownerCt.ownerCt.close();
-                                dataRegion.refresh();
-                            }, this);
-                        }
-                    }, {
-                        text: 'Close',
-                        handler: function (o) {
-                            o.ownerCt.ownerCt.close();
-                        }
-                    }]
-                }).show();
-            }
-
-        },
-        batchCompleteRecords: function (dataRegionName) {
-            var dataRegion = LABKEY.DataRegions[dataRegionName];
-            var checked = dataRegion.getChecked();  //TODO: update to getSelected with callback
-            var checkedInt = checked.map(function(item) {
-                return parseInt(item, 10);
-            });
-            var checkedJoin = checked.join(";");
-            console.log(checkedJoin);
-            if (!checked || !checked.length) {
-                Ext4.Msg.alert('Error', 'No records selected');
-                return;
-            }
-            var filt = [];
-            filt.push(LABKEY.Filter.create('key', checkedJoin, LABKEY.Filter.Types.IN));
-            var uniq = [];
-            LABKEY.Query.selectRows({
-                schemaName: 'lists',
-                queryName: 'vl_sample_queue',
-                filterArray: filt,
-                success: function (d) {
-                    //check that all records are the same animal id
-                    var toUpdate = d["rows"];
                     new Ext4.Window({
-                        title: 'Change Request Status',
+                        title: 'Approve VVC Request',
                         width: 430,
                         autoHeight: true,
                         items: [{
@@ -1031,9 +923,9 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 border: false
                             },
                             items: [{
-                                html: 'Total Records: '+checked.length+'<br><br>',
+                                html: 'Total Records: ' + checked.length + '<br><br>',
                                 tag: 'div'
-                            },{
+                            }, {
                                 xtype: 'combo',
                                 fieldLabel: 'Status',
                                 width: 300,
@@ -1041,78 +933,337 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 mode: 'local',
                                 store: new LABKEY.ext4.Store({
                                     xtype: 'labkey-store',
-                                    schemaName: 'lists',
-                                    queryName: 'status',
-                                    columns: 'Key,Status',
-                                    sort: 'Key',
+                                    schemaName: 'study',
+                                    queryName: 'qcstate',
+                                    columns: 'rowid,label',
+                                    sort: 'label',
                                     //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
                                     autoLoad: true
                                 }),
-                                displayField: 'Status',
-                                valueField: 'Key',
-                                ref: 'qcstate',
-                                id: 'change-vl-qcstate',
-                                allowBlank: false
-                            }, {
-                                xtype: 'numberfield',
-                                ref: 'experiment',
-                                fieldLabel: 'Experiment #',
-                                width: 300,
-                                id: 'enter-experiment-number',
-                                allowBlank: false
-                            }
-                            ]
+                                id: 'approve-request-qc',
+                                displayField: 'Label',
+                                valueField: 'RowId',
+                                ref: 'qcstate'
+                            }]
                         }],
                         buttons: [{
-                            text:'Submit',
-                            disabled:false,
+                            text: 'Submit',
+                            disabled: false,
                             formBind: true,
                             ref: '../submit',
                             scope: this,
-                            handler: function(o) {
+                            handler: function (o) {
                                 var win = o.up('window');
                                 var form = win.down('form');
-                                var qc = form.getForm().findField('change-vl-qcstate').getValue();
-                                var num = form.getForm().findField('enter-experiment-number').getValue();
+
+                                var qc = form.getForm().findField('approve-request-qc').getValue()
+
+                                if (!qc) {
+                                    alert('Must choose a status');
+                                    return;
+                                }
+
                                 Ext4.Msg.wait('Loading...');
 
-                                //update qc status
-                                Ext4.each(toUpdate, function (row) {
-                                    row.Status = qc;
-                                    row.experimentNumber = parseInt(num);
+                                var multi = new LABKEY.MultiRequest();
+
+                                var toUpdate = {};
+                                var obj;
+                                Ext.each(records, function (rec) {
+                                    if (!toUpdate['vvc'])
+                                        toUpdate['vvc'] = [];
+
+                                    obj = {rowid: rec.rowid};
+                                    if (qc) {
+                                        obj.QCState = qc;
+
+                                    }
+
+                                    toUpdate['vvc'].push(obj)
                                 }, this);
 
-                                if (toUpdate.length) {
-                                    LABKEY.Query.updateRows({
-                                        schemaName: 'lists',
-                                        queryName: 'vl_sample_queue',
-                                        rows: toUpdate,
+                                for (var i in toUpdate) {
+                                    multi.add(LABKEY.Query.updateRows, {
+                                        schemaName: 'wnprc',
+                                        queryName: i,
+                                        rows: toUpdate[i],
                                         scope: this,
-                                        success: function () {
-                                            dataRegion.selectNone();
-                                            dataRegion.refresh();
-                                            Ext4.Msg.hide();
-                                        },
                                         failure: EHR.Utils.onError
                                     });
-
                                 }
+
+                                multi.send(function () {
+                                    Ext4.Msg.hide();
+                                    dataRegion.selectNone();
+
+                                    o.ownerCt.ownerCt.close();
+                                    dataRegion.refresh();
+                                }, this);
                             }
-                        },{
+                        }, {
                             text: 'Close',
-                            handler: function(o){
+                            handler: function (o) {
                                 o.ownerCt.ownerCt.close();
                             }
                         }]
                     }).show();
-
-
-                },
-                failure: function() {
-
                 }
             });
 
         },
+                    /**
+                     * This handler will allow the user to basically change the status of the VVC request in batch.
+                     * It is different than Change Request Status button in that it has more QC states listed.
+                     * @param dataRegion
+                     */
+                    approveVVCButtonHandler: function (dataRegion){
+
+                var checked = dataRegion.getChecked();
+                if(!checked || !checked.length){
+                    alert('No records selected');
+                    return;
+                }
+
+                Ext4.Msg.wait('Loading...');
+                LABKEY.Query.selectRows({
+                    schemaName: dataRegion.schemaName,
+                    queryName: dataRegion.queryName,
+                    columns: 'rowid,date,requestid,taskid',
+                    filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+                    scope: this,
+                    success: onSuccess,
+                    failure: EHR.Utils.onError
+                });
+
+                function onSuccess(data) {
+                    var records = data.rows;
+                    Ext4.Msg.hide();
+
+                    if (!records || !records.length) {
+                        Ext4.Msg.hide();
+                        alert('No records found');
+                        return;
+                    }
+
+                    new Ext4.Window({
+                        title: 'Approve VVC Request',
+                        width: 430,
+                        autoHeight: true,
+                        items: [{
+                            xtype: 'form',
+                            ref: 'theForm',
+                            bodyStyle: 'padding: 5px;',
+                            defaults: {
+                                border: false
+                            },
+                            items: [{
+                                html: 'Total Records: ' + checked.length + '<br><br>',
+                                tag: 'div'
+                            }, {
+                                xtype: 'combo',
+                                fieldLabel: 'Status',
+                                width: 300,
+                                triggerAction: 'all',
+                                mode: 'local',
+                                store: new LABKEY.ext4.Store({
+                                    xtype: 'labkey-store',
+                                    schemaName: 'study',
+                                    queryName: 'qcstate',
+                                    columns: 'rowid,label',
+                                    sort: 'label',
+                                    //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                    autoLoad: true
+                                }),
+                                id: 'approve-request-qc',
+                                displayField: 'Label',
+                                valueField: 'RowId',
+                                ref: 'qcstate'
+                            }]
+                        }],
+                        buttons: [{
+                            text: 'Submit',
+                            disabled: false,
+                            formBind: true,
+                            ref: '../submit',
+                            scope: this,
+                            handler: function (o) {
+                                var win = o.up('window');
+                                var form = win.down('form');
+
+                                var qc = form.getForm().findField('approve-request-qc').getValue()
+
+                                if (!qc) {
+                                    alert('Must choose a status');
+                                    return;
+                                }
+
+                                Ext4.Msg.wait('Loading...');
+
+                                var multi = new LABKEY.MultiRequest();
+
+                                var toUpdate = {};
+                                var obj;
+                                Ext.each(records, function (rec) {
+                                    if (!toUpdate['vvc'])
+                                        toUpdate['vvc'] = [];
+
+                                    obj = {rowid: rec.rowid};
+                                    if (qc) {
+                                        obj.QCState = qc;
+
+                                    }
+
+                                    toUpdate['vvc'].push(obj)
+                                }, this);
+
+                                for (var i in toUpdate) {
+                                    multi.add(LABKEY.Query.updateRows, {
+                                        schemaName: 'wnprc',
+                                        queryName: i,
+                                        rows: toUpdate[i],
+                                        scope: this,
+                                        failure: EHR.Utils.onError
+                                    });
+                                }
+
+                                multi.send(function () {
+                                    Ext4.Msg.hide();
+                                    dataRegion.selectNone();
+
+                                    o.ownerCt.ownerCt.close();
+                                    dataRegion.refresh();
+                                }, this);
+                            }
+                        }, {
+                            text: 'Close',
+                            handler: function (o) {
+                                o.ownerCt.ownerCt.close();
+                            }
+                        }]
+                    }).show();
+                }
+
+            },
+
+            batchCompleteRecords: function (dataRegionName) {
+                var dataRegion = LABKEY.DataRegions[dataRegionName];
+                var checked = dataRegion.getChecked();  //TODO: update to getSelected with callback
+                var checkedInt = checked.map(function(item) {
+                    return parseInt(item, 10);
+                });
+                var checkedJoin = checked.join(";");
+                console.log(checkedJoin);
+                if (!checked || !checked.length) {
+                    Ext4.Msg.alert('Error', 'No records selected');
+                    return;
+                }
+                var filt = [];
+                filt.push(LABKEY.Filter.create('key', checkedJoin, LABKEY.Filter.Types.IN));
+                var uniq = [];
+                LABKEY.Query.selectRows({
+                    schemaName: 'lists',
+                    queryName: 'vl_sample_queue',
+                    filterArray: filt,
+                    success: function (d) {
+                        //check that all records are the same animal id
+                        var toUpdate = d["rows"];
+                        new Ext4.Window({
+                            title: 'Change Request Status',
+                            width: 430,
+                            autoHeight: true,
+                            items: [{
+                                xtype: 'form',
+                                ref: 'theForm',
+                                bodyStyle: 'padding: 5px;',
+                                defaults: {
+                                    border: false
+                                },
+                                items: [{
+                                    html: 'Total Records: '+checked.length+'<br><br>',
+                                    tag: 'div'
+                                },{
+                                    xtype: 'combo',
+                                    fieldLabel: 'Status',
+                                    width: 300,
+                                    triggerAction: 'all',
+                                    mode: 'local',
+                                    store: new LABKEY.ext4.Store({
+                                        xtype: 'labkey-store',
+                                        schemaName: 'lists',
+                                        queryName: 'status',
+                                        columns: 'Key,Status',
+                                        sort: 'Key',
+                                        //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                        autoLoad: true
+                                    }),
+                                    displayField: 'Status',
+                                    valueField: 'Key',
+                                    ref: 'qcstate',
+                                    id: 'change-vl-qcstate',
+                                    allowBlank: false
+                                }, {
+                                    xtype: 'numberfield',
+                                    ref: 'experiment',
+                                    fieldLabel: 'Experiment #',
+                                    width: 300,
+                                    id: 'enter-experiment-number',
+                                    allowBlank: false
+                                }
+                                ]
+                            }],
+                            buttons: [{
+                                text:'Submit',
+                                disabled:false,
+                                formBind: true,
+                                ref: '../submit',
+                                scope: this,
+                                handler: function(o) {
+                                    var win = o.up('window');
+                                    var form = win.down('form');
+                                    var qc = form.getForm().findField('change-vl-qcstate').getValue();
+                                    var num = form.getForm().findField('enter-experiment-number').getValue();
+                                    Ext4.Msg.wait('Loading...');
+
+                                    //update qc status
+                                    Ext4.each(toUpdate, function (row) {
+                                        row.Status = qc;
+                                        row.experimentNumber = parseInt(num);
+                                    }, this);
+
+                                    if (toUpdate.length) {
+                                        LABKEY.Query.updateRows({
+                                            schemaName: 'lists',
+                                            queryName: 'vl_sample_queue',
+                                            rows: toUpdate,
+                                            scope: this,
+                                            success: function () {
+                                                dataRegion.selectNone();
+                                                dataRegion.refresh();
+                                                Ext4.Msg.hide();
+                                            },
+                                            failure: EHR.Utils.onError
+                                        });
+
+                                    }
+                                }
+                            },{
+                                text: 'Close',
+                                handler: function(o){
+                                    o.ownerCt.ownerCt.close();
+                                }
+                            }]
+                        }).show();
+
+
+                    },
+                    failure: function() {
+
+                    }
+                });
+
+            },
+
+
+
     }
 };

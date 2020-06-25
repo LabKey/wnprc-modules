@@ -12,13 +12,14 @@ import org.labkey.api.laboratory.LaboratoryService;
 import org.labkey.api.ldk.LDKService;
 import org.labkey.api.ldk.table.ButtonConfigFactory;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
 
 import java.util.List;
 
 public class ViralAssayCustomizer implements TableCustomizer {
 
+    @Override
     public void customize(TableInfo ti)
     {
         //apply defaults
@@ -54,7 +55,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
 
     public void customizeSharedColumns(AbstractTableInfo ti)
     {
-        ColumnInfo hypothesis = ti.getColumn("hypothesis");
+        var hypothesis = ti.getMutableColumn("hypothesis");
         if (hypothesis != null)
         {
             hypothesis.setShownInInsertView(false);
@@ -89,14 +90,14 @@ public class ViralAssayCustomizer implements TableCustomizer {
     }
 
     public void customizeDataTable(AbstractTableInfo ti) {
-        ColumnInfo subject = ti.getColumn("subjectId");
+        var subject = ti.getMutableColumn("subjectId");
         if (subject != null) {
             subject.setLabel("Subject Id");
             subject.setConceptURI("http://cpas.labkey.com/Study#ParticipantId");
             // LDKService.get().applyNaturalSort(ti, "subjectId");
         }
 
-        ColumnInfo result = ti.getColumn("result");
+        var result = ti.getMutableColumn("result");
         if (result != null) {
             result.setLabel("Result");
             result.setMeasure(true);
@@ -105,7 +106,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
             result.setConceptURI(LaboratoryService.ASSAYRESULT_CONCEPT_URI);
         }
 
-        ColumnInfo rawResult = ti.getColumn("rawResult");
+        var rawResult = ti.getMutableColumn("rawResult");
         if (rawResult != null) {
             rawResult.setLabel("Raw Result");
             rawResult.setHidden(true);
@@ -119,18 +120,18 @@ public class ViralAssayCustomizer implements TableCustomizer {
             rawResult.setConceptURI(LaboratoryService.ASSAYRAWRESULT_CONCEPT_URI);
         }
 
-        ColumnInfo date = ti.getColumn("date");
+        var date = ti.getMutableColumn("date");
         if (date != null) {
             date.setLabel("Sample Date");
             date.setConceptURI(LaboratoryService.SAMPLEDATE_CONCEPT_URI);
         }
 
-        ColumnInfo requestId = ti.getColumn("requestId");
+        var requestId = ti.getMutableColumn("requestId");
         if (requestId != null) {
             requestId.setLabel("Request Id");
         }
 
-        ColumnInfo qcFlags = ti.getColumn("qcflags");
+        var qcFlags = ti.getMutableColumn("qcflags");
         if (qcFlags != null)
         {
             qcFlags.setLabel("QC Flags");
@@ -139,7 +140,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
             qcFlags.setDimension(false);
         }
 
-        ColumnInfo statusFlags = ti.getColumn("statusflag");
+        var statusFlags = ti.getMutableColumn("statusflag");
         if (statusFlags != null)
         {
             statusFlags.setLabel("Status Flag");
@@ -150,16 +151,18 @@ public class ViralAssayCustomizer implements TableCustomizer {
 
         ColumnInfo sourceMaterialColumn = ti.getColumn("sourceMaterial");
         if (sourceMaterialColumn != null) {
-            TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo();
-            ColumnInfo liquidColumn = sourceMaterialTable.getColumn("liquid");
-            if (liquidColumn != null) {
-                liquidColumn.setLabel("Units");
-                liquidColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
-                    @Override
-                    public DisplayColumn createRenderer(ColumnInfo colInfo) {
-                        return new ViralLoadUnitsColumn(colInfo);
-                    }
-                });
+            TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo(); // CONSIDER: replace foreignkey instead attempting surgery on this inner columninfo
+            if (sourceMaterialTable instanceof AbstractTableInfo) {
+                var liquidColumn = ((AbstractTableInfo)sourceMaterialTable).getMutableColumn("liquid");
+                if (liquidColumn != null) {
+                    liquidColumn.setLabel("Units");
+                    liquidColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
+                        @Override
+                        public DisplayColumn createRenderer(ColumnInfo colInfo) {
+                            return new ViralLoadUnitsColumn(colInfo);
+                        }
+                    });
+                }
             }
         }
 
@@ -183,18 +186,18 @@ public class ViralAssayCustomizer implements TableCustomizer {
     }
 
     public void customizeBatchTable(AbstractTableInfo ti) {
-        ColumnInfo name = ti.getColumn("name");
+        var name = ti.getMutableColumn("name");
         if (name != null) {
             name.setLabel("Batch Name");
             name.setShownInInsertView(false);
         }
 
-        ColumnInfo comments = ti.getColumn("comments");
+        var comments = ti.getMutableColumn("comments");
         if (comments != null) {
             comments.setShownInInsertView(false);
         }
 
-        ColumnInfo importMethod = ti.getColumn("importMethod");
+        var importMethod = ti.getMutableColumn("importMethod");
         if (importMethod != null) {
             importMethod.setHidden(true);
             importMethod.setLabel("Import Method");
@@ -213,7 +216,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
         public Object getValue(RenderContext ctx) {
             Object value = super.getValue(ctx);
             if (value instanceof Boolean) {
-                boolean liquid = (boolean) value;
+                boolean liquid = (Boolean) value;
                 if (liquid) {
                     return "mL";
                 }

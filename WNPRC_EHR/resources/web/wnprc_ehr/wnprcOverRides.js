@@ -5,6 +5,71 @@
  */
 Ext4.namespace('WNPRC_EHR');
 
+EHR.DatasetButtons.registerMoreActionsCustomizer(function(dataRegionName){
+    var dataRegion = LABKEY.DataRegions[dataRegionName],
+        headerEl = Ext4.get(dataRegion.domId + "-headerbar"),
+        menu_customized = false;
+
+    if (headerEl) {
+        var btnEls = Ext4.DomQuery.select('.lk-menu-drop', headerEl.dom);
+        Ext4.each(btnEls, function(btnEl) {
+            if (btnEl.innerHTML.indexOf('More Actions') > -1) {
+                var menuEls = Ext4.DomQuery.select(".dropdown-menu", btnEl);
+                if (menuEls && menuEls.length > 0) {
+                    var menu = menuEls[0];
+                    menu_customized = true;
+                    var action = LABKEY.ActionURL.getAction();
+                    var queryName = dataRegion.queryName.replace(' ', '');
+                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^Demographics$/i)) {
+                        if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Weight', schemaName: 'study'})) {
+                            WNPRC_EHR.DatasetButtons.addCreateTaskFromIdsBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Weight'}], formType: 'Weight'});
+                        }
+                    }
+
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
+                        if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
+                            WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Clinpath Runs'}], formType: 'Clinpath'});
+                            WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
+                        }
+                    }
+
+                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^ClinpathRuns$/i)) {
+                        if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'Clinpath Runs', schemaName: 'study'})) {
+                            WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
+                        }
+                    }
+
+                    if (dataRegion.schemaName.match(/^study$/i) && queryName.match(/^blood$/i)) {
+                        if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Blood Draws', schemaName: 'study'})) {
+                            WNPRC_EHR.DatasetButtons.addCreateTaskBtn(dataRegion.name, menu, {queries: [{schemaName: 'study', queryName: 'Blood Draws'}], formType: 'Blood Draws'});
+                            WNPRC_EHR.DatasetButtons.addChangeBloodQCStateBtn(dataRegion.name, menu);
+                        }
+                    }
+
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^study$/i) && queryName.match(/^StudyData$/i)) {
+                        if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'Blood Draws', schemaName: 'study'})) {
+                            WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
+                        }
+                    }
+                    if (action.match(/^dataEntry$/i) && dataRegion.schemaName.match(/^wnprc$/i) && queryName.match(/^vvc$/i)) {
+                        if (EHR.Security.hasPermission('Scheduled', 'insert', {queryName: 'vvc', schemaName: 'wnprc'})) {
+                            WNPRC_EHR.DatasetButtons.addChangeQCStateBtn(dataRegion.name, menu);
+                        }
+                    }
+                    if (dataRegion.schemaName.match(/^wnprc$/i) && queryName.match(/^vvc$/i)) {
+                        if (EHR.Security.hasPermission('Completed', 'update', {queryName: 'vvc', schemaName: 'wnprc'})) {
+                            WNPRC_EHR.DatasetButtons.addMarkReviewedBtn(dataRegion.name, menu);
+                            WNPRC_EHR.DatasetButtons.addVVCChangeQCStateBtn(dataRegion.name, menu);
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+    }
+});
+
+
 WNPRC_EHR.ProjectField2 = Ext.extend(LABKEY.ext.ComboBox, {
     initComponent: function() {
         Ext4.apply(this, {

@@ -29,6 +29,7 @@
     {
         dependencies.add("clientapi/ext4");
         dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.js");
+        dependencies.add("/webutils/lib/webutils_core/api.js");
         //dependencies.add("/mypath/mydependency.js");
     }
 %>
@@ -41,7 +42,7 @@
 <script src= 'https://unpkg.com/popper.js/dist/umd/popper.min.js'></script>
 <script src= 'https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js'></script>
 <%--<script src= '/labkey/webutils/lib/ko/core/knockout-3.4.0.js' type="text/javascript"></script>--%>
-<script src= '/labkey/webutils/lib/webutils_core/api.js' type="text/javascript"></script>
+<%--<script src= '/labkey/webutils/lib/webutils_core/api.js' type="text/javascript"></script>--%>
 <%--<script src= '/WebUtils/src/org/labkey/webutils/view/JspPage.jsp' type="text/jsp"></script>--%>
 
 
@@ -564,10 +565,6 @@
 
                             WebUtils.VM.taskDetails[key](value);
 
-
-
-
-
                             $('#waterExceptionPanel').collapse('hide');
 
                             var today = moment();
@@ -585,16 +582,8 @@
                                // $('#enterWaterOrder').removeAttr('disabled');
                                 $('#waterInfo').text('Edit Single Day Water');
                             }
-
-
                         }
                     });
-
-
-
-
-
-
                 }
 
             })
@@ -613,171 +602,171 @@
 
        // var $scheduleForm = $('.scheduleForm');
 
-            _.extend(WebUtils.VM, {
+        _.extend(WebUtils.VM, {
 
-                taskDetails: {
-                    lsid:                       ko.observable(),
-                    objectIdCoalesced:          ko.observable(),
-                    taskid:                     ko.observable(),
-                    projectCoalesced:           ko.observable(),
-                    animalId:                   ko.observable(),
-                    date:                       ko.observable(),
-                    volume:                     ko.observable(),
-                    dataSource:                 ko.observable(),
-                    assignedToCoalesced:        ko.observable(),
-                    assignedToTitleCoalesced:   ko.observable(),
-                    frequencyCoalesced:         ko.observable(),
-                    frequencyMeaningCoalesced:  ko.observable(),
-                    rawDate:                    ko.observable(),
-                    wantsSpam:                  ko.observable(),
+            taskDetails: {
+                lsid:                       ko.observable(),
+                objectIdCoalesced:          ko.observable(),
+                taskid:                     ko.observable(),
+                projectCoalesced:           ko.observable(),
+                animalId:                   ko.observable(),
+                date:                       ko.observable(),
+                volume:                     ko.observable(),
+                dataSource:                 ko.observable(),
+                assignedToCoalesced:        ko.observable(),
+                assignedToTitleCoalesced:   ko.observable(),
+                frequencyCoalesced:         ko.observable(),
+                frequencyMeaningCoalesced:  ko.observable(),
+                rawDate:                    ko.observable(),
+                wantsSpam:                  ko.observable(),
 
-                },
-                form: ko.mapping.fromJS({
-                    lsid:           '',
-                    animalId:       '',
-                    date:           new Date(),
-                    volume:         '',
-                    dataSource:     '',
-                    object:         '',
-                    assignedTo:     '',
-                    frequency:      ''
+            },
+            form: ko.mapping.fromJS({
+                lsid:           '',
+                animalId:       '',
+                date:           new Date(),
+                volume:         '',
+                dataSource:     '',
+                object:         '',
+                assignedTo:     '',
+                frequency:      ''
 
-                }),
+            }),
 
 
-                requestTableClickAction: function(row) {
-                    /*$('#waterExceptionPanel').block({
-                        css: {
-                            visibility: visible
+            requestTableClickAction: function(row) {
+                /*$('#waterExceptionPanel').block({
+                    css: {
+                        visibility: visible
+                    }
+                });*/
+                WebUtils.VM.requestRowInForm = row;
+                //WebUtils.VM.updateForm(row.animalId);
+
+            },
+            collapseSingleWater: function(){
+                $('#waterExceptionPanel').collapse('hide');
+
+            },
+
+            endWaterOrder: function (row){
+
+                $('#waterInfoPanel').block({
+                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
+                    css: {
+                        border: 'none',
+                        padding: '15px',
+                        backgroundColor: '#000',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .5,
+                        color: '#fff'
+                    }
+                });
+
+                WebUtils.VM.requestRowInForm = row;
+                var waterOrder = ko.mapping.toJS(row);
+
+                //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
+                //TODO: should have the QC Status of Started and not complete
+
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "CloseWaterOrder", null, {
+                        lsid:               waterOrder.lsid,
+                        taskId:             waterOrder.taskid,
+                        objectId:           waterOrder.objectIdCoalesced,
+                        animalId:           waterOrder.animalId,
+                        endDate:            waterOrder.date,
+                        dataSource:         waterOrder.dataSource
+
+                    }),
+                    success: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        if (response.success){
+
+                            // Refresh the calendar view.
+                            $calendar.fullCalendar('refetchEvents');
+
+                            $('#waterInfoPanel').unblock();
+
+                        } else {
+                            alert('Water cannot be closed')
                         }
-                    });*/
-                    WebUtils.VM.requestRowInForm = row;
-                    //WebUtils.VM.updateForm(row.animalId);
 
-                },
-                collapseSingleWater: function(){
-                    $('#waterExceptionPanel').collapse('hide');
 
-                },
+                    }, this)
 
-                endWaterOrder: function (row){
+                });
 
-                    $('#waterInfoPanel').block({
-                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
-                        css: {
-                            border: 'none',
-                            padding: '15px',
-                            backgroundColor: '#000',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .5,
-                            color: '#fff'
+            },
+
+            enterNewWaterOrder: function (row){
+
+                $('#waterInfoPanel').block({
+                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
+                    css: {
+                        border: 'none',
+                        padding: '15px',
+                        backgroundColor: '#000',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .5,
+                        color: '#fff'
+                    }
+                });
+
+                WebUtils.VM.requestRowInForm = row;
+                var waterOrder = ko.mapping.toJS(row);
+
+                //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
+                //TODO: should have the QC Status of Started and not complete
+
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "EnterNewWaterOrder", null, {
+                        lsid:                   waterOrder.lsid,
+                        taskId:                 waterOrder.taskid,
+                        objectId:               waterOrder.objectIdCoalesced,
+                        animalId:               waterOrder.animalId,
+                        endDate:                waterOrder.date,
+                        dataSource:             waterOrder.dataSource,
+                        project:                waterOrder.projectCoalesced,
+                        frequency:              waterOrder.frequency,
+                        assignedTo:             waterOrder.assignedToCoalesced,
+                        volume:                 waterOrder.volume
+
+                    }),
+                    success: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        if (response.success){
+
+                            // Refresh the calendar view.
+                            $calendar.fullCalendar('refetchEvents');
+
+                            $('#waterInfoPanel').unblock();
+                            console.log(response.taskId);
+
+                            //('ehr', 'dataEntryForm.view', null, {formType: LABKEY.ActionURL.getParameter('formType')})
+                            var newWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', null, {formType: 'Enter Water Daily Amount', 'taskid': response.taskId});
+                            //schemaName: 'study', 'query.queryName': 'demographicsParentStatus', 'query.Id~eq': this.subjectId})
+
+                            window.open(newWaterOrder,'_blank');
+
+                        } else {
+                            alert('Water cannot be closed')
+                            $('#waterInfoPanel').unblock();
                         }
-                    });
-
-                    WebUtils.VM.requestRowInForm = row;
-                    var waterOrder = ko.mapping.toJS(row);
-
-                    //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
-                    //TODO: should have the QC Status of Started and not complete
-
-                    LABKEY.Ajax.request({
-                        url: LABKEY.ActionURL.buildURL("wnprc_ehr", "CloseWaterOrder", null, {
-                            lsid:               waterOrder.lsid,
-                            taskId:             waterOrder.taskid,
-                            objectId:           waterOrder.objectIdCoalesced,
-                            animalId:           waterOrder.animalId,
-                            endDate:            waterOrder.date,
-                            dataSource:         waterOrder.dataSource
-
-                        }),
-                        success: LABKEY.Utils.getCallbackWrapper(function (response)
-                        {
-                            if (response.success){
-
-                                // Refresh the calendar view.
-                                $calendar.fullCalendar('refetchEvents');
-
-                                $('#waterInfoPanel').unblock();
-
-                            } else {
-                                alert('Water cannot be closed')
-                            }
 
 
-                        }, this)
+                    }, this)
 
-                    });
+                });
 
-                },
-
-                enterNewWaterOrder: function (row){
-
-                    $('#waterInfoPanel').block({
-                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
-                        css: {
-                            border: 'none',
-                            padding: '15px',
-                            backgroundColor: '#000',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .5,
-                            color: '#fff'
-                        }
-                    });
-
-                    WebUtils.VM.requestRowInForm = row;
-                    var waterOrder = ko.mapping.toJS(row);
-
-                    //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
-                    //TODO: should have the QC Status of Started and not complete
-
-                    LABKEY.Ajax.request({
-                        url: LABKEY.ActionURL.buildURL("wnprc_ehr", "EnterNewWaterOrder", null, {
-                            lsid:                   waterOrder.lsid,
-                            taskId:                 waterOrder.taskid,
-                            objectId:               waterOrder.objectIdCoalesced,
-                            animalId:               waterOrder.animalId,
-                            endDate:                waterOrder.date,
-                            dataSource:             waterOrder.dataSource,
-                            project:                waterOrder.projectCoalesced,
-                            frequency:              waterOrder.frequency,
-                            assignedTo:             waterOrder.assignedToCoalesced,
-                            volume:                 waterOrder.volume
-
-                        }),
-                        success: LABKEY.Utils.getCallbackWrapper(function (response)
-                        {
-                            if (response.success){
-
-                                // Refresh the calendar view.
-                                $calendar.fullCalendar('refetchEvents');
-
-                                $('#waterInfoPanel').unblock();
-                                console.log(response.taskId);
-
-                                //('ehr', 'dataEntryForm.view', null, {formType: LABKEY.ActionURL.getParameter('formType')})
-                                var newWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', null, {formType: 'Enter Water Daily Amount', 'taskid': response.taskId});
-                                //schemaName: 'study', 'query.queryName': 'demographicsParentStatus', 'query.Id~eq': this.subjectId})
-
-                                window.open(newWaterOrder,'_blank');
-
-                            } else {
-                                alert('Water cannot be closed')
-                                $('#waterInfoPanel').unblock();
-                            }
-
-
-                        }, this)
-
-                    });
-
-                },
+            },
 
 
 
 
-            });
+        });
 
         WebUtils.VM.taskDetails.animalLink = ko.pureComputed(function() {
             var animalId = WebUtils.VM.taskDetails.animalId();
@@ -798,10 +787,6 @@
             }else {
                 return " ";
             }
-
-
-
-
         });
 
         _.extend(WebUtils.VM, {
@@ -956,9 +941,4 @@
         var start = new Date().getTime();
         while (new Date().getTime() < start + delay);
     }
-
-
-
-
-
 </script>

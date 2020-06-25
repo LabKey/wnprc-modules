@@ -61,6 +61,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1066,7 +1067,7 @@ public class TriggerScriptHelper {
         filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
         //filter.addCondition(FieldKey.fromString("frequency"), frequency);
 
-        TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set("objectidcoalesced","animalId", "date", "StartDate","endDateCoalescedFuture", "frequency", "dataSource", "lsidCoalesced"), filter, null);
+        TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume"), filter, null);
         waterOrdersFromDatabase.setNamedParameters(parameters);
         waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1074,7 +1075,7 @@ public class TriggerScriptHelper {
         for (WaterDataBaseRecord waterRecord : waterRecords)
         {
             //If the record is updated it should allow to enter new information.
-            if (waterRecord.getobjectIdCoalesced().compareTo(objectId) != 0){
+            if (waterRecord.getObjectId().compareTo(objectId) != 0){
 
                 LocalDate startLoop = convertToLocalDateViaSqlDate(clientStartDate);
                 LocalDate endOfLoop;
@@ -1098,10 +1099,10 @@ public class TriggerScriptHelper {
                         {
 
                             DateTimeFormatter dateFormatted = DateTimeFormatter.ISO_LOCAL_DATE;
-                            String startFormatDate = dateFormatted.format(convertToLocalDateViaSqlDate(waterRecord.getStartDate()));
+                            String startFormatDate = dateFormatted.format(convertToLocalDateViaSqlDate(waterRecord.getStartDateCoalesced()));
                             String endFormattedDate;
 
-                            LocalDate endDateFromServer =convertToLocalDateViaSqlDate(waterRecord.getEnddateCoalescedFuture());
+                            LocalDate endDateFromServer =convertToLocalDateViaSqlDate(waterRecord.getEndDateCoalescedFuture());
 
                             if (endDateFromServer.isAfter(endOfLoop))
                             {
@@ -1115,24 +1116,24 @@ public class TriggerScriptHelper {
                             editURL.addParameter("schemaName", "study");
                             editURL.addParameter("queryName", waterRecord.getDataSource());
                             editURL.addParameter("keyField", "lsid");
-                            editURL.addParameter("key", waterRecord.getLsidCoalesced());
+                            editURL.addParameter("key", waterRecord.getLsid());
 
                             JSONObject returnErrors = new JSONObject();
                             returnErrors.put("dataSource", waterRecord.getDataSource());
-                            if (clientStartDate.getTime() > waterRecord.getStartDate().getTime()){
+                            if (clientStartDate.getTime() > waterRecord.getStartDateCoalesced().getTime()){
                                 returnErrors.put("field", "date");
-                            }else if (clientEndDate.getTime() > waterRecord.getStartDate().getTime()){
+                            }else if (Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime() > waterRecord.getStartDateCoalesced().getTime()){
                                 returnErrors.put("field", "enddate");
                             }else {
                                 returnErrors.put("field", "frequency");
                             }
 
                             returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
-                                    " End Date: " + endFormattedDate + " <a href='" + editURL.toString() + "'><b> EDIT</b></a>");
-                            returnErrors.put("objectId", waterRecord.getobjectIdCoalesced());
+                                    " End Date: " + endFormattedDate +" Source: "+ waterRecord.getDataSource() +" <a href='" + editURL.toString() + "'><b> EDIT</b></a>");
+                            returnErrors.put("objectId", waterRecord.getObjectId());
                             returnErrors.put("severity", "ERROR");
 
-                            errorMap.put(waterRecord.getobjectIdCoalesced(), returnErrors);
+                            errorMap.put(waterRecord.getObjectId(), returnErrors);
                         }
 
                     }
@@ -1297,12 +1298,12 @@ public class TriggerScriptHelper {
     public static class WaterDataBaseRecord {
 
         private String taskId;
-        private String objectIdCoalesced;
-        private String lsidCoalesced;
+        private String objectId;
+        private String lsid;
         private String animalId;
         private Date date;
-        private Date startDate;
-        private Date enddateCoalescedFuture;
+        private Date startDateCoalesced;
+        private Date endDateCoalescedFuture;
         private String dataSource;
         private String project;
         private String frequency;
@@ -1314,14 +1315,14 @@ public class TriggerScriptHelper {
             this.taskId = taskId;
         }
 
-        public void setobjectIdCoalesced(String objectIdCoalesced)
+        public void setObjectId(String objectId)
         {
-            this.objectIdCoalesced = objectIdCoalesced;
+            this.objectId = objectId;
         }
 
-        public void setLsidCoalesced(String lsidCoalesced)
+        public void setLsid(String lsid)
         {
-            this.lsidCoalesced = lsidCoalesced;
+            this.lsid = lsid;
         }
 
         public void setAnimalId(String animalId)
@@ -1334,12 +1335,12 @@ public class TriggerScriptHelper {
             this.date = date;
         }
 
-        public void setStartDate(Date date)
+        public void setStartDateCoalesced(Date startDateCoalesced)
         {
-            this.startDate = date;
+            this.startDateCoalesced = startDateCoalesced;
         }
 
-        public void setEnddateCoalescedFuture(Date enddateCoalescedFuture){ this.enddateCoalescedFuture = enddateCoalescedFuture; }
+        public void setEnddateCoalescedFuture(Date enddateCoalescedFuture){ this.endDateCoalescedFuture = enddateCoalescedFuture; }
 
         public void setDataSource(String dataSource)
         {
@@ -1373,14 +1374,14 @@ public class TriggerScriptHelper {
             return taskId;
         }
 
-        public String getobjectIdCoalesced()
+        public String getObjectId()
         {
-            return objectIdCoalesced;
+            return objectId;
         }
 
-        public String getLsidCoalesced()
+        public String getLsid()
         {
-            return lsidCoalesced;
+            return lsid;
         }
 
         public String getAnimalId()
@@ -1393,14 +1394,14 @@ public class TriggerScriptHelper {
             return date;
         }
 
-        public Date getStartDate()
+        public Date getStartDateCoalesced()
         {
-            return startDate;
+            return startDateCoalesced;
         }
 
-        public Date getEnddateCoalescedFuture()
+        public Date getEndDateCoalescedFuture()
         {
-            return enddateCoalescedFuture;
+            return endDateCoalescedFuture;
         }
 
         public String getDataSource()
@@ -1434,12 +1435,12 @@ public class TriggerScriptHelper {
             {
                 if (prop.getKey().equalsIgnoreCase("taskId") && prop.getValue() instanceof String)
                     setTaskId((String)prop.getValue());
-                else if (prop.getKey().equalsIgnoreCase("objectIdCoalesced") && prop.getValue() instanceof String)
-                    setobjectIdCoalesced((String)prop.getValue());
+                else if (prop.getKey().equalsIgnoreCase("objectId") && prop.getValue() instanceof String)
+                    setObjectId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("animalId") && prop.getValue() instanceof String)
                     setAnimalId((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("startDate") && prop.getValue() instanceof Date)
-                    setStartDate((Date)prop.getValue());
+                    setStartDateCoalesced((Date)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("endDate") && prop.getValue() instanceof Date)
                     setEnddateCoalescedFuture((Date)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("dataSource") && prop.getValue() instanceof String)

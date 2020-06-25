@@ -6,7 +6,8 @@
     WA.created AS dateCreated,
     WA.id.curLocation.area as area,
     WA.id.curLocation.room as room,
-    curdate() AS dateRangeStartDate,
+    WA.date AS startDateCoalesced,
+    WA.date AS endDateCoalescedFuture,
     CAST (WA.volume AS DOUBLE) AS volume,
     WA.assignedTo AS assignedTo,
     WA.assignedTo.title AS assignedToTitle,
@@ -32,7 +33,8 @@ UNION ALL
     WS.created AS dateCreated,
     WS.area as area,
     WS.room as room,
-    WS.dateRangeStartDate AS dateRangeStartDate,
+    WS.startDate AS startDateCoalesced,
+    WS.enddateCoalescedFuture AS endDateCoalescedFuture,
     CAST (WS.volume AS DOUBLE) AS volume,
     WS.assignedTo AS assignedTo,
     WS.assignedToTittle AS assignedToTitle,
@@ -51,8 +53,4 @@ WHERE NOT EXISTS (SELECT 1
                     FROM study.waterAmount WAI
                     WHERE WAI.id = WS.animalId AND WAI.date = WS.origDate
                     )
-
-
 )
-
-

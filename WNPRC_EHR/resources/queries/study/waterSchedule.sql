@@ -50,7 +50,7 @@ JOIN (
           t1.date as startDate,
           timestampdiff('SQL_TSI_DAY', cast(t1.dateOnly as timestamp), dr.dateOnly) + 1  as daysElapsed,
           t1.enddate,
-          t1.enddateCoalescedFuture,    --debug column
+          t1.enddateCoalescedFuture,    --column use to display future dates when the endDate is null
           t1.frequency AS frequency,
           t1.frequency.meaning AS freqMeaning,
           t1.provideFruit AS provideFruit,

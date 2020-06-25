@@ -6,7 +6,7 @@ SELECT
     animalId AS animalId,
     date AS date,
     dateCreated AS dateCreated,
-    dateRangeStartDate AS dateRangeStartDate,
+    startDateCoalesced AS startDateCoalesced,
     volume AS volume,
     dataSource AS dataSource,
     assignedTo AS assignedToCoalesced,

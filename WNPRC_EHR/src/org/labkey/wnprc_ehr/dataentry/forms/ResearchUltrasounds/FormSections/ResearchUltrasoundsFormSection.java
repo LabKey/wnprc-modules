@@ -1,39 +1,13 @@
 package org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections;
 
-import org.json.JSONObject;
-import org.labkey.api.ehr.dataentry.DataEntryFormContext;
-import org.labkey.api.ehr.dataentry.SimpleFormSection;
-import org.labkey.api.view.template.ClientDependency;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleFormSection;
 
 public class ResearchUltrasoundsFormSection extends SimpleFormSection
 {
-    Integer maxItemsPerColumn = 20;
-
     public ResearchUltrasoundsFormSection() {
-        super("study", "research_ultrasounds", "Research Ultrasounds", "ehr-formpanel");
+        super("study", "research_ultrasounds", "Research Ultrasounds");
 
+        this.maxItemsPerColumn = 20;
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.ResearchUltrasoundsClientStore");
-    }
-
-    @Override
-    public JSONObject toJSON(DataEntryFormContext ctx, boolean includeFormElements) {
-        JSONObject ret = super.toJSON(ctx, includeFormElements);
-
-        Map<String, Object> formConfig = new HashMap<>();
-        Map<String, Object> bindConfig = new HashMap<>();
-        bindConfig.put("createRecordOnLoad", true);
-        formConfig.put("bindConfig", bindConfig);
-
-        if ( maxItemsPerColumn != null ) {
-            // Make the form appear in two columns
-            formConfig.put("maxItemsPerCol", maxItemsPerColumn);
-        }
-
-        ret.put("formConfig", formConfig);
-
-        return ret;
     }
 }

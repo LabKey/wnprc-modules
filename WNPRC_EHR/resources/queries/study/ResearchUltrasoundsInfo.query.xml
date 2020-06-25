@@ -2,6 +2,10 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="ResearchUltrasoundsInfo" tableDbType="NOT_IN_DB">
+                <importUrl></importUrl>
+                <updateUrl>/ehr/dataEntryForm.view?formType=Research%20Ultrasounds%20Review&amp;taskid=${taskid}</updateUrl>
+                <insertUrl>/ehr/dataEntryForm.view?formType=${taskid/formtype}&amp;taskid=${taskid}</insertUrl>
+                <deleteUrl></deleteUrl>
                 <columns>
                     <column columnName="objectid">
                         <!--<isHidden>true</isHidden>-->

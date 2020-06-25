@@ -3,6 +3,7 @@ package org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections;
 import org.json.JSONObject;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.SimpleFormSection;
+import org.labkey.api.view.template.ClientDependency;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +15,7 @@ public class ResearchUltrasoundsFormSection extends SimpleFormSection
     public ResearchUltrasoundsFormSection() {
         super("study", "research_ultrasounds", "Research Ultrasounds", "ehr-formpanel");
 
-//        setTemplateMode(TEMPLATE_MODE.NONE);
-
-//        fieldNamesAtStartInOrder = Arrays.asList(
-//                "dateRequested",
-//                "Project"
-//        );
+        setClientStoreClass("WNPRC.ext.data.SingleAnimal.ResearchUltrasoundsClientStore");
     }
 
     @Override

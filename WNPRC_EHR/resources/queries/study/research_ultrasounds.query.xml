@@ -5,7 +5,7 @@
             <table tableName="research_ultrasounds" tableDbType="TABLE">
                 <tableUrl></tableUrl>
                 <importUrl></importUrl>
-                <updateUrl>/ehr/dataEntryForm.view?formType=${taskid/formtype}&amp;taskid=${taskid}</updateUrl>
+                <updateUrl>/ehr/dataEntryForm.view?formType=Research%20Ultrasounds%20Review&amp;taskid=${taskid}</updateUrl>
                 <insertUrl>/ehr/dataEntryForm.view?formType=${taskid/formtype}&amp;taskid=${taskid}</insertUrl>
                 <deleteUrl></deleteUrl>
                 <columns>

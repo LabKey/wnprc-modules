@@ -4,6 +4,7 @@ import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.TaskFormSection;
 import org.labkey.api.module.Module;
+import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsFormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsInstructionsFormSection;
@@ -23,11 +24,8 @@ public class ResearchUltrasoundsForm extends SimpleTaskForm
             new ResearchUltrasoundsFormSection()
         ));
 
-        //addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
-        //setStoreCollectionClass("WNPRC.ext.data.TaskStoreCollection");
-
-        //for(FormSection section : this.getFormSections()) {
-        //    section.addConfigSource("task");
-        //}
+        setStoreCollectionClass("WNPRC.ext.data.ResearchUltrasoundsStoreCollection");
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsServerStore.js"));
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsStoreCollection.js"));
     }
 }

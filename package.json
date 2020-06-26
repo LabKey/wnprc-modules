@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "better-npm-run build-prod",
+    "build": "better-npm-run build",
     "build-prod": "better-npm-run build-prod"
   },
   "repository": {
@@ -98,6 +98,12 @@
       "command": "webpack --config primateid/webpack.config.ts",
       "env": {
         "NODE_ENV": "development"
+      }
+    },
+    "build-prod": {
+      "command": "webpack --config primateid/webpack.config.ts",
+      "env": {
+        "NODE_ENV": "production"
       }
     }
   }

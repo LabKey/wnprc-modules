@@ -30,7 +30,9 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     setAnimalInfoStateExternal,
     animalInfoState,
     setAnimalIdsExternal,
-      animalIds
+      animalIds,
+    editMode,
+      setEditMode
   } = useContext(AppContext);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
@@ -173,7 +175,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
             variant="primary"
             className="wnprc-secondary-btn"
             id="add-record"
-            /*disabled={singleEditMode}*/
+            disabled={editMode}
             onClick={() => {
               let newForm = addRecord();
               setFormDataExternal(newForm)
@@ -187,7 +189,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
             variant="primary"
             className="wnprc-secondary-btn"
             id="add-batch"
-            /*disabled={singleEditMode}*/
+            disabled={editMode}
             onClick={handleShowRewrite}
         >
           Add Batch

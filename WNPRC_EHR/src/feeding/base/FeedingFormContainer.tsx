@@ -101,24 +101,12 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
 
   const removeRecord = (i) => {
     let copyformdata = [...formData];
-    //TODO
-    //copyformdata[i]["visibility"]["value"] ="hide-record";
+    //only need to do this part if we are in wasSaved or editMode, otherwise we can splice.
+    //TODO cover edit mode
+    copyformdata.splice(i, 1);
+    //the validity of this record is no longer valid, so set the error level to whatever it was
     setFormDataExternal(copyformdata);
-    sleep(750).then(() => {
-      let copyformdata = [...formData];
-      //only need to do this part if we are in wasSaved or editMode, otherwise we can splice.
-      //TODO
-      /*if (wasSaved || editMode) {
-        copyformdata[i]["command"]["value"] = "delete";
-      } else {
-        copyformdata.splice(i, 1);
-      }*/
-      copyformdata.splice(i, 1);
-      //the validity of this record is no longer valid, so set the error level to whatever it was
-      setFormDataExternal(copyformdata);
-      //TODO
-      //onValidate();
-    });
+    /*onValidate();*/
   };
 
   const triggerSubmit = () => {
@@ -133,8 +121,8 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       setSubmitTextBody("Success!");
       wait(3, setSubmitTextBody).then(() => {
         window.location.href = ActionURL.buildURL(
-            "ehr",
-            "executeQuery.view?schemaName=study&query.queryName=Feeding",
+            "wnprc_ehr",
+            "dataEntry",
             ActionURL.getContainer()
         );
       });
@@ -256,13 +244,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                             "hide-record";*/
                         setFormDataExternal(copyformdata);
                         sleep(100).then(() => {
-                          let copyformdata = [...formData];
-                          //only need to do this part if we are in wasSaved or editMode, otherwise we can splice.
-                          //TODO cover edit mode
-                          copyformdata.splice(i, 1);
-                          //the validity of this record is no longer valid, so set the error level to whatever it was
-                          setFormDataExternal(copyformdata);
-                          /*onValidate();*/
+                          removeRecord(i);
                         });
                       }}
                   >

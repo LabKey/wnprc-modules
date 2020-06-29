@@ -34,6 +34,10 @@
         color: white;
     }
 
+    em {
+        color: red;
+    }
+
 </style>
 
 <div class="panel panel-primary">
@@ -205,7 +209,7 @@
         let headerRow = document.createElement("tr");
         for (let i = 0; i < onCallSchedule[0].length; i++) {
             let th = document.createElement("th");
-            th.innerHTML = (onCallSchedule[0][i]) ? onCallSchedule[0][i].html : "NO DATA";
+            th.innerHTML = (onCallSchedule[0][i]) ? onCallSchedule[0][i].html : "<strong>NO DATA</strong>";
             headerRow.appendChild(th);
         }
         table.appendChild(headerRow);
@@ -213,7 +217,7 @@
             let tr = document.createElement("tr");
             for (let j = 0; j < onCallSchedule[i].length; j++) {
                 let td = document.createElement("td");
-                td.innerHTML = (onCallSchedule[i][j]) ? onCallSchedule[i][j].html : "NO DATA";
+                td.innerHTML = (onCallSchedule[i][j]) ? onCallSchedule[i][j].html : "<strong>NO DATA</strong>";
                 tr.appendChild(td);
             }
             table.appendChild(tr);

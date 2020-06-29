@@ -56,6 +56,8 @@ import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
+import org.labkey.api.security.Group;
+import org.labkey.api.security.GroupManager;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
@@ -74,6 +76,7 @@ import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
 import org.labkey.googledrive.api.GoogleDriveService;
+import org.labkey.security.xml.GroupEnumType;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
@@ -110,6 +113,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1017,18 +1021,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "wnprc").getTable("on_call_calendars");
-                Sort sort = new Sort("-display_name");
-
-                Set<FieldKey> columns = new HashSet<>();
-                columns.add(FieldKey.fromString("display_name"));
-                columns.add(FieldKey.fromString("calendar_id"));
-                columns.add(FieldKey.fromString("calendar_type"));
-                columns.add(FieldKey.fromString("default_bg_color"));
-                final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
-
-                TableSelector ts = new TableSelector(ti, colMap.values(), null, sort);
-                Map<String, Object>[] onCallCalendars = ts.getMapArray();
+                Map<String, Object>[] onCallCalendars = getOnCallCalendars();
 
                 //Calculate how many days to show on the schedule
                 java.time.LocalDate startDate = java.time.LocalDate.ofInstant(event.getStartDate().toInstant(), ZoneId.systemDefault());
@@ -1053,10 +1046,18 @@ public class WNPRC_EHRController extends SpringActionController
 
                 //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
                 for (int i = 0; i < onCallCalendars.length; i++) {
-                    Map<String, Object> row = onCallCalendars[i];
-                    JSONArray events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
-
-                    organizeOnCallEvents(onCallSchedule, events, startDate, endDate, i + 2);
+                    JSONArray events = new JSONArray();
+                    boolean calendarReadSuccessful = true;
+                    try {
+                        Map<String, Object> row = onCallCalendars[i];
+                        events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
+                    } catch (Exception e) {
+                        _log.error("Error retrieving events from on-call calendar with calendarId: " + onCallCalendars[i].get("calendar_id"));
+                        onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name") + "<br><em>Error: Failed to load</em>");
+                        calendarReadSuccessful = false;
+                    } finally {
+                        organizeOnCallEvents(onCallSchedule, events, startDate, endDate, i + 2, calendarReadSuccessful);
+                    }
                 }
 
                 response.put("success", true);
@@ -1072,32 +1073,81 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    private void organizeOnCallEvents(JSONObject[][] onCallSchedule, JSONArray events, java.time.LocalDate startDate, java.time.LocalDate endDate, int column) {
+    //Organize the calendar events into an easy format for the front end to parse
+    private void organizeOnCallEvents(JSONObject[][] onCallSchedule, JSONArray events, java.time.LocalDate startDate, java.time.LocalDate endDate, int column, boolean calendarReadSuccessful) {
         long daysBetween = DAYS.between(startDate, endDate);
         for (int i = 0; i <= daysBetween; i++) {
-            for (int j = 0; j < events.length(); j++) {
-                JSONObject event = events.getJSONObject(j);
-                if (startDate.plusDays(i).equals(event.get("date"))) {
-                    if (onCallSchedule[i + 1][column] == null) {
-                        onCallSchedule[i + 1][column] = new JSONObject();
-                    }
-                    String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
-                    title = title.replaceAll("(?i)<br */?>", "\n").trim();
-                    title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
-                    String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
-                    description = description.replaceAll("(?i)<br */?>", "\n").trim();
-                    description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
-                    if (onCallSchedule[i + 1][column].getString("html") == null) {
-                        onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
-                    } else {
-                        onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");
+            if (calendarReadSuccessful) {
+                for (int j = 0; j < events.length(); j++) {
+                    JSONObject event = events.getJSONObject(j);
+                    if (startDate.plusDays(i).equals(event.get("date"))) {
+                        if (onCallSchedule[i + 1][column] == null) {
+                            onCallSchedule[i + 1][column] = new JSONObject();
+                        }
+                        //Replace <br> tags with newlines and then strip out any remaining html tags from title and description
+                        //Once the strings are cleaned up, add back in the <br> tags instead of the newlines
+                        String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
+                        title = title.replaceAll("(?i)<br */?>", "\n").trim();
+                        title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
+                        String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
+                        description = description.replaceAll("(?i)<br */?>", "\n").trim();
+                        description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
+                        if (onCallSchedule[i + 1][column].getString("html") == null) {
+                            onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
+                        } else {
+                            onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");
+                        }
                     }
                 }
-            }
-            if (onCallSchedule[i + 1][column] == null) {
-                onCallSchedule[i + 1][column] = new JSONObject().put("html", "<strong>NO DATA</strong>");
+                if (onCallSchedule[i + 1][column] == null) {
+                    onCallSchedule[i + 1][column] = new JSONObject().put("html", "<strong>NO DATA</strong>");
+                }
+            } else {
+                onCallSchedule[i + 1][column] = new JSONObject();
+                onCallSchedule[i + 1][column].put("html", "<em>Error: Failed to load</em>");
             }
         }
+    }
+
+    private Map<String, Object>[] getOnCallCalendars() {
+        TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "wnprc").getTable("on_call_calendars");
+        Sort sort = new Sort("-display_name");
+
+        Set<FieldKey> columns = new HashSet<>();
+        columns.add(FieldKey.fromString("display_name"));
+        columns.add(FieldKey.fromString("calendar_id"));
+        columns.add(FieldKey.fromString("calendar_type"));
+        columns.add(FieldKey.fromString("default_bg_color"));
+        columns.add(FieldKey.fromString("requires_authorization"));
+        columns.add(FieldKey.fromString("authorized_groups"));
+        final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
+
+        TableSelector ts = new TableSelector(ti, colMap.values(), null, sort);
+        Map<String, Object>[] queryResults = ts.getMapArray();
+
+        List<Map<String, Object>> authorizedCalendars = new ArrayList();
+
+        //Only return calendars that the user is authorized to view
+        for (int i = 0; i < queryResults.length; i++) {
+            if (queryResults[i].get("requires_authorization") != null && (Boolean) queryResults[i].get("requires_authorization")) {
+                String authorizedGroupsString = (String) queryResults[i].get("authorized_groups");
+                if (authorizedGroupsString != null) {
+                    String[] authorizedGroups = authorizedGroupsString.trim().split("\\s*,\\s*");
+                    for (int j = 0; j < authorizedGroups.length; j++) {
+                        Group authorizedGroup = GroupManager.getGroup(getContainer(), authorizedGroups[j], GroupEnumType.SITE);
+                        if (getUser().isInGroup(authorizedGroup.getUserId()) || getUser().isInSiteAdminGroup()) {
+                            authorizedCalendars.add(queryResults[i]);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                authorizedCalendars.add(queryResults[i]);
+            }
+        }
+
+        Map<String, Object>[] onCallCalendars = new Map[authorizedCalendars.size()];
+        return authorizedCalendars.toArray(onCallCalendars);
     }
 
     private JSONArray fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType, String backgroundColor, Date startDate, Date endDate) throws Exception

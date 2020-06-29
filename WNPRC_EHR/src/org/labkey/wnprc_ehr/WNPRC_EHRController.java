@@ -1046,10 +1046,18 @@ public class WNPRC_EHRController extends SpringActionController
 
                 //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
                 for (int i = 0; i < onCallCalendars.length; i++) {
-                    Map<String, Object> row = onCallCalendars[i];
-                    JSONArray events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
-
-                    organizeOnCallEvents(onCallSchedule, events, startDate, endDate, i + 2);
+                    JSONArray events = new JSONArray();
+                    boolean calendarReadSuccessful = true;
+                    try {
+                        Map<String, Object> row = onCallCalendars[i];
+                        events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
+                    } catch (Exception e) {
+                        _log.error("Error retrieving events from on-call calendar with calendarId: " + onCallCalendars[i].get("calendar_id"));
+                        onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name") + "<br><em>Error: Failed to load</em>");
+                        calendarReadSuccessful = false;
+                    } finally {
+                        organizeOnCallEvents(onCallSchedule, events, startDate, endDate, i + 2, calendarReadSuccessful);
+                    }
                 }
 
                 response.put("success", true);
@@ -1066,30 +1074,37 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     //Organize the calendar events into an easy format for the front end to parse
-    private void organizeOnCallEvents(JSONObject[][] onCallSchedule, JSONArray events, java.time.LocalDate startDate, java.time.LocalDate endDate, int column) {
+    private void organizeOnCallEvents(JSONObject[][] onCallSchedule, JSONArray events, java.time.LocalDate startDate, java.time.LocalDate endDate, int column, boolean calendarReadSuccessful) {
         long daysBetween = DAYS.between(startDate, endDate);
         for (int i = 0; i <= daysBetween; i++) {
-            for (int j = 0; j < events.length(); j++) {
-                JSONObject event = events.getJSONObject(j);
-                if (startDate.plusDays(i).equals(event.get("date"))) {
-                    if (onCallSchedule[i + 1][column] == null) {
-                        onCallSchedule[i + 1][column] = new JSONObject();
-                    }
-                    String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
-                    title = title.replaceAll("(?i)<br */?>", "\n").trim();
-                    title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
-                    String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
-                    description = description.replaceAll("(?i)<br */?>", "\n").trim();
-                    description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
-                    if (onCallSchedule[i + 1][column].getString("html") == null) {
-                        onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
-                    } else {
-                        onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");
+            if (calendarReadSuccessful) {
+                for (int j = 0; j < events.length(); j++) {
+                    JSONObject event = events.getJSONObject(j);
+                    if (startDate.plusDays(i).equals(event.get("date"))) {
+                        if (onCallSchedule[i + 1][column] == null) {
+                            onCallSchedule[i + 1][column] = new JSONObject();
+                        }
+                        //Replace <br> tags with newlines and then strip out any remaining html tags from title and description
+                        //Once the strings are cleaned up, add back in the <br> tags instead of the newlines
+                        String title = event.getString("title") != null ? event.getString("title") : "NO NAME";
+                        title = title.replaceAll("(?i)<br */?>", "\n").trim();
+                        title = Jsoup.parse(title).wholeText().replaceAll("\\R", "<br>");
+                        String description = event.getString("description") != null ? event.getString("description") : "NO PHONE NUMBER";
+                        description = description.replaceAll("(?i)<br */?>", "\n").trim();
+                        description = Jsoup.parse(description).wholeText().replaceAll("\\R", "<br>");
+                        if (onCallSchedule[i + 1][column].getString("html") == null) {
+                            onCallSchedule[i + 1][column].put("html", "<strong>" + title + "<br>" + description + "</strong>");
+                        } else {
+                            onCallSchedule[i + 1][column].put("html", "<strong>" + onCallSchedule[i + 1][column].getString("html") + "<br>" + title + "<br>" + description + "</strong>");
+                        }
                     }
                 }
-            }
-            if (onCallSchedule[i + 1][column] == null) {
-                onCallSchedule[i + 1][column] = new JSONObject().put("html", "<strong>NO DATA</strong>");
+                if (onCallSchedule[i + 1][column] == null) {
+                    onCallSchedule[i + 1][column] = new JSONObject().put("html", "<strong>NO DATA</strong>");
+                }
+            } else {
+                onCallSchedule[i + 1][column] = new JSONObject();
+                onCallSchedule[i + 1][column].put("html", "<em>Error: Failed to load</em>");
             }
         }
     }

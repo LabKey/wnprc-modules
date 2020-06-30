@@ -2,8 +2,6 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import * as $ from 'jquery';
-import {TextInput} from '@labkey/components';
-import {QueryColumn} from '@labkey/components';
 
 
 $(() => {

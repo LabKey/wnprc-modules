@@ -58,8 +58,7 @@
     "scss-loader": "^0.0.1"
   },
   "dependencies": {
-    "@labkey/api": "^0.1.2-fb-sampleTimelineAuditEvents.3",
-    "@labkey/components": "^0.42.0-fb-biologics-comp-migrate.7",
+    "@labkey/api": "0.0.47",
     "@wnprc/primate-id": "^1.1.7",
     "blockui": "^1.0.0",
     "bootstrap": "^3.0.0",
@@ -80,6 +79,7 @@
     "react-dom": "^16.13.1",
     "react-tabs": "^1.0.0",
     "react-select": "^3.1.0",
+    "react-datepicker": "^3.0.0",
     "rsvp": "~3.3.0",
     "simplefilter": "^1.0.0",
     "toastr": "^2.0.0",

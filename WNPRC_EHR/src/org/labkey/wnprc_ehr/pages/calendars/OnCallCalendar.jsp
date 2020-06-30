@@ -8,33 +8,30 @@
 
 <style type="text/css">
 
-    table, th, td {
+    .thin-bordered-table {
         border: 1px solid black;
         padding: 1em;
     }
 
-    th, td {
+    .centered-text-table {
         text-align: center;
         vertical-align: middle;
     }
 
-    a {
+    .schedule-nav-link {
         text-decoration: none;
         display: inline-block;
         padding: 8px 16px;
-    }
-
-    a:hover {
-        background-color: #116596;
-        color: black;
-    }
-
-    .next, .previous {
         background-color: #116596;
         color: white;
     }
 
-    em {
+    .schedule-nav-link:hover {
+        background-color: #116596;
+        color: black;
+    }
+
+    .error-text {
         color: red;
     }
 
@@ -70,9 +67,9 @@
             <div class="col-sm-6">
                 <div id="navigateByWeek">
                     <br><br>
-                    <a href="javascript:changeWeek(-1)" class="previous">&laquo; Previous</a>
-                    <a href="javascript:loadCurrentWeek()" class="previous">Current Week</a>
-                    <a href="javascript:changeWeek(1)" class="next">Next &raquo;</a>
+                    <a class="schedule-nav-link" href="javascript:changeWeek(-1)">&laquo; Previous</a>
+                    <a class="schedule-nav-link" href="javascript:loadCurrentWeek()">Current Week</a>
+                    <a class="schedule-nav-link" href="javascript:changeWeek(1)">Next &raquo;</a>
                     <br><br>
                 </div>
             </div>
@@ -206,9 +203,12 @@
     function createOnCallTable(onCallSchedule) {
         let onCallTableDiv = document.getElementById("onCallTable");
         let table = document.createElement("table");
+        table.classList.add("thin-bordered-table");
         let headerRow = document.createElement("tr");
         for (let i = 0; i < onCallSchedule[0].length; i++) {
             let th = document.createElement("th");
+            th.classList.add("thin-bordered-table");
+            th.classList.add("centered-text-table");
             th.innerHTML = (onCallSchedule[0][i]) ? onCallSchedule[0][i].html : "<strong>NO DATA</strong>";
             headerRow.appendChild(th);
         }
@@ -217,6 +217,8 @@
             let tr = document.createElement("tr");
             for (let j = 0; j < onCallSchedule[i].length; j++) {
                 let td = document.createElement("td");
+                td.classList.add("thin-bordered-table");
+                td.classList.add("centered-text-table");
                 td.innerHTML = (onCallSchedule[i][j]) ? onCallSchedule[i][j].html : "<strong>NO DATA</strong>";
                 tr.appendChild(td);
             }

@@ -1053,7 +1053,7 @@ public class WNPRC_EHRController extends SpringActionController
                         events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
                     } catch (Exception e) {
                         _log.error("Error retrieving events from on-call calendar with calendarId: " + onCallCalendars[i].get("calendar_id"));
-                        onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name") + "<br><em>Error: Failed to load</em>");
+                        onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name") + "<br><span class='error-text'>Error: Failed to load</span>");
                         calendarReadSuccessful = false;
                     } finally {
                         organizeOnCallEvents(onCallSchedule, events, startDate, endDate, i + 2, calendarReadSuccessful);
@@ -1104,7 +1104,7 @@ public class WNPRC_EHRController extends SpringActionController
                 }
             } else {
                 onCallSchedule[i + 1][column] = new JSONObject();
-                onCallSchedule[i + 1][column].put("html", "<em>Error: Failed to load</em>");
+                onCallSchedule[i + 1][column].put("html", "<span class='error-text'>Error: Failed to load</span>");
             }
         }
     }

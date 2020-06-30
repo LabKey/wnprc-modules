@@ -1,0 +1,18 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="restraints" tableDbType="TABLE" useColumnOrder="true">
+                <columns>
+                    <column columnName="weight_objectid">
+                        <columnTitle>Weight ObjectID</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>weight</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

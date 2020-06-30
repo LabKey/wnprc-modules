@@ -654,6 +654,17 @@
                         }
                     ],
                     requests: true
+                },
+                {
+                    header: 'New Forms in Test',
+                    items: [
+                        {
+                            url:     LABKEY.ActionURL.buildURL('enterweights', 'app', ctx['EHRStudyContainer']),
+                            title:   'Enter Weights',
+                            queries:['weight']
+                        },
+
+                    ]
                 }
             ];
 

@@ -1,0 +1,215 @@
+.content-wrapper {
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  border-color: #dddddd;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+}
+
+.content-wrapper-body {
+  padding: 15px;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+  max-width: 225px;
+}
+
+/* need this rule so the size is respected */
+/* todo maybe we can style the component via jsx instead?*/
+.react-datepicker__input-container {
+  display: block !important;
+}
+
+.custom-date-input {
+  width: 100%;
+  position: relative;
+  min-height: 1px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+#date-calendar-img {
+  display: inline-block;
+  position: absolute;
+  right: 5px;
+  top: 1px;
+  cursor: pointer;
+}
+
+.remove-record-button {
+  margin-left: 0px;
+  float: right;
+  background: none;
+}
+
+.remove-record-button {
+  margin-left: 0px;
+  float: right;
+  border: none;
+  font-size: 2rem;
+  fill: red;
+}
+
+.card-header:hover {
+  cursor: pointer;
+}
+
+.card-header {
+  background-color: #e0e0e0;
+}
+
+.card-header.invalid {
+  border: 1px solid rgba(255, 0, 30, 0.33);
+}
+
+.card-header.valid {
+  border: none;
+}
+
+#invalid-tooltip {
+  float:right;
+  margin: 4px;
+  z-index: 0;
+}
+
+.card-body {
+  padding: 1rem;
+  border: 1px solid;
+  border-color: #e0e0e0;
+  margin-bottom: 2rem;
+}
+
+.card {
+  border-color: #e0e0e0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 2px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.row.card {
+  -webkit-transition: 0.5s !important;
+  -moz-transition: 0.5s !important;
+  -o-transition: 0.5s !important;
+  transition: 0.5s !important;
+}
+
+.loading {
+  background-image: url("/_images/ajax-loading.gif");
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1000ms;
+}
+
+.notloading {
+  opacity: 1;
+  transition: opacity 1000ms;
+}
+
+input.form-control,
+textarea.form-control,
+select.form-control {
+  max-width: 225px;
+  float: left;
+  width: 100%;
+}
+
+.submit-btn {
+  float: right;
+}
+
+.modal-backdrop {
+  opacity: 0.5;
+}
+
+#modal-body {
+  margin: auto;
+  width: 75%;
+  padding: 10px;
+}
+
+#modal-body-batch {
+  padding-left: 75px;
+}
+
+.centered-wrapper {
+  margin: auto;
+  max-width: 500px;
+}
+
+.panel-portal-left {
+  margin-right: 15px;
+}
+
+.animal-info-pane {
+  position: fixed;
+  left: 55%;
+}
+
+button {
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
+  margin-right: 5px !important;
+}
+
+input[id^="animalid"],
+input[id^="weight"] {
+  margin-bottom: 5px;
+  text-transform: lowercase;
+}
+
+.wnprc-secondary-btn {
+  color: #5b5b5b !important;
+  border-color: #95989a !important;
+}
+
+#animal-info-empty {
+  padding: 15px;
+  padding-bottom: 40px;
+}
+
+#locations-select {
+  width: 160px;
+}
+
+.hide-record {
+  animation: slideout 0.5s linear 0.5s;
+  animation-iteration-count: 1;
+  animation-delay: 0s;
+  -webkit-animation-fill-mode: forwards;
+}
+
+.visible {
+  animation: slidein 3s linear 1s infinite alternate;
+}
+
+@keyframes slideout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  input.form-control,
+  textarea.form-control,
+  select.form-control {
+    width: 80%;
+    margin-left: 1em;
+  }
+
+  #date-calendar-img {
+    display: inline-block;
+    position: absolute;
+    right: -4px;
+    top: 1px;
+    cursor: pointer;
+  }
+}

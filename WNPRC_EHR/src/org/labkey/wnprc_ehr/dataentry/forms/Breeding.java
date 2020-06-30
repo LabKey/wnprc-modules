@@ -78,7 +78,7 @@ public final class Breeding
         breedingSections.add(new SingleQueryFormSection("study", PREGNANCY_OUTCOME_QUERY, BREEDING_ENCOUNTER_LABEL));
 
         breedingSections.forEach(fs -> {
-            fs.addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
+            fs.addClientDependency(ClientDependency.supplierFromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
             fs.addConfigSource("Breeding.Columns");
             fs.addConfigSource("Breeding.Editors");
             fs.addConfigSource("Breeding.Config");
@@ -132,7 +132,7 @@ public final class Breeding
         public BreedingForm(DataEntryFormContext ctx, Module owner, String formName, FormSection... sections)
         {
             super(ctx, owner, formName, formName, "Colony Records", Arrays.asList(sections));
-            addClientDependency(ClientDependency.fromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
+            addClientDependency(ClientDependency.supplierFromPath("/wnprc_ehr/ext4/breeding.lib.xml"));
             getFormSections().forEach(s -> {
                 s.addConfigSource("Breeding.Columns");
                 s.addConfigSource("Breeding.Editors");

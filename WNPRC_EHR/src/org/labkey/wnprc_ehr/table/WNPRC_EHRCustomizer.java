@@ -17,7 +17,7 @@ package org.labkey.wnprc_ehr.table;
 
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.BaseColumnInfo;
-import org.labkey.api.data.ColumnInfo;
+//import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
@@ -235,7 +235,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col19.setDescription("This calculates the current behavior(s) for the animal, based on the behavior abstract table");
             ds.addColumn(col19);
 
-            ColumnInfo col20 = getWrappedIdCol(us, ds, "PrimateId", "demographicsPrimateId");
+            BaseColumnInfo col20 = getWrappedIdCol(us, ds, "PrimateId", "demographicsPrimateId");
             col20.setLabel("PrimateId");
             col20.setDescription("Unique PrimateID column to be shared across all datasets");
             ds.addColumn(col20);
@@ -252,7 +252,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeProtocolTable(AbstractTableInfo table)
     {
-        ColumnInfo protocolCol = table.getColumn("protocol");
+        BaseColumnInfo protocolCol = (BaseColumnInfo) table.getColumn("protocol");
         if (protocolCol != null && table.getColumn("pdf") == null)
         {
             var col = table.addColumn(new WrappedColumn(protocolCol, "pdf"));
@@ -290,7 +290,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
+                BaseColumnInfo col2 = (BaseColumnInfo) table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
                 col2.setLabel("Expiration Date");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
@@ -303,7 +303,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
+                BaseColumnInfo col2 = (BaseColumnInfo) table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
                 col2.setLabel("Max Animals Per Species");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
@@ -328,7 +328,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     private void customizeSireIdColumn(AbstractTableInfo ti) {
-        ColumnInfo sireid = ti.getColumn("sireid");
+        BaseColumnInfo sireid = (BaseColumnInfo) ti.getColumn("sireid");
         if (sireid != null)
         {
             UserSchema us = getUserSchema(ti, "study");
@@ -372,7 +372,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     private void customizeReasonForMoveColumn(AbstractTableInfo ti) {
-        ColumnInfo reason = ti.getColumn("reason");
+        BaseColumnInfo reason = (BaseColumnInfo)ti.getColumn("reason");
         if (reason != null)
         {
             UserSchema us = getUserSchema(ti, "study");

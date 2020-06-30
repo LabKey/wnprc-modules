@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.query;
 
 import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -166,7 +167,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
             }
         }
 
-        ColumnInfo batchedColumn = ti.getColumn("batched");
+        BaseColumnInfo batchedColumn = (BaseColumnInfo)ti.getColumn("batched");
 
         if (batchedColumn != null) {
             batchedColumn.setDisplayColumnFactory(new DisplayColumnFactory() {

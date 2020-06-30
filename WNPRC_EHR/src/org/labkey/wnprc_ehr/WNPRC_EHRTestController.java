@@ -1,7 +1,7 @@
 package org.labkey.wnprc_ehr;
 
 import com.google.common.base.Throwables;
-import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.Module;
@@ -35,7 +35,7 @@ public class WNPRC_EHRTestController extends SpringActionController
      * definition.
      */
     @RequiresSiteAdmin
-    public static class ImportDatasetMetadataAction extends ApiAction<Void>
+    public static class ImportDatasetMetadataAction extends MutatingApiAction<Void>
     {
         @Override
         public Object execute(Void aVoid, BindException errors) throws Exception
@@ -98,7 +98,7 @@ public class WNPRC_EHRTestController extends SpringActionController
      * demographic datasets.
      */
     @RequiresSiteAdmin
-    public class CreatePregnanciesAction extends ApiAction<Void>
+    public class CreatePregnanciesAction extends MutatingApiAction<Void>
     {
         @Override
         public Object execute(Void aVoid, BindException errors)

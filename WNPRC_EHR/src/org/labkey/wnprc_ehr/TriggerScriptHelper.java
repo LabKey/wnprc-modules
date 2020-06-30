@@ -22,7 +22,7 @@ import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
-import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
+//import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
@@ -171,8 +171,8 @@ public class TriggerScriptHelper {
                         stopExecution = true;
                     }
                 }
-                housingRow.put("sex", EHRDemographicsServiceImpl.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
-                filteredHousingRows.add(housingRow);
+                //housingRow.put("sex", EHRDemographicsServiceImpl.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
+                //filteredHousingRows.add(housingRow);
             }
         }
 

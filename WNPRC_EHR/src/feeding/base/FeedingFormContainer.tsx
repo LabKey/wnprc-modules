@@ -123,8 +123,8 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       setSubmitTextBody("Success!");
       wait(3, setSubmitTextBody).then(() => {
         window.location.href = ActionURL.buildURL(
-            "wnprc_ehr",
-            "dataEntry",
+            "ehr",
+            "executeQuery.view?schemaName=study&query.queryName=Feeding",
             ActionURL.getContainer()
         );
       });

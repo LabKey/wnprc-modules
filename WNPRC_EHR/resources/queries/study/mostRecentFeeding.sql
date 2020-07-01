@@ -15,12 +15,13 @@ SELECT
         WHERE w.id=w2.id AND w.DateChanged=w2.date
     ) as double) AS Amount,
     w.remark,
-    w.DateChanged
+    w.DateChanged,
+    w.chowConversion
     /*timestampdiff('SQL_TSI_DAY', w.DateChanged, now()) AS DaysSinceFeedingChange,*/
 
 FROM (
 
-         SELECT m.Id, m.type, m.remark, m.Id.curLocation.Room as Room, m.Id.curLocation.Cage as Cage, t.DateChanged
+         SELECT m.Id, m.type, m.remark, m.Id.curLocation.Room as Room, m.Id.curLocation.Cage as Cage, m.chowConversion, t.DateChanged
          FROM (
                   SELECT
                       w.Id AS Id,

@@ -15,11 +15,11 @@
 
        <column name="amount"/>
        <column name="type"/>
+       <column name="date" />
        <column name="remark"/>
        <!--<column name="performedby"/>-->
-       <column name="modified" />
        <!--<column name="modifiedby" />-->
-       <column name="qcstate" />
+       <column name="chowConversion"/>
        <!--<column name="taskid" />-->
    </columns>
    <sorts>

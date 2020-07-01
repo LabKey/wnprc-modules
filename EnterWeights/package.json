@@ -103,7 +103,7 @@
       }
     },
     "clean": {
-      "command": "rimraf resources/web/enterweights/app/"
+      "command": "rimraf resources/web/enterweights/app/app*"
     },
     "reallyClean": {
       "command": "rimraf resources/web/enterweights/app/app* ; rimraf node_modules"

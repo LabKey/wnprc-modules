@@ -166,12 +166,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     id : 'location',
                     listeners: {
                         change: function (field, val) {
-                            debugger;
                             var weightStartTime = Ext4.getCmp('weightDateTime');
                             var chairingStartTime = Ext4.getCmp('chairingStartTime');
                             var chairingEndTime = Ext4.getCmp('chairingEndTime');
                             var waterLocation = Ext4.getCmp('waterLocation');
                             var startTime = new Date(weightStartTime.getValue());
+                            
                             chairingStartTime.setValue(startTime);
                             chairingEndTime.setValue(startTime);
                             waterLocation.setValue(val);
@@ -197,12 +197,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
             chairingStartTime: {
                 xtype: 'xdatetime',
-                extFormat:'Y-m-d H:i',
                 hidden: false,
                 allowBlank: false,
                // hideMode: 'offsets',
                 editorConfig : {
                     id : 'chairingStartTime',
+                    timeFormat:'H:i'
 
                 }
 
@@ -211,12 +211,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             chairingEndTime: {
                 xtype: 'xdatetime',
-                extFormat:'Y-m-d H:i',
                 allowBlank: false,
                 hidden: false,
                 hideMode: 'offsets',
                 editorConfig : {
                     id : 'chairingEndTime',
+                    timeFormat:'H:i'
 
                 }
 

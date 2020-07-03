@@ -226,7 +226,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             });
             tempModel.phantom = false;
             records.push(tempModel);
-            if (row.getValue('provideFruit') != null){
+            if (!row.getValue('provideFruit') || row.getValue('provideFruit') != 'none'){
                 var fruitModel = this.targetStore.createModel({
                     Id:                 row.getValue('animalid'),
                     date:               modelDate,

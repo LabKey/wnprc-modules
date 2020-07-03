@@ -73,10 +73,10 @@ function onInit(event, helper){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
-    if (row.volume == null){
+    /*if (row.volume == null){
         EHR.Server.Utils.addError(scriptErrors, 'volume', 'This field is required', 'WARN');
         console.log ("value of QCState "+ row.QCState)
-    }
+    }*/
 
     if (row.QCStateLabel == 'Scheduled'){
         console.log ("value of date "+ row.date);

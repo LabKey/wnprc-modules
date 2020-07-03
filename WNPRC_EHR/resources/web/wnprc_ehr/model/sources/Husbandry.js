@@ -487,13 +487,16 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                 }
             },
-            frequency:{
-                defaultValue: 'Daily - PM',
-                allowBlank: 'true'
-            },
             waterSource:{
                 defaultValue: 'regulated',
-                allowBlank: 'false'
+                allowBlank: 'false',
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'water_source',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+
+                }
 
             },
             volume:{
@@ -512,10 +515,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             frequency:{
                 allowBlank: false,
+                defaultValue: 'Daily - PM',
+                allowBlank: 'false',
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',
-                    keyColumn: 'rowid',
+                    keyColumn: 'meaning',
                     displayColumn: 'meaning',
                     sort: 'sort_order'
                 }
@@ -524,6 +529,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 defaultValue: 'none',
                 allowBlank: false,
                 lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'husbandry_fruit',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
                     sort: 'sort_order'
                 }
             }

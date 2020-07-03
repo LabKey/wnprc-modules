@@ -1456,10 +1456,10 @@ public class TriggerScriptHelper {
 
     //Generic function to get lookup table to get meaning from rowid
     //improvement to return a map with all the items in the table and only call the db once
-    public String getMeaningFromRowid (String rowid, String lookupTable){
+    public String getMeaningFromRowid (String lookupColumn, String lookupTable){
 
         TableInfo husbandryFrequency = getTableInfo("ehr_lookups",lookupTable);
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("rowid"), Integer.parseInt(rowid), CompareType.EQUAL);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("meaning"), lookupColumn, CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("active"), true);
         //filter.addCondition(FieldKey.fromString("active"), true, CompareType.EQUAL);
         TableSelector frequencyRecord = new TableSelector(husbandryFrequency, PageFlowUtil.set("rowid", "meaning", "sort_order", "active"),filter, null);

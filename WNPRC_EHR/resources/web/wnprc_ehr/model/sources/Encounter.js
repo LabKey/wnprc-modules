@@ -2,12 +2,14 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
 
     byQuery: {
         'study.waterGiven':{
-
-
+            Id: {
+                editable: false
+            },
             date: {
                 allowBlank: false
             },
             project:{
+                editable: false,
                 allowBlank: false
             },
             volume: {
@@ -18,12 +20,15 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 allowBlank: true
             },
             provideFruit:{
+                editable: false
 
             },
             route: {
+                editable: false,
                 defaultValue : 'oral'
             },
             location:{
+                editable: false,
                 defaultValue: 'animalRoom',
                 lookup:{
                     schemaName: 'ehr_lookups',
@@ -37,6 +42,7 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 }
             },
             assignedTo:{
+                editable: false
 
             },
             remarks :{
@@ -51,7 +57,7 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 hidden: true
             },
             dateordered:{
-                //hidden: true
+                hidden: true
             }
 
         },

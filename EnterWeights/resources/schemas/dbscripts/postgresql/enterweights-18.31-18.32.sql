@@ -1,1 +1,1 @@
-insert into ehr.form_framework_types (schemaname,queryname,framework,container) select 'study', 'weight', 'reactjs', entityid from core.containers WHERE name='EHR';
+insert into ehr.form_framework_types (schemaname,queryname,framework,container) select 'study', 'weight', 'reactjs', entityid from core.containers WHERE name='EHR' LIMIT 1;

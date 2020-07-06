@@ -430,6 +430,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             frequency:{
                 allowBlank: false,
+                defaultValue: 'PM',
+                editable: false,
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',

@@ -1,5 +1,5 @@
 dependencies {
-    apiCompile "com.google.guava:guava:18.0"
+    apiCompile "com.google.guava:guava:${guavaVersion}"
     compile project(":server:modules:query")
     external "org.jooq:jooq:3.8.4"
     external "javax.xml.bind:jaxb-api:${jaxbVersion}"

@@ -18,7 +18,8 @@
     WA.lsid AS lsid,
     WA.project AS project,
     WA.frequency AS frequency,
-    WA.frequency.meaning AS frequencyMeaning
+    WA.frequency.meaning AS frequencyMeaning,
+    WA.waterSource AS waterSource
 
 
 FROM study.waterAmount WA
@@ -45,7 +46,8 @@ UNION ALL
     WS.lsid AS lsid,
     WS.project AS project,
     WS.frequency AS frequency,
-    WS.freqMeaning AS frequencyMeaning
+    WS.freqMeaning AS frequencyMeaning,
+    WS.waterSource AS waterSource
 
 
 FROM study.waterSchedule WS

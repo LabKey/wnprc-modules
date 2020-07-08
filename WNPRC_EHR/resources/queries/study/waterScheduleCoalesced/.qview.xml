@@ -4,6 +4,7 @@
         <column name="date" />
         <column name="volume" />
         <column name="frequency" />
+        <column name="waterSource"/>
         <column name="dataSource"/>
         <column name="assignedTo"/>
         <column name="provideFruit"/>

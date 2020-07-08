@@ -107,17 +107,25 @@
                             </conditionalFormat>
                         </conditionalFormats>
                     </column>
-                    <column columnName="conc2">
-                        <columnTitle>Concentration</columnTitle>
-                    </column>
-                    <column columnName="amount2">
-                        <columnTitle>Amount Given</columnTitle>
-                    </column>
                     <column columnName="volume">
                         <columnTitle>Volume</columnTitle>
                     </column>
-                    <column columnName="volume2">
-                        <columnTitle>Volume</columnTitle>
+                    <column columnName="waterSource">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_source</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>
+                    </column>
+                    <column columnName="provideFruit">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_fruit</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>
+
                     </column>
                     <column columnName="treatmentStatus">
                         <!--<url>/ehr/taskDetails.view?formtype=${taskid/formtype}&amp;taskid=${taskid}</url>-->

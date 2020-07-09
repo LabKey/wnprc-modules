@@ -142,9 +142,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         String chowConversion = "chowConversion";
         SQLFragment sql = new SQLFragment("(SELECT " +
                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log') " +
-                "THEN CAST(ROUND(amount*"+ conv.toString() + ") as INTEGER)" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower') " +
-                "THEN CAST(ROUND(amount*" + invconv.toString() + ") as INTEGER)" +
+                    "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = ' flower') " +
+                    "THEN (ROUND(amount*" + invconv.toString() + ") || ' log')" +
                 "END) as ChowConversion)");
         ExprColumn newCol = new ExprColumn(ti, chowConversion, sql, JdbcType.VARCHAR);
         newCol.setLabel("Chow Conversion");

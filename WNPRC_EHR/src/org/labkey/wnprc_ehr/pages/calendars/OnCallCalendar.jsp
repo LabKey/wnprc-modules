@@ -41,7 +41,7 @@
     <div class="panel-heading"><span>On Call Schedule</span></div>
 
     <div class="panel-body">
-        <form>
+        <form class="hidden-print">
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-2">
@@ -54,6 +54,7 @@
                     </div>
                 </div>
             </div>
+            
             <div class="form-group">
                 <div class="row">
                     <div class="col-sm-2">
@@ -76,9 +77,41 @@
         </div>
         <div class="row">
             <div class="col-sm-6">
+                In the event of an injury or potential exposure occurring on the weekend that requires a trip the UW Hospital Emergency
+                Department, contact either the Colony Management Supervisor or the Veterinarian on-call, and they will contact the
+                appropriate HR representative.
+                <br><br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
                 <div id="onCallTable">Loading schedule...</div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <br>
+                Use the above contact information for: <b>AFTER HOURS (weekdays 4pm-6am), WEEKENDS, and HOLIDAYS</b>. Contact staff using the phone numbers listed above,
+                calling the bolded number first.
+                <br><br>
+                <ul>
+                    <li> If the on-call <b>Veterinarian</b> cannot be reached after multiple attempts, contact another veterinarian listed or Buddy Capuano (Attending Veterinarian) at 209-6846.</li>
+                    <ul>
+                        <li>Leaving a voicemail or sending a text message without further follow up is NOT appropriate when contacting the veterinarian for animal concerns.</li>
+                    </ul>
+                    <br>
+                    <li>If the <b>Supervisor</b> cannot be reached after multiple attempts, contact another supervisor listed or Bonnie Friscino (Colony Manager) at 209-6522.</li>
+                    <ul>
+                        <li>For facility in-house emergencies (e.g. water leaks, broken pipes, and temperature problems), contact the Physical Plant at 263-3333 (after hours)
+                            or Bruce Pape (209-6808) as well as the supervisor.</li>
+                        <li>Night ART/Nursery staff must contact the supervisor to check out.</li>
+                    </ul>
+                    <br>
+                    <li>If the <b>Pathologist</b> cannot be reached, leave a message including date and time of the call, your name and phone number, and the age, ID#, and species of the animal.</li>
+                </ul>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -106,8 +139,10 @@
         if (!startingDate) {
             startingDate = new Date();
         }
+        let stringDate;
         let returnDate = new Date(startingDate);
         returnDate.setDate(returnDate.getDate() - returnDate.getDay() + dayOfWeek);
+       // stringDate = returnDate.getDate() + "-" + (returnDate.getMonth()+1) + "-" + returnDate.getFullYear();
         return returnDate;
     }
 

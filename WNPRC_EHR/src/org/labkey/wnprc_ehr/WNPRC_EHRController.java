@@ -112,6 +112,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -1030,14 +1031,16 @@ public class WNPRC_EHRController extends SpringActionController
 
                 //Set the headers for the on call schedule html table
                 JSONObject[][] onCallSchedule = new JSONObject[(int)daysBetween + 2][onCallCalendars.length + 2];
-                onCallSchedule[0][0] = new JSONObject().put("html", "Date");
+                onCallSchedule[0][0] = new JSONObject().put("html", "Date<br>dd-mm-yyyy");
                 onCallSchedule[0][1] = new JSONObject().put("html", "Day");
                 for (int i = 0; i < onCallCalendars.length; i++) {
                     onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name"));
                 }
                 //Set the dates in the html table
                 for (int i = 0; i <= daysBetween; i++) {
-                    onCallSchedule[i + 1][0] = new JSONObject().put("html", startDate.plusDays(i).toString());
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    String dateText = startDate.plusDays(i).format(formatter);
+                    onCallSchedule[i + 1][0] = new JSONObject().put("html", dateText);
                 }
                 //Set the days of the week in the html table
                 for (int i = 0; i <= daysBetween; i++) {

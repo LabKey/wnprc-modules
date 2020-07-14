@@ -18,6 +18,8 @@ import {
 import {ActionURL} from '@labkey/api';
 import AnimalInfoPane from "../../components/AnimalInfoPane";
 import BatchModal from "../../components/BatchModal";
+import BulkEditModal from "../../components/BulkEditModal";
+import BulkEditFields from "./BulkEditFields";
 
 const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   const {
@@ -194,6 +196,15 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         >
           Add Batch
         </Button>
+        <Button
+            variant="primary"
+            className="wnprc-secondary-btn"
+            id="edit-batch"
+            disabled={editMode}
+            onClick={handleShowRewrite}
+        >
+          Edit Batch
+        </Button>
 
         {showModal == "submit-all-btn" && (
             <SubmitModal
@@ -211,6 +222,14 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                 setLocation={passLocationAndSetIds}
                 setIds={setFormIds}
                 flipState={flipModalState}
+            />
+        )}
+        {showModal == "edit-batch" && (
+            <BulkEditModal
+              liftUpBulkValues={()=>{console.log('blah')}}
+              flipState={flipModalState}
+              bulkEditFields={<BulkEditFields fieldValues={()=>{console.log('test')}}/>}
+
             />
         )}
         <form className="feeding-form" ref={formEl}>

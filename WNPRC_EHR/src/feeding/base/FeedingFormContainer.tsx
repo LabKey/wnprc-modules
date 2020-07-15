@@ -1,21 +1,23 @@
 import * as React from "react";
 import { useEffect, useState, useContext, useRef } from "react";
-import {Button} from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import FeedingForm from "./FeedingForm";
-import { Query, Security, Filter, Utils} from "@labkey/api";
+import { Query, Security, Filter, Utils } from "@labkey/api";
 import { AppContext } from "./ContextProvider";
 import "../../theme/css/react-datepicker.css";
 import "../../theme/css/index.css";
 import SubmitModal from "../../components/SubmitModal";
 import {
-  checkEditMode, getAnimalIdsFromLocation,
+  checkEditMode,
+  getAnimalIdsFromLocation,
   groupCommands,
   labkeyActionSelectWithPromise,
   saveRowsDirect,
-  setupJsonData, sleep,
-  wait
+  setupJsonData,
+  sleep,
+  wait,
 } from "../../query/helpers";
-import {ActionURL} from '@labkey/api';
+import { ActionURL } from "@labkey/api";
 import AnimalInfoPane from "../../components/AnimalInfoPane";
 import BatchModal from "../../components/BatchModal";
 import BulkEditModal from "../../components/BulkEditModal";
@@ -32,10 +34,10 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     setAnimalInfoStateExternal,
     animalInfoState,
     setAnimalIdsExternal,
-      animalIds,
+    animalIds,
     editMode,
-      setEditMode,
-      updateFormDataExternal
+    setEditMode,
+    updateFormDataExternal,
   } = useContext(AppContext);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
@@ -57,7 +59,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         if (columnData.length > 0) {
           //make an object whos keys are the column names
           let newDataArr = columnData.reduce((acc, item) => {
-            if (item.required && !item.autoIncrement){
+            if (item.required && !item.autoIncrement) {
               console.log(item.name);
             }
             if (!acc[item.name]) {
@@ -72,7 +74,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     });
   }, []);
 
-  const onSubmit = e => {
+  const onSubmit = (e) => {
     e.preventDefault();
     if (formEl.current.checkValidity()) {
       handleShowRewrite(e);
@@ -81,7 +83,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     }
   };
 
-  const handleShowRewrite = e => {
+  const handleShowRewrite = (e) => {
     setShowModal(e.target.id);
   };
 
@@ -93,13 +95,13 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     let copyFormData = [...formData];
     copyFormData.push({
       Id: { value: "", error: "" },
-      date: { value: new Date() , error: ""},
+      date: { value: new Date(), error: "" },
       type: { value: "", error: "" },
       amount: { value: "", error: "" },
       remark: { value: "", error: "" },
       lsid: { value: "", error: "" },
-      command: {value: "insert", error: ""},
-      QCStateLabel: {value: "Completed", error: ""}
+      command: { value: "insert", error: "" },
+      QCStateLabel: { value: "Completed", error: "" },
     });
     return copyFormData;
   };
@@ -119,22 +121,24 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     setSubmitTextBody("Submitting...");
 
     let itemsToInsert = groupCommands(formData);
-    let jsonData = setupJsonData(itemsToInsert, 'study', 'feeding');
+    let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
 
-    saveRowsDirect(jsonData).then((data) => {
-      console.log(data);
-      setSubmitTextBody("Success!");
-      wait(3, setSubmitTextBody).then(() => {
-        window.location.href = ActionURL.buildURL(
+    saveRowsDirect(jsonData)
+      .then((data) => {
+        console.log(data);
+        setSubmitTextBody("Success!");
+        wait(3, setSubmitTextBody).then(() => {
+          window.location.href = ActionURL.buildURL(
             "ehr",
             "executeQuery.view?schemaName=study&query.queryName=Feeding",
             ActionURL.getContainer()
-        );
+          );
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        setSubmitTextBody(e.exception);
       });
-    }).catch(e => {
-      console.log(e);
-      setSubmitTextBody(e.exception)
-    });
   };
 
   /*const triggerLocation = (loc: Array<any>) => {
@@ -144,29 +148,28 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   const setFormIds = (ids: any) => {
     setFormDataExternal([]);
     setAnimalIdsExternal(ids);
-      let t = [];
-      ids.forEach((id, i) => {
-        t.push({
-          Id: { value: id, error: "" },
-          date: { value: new Date() , error: ""},
-          type: { value: "", error: "" },
-          amount: { value: "", error: "" },
-          remark: { value: "", error: "" },
-          lsid: { value: "", error: "" },
-          command: {value: "insert", error: ""},
-          QCStateLabel: {value: "Completed", error: ""}
-        });
+    let t = [];
+    ids.forEach((id, i) => {
+      t.push({
+        Id: { value: id, error: "" },
+        date: { value: new Date(), error: "" },
+        type: { value: "", error: "" },
+        amount: { value: "", error: "" },
+        remark: { value: "", error: "" },
+        lsid: { value: "", error: "" },
+        command: { value: "insert", error: "" },
+        QCStateLabel: { value: "Completed", error: "" },
       });
+    });
     setFormDataExternal(t);
   };
 
   const passLocationAndSetIds = (location) => {
-    const e = getAnimalIdsFromLocation(location).then((f)=>{
+    const e = getAnimalIdsFromLocation(location).then((f) => {
       console.log(f);
       setFormIds(f);
     });
-  }
-
+  };
 
   return (
     <div className={`content-wrapper-body ${false ? "saving" : ""}`}>
@@ -175,63 +178,68 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
           <h3>Data entry</h3>
         </div>
         <Button
-            variant="primary"
-            className="wnprc-secondary-btn"
-            id="add-record"
-            disabled={editMode}
-            onClick={() => {
-              let newForm = addRecord();
-              setFormDataExternal(newForm)
-              /*let index = formdata.length;
+          variant="primary"
+          className="wnprc-secondary-btn"
+          id="add-record"
+          disabled={editMode}
+          onClick={() => {
+            let newForm = addRecord();
+            setFormDataExternal(newForm);
+            /*let index = formdata.length;
               setCurrent(index);*/
-            }}
+          }}
         >
           Add record
         </Button>
         <Button
-            variant="primary"
-            className="wnprc-secondary-btn"
-            id="add-batch"
-            disabled={editMode}
-            onClick={handleShowRewrite}
+          variant="primary"
+          className="wnprc-secondary-btn"
+          id="add-batch"
+          disabled={editMode}
+          onClick={handleShowRewrite}
         >
           Add Batch
         </Button>
         <Button
-            variant="primary"
-            className="wnprc-secondary-btn"
-            id="edit-batch"
-            disabled={editMode}
-            onClick={handleShowRewrite}
+          variant="primary"
+          className="wnprc-secondary-btn"
+          id="edit-batch"
+          disabled={editMode}
+          onClick={handleShowRewrite}
         >
           Edit Batch
         </Button>
 
         {showModal == "submit-all-btn" && (
-            <SubmitModal
-                name="final"
-                title="Submit All"
-                submitAction={triggerSubmit}
-                bodyText={submitTextBody}
-                submitText="Submit final"
-                enabled={true}
-                flipState={flipModalState}
-            />
+          <SubmitModal
+            name="final"
+            title="Submit All"
+            submitAction={triggerSubmit}
+            bodyText={submitTextBody}
+            submitText="Submit final"
+            enabled={true}
+            flipState={flipModalState}
+          />
         )}
         {showModal == "add-batch" && (
-            <BatchModal
-                setLocation={passLocationAndSetIds}
-                setIds={setFormIds}
-                flipState={flipModalState}
-            />
+          <BatchModal
+            setLocation={passLocationAndSetIds}
+            setIds={setFormIds}
+            flipState={flipModalState}
+          />
         )}
         {showModal == "edit-batch" && (
-            <BulkEditModal
-                updateFormDataFunction={updateFormDataExternal}
-              flipState={flipModalState}
-              bulkEditFields={<BulkEditFields fieldValues={()=>{console.log('test')}}/>}
-
-            />
+          <BulkEditModal
+            updateFormDataFunction={updateFormDataExternal}
+            flipState={flipModalState}
+            bulkEditFields={
+              <BulkEditFields
+                fieldValues={() => {
+                  console.log("test");
+                }}
+              />
+            }
+          />
         )}
         <form className="feeding-form" ref={formEl}>
           {formData.map((item, i) => (
@@ -239,8 +247,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
               <div className="row" key={i}>
                 <div className="col-xs-10">
                   <div className="row card">
-                    <div className="card-header">
-                    </div>
+                    <div className="card-header"></div>
                     <div>
                       <div className="card-body">
                         <FeedingForm
@@ -255,26 +262,26 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                 </div>
                 <div className="col-xs-2">
                   <button
-                      className="remove-record-button"
-                      id={`remove-record-btn_${i}`}
-                      type="button"
-                      title="Remove Record"
-                      aria-label="Close"
-                      onClick={e => {
-                        let copyformdata = [...formData];
-                        /*copyformdata[i]["visibility"]["value"] =
+                    className="remove-record-button"
+                    id={`remove-record-btn_${i}`}
+                    type="button"
+                    title="Remove Record"
+                    aria-label="Close"
+                    onClick={(e) => {
+                      let copyformdata = [...formData];
+                      /*copyformdata[i]["visibility"]["value"] =
                             "hide-record";*/
-                        setFormDataExternal(copyformdata);
-                        sleep(100).then(() => {
-                          removeRecord(i);
-                        });
-                      }}
+                      setFormDataExternal(copyformdata);
+                      sleep(100).then(() => {
+                        removeRecord(i);
+                      });
+                    }}
                   >
                     <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
                     >
                       <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                     </svg>
@@ -283,14 +290,14 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
               </div>
             </div>
           ))}
-        <button
-          className={`btn btn-primary submit-btn ${false ? "saving" : ""}`}
-          id="submit-all-btn"
-          onClick={e => onSubmit(e)}
-          /*disabled={errorLevel !== "submittable"}*/
-        >
-          Submit
-        </button>
+          <button
+            className={`btn btn-primary submit-btn ${false ? "saving" : ""}`}
+            id="submit-all-btn"
+            onClick={(e) => onSubmit(e)}
+            /*disabled={errorLevel !== "submittable"}*/
+          >
+            Submit
+          </button>
         </form>
       </div>
       <div className="col-xs-5 panel panel-portal animal-info-pane">

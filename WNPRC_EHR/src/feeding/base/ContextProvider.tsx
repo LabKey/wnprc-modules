@@ -1,25 +1,35 @@
 import * as React from "react";
-import {createContext, useEffect, useState} from "react";
-import {checkEditMode, labkeyActionSelectWithPromise} from "../../query/helpers";
-import {ActionURL, Filter} from "@labkey/api";
-import {ConfigProps, ContextProps, InfoProps, infoStates, RowObj} from "../typings/main";
+import { createContext, useEffect, useState } from "react";
+import {
+  checkEditMode,
+  labkeyActionSelectWithPromise,
+} from "../../query/helpers";
+import { ActionURL, Filter } from "@labkey/api";
+import {
+  ConfigProps,
+  ContextProps,
+  InfoProps,
+  infoStates,
+  RowObj,
+} from "../typings/main";
 
 const AppContext = createContext({} as ContextProps);
 
 const ContextProvider: React.FunctionComponent = ({ children }) => {
-
   const [queryDetails, setQueryDetails] = useState(null);
   //introduce type of field here?
-  const [formData, setFormData] = useState<Array<RowObj>>([{
-    Id: { value: "", error: "" },
-    date: { value: new Date() , error: ""},
-    type: { value: "", error: "" },
-    amount: { value: "", error: "" },
-    remark: { value: "", error: "" },
-    lsid: { value: "", error: "" },
-    command: {value: "insert", error: ""},
-    QCStateLabel: {value: "Completed", error: ""}
-  }]);
+  const [formData, setFormData] = useState<Array<RowObj>>([
+    {
+      Id: { value: "", error: "" },
+      date: { value: new Date(), error: "" },
+      type: { value: "", error: "" },
+      amount: { value: "", error: "" },
+      remark: { value: "", error: "" },
+      lsid: { value: "", error: "" },
+      command: { value: "insert", error: "" },
+      QCStateLabel: { value: "Completed", error: "" },
+    },
+  ]);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
   const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
@@ -37,20 +47,29 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
 
   const setBulkEditValuesExternal = (bev) => {
     setBulkEditValues(bev);
-  }
+  };
 
   const updateFormDataExternal = () => {
     //take the form data and update the values?
     const copyformdata: RowObj[] = [...formData];
 
-    copyformdata.forEach(item => {
-      item["date"] = bulkEditValues["date"]["value"] != "" ? Object.assign({}, bulkEditValues["date"]) : Object.assign({}, item["date"]);
-      item["type"] = bulkEditValues["type"]["value"] != "" ? Object.assign({}, bulkEditValues["type"]) : Object.assign({}, item["type"]);
-      item["amount"] = bulkEditValues["amount"]["value"] != "" ? Object.assign({}, bulkEditValues["amount"]) : Object.assign({}, item["amount"]);
+    copyformdata.forEach((item) => {
+      item["date"] =
+        bulkEditValues["date"]["value"] != ""
+          ? Object.assign({}, bulkEditValues["date"])
+          : Object.assign({}, item["date"]);
+      item["type"] =
+        bulkEditValues["type"]["value"] != ""
+          ? Object.assign({}, bulkEditValues["type"])
+          : Object.assign({}, item["type"]);
+      item["amount"] =
+        bulkEditValues["amount"]["value"] != ""
+          ? Object.assign({}, bulkEditValues["amount"])
+          : Object.assign({}, item["amount"]);
     });
 
     setFormData(copyformdata);
-  }
+  };
 
   const setAnimalInfoExternal = (ai) => {
     setAnimalInfo(ai);
@@ -61,14 +80,14 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
 
   const setAnimalIdsExternal = (ids) => {
     setAnimalIds(ids);
-  }
+  };
 
   const constructObject = (key, val) => {
     let add;
     if (key == "date") {
-      add = {[key]: {value: new Date(val)}};
-    }else{
-      add = {[key]: {value: val}};
+      add = { [key]: { value: new Date(val) } };
+    } else {
+      add = { [key]: { value: val } };
     }
     return add;
   };
@@ -88,34 +107,34 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     setAnimalIdsExternal,
     animalIds,
     updateFormDataExternal,
-    setBulkEditValuesExternal
+    setBulkEditValuesExternal,
   };
 
-  useEffect( () => {
+  useEffect(() => {
     setEditMode(checkEditMode);
-  },[]);
+  }, []);
 
   useEffect(() => {
     let options: ConfigProps = {
       schemaName: "ehr_lookups",
-      queryName: "feeding_types"
+      queryName: "feeding_types",
     };
     labkeyActionSelectWithPromise(options).then((res) => {
       setFeedingTypes(res.rows);
-    })
-  },[]);
+    });
+  }, []);
 
-  useEffect( () => {
+  useEffect(() => {
     if (!editMode) return;
 
     let filter = [];
     if (ActionURL.getParameter("lsid")) {
       filter.push(
-          Filter.create(
-              "lsid",
-              ActionURL.getParameter("lsid"),
-              Filter.Types.EQUAL
-          )
+        Filter.create(
+          "lsid",
+          ActionURL.getParameter("lsid"),
+          Filter.Types.EQUAL
+        )
       );
     }
 
@@ -123,22 +142,19 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
       schemaName: "study",
       queryName: "feeding",
       filterArray: filter,
-      columns: "Id,date,type,type,amount,remark,lsid,QCState"
+      columns: "Id,date,type,type,amount,remark,lsid,QCState",
     };
 
-    let newformdata:Array<RowObj> = [];
+    let newformdata: Array<RowObj> = [];
 
-    labkeyActionSelectWithPromise(options).then(data => {
-
-      if (data["rows"].length == 0){
+    labkeyActionSelectWithPromise(options).then((data) => {
+      if (data["rows"].length == 0) {
         //setWasError(true);
         //setErrorText("Cannot find a record with that taskid/lsid.");
         return;
       }
 
       data["rows"].forEach((row, i) => {
-
-
         newformdata.push({
           Id: { value: row.Id, error: "" },
           date: { value: new Date(row.date), error: "" },
@@ -147,9 +163,8 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
           amount: { value: row.amount, error: "" },
           lsid: { value: row.lsid, error: "" },
           QCState: { value: row.QCState, error: "" },
-          command: { value: "update", error: "" }
+          command: { value: "update", error: "" },
         });
-
 
         /*build up correct form data... need special command here though.
 
@@ -174,10 +189,8 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
         newformdata.push(obj);*/
       });
       setFormDataExternal(newformdata);
-    })
-  },[editMode]);
-
-
+    });
+  }, [editMode]);
 
   return (
     <AppContext.Provider value={defaultContext}>{children}</AppContext.Provider>

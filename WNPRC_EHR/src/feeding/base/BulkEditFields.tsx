@@ -9,25 +9,18 @@ import { useRef } from "react";
 import DropdownOptions from "../../components/DropdownOptions";
 import {AppContext} from "./ContextProvider";
 
-interface RewriteProps {
-    fieldValues: (values: object) => void;
-}
-
 /**
  * A set of fields whose values are meant to be passed up to a parent modal.
  */
-const BulkEditFields: React.FunctionComponent<RewriteProps> = props => {
-    const { fieldValues } = props;
-    const [type, setType] = useState<any>(new Date());
+const BulkEditFields: React.FunctionComponent<any> = props => {
+    const [type, setType] = useState<any>("");
     const [amount, setAmount] = useState<any>("");
-    const [date, setDate] = useState<any>("");
-    const [restraint, setRestraint] = useState<any>("");
-    const {feedingTypes} = useContext(AppContext);
+    const [date, setDate] = useState<any>(new Date());
+    const {feedingTypes, setBulkEditValuesExternal} = useContext(AppContext);
 
-    //lift state up to parent
-    //can either use full objects or objects w errors
+    // Set bulk edit values in the context provider
     useEffect(() => {
-        fieldValues(
+        setBulkEditValuesExternal(
             {
                 amount: {value: amount, error: ""},
                 type: {value: type, error: ""},
@@ -43,10 +36,6 @@ const BulkEditFields: React.FunctionComponent<RewriteProps> = props => {
 
     const handleDateChange = date => {
         setDate(date);
-    };
-
-    const handleRestraintChange = restraint => {
-        setRestraint(restraint);
     };
 
     let calendarEl = useRef(null);
@@ -77,10 +66,12 @@ const BulkEditFields: React.FunctionComponent<RewriteProps> = props => {
                     <div className="col-xs-9">
                         <DropdownOptions
                             options={feedingTypes}
-                            initialvalue={restraint}
-                            value={handleRestraintChange}
-                            name="restraints"
-                            id="restraint-bulk"
+                            initialvalue={type}
+                            value={ e => {
+                                setType(e);
+                            }}
+                            name="type"
+                            id="type-bulk"
                             classname="form-control"
                             valuekey="rowid"
                             displaykey="value"
@@ -92,7 +83,7 @@ const BulkEditFields: React.FunctionComponent<RewriteProps> = props => {
                     <div className="col-xs-9">
                         <input
                             className="form-control"
-                            id="type-bulk"
+                            id="amount-bulk"
                             type="number"
                             value={amount}
                             min="0"

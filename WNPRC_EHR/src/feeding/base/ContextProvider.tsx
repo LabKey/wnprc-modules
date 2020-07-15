@@ -26,6 +26,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const [feedingTypes, setFeedingTypes] = useState<Array<any>>();
   const [animalIds, setAnimalIds] = useState<Array<any>>();
   const [locations, setLocations] = useState<Array<any>>();
+  const [bulkEditValues, setBulkEditValues] = useState<any>();
 
   const setQueryDetailsExternal = (qd) => {
     setQueryDetails(qd);
@@ -33,6 +34,24 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const setFormDataExternal = (fd) => {
     setFormData(fd);
   };
+
+  const setBulkEditValuesExternal = (bev) => {
+    setBulkEditValues(bev);
+  }
+
+  const updateFormDataExternal = () => {
+    //take the form data and update the values?
+    const copyformdata: RowObj[] = [...formData];
+
+    copyformdata.forEach(item => {
+      item["date"] = bulkEditValues["date"]["value"] != "" ? Object.assign({}, bulkEditValues["date"]) : Object.assign({}, item["date"]);
+      item["type"] = bulkEditValues["type"]["value"] != "" ? Object.assign({}, bulkEditValues["type"]) : Object.assign({}, item["type"]);
+      item["amount"] = bulkEditValues["amount"]["value"] != "" ? Object.assign({}, bulkEditValues["amount"]) : Object.assign({}, item["amount"]);
+    });
+
+    setFormData(copyformdata);
+  }
+
   const setAnimalInfoExternal = (ai) => {
     setAnimalInfo(ai);
   };
@@ -67,7 +86,9 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     animalInfoState,
     feedingTypes,
     setAnimalIdsExternal,
-    animalIds
+    animalIds,
+    updateFormDataExternal,
+    setBulkEditValuesExternal
   };
 
   useEffect( () => {

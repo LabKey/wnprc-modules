@@ -34,7 +34,8 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     setAnimalIdsExternal,
       animalIds,
     editMode,
-      setEditMode
+      setEditMode,
+      updateFormDataExternal
   } = useContext(AppContext);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
@@ -226,7 +227,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         )}
         {showModal == "edit-batch" && (
             <BulkEditModal
-              liftUpBulkValues={()=>{console.log('blah')}}
+                updateFormDataFunction={updateFormDataExternal}
               flipState={flipModalState}
               bulkEditFields={<BulkEditFields fieldValues={()=>{console.log('test')}}/>}
 

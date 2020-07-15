@@ -1,35 +1,27 @@
-import { useState } from "react";
+import {useContext} from "react";
 import * as React from "react";
-//import BulkEditFields from "../containers/Forms/BulkEditFields";
 import SubmitModal from "./SubmitModal";
+import {AppContext} from "../feeding/base/ContextProvider";
 
 interface PropTypes {
-    liftUpBulkValues: (values: object) => void;
     flipState: () => void;
     bulkEditFields: any;
+    updateFormDataFunction: any;
 }
 
 /**
  * Uses a Submit Modal to display a set of fields used for bulk editing.
  * Requires an action to lift up all of the field values and flip the state
  *  flipstate just decides whether or not to show this modal.
+ *  Also requires an action from the context provider to set the form data
  */
 const BulkEditModal: React.FunctionComponent<PropTypes> = props => {
-    const { liftUpBulkValues, flipState, bulkEditFields} = props;
-    const [vals, setVals] = useState<any>();
-
-
-    // The job of this component is to set the form fields
-    // The job of the bulk edit fields is to pass the field values to this component
+    const {flipState, bulkEditFields, updateFormDataFunction} = props;
 
     const handleSubmit = () => {
-        liftUpBulkValues(vals);
+        //Update form values in the context provider
+        updateFormDataFunction();
         flipState();
-    };
-
-    //Change this to context provider
-    const liftUpBulkVals = (values: any) => {
-        setVals(values);
     };
 
     const bodyText = (

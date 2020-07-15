@@ -1038,7 +1038,7 @@ public class WNPRC_EHRController extends SpringActionController
                 }
                 //Set the dates in the html table
                 for (int i = 0; i <= daysBetween; i++) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-LLL-yyyy");
                     String dateText = startDate.plusDays(i).format(formatter);
                     onCallSchedule[i + 1][0] = new JSONObject().put("html", dateText);
                 }

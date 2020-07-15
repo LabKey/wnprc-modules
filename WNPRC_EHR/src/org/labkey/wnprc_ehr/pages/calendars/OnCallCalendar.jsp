@@ -17,6 +17,9 @@
         text-align: center;
         vertical-align: middle;
     }
+    .date-column {
+        width: 110px;
+    }
 
     .schedule-nav-link {
         text-decoration: none;
@@ -93,7 +96,7 @@
                 <br>
                 Use the above contact information for: <b>AFTER HOURS (weekdays 4pm-6am), WEEKENDS, and HOLIDAYS</b>. Contact staff using the phone numbers listed above,
                 calling the bolded number first.
-                <br><br>
+                <br>
                 <ul>
                     <li> If the on-call <b>Veterinarian</b> cannot be reached after multiple attempts, contact another veterinarian listed or Buddy Capuano (Attending Veterinarian) at 209-6846.</li>
                     <ul>
@@ -242,6 +245,10 @@
         let headerRow = document.createElement("tr");
         for (let i = 0; i < onCallSchedule[0].length; i++) {
             let th = document.createElement("th");
+            if(i == 0){
+                th.classList.add("date-column");
+            }
+
             th.classList.add("thin-bordered-table");
             th.classList.add("centered-text-table");
             th.innerHTML = (onCallSchedule[0][i]) ? onCallSchedule[0][i].html : "<strong>NO DATA</strong>";

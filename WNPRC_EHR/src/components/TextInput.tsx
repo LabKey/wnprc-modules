@@ -6,9 +6,9 @@ interface TextInputProps {
   id: string;
   className: string;
   value: any; //function?
-  onChange: any; //function?
-  onBlur: any;
-  onFocus: any;
+  onChange?: any; //function?
+  onBlur?: any;
+  onFocus?: any;
   required: boolean;
   autoFocus: boolean;
 }

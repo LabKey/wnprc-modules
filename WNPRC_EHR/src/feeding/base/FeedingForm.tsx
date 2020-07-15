@@ -2,10 +2,9 @@ import * as React from "react";
 import TextInput from "../../components/TextInput";
 import InputLabel from "../../components/InputLabel";
 import DateInput from "../../components/DateInput";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useRef } from "react";
 import { AppContext } from "./ContextProvider";
 import DatePicker from "react-datepicker";
-import * as webpack from "webpack";
 import { labkeyActionSelectWithPromise } from "../../query/helpers";
 import { Filter } from "@labkey/api";
 import DropdownOptions from "../../components/DropdownOptions";
@@ -105,11 +104,8 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
             className="form-control Id"
             value={values.Id.value}
             onChange={handleValueChange}
-            onBlur={() => {
-              lookupAnimalInfo();
-            }}
             onFocus={() => {
-              console.log("focus");
+              lookupAnimalInfo();
             }}
             required={true}
             autoFocus={true}

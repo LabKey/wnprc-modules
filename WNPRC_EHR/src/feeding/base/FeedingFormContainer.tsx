@@ -8,10 +8,8 @@ import "../../theme/css/react-datepicker.css";
 import "../../theme/css/index.css";
 import SubmitModal from "../../components/SubmitModal";
 import {
-  checkEditMode,
   getAnimalIdsFromLocation,
   groupCommands,
-  labkeyActionSelectWithPromise,
   saveRowsDirect,
   setupJsonData,
   sleep,

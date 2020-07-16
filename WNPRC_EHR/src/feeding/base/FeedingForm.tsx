@@ -5,7 +5,7 @@ import DateInput from "../../components/DateInput";
 import { useContext, useRef } from "react";
 import { AppContext } from "./ContextProvider";
 import DatePicker from "react-datepicker";
-import { labkeyActionSelectWithPromise } from "../../query/helpers";
+import {labkeyActionSelectWithPromise, lookupAnimalInfo} from "../../query/helpers";
 import { Filter } from "@labkey/api";
 import DropdownOptions from "../../components/DropdownOptions";
 
@@ -20,8 +20,10 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
     setAnimalInfoStateExternal,
     animalInfoState,
     feedingTypes,
+    animalInfoCache,
+    updateAnimalInfoCacheExternal
   } = useContext(AppContext);
-  const { values } = props;
+  const { values, index } = props;
 
   let calendarEl = useRef(null);
 
@@ -56,9 +58,32 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
     //@ts-ignore
     calendarEl.setOpen(true);
   };
-  const lookupAnimalInfo = () => {
+  const getAnimalInfo = () => {
     if (values.Id.value == "") {
       setAnimalInfoStateExternal("waiting");
+      return;
+    }
+    if (animalInfoCache && animalInfoCache[values.Id.value]){
+      console.log('found in cache!');
+      setAnimalInfoExternal(animalInfoCache[values.Id.value]);
+      return;
+    }
+    lookupAnimalInfo(values.Id.value).then((d) => {
+      setAnimalInfoExternal(d);
+      setAnimalInfoStateExternal("loading-success");
+      updateAnimalInfoCacheExternal(d)
+    }).catch((d)=> {
+      setAnimalInfoStateExternal("loading-unsuccess");
+    });
+  }
+  /*const lookupAnimalInfo = () => {
+    if (values.Id.value == "") {
+      setAnimalInfoStateExternal("waiting");
+      return;
+    }
+    if (animalInfoCache && animalInfoCache[values.Id.value]){
+      console.log('found in cache!');
+      setAnimalInfoExternal(animalInfoCache[values.Id.value]);
       return;
     }
     console.log("setting Id");
@@ -75,20 +100,17 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
         if (data["rows"][0]) {
           setAnimalInfoExternal(data["rows"][0]);
           setAnimalInfoStateExternal("loading-success");
-          /*validateItems("Id", Id);
-                setAnimalError("");*/
+          updateAnimalInfoCacheExternal(data["rows"][0])
         } else {
           //TODO propagate up animal not found issue?
           setAnimalInfoStateExternal("loading-unsuccess");
-          /*setAnimalError("Animal Not Found");
-                validateItems("Id", Id)*/
         }
       })
       .catch((data) => {
         console.log(values.Id.value);
         console.log(data);
       });
-  };
+  };*/
 
   return (
     <>
@@ -100,12 +122,12 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
         <div className="col-xs-9">
           <TextInput
             name="Id"
-            id="Id-id"
+            id={`id_${index}`}
             className="form-control Id"
             value={values.Id.value}
             onChange={handleValueChange}
             onFocus={() => {
-              lookupAnimalInfo();
+              getAnimalInfo();
             }}
             required={true}
             autoFocus={true}
@@ -147,8 +169,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
             initialvalue={values.type.value}
             value={handleTypeChange}
             name="type"
-            /*id={`restraint_${index}`}*/
-            id={"feedingtype"}
+            id={`type_${index}`}
             classname="form-control"
             valuekey="rowid"
             displaykey="value"
@@ -163,7 +184,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
         <div className="col-xs-9">
           <TextInput
             name="amount"
-            id="type-id"
+            id={`amount_${index}`}
             className="form-control type"
             value={values.amount.value}
             onChange={handleValueChange}
@@ -186,7 +207,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
         <div className="col-xs-9">
           <textarea
             name="remark"
-            id="remark-id"
+            id={`remark_${index}`}
             className="form-control remark"
             rows={3}
             value={values.remark.value}

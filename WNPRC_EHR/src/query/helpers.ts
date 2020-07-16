@@ -132,3 +132,26 @@ export const getAnimalIdsFromLocation = (location) => {
   });
   })
 }
+
+export const lookupAnimalInfo = (id) => {
+  return new Promise ((resolve, reject) => {
+    let config = {
+      schemaName: "study",
+      queryName: "demographics",
+      sort: "-date",
+      filterArray: [Filter.create("Id", id, Filter.Types.EQUAL)],
+    };
+    labkeyActionSelectWithPromise(config)
+      .then((data) => {
+        //cache animal info
+        if (data["rows"][0]) {
+          resolve(data["rows"][0])
+          return data["rows"][0]
+        }
+      })
+      .catch((data) => {
+        reject(data);
+      });
+
+  });
+};

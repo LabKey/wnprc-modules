@@ -9,7 +9,7 @@ import "../../theme/css/index.css";
 import SubmitModal from "../../components/SubmitModal";
 import {
   getAnimalIdsFromLocation,
-  groupCommands,
+  groupCommands, lookupAnimalInfo,
   saveRowsDirect,
   setupJsonData,
   sleep,
@@ -36,6 +36,8 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     editMode,
     setEditMode,
     updateFormDataExternal,
+    animalInfoCache,
+    updateAnimalInfoCacheExternal
   } = useContext(AppContext);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
@@ -114,29 +116,74 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     /*onValidate();*/
   };
 
-  const triggerSubmit = () => {
-    /*let command = wasSaved || editMode ? "update" : "insert";*/
-    setSubmitTextBody("Submitting...");
+  const validate = () => {
 
-    let itemsToInsert = groupCommands(formData);
-    let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
+    return new Promise ( (resolve, reject) => {
+      let promises = [];
+      for (let record of formData){
+        if (animalInfoCache && animalInfoCache[record["Id"]["value"]])
+        {
+          let animalRecord = animalInfoCache[record["Id"]["value"]];
+          if (animalRecord["calculated_status"] == "Dead")
+          {
+            alert('cannot enter dead animals animal is dead');
+            //return false;
+            resolve(false);
+          }
+        } else {
+          promises.push(lookupAnimalInfo(record["Id"]["value"]));
+        }
 
-    saveRowsDirect(jsonData)
-      .then((data) => {
-        console.log(data);
-        setSubmitTextBody("Success!");
-        wait(3, setSubmitTextBody).then(() => {
-          window.location.href = ActionURL.buildURL(
-            "ehr",
-            "executeQuery.view?schemaName=study&query.queryName=Feeding",
-            ActionURL.getContainer()
-          );
-        });
+      }
+      console.log('doing promises..')
+      Promise.all(promises).then((results)=> {
+
+        console.log('promises done...')
+        for (let result of results) {
+          if (result["calculated_status"] == "Dead"){
+            resolve(false);
+          }
+        }
+        resolve(true);
+
       })
-      .catch((e) => {
-        console.log(e);
-        setSubmitTextBody(e.exception);
-      });
+    })
+  }
+
+  async function triggerSubmit() {
+    //do some validation here
+    let bad = false;
+    await validate().then((d) => {
+      if (!d){
+        console.log('bad!!')
+        return
+      }
+        console.log('submitting...')
+
+        /*let command = wasSaved || editMode ? "update" : "insert";*/
+        setSubmitTextBody("Submitting...");
+
+        let itemsToInsert = groupCommands(formData);
+        let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
+
+        saveRowsDirect(jsonData)
+          .then((data) => {
+            console.log(data);
+            setSubmitTextBody("Success!");
+            wait(3, setSubmitTextBody).then(() => {
+              window.location.href = ActionURL.buildURL(
+                "ehr",
+                "executeQuery.view?schemaName=study&query.queryName=Feeding",
+                ActionURL.getContainer()
+              );
+            });
+          })
+          .catch((e) => {
+            console.log(e);
+            setSubmitTextBody(e.exception);
+          });
+
+    });
   };
 
   /*const triggerLocation = (loc: Array<any>) => {

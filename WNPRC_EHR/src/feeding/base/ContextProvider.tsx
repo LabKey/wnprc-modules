@@ -37,6 +37,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const [animalIds, setAnimalIds] = useState<Array<any>>();
   const [locations, setLocations] = useState<Array<any>>();
   const [bulkEditValues, setBulkEditValues] = useState<any>();
+  const [animalInfoCache, updateAnimalInfoCache] = useState<any>();
 
   const setQueryDetailsExternal = (qd) => {
     setQueryDetails(qd);
@@ -48,6 +49,12 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const setBulkEditValuesExternal = (bev) => {
     setBulkEditValues(bev);
   };
+
+  const updateAnimalInfoCacheExternal = (ai) => {
+    let animalInfoCacheNew = {[ai["Id"]]: ai};
+    let animalInfoCacheUpdated = {...animalInfoCache, ...animalInfoCacheNew}
+    updateAnimalInfoCache(animalInfoCacheUpdated);
+  }
 
   const updateFormDataExternal = () => {
     //take the form data and update the values?
@@ -108,6 +115,8 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     animalIds,
     updateFormDataExternal,
     setBulkEditValuesExternal,
+    animalInfoCache,
+    updateAnimalInfoCacheExternal
   };
 
   useEffect(() => {

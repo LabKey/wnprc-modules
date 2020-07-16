@@ -14,6 +14,8 @@ export interface ContextProps {
   setAnimalIdsExternal: any;
   updateFormDataExternal: any;
   setBulkEditValuesExternal: any;
+  updateAnimalInfoCacheExternal: any;
+  animalInfoCache: any;
 }
 
 export interface ConfigProps {

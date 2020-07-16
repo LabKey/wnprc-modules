@@ -65,7 +65,7 @@ JOIN (
 
         JOIN study.waterOrders t1
           --NOTE: should the enddate consider date/time?
-          ON dr.dateOnly >= t1.dateOnly AND dr.dateOnly <= t1.enddateCoalescedFuture --AND
+          ON dr.dateOnly >= t1.dateOnly AND dr.dateOnly <= t1.enddateCoalescedFuture 
 
         LEFT JOIN ehr_lookups.treatment_frequency_times ft ON (ft.frequency = t1.frequency.meaning)
 
@@ -92,7 +92,7 @@ JOIN (
 
 ) s ON (s.wanimalid = d.id)
 
-WHERE (d.lastDayatCenter Is Null or d.lastDayAtCenter >= s.enddateCoalescedFuture)
+WHERE (d.lastDayatCenter Is Null OR d.lastDayAtCenter >= s.enddateCoalescedFuture)
 
 --Adding differet frequecies time
 
@@ -100,3 +100,6 @@ WHERE (d.lastDayatCenter Is Null or d.lastDayAtCenter >= s.enddateCoalescedFutur
 --account for date/time in schedule
 --origDate has to have 00:00 a time otherwise it does not include the first day of the order
 and s.origDate >= s.startDate and s.origDate <= s.enddateCoalescedFuture
+
+--Filtering water regulated
+--AND (s.waterSource = 'regulated' OR s.startDate = s.origDate)

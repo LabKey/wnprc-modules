@@ -522,7 +522,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',
-                    keyColumn: 'meaning',
+                    keyColumn: 'rowid',
                     displayColumn: 'meaning',
                     sort: 'sort_order'
                 }

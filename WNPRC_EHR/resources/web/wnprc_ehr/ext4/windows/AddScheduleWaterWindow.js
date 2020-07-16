@@ -109,6 +109,8 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
         filtersArray.push(LABKEY.Filter.create('date', curDate.format('Y-m-d'), LABKEY.Filter.Types.DATE_EQUAL));
         filtersArray.push(LABKEY.Filter.create('assignedToTitle', assignedTo.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
         filtersArray.push(LABKEY.Filter.create('frequencyMeaning', frequency.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
+        //TODO: add the action required column filterArray
+        filtersArray.push()
 
         if (area.length)
             filtersArray.push(LABKEY.Filter.create('area', area.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));

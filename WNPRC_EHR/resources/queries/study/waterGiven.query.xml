@@ -30,12 +30,9 @@
                             <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
-
-                    
-
-
-
-
+                    <column columnName="waterSource">
+                        <columnTitle>Water Source</columnTitle>
+                    </column>
                     <column columnName="location">
                         <columnTitle>Water Location</columnTitle>
                         <displayWidth>250</displayWidth>

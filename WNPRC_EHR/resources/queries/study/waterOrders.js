@@ -54,7 +54,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     var endDate = new Date(row.enddate);
     endDate.setHours(0,0,0,0);
 
-    //TODO: remove triggers.js already checks this data
+    //This does not get checked when the dataset if updated, only when using Ext4 form
     if (rowDate.getTime() > endDate.getTime()){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }
@@ -63,7 +63,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
     if (row.objectid) {
-        //
+        console.log('value of row: '+row + ' '+ row.frequency);
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.objectid);
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {
@@ -71,6 +71,13 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 console.log(i + " " + errorObject.message);
                 EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
             }
+        }
+    }
+
+    if (oldRow && oldRow.waterSource == 'regulated' && row.waterSource == 'lixit'){
+        let changeMessage = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource);
+        if (changeMessage == 'Error'){
+            EHR.Server.Utils.addError(scriptErrors,'id', 'Problems changing water scheduled animals', 'WARN');
         }
     }
 

@@ -13,6 +13,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.LookupColumn;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ConvertHelper;
@@ -1459,7 +1460,8 @@ public class TriggerScriptHelper {
     public String getMeaningFromRowid (String lookupColumn, String lookupTable){
 
         TableInfo husbandryFrequency = getTableInfo("ehr_lookups",lookupTable);
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("meaning"), lookupColumn, CompareType.EQUAL);
+        int frequencyNumber = Integer.parseInt(lookupColumn);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("rowid"), frequencyNumber, CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("active"), true);
         //filter.addCondition(FieldKey.fromString("active"), true, CompareType.EQUAL);
         TableSelector frequencyRecord = new TableSelector(husbandryFrequency, PageFlowUtil.set("rowid", "meaning", "sort_order", "active"),filter, null);
@@ -1537,6 +1539,14 @@ public class TriggerScriptHelper {
 
 
         return  isAnimalRestricted;
+    }
+
+    public String changeWaterScheduled(String animalId, Date clientDate, String waterSource){
+        String returnMessage = null;
+        
+
+
+        return returnMessage;
     }
 
 

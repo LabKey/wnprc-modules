@@ -19,7 +19,8 @@
     WA.project AS project,
     WA.frequency AS frequency,
     WA.frequency.meaning AS frequencyMeaning,
-    WA.waterSource AS waterSource
+    WA.waterSource AS waterSource,
+    true AS actionRequired
 
 
 FROM study.waterAmount WA
@@ -47,12 +48,13 @@ UNION ALL
     WS.project AS project,
     WS.frequency AS frequency,
     WS.freqMeaning AS frequencyMeaning,
-    WS.waterSource AS waterSource
+    WS.waterSource AS waterSource,
+    (WS.waterSource = 'regulated' OR WS.startDate = WS.origDate) AS actionRequired
 
 
 FROM study.waterSchedule WS
 WHERE NOT EXISTS (SELECT 1
                     FROM study.waterAmount WAI
-                    WHERE WAI.id = WS.animalId AND WAI.date = WS.origDate
+                    WHERE WAI.id = WS.animalId AND WAI.date = WS.date
                     )
 )

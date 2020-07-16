@@ -28,7 +28,7 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>husbandry_frequency</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                           <!-- <fkDisplayColumn>Meaning</fkDisplayColumn>-->
+                            <fkDisplayColumn>Meaning</fkDisplayColumn>
                         </fk>
                     </column>
                     <column columnName="assignedTo">

@@ -1,0 +1,37 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="SOP_ID"/>
+        <column name="Name">
+            <properties>
+                <property name="columnTitle" value="Name"/>
+            </properties>
+        </column>
+        <column name="PDF">
+            <properties>
+                <property name="columnTitle" value="PDF"/>
+            </properties>
+        </column>
+        <column name="SOP_ID/Spanish_PDF">
+            <properties>
+                <property name="columnTitle" value="Translated PDF"/>
+            </properties>
+        </column>
+        <column name="SOP_ID/video">
+        	<properties>
+        		<property name="columnTitle" value="Supporting Video"/>
+        	</properties>
+        </column>
+        <column name="LastRead"/>
+        <column name="MonthsUntilRenewal"/>
+        <column name="required"/>
+    </columns>
+    <filters>
+        <filter column="required" operator="eq" value="true"/>
+        <filter column="MonthsUntilRenewal" operator="lte" value="10"/>
+        <filter column="MonthsUntilRenewal" operator="isnonblank"/>
+    </filters>
+    <sorts>
+        <sort column="MonthsUntilRenewal" descending="false"/>
+        <sort column="SOP_ID" descending="false"/>
+    </sorts>
+</customView>

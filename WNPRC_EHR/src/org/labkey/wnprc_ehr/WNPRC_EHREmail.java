@@ -29,6 +29,7 @@ public class WNPRC_EHREmail<Model> {
     public class CharArrayWriterResponse extends HttpServletResponseWrapper {
 
         private final CharArrayWriter charArray = new CharArrayWriter();
+        private final PrintWriter _printWriter = new PrintWriter(charArray);
 
         public CharArrayWriterResponse(HttpServletResponse response) {
             super(response);
@@ -37,7 +38,7 @@ public class WNPRC_EHREmail<Model> {
         @Override
         public PrintWriter getWriter()
         {
-            return new PrintWriter(charArray);
+            return _printWriter;
         }
 
         public String getOutput() {
@@ -54,6 +55,7 @@ public class WNPRC_EHREmail<Model> {
         JspView<Model> view = new JspView<>(_path, model);
 
         MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setMethod("GET");
         CharArrayWriterResponse response = new CharArrayWriterResponse(new MockHttpServletResponse());
 
         view.setFrame(WebPartView.FrameType.NONE);

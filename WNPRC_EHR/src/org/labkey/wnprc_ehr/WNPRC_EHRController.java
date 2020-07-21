@@ -114,6 +114,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -1039,7 +1040,9 @@ public class WNPRC_EHRController extends SpringActionController
                 }
                 //Set the dates in the html table
                 for (int i = 0; i <= daysBetween; i++) {
-                    onCallSchedule[i + 1][0] = new JSONObject().put("html", startDate.plusDays(i).toString());
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+                    String dateText = startDate.plusDays(i).format(formatter);
+                    onCallSchedule[i + 1][0] = new JSONObject().put("html", dateText);
                 }
                 //Set the days of the week in the html table
                 for (int i = 0; i <= daysBetween; i++) {
@@ -1754,6 +1757,23 @@ public class WNPRC_EHRController extends SpringActionController
         public String getTitle()
         {
             return "On Call Calendar";
+        }
+    }
+
+    @ActionNames("OnCallCalendarPrintable")
+    @RequiresLogin()
+    public class OnCallCalendarPrintableAction extends WNPRCReportPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/calendars/OnCallCalendar.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Printable On Call Calendar";
         }
     }
 

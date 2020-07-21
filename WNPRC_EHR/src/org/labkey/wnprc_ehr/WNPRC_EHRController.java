@@ -1031,14 +1031,14 @@ public class WNPRC_EHRController extends SpringActionController
 
                 //Set the headers for the on call schedule html table
                 JSONObject[][] onCallSchedule = new JSONObject[(int)daysBetween + 2][onCallCalendars.length + 2];
-                onCallSchedule[0][0] = new JSONObject().put("html", "Date<br>dd-mm-yyyy");
+                onCallSchedule[0][0] = new JSONObject().put("html", "Date");
                 onCallSchedule[0][1] = new JSONObject().put("html", "Day");
                 for (int i = 0; i < onCallCalendars.length; i++) {
                     onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name"));
                 }
                 //Set the dates in the html table
                 for (int i = 0; i <= daysBetween; i++) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
                     String dateText = startDate.plusDays(i).format(formatter);
                     onCallSchedule[i + 1][0] = new JSONObject().put("html", dateText);
                 }
@@ -1269,6 +1269,23 @@ public class WNPRC_EHRController extends SpringActionController
         public String getTitle()
         {
             return "On Call Calendar";
+        }
+    }
+
+    @ActionNames("OnCallCalendarPrintable")
+    @RequiresLogin()
+    public class OnCallCalendarPrintableAction extends WNPRCReportPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/calendars/OnCallCalendar.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Printable On Call Calendar";
         }
     }
 

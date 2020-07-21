@@ -1060,6 +1060,35 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 width: 300,
                                 id: 'enter-experiment-number',
                                 allowBlank: false
+                            }, {
+                                xtype: 'numberfield',
+                                ref: 'positivecontrol',
+                                fieldLabel: 'Positive Control #',
+                                width: 300,
+                                id: 'enter-positive-control',
+                                allowBlank: false
+                            }, {
+                                xtype: 'textfield',
+                                ref: 'vlpositivecontrol',
+                                fieldLabel: 'Positive Control',
+                                width: 300,
+                                id: 'enter-vlpositive-control',
+                                allowBlank: false
+                            }, {
+                                xtype: 'textfield',
+                                ref: 'avgvlpositivecontrol',
+                                fieldLabel: 'AVG Positive Control',
+                                width: 300,
+                                id: 'enter-avgvlpositive-control',
+                                allowBlank: false
+                            }, {
+                                xtype: 'numberfield',
+                                ref: 'efficiency',
+                                fieldLabel: 'Efficiency',
+                                width: 300,
+                                id: 'efficiency',
+                                allowBlank: false,
+                                allowDecimals: true
                             }
                             ]
                         }],
@@ -1074,12 +1103,21 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 var form = win.down('form');
                                 var qc = form.getForm().findField('change-vl-qcstate').getValue();
                                 var num = form.getForm().findField('enter-experiment-number').getValue();
+                                var positive_control = form.getForm().findField('enter-positive-control').getValue();
+                                var vl_positive_control = form.getForm().findField('enter-vlpositive-control').getValue();
+                                var avg_vl_positive_control = form.getForm().findField('enter-avgvlpositive-control').getValue();
+                                var efficiency = form.getForm().findField('efficiency').getValue();
+
                                 Ext4.Msg.wait('Loading...');
 
                                 //update qc status
                                 Ext4.each(toUpdate, function (row) {
                                     row.Status = qc;
                                     row.experimentNumber = parseInt(num);
+                                    row.positive_control = parseInt(positive_control);
+                                    row.vl_positive_control = vl_positive_control;
+                                    row.avg_vl_positive_control = avg_vl_positive_control;
+                                    row.efficiency = parseFloat(efficiency);
                                 }, this);
 
                                 if (toUpdate.length) {

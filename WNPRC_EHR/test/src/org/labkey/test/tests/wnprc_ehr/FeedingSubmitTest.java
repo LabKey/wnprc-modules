@@ -131,7 +131,7 @@ public class FeedingSubmitTest extends BaseWebDriverTest
         shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
     }
 
-    @Test
+    //@Test
     public void testEnterFeeding() throws IOException, CommandException
     {
         //getDriver().manage().window().setSize(new Dimension(768, 1024));

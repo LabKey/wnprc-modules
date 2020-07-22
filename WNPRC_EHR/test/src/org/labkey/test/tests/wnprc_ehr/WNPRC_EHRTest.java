@@ -17,8 +17,6 @@ package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.json.simple.JSONObject;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -27,8 +25,10 @@ import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
-import org.labkey.remoteapi.query.Sort;
+import org.labkey.remoteapi.query.TruncateTableCommand;
+import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.SortDirection;
@@ -51,7 +51,6 @@ import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
-import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -59,11 +58,8 @@ import org.labkey.test.util.ext4cmp.Ext4FileFieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -73,7 +69,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -108,7 +103,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");
-    private static final int ALIASES_NUM_ROWS = 2;
+    private static final int ALIASES_NUM_ROWS = 4;
 
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
@@ -133,21 +128,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static final int CHARGE_UNITS_NUM_ROWS = 6;
     private static int BILLING_RUN_COUNT = 0;
 
-    protected static final Double WEIGHT_VAL = 12.12;
-    protected static final Double NEW_WEIGHT_VAL = 12.13;
-    protected static final Double LOW_VAL = 0.1;
-    protected static final Double HIGH_VAL = 0.12;
-    protected static final String ROOM_ID_LOCAL = "ab160";
-    protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};
-    protected static final String ROOM_ID_EHR_TEST = "2341092";
-    protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
-
     protected EHRTestHelper _helper = new EHRTestHelper(this);
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
 
     protected DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public static final String NON_GEN_CREDIT_ACCOUNT_ID = "acct102";
+    public static final String GEN_CREDIT_ACCT_ID = "acct103";
+
+    private Map<String, Object> aliasesMap = new HashMap<>();
 
     @Nullable
     @Override
@@ -170,11 +161,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.initProject("EHR");
         initTest.createTestSubjects();
         initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic", "EnterWeights"));
+        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
-
-        initTest.updateEHRFormFrameworkTypes();
 
         initTest.createFinanceManagementFolders();
         initTest.clickFolder("Private");
@@ -361,25 +350,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         msgWindow.clickButton(buttonText, 0);
     }
 
-    // this mocks the behavior of enterweights sql update script
-    public void updateEHRFormFrameworkTypes() throws IOException, CommandException
-    {
-        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
-
-        log("Inserting weight as a reactjs form type into ehr.form_framework_types");
-
-        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
-        Map<String,Object> rowMap = new HashMap<>();
-        rowMap.put("schemaname", "study");
-        rowMap.put("queryname", "weight");
-        rowMap.put("framework", "reactjs");
-        rowMap.put("container", getContainerId());
-        insertCmd.addRow(rowMap);
-
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
-
-        log("Inserted weight as a reactjs form type into ehr.form_framework_types");
-    }
     public void importStudy()
     {
         goToManageStudy();
@@ -399,8 +369,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Enter misc charges via data entry form.");
         enterCharges();
 
-        log("Perform Billing Run.");
-        performBillingPeriodRun();
+        log("Perform Billing Run for period 10/01/2010-10/31/2010");
+        performBillingRun("10/01/2010", "10/31/2010", ++BILLING_RUN_COUNT);
+
+        log("Test Invoiced Items");
+        testInvoicedItems();
+
+        log("Test Summary Reports");
+        testSummaryReports();
 
         log("View and download JET");
         viewJET();
@@ -468,6 +444,76 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         viewChargesAdjustmentsNotYetBilled(MORE_ANIMAL_IDS.length, "comment", comment, expectedRowData);
     }
 
+    @Test
+    public void testDebitAccountFiltering()
+    {
+        log("Verify Debit Account drop down with list of account(s) active on the date of charge");
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+
+        Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
+        _helper.addRecordToGrid(miscChargesGrid);
+
+        miscChargesGrid.setGridCell(1, "date", "1997-05-16");
+        Locator comboCol = miscChargesGrid.getCell(1, "debitedaccount");
+        click(comboCol);
+        List<String> options = _ext4Helper.getComboBoxOptions(Ext4Helper.Locators.formItemWithInputNamed("debitedaccount"));
+        assertEquals("There should be only one account listed in Debited Account drop down: ", 1, options.size());
+        assertEquals("Account not found: ", ACCOUNT_ID_1, options.get(0));
+    }
+
+    @Test
+    public void testJETWithNonGenCreditAccount()
+    {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+
+        String startDate = LocalDateTime.now().minusDays(45).format(_dateTimeFormatter);
+        String endDate = LocalDateTime.now().minusDays(16).format(_dateTimeFormatter);
+
+        Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
+        mapWithDebitAcct.put("date", startDate);
+        mapWithDebitAcct.put("debitedaccount", NON_GEN_CREDIT_ACCOUNT_ID);
+        mapWithDebitAcct.put("chargeGroup", "Business Office");
+        mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
+        mapWithDebitAcct.put("quantity", "8");
+        mapWithDebitAcct.put("chargetype", "Adjustment");
+        mapWithDebitAcct.put("comment", "charge without non gen credit acct");
+
+        Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
+        mapWithDebitAcct2.put("date", startDate);
+        mapWithDebitAcct2.put("debitedaccount", GEN_CREDIT_ACCT_ID);
+        mapWithDebitAcct2.put("chargeGroup", "Clinical Pathology");
+        mapWithDebitAcct2.put("chargeId", "vaccine supplies");
+        mapWithDebitAcct2.put("quantity", "5");
+        mapWithDebitAcct2.put("comment", "charge with gen credit acct");
+
+        log("Enter Misc. Charges with debit account " + NON_GEN_CREDIT_ACCOUNT_ID + " in grid row 1");
+        enterChargesInGrid(1, mapWithDebitAcct);
+
+        log("Enter Misc. Charges with debit account " + GEN_CREDIT_ACCT_ID + " in grid row 2");
+        enterChargesInGrid(2, mapWithDebitAcct2);
+
+        log("Submit the form");
+        sleep(5000);
+        submitForm();
+
+        performBillingRun(startDate, endDate, ++BILLING_RUN_COUNT);
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+
+        DataRegionTable invoiceRunsDataRegionTable = getInvoiceRunsDataRegionTable();
+        invoiceRunsDataRegionTable.link(0, "viewJETInvoice").click();
+
+        DataRegionTable jetRegionTable  = new DataRegionTable("query", this);
+        assertEquals("Wrong jet item count: ", 1, jetRegionTable.getDataRowCount());
+
+        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "8.00");
+        List<String> actualRowData = jetRegionTable.getRowDataAsText(0, "Project", "Amount");
+        assertEquals("Wrong row data for CSV to JET Preview report ", expectedRowData, actualRowData);
+    }
+
     private void addCommentViaBulkEdit(Locator.XPathLocator bulkEditWindow, Ext4GridRef grid, String comment, int numRows, String msg)
     {
         grid.clickTbarButton("Select All");
@@ -490,6 +536,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         waitForElement(bulkEditWindow);
 
+        _helper.toggleBulkEditField("Date of Charge");
+        if (Ext4FieldRef.getForLabel(this, "Date of Charge").getValue() == null)
+        {
+            Ext4FieldRef.getForLabel(this, "Date of Charge").setValue(LocalDateTime.now().format(_dateTimeFormatter));
+        }
+
         log ("Toggle fields");
         if (hasAnimalId)
         {
@@ -498,12 +550,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         else
         {
             _helper.toggleBulkEditField("Debit Account");
-        }
-        _helper.toggleBulkEditField("Date of Charge");
-
-        if (Ext4FieldRef.getForLabel(this, "Date of Charge").getValue() == null)
-        {
-            Ext4FieldRef.getForLabel(this, "Date of Charge").setValue(LocalDateTime.now().format(_dateTimeFormatter));
         }
 
         _helper.toggleBulkEditField("Investigator");
@@ -719,6 +765,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void addInvestigators() throws IOException, CommandException
     {
+        Map<String,Object> investigatorsMap = new HashMap<>();
+
         log("Add investigators to ehr.investigators table.");
 
         navigateToFolder(PROJECT_NAME, EHR_FOLDER);
@@ -726,7 +774,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
 
         log("Inserting Principal Investigator Jon Snow.");
-
         InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "investigators");
         Map<String,Object> rowMap = new HashMap<>();
         rowMap.put("firstName", "Jon");
@@ -743,40 +790,37 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap.put("userid", getUserId(INVESTIGATOR.getEmail()));
         insertCmd.addRow(rowMap);
 
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
-
+        insertCmd.execute(cn, EHR_FOLDER_PATH).getRows().forEach(row -> investigatorsMap.put(row.get("emailAddress").toString(), row.get("rowid")));
         log("Investigators inserted in to ehr.investigators table.");
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        clickAndWait(Locator.bodyLinkContainingText("Grant Accounts - ALL"));
-        DataRegionTable aliases = new DataRegionTable("query", getDriver());
-        aliases.setSort("alias", SortDirection.ASC);
-        log("Update Grant Account with Investigator 'Stark'");
-        updateRecordsAndVerify(aliases, 0, "Investigator:", "Stark, Sansa", "investigatorId");
-        log("Update Grant Account with Investigator 'Snow'");
-        updateRecordsAndVerify(aliases, 1, "Investigator:", "Snow, Jon", "investigatorId");
+        log("Update ehr_billing.aliases with investigators.");
+        UpdateRowsCommand cmdUpd = new UpdateRowsCommand("ehr_billing", "aliases");
+        Map<String,Object> aliasesRowMap = new HashMap<>();
+        aliasesRowMap.put("rowid", aliasesMap.get(ACCOUNT_ID_1));
+        aliasesRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR.getEmail()));
+        cmdUpd.addRow(aliasesRowMap);
 
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        clickAndWait(Locator.bodyLinkContainingText("WNPRC Projects"));
-        DataRegionTable projects = new DataRegionTable("query", getDriver());
-        projects.setSort("project", SortDirection.ASC);
-        log("Update Project with Investigator 'Stark'");
-        updateRecordsAndVerify(projects, 0, "Investigator:", "Stark, Sansa", "investigatorId");
-        log("Update Project with Investigator 'Snow'");
-        updateRecordsAndVerify(projects, 1, "Investigator:", "Snow, Jon", "investigatorId");
-    }
+        aliasesRowMap = new HashMap<>();
+        aliasesRowMap.put("rowid", aliasesMap.get(ACCOUNT_ID_2));
+        aliasesRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR_PRINCIPAL.getEmail()));
+        cmdUpd.addRow(aliasesRowMap);
 
-    private void updateRecordsAndVerify(DataRegionTable table, int rowNum, String inputLabel, String inputValue, String inputName)
-    {
-        table.clickEditRow(rowNum);
-        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining(inputLabel), Ext4Helper.TextMatchTechnique.CONTAINS, inputValue);
-        clickButton("Submit",0);
-        checkMessageWindow("Success", "Your upload was successful!", "OK");
+        cmdUpd.execute(cn, PRIVATE_FOLDER_PATH);
 
-        log("Verify '" + inputLabel + "' value '" + inputValue + "' was inserted.");
-        List<String> actualRowData = table.getRowDataAsText(rowNum, inputName);
-        List<String> expectedRowData = Arrays.asList(inputValue);
-        assertEquals(inputName + " value not found: ", expectedRowData, actualRowData);
+        log("Update ehr_billing.project with investigators.");
+        cmdUpd = new UpdateRowsCommand("ehr", "project");
+        Map<String,Object> projRowMap = new HashMap<>();
+        projRowMap.put("project", Integer.valueOf(PROJECT_ID));
+        projRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR.getEmail()));
+        cmdUpd.addRow(projRowMap);
+
+        projRowMap = new HashMap<>();
+        projRowMap.put("project", Integer.valueOf(PROTOCOL_PROJECT_ID));
+        projRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR_PRINCIPAL.getEmail()));
+        cmdUpd.addRow(projRowMap);
+
+        cmdUpd.execute(cn, EHR_FOLDER_PATH);
+
     }
 
     private void provideBillingDataAccess() throws IOException, CommandException
@@ -910,8 +954,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("comment", "charge 1 with animal id");
 
         Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
-        mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct.put("date", "2010-10-23");
+        mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct.put("chargeGroup", "Business Office");
         mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
         mapWithDebitAcct.put("quantity", "8");
@@ -919,8 +963,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithDebitAcct.put("comment", "charge 1 without animal id");
 
         Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
-        mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct2.put("date", "2010-10-22");
+        mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct2.put("chargeGroup", "Clinical Pathology");
         mapWithDebitAcct2.put("chargeId", "vaccine supplies");
         mapWithDebitAcct2.put("quantity", "5");
@@ -1005,17 +1049,19 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         click(Ext4Helper.Locators.ext4Button("Yes"));
         waitForTextToDisappear("Saving Changes", 5000);
     }
+
     private void addComboBoxRecord(int rowIndex, String colName, String comboBoxSelectionValue, Ext4GridRef miscChargesGrid,
                                    @Nullable Ext4Helper.TextMatchTechnique matchTechnique)
     {
-        Locator chargetype = miscChargesGrid.getCell(rowIndex, colName);
-        click(chargetype);
-        Locator.XPathLocator chargetypeLocator = Ext4Helper.Locators.formItemWithInputNamed(colName);
+        Locator comboCol = miscChargesGrid.getCell(rowIndex, colName);
+        click(comboCol);
+        sleep(2000);
+        Locator.XPathLocator comboColLocator = Ext4Helper.Locators.formItemWithInputNamed(colName);
 
         if (matchTechnique != null)
-            _ext4Helper.selectComboBoxItem(chargetypeLocator, matchTechnique, comboBoxSelectionValue);
+            _ext4Helper.selectComboBoxItem(comboColLocator, matchTechnique, comboBoxSelectionValue);
         else
-            _ext4Helper.selectComboBoxItem(chargetypeLocator, comboBoxSelectionValue);
+            _ext4Helper.selectComboBoxItem(comboColLocator, comboBoxSelectionValue);
 
     }
 
@@ -1184,73 +1230,74 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertEquals(itemRows, drt.getDataRowCount());
     }
 
+    private void truncateBillingTables(Connection connection) throws IOException, CommandException
+    {
+        truncateTable(connection, "wnprc_billing", "tierRates");
+        truncateTable(connection, "ehr_billing", "aliases");
+        truncateTable(connection, "ehr_billing", "chargeUnits");
+        truncateTable(connection, "ehr_billing", "chargeRates");
+        truncateTable(connection, "ehr_billing", "chargeableItems");
+        truncateTable(connection, "ehr_billing", "chargeableItemCategories");
+        truncateTable(connection, "wnprc_billing", "groupCategoryAssociations");
+
+    }
+
     private void uploadData() throws IOException, CommandException
     {
+        Connection connection = createDefaultConnection(true);
+        Map<String, Object> responseMap = new HashMap<>();
+
+        truncateBillingTables(connection);
+
         //upload Tier Rates
-        importBulkDataFromFile(TIER_RATES_TSV, "Tier Rates", TIER_RATES_NUM_ROWS);
-        testExpectedRowCount(TIER_RATES_NUM_ROWS);
+        List<Map<String, Object>> tsv = loadTsv(TIER_RATES_TSV);
+        insertTsvData(connection, "wnprc_billing", "tierrates", tsv)
+                .forEach(row -> responseMap.put(row.get("tierRateType").toString(),row.get("rowid")));
 
         //upload Grant Accounts
-        importBulkDataFromFile(ALIASES_TSV, "Grant Accounts - ALL", ALIASES_NUM_ROWS);
-        testExpectedRowCount(ALIASES_NUM_ROWS);
+        tsv = loadTsv(ALIASES_TSV);
+        insertTsvData(connection, "ehr_billing", "aliases", tsv)
+                .forEach(row -> aliasesMap.put(row.get("alias").toString(),row.get("rowid")));
 
         //upload Charge Units
-        importBulkDataFromFile(CHARGE_UNITS_TSV, "Groups", CHARGE_UNITS_NUM_ROWS);
-        testExpectedRowCount(CHARGE_UNITS_NUM_ROWS);
+        tsv = loadTsv(CHARGE_UNITS_TSV);
+        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv)
+                .forEach(row -> responseMap.put(row.get("groupName").toString(),row.get("active")));
 
         //upload Chargeable Item Categories
-        importBulkDataFromFile(CHARGEABLE_ITEM_CATEGORIES_TSV, "Chargeable Item Categories", CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS);
-        testExpectedRowCount(CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS);
+        tsv = loadTsv(CHARGEABLE_ITEM_CATEGORIES_TSV);
+        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv)
+                .forEach(row -> responseMap.put(row.get("name").toString(),row.get("rowId")));
 
         //upload Group-Category Associations
-        importBulkDataFromFile(GROUP_CATEGORY_ASSOCIATIONS_TSV, "Group Category Associations", GROUP_CATEGORY_ASSOCIATIONS_NUM_ROWS);
-        testExpectedRowCount(GROUP_CATEGORY_ASSOCIATIONS_NUM_ROWS);
+        tsv = loadTsv(GROUP_CATEGORY_ASSOCIATIONS_TSV);
+        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv)
+                .forEach(row -> responseMap.put(row.get("chargeGroupName").toString(),row.get("rowid")));
 
         //upload Chargeable Items and Charge Rates
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_TSV, CHARGE_RATES_NUM_ROWS, CHARGEABLE_ITEMS_NUM_ROWS);
 
     }
 
-    private void testExpectedRowCount(int expectedNumRows)
+    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv) throws IOException, CommandException
     {
-        DataRegionTable results = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong row count", expectedNumRows, results.getDataRowCount());
+        log("Loading tsv data: " + schemaName + "." + queryName);
+        InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
+        command.setRows(tsv);
+        SaveRowsResponse response = command.execute(connection, PRIVATE_FOLDER_PATH);
+        return response.getRows();
     }
 
-    private void importBulkDataFromFile(File file, String linkText, int numRows)
+    private void truncateTable(Connection connection, String schemaName, String queryName) throws IOException, CommandException
     {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-
-        clickAndWait(Locator.bodyLinkContainingText(linkText));
-
-        DataRegionTable drt = new DataRegionTable("query", getDriver());
-        drt.clickHeaderButton("Import bulk data");
-
-        waitForText("Import Data");
-
-        _ext4Helper.clickTabContainingText("Import Spreadsheet");
-        waitForText("Upload From File");
-        RadioButton().withLabel("Upload From File").find(this.getDriver()).check();
-
-        Ext4FileFieldRef fileField = Ext4FileFieldRef.create(this);
-        fileField.setToFile(file);
-
-        waitAndClick(Ext4Helper.Locators.ext4ButtonContainingText("Upload"));
-
-        checkMessageWindow("Success", "Success! " + numRows + " rows inserted.", "OK");
-    }
-
-    private void performBillingPeriodRun()
-    {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-
-        performBillingRun("10/01/2010", "10/31/2010",++BILLING_RUN_COUNT);
-        testInvoicedItems();
-        testSummaryReports();
+        log("Truncating table: " + schemaName + "." + queryName);
+        TruncateTableCommand command = new TruncateTableCommand(schemaName, queryName);
+        command.execute(connection, PRIVATE_FOLDER_PATH);
     }
 
     private void performBillingRun(String startDate, String endDate, int billingRunCount)
     {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         waitAndClickAndWait(Locator.linkContainingText("Perform Billing Run"));
         Ext4FieldRef.waitForField(this, "Start Date");
         Ext4FieldRef.getForLabel(this, "Start Date").setValue(startDate);
@@ -1360,7 +1407,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText(tableName));
     }
 
-    //@Test - old test to test ExtJS version
+    @Test
     public void testWeightDataEntry()
     {
         goToEHRFolder();
@@ -1946,15 +1993,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Invoice"));
         DataRegionTable invoice = new DataRegionTable("query", getDriver());
         invoice.clickEditRow(0);
-        setFormElement(Locator.input("invoiceSentOn"), date);
-        setFormElement(Locator.input("paymentReceivedOn"), date);
-        setFormElement(Locator.input("paymentAmountReceived"), amount);
+        setFormElement(Locator.inputByNameContaining("invoiceSentOn"), date);
+        setFormElement(Locator.inputByNameContaining("paymentReceivedOn"), date);
+        setFormElement(Locator.inputByNameContaining("paymentAmountReceived"), amount);
 
         clickButton("Submit",0);
-
-        Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Success").waitFor();
-        assertEquals("Your upload was successful!", "Success", msgWindow.getTitle());
-        msgWindow.clickButton("OK", 0);
 
         invoice = new DataRegionTable("query", getDriver());
         String balance = invoice.getDataAsText(0,"balanceDue");
@@ -1971,419 +2014,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
         assertTrue(auditLog.contains("paymentamountreceived:  » 1028.95"));
         assertTrue(auditLog.contains("balancedue:  » 0.0"));
-    }
-
-    public void navigateToWeights()
-    {
-        //WebElement modeElement = Locator.tagWithText("a", "Enter Data").findElement(getDriver());
-        //modeElement.click();
-        //waitForElement(Locator.linkContainingText("Enter Weights"));
-        //WebElement modeElement2 = Locator.tagWithText("a", "Enter Weights").findElement(getDriver());
-        //modeElement2.click();
-        beginAt(buildURL("enterweights", getContainerPath(), "app"));
-    }
-
-    public WebElement fillAnInput(String inputId, String value)
-    {
-        WebElement el = Locator.id(inputId).findElement(getDriver());
-        el.sendKeys(value);
-        return el;
-    }
-
-    public void fillWeightForm(String weightVal, Integer index)
-    {
-        WebElement el = fillAnInput("animalid_" + index.toString(), SUBJECTS[index]);
-        WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
-        el2.sendKeys(Keys.TAB);
-        el2.sendKeys(Keys.TAB);
-    }
-
-    public void clickNewButton(String id)
-    {
-        WebElement o = Locator.tagWithId("button",id).findElement(getDriver());
-        o.click();
-    }
-
-    public void waitUntilElementIsClickable(String id)
-    {
-        shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
-    }
-
-    @Test
-    public void testWeightWarning() throws IOException, CommandException
-    {
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        fillWeightForm(LOW_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
-        SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
-        TestLogger.log(wt.get("value").toString());
-        Assert.assertEquals(null, LOW_VAL, wt.get("value"));
-
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        navigateToWeights();
-        fillWeightForm(HIGH_VAL.toString(),0);
-        sleep(1000);
-        assertElementPresent(Locator.id("weight-warning"));
-        sleep(2000);
-
-    }
-
-    @Test
-    public void testEnterWeights() throws IOException, CommandException
-    {
-        //navigate to weights form and fill it out
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
-
-        SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
-        TestLogger.log(wt.get("value").toString());
-        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-
-    }
-
-
-    public SelectRowsResponse fetchWeightData() throws IOException, CommandException
-    {
-        Connection cn = this.createDefaultConnection(false);
-        SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
-        cmd.setRequiredVersion(9.1);
-        cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid", "objectid"));
-        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
-        cmd.setMaxRows(100);
-        SelectRowsResponse response = cmd.execute(cn, EHR_FOLDER_PATH);
-        return response;
-
-    }
-    public SelectRowsResponse fetchTaskData(String taskid) throws IOException, CommandException
-    {
-        Connection cn = this.createDefaultConnection(false);
-        SelectRowsCommand cmd = new SelectRowsCommand("ehr", "tasks");
-        cmd.setRequiredVersion(9.1);
-        cmd.setColumns(Arrays.asList("rowid", "updateTitle", "formtype", "assignedto", "duedate", "createdby", "created", "qcstate"));
-        cmd.addFilter("taskId", taskid, Filter.Operator.EQUAL);
-        cmd.setSorts(Arrays.asList(new Sort("duedate", Sort.Direction.DESCENDING), new Sort("created", Sort.Direction.DESCENDING)));
-
-        return cmd.execute(cn, EHR_FOLDER_PATH);
-
-    }
-
-    @Test
-    public void testWeightSubmitForReview() throws IOException, CommandException
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-review-btn");
-        clickNewButton("submit-review-btn");
-        sleep(1000);
-        //waitForElement(Locator.id("reviewers"),10000);
-        waitForText("Submit for Review");
-
-        WebElement c = Locator.id("reviewers").findElement(getDriver());
-        TestLogger.log(FULL_SUBMITTER.getGroup());
-
-        Select select = new Select(c);
-        sleep(1000);
-        select.selectByIndex(2);
-        List<WebElement> l = select.getAllSelectedOptions();
-        WebElement option = l.get(0);
-        String defaultItem = option.getAttribute("value");
-        TestLogger.log(defaultItem);
-        //System.out.println(defaultItem );
-
-        //c.sendKeys(LOCAL_USER);
-        //c.sendKeys(Keys.ENTER);
-        sleep(1000);
-        clickNewButton("submit-final");
-        waitForText("Success");
-
-        SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
-        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
-        String taskid = taskidob.get("value").toString();
-
-        SelectRowsResponse t = fetchTaskData(taskid);
-        //assert that this task's assigned to is the same as info entered above
-        JSONObject id = (JSONObject) t.getRows().get(0).get("assignedto");
-        Assert.assertEquals(null, defaultItem, id.get("value").toString());
-
-    }
-
-    @Test
-    public void testSaveWeightDraft() throws IOException, CommandException
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        fillWeightForm(LOW_VAL.toString(),0);
-        waitUntilElementIsClickable("save-draft-btn");
-        clickNewButton("save-draft-btn");
-        //clickNewButton("submit-final");
-        waitForText("Saved");
-        //and check that it was actually saved and QC state is "In Progress"
-        SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
-        TestLogger.log(wt.get("value").toString());
-        Assert.assertEquals(null, LOW_VAL, wt.get("value"));
-        JSONObject qc = (JSONObject) r.getRows().get(0).get("QCState");
-        Assert.assertEquals(null, "In Progress", qc.get("displayValue"));
-
-    }
-
-    public SelectRowsResponse fetchWeightDataGivenTaskRowId(String taskrowid) throws IOException, CommandException
-    {
-        Connection cn = this.createDefaultConnection(false);
-        SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
-        cmd.setRequiredVersion(9.1);
-        cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid"));
-        cmd.addFilter("taskid/rowid", taskrowid, Filter.Operator.EQUAL);
-        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
-        return cmd.execute(cn, EHR_FOLDER_PATH);
-    }
-
-    @Test
-    public void testEditAndDelete() throws IOException, CommandException
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
-        clickNewButton("add-record");
-        fillWeightForm(WEIGHT_VAL.toString(),1);
-        waitUntilElementIsClickable("submit-all-btn");
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-
-        waitForText("Success");
-        SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
-        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-
-        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
-        String taskid = taskidob.get("value").toString();
-        SelectRowsResponse t = fetchTaskData(taskid);
-        JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
-        TestLogger.log("testEditAndDelete: Navigating to task id...");
-        TestLogger.log(id.get("value").toString());
-        waitAndClick(Locator.linkWithText(id.get("value").toString()));
-        waitForText("Task Details");
-        //waitAndClick(Locator.linkWithText("Weight"));
-        //since clicking the link directly opens a new tab and loses focus, go to url directly
-        waitForElement(Locator.linkWithText("Weight"));
-        WebElement el = Locator.linkWithText("Weight").findElement(getDriver());
-        String url = el.getAttribute("href");
-        getDriver().navigate().to(url);
-        TestLogger.log("waiting for button..");
-        sleep(2000);
-        //query weights and go to the weights view
-        waitForText(SUBJECTS[1]);
-        //TestLogger.log(Locator.className("content-left").findElement(getDriver()).getAttribute("outerHTML"));
-        clickNewButton("remove-record-btn_1");
-        sleep(2000);
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
-        //verify that it was deleted by counting that task has only 1 record in it
-        //do a a query to get weights filtered by taskid
-        SelectRowsResponse r2 =  fetchWeightDataGivenTaskRowId(id.get("value").toString());
-        Assert.assertEquals(1,r2.getRows().size());
-        TestLogger.log(String.valueOf(countText(id.get("value").toString())));
-    }
-
-    public void addBatchByIds()
-    {
-        clickNewButton("add-batch");
-        waitForElement(Locator.id("ids"));
-        WebElement el = Locator.id("ids").findElement(getDriver());
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
-            el.sendKeys(ANIMAL_SUBSET_EHR_TEST[i]);
-            if (i < ANIMAL_SUBSET_EHR_TEST.length-1 ){
-                el.sendKeys(",");
-            }
-        }
-        clickNewButton("submit-batch");
-        sleep(10000);
-    }
-
-    public void addBatchByLocation()
-    {
-        clickNewButton("add-batch");
-        waitForElement(Locator.id("locations"));
-        WebElement el = Locator.id("locations").findElement(getDriver());
-        WebElement in = el.findElement(By.tagName("input"));
-        in.sendKeys(ROOM_ID_EHR_TEST);
-        sleep(2000);
-        in.sendKeys(Keys.ENTER);
-        clickNewButton("submit-batch");
-        sleep(5000);
-    }
-
-    public SelectRowsResponse fetchRestraintDataGivenWeightObjectId(String weight_objectid) throws IOException, CommandException
-    {
-        Connection cn = this.createDefaultConnection(false);
-        SelectRowsCommand cmd = new SelectRowsCommand("study", "restraints");
-        cmd.setRequiredVersion(9.1);
-        cmd.setColumns(Arrays.asList("Id", "date", "restraintType", "weight_objectid"));
-        cmd.addFilter("weight_objectid", weight_objectid, Filter.Operator.EQUAL);
-        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
-        cmd.setMaxRows(100);
-        return cmd.execute(cn, EHR_FOLDER_PATH);
-
-    }
-
-    @Test
-    public void testAddBatchIds()
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        addBatchByIds();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
-            assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
-        }
-    }
-
-    @Test
-    public void testEditBatch() throws IOException, CommandException
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        addBatchByLocation();
-        clickNewButton("edit-batch");
-        WebElement el = Locator.id("weight-bulk").findElement(getDriver());
-        el.sendKeys(WEIGHT_VAL.toString());
-        clickNewButton("submit-bulk");
-        waitUntilElementIsClickable("submit-all-btn");
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
-
-        SelectRowsResponse r = fetchWeightData();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
-        {
-            JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
-            Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-        }
-    }
-
-    @Test
-    public void testAddBatch()
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        addBatchByLocation();
-        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
-            assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
-        }
-    }
-
-
-    @Test
-    public void testDisplayAnimalInfo() throws IOException, CommandException
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        WebElement f = fillAnInput("animalid_0", ANIMAL_SUBSET_EHR_TEST[0]);
-        f.sendKeys(Keys.TAB);
-        waitForElement(Locator.byClass("animal-info-table"));
-
-    }
-
-    @Test
-    public void testAddRestraint() throws IOException, CommandException
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
-        WebElement el2 = fillAnInput("restraint_0", "T");
-        waitUntilElementIsClickable("submit-all-btn");
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
-
-        SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
-        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
-        JSONObject objectid = (JSONObject) r.getRows().get(0).get("objectid");
-
-        SelectRowsResponse c = fetchRestraintDataGivenWeightObjectId(objectid.get("value").toString());
-        JSONObject rt = (JSONObject) c.getRows().get(0).get("restraintType");
-        Assert.assertEquals(null, "Table-Top", rt.get("value"));
-
-    }
-
-    public void navigateToWeightsTable()
-    {
-        beginAt(buildURL("ehr", getContainerPath(), "updateQuery.view?schemaName=study&queryName=weight"));
-    }
-
-    @Test
-    public void testUpdateSingleRecordThroughEHR() throws IOException, CommandException
-    {
-        navigateToWeights();
-        fillWeightForm(WEIGHT_VAL.toString(),0);
-        waitUntilElementIsClickable("submit-all-btn");
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
-
-        navigateToWeightsTable();
-        DataRegionTable table = new DataRegionTable("query", getDriver());
-        String id = table.getDataAsText(0, "Id");
-        table.clickEditRow(0);
-        waitForText(id);
-        WebElement we = Locator.inputById("weight_0").findElement(getDriver());
-        for (int i = 0; i < 10; i++){
-            we.sendKeys(Keys.BACK_SPACE);
-            sleep(500);
-        }
-        fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
-        waitUntilElementIsClickable("submit-all-btn");
-        clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
-
-        SelectRowsResponse r = fetchWeightData();
-        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
-        TestLogger.log(wt.get("value").toString());
-        Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
-
-    }
-
-    @Test
-    public void testAddBulkThenSave() throws IOException, CommandException
-    {
-        //beginAt(buildURL("project", getContainerPath(), "begin"));
-        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
-        navigateToWeights();
-        addBatchByLocation();
-        // look that the error text DOES NOT exist
-        waitUntilElementIsClickable("save-draft-btn");
-        clickNewButton("save-draft-btn");
-        sleep(2000);
-        clickNewButton("save-draft-btn");
-        sleep(2000);
-        assertTextNotPresent("Error during operation");
     }
 
     @Override

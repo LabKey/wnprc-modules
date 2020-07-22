@@ -1218,11 +1218,6 @@ public class WNPRC_EHRController extends SpringActionController
                             getContainer().getPath()));
                     newUrl.addParameters(params);
                     break;
-                case "weight":
-                    newUrl = new ActionURL(String.format("/enterweights%s/app.view",
-                            getContainer().getPath()));
-                    newUrl.addParameters(params);
-                    break;
                 // this is the list of things that need redirected to the dataEntryForm.view in the EHR
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
                 case "necropsy":

@@ -16,6 +16,8 @@ export interface ContextProps {
   setBulkEditValuesExternal: any;
   updateAnimalInfoCacheExternal: any;
   animalInfoCache: any;
+  errorText: any;
+  setErrorTextExternal: any;
 }
 
 export interface ConfigProps {

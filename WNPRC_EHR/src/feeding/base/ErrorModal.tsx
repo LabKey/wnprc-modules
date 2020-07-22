@@ -1,5 +1,7 @@
 import * as React from "react";
-import SubmitModal from "../../components/SubmitModal"
+import { useContext } from "react";
+import SubmitModal from "../../components/SubmitModal";
+import { AppContext } from "./ContextProvider";
 
 interface PropTypes {
   errorText: any;
@@ -9,10 +11,17 @@ interface PropTypes {
 /**
  * Uses Submit Modal to show error dialogue.
  */
-const ErrorModal: React.FunctionComponent<PropTypes> = props => {
+const ErrorModal: React.FunctionComponent<PropTypes> = (props) => {
+  const { setErrorTextExternal } = useContext(AppContext);
 
   const handleSubmit = () => {
     props.flipState();
+    setErrorTextExternal("");
+  };
+
+  const handleCancel = () => {
+    props.flipState();
+    setErrorTextExternal("");
   };
 
   const bodyText = props.errorText;
@@ -22,7 +31,7 @@ const ErrorModal: React.FunctionComponent<PropTypes> = props => {
       name="error"
       title="Error"
       submitAction={handleSubmit}
-      flipState={props.flipState}
+      flipState={handleCancel}
       bodyText={bodyText}
       submitText="OK"
       enabled={true}

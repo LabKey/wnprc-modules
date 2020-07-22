@@ -38,6 +38,7 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
   const [locations, setLocations] = useState<Array<any>>();
   const [bulkEditValues, setBulkEditValues] = useState<any>();
   const [animalInfoCache, updateAnimalInfoCache] = useState<any>();
+  const [errorText, setErrorText] = useState<string>("");
 
   const setQueryDetailsExternal = (qd) => {
     setQueryDetails(qd);
@@ -89,6 +90,10 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     setAnimalIds(ids);
   };
 
+  const setErrorTextExternal = (et) => {
+    setErrorText(et);
+  }
+
   const constructObject = (key, val) => {
     let add;
     if (key == "date") {
@@ -116,7 +121,9 @@ const ContextProvider: React.FunctionComponent = ({ children }) => {
     updateFormDataExternal,
     setBulkEditValuesExternal,
     animalInfoCache,
-    updateAnimalInfoCacheExternal
+    updateAnimalInfoCacheExternal,
+    errorText,
+    setErrorTextExternal
   };
 
   useEffect(() => {

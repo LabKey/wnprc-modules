@@ -64,7 +64,6 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
       return;
     }
     if (animalInfoCache && animalInfoCache[values.Id.value]){
-      console.log('found in cache!');
       setAnimalInfoExternal(animalInfoCache[values.Id.value]);
       return;
     }
@@ -157,9 +156,6 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
             className="form-control type"
             value={values.amount.value}
             onChange={handleValueChange}
-            onBlur={() => {
-              console.log("blur");
-            }}
             onFocus={() => {
               getAnimalInfo();
             }}
@@ -181,9 +177,6 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
             rows={3}
             value={values.remark.value}
             onChange={handleValueChange}
-            onBlur={() => {
-              console.log("blur");
-            }}
             onFocus={() => {
               getAnimalInfo();
             }}

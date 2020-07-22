@@ -39,6 +39,8 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     updateFormDataExternal,
     animalInfoCache,
     updateAnimalInfoCacheExternal,
+    errorText,
+    setErrorTextExternal
   } = useContext(AppContext);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
@@ -60,9 +62,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         if (columnData.length > 0) {
           //make an object whos keys are the column names
           let newDataArr = columnData.reduce((acc, item) => {
-            if (item.required && !item.autoIncrement) {
-              console.log(item.name);
-            }
             if (!acc[item.name]) {
               acc[item.name] = [];
             }
@@ -75,10 +74,14 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     });
   }, []);
 
-  /*useEffect(()=> {
-    if (document.getElementById("id_"+(formData.length-1).toString()))
-      document.getElementById("id_"+(formData.length-1).toString()).focus()
-  },[formData.length])*/
+  //set focus to record only when formdata length changes AND the last record is blank
+  useEffect(()=> {
+    let el = document.getElementById("id_"+(formData.length-1).toString());
+    if (el)
+      if (el['value'] == ""){
+        el.focus()
+      }
+  },[formData.length])
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -129,7 +132,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         if (animalInfoCache && animalInfoCache[record["Id"]["value"]]) {
           let animalRecord = animalInfoCache[record["Id"]["value"]];
           if (animalRecord["calculated_status"] == "Dead") {
-            //alert('cannot enter dead animals animal is dead');
+            setErrorTextExternal("Cannot update dead animal record "+ record["Id"]["value"]);
             setShowModal("none");
             setShowModal("error");
             //return false;
@@ -139,22 +142,29 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
           promises.push(lookupAnimalInfo(record["Id"]["value"]));
         }
       }
-      console.log("doing promises..");
       Promise.all(promises).then((results) => {
-        console.log("promises done...");
         for (let result of results) {
           if (result["calculated_status"] == "Dead") {
+            setErrorTextExternal("Cannot update dead animal record: "+ result["Id"]);
             resolve(false);
           }
         }
         resolve(true);
+      }).catch((d)=>{
+        if (d.rows.length == 0){
+          setErrorTextExternal("One or more animals not found. Unable to submit records.")
+        } else {
+          setErrorTextExternal("Unknown error. Unable to submit records.")
+        }
+        console.log(d);
+        resolve(false);
       });
     });
   };
 
   function triggerSubmit() {
     //do some validation here
-    setSubmitTextBody("Checking some things....");
+    setSubmitTextBody("One moment. Performing validations...");
     validate().then((d) => {
       if (!d) {
         setShowModal("none");
@@ -162,7 +172,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         setSubmitTextBody("Submit values?");
         return;
       }
-      console.log("submitting...");
 
       /*let command = wasSaved || editMode ? "update" : "insert";*/
       setSubmitTextBody("Submitting...");
@@ -214,10 +223,13 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
 
   const passLocationAndSetIds = (location) => {
     const e = getAnimalIdsFromLocation(location).then((f) => {
-      console.log(f);
       setFormIds(f);
     });
   };
+
+  const resetErrorText = () => {
+    setErrorTextExternal("")
+  }
 
   return (
     <div className={`content-wrapper-body ${false ? "saving" : ""}`}>
@@ -283,7 +295,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
             bulkEditFields={
               <BulkEditFields
                 fieldValues={() => {
-                  console.log("test");
                 }}
               />
             }
@@ -291,13 +302,12 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
         )}
         {showModal == "error" && (
           <ErrorModal
-            errorText={"Cannot update dead animal record."}
+            errorText={errorText}
             flipState={flipModalState}
           />
         )}
         <form className="feeding-form" ref={formEl}>
           {formData.map((item, i) => (
-            <div>
               <div className="row" key={i}>
                 <div className="col-xs-10">
                   <div className="row card">
@@ -342,7 +352,6 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                   </button>
                 </div>
               </div>
-            </div>
           ))}
           <button
             className={`btn btn-primary submit-btn ${false ? "saving" : ""}`}

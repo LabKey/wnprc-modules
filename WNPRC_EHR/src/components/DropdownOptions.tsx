@@ -10,6 +10,8 @@ interface PropTypes {
   valuekey: string;
   displaykey: string;
   initialvalue: string;
+  onfocus?: any;
+  required: boolean;
 }
 
 /**
@@ -26,6 +28,8 @@ const DropdownOptions: React.FunctionComponent<PropTypes> = (props) => {
     valuekey,
     displaykey,
     initialvalue,
+    onfocus,
+    required
   } = props;
   const [option, setOption] = useState(initialvalue);
 
@@ -40,6 +44,7 @@ const DropdownOptions: React.FunctionComponent<PropTypes> = (props) => {
       name={name}
       value={initialvalue != "" ? initialvalue : option}
       onChange={(e) => setOption(e.target.value)}
+      required={required}
     >
       <option></option>
       {options &&

@@ -6,7 +6,7 @@ import { useContext, useRef } from "react";
 import { AppContext } from "./ContextProvider";
 import DatePicker from "react-datepicker";
 import {labkeyActionSelectWithPromise, lookupAnimalInfo} from "../../query/helpers";
-import { Filter } from "@labkey/api";
+import { ActionURL } from "@labkey/api";
 import DropdownOptions from "../../components/DropdownOptions";
 
 const FeedingForm: React.FunctionComponent<any> = (props) => {
@@ -76,41 +76,6 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
       setAnimalInfoStateExternal("loading-unsuccess");
     });
   }
-  /*const lookupAnimalInfo = () => {
-    if (values.Id.value == "") {
-      setAnimalInfoStateExternal("waiting");
-      return;
-    }
-    if (animalInfoCache && animalInfoCache[values.Id.value]){
-      console.log('found in cache!');
-      setAnimalInfoExternal(animalInfoCache[values.Id.value]);
-      return;
-    }
-    console.log("setting Id");
-    let config = {
-      schemaName: "study",
-      queryName: "demographics",
-      sort: "-date",
-      filterArray: [Filter.create("Id", values.Id.value, Filter.Types.EQUAL)],
-    };
-    console.log(config);
-    labkeyActionSelectWithPromise(config)
-      .then((data) => {
-        //cache animal info
-        if (data["rows"][0]) {
-          setAnimalInfoExternal(data["rows"][0]);
-          setAnimalInfoStateExternal("loading-success");
-          updateAnimalInfoCacheExternal(data["rows"][0])
-        } else {
-          //TODO propagate up animal not found issue?
-          setAnimalInfoStateExternal("loading-unsuccess");
-        }
-      })
-      .catch((data) => {
-        console.log(values.Id.value);
-        console.log(data);
-      });
-  };*/
 
   return (
     <>
@@ -130,7 +95,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
               getAnimalInfo();
             }}
             required={true}
-            autoFocus={true}
+            autoFocus={false}
           />
         </div>
       </div>
@@ -149,11 +114,14 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
             className="form-control"
             name="date"
             onFocus={() => {
-              console.log("Focused!");
+              getAnimalInfo();
             }}
             onChange={handleDateChange}
             customInput={
-              <DateInput value={values.date.value} opendate={openDatepicker} />
+              <DateInput
+                value={values.date.value}
+                opendate={openDatepicker}
+                iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}/>
             }
           />
         </div>
@@ -173,6 +141,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
             classname="form-control"
             valuekey="rowid"
             displaykey="value"
+            required={true}
           />
         </div>
       </div>
@@ -192,7 +161,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
               console.log("blur");
             }}
             onFocus={() => {
-              console.log("focus");
+              getAnimalInfo();
             }}
             required={true}
             autoFocus={false}
@@ -216,7 +185,7 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
               console.log("blur");
             }}
             onFocus={() => {
-              console.log("focus");
+              getAnimalInfo();
             }}
             required={false}
             autoFocus={false}

@@ -8,12 +8,7 @@ SELECT
     w.Room,
     w.Cage,
     w.id,
-    w.type as TypeOfChow,
-    cast((
-        SELECT round(cast(AVG(w2.amount) as double), 2) AS _expr
-        FROM study.feeding w2
-        WHERE w.id=w2.id AND w.DateChanged=w2.date
-    ) as double) AS Amount,
+    w.chowLookup as TypeOfChow,
     w.remark,
     w.DateChanged,
     w.chowConversion
@@ -21,7 +16,7 @@ SELECT
 
 FROM (
 
-         SELECT m.Id, m.type, m.remark, m.Id.curLocation.Room as Room, m.Id.curLocation.Cage as Cage, m.chowConversion, t.DateChanged
+         SELECT m.Id, m.chowLookup, m.remark, m.Id.curLocation.Room as Room, m.Id.curLocation.Cage as Cage, m.chowConversion, t.DateChanged
          FROM (
                   SELECT
                       w.Id AS Id,

@@ -42,7 +42,12 @@ const SubmitModal: React.FunctionComponent<PropTypes> = props => {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCancel}>
+          <Button
+            variant="secondary"
+            disabled={enableButton}
+            onClick={handleCancel}
+          >
+
             Cancel
           </Button>
           <Button

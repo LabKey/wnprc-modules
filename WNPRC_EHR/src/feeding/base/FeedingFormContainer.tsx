@@ -2,24 +2,25 @@ import * as React from "react";
 import { useEffect, useState, useContext, useRef } from "react";
 import { Button } from "react-bootstrap";
 import FeedingForm from "./FeedingForm";
-import { Query, Security, Filter, Utils } from "@labkey/api";
+import { Query, ActionURL } from "@labkey/api";
 import { AppContext } from "./ContextProvider";
 import "../../theme/css/react-datepicker.css";
 import "../../theme/css/index.css";
 import SubmitModal from "../../components/SubmitModal";
 import {
   getAnimalIdsFromLocation,
-  groupCommands, lookupAnimalInfo,
+  groupCommands,
+  lookupAnimalInfo,
   saveRowsDirect,
   setupJsonData,
   sleep,
   wait,
 } from "../../query/helpers";
-import { ActionURL } from "@labkey/api";
 import AnimalInfoPane from "../../components/AnimalInfoPane";
 import BatchModal from "../../components/BatchModal";
 import BulkEditModal from "../../components/BulkEditModal";
 import BulkEditFields from "./BulkEditFields";
+import ErrorModal from "./ErrorModal";
 
 const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   const {
@@ -37,7 +38,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     setEditMode,
     updateFormDataExternal,
     animalInfoCache,
-    updateAnimalInfoCacheExternal
+    updateAnimalInfoCacheExternal,
   } = useContext(AppContext);
   const [showModal, setShowModal] = useState<string>();
   const formEl = useRef(null);
@@ -73,6 +74,11 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       },
     });
   }, []);
+
+  /*useEffect(()=> {
+    if (document.getElementById("id_"+(formData.length-1).toString()))
+      document.getElementById("id_"+(formData.length-1).toString()).focus()
+  },[formData.length])*/
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -117,74 +123,71 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   };
 
   const validate = () => {
-
-    return new Promise ( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let promises = [];
-      for (let record of formData){
-        if (animalInfoCache && animalInfoCache[record["Id"]["value"]])
-        {
+      for (let record of formData) {
+        if (animalInfoCache && animalInfoCache[record["Id"]["value"]]) {
           let animalRecord = animalInfoCache[record["Id"]["value"]];
-          if (animalRecord["calculated_status"] == "Dead")
-          {
-            alert('cannot enter dead animals animal is dead');
+          if (animalRecord["calculated_status"] == "Dead") {
+            //alert('cannot enter dead animals animal is dead');
+            setShowModal("none");
+            setShowModal("error");
             //return false;
             resolve(false);
           }
         } else {
           promises.push(lookupAnimalInfo(record["Id"]["value"]));
         }
-
       }
-      console.log('doing promises..')
-      Promise.all(promises).then((results)=> {
-
-        console.log('promises done...')
+      console.log("doing promises..");
+      Promise.all(promises).then((results) => {
+        console.log("promises done...");
         for (let result of results) {
-          if (result["calculated_status"] == "Dead"){
+          if (result["calculated_status"] == "Dead") {
             resolve(false);
           }
         }
         resolve(true);
-
-      })
-    })
-  }
-
-  async function triggerSubmit() {
-    //do some validation here
-    let bad = false;
-    await validate().then((d) => {
-      if (!d){
-        console.log('bad!!')
-        return
-      }
-        console.log('submitting...')
-
-        /*let command = wasSaved || editMode ? "update" : "insert";*/
-        setSubmitTextBody("Submitting...");
-
-        let itemsToInsert = groupCommands(formData);
-        let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
-
-        saveRowsDirect(jsonData)
-          .then((data) => {
-            console.log(data);
-            setSubmitTextBody("Success!");
-            wait(3, setSubmitTextBody).then(() => {
-              window.location.href = ActionURL.buildURL(
-                "ehr",
-                "executeQuery.view?schemaName=study&query.queryName=Feeding",
-                ActionURL.getContainer()
-              );
-            });
-          })
-          .catch((e) => {
-            console.log(e);
-            setSubmitTextBody(e.exception);
-          });
-
+      });
     });
   };
+
+  function triggerSubmit() {
+    //do some validation here
+    setSubmitTextBody("Checking some things....");
+    validate().then((d) => {
+      if (!d) {
+        setShowModal("none");
+        setShowModal("error");
+        setSubmitTextBody("Submit values?");
+        return;
+      }
+      console.log("submitting...");
+
+      /*let command = wasSaved || editMode ? "update" : "insert";*/
+      setSubmitTextBody("Submitting...");
+
+      let itemsToInsert = groupCommands(formData);
+      let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
+
+      saveRowsDirect(jsonData)
+        .then((data) => {
+          console.log(data);
+          setSubmitTextBody("Success!");
+          wait(3, setSubmitTextBody).then(() => {
+            window.location.href = ActionURL.buildURL(
+              "ehr",
+              "executeQuery.view?schemaName=study&query.queryName=Feeding",
+              ActionURL.getContainer()
+            );
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+          setSubmitTextBody(e.exception);
+        });
+    });
+  }
 
   /*const triggerLocation = (loc: Array<any>) => {
     setLocation(loc);
@@ -284,6 +287,12 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
                 }}
               />
             }
+          />
+        )}
+        {showModal == "error" && (
+          <ErrorModal
+            errorText={"Cannot update dead animal record."}
+            flipState={flipModalState}
           />
         )}
         <form className="feeding-form" ref={formEl}>

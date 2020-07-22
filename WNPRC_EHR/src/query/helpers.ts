@@ -143,10 +143,12 @@ export const lookupAnimalInfo = (id) => {
     };
     labkeyActionSelectWithPromise(config)
       .then((data) => {
+        console.log(data);
         //cache animal info
         if (data["rows"][0]) {
           resolve(data["rows"][0])
-          return data["rows"][0]
+        } else {
+          reject(data);
         }
       })
       .catch((data) => {

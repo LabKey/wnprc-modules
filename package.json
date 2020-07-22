@@ -58,7 +58,7 @@
     "scss-loader": "^0.0.1"
   },
   "dependencies": {
-    "@labkey/api": "0.0.47",
+    "@labkey/api": "1.0.0",
     "@wnprc/primate-id": "^1.1.7",
     "blockui": "^1.0.0",
     "bootstrap": "^3.0.0",

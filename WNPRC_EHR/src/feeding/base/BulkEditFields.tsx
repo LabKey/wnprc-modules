@@ -73,6 +73,7 @@ const BulkEditFields: React.FunctionComponent<any> = (props) => {
               classname="form-control"
               valuekey="rowid"
               displaykey="value"
+              required={false}
             />
           </div>
         </div>

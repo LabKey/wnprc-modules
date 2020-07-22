@@ -78,9 +78,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeProjectTable((AbstractTableInfo) table);
             } else if (matches(table, "study", "feeding")) {
                 customizeFeedingTable((AbstractTableInfo) table);
-            }
+            } else if (matches(table, "study", "demographics")) {
+                customizeDemographicsTable((AbstractTableInfo) table);
         }
     }
+}
 
     private void customizeColumns(AbstractTableInfo ti)
     {
@@ -154,6 +156,23 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         newCol.setLabel("Chow Conversion");
         newCol.setDescription("This column shows the calculated conversion amount between log and flower chows. The current conversion is 12g log <=> 18g flower.");
         ti.addColumn(newCol);
+
+        String chowLookup = "chowLookup";
+        SQLFragment sql2 = new SQLFragment("(SELECT " +
+                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log') " +
+                "THEN (CAST (amount as text) || ' log')" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)') " +
+                "THEN (CAST (amount as text) || ' log (gluten-free)')" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower') " +
+                "THEN (CAST (amount as text) || ' flower')" +
+                "ELSE " +
+                " 'bad data'" +
+                "END) as ChowLookup)");
+        ExprColumn newCol2 = new ExprColumn(ti, chowLookup, sql2, JdbcType.VARCHAR);
+        newCol2.setLabel("Chow Lookup");
+        ti.addColumn(newCol2);
+
+
     }
 
     private void customizeBirthTable(AbstractTableInfo ti)
@@ -261,6 +280,22 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col15.setDescription("Shows the total offspring of each animal");
             ds.addColumn(col15);
         }
+    }
+
+    private void customizeDemographicsTable(AbstractTableInfo table)
+    {
+        if (table.getColumn("Feeding") != null)
+            return;
+
+        UserSchema us = getStudyUserSchema(table);
+        if (us == null){
+            return;
+        }
+
+        ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+        col21.setLabel("Feeding");
+        col21.setDescription("Shows most recent feeding type and chow conversion.");
+        table.addColumn(col21);
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)

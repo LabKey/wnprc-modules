@@ -130,6 +130,14 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               </td>
             </tr>
             <tr>
+              <td>Current Chow</td>
+              <td>{animalInfo["Feeding/TypeOfChow"]}</td>
+            </tr>
+            <tr>
+              <td>Chow Conversion</td>
+              <td>{animalInfo["Feeding/chowConversion"]}</td>
+            </tr>
+            <tr>
               <td>Medical</td>
               <td></td>
             </tr>

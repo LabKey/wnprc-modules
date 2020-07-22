@@ -62,8 +62,8 @@
         <column name="medical"/>
         <column name="prepaid"/>
         <column name="Id/CurrentBehavior/currentBehaviors"/>
-        <column name="Feeding/TypeOfChow"></column>
-        <column name="Feeding/chowConversion"></column>
+        <column name="Feeding/TypeOfChow"/>
+        <column name="Feeding/chowConversion"/>
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

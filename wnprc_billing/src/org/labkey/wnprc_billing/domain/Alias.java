@@ -7,11 +7,13 @@ public class Alias
     String _alias;
     String _type;
     String _po_number;
+    String _investigatorName;
     String _institution;
     String _address;
     String _city;
     String _state;
     String _zip;
+    String _billing_contact_info;
     String _contact_email;
     private String _grantNumber;
     private String _uw_account;
@@ -50,6 +52,16 @@ public class Alias
     public void setPo_number(String po_number)
     {
         _po_number = po_number;
+    }
+
+    public String getInvestigatorName()
+    {
+        return _investigatorName;
+    }
+
+    public void setInvestigatorName(String investigatorName)
+    {
+        _investigatorName = investigatorName;
     }
 
     public String getInstitution()
@@ -100,6 +112,16 @@ public class Alias
     public void setZip(String zip)
     {
         _zip = zip;
+    }
+
+    public String getBilling_contact_info()
+    {
+        return _billing_contact_info;
+    }
+
+    public void setBilling_contact_info(String billing_contact_info)
+    {
+        _billing_contact_info = billing_contact_info;
     }
 
     public String getContact_email()

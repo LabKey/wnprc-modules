@@ -1,12 +1,23 @@
-<%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus" %>
-<%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.PopulationInstant" %>
-<%@ page import="org.joda.time.LocalDate" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.wnprc_ehr.calendar.OnCallCalendar" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
+<%
+    boolean reportMode = request.getParameter("reportMode") != null && request.getParameter("reportMode").equals("true");
+    String startDate = request.getParameter("startDate");
+    String endDate = request.getParameter("endDate");
+%>
+
 <style type="text/css">
+
+    @media print {
+        @page {
+            margin: 20px;
+        }
+
+        * {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    }
 
     .thin-bordered-table {
         border: 1px solid black;
@@ -16,6 +27,9 @@
     .centered-text-table {
         text-align: center;
         vertical-align: middle;
+    }
+    .date-column {
+        white-space: nowrap;
     }
 
     .schedule-nav-link {
@@ -37,10 +51,24 @@
 
 </style>
 
+    <%
+        if (!reportMode) {
+    %>
 <div class="panel panel-primary">
     <div class="panel-heading"><span>On Call Schedule</span></div>
+    <%
+        } else {
+    %>
+<div>
+    <div class="text-center"><span id="printable-schedule-header"></span><br><br></div>
+    <%
+        }
+    %>
 
     <div class="panel-body">
+        <%
+            if (!reportMode) {
+        %>
         <form class="hidden-print">
             <div class="form-group">
                 <div class="row">
@@ -75,6 +103,9 @@
                 </div>
             </div>
         </div>
+        <%
+            }
+        %>
         <div class="row">
             <div class="col-sm-6">
                 In the event of an injury or potential exposure occurring on the weekend that requires a trip the UW Hospital Emergency
@@ -83,6 +114,18 @@
                 <br><br>
             </div>
         </div>
+        <%
+            if (!reportMode) {
+        %>
+        <div class="row">
+            <div class="col-sm-6">
+                <a id="printable-schedule-link" href="#">Printable Schedule</a>
+                <br>
+            </div>
+        </div>
+        <%
+            }
+        %>
         <div class="row">
             <div class="col-sm-6">
                 <div id="onCallTable">Loading schedule...</div>
@@ -91,23 +134,23 @@
         <div class="row">
             <div class="col-sm-6">
                 <br>
-                Use the above contact information for: <b>AFTER HOURS (weekdays 4pm-6am), WEEKENDS, and HOLIDAYS</b>. Contact staff using the phone numbers listed above,
+                Use the above contact information for: <strong>AFTER HOURS (weekdays 4pm-6am), WEEKENDS, and HOLIDAYS</strong>. Contact staff using the phone numbers listed above,
                 calling the bolded number first.
-                <br><br>
+                <br>
                 <ul>
-                    <li> If the on-call <b>Veterinarian</b> cannot be reached after multiple attempts, contact another veterinarian listed or Buddy Capuano (Attending Veterinarian) at 209-6846.</li>
+                    <li> If the on-call <strong>Veterinarian</strong> cannot be reached after multiple attempts, contact another veterinarian listed or Buddy Capuano (Attending Veterinarian) at 209-6846.</li>
                     <ul>
                         <li>Leaving a voicemail or sending a text message without further follow up is NOT appropriate when contacting the veterinarian for animal concerns.</li>
                     </ul>
                     <br>
-                    <li>If the <b>Supervisor</b> cannot be reached after multiple attempts, contact another supervisor listed or Bonnie Friscino (Colony Manager) at 209-6522.</li>
+                    <li>If the <strong>Supervisor</strong> cannot be reached after multiple attempts, contact another supervisor listed or Bonnie Friscino (Colony Manager) at 209-6522.</li>
                     <ul>
                         <li>For facility in-house emergencies (e.g. water leaks, broken pipes, and temperature problems), contact the Physical Plant at 263-3333 (after hours)
                             or Bruce Pape (209-6808) as well as the supervisor.</li>
                         <li>Night ART/Nursery staff must contact the supervisor to check out.</li>
                     </ul>
                     <br>
-                    <li>If the <b>Pathologist</b> cannot be reached, leave a message including date and time of the call, your name and phone number, and the age, ID#, and species of the animal.</li>
+                    <li>If the <strong>Pathologist</strong> cannot be reached, leave a message including date and time of the call, your name and phone number, and the age, ID#, and species of the animal.</li>
                 </ul>
             </div>
         </div>
@@ -116,6 +159,71 @@
 </div>
 
 <script>
+    let startDateOfSchedule;
+    let endDateOfSchedule;
+
+    function setReportHeaderText(startDate, endDate) {
+        let headerElement = document.getElementById("printable-schedule-header");
+
+        if (headerElement) {
+            let headerText = "<strong>Wisconsin National Primate Research Center" +
+                "<br>On-call Schedule for:" +
+                "<br>" + getReportHeaderDateRange(startDate, endDate) + "</strong>";
+
+            headerElement.innerHTML = headerText;
+        }
+    }
+
+    function getReportHeaderDateRange(startDate, endDate) {
+        let formattedDateRange = "";
+
+        let formattedStartDate = startDate.toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'long'
+        });
+        formattedStartDate += getDateOrdinal(startDate.getDate());
+
+        let formattedEndDate = endDate.toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'long'
+        });
+        formattedEndDate += getDateOrdinal(endDate.getDate());
+
+        if (startDate.getFullYear() === endDate.getFullYear()) {
+            formattedDateRange = formattedStartDate + " - " + formattedEndDate + ", " + startDate.getFullYear();
+        }
+        else {
+            formattedDateRange = formattedStartDate + ", " + startDate.getFullYear() + " - " + formattedEndDate + ", " + endDate.getFullYear();
+        }
+
+        return formattedDateRange;
+    }
+
+    //from https://stackoverflow.com/questions/15397372/javascript-new-date-ordinal-st-nd-rd-th
+    function getDateOrdinal(day) {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1:
+                return "st";
+            case 2:
+                return "nd";
+            case 3:
+                return "rd";
+            default:
+                return "th";
+        }
+    }
+
+    function setPrintableScheduleLink() {
+        let printableURL = LABKEY.ActionURL.buildURL('wnprc_ehr', 'OnCallCalendarPrintable', null, {
+            reportMode: true,
+            startDate: getPlaceholderText(document.getElementById("startDate")),
+            endDate: getPlaceholderText(document.getElementById("endDate"))
+        });
+        if (document.getElementById("printable-schedule-link")) {
+            document.getElementById("printable-schedule-link").href = printableURL;
+        }
+    }
 
     function getFirstDayOfWeek(startingDate) {
         return getDateForDayOfWeek(0, startingDate);
@@ -142,7 +250,6 @@
         let stringDate;
         let returnDate = new Date(startingDate);
         returnDate.setDate(returnDate.getDate() - returnDate.getDay() + dayOfWeek);
-       // stringDate = returnDate.getDate() + "-" + (returnDate.getMonth()+1) + "-" + returnDate.getFullYear();
         return returnDate;
     }
 
@@ -151,15 +258,24 @@
         onCallTableDiv.innerText = "Loading schedule..."
     }
 
-    let startDateOfSchedule;
-    let endDateOfSchedule;
-    if (new Date() < getDateForDayOfWeek(5)) {
-        startDateOfSchedule = getDateForDayOfWeek(-2);
-        endDateOfSchedule = getDateForDayOfWeek(4);
-    }
-    else {
-        startDateOfSchedule = getDateForDayOfWeek(5);
-        endDateOfSchedule = getDateForDayOfWeek(11);
+
+    function initializeDateRange() {
+        if (new Date() < getDateForDayOfWeek(5)) {
+            startDateOfSchedule = getDateForDayOfWeek(-2);
+            endDateOfSchedule = getDateForDayOfWeek(4);
+        }
+        else {
+            startDateOfSchedule = getDateForDayOfWeek(5);
+            endDateOfSchedule = getDateForDayOfWeek(11);
+        }
+        <%
+            if (startDate != null && endDate != null) {
+        %>
+        startDateOfSchedule = new Date("<%= startDate %>");
+        endDateOfSchedule = new Date("<%= endDate %>");
+        <%
+            }
+        %>
     }
 
     function changeWeek(direction) {
@@ -183,15 +299,23 @@
     }
 
     function loadRequestedWeek() {
-        let startDatePh = document.getElementById("startDate").placeholder;
-        let endDatePh = document.getElementById("endDate").placeholder;
-        let startDateString = startDatePh.substring(6, 10) + "-" + startDatePh.substring(0, 2) + "-" + startDatePh.substring(3, 5) + "T12:00:00Z";
-        let endDateString = endDatePh.substring(6, 10) + "-" + endDatePh.substring(0, 2) + "-" + endDatePh.substring(3, 5) + "T12:00:00Z";
-
-        startDateOfSchedule = new Date(startDateString);
-        endDateOfSchedule = new Date(endDateString);
+        startDateOfSchedule = placeholderTextToDate(document.getElementById("startDate").placeholder);
+        endDateOfSchedule = placeholderTextToDate(document.getElementById("endDate").placeholder);
         setLoadingMessage();
         loadOnCallSchedule(startDateOfSchedule, endDateOfSchedule);
+    }
+
+    function getPlaceholderText(element) {
+        let dateString = "";
+        if (element) {
+            let phText = element.placeholder;
+            dateString = phText.substring(6, 10) + "-" + phText.substring(0, 2) + "-" + phText.substring(3, 5) + "T12:00:00Z";
+        }
+        return dateString;
+    }
+
+    function placeholderTextToDate(phText) {
+        return new Date(phText.substring(6, 10) + "-" + phText.substring(0, 2) + "-" + phText.substring(3, 5) + "T12:00:00Z");
     }
 
     function setPlaceholderDates(startDate, endDate) {
@@ -205,12 +329,16 @@
         let endMonth = endDate.getMonth() + 1;
         let endDay = endDate.getDate();
 
-        startDateEl.value = "";
-        startDateEl.placeholder = String(startMonth).padStart(2, "0") + "/" + String(startDay).padStart(2, "0") + "/" + startYear;
-        startDateEl.type = "text";
-        endDateEl.value = "";
-        endDateEl.placeholder = String(endMonth).padStart(2, "0") + "/" + String(endDay).padStart(2, "0") + "/" + endYear;
-        endDateEl.type = "text";
+        if (startDateEl) {
+            startDateEl.value = "";
+            startDateEl.placeholder = String(startMonth).padStart(2, "0") + "/" + String(startDay).padStart(2, "0") + "/" + startYear;
+            startDateEl.type = "text";
+        }
+        if (endDateEl) {
+            endDateEl.value = "";
+            endDateEl.placeholder = String(endMonth).padStart(2, "0") + "/" + String(endDay).padStart(2, "0") + "/" + endYear;
+            endDateEl.type = "text";
+        }
     }
 
     function setPlaceholderOnBlur(dateEl) {
@@ -252,6 +380,9 @@
             let tr = document.createElement("tr");
             for (let j = 0; j < onCallSchedule[i].length; j++) {
                 let td = document.createElement("td");
+                if (j == 0) {
+                    td.classList.add("date-column");
+                }
                 td.classList.add("thin-bordered-table");
                 td.classList.add("centered-text-table");
                 td.innerHTML = (onCallSchedule[i][j]) ? onCallSchedule[i][j].html : "<strong>NO DATA</strong>";
@@ -265,6 +396,7 @@
 
     function loadOnCallSchedule(startDateOfSchedule, endDateOfSchedule) {
         setPlaceholderDates(startDateOfSchedule, endDateOfSchedule);
+        setPrintableScheduleLink();
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchOnCallScheduleGoogleEvents", null, {
                 startDate: startDateOfSchedule,
@@ -284,6 +416,8 @@
     }
 
     $(document).ready(function() {
+        initializeDateRange();
+        setReportHeaderText(startDateOfSchedule, endDateOfSchedule);
         loadOnCallSchedule(startDateOfSchedule, endDateOfSchedule);
     });
 </script>

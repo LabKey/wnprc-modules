@@ -127,6 +127,9 @@
                         </fk>
 
                     </column>
+                    <column columnName="actionRequired">
+                        
+                    </column>
                     <column columnName="treatmentStatus">
                         <!--<url>/ehr/taskDetails.view?formtype=${taskid/formtype}&amp;taskid=${taskid}</url>-->
                         <isHidden>false</isHidden>

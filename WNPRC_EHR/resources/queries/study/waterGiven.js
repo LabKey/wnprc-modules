@@ -162,6 +162,9 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
            // row.QCState = 1;
 
         }
+        if (row.waterSource == 'lixit' && !row.remarks){
+            EHR.Server.Utils.addError(scriptErrors, 'remarks', 'Add remark for connecting lixit', 'WARN');
+        }
 
 
         //EHR.Server.Validation.checkRestraint(row, scriptErrors);

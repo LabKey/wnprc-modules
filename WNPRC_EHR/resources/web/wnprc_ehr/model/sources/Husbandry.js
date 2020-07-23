@@ -328,6 +328,26 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             }
 
         },
+        'study.drug':{
+            id:{
+                hidden: true,
+                shownInGrid:false
+            },
+            project:{
+                hidden: true,
+                shownInGrid:false
+            },
+            code: {
+                editorConfig: {
+                    xtype: 'ehr-snomedcombo',
+                    defaultSubset: 'Common Treatments'
+                }
+            },
+            route: {
+                defaultValue : 'topical'
+            }
+
+        },
         'study.waterGiven':{
             performedby: {
                 allowBlank: false,

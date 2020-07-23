@@ -8,6 +8,7 @@
         <column name="dataSource"/>
         <column name="assignedTo"/>
         <column name="provideFruit"/>
+        <column name="actionRequired"/>
         <column name="qcstate" />
         <column name="taskid" />
     </columns>

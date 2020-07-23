@@ -110,7 +110,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
         filtersArray.push(LABKEY.Filter.create('assignedToTitle', assignedTo.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
         filtersArray.push(LABKEY.Filter.create('frequencyMeaning', frequency.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
         //TODO: add the action required column filterArray
-        filtersArray.push()
+        filtersArray.push(LABKEY.Filter.create('actionRequired',true, LABKEY.Filter.Types.EQUAL));
 
         if (area.length)
             filtersArray.push(LABKEY.Filter.create('area', area.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
@@ -137,7 +137,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             queryName: 'waterScheduleCoalesced',
             parameters: {NumDays: 1, StartDate: new Date()},
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
-            columns: 'animalid,date,project,assignedTo,assignedToTitle,frequency,volume,provideFruit,objectid,dateCreated',
+            columns: 'animalid,date,project,assignedTo,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dateCreated',
             filterArray: filtersArray,
             scope: this,
             success: this.loadWater,
@@ -222,6 +222,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 volume:             row.getValue('volume'),
                 project:            row.getValue('project'),
                 assignedto:         row.getValue('assignedTo'),
+                waterSource:        row.getValue('waterSource'),
                 treatmentid:        row.getValue('objectid'),
                 dateordered:        row.getValue('dateCreated')
 

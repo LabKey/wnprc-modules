@@ -6,7 +6,10 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 editable: false
             },
             date: {
-                allowBlank: false
+                allowBlank: false,
+                columnConfig: {
+                    width:125
+                }
             },
             project:{
                 editable: false,
@@ -23,12 +26,23 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 editable: false
 
             },
+            waterSource:{
+                editable: false,
+                allowBlank: false
+
+            },
+            remarks :{
+                xtype: 'ehr-remarkfield',
+                shownInGrid: true
+            },
             route: {
                 editable: false,
                 defaultValue : 'oral'
+
             },
             location:{
                 editable: false,
+                shownInGrid: false,
                 defaultValue: 'animalRoom',
                 lookup:{
                     schemaName: 'ehr_lookups',
@@ -38,20 +52,19 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                     sort: 'sort_order'
                 },
                 columnConfig: {
-                    width:130
+                    width:80
                 }
             },
             assignedTo:{
                 editable: false
 
             },
-            remarks :{
-                xtype: 'ehr-remarkfield',
-                //hidden : true,
-                shownInGrid: false
-            },
+            
             performedby:{
-                allowBlank: false
+                allowBlank: false,
+                columnConfig: {
+                    width:100
+                }
             },
             treatmentid: {
                 hidden: true

@@ -23,6 +23,7 @@
        <column name="performedby"/>
        <!--<column name="HeaderDate"/>-->
        <column name="qcstate" />
+       <column name="parentid"/>
        <column name="taskid" />
    </columns>
    <sorts>

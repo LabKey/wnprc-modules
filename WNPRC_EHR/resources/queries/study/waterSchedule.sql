@@ -8,7 +8,9 @@ SELECT
 d.id AS animalId,
 d.calculated_status,
 s.*,
-s.objectid as treatmentid
+s.objectid as treatmentid,
+--(SELECT max(d.qcstate) as label FROM study.drug d WHERE s.objectid = d.treatmentid AND s.date = d.timeordered) as treatmentStatus,
+(SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE s.objectid = wg.treatmentid AND s.date = wg.dateordered) as waterStatus
 
 FROM study.demographics d
 

@@ -30,8 +30,17 @@
                             <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="remarks">
+
+                    </column>
                     <column columnName="waterSource">
                         <columnTitle>Water Source</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_source</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>
                     </column>
                     <column columnName="location">
                         <columnTitle>Water Location</columnTitle>
@@ -60,9 +69,7 @@
                         </fk>
 
                     </column>
-                    <column columnName="remarks">
-                        
-                    </column>
+
                     <column columnName="project">
 
                     </column>
@@ -77,7 +84,7 @@
                         </fk>
                     </column>
                     <column columnName="treatmentId">
-                        <isHidden>true</isHidden>          
+                        <isHidden>false</isHidden>
                     </column>
                 </columns>
             </table>

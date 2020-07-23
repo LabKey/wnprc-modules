@@ -29,7 +29,7 @@
         vertical-align: middle;
     }
     .date-column {
-        width: 110px;
+        white-space: nowrap;
     }
 
     .schedule-nav-link {
@@ -370,10 +370,6 @@
         let headerRow = document.createElement("tr");
         for (let i = 0; i < onCallSchedule[0].length; i++) {
             let th = document.createElement("th");
-            if(i == 0){
-                th.classList.add("date-column");
-            }
-
             th.classList.add("thin-bordered-table");
             th.classList.add("centered-text-table");
             th.innerHTML = (onCallSchedule[0][i]) ? onCallSchedule[0][i].html : "<strong>NO DATA</strong>";
@@ -384,6 +380,9 @@
             let tr = document.createElement("tr");
             for (let j = 0; j < onCallSchedule[i].length; j++) {
                 let td = document.createElement("td");
+                if (j == 0) {
+                    td.classList.add("date-column");
+                }
                 td.classList.add("thin-bordered-table");
                 td.classList.add("centered-text-table");
                 td.innerHTML = (onCallSchedule[i][j]) ? onCallSchedule[i][j].html : "<strong>NO DATA</strong>";

@@ -12,15 +12,15 @@ public class WaterDrugAdministrationSection extends SlaveGridSection
 {
     public WaterDrugAdministrationSection(){
         super ("study", "drug", "Implant Maintenance");
-        setClientStoreClass("EHR.data.DrugAdministrationRunsClientStore");
-        addClientDependency(ClientDependency.fromPath("ehr/data/DrugAdministrationRunsClientStore.js"));
+        //setClientStoreClass("EHR.data.DrugAdministrationRunsClientStore");
+        //addClientDependency(ClientDependency.fromPath("ehr/data/DrugAdministrationRunsClientStore.js"));
         addClientDependency(ClientDependency.fromPath("ehr/form/field/SnomedCombo.js"));
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
        // setAllowBulkAdd(true);
     }
     public WaterDrugAdministrationSection(String title){
         super ("study", "drug", title);
-        this.addConfigSource("WNPRC_Request");
+        //this.addConfigSource("WNPRC_Request");
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
         // setAllowBulkAdd(true);
     }
@@ -33,8 +33,8 @@ public class WaterDrugAdministrationSection extends SlaveGridSection
 
         return fields;
     }
-    /*@Override
+    @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id", "date","code", "project", "route","areaCleaned","remark");
-    }*/
+        return Arrays.asList("Id","project","date","category","code","areaCleaned","route","remark");
+    }
 }

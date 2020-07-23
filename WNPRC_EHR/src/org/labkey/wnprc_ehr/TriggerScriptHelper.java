@@ -56,7 +56,6 @@ import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
-import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.ResultSet;

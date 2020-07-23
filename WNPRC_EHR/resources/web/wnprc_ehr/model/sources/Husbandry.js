@@ -331,7 +331,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
         'study.drug':{
             id:{
                 hidden: true,
-                shownInGrid:false
+                shownInGrid:false,
             },
             project:{
                 hidden: true,
@@ -340,11 +340,17 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             code: {
                 editorConfig: {
                     xtype: 'ehr-snomedcombo',
-                    defaultSubset: 'Common Treatments'
+                    defaultSubset: 'Implant Cleaning',
                 }
             },
             route: {
                 defaultValue : 'topical'
+            },
+            category:{
+                hidden: false,
+                shownInGrid: true,
+                editable: false,
+                defaultValue: 'Implant Maintenance'
             }
 
         },
@@ -371,6 +377,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 compositeField: 'Volume (mL)',
                 header: 'Volume (ml)',
                 allowBlank: false
+            },
+            waterSource: {
+                defaultValue: 'regulated'
             },
             route: {
                 defaultValue : 'oral'

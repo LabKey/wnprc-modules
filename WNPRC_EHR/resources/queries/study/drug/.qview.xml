@@ -10,6 +10,7 @@
                <property name="columnTitle" value="SNOMED Code"/>
            </properties>
        </column>
+       <column name="areaCleaned"/>
        <column name="qualifier"/>
        <column name="amount"/>
        <column name="amount_units"/>

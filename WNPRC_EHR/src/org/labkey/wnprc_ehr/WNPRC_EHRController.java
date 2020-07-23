@@ -126,7 +126,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1774,9 +1773,9 @@ public class WNPRC_EHRController extends SpringActionController
                     BatchValidationException validationTaskException = new BatchValidationException();
                     List<Map<String, Object>> insertedTask = service.insertRows(getUser(), getContainer(), taskToInsert, validationTaskException, null, null);
 
-                    Calendar StartDate = Calendar.getInstance();
+                    java.util.Calendar StartDate = java.util.Calendar.getInstance();
                     StartDate.setTime(event.getEndDate());
-                    StartDate.add(Calendar.DATE, 1);
+                    StartDate.add(java.util.Calendar.DATE, 1);
 
                     waterOrderRow.put("taskid", taskId);
                     waterOrderRow.put("date",StartDate.getTime());

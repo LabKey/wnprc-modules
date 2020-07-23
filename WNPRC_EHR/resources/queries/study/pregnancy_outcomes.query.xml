@@ -18,6 +18,7 @@
                     </column>
                     <column columnName="date">
                         <columnTitle>Delivery Date</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="pregnancyid">
                         <columnTitle>Pregnancy (Conc. Date)</columnTitle>

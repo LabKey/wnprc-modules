@@ -90,6 +90,7 @@ function createNavMenu()
                 {name: 'Colony Census', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/colonyCensus.view?'},
                 {name: 'Pregnancies', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/breeding.view?'},
                 {name: 'Room Utilization', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=roomUtilization'},
+                {name: 'Feeding', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=feeding'},
                 {name: 'Time Chart', url: '<%=contextPath%>/visualization' + ctx['EHRStudyContainer'] + '/timeChartWizard.view?edit=true'},
                 {name: 'Viral Challenges', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=ViralChallenges'},
                 {name: 'Weight: 10% Drop In Last 30 Days', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 30 Days'},

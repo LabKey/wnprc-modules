@@ -39,7 +39,7 @@ const customStyles = {
  * Uses Submit Modal to add batch records by a string of ids or room locaiton.
  */
 const BatchModal: React.FunctionComponent<PropTypes> = props => {
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState();
   const [locations, setLocations] = useState([]);
   const [ids, setIds] = useState([]);
 

@@ -224,6 +224,8 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   const passLocationAndSetIds = (location) => {
     const e = getAnimalIdsFromLocation(location).then((f) => {
       setFormIds(f);
+    }).catch((e)=> {
+      console.log(e)
     });
   };
 

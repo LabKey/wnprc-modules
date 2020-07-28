@@ -120,6 +120,9 @@ export const getlocations = (location:Array<any>): Array<Promise<any>> => {
 export const getAnimalIdsFromLocation = (location) => {
   let animalIDArray = [];
   return new Promise((resolve, reject) => {
+    if (!location){
+      reject("Provide a location.")
+    }
     Promise.all(getlocations(location)).then(d => {
       d.forEach((promise, i) => {
         if (promise["rows"]) {

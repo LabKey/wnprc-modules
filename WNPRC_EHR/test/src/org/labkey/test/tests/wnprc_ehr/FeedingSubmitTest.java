@@ -76,7 +76,7 @@ public class FeedingSubmitTest extends BaseWebDriverTest
         return Arrays.asList("core");
     }
 
-    //@Test
+    @Test
     public void dummyTest(){
 
     }
@@ -422,8 +422,10 @@ public class FeedingSubmitTest extends BaseWebDriverTest
         navigateToFeeding();
         addBatchByLocation();
         clickNewButton("edit-batch");
-        WebElement el = Locator.id("weight-bulk").findElement(getDriver());
+        WebElement el = Locator.id("amount-bulk").findElement(getDriver());
         el.sendKeys(WEIGHT_VAL.toString());
+        WebElement el2 = Locator.id("type-bulk").findElement(getDriver());
+        el2.sendKeys("l");
         clickNewButton("submit-bulk");
         waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
@@ -433,7 +435,7 @@ public class FeedingSubmitTest extends BaseWebDriverTest
         SelectRowsResponse r = fetchFeedingData();
         for (int i = 0; i < EXPECTED_ANIMALS_LOCAL.length; i++)
         {
-            JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
+            JSONObject wt = (JSONObject) r.getRows().get(i).get("amount");
             Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         }
     }

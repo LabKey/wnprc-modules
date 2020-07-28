@@ -6,6 +6,7 @@
 SELECT
 
 d.id as Id,
+CAST(d.id.demographics.birth AS varchar) as BirthDate,
 d.dam as Dam,
 d.sire as Sire,
 '' as Display,
@@ -28,6 +29,7 @@ CASE (d.gender)
   WHEN 'e' THEN 1
   WHEN 'c' THEN 2
   WHEN 'v' THEN 1
+  WHEN 'h' THEN 2
   ELSE 3
 END
 -- , INTEGER)
@@ -46,7 +48,7 @@ d.species as Species
 
 FROM study.demographics d
 
-WHERE d.gender != '' AND d.gender != 'h'
+WHERE d.gender != '' 
 --AND (d.dam is not NULL or d.sire is not null)
 
 UNION ALL
@@ -54,6 +56,7 @@ UNION ALL
 SELECT
 
 p.id as Id,
+CAST(NULL AS varchar) as BirthDate,
 p.dam as Dam,
 p.sire as Sire,
 '' as Display,

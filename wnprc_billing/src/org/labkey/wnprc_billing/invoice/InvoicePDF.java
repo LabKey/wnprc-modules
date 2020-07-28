@@ -819,10 +819,15 @@ public class InvoicePDF extends FPDF
 
     private String formatAddess(Alias alias)
     {
+        //check for pi name before appending (only show on internal invoices)
         //check for institution before appending
         //always assume address will be present
         //check for city/state/zip before appending
         StringBuilder address = new StringBuilder();
+        if (alias.getType().toLowerCase().contains("internal") && StringUtils.isNotBlank(alias.getInvestigatorName()))
+        {
+            address.append(alias.getInvestigatorName()).append("\n");
+        }
         if (StringUtils.isNotBlank(alias.getInstitution()))
         {
             address.append(alias.getInstitution()).append("\n");

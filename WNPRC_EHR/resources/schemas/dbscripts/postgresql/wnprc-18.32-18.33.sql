@@ -1,6 +1,23 @@
-insert into ehr.form_framework_types (schemaname,queryname,framework,container) select 'study', 'feeding', 'reactjs', entityid from core.containers WHERE name='EHR' LIMIT 1;
+<<<<<<< HEAD
+DROP TABLE IF EXISTS wnprc.on_call_calendars;
+CREATE TABLE wnprc.on_call_calendars
+(
+    calendar_id             VARCHAR(100),
+    calendar_type           VARCHAR(100),
+    display_name            VARCHAR(500),
+    api_action              VARCHAR(200),
+    folder_id               VARCHAR(200),
+    show_by_default         BOOLEAN DEFAULT TRUE,
+    requires_authorization  BOOLEAN DEFAULT FALSE,
+    default_bg_color        VARCHAR(20),
+    authorized_groups       VARCHAR(500),
 
-insert into ehr_lookups.lookup_sets (setname,container)  select 'feeding_types' as setname, container from ehr_lookups.lookup_sets where setname='viral_status' LIMIT 1;
-insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'log' as value from ehr_lookups.lookup_sets where setname='feeding_types';
-insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'log (gluten-free)' as value from ehr_lookups.lookup_sets where setname='feeding_types';
-insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'flower' as value from ehr_lookups.lookup_sets where setname='feeding_types';
+    -- Default fields for LabKey.
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+
+    CONSTRAINT pk_on_call_calendar_id PRIMARY KEY (calendar_id)
+);

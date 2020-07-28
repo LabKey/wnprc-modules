@@ -71,10 +71,12 @@
                 <column columnName="contact_email">
                     <nullable>false</nullable>
                 </column>
+                <column columnName="institution"/>
                 <column columnName="address"/>
                 <column columnName="city"/>
                 <column columnName="state"/>
                 <column columnName="zip"/>
+                <column columnName="billing_contact_info"/>
                 <column columnName="comments"/>
                 <column columnName="po_number"/>
                 <column columnName="po_amount">

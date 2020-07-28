@@ -30,6 +30,7 @@ import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
+import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -631,16 +632,16 @@ public class TriggerScriptHelper {
         return thestatus;
     }
 
-    public void sendViralLoadQueueNotification(Integer key, Integer status, String hostName) throws SQLException
+    public void sendViralLoadQueueNotification(String[] keys, Map<String,Object> emailProps) throws SQLException
     {
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
-        String recordStatus = getVLStatus(user, viralLoadContainer, status);
+        String recordStatus = getVLStatus(user, viralLoadContainer, (Integer) emailProps.get("status"));
         if ("08-complete-email-Zika_portal".equals(recordStatus)){
-            _log.info("Using java helper to send email for viral load queue record: "+key);
-            ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, key, user, viralLoadContainer, hostName);
+            //_log.info("Using java helper to send email for viral load queue record: "+key);
+            ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, user, viralLoadContainer, emailProps);
             Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-            notification.sendManually(ehrContainer,user);
+            notification.sendManually(ehrContainer);
         }
     }
 

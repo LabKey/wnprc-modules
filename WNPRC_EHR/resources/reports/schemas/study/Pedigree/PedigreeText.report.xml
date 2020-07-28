@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportDescriptor>
+    <Properties>
+        <!--<Prop name="reportType">Study.rReport</Prop>-->
+        <Prop name="dataRegionName">query</Prop>
+        <!--<Prop name="runInBackground">true</Prop>-->
+    </Properties>
+</ReportDescriptor>

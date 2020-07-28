@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 DROP TABLE IF EXISTS wnprc.on_call_calendars;
 CREATE TABLE wnprc.on_call_calendars
 (

@@ -1457,8 +1457,9 @@ public class WNPRC_EHRController extends SpringActionController
             // just to be safe, make sure we're reading the form type regardless of the capitalization
             // (it _should_ be all lowercase, but we should check anyway)
             String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
-
-            switch (formType.toLowerCase())
+            formType = formType != null ? formType.toLowerCase() : null;
+            
+            switch (formType)
             {
 
                 case "feeding":

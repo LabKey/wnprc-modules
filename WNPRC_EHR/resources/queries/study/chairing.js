@@ -6,8 +6,9 @@ function onInit(event, helper){
 }
 function onUpsert(helper, scriptErrors, row, oldRow){
 
-    var startChairing = new Date (row.chairingStartTime);
-    var endChairing = new Date (row.chairingEndTime);
+    var startChairing = new Date (row.chairingStartTime.toGMTString());
+    var endChairing = new Date (row.chairingEndTime.toGMTString());
+
 
     var _MS_PER_HOUR = 1000 * 60 * 60;
 

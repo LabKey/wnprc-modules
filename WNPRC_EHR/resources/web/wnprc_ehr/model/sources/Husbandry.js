@@ -197,11 +197,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
             chairingStartTime: {
                 xtype: 'xdatetime',
+                extFormat: 'Y-m-d H:i',
                 hidden: false,
                 allowBlank: false,
                // hideMode: 'offsets',
                 editorConfig : {
                     id : 'chairingStartTime',
+                    dateFormat: 'Y-m-d',
                     timeFormat:'H:i'
 
                 }
@@ -211,11 +213,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             chairingEndTime: {
                 xtype: 'xdatetime',
+                extFormat: 'Y-m-d H:i',
                 allowBlank: false,
                 hidden: false,
                 hideMode: 'offsets',
                 editorConfig : {
                     id : 'chairingEndTime',
+                    dateFormat: 'Y-m-d',
                     timeFormat:'H:i'
 
                 }
@@ -379,13 +383,14 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 allowBlank: false
             },
             waterSource: {
-                defaultValue: 'regulated'
+                defaultValue: 'regulated',
+                hidden: true
             },
             route: {
                 defaultValue : 'oral'
             },
             location:{
-              //  defaultValue: 'lab',
+                defaultValue: 'lab',
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'water_location',

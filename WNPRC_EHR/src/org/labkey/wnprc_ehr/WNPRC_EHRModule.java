@@ -49,6 +49,7 @@ import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
 import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.MarkReviewedButton;
+import org.labkey.wnprc_ehr.buttons.WNPRCAddRecordsButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
@@ -196,7 +197,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public double getVersion()
     {
-        return 18.33;
+        return 18.34;
     }
 
     public boolean hasScripts()
@@ -258,7 +259,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         //buttons
         EHRService.get().registerMoreActionsButton(new WNPRCGoToTaskButton(this, "Assignment"), "study", "assignment");
-        EHRService.get().registerMoreActionsButton(new WNPRCGoToTaskButton(this, "Feeding"), "study", "feeding");
+        EHRService.get().registerMoreActionsButton(new WNPRCAddRecordsButton(this, "feeding"), "study", "feeding");
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "Tasks_DataEntry");
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "my_tasks");
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");

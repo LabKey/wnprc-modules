@@ -659,6 +659,17 @@
                         }
                     ],
                     requests: true
+                },
+                {
+                    header: 'New Forms in Test',
+                    items: [
+                        {
+                            url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'feeding', ctx['EHRStudyContainer']),
+                            title:   'Enter Feeding Orders',
+                            queries:['feeding']
+                        },
+
+                    ]
                 }
             ];
 

@@ -15,17 +15,17 @@
 
        <column name="amount"/>
        <column name="type"/>
+       <column name="date" />
        <column name="remark"/>
        <!--<column name="performedby"/>-->
-       <column name="modified" />
        <!--<column name="modifiedby" />-->
-       <column name="qcstate" />
+       <column name="chowConversion"/>
        <!--<column name="taskid" />-->
    </columns>
    <sorts>
-       <!--<sort column="date" descending="true"/>-->
        <sort column="Id/curLocation/cage" descending="false"/>
        <sort column="Id/curLocation/room" descending="false"/>
+       <sort column="date" descending="true"/>
    </sorts>
     <!--<filters>-->
         <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->

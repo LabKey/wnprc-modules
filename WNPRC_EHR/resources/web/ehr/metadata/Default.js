@@ -1155,6 +1155,14 @@ EHR.Metadata.registerMetadata('Default', {
             }
         },
         Assignment: {
+            objectid:{
+                setInitialValue: function (v, rec){
+                return v || LABKEY.Utils.generateUUID();
+                },
+                parentConfig:false,
+                hidden : true,
+                shownInGrid: false
+            },
             project: {
                 shownInGrid: true,
                 allowBlank: false,

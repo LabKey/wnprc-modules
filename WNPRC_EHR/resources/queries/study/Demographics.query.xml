@@ -231,6 +231,15 @@
                         </url>
                         &lt;!&ndash;<formatString>#.##</formatString>&ndash;&gt;
                     </column>-->
+                    <column columnName="Feeding/TypeOfChow">
+                        <columnTitle>Type of Chow</columnTitle>
+                        <isHidden>true</isHidden>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>feeding_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

@@ -15,7 +15,8 @@
  */
 package org.labkey.wnprc_ehr.notification;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -57,7 +58,7 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
         return "Water Monitoring";
     }
 
-    private static final Logger _log = Logger.getLogger(WaterMonitoringNotification.class);
+    private static final Logger _log = LogManager.getLogger(WaterMonitoringNotification.class);
 
     @Override
     public String getEmailSubject(Container c)

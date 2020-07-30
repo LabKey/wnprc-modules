@@ -1,7 +1,8 @@
 package org.labkey.wnprc_ehr.dataentry.generics.sections;
 
 import java.util.Arrays;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 import org.json.JSONObject;
 import org.labkey.api.data.TableInfo;
@@ -22,7 +23,7 @@ public class SimpleFormSection extends SimpleFormPanelSection {
     protected List<String> fieldNamesAtStartInOrder = new ArrayList<>();
     protected List<String> fieldNamesAtEndInOrder   = new ArrayList<>();
     protected Integer maxItemsPerColumn = null;
-    protected static final Logger _log = Logger.getLogger(SimpleFormSection.class);
+    protected static final Logger _log = LogManager.getLogger(SimpleFormSection.class);
 
     public SimpleFormSection(String schemaName, String queryName, String label) {
         super(schemaName, queryName, label);

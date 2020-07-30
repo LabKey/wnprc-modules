@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.bc;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.module.ModuleLoader;
@@ -29,7 +30,7 @@ import static org.quartz.TriggerKey.*;
  * Created by jon on 1/19/17.
  */
 public class BCReportRunner implements Job {
-    private static Logger _log = Logger.getLogger(BCReportRunner.class);
+    private static Logger _log = LogManager.getLogger(BCReportRunner.class);
 
     public static String GROUP_ID = "wnprc";
     public static String JOB_ID = "bc_report_job";

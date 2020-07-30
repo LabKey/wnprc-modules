@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -24,7 +25,7 @@ import java.util.List;
 public class TriggerScriptHelper {
     protected final Container container;
     protected final User user;
-    protected static final Logger _log = Logger.getLogger(TriggerScriptHelper.class);
+    protected static final Logger _log = LogManager.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
 
     private TriggerScriptHelper(int userId, String containerId) {

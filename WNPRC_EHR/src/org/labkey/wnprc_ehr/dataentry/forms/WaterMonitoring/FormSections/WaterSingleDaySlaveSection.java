@@ -23,10 +23,8 @@ public class WaterSingleDaySlaveSection extends SlaveGridSection
     @Override
     public Set<String> getSlaveFields(){
         Set<String> fields = new HashSet<>();
-
         fields.add("Id");
         fields.add("project");
-
         return fields;
     }
     @Override

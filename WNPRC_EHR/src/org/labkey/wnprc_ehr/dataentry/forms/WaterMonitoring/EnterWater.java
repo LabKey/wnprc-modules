@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring;
 
-import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
+//import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
+import org.labkey.wnprc_ehr.dataentry.generics.sections.AnimalDetailsPanel;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterDrugAdministrationSection;
@@ -27,7 +28,8 @@ public class EnterWater extends SimpleTaskForm
         super(ctx, owner, NAME,  NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new WaterWeightSection(),
-                new AnimalDetailsFormSection(),
+                new AnimalDetailsPanel(),
+                //new AnimalDetailsFormSection(),
                 new chairingFormSection(),
                 new restraintFormSection(),
                 new WaterDrugAdministrationSection(),

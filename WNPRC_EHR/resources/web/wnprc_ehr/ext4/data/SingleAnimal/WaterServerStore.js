@@ -58,9 +58,9 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                     console.log ('value of r '+ r);
 
                     switch (r.store.queryName){
-                        case 'weight':
-                            var weight = r.get('weight');
-                            if (weight == null ){
+                        case 'waterGiven':
+                            var waterGiven = r.get('waterGiven');
+                            if (waterGiven == null ){
                                 break;
                             }
                             else {

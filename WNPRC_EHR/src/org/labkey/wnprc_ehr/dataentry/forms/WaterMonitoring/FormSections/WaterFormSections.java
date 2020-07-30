@@ -24,11 +24,17 @@ public class WaterFormSections extends SlaveFormSection
     @Override
     public Set<String> getSlaveFields(){
         Set<String> fields = new HashSet<>();
-
         fields.add("Id");
+        fields.add("project");
         fields.add("date");
-
         return fields;
     }
+
+    @Override
+    public List<String> getFieldNames(){
+        return Arrays.asList("Id", "date", "volume", "assignedTo", "project","frequency","performedby","waterSource");
+    }
+
+
 
 }

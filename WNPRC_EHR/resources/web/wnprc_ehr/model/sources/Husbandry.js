@@ -112,6 +112,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
         },
         'study.weight':{
+            Id:{
+                parentConfig: null
+            },
             project: {
                 xtype: 'wnprc-projectentryfield',
                 editable : true,
@@ -159,11 +162,18 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             date: {
                 hidden : true
             },
+            project:{
+                hidden: true,
+                parentConfig: {
+                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    dataIndex: 'project'
+                }
+            },
             location: {
                 helpPopup : 'Location of longest chairing',
                 hidden: false,
                 editorConfig : {
-                    id : 'location',
+                    id : 'waterLocation',
                     listeners: {
                         change: function (field, val) {
                             var weightStartTime = Ext4.getCmp('weightDateTime');
@@ -243,6 +253,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             date: {
                 hidden :true
+            },
+            project:{
+                hidden : true,
+                parentConfig: {
+                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    dataIndex: 'project'
+                }
             },
             restraintType: {
 
@@ -339,7 +356,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             project:{
                 hidden: true,
-                shownInGrid:false
+                shownInGrid:false,
+                parentConfig: {
+                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    dataIndex: 'project'
+                }
             },
             code: {
                 editorConfig: {
@@ -373,8 +394,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 shownInGrid: false
             },
             project:{
-                hidden: true
-                //allowBlank: false
+                hidden: true,
+                parentConfig: {
+                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    dataIndex: 'project'
+                }
+
             },
             volume: {
                 xtype: 'numberfield',
@@ -457,7 +482,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             project:{
                 hidden: true,
-                shownInGrid: false
+                shownInGrid: false,
+                parentConfig: {
+                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    dataIndex: 'project'
+                }
             },
             assignedTo:{
                 allowBlank: false
@@ -488,6 +517,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 columnConfig: {
                     width:90
                 },
+                parentConfig: {
+                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    dataIndex: 'project'
+                }
             },
             date:{
                 xtype: 'datefield',

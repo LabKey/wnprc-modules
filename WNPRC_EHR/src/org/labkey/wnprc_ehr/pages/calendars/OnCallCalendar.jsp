@@ -78,7 +78,7 @@
                     </div>
                     <div class="col-sm-2">
                         <label for="endDate">End Date</label>
-                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="endDate" placeholder="Password">
+                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="endDate" placeholder="">
                     </div>
                 </div>
             </div>
@@ -93,7 +93,7 @@
         </form>
 
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <div id="navigateByWeek">
                     <br><br>
                     <a class="schedule-nav-link" href="javascript:changeWeek(-1)">&laquo; Previous</a>
@@ -107,9 +107,9 @@
             }
         %>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 In the event of an injury or potential exposure occurring on the weekend that requires a trip the UW Hospital Emergency
-                Department, contact either the Colony Management Supervisor or the Veterinarian on-call, and they will contact the
+                Department, contact<br>either the Colony Management Supervisor or the Veterinarian on-call, and they will contact the
                 appropriate HR representative.
                 <br><br>
             </div>
@@ -118,7 +118,7 @@
             if (!reportMode) {
         %>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <a id="printable-schedule-link" href="#">Printable Schedule</a>
                 <br>
             </div>
@@ -127,12 +127,12 @@
             }
         %>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <div id="onCallTable">Loading schedule...</div>
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <br>
                 Use the above contact information for: <strong>AFTER HOURS (weekdays 4pm-6am), WEEKENDS, and HOLIDAYS</strong>. Contact staff using the phone numbers listed above,
                 calling the bolded number first.

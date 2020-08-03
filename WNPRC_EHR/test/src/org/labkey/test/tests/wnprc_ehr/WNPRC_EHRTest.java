@@ -17,6 +17,8 @@ package org.labkey.test.tests.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.json.simple.JSONObject;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -25,6 +27,7 @@ import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.Sort;
 import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.remoteapi.query.TruncateTableCommand;
@@ -51,6 +54,7 @@ import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
+import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -58,6 +62,7 @@ import org.labkey.test.util.ext4cmp.Ext4FileFieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -69,6 +74,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -140,6 +146,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private Map<String, Object> aliasesMap = new HashMap<>();
 
+    protected static final Double FEEDING_AMT = 12.12;
+    protected static final Double NEW_WEIGHT_VAL = 12.13;
+    protected static final Double LOW_VAL = 0.1;
+    protected static final Double HIGH_VAL = 0.12;
+    protected static final String ROOM_ID_LOCAL = "ab160";
+    protected static final String[] EXPECTED_ANIMALS_LOCAL = {"r19022","r19028","r19035","r19043","r19050"};
+    protected static final String ROOM_ID_EHR_TEST = "2341092";
+    protected static final String[] ANIMAL_SUBSET_EHR_TEST = {"test3844307", "test8976544", "test9195996"};
+
     @Nullable
     @Override
     protected String getProjectName()
@@ -168,6 +183,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.createFinanceManagementFolders();
         initTest.clickFolder("Private");
         initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+
+        initTest.updateEHRFormFrameworkTypes();
+
         initTest.loadBloodBilledByLookup();
         initTest.addFinanceRelatedWebParts();
         initTest.clickFolder("Private");
@@ -357,11 +375,81 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         importStudyFromZip(STUDY_ZIP);
     }
 
+    // this mocks the behavior of enterweights sql update script
+    public void updateEHRFormFrameworkTypes() throws IOException, CommandException
+    {
+        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+
+        log("Inserting feeding as a reactjs form type into ehr.form_framework_types");
+
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "form_framework_types");
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("schemaname", "study");
+        rowMap.put("queryname", "feeding");
+        rowMap.put("framework", "reactjs");
+        rowMap.put("container", getContainerId());
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+        log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
+    }
+
     @Override
     protected boolean doSetUserPasswords()
     {
         return true;
     }
+
+    public void navigateToFeeding()
+    {
+        /*WebElement modeElement = Locator.tagWithText("a", "Enter Data").findElement(getDriver());
+        modeElement.click();
+        waitForElement(Locator.linkContainingText("Enter Feeding Orders"));
+        WebElement modeElement2 = Locator.tagWithText("a", "Enter Feeding Orders").findElement(getDriver());
+        modeElement2.click();*/
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "feeding"));
+    }
+
+    public WebElement fillAnInput(String inputId, String value)
+    {
+        WebElement el = Locator.id(inputId).findElement(getDriver());
+        el.sendKeys(value);
+        return el;
+    }
+
+    public void fillFeedingForm(String weightVal, Integer index)
+    {
+        WebElement el = fillAnInput("id_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
+        el.sendKeys(Keys.TAB);
+        el.sendKeys(Keys.TAB);
+        WebElement el3 = fillAnInput("type_" + index.toString(), "l");
+        WebElement el4 = fillAnInput("amount_" + index.toString(), weightVal);
+        WebElement el5 = fillAnInput("remark_"+ index.toString(), "Entered from automated test");
+    }
+
+    public void waitUntilElementIsClickable(String id)
+    {
+        shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id(id)));
+    }
+
+    public void clickNewButton(String id){
+        WebElement o = Locator.tagWithId("button",id).findElement(getDriver());
+        o.click();
+    }
+
+    public SelectRowsResponse fetchFeedingData() throws IOException, CommandException
+    {
+        Connection cn = this.createDefaultConnection(false);
+        SelectRowsCommand cmd = new SelectRowsCommand("study", "feeding");
+        cmd.setRequiredVersion(9.1);
+        cmd.setColumns(Arrays.asList("Id", "date", "type", "amount", "remark", "QCState", "taskid", "objectid"));
+        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
+        cmd.setMaxRows(100);
+        return cmd.execute(cn, EHR_FOLDER_PATH);
+
+    }
+
 
     @Test
     public void testBilling() throws IOException, CommandException
@@ -2014,6 +2102,29 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
         assertTrue(auditLog.contains("paymentamountreceived:  » 1028.95"));
         assertTrue(auditLog.contains("balancedue:  » 0.0"));
+    }
+
+    @Test
+    public void testEnterFeeding() throws IOException, CommandException
+    {
+        //getDriver().manage().window().setSize(new Dimension(768, 1024));
+        //getDriver().manage().window().setSize(new Dimension(800,650));
+        //getDriver().manage().window().setPosition(new Point(0,500));
+        //navigate to weights form and fill it out
+        beginAt(buildURL("project", getContainerPath(), "begin"));
+        navigateToFeeding();
+        fillFeedingForm(FEEDING_AMT.toString(),0);
+        waitUntilElementIsClickable("submit-all-btn");
+        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchFeedingData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("amount");
+        TestLogger.log((wt.get("value")).toString());
+        Assert.assertEquals(null, FEEDING_AMT, wt.get("value"));
+
     }
 
     @Override

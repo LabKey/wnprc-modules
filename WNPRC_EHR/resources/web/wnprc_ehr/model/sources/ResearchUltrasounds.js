@@ -18,6 +18,9 @@ EHR.model.DataModelManager.registerMetadata('ResearchUltrasounds', {
             QCState: {
                 shownInGrid: false,
                 hidden: true
+            },
+            pregnancyid: {
+                xtype: 'wnprc-pregnancyidfield'
             }
         },
         'study.ultrasound_measurements': {

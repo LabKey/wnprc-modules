@@ -33,5 +33,6 @@ public class ResearchUltrasoundsForm extends SimpleTaskForm
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/ResearchUltrasounds.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsServerStore.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsStoreCollection.js"));
+        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/fields/PregnancyIdField.js"));
     }
 }

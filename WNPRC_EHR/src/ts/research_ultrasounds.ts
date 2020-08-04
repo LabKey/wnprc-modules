@@ -237,7 +237,7 @@ export class ResearchUltrasounds
                     LABKEY.QueryWebPart.standardButtons.views,
                     LABKEY.QueryWebPart.standardButtons.exportRows,
                     LABKEY.QueryWebPart.standardButtons.print,
-                    LABKEY.QueryWebPart.standardButtons.pageSize,
+                    //LABKEY.QueryWebPart.standardButtons.pageSize,
                     {
                         text: 'insert new',
                         url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.ActionURL.getContainer(),

@@ -387,7 +387,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap.put("schemaname", "study");
         rowMap.put("queryname", "feeding");
         rowMap.put("framework", "reactjs");
-        rowMap.put("container", getContainerId());
         insertCmd.addRow(rowMap);
 
         insertCmd.execute(cn, EHR_FOLDER_PATH);

@@ -52,6 +52,23 @@
                     <column columnName="remark">
                         <columnTitle>Remark</columnTitle>
                     </column>
+                    <column columnName="completed">
+                        <columnTitle>Review Completed</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="true"/>
+                                </filters>
+                                <backgroundColor>00CC33</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="false"/>
+                                </filters>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
                     <column columnName="taskid">
                         <columnTitle>Task Id</columnTitle>
                         <fk>

@@ -2,6 +2,7 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 require("ehr/triggers").initScript(this);
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
+    row.completed = !!row.completed;
     if (!row.ultrasound_id) {
         LABKEY.Query.selectRows({
             schemaName: 'study',

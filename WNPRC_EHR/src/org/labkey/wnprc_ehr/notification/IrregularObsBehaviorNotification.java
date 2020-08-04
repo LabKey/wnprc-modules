@@ -12,6 +12,7 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
@@ -153,12 +154,13 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     animalId.append("<a href='").append(hrefForAnimalAbstract).append("'>");
                     animalId.append(row.get("Id"));
                     animalId.append("</a>");
+                    HtmlString animalEncoded = HtmlString.of(animalId.toString());
 
                     msg.append(createTableBorder(behaviorsDashLength));
 
                     msg.append("<tr>");
                     msg.append("<td>|</td>");
-                    msg.append("<td>").append(animalId).append("</td>");
+                    msg.append("<td>").append(animalEncoded).append("</td>");
                     msg.append("<td>|</td>");
                     msg.append("<td>").append(row.get("roomattime")).append("</td>");
                     msg.append("<td>|</td>");
@@ -176,7 +178,9 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                 msg.append("</table>");
             }
         } catch (SQLException e) {
-            return new StringBuilder("<strong>There was an error retrieving the data. Please alert the IDS team.</strong>");
+            System.err.println("Error retrieving IrregularObs data: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return new StringBuilder("<strong>There was an error retrieving the data. Please alert the IDS team.</strong><br>");
         }
 
         StringBuilder queryParams = new StringBuilder();

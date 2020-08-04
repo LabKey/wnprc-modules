@@ -571,7 +571,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("linkCards")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF(CSRF.Method.POST)
     public class LinkCardAPI extends MutatingApiAction<CardLinkForm> {
         @Override
         public Object execute(CardLinkForm form, BindException errors) throws Exception {

@@ -16,4 +16,3 @@
 select Value
 from wnprc_r24.lookups
 where SetName = 'SampleTypes'
-ORDER BY SortOrder asc

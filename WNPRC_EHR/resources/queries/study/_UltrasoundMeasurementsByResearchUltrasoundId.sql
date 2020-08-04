@@ -6,4 +6,3 @@ SELECT
   um.measurement_unit
 FROM ultrasound_measurements um
 WHERE um.ultrasound_id = PARENT_RECORD_ID
-ORDER BY um.measurement_label ASC, um.measurement_value ASC

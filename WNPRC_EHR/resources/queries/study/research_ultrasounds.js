@@ -68,40 +68,6 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     }
 }
 
-// function onComplete(event, errors, helper) {
-//     let ultrasoundRows = helper.getRows();
-//     let validMeasurements = getValidMeasurements();
-//     let insertRows = [];
-//
-//     for (let i = 0; i < ultrasoundRows.length; i++) {
-//         let row = ultrasoundRows[i].row;
-//         for (let measurementName in validMeasurements) {
-//             if (validMeasurements.hasOwnProperty(measurementName)) {
-//                 if (row[measurementName] != null && row[measurementName].length > 0) {
-//                     console.log('row[measurementName] = ' + row[measurementName]);
-//                     let measurements = row[measurementName].replace(/[\s,]+/g, ' ').trim().split(' ');
-//                     measurements.forEach(function (measurement) {
-//                         console.log('Measurement: ' + measurement);
-//                         insertRows.push({
-//                             Id: row.Id,
-//                             date: row.date,
-//                             measurement_name: measurementName,
-//                             measurement_label: validMeasurements[measurementName].label,
-//                             measurement_value: measurement,
-//                             measurement_unit: validMeasurements[measurementName].unit,
-//                             ultrasound_id: row.objectid,
-//                             taskid: row.taskid
-//                         });
-//                         console.log('Insert Object: ' + JSON.stringify(insertRows));
-//                     });
-//                 }
-//             }
-//         }
-//     }
-//
-//     WNPRC.Utils.getJavaHelper().insertUltrasoundMeasurements(insertRows);
-// }
-
 // function setDescription(row, helper){
 //     let description = [];
 //

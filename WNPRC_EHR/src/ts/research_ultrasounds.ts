@@ -20,11 +20,17 @@ export class ResearchUltrasounds
      */
     private static readonly CHILD_RECORDS: ChildRecordConfiguration[] = [
         {   // ultrasound measurements
-            formName: 'Ultrasound Measurements',
+            formName: 'Research Ultrasounds',
             parametersFactory: ResearchUltrasounds.createQueryParams,
             queryName: '_UltrasoundMeasurementsByResearchUltrasoundId',
             schemaName: 'study',
             title: 'Ultrasound Measurements'
+        }, {// ultrasound review
+            formName: 'Research Ultrasounds Review',
+            parametersFactory: ResearchUltrasounds.createQueryParams,
+            queryName: '_UltrasoundReviewByResearchUltrasoundId',
+            schemaName: 'study',
+            title: 'Ultrasound Review'
         }];
 
     // </editor-fold>
@@ -37,7 +43,7 @@ export class ResearchUltrasounds
      * @param {String} objectId
      * @returns {{buttonBar: {items: (any | {text: string; url: any})[]}}}
      */
-    private static createDefaultButtonBar(formName: String, objectId: String)
+    private static createDefaultButtonBar(formName: String, objectId: String, taskid: String)
     {
         return {
             buttonBar: {
@@ -45,21 +51,21 @@ export class ResearchUltrasounds
                     LABKEY.QueryWebPart.standardButtons.exportRows,
                     LABKEY.QueryWebPart.standardButtons.print,
                     {
-                        text: 'insert new',
+                        text: 'insert new/update existing',
                         url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.ActionURL.getContainer(), {
                             formType: formName,
                             returnUrl: window.location,
-                            pregnancyid: objectId,
+                            taskid: taskid,
                         }),
-                    },
-                    {
-                        text: 'edit records',
-                        url: LABKEY.ActionURL.buildURL('ehr', 'updateQuery', LABKEY.ActionURL.getContainer(), {
-                            schemaName: 'study',
-                            'query.queryName': 'ultrasound_measurements',
-                            'query.ultrasound_id~eq': objectId
-                        }),
-                    }
+                    }//,
+                    // {
+                    //     text: 'edit records',
+                    //     url: LABKEY.ActionURL.buildURL('ehr', 'updateQuery', LABKEY.ActionURL.getContainer(), {
+                    //         schemaName: 'study',
+                    //         'query.queryName': 'ultrasound_measurements',
+                    //         'query.ultrasound_id~eq': objectId
+                    //     }),
+                    // }
                 ],
             },
         }
@@ -122,7 +128,7 @@ export class ResearchUltrasounds
 
     // noinspection JSMethodCanBeStatic,JSUnusedGlobalSymbols
     /**
-     * Entry point for the main polyfill. Renders the pregnancy grid (and possibly the details) and hooks up the browser
+     * Entry point for the main polyfill. Renders the research ultrasounds grid (and possibly the details) and hooks up the browser
      * history management using the popstate event
      * @param {string} gridElementId
      * @param {string} detailElementId
@@ -148,7 +154,7 @@ export class ResearchUltrasounds
         if (webpart.objectId)
         {
             const detailPanel = Ext4.create('WNPRC.ext4.ChildRecordsPanel', {
-                childRecords: ResearchUltrasounds.CHILD_RECORDS.map((c) => Ext4.apply(Ext4.apply({}, ResearchUltrasounds.createDefaultButtonBar(c.formName, webpart.objectId)), c)),
+                childRecords: ResearchUltrasounds.CHILD_RECORDS.map((c) => Ext4.apply(Ext4.apply({}, ResearchUltrasounds.createDefaultButtonBar(c.formName, webpart.objectId, webpart.taskid)), c)),
                 renderTo: webpart.wrapperDivId,
                 store: {
                     filterArray: [LABKEY.Filter.create('objectid', webpart.objectId, LABKEY.Filter.Types.EQUAL)],
@@ -156,7 +162,7 @@ export class ResearchUltrasounds
                     schemaName: 'study',
                     viewName: '_details',
                 },
-                title: 'Ultrasound Measurements',
+                title: 'Ultrasound Details',
             });
             detailPanel.on('childLoad', this.attachDetailClickHandler, this, {single: true});
         }
@@ -177,19 +183,21 @@ export class ResearchUltrasounds
     {
         $(`a[href*='${ResearchUltrasounds.DETAIL_PLACEHOLDER}']`).each((i, e) => {
             const id = (URI($(e).attr('href')).query(true) as any).Id;
+            const taskid = (URI($(e).attr('href')).query(true) as any).taskid;
             $(e).attr('href', 'javascript:void(0)')
-                .click(this.onDetailClick.bind(this, id));
+                .click(this.onDetailClick.bind(this, id, taskid));
         });
     }
 
     /**
-     * Handler for clicking the detail links in the pregnancy grid
+     * Handler for clicking the detail links in the research ultrasounds grid
      * @param {string | null} objectId
      */
-    private onDetailClick(objectId: string | null)
+    private onDetailClick(objectId: string | null, taskid: string | null)
     {
         ResearchUltrasounds.updateBrowserState('objectId', objectId);
-        this.renderWebpart(objectId);
+        ResearchUltrasounds.updateBrowserState('taskid', taskid);
+        this.renderWebpart(objectId, taskid);
     }
 
     /**
@@ -207,7 +215,7 @@ export class ResearchUltrasounds
     }
 
     /**
-     * Renders the pregnancy grid view based on the passed state (viewName/breedingId)
+     * Renders the research ultrasounds grid view based on the passed state
      * @param {UltrasoundState} state
      */
     private renderGrid(state: UltrasoundState)
@@ -219,8 +227,8 @@ export class ResearchUltrasounds
             filters.push(LABKEY.Filter.create('Id', state.subjects, LABKEY.Filter.Types.IN));
 
         // set up the view. if a view had been specified as part of the state, use that, otherwise check the
-        // subject filters. if there are subject filters, we probably want the full pregnancy history for those
-        // animals, otherwise leave it blank to get the current pregnancies
+        // subject filters. if there are subject filters, we probably want the full research ultrasound history for those
+        // animals, otherwise leave it blank to get the current research ultrasound
         const view = state.viewName || '';
 
         const x = new LABKEY.QueryWebPart({
@@ -240,7 +248,7 @@ export class ResearchUltrasounds
                     },
                 ],
             },
-            detailsURL: `/wnprc_ehr/${ResearchUltrasounds.DETAIL_PLACEHOLDER}\${objectid}`,
+            detailsURL: `/wnprc_ehr/${ResearchUltrasounds.DETAIL_PLACEHOLDER}\${objectid}&taskid=\${taskid}`,
             failure: LABKEY.Utils.onError,
             filterArray: filters,
             maxRows: 20,
@@ -250,7 +258,7 @@ export class ResearchUltrasounds
             success: (dr) => {
                 ResearchUltrasounds.updateBrowserState('viewName', dr.viewName);
                 this.attachDetailClickHandler();
-                this.renderWebpart(state.objectId);
+                this.renderWebpart(state.objectId, state.taskid);
             },
             title: 'Research Ultrasounds',
             viewName: view,
@@ -259,13 +267,14 @@ export class ResearchUltrasounds
     }
 
     /**
-     * Renders the detail webpart for the passed breeding encounter id (or clears it)
+     * Renders the detail webpart for the passed ultrasound id (or clears it)
      * @param {string | null} objectId
+     * @param {string | null} taskid
      */
-    private renderWebpart(objectId: string | null)
+    private renderWebpart(objectId: string | null, taskid: string | null)
     {
         const x = new LABKEY.WebPart({
-            partConfig: {objectId},
+            partConfig: {objectId, taskid},
             partName: 'Research Ultrasounds Detail',
             renderTo: this.detailElementId,
         });
@@ -307,21 +316,24 @@ interface DataSetRecord
 }
 
 /**
- * Browser state/get query parameters for loading the pregnancy grid/detail
+ * Browser state/get query parameters for loading the research ultrasounds grid/detail
  */
 interface UltrasoundState
 {
     objectId: string | null;
+    taskid:   string | null;
     viewName: string | null;
     subjects: string | null;
 }
 
 /**
- * Configuration object passed from the webpart config for the pregnancy detail webpart
+ * Configuration object passed from the webpart config for the research ultrasounds detail webpart
  */
 interface WebPartConfig
 {
     objectId: string | null;
+    taskId: string | null;
+    taskid: string | null;
     wrapperDivId: string;
 }
 

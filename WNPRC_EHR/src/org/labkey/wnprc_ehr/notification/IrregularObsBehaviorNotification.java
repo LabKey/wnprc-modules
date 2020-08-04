@@ -147,20 +147,21 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     Map<String, Object> row = rs.getRowMap();
                     String behaviors = getBehaviorString(behaviorCodesTableInfo, rs.getRowMap());
 
+                    HtmlString animalEncoded = HtmlString.of((String)row.get("Id"));
                     StringBuilder hrefForAnimalAbstract = new StringBuilder();
                     hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view")).toString();
-                    hrefForAnimalAbstract.append("?#subjects:").append(row.get("Id")).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
+                    hrefForAnimalAbstract.append("?#subjects:").append(animalEncoded).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
                     StringBuilder animalId = new StringBuilder();
                     animalId.append("<a href='").append(hrefForAnimalAbstract).append("'>");
-                    animalId.append(row.get("Id"));
+                    animalId.append(animalEncoded);
                     animalId.append("</a>");
-                    HtmlString animalEncoded = HtmlString.of(animalId.toString());
+
 
                     msg.append(createTableBorder(behaviorsDashLength));
 
                     msg.append("<tr>");
                     msg.append("<td>|</td>");
-                    msg.append("<td>").append(animalEncoded).append("</td>");
+                    msg.append("<td>").append(animalId).append("</td>");
                     msg.append("<td>|</td>");
                     msg.append("<td>").append(row.get("roomattime")).append("</td>");
                     msg.append("<td>|</td>");

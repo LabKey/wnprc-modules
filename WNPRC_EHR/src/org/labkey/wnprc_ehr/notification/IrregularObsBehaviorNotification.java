@@ -12,6 +12,7 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
@@ -146,13 +147,15 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     Map<String, Object> row = rs.getRowMap();
                     String behaviors = getBehaviorString(behaviorCodesTableInfo, rs.getRowMap());
 
+                    HtmlString animalEncoded = HtmlString.of((String)row.get("Id"));
                     StringBuilder hrefForAnimalAbstract = new StringBuilder();
                     hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view")).toString();
-                    hrefForAnimalAbstract.append("?#subjects:").append(row.get("Id")).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
+                    hrefForAnimalAbstract.append("?#subjects:").append(animalEncoded).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
                     StringBuilder animalId = new StringBuilder();
                     animalId.append("<a href='").append(hrefForAnimalAbstract).append("'>");
-                    animalId.append(row.get("Id"));
+                    animalId.append(animalEncoded);
                     animalId.append("</a>");
+
 
                     msg.append(createTableBorder(behaviorsDashLength));
 
@@ -176,7 +179,9 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                 msg.append("</table>");
             }
         } catch (SQLException e) {
-            return new StringBuilder("<strong>There was an error retrieving the data. Please alert the IDS team.</strong>");
+            System.err.println("Error retrieving IrregularObs data: " + e.getMessage());
+            e.printStackTrace(System.err);
+            return new StringBuilder("<strong>There was an error retrieving the data. Please alert the IDS team.</strong><br>");
         }
 
         StringBuilder queryParams = new StringBuilder();

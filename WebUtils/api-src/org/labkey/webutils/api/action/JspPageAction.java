@@ -4,6 +4,7 @@ import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.action.HasPageConfig;
 import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.PermissionCheckable;
+import org.labkey.api.action.PermissionCheckableAction;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.UnauthorizedException;
@@ -26,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  * controller handles populating the pageConfig and viewContext before calling handleRequest, calls handleRequest
  * to get the ModelAndView, and then calls render on the ModelAndView after handleRequest returns.
  */
-public abstract class JspPageAction implements Controller, HasViewContext, HasPageConfig, PermissionCheckable {
+public abstract class JspPageAction extends PermissionCheckableAction implements HasPageConfig {
     @Override
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         ModelAndView _pageView = getModelAndView(request, response);
@@ -53,13 +54,6 @@ public abstract class JspPageAction implements Controller, HasViewContext, HasPa
     ViewContext _viewContext;
     @Override public void setViewContext(ViewContext context) { _viewContext = context; }
     @Override public ViewContext getViewContext()             { return _viewContext; }
-
-    // The SpringActionController uses this method (part of PermissionCheckable) to check for permission to access
-    // the specified page.
-    @Override public void checkPermissions() throws UnauthorizedException {
-        //TODO: Implement this
-        return;
-    }
 
     public java.lang.Class getBaseClass() {
         return getModule().getClass();

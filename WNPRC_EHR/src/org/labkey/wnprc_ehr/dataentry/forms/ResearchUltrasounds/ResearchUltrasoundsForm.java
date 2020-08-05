@@ -11,7 +11,9 @@ import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.Res
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsInstructionsFormSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleTaskForm;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ResearchUltrasoundsForm extends SimpleTaskForm
 {
@@ -34,5 +36,25 @@ public class ResearchUltrasoundsForm extends SimpleTaskForm
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsServerStore.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsStoreCollection.js"));
         addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/fields/PregnancyIdField.js"));
+
+        setDisplayReviewRequired(true);
+    }
+
+    @Override
+    protected List<String> getButtonConfigs()
+    {
+        List<String> defaultButtons = new ArrayList<>();
+        defaultButtons.add("WNPRC_CANCEL");
+        defaultButtons.add("WNPRC_REVIEW");
+        return defaultButtons;
+    }
+
+    @Override
+    protected List<String> getMoreActionButtonConfigs() {
+        List<String> defaultButtons = new ArrayList<>();
+        //defaultButtons.add("WNPRC_FIX_QCSTATE");
+        //defaultButtons.add("DISCARD");
+        defaultButtons.add("VALIDATEALL");
+        return defaultButtons;
     }
 }

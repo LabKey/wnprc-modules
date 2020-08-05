@@ -141,6 +141,10 @@ function getValidMeasurements() {
             label: 'Head Circumference',
             unit: 'mm'
         },
+        occipital_frontal_diameter_mm: {
+            label: 'Occipital Frontal Diameter',
+            unit: 'mm'
+        },
         abdominal_circumference_mm: {
             label: 'Abdominal Circumference',
             unit: 'mm'
@@ -149,8 +153,16 @@ function getValidMeasurements() {
             label: 'Femur Length',
             unit: 'mm'
         },
-        ua_systolic_velocity_cms: {
-            label: 'Umbilical Artery Systolic Velocity',
+        ua_peak_systolic_velocity_cms: {
+            label: 'Umbilical Artery Peak Systolic Velocity',
+            unit: 'cm/s'
+        },
+        ua_end_systolic_velocity_cms: {
+            label: 'Umbilical Artery End Systolic Velocity',
+            unit: 'cm/s'
+        },
+        ua_peak_diastolic_velocity_cms: {
+            label: 'Umbilical Artery Peak Diastolic Velocity',
             unit: 'cm/s'
         },
         ua_end_diastolic_velocity_cms: {
@@ -185,12 +197,20 @@ function getValidMeasurements() {
             label: 'Middle Cerebral Artery Peak Systolic',
             unit: 'cm/s'
         },
+        mca_end_diastolic_cms: {
+            label: 'Middle Cerebral Artery End Diastolic',
+            unit: 'cm/s'
+        },
         mca_systolic_diastolic_ratio: {
             label: 'Middle Cerebral Artery Systolic/Diastolic',
             unit: ''
         },
         mca_pulsatility_index: {
             label: 'Middle Cerebral Artery Pulsatility Index',
+            unit: ''
+        },
+        mca_resistive_index: {
+            label: 'Middle Cerebral Artery Resistive Index',
             unit: ''
         },
         cardiac_circumference_mm: {
@@ -225,10 +245,10 @@ function getValidMeasurements() {
             label: 'Gestational Sac Diameter',
             unit: 'mm'
         },
-        yolk_sac_diameter_mm: {
-            label: 'Yolk Sac Diameter',
-            unit: 'mm'
-        },
+        nuchal_fold: {
+            label: 'Nuchal Fold',
+            unit: ''
+        }
     };
 
     return validMeasurements;

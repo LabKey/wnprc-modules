@@ -1,7 +1,8 @@
 package org.labkey.wnprc_ehr.email;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -33,7 +34,7 @@ import java.util.UUID;
  * contact an email server to interact with messages.
  */
 public class EmailServerConfig implements ConvertibleToJSON {
-    private static Logger _log = Logger.getLogger(EmailServerConfig.class);
+    private static Logger _log = LogManager.getLogger(EmailServerConfig.class);
     private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 
     // Primary Key, so should be final.

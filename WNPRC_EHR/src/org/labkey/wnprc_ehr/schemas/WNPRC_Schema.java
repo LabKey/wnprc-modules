@@ -1,7 +1,7 @@
 package org.labkey.wnprc_ehr.schemas;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,7 +47,7 @@ import java.util.Set;
  * Created by jon on 2/24/16.
  */
 public class WNPRC_Schema extends SimpleUserSchema {
-    private static Logger _log = Logger.getLogger(WNPRC_Schema.class);
+    private static Logger _log = LogManager.getLogger(WNPRC_Schema.class);
     public static final String NAME = "wnprc";
     public static String DESCRIPTION = "Schema for WNPRC specific data.";
     public Container _container;
@@ -153,7 +153,7 @@ public class WNPRC_Schema extends SimpleUserSchema {
             PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(propertyURI, ContainerManager.getSharedContainer());
             if (domainProperty == null) {
                 // The property doesn't exist, so we should create it
-                _log.log(Priority.INFO, String.format("The %s column doesn't exist on the %s table.  Creating it now.", systemProperty.getPropertyDescriptor().getName(), TissueSampleTable.TABLENAME));
+                _log.info(String.format("The %s column doesn't exist on the %s table.  Creating it now.", systemProperty.getPropertyDescriptor().getName(), TissueSampleTable.TABLENAME));
 
                 domainProperty = tissueSamplesDomain.addProperty();
                 domainProperty.setPropertyURI(pd.getPropertyURI());
@@ -161,7 +161,7 @@ public class WNPRC_Schema extends SimpleUserSchema {
                 domainProperty.setName(pd.getName());
             }
             else {
-                _log.log(Priority.INFO, String.format("The %s column already exists on the %s table.", systemProperty.getPropertyDescriptor().getName(), TissueSampleTable.TABLENAME));
+                _log.info(String.format("The %s column already exists on the %s table.", systemProperty.getPropertyDescriptor().getName(), TissueSampleTable.TABLENAME));
             }
         }
 

@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.bc;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.User;
@@ -16,7 +17,7 @@ import java.security.GeneralSecurityException;
  * Created by jon on 1/19/17.
  */
 public class BCReportManager {
-    private static Logger _log = Logger.getLogger(BCReportManager.class);
+    private static Logger _log = LogManager.getLogger(BCReportManager.class);
 
     Container studyContainer;
     User user;

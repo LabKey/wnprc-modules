@@ -15,7 +15,8 @@
  */
 package org.labkey.wnprc_ehr;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -131,7 +132,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     /**
      * Logger for logging the logs
      */
-    private static final Logger LOG = Logger.getLogger(WNPRC_EHRModule.class);
+    private static final Logger LOG = LogManager.getLogger(WNPRC_EHRModule.class);
 
     /**
      * Flag (from the JVM) to indicate we should force the module to re-run all updates

@@ -20,6 +20,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                         measurement_value: measurement,
                         measurement_unit: validMeasurements[measurementName].unit,
                         ultrasound_id: row.objectid,
+                        QCStateLabel: "Review Required",
                         taskid: row.taskid
                     });
                     measurementsToSave = true;
@@ -50,6 +51,7 @@ function onUpdate(helper, scriptErrors, row, oldRow) {
                     measurements_string: row[measurementName],
                     measurement_unit: validMeasurements[measurementName].unit,
                     ultrasound_id: row.objectid,
+                    QCStateLabel: row.QCStateLabel,
                     taskid: row.taskid
                 });
                 measurementsToUpdate = true;

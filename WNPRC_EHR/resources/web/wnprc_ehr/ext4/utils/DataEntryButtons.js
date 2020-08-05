@@ -100,6 +100,16 @@
     });
 
     /*
+     * This is a wrapper on the Submit For Review button to add the tooltip and change the success URL
+     * to the WNPRC data entry page, instead of the EHR one.
+     */
+    let SubmitForReviewButtonName = "WNPRC_REVIEW";
+    registerBtn(SubmitForReviewButtonName, _.extend(getBtn("REVIEW"), {
+        successURL:    getReturnURL() || LABKEY.ActionURL.buildURL('wnprc_ehr', 'dataEntry.view'),
+        tooltip:       "Set the status of this record to Review Required, save the record, and leave this page."
+    }));
+
+    /*
      * This is a wrapper on the Submit Final button to add the tooltip and change the success URL to
      * the WNPRC data entry page, instead of the EHR one.
      */

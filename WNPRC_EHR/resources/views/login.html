@@ -1,0 +1,50 @@
+<form class="auth-form" name="login" action="javascript:void(0)" method="post">
+    <div class="auth-header">Sign In</div>
+    <div class="labkey-error" id="errors"></div>
+    <div class="auth-form-body">
+        <label for="email">NetID or Email*</label>
+        <input id="email" name="email" type="text" class="input-block" tabindex="1" autocomplete="off">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" class="input-block" tabindex="2" autocomplete="off">
+        <input tabindex="3" type="checkbox" name="remember" id="remember"  checked> Remember my username
+        <div class="termsOfUseSection" hidden>
+            <div class="auth-header auth-item">Terms of Use</div>
+            <div class="toucontent auth-item termsOfUseContent"></div>
+            <div class="auth-item">
+                <input type="checkbox" tabindex="4" name="approvedTermsOfUse" id="approvedTermsOfUse" class="auth-item" unchecked>
+                <label for="approvedTermsOfUse">I agree to these terms</label>
+            </div>
+        </div>
+        <input type="hidden" name="termsOfUseType" id="termsOfUseType">
+        <div class="auth-item auth-credentials-submit">
+            <input type="submit" tabindex="-1" class="loginSubmitButton"/>
+            <a tabindex="5" class="labkey-button primary signin-btn"><span>Sign In</span></a>
+            <span class="registrationSection" hidden>
+                <a class="labkey-button" id="registerButton" href="login-register.view?">Register</a>
+            </span>
+        </div>
+        <div class="forgot-password-link" style="margin-top:10px">
+            <a href="https://www.mynetid.wisc.edu/recover/pwdreset" target="_blank">Forgot password?</a>
+        </div>
+        <div style="margin-top:10px">
+            <p>*Note: users that do not have a UW NetID should continue to use their full email to login.</p>
+        </div>
+        <div class="signing-in-msg" hidden>
+            <span class="fa fa-spinner fa-pulse"></span> Signing you in. This may take a moment.
+        </div>
+
+        <input type="hidden" name="returnUrl">
+        <input type="hidden" id="urlhash" name="urlhash">
+        <input type="hidden" name='X-LABKEY-CSRF'>
+    </div>
+</form>
+<div class="otherLoginMechanismsSection" hidden>
+    <div class="auth-header">Or Sign In using</div>
+    <div class="otherLoginMechanismsContent"></div>
+</div>
+
+<script type="application/javascript">
+    if (LABKEY.ActionURL.getParameter('returnUrl')) {
+        document.getElementById('registerButton').href += 'returnUrl=' + encodeURIComponent(LABKEY.ActionURL.getParameter('returnUrl'));
+    }
+</script>

@@ -148,6 +148,7 @@ public class TriggerScriptHelper {
                     newRow.put("measurement_unit", updatedRow.get("measurement_unit"));
                     newRow.put("ultrasound_id", updatedRow.get("ultrasound_id"));
                     newRow.put("taskid", updatedRow.get("taskid"));
+                    newRow.put("QCStateLabel", updatedRow.get("QCStateLabel"));
                     rowsToInsert.add(newRow);
                 }
             }

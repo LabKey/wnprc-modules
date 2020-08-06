@@ -162,6 +162,10 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     });
   };
 
+  console.log = function(message) {
+    document.getElementsByClassName("centered-wrapper")[0]['innerHTML'] = message;
+  };
+
   function triggerSubmit() {
     //do some validation here
     setSubmitTextBody("One moment. Performing validations...");
@@ -176,7 +180,9 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       /*let command = wasSaved || editMode ? "update" : "insert";*/
       setSubmitTextBody("Submitting...");
 
+      console.log(groupCommands(formData));
       let itemsToInsert = groupCommands(formData);
+      console.log(setupJsonData(itemsToInsert, "study", "feeding"));
       let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
 
       saveRowsDirect(jsonData)

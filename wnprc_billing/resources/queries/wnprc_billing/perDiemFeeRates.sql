@@ -31,7 +31,7 @@
     ci1.name AS item,
     ci1.chargeCategoryId.name AS category,
     pdt.comment,
-    ci1.departmentCode AS serviceCenter,
+    ci1.departmentCode AS groupName,
     pdt.tierRate AS tierRate,
     NULL AS isMiscCharge,
 
@@ -46,9 +46,9 @@
     (CASE WHEN pdt.account.isAcceptingCharges IS FALSE THEN 'N' END) AS isAcceptingCharges,
     (CASE WHEN (cr1.unitCost IS NULL OR cr1.unitCost = 0) THEN 'Y' ELSE null END) AS lacksRate,
     (CASE
-       WHEN pdt.account.investigatorId IS NOT NULL THEN pdt.account.investigatorId.lastName
-       WHEN pdt.project.investigatorId IS NOT NULL THEN pdt.project.investigatorId.lastName
-       ELSE NULL END) AS investigatorLastName,
+       WHEN pdt.account.investigatorId IS NOT NULL THEN pdt.account.investigatorId
+       WHEN pdt.project.investigatorId IS NOT NULL THEN pdt.project.investigatorId
+       ELSE NULL END) AS investigator,
     CASE WHEN (TIMESTAMPDIFF('SQL_TSI_DAY', pdt.adate, curdate()) > 45) THEN 'Y' ELSE null END AS isOldCharge,
     pdt.account.projectNumber
 

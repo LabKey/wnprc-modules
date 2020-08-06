@@ -32,6 +32,7 @@ import org.labkey.api.pipeline.AbstractSpecimenTransformTask;
 import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -46,6 +47,7 @@ import org.labkey.api.writer.ZipUtil;
 import org.labkey.wnprc_billing.domain.*;
 import org.labkey.wnprc_billing.invoice.InvoicePDF;
 import org.labkey.wnprc_billing.invoice.SummaryPDF;
+import org.labkey.wnprc_billing.query.WNPRC_BillingUserSchema;
 import org.springframework.validation.BindException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -58,6 +60,7 @@ import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +86,7 @@ public class WNPRC_BillingController extends SpringActionController
         TableInfo tableInfo = getEhrBillingSchema().getTable(WNPRC_BillingSchema.TABLE_INVOICED_ITEMS_FOR_PDF);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("invoiceNumber"), invoiceNumber);
-        TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort( "date,serviceCenter,id"));
+        TableSelector tableSelector = new TableSelector(tableInfo, filter,new Sort("date,groupName,id"));
         return tableSelector.getArrayList(InvoicedItem.class);
     }
 
@@ -100,7 +103,9 @@ public class WNPRC_BillingController extends SpringActionController
 
     private TierRate getTierRate(String tierRateType)
     {
-        TableInfo tableInfo = WNPRC_BillingSchema.getSchema().getTable(WNPRC_BillingSchema.TABLE_TIER_RATES);
+
+        UserSchema userSchema = QueryService.get().getUserSchema(getUser(), getContainer(), WNPRC_BillingSchema.NAME);
+        TableInfo tableInfo = userSchema.getTable(WNPRC_BillingSchema.TABLE_TIER_RATES);
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("tierRateType"), tierRateType);
         filter.addCondition(FieldKey.fromString("isActive"), true, CompareType.EQUAL);
@@ -528,6 +533,42 @@ public class WNPRC_BillingController extends SpringActionController
                     catch (IOException e)
                     {
                        throw new RuntimeException(e);
+                    }
+                });
+            }
+
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class DownloadSummaryInvoicesAction extends ExportAction<InvoicePdfForm>
+    {
+        @Override
+        public void export(InvoicePdfForm invoicePdfForm, HttpServletResponse response, BindException errors) throws Exception
+        {
+            Set<String> selectedInvoices = DataRegionSelection.getSelected(HttpView.currentContext(), null, true);
+
+            String currentDate = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
+            String headerString = "attachment; filename=Invoices "+ currentDate+ ".zip";
+
+            response.reset();
+            response.setContentType("application/zip");
+            response.setHeader("Content-Disposition", headerString);
+
+            try(ZipOutputStream zout = new ZipOutputStream(response.getOutputStream()))
+            {
+                selectedInvoices.forEach(invoiceNumber-> {
+                    try
+                    {
+                        PDFFile pdfFile = getInvoicePDF(invoiceNumber, "Download Summary Invoices");
+                        ZipEntry entry = new ZipEntry(pdfFile.getFileName());
+                        zout.putNextEntry(entry);
+                        pdfFile.getInvoicePDF().output(zout);
+                        zout.closeEntry();
+                    }
+                    catch (IOException e)
+                    {
+                        throw new RuntimeException(e);
                     }
                 });
             }

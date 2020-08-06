@@ -8,6 +8,7 @@
         <column name="sourceMaterial/liquid" />
         <column name="sampleType" />
         <column name="comment"/>
+        <column name="batched" />
         <column name="Run/RowId">
             <properties>
                 <property name="columnTitle" value="Run"/>

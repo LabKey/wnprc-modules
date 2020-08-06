@@ -46,7 +46,15 @@ public class WNPRC_BillingContainerListener implements ContainerListener
         {
             TableInfo tierRatesTable = WNPRC_BillingSchema.getInstance().getTierRates();
             if (tierRatesTable.getTableType() == DatabaseTableType.TABLE)
+            {
                 Table.delete(tierRatesTable, containerFilter);
+            }
+
+            TableInfo groupCategoryAssociations = WNPRC_BillingSchema.getInstance().getGroupCategoryAssociations();
+            if (groupCategoryAssociations.getTableType() == DatabaseTableType.TABLE)
+            {
+                Table.delete(groupCategoryAssociations, containerFilter);
+            }
 
             transaction.commit();
         }

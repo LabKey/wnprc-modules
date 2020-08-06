@@ -1,0 +1,50 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="ehr/ext3/ExtOverrides.js"/>
+        <script path="ehr/ext3/ehrMetaHelper.js"/>
+        <script path="ehr/ext3/Ext3Utils.js"/>
+        <script path="ehr/ext3/navMenu.js"/>
+        <script path="ehr/ext3/databind.js"/>
+        <script path="ehr/ext3/ehrStore.js"/>
+
+        <script path="ehr/ext3/ehrStoreCollection.js"/>
+        <script path="ehr/ext3/ehrEditorGridpanel.js"/>
+        <script path="ehr/ext3/ehrImportPanel.js"/>
+        <script path="ehr/ext3/ehrFormPanel.js"/>
+        <script path="ehr/ext3/ehrGridFormPanel.js"/>
+        <script path="ehr/ext3/ehrPrintTaskPanel.js"/>
+
+        <script path="ehr/ext3/ext.ux.multiselect.js"/>
+        <script path="ehr/ext3/ext.ux.datetimefield.js"/>
+        <script path="ehr/ext3/datetime.js"/>
+
+        <script path="ehr/ext3/ExtComponents.js"/>
+        <script path="ehr/ext3/ExtContainers.js"/>
+
+        <!--metadata-->
+        <script path="ehr/metadata/Metadata.js"/>
+        <script path="ehr/metadata/Anesthesia.js"/>
+        <script path="ehr/metadata/Assay.js"/>
+        <script path="ehr/metadata/Biopsy.js"/>
+        <script path="ehr/metadata/Default.js"/>
+        <script path="ehr/metadata/Encounter.js"/>
+        <script path="ehr/metadata/MPR.js"/>
+        <script path="ehr/metadata/Necropsy.js"/>
+        <script path="ehr/metadata/NewAnimal.js"/>
+        <script path="ehr/metadata/NWM_PE.js"/>
+        <script path="ehr/metadata/PE.js"/>
+        <script path="ehr/metadata/Request.js"/>
+        <script path="ehr/metadata/SimpleForm.js"/>
+        <script path="ehr/metadata/Surgery.js"/>
+        <script path="ehr/metadata/Task.js"/>
+        <script path="ehr/metadata/Treatments.js"/>
+    </library>
+    <dependencies>
+        <dependency path="clientapi/ext3"/>
+        <dependency path="LDK.context"/>
+        <dependency path="ehr/ehr_api"/>
+        <dependency path="Ext.ux.form.LovCombo.js"/>
+        <dependency path="Ext.ux.form.LovCombo.css"/>
+        <dependency path="StatusBar.js"/>
+    </dependencies>
+</libraries>

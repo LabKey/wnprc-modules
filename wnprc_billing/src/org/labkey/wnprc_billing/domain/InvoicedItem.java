@@ -18,7 +18,6 @@ public class InvoicedItem
     Date _date;
     TimeStamp _invoiceDate;
     private String _category;
-    private String _servicecenter;
 
     public int getRowId()
     {
@@ -128,16 +127,6 @@ public class InvoicedItem
     public void setCategory(String category)
     {
         _category = category;
-    }
-
-    public String getServicecenter()
-    {
-        return _servicecenter;
-    }
-
-    public void setServicecenter(String servicecenter)
-    {
-        _servicecenter = servicecenter;
     }
 
     public String getGroupName()

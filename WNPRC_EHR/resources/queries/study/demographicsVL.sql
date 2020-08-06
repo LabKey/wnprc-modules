@@ -5,11 +5,11 @@
  */
 SELECT
   v.Id,
-  max(v.ViralLoad) as MaxViralLoad,
-  min(v.ViralLoad) as MinViralLoad,
+  max(v.AverageViralLoad) as MaxViralLoad,
+  min(v.AverageViralLoad) as MinViralLoad,
   min(v.date) as FirstViralLoadDate,
   max(v.date) as LastViralLoadDate,
-  (select avg(v1.viralLoad) as viralLoad FROM study.ViralLoads v1 WHERE v1.Id=v.Id AND max(v.date)=v1.date) as LatestViralLoad
+  (select avg(v1.AverageViralLoad) as viralLoad FROM study.ViralLoads v1 WHERE v1.Id=v.Id AND max(v.date)=v1.date) as LatestViralLoad
 
 FROM study.ViralLoads v
 

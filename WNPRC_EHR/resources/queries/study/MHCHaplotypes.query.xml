@@ -11,47 +11,13 @@
                     <column columnName="date">
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
-
-
-
                     <column columnName="id">
-
                     </column>
-
                     <column columnName="Date">
-
                     </column>
-                    <column columnName="MHCHaplotypesConcatenated" wrappedColumnName="id">
-                        <columnTitle>Haplotypes Concatenated</columnTitle>
-                        <fk>
-                            <fkDbSchema>study</fkDbSchema>
-                            <fkTable>MHCHaplotypeConcatenated</fkTable>
-                            <fkColumnName>id</fkColumnName>
-                        </fk>
+                    <column columnName="ConcatenatedHaplotypes">
                     </column>
-                    <column columnName="mamuAHaplotype1">
-                        <url>/query/executeQuery.view?schemaName=lists&amp;
-                            query.queryName=rhesusHaplotypesDefinitions&amp;
-                            query.haplotype~eq=${mamuAHaplotype1}
-                        </url>
-                    </column>
-                    <column columnName="mamuAHaplotype2">
-                        <url>/query/executeQuery.view?schemaName=lists&amp;
-                            query.queryName=rhesusHaplotypesDefinitions&amp;
-                            query.haplotype~eq=${mamuAHaplotype2}
-                        </url>
-                    </column>
-                    <column columnName="mamuBHaplotype1">
-                        <url>/query/executeQuery.view?schemaName=lists&amp;
-                            query.queryName=rhesusHaplotypesDefinitions&amp;
-                            query.haplotype~eq=${mamuBHaplotype1}
-                        </url>
-                    </column>
-                    <column columnName="mamuBHaplotype2">
-                        <url>/query/executeQuery.view?schemaName=lists&amp;
-                            query.queryName=rhesusHaplotypesDefinitions&amp;
-                            query.haplotype~eq=${mamuBHaplotype2}
-                        </url>
+                    <column columnName="Phased">
                     </column>
 
                 </columns>

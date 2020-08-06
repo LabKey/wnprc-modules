@@ -8,6 +8,7 @@
         <column name="viralLoadScientific" />
         <column name="sourceMaterial/liquid" />
         <column name="sampleType" />
+        <column name="batched" />
         <column name="Run/RowId">
             <properties>
                 <property name="columnTitle" value="Run"/>

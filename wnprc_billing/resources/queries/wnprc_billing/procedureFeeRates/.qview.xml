@@ -8,13 +8,14 @@
         <column name="category"/>
         <column name="chargeId"/>
         <column name="comment"/>
-        <column name="serviceCenter"/>
+        <column name="groupName"/>
         <column name="unitCostDirect"/>
         <column name="quantity"/>
         <column name="totalCostDirect"/>
         <column name="tierRate"/>
         <column name="unitCost"/>
         <column name="totalCost"/>
+        <column name="performedby"/>
     </columns>
     <sorts>
         <sort column="date" descending="true" />

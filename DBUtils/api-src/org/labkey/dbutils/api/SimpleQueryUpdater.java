@@ -36,10 +36,77 @@ public class SimpleQueryUpdater {
         this.container = container;
     }
 
+    public List<CaseInsensitiveMapWrapper<Object>> insert(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
+        return this.insert(rows);
+    }
+
+    public List<CaseInsensitiveMapWrapper<Object>> update(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, BatchValidationException, InvalidKeyException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
+        return this.update(rows);
+    }
+
     public List<CaseInsensitiveMapWrapper<Object>> upsert(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
         List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
         return this.upsert(rows);
     }
+
+    /**
+     * Inserts a row into the table. It does the entire thing as a transaction, so any failure
+     * will result in no data being inserted.
+     *
+     * @param rows A "list" of {@link Map<String, Object>} objects that represent rows.  Note that these can
+     *      be {@link JSONObject}s, if you so choose.
+     * @return A {@link List<CaseInsensitiveMapWrapper>} of the rows that were inserted.  They will have all been
+     *      converted to be case-insensitive, and will include any fields that were added/changed automatically
+     *      by the INSERT or trigger scripts.
+     * @throws QueryUpdateServiceException Indicates an internal error in the QueryUpdateService
+     * @throws SQLException Indicates a communication problem with the SQL database
+     * @throws BatchValidationException Thrown if the trigger scripts throw an error on any row
+     * @throws DuplicateKeyException Thrown if there is already a row in the table with the same key
+     */
+    public List<CaseInsensitiveMapWrapper<Object>> insert(List<Map<String, Object>> rows) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException {
+        rows = makeRowListCaseInsensitive(rows);
+        List<CaseInsensitiveMapWrapper<Object>> rowsToReturn = new ArrayList<>();
+
+        // Wrap everything in a transaction to make INSERT operations atomic together.
+        try(DbScope.Transaction transaction = tableInfo.getSchema().getScope().ensureTransaction()) {
+            rowsToReturn.addAll(getCaseInsensitiveRowList(doInsert(rows)));
+
+            // Actually commit the changes.
+            transaction.commit();
+        }
+        return rowsToReturn;
+    }
+
+    /**
+     * Updates a row in the table. It does the entire thing as a transaction, so any failure
+     * will result in no data being updated.
+     *
+     * @param rows A "list" of {@link Map<String, Object>} objects that represent rows.  Note that these can
+     *      be {@link JSONObject}s, if you so choose.
+     * @return A {@link List<CaseInsensitiveMapWrapper>} of the rows that were updated.  They will have all been
+     *      converted to be case-insensitive, and will include any fields that were added/changed automatically
+     *      by the UPDATE or trigger scripts.
+     * @throws QueryUpdateServiceException Indicates an internal error in the QueryUpdateService
+     * @throws SQLException Indicates a communication problem with the SQL database
+     * @throws InvalidKeyException Thrown if the key in an updated row doesn't exist in the table
+     * @throws BatchValidationException Thrown if the trigger scripts throw an error on any row
+     */
+    public List<CaseInsensitiveMapWrapper<Object>> update(List<Map<String, Object>> rows) throws QueryUpdateServiceException, SQLException, BatchValidationException, InvalidKeyException {
+        rows = makeRowListCaseInsensitive(rows);
+        List<CaseInsensitiveMapWrapper<Object>> rowsToReturn = new ArrayList<>();
+
+        // Wrap everything in a transaction to make UPDATE operations atomic together.
+        try(DbScope.Transaction transaction = tableInfo.getSchema().getScope().ensureTransaction()) {
+            rowsToReturn.addAll(getCaseInsensitiveRowList(doUpdate(rows)));
+
+            // Actually commit the changes.
+            transaction.commit();
+        }
+        return rowsToReturn;
+    }
+
 
 
     /**
@@ -84,44 +151,47 @@ public class SimpleQueryUpdater {
 
         // Wrap everything in a transaction to make both UPDATE and INSERT operations atomic together.
         try(DbScope.Transaction transaction = tableInfo.getSchema().getScope().ensureTransaction()) {
-            BatchValidationException validationException = new BatchValidationException();
-
-            if (rowsToInsert.size() > 0) {
-                List<Map<String, Object>> insertedRows = service.insertRows(user, container, rowsToInsert, validationException, null, null);
-
-                if (validationException.hasErrors()) {
-                    throw validationException;
-                }
-                // From my understanding, this shouldn't really happen, if you're checking the BatchValidationException.
-                // Otherwise, the QueryUpdateService has a tendency to insert as much as it can, and not throw an error
-                // for the rows that it couldn't.
-                else if (insertedRows.size() != rowsToInsert.size()) {
-                    throw new QueryUpdateServiceException("Not all rows were inserted properly");
-                }
-                else {
-                    rowsToReturn.addAll(getCaseInsensitiveRowList(insertedRows));
-                }
-            }
-
-            if (rowsToUpdate.size() > 0) {
-                List<Map<String, Object>> updatedRows = service.updateRows(user, container, rowsToUpdate, rowsToUpdate, null, null);
-
-                if (updatedRows.size() != rowsToUpdate.size()) {
-                    throw new QueryUpdateServiceException("Not all rows updated properly");
-                }
-                else {
-                    rowsToReturn.addAll(getCaseInsensitiveRowList(updatedRows));
-                }
-            }
+            rowsToReturn.addAll(getCaseInsensitiveRowList(doInsert(rowsToInsert)));
+            rowsToReturn.addAll(getCaseInsensitiveRowList(doUpdate(rowsToUpdate)));
 
             // Actually commit the changes.
             transaction.commit();
         }
-
         return rowsToReturn;
     }
 
-    public List<CaseInsensitiveMapWrapper<Object>> delete(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException, DuplicateKeyException {
+    public List<Map<String, Object>> doInsert(List<Map<String, Object>> rows) throws BatchValidationException , DuplicateKeyException, SQLException, QueryUpdateServiceException{
+        List<Map<String, Object>> insertedRows = new ArrayList<>();
+        if (rows.size() > 0) {
+            BatchValidationException validationException = new BatchValidationException();
+            insertedRows = service.insertRows(user, container, rows, validationException, null, null);
+
+            if (validationException.hasErrors()) {
+                throw validationException;
+            }
+            // From my understanding, this shouldn't really happen, if you're checking the BatchValidationException.
+            // Otherwise, the QueryUpdateService has a tendency to insert as much as it can, and not throw an error
+            // for the rows that it couldn't.
+            else if (insertedRows.size() != rows.size()) {
+                throw new QueryUpdateServiceException("Not all rows were inserted properly");
+            }
+        }
+        return insertedRows;
+    }
+
+    public List<Map<String, Object>> doUpdate(List<Map<String, Object>> rows) throws BatchValidationException , InvalidKeyException, SQLException, QueryUpdateServiceException {
+        List<Map<String, Object>> updatedRows = new ArrayList<>();
+        if (rows.size() > 0) {
+            updatedRows = service.updateRows(user, container, rows, rows, null, null);
+
+            if (updatedRows.size() != rows.size()) {
+                throw new QueryUpdateServiceException("Not all rows updated properly");
+            }
+        }
+        return updatedRows;
+    }
+
+    public List<CaseInsensitiveMapWrapper<Object>> delete(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
         List<Map<String, Object>> rowsToDelete = makeRowsCaseInsensitive(rowArray);
         List<CaseInsensitiveMapWrapper<Object>> rowsToReturn = new ArrayList<>();
 

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<query xmlns="http://labkey.org/data/xml/query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://labkey.org/data/xml ../../../../../../schemas/tableInfo.xsd">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="ultrasounds" tableDbType="TABLE">
+                <columns>
+                    <column columnName="Id"/>
+                    <column columnName="date"/>
+                    <column columnName="pregnancyid">
+                        <columnTitle>Pregnancy (Conc. Date)</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>pregnancyConceptionDate</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                            <fkDisplayColumnName>date_conception</fkDisplayColumnName>
+                        </fk>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="project"/>
+                    <column columnName="restraint"/>
+                    <column columnName="fetal_heartbeat"/>
+                    <column columnName="beats_per_minute"/>
+                    <column columnName="gest_sac_mm"/>
+                    <column columnName="gest_sac_gest_day"/>
+                    <column columnName="crown_rump_mm"/>
+                    <column columnName="crown_rump_gest_day"/>
+                    <column columnName="biparietal_diameter_mm"/>
+                    <column columnName="biparietal_diameter_gest_day"/>
+                    <column columnName="femur_length_mm"/>
+                    <column columnName="femur_length_gest_day"/>
+                    <column columnName="yolk_sac_diameter_mm"/>
+                    <column columnName="head_circumference_mm"/>
+                    <column columnName="code">
+                        <columnTitle>SNOMED</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="remark"/>
+                    <column columnName="performedby">
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="followup_required"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

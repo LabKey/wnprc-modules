@@ -6,9 +6,9 @@ SELECT DISTINCT
   misc.billingDate,
   misc.project,
   coalesce(misc.debitedaccount, misc.project.account) AS debitedAccount,
-  misc.chargetype,
+  misc.chargetype, --adjustment or reversal
   misc.chargeId,
-  misc.chargeCategory, --adjustment or reversal
+  misc.chargeGroup,
   misc.objectid AS sourceRecord,
   misc.comment,
   misc.objectid,

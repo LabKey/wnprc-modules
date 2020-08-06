@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<query xmlns="http://labkey.org/data/xml/query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://labkey.org/data/xml ../../../../../../schemas/tableInfo.xsd">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="pregnancy_outcomes" tableDbType="TABLE">
+                <columns>
+                    <column columnName="Id"/>
+                    <column columnName="outcome">
+                        <columnTitle>Outcome</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>birth_type</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>description</fkDisplayColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Delivery Date</columnTitle>
+                    </column>
+                    <column columnName="pregnancyid">
+                        <columnTitle>Pregnancy (Conc. Date)</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>pregnancies</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                            <fkDisplayColumnName>date_conception</fkDisplayColumnName>
+                        </fk>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="infantid"/>
+                    <column columnName="rejected"/>
+                    <column columnName="protected"/>
+                    <column columnName="project">
+                        <columnTitle>Offered To</columnTitle>
+                    </column>
+                    <column columnName="remark"/>
+                    <column columnName="performedby">
+                        <nullable>false</nullable>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

@@ -818,7 +818,7 @@
                                         d3.select(this).style('stroke', 'red').style('stroke-width', 2);
 
                                         var formatDate = function (dateString) {
-                                            if (dateString === '') {
+                                            if (!dateString || dateString === '') {
                                                 dateString = new Date();
                                             }
                                             return (new Date(dateString)).format('M d, Y');
@@ -827,6 +827,7 @@
                                         if (!VM.selectedAssignmentItem.stuck()) {
                                             var rawRow = d.row();
                                             VM.selectedAssignmentItem.startDate(formatDate(rawRow.date()));
+                                            console.log(rawRow.enddate());
                                             VM.selectedAssignmentItem.endDate(formatDate(rawRow.enddate()));
                                             VM.selectedAssignmentItem.code(rawRow['project/avail']());
                                             VM.selectedAssignmentItem.description(d.availDesc());
@@ -1005,7 +1006,7 @@
                                         d3.select(this).style('stroke', 'red').style('stroke-width', 2);
 
                                         var formatDate = function (dateString) {
-                                            if (dateString === '') {
+                                            if (!dateString || dateString === '') {
                                                 dateString = new Date();
                                             }
                                             return (new Date(dateString)).format('M d, Y');
@@ -1016,6 +1017,7 @@
                                             VM.selectedHousingItem.cage(d.cage());
                                             VM.selectedHousingItem.room(d.room());
                                             VM.selectedHousingItem.startDate(formatDate(rawRow.date()));
+                                            console.log(rawRow.enddate());
                                             VM.selectedHousingItem.endDate(formatDate(rawRow.enddate()));
                                             VM.selectedHousingItem.description(d.housingDesc());
                                             VM.selectedHousingItem.reason(d.housingReason());

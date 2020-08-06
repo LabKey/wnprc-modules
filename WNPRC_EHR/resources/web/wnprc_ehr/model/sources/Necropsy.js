@@ -125,8 +125,36 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
                     plugins: ['ldk-usereditablecombo']
                 }
             },
-            pathologist: {
-                hidden: true // WNPRC uses performedby instead of the pathologist field.
+            pathologistHistology: {
+                xtype: 'combo',
+                allowBlank: true,
+                hasOwnTpl: true,
+                hidden: false,
+                lookup: {
+                    schemaName: 'ehr_lookups',
+                    queryName: 'pathologists',
+                    displayColumn: 'UserId',
+                    keyColumn: 'UserId'
+                },
+                editorConfig: {
+                    plugins: ['ldk-usereditablecombo']
+                }
+            },
+            pathologistReview: {
+                xtype: 'combo',
+                allowBlank: true,
+                hasOwnTpl: true,
+                hidden: false,
+                lookup: {
+                    schemaName: 'ehr_lookups',
+                    queryName: 'pathologists',
+                    displayColumn: 'UserId',
+                    keyColumn: 'UserId'
+                },
+                editorConfig: {
+                    plugins: ['ldk-usereditablecombo']
+                }
+
             },
             comments: {
                 hidden: true // WNPRC uses remarks instead

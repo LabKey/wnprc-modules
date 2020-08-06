@@ -1,0 +1,1 @@
+ALTER TABLE wnprc_billing.tierRates DROP COLUMN isActive;

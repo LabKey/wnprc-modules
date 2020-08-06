@@ -1,682 +1,696 @@
 <script type="text/javascript">
 
-Ext.onReady(function(){
-    EHR.Security.init({
-        success: onSuccess,
-        scope: this
-    });
+    var webpartContext = <%=webpartContext%>;
 
-    var webpart = <%=webpartContext%>;
-    var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
-    if(!ctx) {
-        return;
-    }
+    Ext4.define('WNPRC_EHR.panel.EnterDataPanel', {
+                extend: 'LABKEY.ext4.BootstrapTabPanel',
 
-    var dataEntryMenuDivId = 'dataEntryMenuDiv_' + webpart.wrapperDivId;
-    var taskTabPanelDivId  = 'ehrTasks_' + webpart.wrapperDivId;
-    var wrapperDivElement  = Ext.get(webpart.wrapperDivId);
-
-    // Add the two container divs for the task tabpanel and list of data entry options.
-    Ext.DomHelper.append(wrapperDivElement, [
-        {
-            tag:   'div',
-            id:    dataEntryMenuDivId,
-            style: 'padding-bottom: 10px;'
-        },
-        {
-            tag:   'div',
-            id:    taskTabPanelDivId,
-            style: 'padding-bottom: 10px;'
-        }
-    ]);
-
-    var baseURL = "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'];
-
-    var makeURL = function(view, params) {
-        var paramArray = [];
-        jQuery.each(params, function(key, value) {
-            paramArray.push( encodeURIComponent(key) + "=" + encodeURIComponent(value));
-        });
-
-        return baseURL + "/" + view + ".view?" + paramArray.join("&")
-    };
-
-    var makeRequestDataEntryURL = function(formName, params) {
-        params = params || {};
-        params.formtype = formName;
-        return makeURL("manageRequest", params);
-    };
-
-    var makeExt4DataEntryURL = function(formName, params) {
-        params = params || {};
-        params.formType = formName;
-        params.returnURL = LABKEY.ActionURL.buildURL("wnprc_ehr", "dataEntry");
-
-        return makeURL("dataEntryForm", params);
-    };
-
-    var makeTaskDataEntryURL = function(formName, params) {
-        params = params || {};
-        params.formtype = formName;
-        return makeURL("manageTask", params);
-    };
-
-
-    function onSuccess(){
-        var menuCfg = {
-            renderTo: 'dataEntryMenuDiv_'+webpart.wrapperDivId,
-            bodyStyle: 'background-color: transparent;',
-            defaults: {
-                bodyStyle: 'background-color: transparent;',
-                style: 'background-color: transparent;'
-            },
-            renderer: function(item){
-                return {
-                    html: '<a href="'+item.url+'">'+item.title+'</a>',
-                    style: 'padding-left:5px;background-color: transparent;'
-                }
-            },
-            additionalSectionStyle: "float: left;"
-        };
-
-        menuCfg.sections = [
-            {
-                header: 'Clinical / SPI',
-                items: [
-                    {
-                        url: makeTaskDataEntryURL("Blood Draws"),
-                        title: 'Enter Blood Draws',
-                        queries: ['Blood Draws']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Clinical%20Remarks&keyField=lsid",
-                        title: 'Enter Clinical Remark',
-                        queries: ['Clinical Remarks']
-                    },
-                    {
-                        url:     "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Feeding&keyField=lsid",
-                        title:   'Enter/Manage Feeding Orders',
-                        queries: ['Feeding']},
-                    {
-                        url:     makeTaskDataEntryURL("Irregular Observations"),
-                        title:   'Enter Irregular Observations',
-                        queries: ['Irregular Observations']
-                    },
-                    {
-                        url:     makeTaskDataEntryURL("In Room"),
-                        title:   'Enter In Rooms',
-                        queries: ['Irregular Observations']
-                    },
-                    {
-                        url:     makeTaskDataEntryURL("MPR"),
-                        title:   'Enter MPR',
-                        queries: ['Drug Administration']
-                    },
-                    {
-                        url:     makeTaskDataEntryURL("MPR") + "&useSnomedCodes=1",
-                        title:   'Enter MPR (using SNOMED codes)',
-                        queries: ['Drug Administration']
-                    },
-                    {
-                        url: makeURL("manageRecord", {
-                            schemaName: 'study',
-                            queryName:  'Notes',
-                            keyField:   'lsid'
-                        }),
-                        title: 'Enter Note',
-                        queries: ['Notes']
-                    },
-                    {
-                        url:     makeTaskDataEntryURL("Physical Exam"),
-                        title:   'Enter Physical Exam (OWM)',
-                        queries: ['Alopecia','Clinical Remarks']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("Physical Exam - NWM"),
-                        title: 'Enter Physical Exam (NWM)',
-                        queries: ['Alopecia','Clinical Remarks']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("Problem List"),
-                        title: 'Enter Problem',
-                        queries: ['Problem List']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("Surgery"),
-                        title: 'Enter Surgery',
-                        queries: ['Clinical Encounters','Clinical Remarks']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("Surgery") + "&useSnomedCodes=1",
-                        title: 'Enter Surgery (using SNOMED codes)',
-                        queries: ['Clinical Encounters','Clinical Remarks']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("TB Tests"),
-                        title: 'Enter TB Tests',
-                        queries: ['TB Tests']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("Treatments"),
-                        title: 'Enter Treatments',
-                        queries: ['Drug Administration']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("Treatment Orders"),
-                        title: 'Enter Treatment Order',
-                        queries: ['Treatment Orders']
-                    },
-                    {
-                        url: makeTaskDataEntryURL("Weight"),
-                        title: 'Enter Weights',
-                        queries: ['Weight']
-                    },
-                    {
-                        url: makeExt4DataEntryURL("Food Deprive Start"),
-                        title: 'Enter Start Food Deprives',
-                        queries: ['foodDeprives']
-                    },
-                    {
-                        url: makeExt4DataEntryURL("Food Deprive Complete"),
-                        title: 'Enter Complete Food Deprives',
-                        queries: ['foodDeprives']
-                    },
-                    {
-                        url: makeExt4DataEntryURL("Breeding Encounter"),
-                        title: 'Enter Breeding/Pregnancy',
-                        queries: ['Breeding Encounters']
-                    }
-                ]
-            },
-            {
-                header: 'Colony Records',
-                items: [
-                    {
-                        url: makeTaskDataEntryURL("Arrival"),
-                        title: 'Enter Arrivals',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Arrival']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Assignment&keyField=lsid",
-                        title: 'Enter/Manage Assignments',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Assignment']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Birth",
-                        title: 'Enter Births',
-                        queries: ['Birth']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Demographics&keyField=lsid",
-                        title: 'Enter/Manage Demographics',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Demographics']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Departure&keyField=lsid",
-                        title: 'Enter Departures',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Departure']
-                    },
-                    {
-                        permission: 'admin',
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR",
-                        title: 'Enter Multi-Animal MPR',
-                        queries: ['Drug Administration']
-                    },
-                    {
-                        permission: 'admin',
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR&useSnomedCodes=1",
-                        title: 'Enter Multi-Animal MPR (using SNOMED codes)',
-                        queries: ['Drug Administration']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Project&keyField=project",
-                        title: 'Enter/Manage Projects',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Assignment']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Protocol&keyField=protocol",
-                        title: 'Enter/Manage Protocols',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Assignment']
-                    },
-                    {
-                        url: makeExt4DataEntryURL("protocol",{
-                            schemaName: 'ehr',
-                            queryName:  'protocol',
-                            keyField:   'protocol'
-                        }),
-                        title: 'New Enter/Manage Protocols',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries:['Assignment']
-
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=SimpleRemark&title=Remark",
-                        title: 'Enter Simple Remark',
-                        queries: ['Clinical Remarks']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=supplemental_pedigree&keyField=rowid",
-                        title: 'Enter/Manage Supplemental Pedigree',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Demographics']
-                    }
-                ]
-            },
-            {
-                header: 'Behavior / Colony Management',
-                items: [
-                    {
-                        url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'AssignBehaviorProjects'),
-                        title: 'Enter/Manage Behavior Assignments',
-                        qcstate: 'Completed',
-                        // This really should check for the "EHR Behavior Services" role, but there's no good way to
-                        // do that, so this'll get approximately the same result.  In any case, this page handles users
-                        // without permissions just fine, so any users who get access to this accidentally won't matter.
-                        queries: ['Behavior Abstract']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Behavior Abstract",
-                        title: 'Enter Behavior Abstract',
-                        queries: ['Behavior Abstract']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Behavior Remarks&keyField=lsid",
-                        title: 'Enter Behavior Remark',
-                        queries: ['Behavior Remarks']
-                    },
-                    {
-                        url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Housing",
-                        title: 'Enter Housing Change',
-                        qcstate: 'Completed',
-                        permission: 'admin',
-                        queries: ['Housing']
-                    }
-                ]
-            },
-            {
-                header: 'Pathology / Clinpath',
-                items: [
-                    {
-                        url:     makeTaskDataEntryURL("Biopsy"),
-                        title:   'Enter Biopsy',
-                        queries: ['Biopsies']
-                    },
-                    {
-                        url:     makeTaskDataEntryURL("Clinpath"),
-                        title:   'Enter Clinpath Results',
-                        queries: ['Clinpath Runs'],
-                        qcstate: 'Completed'
-                    },
-                    {
-                        url:     makeTaskDataEntryURL("Death"),
-                        title:   'Enter Death Record',
-                        queries: ['Deaths']
-                    },
-                    {
-                        url:     makeExt4DataEntryURL("Necropsy"),
-                        title:   'Enter Necropsy',
-                        queries: ['Necropsies']
-                    },
-                    {
-                        url:     makeURL("manageRecord", { schemaName: 'study', queryName: 'Prenatal Deaths', keyField: 'lsid' }),
-                        title:   'Enter Prenatal Death',
-                        queries: ['Prenatal Deaths']
-                    }
-                ]
-            },
-            {
-                header: 'Requests',
-                items: [
-                    {
-                        url:     makeRequestDataEntryURL("Blood Draw Request"),
-                        title:   'Request Blood Draws',
-                        queries: ['Blood Draws']
-                    },
-                    {
-                        url:     makeRequestDataEntryURL("Clinpath Request"),
-                        title:   'Request Clinpath Services',
-                        queries: ['Clinpath Runs']
-                    },
-                    {
-                        url:     makeExt4DataEntryURL("NecropsyRequest"),
-                        title:   'Request Necropsy',
-                        queries: ['Necropsies']
-                    },
-                    {
-                        url: makeExt4DataEntryURL("VVCRequest"),
-                        title: 'Request VVC',
-                        queries: ['blood']
-                    },
-                    {
-                        url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'NecropsySchedule', ctx['EHRStudyContainer']),
-                        title:   'Schedule Necropsy',
-                        queries: ['Necropsies']
-                    },
-                    {
-                        url:  makeExt4DataEntryURL("Food Deprive Request"),
-                        title: 'Request Food Deprives',
-                        queries: ['foodDeprives']
-                    }
-                ],
-                requests: true
-            }
-        ];
-
-        menuCfg.sections = menuCfg.sections.filter(function(section) {
-            var qcState = (section.requests) ? 'Request: Pending' : 'In Progress';
-
-            section.items = section.items || [];
-
-            // Filter out any forms that we don't have permission to insert into.
-            section.items = section.items.filter(function(item) {
-                item.qcstate = item.qcstate || qcState;
-                item.permission = item.permission || 'insert';
-                return EHR.Security.hasPermission(item.qcstate, item.permission, item.queries.map(function(queryName) {
-                    return {
-                        schemaName: 'study',
-                        queryName:  queryName
-                    };
-                }));
-            });
-
-            return section.items.length > 0;
-        });
-
-        new EHR.ext.NavMenu(menuCfg).render();
-
-        //only give a task manager if they have access to at least 1 form
-        if(menuCfg.sections.length){
-            function onActivate(t){
-                this.ownerCt.ownerCt.ownerCt.ownerCt.loadTab(t);
-            }
-
-            var clinpathUpdateURL = '';
-            var clinpathInsertURL = '';
-            var clinpathDeleteURL = '';
-
-            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Clinpath Runs', schemaName: 'study'})){
-                clinpathUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&key=${lsid}&update=1';
-                clinpathInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&update=1';
-                clinpathDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Clinpath Runs';
-            }
-
-            var bloodUpdateURL = '';
-            var bloodInsertURL = '';
-            var bloodDeleteURL = '';
-
-            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
-                bloodUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&key=${lsid}&update=1';
-                bloodInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&update=1';
-                bloodDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Blood Draws';
-            }
-
-            var VVCUpdateURL = '';
-            var VVCDeleteURL = '';
-
-            if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
-                VVCUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
-                VVCDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
-            }
-
-            function onSuccess(dr){
-                var width1 = Ext.get(dr.domId).getSize().width + 50;
-                var width2 = Ext.get(taskpanel.id).getSize().width;
-
-                if(width1 > width2){
-                    console.log(width1+'/'+width2)
-                    taskpanel.setWidth(width1+80);
-                    console.log('resizing')
-                }
-                else {
-                    taskpanel.setWidth('100%');
-                }
-            }
-
-            var taskpanel = new Ext.Panel({
                 border: false,
                 autoHeight: true,
                 layout: 'anchor',
                 width: '100%',
                 boxMinWidth: 1000,
-                loadTab: function(t){
-                    if(this.parentTabPanel){
+
+                clinpathUpdateURL: '',
+                clinpathInsertURL: '',
+                clinpathDeleteURL: '',
+
+                bloodUpdateURL: '',
+                bloodInsertURL: '',
+                bloodDeleteURL: '',
+
+                vvcUpdateURL: '',
+                vvcDeleteURL: '',
+
+                animalRequestUpdateURL: '',
+                animalRequestDeleteURL: '',
+
+                initComponent: function() {
+
+
+                    if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Clinpath Runs', schemaName: 'study'})){
+                        this.clinpathUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&key=${lsid}&update=1';
+                        this.clinpathInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Clinpath Runs&keyField=lsid&update=1';
+                        this.clinpathDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Clinpath Runs';
+                    }
+
+                    if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
+                        this.bloodUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&key=${lsid}&update=1';
+                        this.bloodInsertURL = '/ehr/manageRecord.view?schemaName=study&queryName=Blood Draws&keyField=lsid&update=1';
+                        this.bloodDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=Blood Draws';
+                    }
+
+                    if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
+                        this.vvcUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=vvc&keyField=rowid&key=${rowid}&update=1';
+                        this.vvcDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=vvc';
+                    }
+
+                    if (EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'vvc', schemaName: 'wnprc'})){
+                        this.animalRequestUpdateURL = '/ehr/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=${rowid}&update=1';
+                        this.animalRequestDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=animal_requests';
+                    }
+
+                    this.items = this.getItems();
+
+                    this.callParent();
+                },
+
+                loadTab: function (t) {
+                    if (this.parentTabPanel) {
                         var topTab = this.parentTabPanel.getActiveTab();
-                        if(topTab){
+                        if (topTab) {
                             var bottomTab = topTab.getActiveTab();
-                            if(bottomTab)
-                                Ext.History.add('topTab:'+topTab.itemId+'&activeReport:'+bottomTab.itemId);
+                            if (bottomTab)
+                                Ext4.History.add('topTab:' + topTab.itemId + '&activeReport:' + bottomTab.itemId);
                         }
                     }
                 },
-                restoreFromUrl: function(){
-                    if(document.location.hash){
+                restoreFromUrl: function () {
+                    if (document.location.hash) {
                         var token = document.location.hash.split('#');
-                        token = token[1].split('&');
-                        var topTab;
-                        var activeReport;
-                        for (var i=0;i<token.length;i++){
-                            var t = token[i].split(':');
-                            switch(t[0]){
-                                case 'activeReport':
-                                    activeReport = t[1];
-                                    break;
-                                case 'topTab':
-                                    topTab = t[1];
-                                    break;
-                            }
+                        if (token.length > 0) {
+                            // this.setActiveTab(token);
                         }
                     }
+                },
 
-                    if(topTab){
-                        this.parentTabPanel.setActiveTab(topTab);
-                        if(activeReport && this.parentTabPanel[topTab])
-                            this.parentTabPanel[topTab].setActiveTab(activeReport);
+                onSuccessResize: function (dr){
+                    var width1 = Ext4.get(dr.domId).getSize().width + 50;
+                    var width2 = Ext4.get(this.id).getSize().width;
+
+                    if(width1 > width2){
+                        console.log(width1+'/'+width2)
+                        Ext4.get(webpartContext.wrapperDivId).setWidth(width1);
+                        console.log('resizing')
                     }
                     else {
-                        this.parentTabPanel.setActiveTab(0);
-                        this.parentTabPanel.items.get(0).setActiveTab(0)
+                        Ext4.get(webpartContext.wrapperDivId).setWidth('100%');
                     }
-
                 },
+
                 listeners: {
-                    render: function(r){
+                    render: function (r) {
                         this.restoreFromUrl();
                     }
                 },
-                items: [
-                    {
-                        border: false,
-                        items: [
-                            {
-                                xtype: 'tabpanel',
-                                autoHeight: true,
-                                ref: '../parentTabPanel',
-                                items: [
-                                    {
-                                        xtype: 'tabpanel',
-                                        title: 'Manage Tasks',
-                                        ref: 'Tasks',
-                                        itemId: 'Tasks',
-                                        autoWidth: true,
-                                        autoHeight: true,
-                                        defaults: {
-                                            listeners: {
-                                                activate: onActivate,
-                                                click: onActivate
-                                            }
-                                        },
-                                        items: [
-                                            {
-                                                title: 'My Tasks',
-                                                ref: 'MyTasks',
-                                                itemId: 'MyTasks',
-                                                xtype: 'ehr-qwppanel',
-                                                cls: 'my-tasks-marker',
-                                                queryConfig:  {
-                                                    schemaName: 'ehr',
-                                                    queryName: 'my_tasks',
-                                                    viewName: 'Active Tasks',
-                                                    scope: this,
-                                                    success: onSuccess
-                                                }
-                                            },
-                                            {
-                                                title: 'All Tasks',
-                                                ref: 'AllTasks',
-                                                itemId: 'AllTasks',
-                                                xtype: 'ehr-qwppanel',
-                                                cls: 'all-tasks-marker',
-                                                queryConfig:  {
-                                                    schemaName: 'ehr',
-                                                    queryName: 'Tasks_DataEntry',
-                                                    viewName: 'Active Tasks',
-                                                    scope: this,
-                                                    success: onSuccess
-                                                }
-                                            },
-                                            {
-                                                title: 'Tasks By Room',
-                                                ref: 'TasksByRoom',
-                                                itemId: 'TasksByRoom',
-                                                xtype: 'ehr-qwppanel',
-                                                cls: 'room-tasks-marker',
-                                                queryConfig:  {
-                                                    schemaName: 'ehr',
-                                                    queryName: 'TasksByLocation_DataEntry',
-                                                    viewName: 'Active Tasks',
-                                                    scope: this,
-                                                    success: onSuccess
-                                                    //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
-                                                }
-                                            },
-                                            {
-                                                title: 'Tasks By Id',
-                                                ref: 'TasksById',
-                                                itemId: 'TasksById',
-                                                xtype: 'ehr-qwppanel',
-                                                cls: 'id-tasks-marker',
-                                                queryConfig:  {
-                                                    schemaName: 'ehr',
-                                                    queryName: 'TasksById_DataEntry',
-                                                    viewName: 'Active Tasks',
-                                                    scope: this,
-                                                    success: onSuccess
-                                                    //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
-                                                }
-                                            },
-                                            {
-                                                title: 'Review Required',
-                                                ref: 'ReviewRequired',
-                                                itemId: 'ReviewRequired',
-                                                xtype: 'ehr-qwppanel',
-                                                cls: 'review-requested-marker',
-                                                queryConfig:  {
-                                                    schemaName: 'ehr',
-                                                    queryName: 'Tasks_DataEntry',
-                                                    viewName: 'Review Required',
-                                                    scope: this,
-                                                    success: onSuccess
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'tabpanel',
-                                        //activeTab: 0,
-                                        title: 'Manage Requests',
-                                        ref: 'Requests',
-                                        itemId: 'Requests',
-                                        autoWidth: true,
-                                        autoHeight: true,
-                                        defaults: {
-                                            listeners: {
-                                                activate: onActivate,
-                                                click: onActivate
-                                            }
-                                        },
-                                        items: [
-                                            {
-                                                title: 'Blood Draw Requests',
-                                                xtype: 'ehr-qwppanel',
-                                                ref: 'BloodDrawRequests',
-                                                itemId: 'BloodDrawRequests',
-                                                queryConfig:  {
-                                                    schemaName: 'study',
-                                                    queryName: 'Blood Draws',
-                                                    viewName: 'Blood Requests',
-                                                    scope: this,
-                                                    success: onSuccess,
-                                                    updateURL: bloodUpdateURL,
-                                                    deleteURL: bloodDeleteURL,
-                                                    filters: [
-                                                        LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
-                                                    ],
-                                                    removeableFilters: [
-                                                        LABKEY.Filter.create('billedby', null, LABKEY.Filter.Types.ISBLANK)
-                                                    ]
-                                                }
-                                            },
-                                            {
-                                                title: 'Clinpath Requests',
-                                                ref: 'ClinpathRequests',
-                                                itemId: 'ClinpathRequests',
-                                                xtype: 'ehr-qwppanel',
-                                                queryConfig: {
-                                                    schemaName: 'study',
-                                                    queryName: 'Clinpath Runs',
-                                                    viewName: 'Clinpath Requests',
-                                                    updateURL: clinpathUpdateURL,
-                                                    deleteURL: clinpathDeleteURL,
-                                                    scope: this,
-                                                    success: onSuccess,
-                                                    filters: [
-                                                        LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
-                                                    ]
-                                                }
-                                            },
-                                            {
-                                                title: 'VVC Requests',
-                                                ref: 'VVCRequests',
-                                                itemId: 'VVCRequests',
-                                                xtype: 'ehr-qwppanel',
-                                                queryConfig: {
-                                                    schemaName: 'wnprc',
-                                                    queryName: 'vvc',
-                                                    viewName: 'VVC Request',
-                                                    updateURL: VVCUpdateURL,
-                                                    deleteURL: VVCDeleteURL,
-                                                    scope: this,
-                                                    success: onSuccess
-                                                }
-                                            },
+                getItems: function() {
+                    return [
+                        {
+                            title: 'My Tasks',
+                            ref: 'MyTasks',
+                            items: [{
+                                itemId: 'MyTasks',
+                                xtype: 'ldk-querycmp',
+                                cls: 'my-tasks-marker',
+                                queryConfig: {
+                                    schemaName: 'ehr',
+                                    queryName: 'my_tasks',
+                                    viewName: 'Active Tasks',
+                                    scope: this,
+                                    success: this.onSuccessResize
+                                }
+                            }]
+                        },
+                        {
+                            title: 'All Tasks',
+                            ref: 'AllTasks',
+                            items: [{
+                                itemId: 'AllTasks',
+                                xtype: 'ldk-querycmp',
+                                cls: 'all-tasks-marker',
+                                queryConfig: {
+                                    schemaName: 'ehr',
+                                    queryName: 'Tasks_DataEntry',
+                                    viewName: 'Active Tasks',
+                                    scope: this,
+                                    success: this.onSuccessResize
+                                }
+                            }]
+                        },
+                        {
+                            title: 'Tasks By Room',
+                            ref: 'TasksByRoom',
+                            items: [{
+                                itemId: 'TasksByRoom',
+                                xtype: 'ldk-querycmp',
+                                cls: 'room-tasks-marker',
+                                queryConfig: {
+                                    schemaName: 'ehr',
+                                    queryName: 'TasksByLocation_DataEntry',
+                                    viewName: 'Active Tasks',
+                                    scope: this,
+                                    success: this.onSuccessResize
+                                    //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                                }
+                            }]
+                        },
+                        {
+                            title: 'Tasks By Id',
+                            ref: 'TasksById',
+                            items: [{
+                                itemId: 'TasksById',
+                                xtype: 'ldk-querycmp',
+                                cls: 'id-tasks-marker',
+                                queryConfig: {
+                                    schemaName: 'ehr',
+                                    queryName: 'TasksById_DataEntry',
+                                    viewName: 'Active Tasks',
+                                    scope: this,
+                                    success: this.onSuccessResize
+                                    //updateURL: '/ehr/manageTask.view?formtype=${formtype}&amp;taskid=${taskid}'
+                                }
+                            }]
+                        },
+                        {
+                            title: 'Tasks Requiring Review',
+                            ref: 'ReviewRequired',
+                            items: [{
+                                itemId: 'ReviewRequired',
+                                xtype: 'ldk-querycmp',
+                                cls: 'review-requested-marker',
+                                queryConfig: {
+                                    schemaName: 'ehr',
+                                    queryName: 'Tasks_DataEntry',
+                                    viewName: 'Review Required',
+                                    scope: this,
+                                    success: this.onSuccessResize
+                                }
+                            }]
+                        },
 
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
+                        {
+                            title: 'Blood Draw Requests',
+                            ref: 'BloodDrawRequests',
+                            items: [{
+                                xtype: 'ldk-querycmp',
+                                itemId: 'BloodDrawRequests',
+                                queryConfig: {
+                                    schemaName: 'study',
+                                    queryName: 'Blood Draws',
+                                    viewName: 'Blood Requests',
+                                    scope: this,
+                                    success: this.onSuccessResize,
+                                    updateURL: this.bloodUpdateURL,
+                                    deleteURL: this.bloodDeleteURL,
+                                    filters: [
+                                        LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                                    ],
+                                    removeableFilters: [
+                                        LABKEY.Filter.create('billedby', null, LABKEY.Filter.Types.ISBLANK)
+                                    ]
+                                }
+                            }]
+                        },
+                        {
+                            title: 'Clinpath Requests',
+                            ref: 'ClinpathRequests',
+                            items: [{
+                                itemId: 'ClinpathRequests',
+                                xtype: 'ldk-querycmp',
+                                queryConfig: {
+                                    schemaName: 'study',
+                                    queryName: 'Clinpath Runs',
+                                    viewName: 'Clinpath Requests',
+                                    updateURL: this.clinpathUpdateURL,
+                                    deleteURL: this.clinpathDeleteURL,
+                                    scope: this,
+                                    success: this.onSuccessResize,
+                                    filters: [
+                                        LABKEY.Filter.create('QCState/Label', 'Request', LABKEY.Filter.Types.STARTS_WITH)
+                                    ]
+                                }
+                            }]
+                        },
+                        {
+                            title: 'VVC Requests',
+                            ref: 'VVCRequests',
+                            items: [{
+                                itemId: 'VVCRequests',
+                                xtype: 'ldk-querycmp',
+                                queryConfig: {
+                                    schemaName: 'wnprc',
+                                    queryName: 'vvc',
+                                    viewName: 'VVC Request',
+                                    updateURL: this.vvcUpdateURL,
+                                    deleteURL: this.vvcDeleteURL,
+                                    scope: this,
+                                    success: this.onSuccessResize
+                                }
+                            }]
+                        },
+                        {
+                            title: 'Animal Requests',
+                            ref: 'AnimalRequests',
+                            items: [{
+                                itemId: 'AnimalRequests',
+                                xtype: 'ldk-querycmp',
+                                queryConfig: {
+                                    schemaName: 'wnprc',
+                                    queryName: 'animal_requests',
+                                    viewName: 'Animal Requests',
+                                    updateURL: this.animalRequestUpdateURL,
+                                    deleteURL: this.animalRequestDeleteURL,
+                                    scope: this,
+                                    success: this.onSuccessResize
+                                }
+                            }]
+                        }
+                    ]
+                }}
+    );
+
+
+
+    Ext4.onReady(function(){
+        EHR.Security.init({
+            success: onSuccess,
+            scope: this
+        });
+
+        var webpart = <%=webpartContext%>;
+        var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+        if(!ctx) {
+            return;
+        }
+
+        var dataEntryMenuDivId = 'dataEntryMenuDiv_' + webpart.wrapperDivId;
+        var taskTabPanelDivId  = 'ehrTasks_' + webpart.wrapperDivId;
+        var wrapperDivElement  = Ext4.get(webpart.wrapperDivId);
+
+        // Add the two container divs for the task tabpanel and list of data entry options.
+        Ext4.DomHelper.append(wrapperDivElement, [
+            {
+                tag:   'div',
+                id:    dataEntryMenuDivId,
+                style: 'padding-bottom: 10px;'
+            },
+            {
+                tag:   'div',
+                id:    taskTabPanelDivId,
+                style: 'padding-bottom: 10px;'
+            }
+        ]);
+
+        var baseURL = "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'];
+
+        var makeURL = function(view, params) {
+            var paramArray = [];
+            jQuery.each(params, function(key, value) {
+                paramArray.push( encodeURIComponent(key) + "=" + encodeURIComponent(value));
+            });
+
+            return baseURL + "/" + view + ".view?" + paramArray.join("&")
+        };
+
+        var makeRequestDataEntryURL = function(formName, params) {
+            params = params || {};
+            params.formtype = formName;
+            return makeURL("manageRequest", params);
+        };
+
+        var makeExt4DataEntryURL = function(formName, params) {
+            params = params || {};
+            params.formType = formName;
+            params.returnURL = LABKEY.ActionURL.buildURL("wnprc_ehr", "dataEntry");
+
+            return makeURL("dataEntryForm", params);
+        };
+
+        var makeTaskDataEntryURL = function(formName, params) {
+            params = params || {};
+            params.formtype = formName;
+            return makeURL("manageTask", params);
+        };
+
+
+        function onSuccess(){
+            var menuCfg = {
+                renderTo: 'dataEntryMenuDiv_'+webpart.wrapperDivId,
+                bodyStyle: 'background-color: transparent;',
+                defaults: {
+                    bodyStyle: 'background-color: transparent;',
+                    style: 'background-color: transparent;'
+                },
+                renderer: function(item){
+                    return {
+                        html: '<a href="'+item.url+'">'+item.title+'</a>',
+                        style: 'padding-left:5px;background-color: transparent;'
                     }
-                ]
-            }).render('ehrTasks_' + webpart.wrapperDivId);
+                },
+                additionalSectionStyle: "float: left;"
+            };
+
+            menuCfg.sections = [
+                {
+                    header: 'Clinical / SPI',
+                    items: [
+                        {
+                            url: makeTaskDataEntryURL("Blood Draws"),
+                            title: 'Enter Blood Draws',
+                            queries: ['Blood Draws']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Clinical%20Remarks&keyField=lsid",
+                            title: 'Enter Clinical Remark',
+                            queries: ['Clinical Remarks']
+                        },
+                        {
+                            url:     "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Feeding&keyField=lsid",
+                            title:   'Enter/Manage Feeding Orders',
+                            queries: ['Feeding']},
+                        {
+                            url:     makeTaskDataEntryURL("Irregular Observations"),
+                            title:   'Enter Irregular Observations',
+                            queries: ['Irregular Observations']
+                        },
+                        {
+                            url:     makeTaskDataEntryURL("In Room"),
+                            title:   'Enter In Rooms',
+                            queries: ['Irregular Observations']
+                        },
+                        {
+                            url:     makeTaskDataEntryURL("MPR"),
+                            title:   'Enter MPR',
+                            queries: ['Drug Administration']
+                        },
+                        {
+                            url:     makeTaskDataEntryURL("MPR") + "&useSnomedCodes=1",
+                            title:   'Enter MPR (using SNOMED codes)',
+                            queries: ['Drug Administration']
+                        },
+                        {
+                            url: makeURL("manageRecord", {
+                                schemaName: 'study',
+                                queryName:  'Notes',
+                                keyField:   'lsid'
+                            }),
+                            title: 'Enter Note',
+                            queries: ['Notes']
+                        },
+                        {
+                            url:     makeTaskDataEntryURL("Physical Exam"),
+                            title:   'Enter Physical Exam (OWM)',
+                            queries: ['Alopecia','Clinical Remarks']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("Physical Exam - NWM"),
+                            title: 'Enter Physical Exam (NWM)',
+                            queries: ['Alopecia','Clinical Remarks']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("Problem List"),
+                            title: 'Enter Problem',
+                            queries: ['Problem List']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("Surgery"),
+                            title: 'Enter Surgery',
+                            queries: ['Clinical Encounters','Clinical Remarks']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("Surgery") + "&useSnomedCodes=1",
+                            title: 'Enter Surgery (using SNOMED codes)',
+                            queries: ['Clinical Encounters','Clinical Remarks']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("TB Tests"),
+                            title: 'Enter TB Tests',
+                            queries: ['TB Tests']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("Treatments"),
+                            title: 'Enter Treatments',
+                            queries: ['Drug Administration']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("Treatment Orders"),
+                            title: 'Enter Treatment Order',
+                            queries: ['Treatment Orders']
+                        },
+                        {
+                            url: makeTaskDataEntryURL("Weight"),
+                            title: 'Enter Weights',
+                            queries: ['Weight']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Food Deprive Start"),
+                            title: 'Enter Start Food Deprives',
+                            queries: ['foodDeprives']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Food Deprive Complete"),
+                            title: 'Enter Complete Food Deprives',
+                            queries: ['foodDeprives']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Ultrasounds"),
+                            title: 'Enter Ultrasounds',
+                            queries: ['ultrasounds']
+                        }
+                    ]
+                },
+                {
+                    header: 'Colony Records',
+                    items: [
+                        {
+                            url: makeTaskDataEntryURL("Arrival"),
+                            title: 'Enter Arrivals',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Arrival']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Assignment&keyField=lsid",
+                            title: 'Enter/Manage Assignments',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Assignment']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Birth",
+                            title: 'Enter Births',
+                            queries: ['Birth']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=study&queryName=Demographics&keyField=lsid",
+                            title: 'Enter/Manage Demographics',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Demographics']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Departure&keyField=lsid",
+                            title: 'Enter Departures',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Departure']
+                        },
+                        {
+                            permission: 'admin',
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR",
+                            title: 'Enter Multi-Animal MPR',
+                            queries: ['Drug Administration']
+                        },
+                        {
+                            permission: 'admin',
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Multi-Animal MPR&useSnomedCodes=1",
+                            title: 'Enter Multi-Animal MPR (using SNOMED codes)',
+                            queries: ['Drug Administration']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Project&keyField=project",
+                            title: 'Enter/Manage Projects',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Assignment']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=Protocol&keyField=protocol",
+                            title: 'Enter/Manage Protocols',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Assignment']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("protocol",{
+                                schemaName: 'ehr',
+                                queryName:  'protocol',
+                                keyField:   'protocol'
+                            }),
+                            title: 'New Enter/Manage Protocols',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries:['Assignment']
+
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=SimpleRemark&title=Remark",
+                            title: 'Enter Simple Remark',
+                            queries: ['Clinical Remarks']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/updateQuery.view?schemaName=ehr&queryName=supplemental_pedigree&keyField=rowid",
+                            title: 'Enter/Manage Supplemental Pedigree',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Demographics']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Pregnancies"),
+                            title: 'Enter Pregnancies',
+                            queries: ['pregnancies']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Pregnancy Outcomes"),
+                            title: 'Enter Pregnancy Outcomes',
+                            queries: ['pregnancy_outcomes']
+                        }
+                    ]
+                },
+                {
+                    header: 'Behavior / Colony Management',
+                    items: [
+                        {
+                            url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'AssignBehaviorProjects'),
+                            title: 'Enter/Manage Behavior Assignments',
+                            qcstate: 'Completed',
+                            // This really should check for the "EHR Behavior Services" role, but there's no good way to
+                            // do that, so this'll get approximately the same result.  In any case, this page handles users
+                            // without permissions just fine, so any users who get access to this accidentally won't matter.
+                            queries: ['Behavior Abstract']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Behavior Abstract",
+                            title: 'Enter Behavior Abstract',
+                            queries: ['Behavior Abstract']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?schemaName=study&queryName=Behavior Remarks&keyField=lsid",
+                            title: 'Enter Behavior Remark',
+                            queries: ['Behavior Remarks']
+                        },
+                        {
+                            url: "<%=contextPath%>/ehr" + ctx['EHRStudyContainer'] + "/manageTask.view?formtype=Housing",
+                            title: 'Enter Housing Change',
+                            qcstate: 'Completed',
+                            permission: 'admin',
+                            queries: ['Housing']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Breeding Encounters"),
+                            title: 'Enter Breeding Encounters',
+                            queries: ['breeding_encounters']
+                        },
+                    ]
+                },
+                {
+                    header: 'Pathology / Clinpath',
+                    items: [
+                        {
+                            url:     makeTaskDataEntryURL("Biopsy"),
+                            title:   'Enter Biopsy',
+                            queries: ['Biopsies']
+                        },
+                        {
+                            url:     makeTaskDataEntryURL("Clinpath"),
+                            title:   'Enter Clinpath Results',
+                            queries: ['Clinpath Runs'],
+                            qcstate: 'Completed'
+                        },
+                        {
+                            url:     makeTaskDataEntryURL("Death"),
+                            title:   'Enter Death Record',
+                            queries: ['Deaths']
+                        },
+                        {
+                            url:     makeExt4DataEntryURL("Necropsy"),
+                            title:   'Enter Necropsy',
+                            queries: ['Necropsies']
+                        },
+                        {
+                            url:     makeURL("manageRecord", { schemaName: 'study', queryName: 'Prenatal Deaths', keyField: 'lsid' }),
+                            title:   'Enter Prenatal Death',
+                            queries: ['Prenatal Deaths']
+                        }
+                    ]
+                },
+                {
+                    header: 'Requests',
+                    items: [
+                        {
+                            url:     makeRequestDataEntryURL("Blood Draw Request"),
+                            title:   'Request Blood Draws',
+                            queries: ['Blood Draws']
+                        },
+                        {
+                            url:     makeRequestDataEntryURL("Clinpath Request"),
+                            title:   'Request Clinpath Services',
+                            queries: ['Clinpath Runs']
+                        },
+                        {
+                            url:     makeExt4DataEntryURL("NecropsyRequest"),
+                            title:   'Request Necropsy',
+                            queries: ['Necropsies']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("VVCRequest"),
+                            title: 'Request VVC',
+                            queries: ['blood']
+                        },
+                        {
+                            url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'NecropsySchedule', ctx['EHRStudyContainer']),
+                            title:   'Schedule Necropsy',
+                            queries: ['Necropsies']
+                        },
+                        {
+                            url:  makeExt4DataEntryURL("Food Deprive Request"),
+                            title: 'Request Food Deprives',
+                            queries: ['foodDeprives']
+                        },
+                        {
+                            url:     LABKEY.ActionURL.buildURL('animalrequests', 'app', ctx['EHRStudyContainer']),
+                            title:   'Request Animals',
+                            queries: ['blood']
+                        }
+                    ],
+                    requests: true
+                }
+            ];
+
+            menuCfg.sections = menuCfg.sections.filter(function(section) {
+                var qcState = (section.requests) ? 'Request: Pending' : 'In Progress';
+
+                section.items = section.items || [];
+
+                // Filter out any forms that we don't have permission to insert into.
+                section.items = section.items.filter(function(item) {
+                    item.qcstate = item.qcstate || qcState;
+                    item.permission = item.permission || 'insert';
+                    return EHR.Security.hasPermission(item.qcstate, item.permission, item.queries.map(function(queryName) {
+                        return {
+                            schemaName: 'study',
+                            queryName:  queryName
+                        };
+                    }));
+                });
+
+                return section.items.length > 0;
+            });
+
+            new EHR.ext.NavMenu(menuCfg).render();
+
+            //only give a task manager if they have access to at least 1 form
+            if(menuCfg.sections.length){
+                function onActivate(t){
+                    this.ownerCt.ownerCt.ownerCt.ownerCt.loadTab(t);
+                }
+
+                var taskpanel = new WNPRC_EHR.panel.EnterDataPanel().render('ehrTasks_' + webpart.wrapperDivId);
+            }
+            else {
+                alert('You do not have access to this page');
+                window.location = LABKEY.ActionURL.buildURL("project", "home");
+            }
         }
-        else {
-            alert('You do not have access to this page');
-            window.location = LABKEY.ActionURL.buildURL("project", "home");
-        }
-    }
-});
+    });
 </script>

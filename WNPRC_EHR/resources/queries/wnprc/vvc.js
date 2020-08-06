@@ -115,8 +115,9 @@ function afterInsert(row, errors){
 
     if (row.QCStateLabel == "Request: Pending" && row.requestId){
         var requestid = row.requestId;
+        var hostName = 'https://' + LABKEY.serverName;
         console.log ("new request submitted "+ requestid);
-        WNPRC.Utils.getJavaHelper().sendVvcNotification(requestid);
+        WNPRC.Utils.getJavaHelper().sendVvcNotification(requestid, hostName);
 
 
     }

@@ -22,7 +22,7 @@ Ben Bimber
 #config options:
 my $baseUrl = $ENV{'LK_BASE_URL'};
 
-my $studyContainer = 'ehr/WNPRC/EHR/';
+my $studyContainer = 'WNPRC/EHR/';
 
 my $notificationtypes = 'Blood Admin Alerts';
 my $mail_server = $ENV{'MAIL_SERVER'};
@@ -34,7 +34,7 @@ my $from = 'ehr-no-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -57,7 +57,7 @@ my $results;
 
 
 #we find any current or future blood draws where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
 -baseUrl => $baseUrl,
 -containerPath => $studyContainer,
 -schemaName => 'study',
@@ -79,7 +79,7 @@ if(@{$results->{rows}}){
 
 
 #we find any blood draws over the allowable limit
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
 	-baseUrl => $baseUrl,
 	-containerPath => $studyContainer,
 	-schemaName => 'study',
@@ -112,7 +112,7 @@ else {
 #$email_html .= "<hr>\n";
 
 #we find any blood draws where the animal is not assigned to that project
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
 -baseUrl => $baseUrl,
 -containerPath => $studyContainer,
 -schemaName => 'study',
@@ -142,7 +142,7 @@ else {
 }
 
 #we find any blood draws not yet approved
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
 -baseUrl => $baseUrl,
 -containerPath => $studyContainer,
 -schemaName => 'study',
@@ -167,7 +167,7 @@ else {
 }
 
 #we find any blood draws not yet assigned to either SPI or animal care
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
 -baseUrl => $baseUrl,
 -containerPath => $studyContainer,
 -schemaName => 'study',
@@ -193,7 +193,7 @@ else {
 }
 
 #we find any current blood draws with clinpath, but lacking a request
-#$results = Labkey::Query::selectRows(
+#$results = LabKey::Query::selectRows(
 #-baseUrl => $baseUrl,
 #-containerPath => $studyContainer,
 #-schemaName => 'study',
@@ -215,7 +215,7 @@ else {
 
 
 #we find any incomplete blood draws scheduled today, by area
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
 -baseUrl => $baseUrl,
 -containerPath => $studyContainer,
 -schemaName => 'study',
@@ -298,7 +298,7 @@ foreach my $row (@{$results->{rows}}){
 #close HTML;
 #die;
 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
 -baseUrl => $baseUrl,
 -requiredVersion => 8.3,
 -containerPath => $studyContainer,

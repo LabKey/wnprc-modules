@@ -45,6 +45,7 @@ public abstract class AbstractMiscChargesFormType extends TaskForm
     {
         List<String> defaultButtons = new ArrayList<String>();
         defaultButtons.add("FINANCESUBMIT");
+        defaultButtons.add("SUBMITANDRELOAD");
 
         return defaultButtons;
     }

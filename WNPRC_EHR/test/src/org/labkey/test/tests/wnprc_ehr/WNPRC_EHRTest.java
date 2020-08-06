@@ -25,7 +25,10 @@ import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
+import org.labkey.remoteapi.query.TruncateTableCommand;
+import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.SortDirection;
@@ -54,8 +57,10 @@ import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.ext4cmp.Ext4FileFieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
+import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
@@ -98,10 +103,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");
-    private static final int ALIASES_NUM_ROWS = 2;
+    private static final int ALIASES_NUM_ROWS = 4;
 
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
+    private final File CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesGroupCategoryError.tsv");
     private static final int CHARGE_RATES_NUM_ROWS = 9;
     private static final int CHARGEABLE_ITEMS_NUM_ROWS = 8;
 
@@ -111,6 +117,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private final File CHARGEABLE_ITEM_CATEGORIES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemCategories.tsv");
     private static final int CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS = 11;
+
+    private final File GROUP_CATEGORY_ASSOCIATIONS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/groupCategoryAssociations.tsv");
+    private static final int GROUP_CATEGORY_ASSOCIATIONS_NUM_ROWS = 11;
 
     private final File TIER_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/tierRates.tsv");
     private static final int TIER_RATES_NUM_ROWS = 4;
@@ -125,6 +134,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public FileBrowserHelper _fileBrowserHelper = new FileBrowserHelper(this);
 
     protected DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public static final String NON_GEN_CREDIT_ACCOUNT_ID = "acct102";
+    public static final String GEN_CREDIT_ACCT_ID = "acct103";
+
+    private Map<String, Object> aliasesMap = new HashMap<>();
 
     @Nullable
     @Override
@@ -175,6 +189,26 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.clickFolder("PI Portal");
         initTest.addBillingPublicWebParts();
+
+        initTest.uploadBillingDataAndVerify();
+    }
+
+    private void uploadBillingDataAndVerify() throws Exception
+    {
+        log("Check Extensible table columns.");
+        checkExtensibleTablesCols();
+
+        log("Upload sample data.");
+        uploadData();
+
+        log("Add investigators.");
+        addInvestigators();
+
+        log("Provide Billing Data Access.");
+        provideBillingDataAccess();
+
+        log("Update new charge rates.");
+        updateChargeRates();
     }
 
     @Override
@@ -334,20 +368,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Test
     public void testBilling() throws IOException, CommandException
     {
-        log("Check Extensible table columns.");
-        checkExtensibleTablesCols();
-
-        log("Upload sample data.");
-        uploadData();
-
-        log("Update new charge rates.");
-        updateChargeRates();
-
         log("Enter misc charges via data entry form.");
         enterCharges();
 
-        log("Perform Billing Run.");
-        performBillingPeriodRun();
+        log("Perform Billing Run for period 10/01/2010-10/31/2010");
+        performBillingRun("10/01/2010", "10/31/2010", ++BILLING_RUN_COUNT);
+
+        log("Test Invoiced Items");
+        testInvoicedItems();
+
+        log("Test Summary Reports");
+        testSummaryReports();
 
         log("View and download JET");
         viewJET();
@@ -355,8 +386,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("View and download invoice PDF.");
         viewPDF("downloadPDF");
 
-        log("View Estimated Charges By Project.");
-        viewEstimatedChargesByProject();
+        log("View Billing Queries");
+        viewBillingQueries();
 
         log("Verify notification link");
         testBillingNotification();
@@ -371,13 +402,257 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         testInvestigatorFacingLinks();
 
         log("View Charges and adjustments Not Yet Billed");
-        viewChargesAdjustmentsNotYetBilled();
+        List<String> expectedRowData = Arrays.asList("test2312318", "2011-09-15", "640991", " ", "vaccine supplies", "Misc. Fees", "Clinical Pathology", " ", "acct101", "10.0", "$15.00", "charge 2 with animal id");
+        viewChargesAdjustmentsNotYetBilled(1, "comment", "charge 2 with animal id", expectedRowData);
 
         log("Download Multiple Invoices");
         testDownloadMultipleInvoices();
 
         log("Delete invoice runs");
         testDeleteInvoiceRuns();
+    }
+
+    @Test
+    public void testBulkEditChargesWithAnimalIds() throws IOException, CommandException
+    {
+        String comment = "Charges with Animal Ids added via bulk edit.";
+        String msg = "You are about to set values for 2 fields on 5 records. Do you want to do this?";
+
+        log ("Animals with Charge Ids - Bulk Edit via Add Batch");
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
+        Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
+        miscChargesGrid.clickTbarButton("Add Batch");
+        waitForElement(Ext4Helper.Locators.window("Choose Animals"));
+        Ext4FieldRef.getForLabel(this, "Id(s)").setValue(StringUtils.join(MORE_ANIMAL_IDS, ";"));
+        Ext4FieldRef.getForLabel(this, "Bulk Edit Before Applying").setChecked(true);
+        waitAndClick(Ext4Helper.Locators.window("Choose Animals").append(Ext4Helper.Locators.ext4Button("Submit")));
+        Locator.XPathLocator bulkEditWindow = Ext4Helper.Locators.window("Bulk Edit");
+        fillBulkEditForm(bulkEditWindow, miscChargesGrid, true);
+
+        assertEquals("Debit account derived in Bulk Edit does not match the Data Entry Grid:", "acct100", miscChargesGrid.getFieldValue(1, "debitedAccount"));
+        assertEquals("Total Cost calculated in Bulk Edit does not match the Data Entry Grid:", "50", miscChargesGrid.getFieldValue(1, "totalCost").toString());
+
+        assertEquals("Animals added via Add Batch and rows in Data Entry grid do not match:", miscChargesGrid.getRowCount(), MORE_ANIMAL_IDS.length);
+
+        log ("Add comment via More Options --> Bulk Edit");
+        addCommentViaBulkEdit(bulkEditWindow, miscChargesGrid, comment, MORE_ANIMAL_IDS.length, msg);
+
+        log ("Submit " + comment);
+        submitForm();
+
+        log ("Verify entered charges in Misc Charges table");
+        List<String> expectedRowData = Arrays.asList("test1020148", LocalDateTime.now().format(_dateTimeFormatter), "795644", "Snow, Jon", "Blood draws", "Blood Draws", "Business Office", " ", "acct100", "5.0", "$10.00", comment);
+        viewChargesAdjustmentsNotYetBilled(MORE_ANIMAL_IDS.length, "comment", comment, expectedRowData);
+    }
+
+    @Test
+    public void testDebitAccountFiltering()
+    {
+        log("Verify Debit Account drop down with list of account(s) active on the date of charge");
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+
+        Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
+        _helper.addRecordToGrid(miscChargesGrid);
+
+        miscChargesGrid.setGridCell(1, "date", "1997-05-16");
+        Locator comboCol = miscChargesGrid.getCell(1, "debitedaccount");
+        click(comboCol);
+        List<String> options = _ext4Helper.getComboBoxOptions(Ext4Helper.Locators.formItemWithInputNamed("debitedaccount"));
+        assertEquals("There should be only one account listed in Debited Account drop down: ", 1, options.size());
+        assertEquals("Account not found: ", ACCOUNT_ID_1, options.get(0));
+    }
+
+    @Test
+    public void testJETWithNonGenCreditAccount()
+    {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+
+        String startDate = LocalDateTime.now().minusDays(45).format(_dateTimeFormatter);
+        String endDate = LocalDateTime.now().minusDays(16).format(_dateTimeFormatter);
+
+        Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
+        mapWithDebitAcct.put("date", startDate);
+        mapWithDebitAcct.put("debitedaccount", NON_GEN_CREDIT_ACCOUNT_ID);
+        mapWithDebitAcct.put("chargeGroup", "Business Office");
+        mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
+        mapWithDebitAcct.put("quantity", "8");
+        mapWithDebitAcct.put("chargetype", "Adjustment");
+        mapWithDebitAcct.put("comment", "charge without non gen credit acct");
+
+        Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
+        mapWithDebitAcct2.put("date", startDate);
+        mapWithDebitAcct2.put("debitedaccount", GEN_CREDIT_ACCT_ID);
+        mapWithDebitAcct2.put("chargeGroup", "Clinical Pathology");
+        mapWithDebitAcct2.put("chargeId", "vaccine supplies");
+        mapWithDebitAcct2.put("quantity", "5");
+        mapWithDebitAcct2.put("comment", "charge with gen credit acct");
+
+        log("Enter Misc. Charges with debit account " + NON_GEN_CREDIT_ACCOUNT_ID + " in grid row 1");
+        enterChargesInGrid(1, mapWithDebitAcct);
+
+        log("Enter Misc. Charges with debit account " + GEN_CREDIT_ACCT_ID + " in grid row 2");
+        enterChargesInGrid(2, mapWithDebitAcct2);
+
+        log("Submit the form");
+        sleep(5000);
+        submitForm();
+
+        performBillingRun(startDate, endDate, ++BILLING_RUN_COUNT);
+
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+
+        DataRegionTable invoiceRunsDataRegionTable = getInvoiceRunsDataRegionTable();
+        invoiceRunsDataRegionTable.link(0, "viewJETInvoice").click();
+
+        DataRegionTable jetRegionTable  = new DataRegionTable("query", this);
+        assertEquals("Wrong jet item count: ", 1, jetRegionTable.getDataRowCount());
+
+        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "8.00");
+        List<String> actualRowData = jetRegionTable.getRowDataAsText(0, "Project", "Amount");
+        assertEquals("Wrong row data for CSV to JET Preview report ", expectedRowData, actualRowData);
+    }
+
+    private void addCommentViaBulkEdit(Locator.XPathLocator bulkEditWindow, Ext4GridRef grid, String comment, int numRows, String msg)
+    {
+        grid.clickTbarButton("Select All");
+        openBulkEditWindowViaMoreActions(bulkEditWindow, grid);
+        _helper.toggleBulkEditField("Comment");
+        _ext4Helper.queryOne("window field[fieldLabel=Comment]", Ext4ComboRef.class).setValue(comment);
+        waitAndClick(bulkEditWindow.append(Ext4Helper.Locators.ext4Button("Submit")));
+        checkMessageWindow("Set Values", msg, "Yes");
+        grid.waitForRowCount(numRows);
+    }
+
+    private void openBulkEditWindowViaMoreActions(Locator.XPathLocator bulkEditWindow, Ext4GridRef grid)
+    {
+        grid.clickTbarButton("More Actions");
+        click(Ext4Helper.Locators.menuItem("Bulk Edit"));
+        waitForElement(bulkEditWindow);
+    }
+
+    private void fillBulkEditForm(Locator.XPathLocator bulkEditWindow, Ext4GridRef grid, boolean hasAnimalId)
+    {
+        waitForElement(bulkEditWindow);
+
+        _helper.toggleBulkEditField("Date of Charge");
+        if (Ext4FieldRef.getForLabel(this, "Date of Charge").getValue() == null)
+        {
+            Ext4FieldRef.getForLabel(this, "Date of Charge").setValue(LocalDateTime.now().format(_dateTimeFormatter));
+        }
+
+        log ("Toggle fields");
+        if (hasAnimalId)
+        {
+            _helper.toggleBulkEditField("Project");
+        }
+        else
+        {
+            _helper.toggleBulkEditField("Debit Account");
+        }
+
+        _helper.toggleBulkEditField("Investigator");
+        _helper.toggleBulkEditField("Group");
+        _helper.toggleBulkEditField("Charge Item");
+        _helper.toggleBulkEditField("Quantity");
+        _helper.toggleBulkEditField("Unit Cost");
+
+        log("Set and Reset fields");
+
+        if (hasAnimalId)
+        {
+            log("Set Project");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Project:"), Ext4Helper.TextMatchTechnique.CONTAINS, "640991");
+
+            log ("Set Investigator");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Investigator:"), "Stark, Sansa");
+
+        }
+        else
+        {
+            log ("Set Debit Account");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Debit Account:"), Ext4Helper.TextMatchTechnique.CONTAINS, "101");
+
+            log ("Set Investigator");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Investigator:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Snow, Jon");
+
+        }
+
+        if (hasAnimalId)
+        {
+            log ("Reset Project");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Project:"), Ext4Helper.TextMatchTechnique.CONTAINS, "795644");
+
+            log ("Reset Investigator");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Investigator:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Snow, Jon");
+        }
+        else
+        {
+            log ("Set Debit Account");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Debit Account:"), Ext4Helper.TextMatchTechnique.CONTAINS, "100");
+
+            log ("Set Investigator");
+            _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Investigator:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Stark, Sansa");
+
+        }
+
+        log ("Set Group");
+        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Group:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Clinical Pathology");
+
+        log ("Set Charge Item");
+        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Charge Item:"), Ext4Helper.TextMatchTechnique.CONTAINS, "vaccine supplies");
+
+        log ("Reset Group");
+        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Group:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Business Office");
+
+        log ("Reset Charge Item");
+        _ext4Helper.selectComboBoxItem( Ext4Helper.Locators.formItemWithLabelContaining("Charge Item:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Blood draws");
+        sleep(1000);
+
+        String unitCost = Ext4FieldRef.getForLabel(this, "Unit Cost").getValue().toString();
+        assertEquals("Unit cost mismatch:", unitCost, "10");
+
+        Ext4FieldRef.getForLabel(this, "Quantity").setValue(5);
+
+        waitAndClick(bulkEditWindow.append(Ext4Helper.Locators.ext4Button("Submit")));
+    }
+
+    @Test
+    public void testBulkEditChargesWithoutAnimalIds() throws IOException, CommandException
+    {
+        String msg = "You are about to set values for 2 fields on 2 records. Do you want to do this?";
+        String comment = "Charges without Animal Ids added via bulk edit.";
+
+        log ("Animals without Charge Ids - Bulk Edit via More Options --> Bulk Edit");
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
+        Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
+        _helper.addRecordToGrid(miscChargesGrid);
+        _helper.addRecordToGrid(miscChargesGrid);
+        miscChargesGrid.clickTbarButton("Select All");
+        Locator.XPathLocator bulkEditWindow = Ext4Helper.Locators.window("Bulk Edit");
+        openBulkEditWindowViaMoreActions(bulkEditWindow, miscChargesGrid);
+        fillBulkEditForm(bulkEditWindow, miscChargesGrid, false);
+
+        Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Set Values").waitFor();
+        msgWindow.clickButton("Yes", 0);
+
+        assertEquals("Total Cost calculated in Bulk Edit does not match the Data Entry Grid:", "50", miscChargesGrid.getFieldValue(1, "totalCost").toString());
+        assertEquals("Animals added via More Actions --> Add Batch and rows in Data Entry grid do not match:", miscChargesGrid.getRowCount(), 2);
+
+        log ("Add comment via More Options --> Bulk Edit");
+        addCommentViaBulkEdit(bulkEditWindow, miscChargesGrid, comment, 2, msg);
+
+        log ("Submit " + comment);
+        submitForm();
+
+        log ("Verify non-animal charges entered via Bulk Edit in Misc Charges table");
+        List<String> expectedRowData = Arrays.asList(" ", LocalDateTime.now().format(_dateTimeFormatter), " ", "Stark, Sansa", "Blood draws", "Blood Draws", "Business Office", " ", "acct100", "5.0", "$10.00", comment);
+        viewChargesAdjustmentsNotYetBilled(2, "comment", comment, expectedRowData);
+
     }
 
     private void testBillingNotification()
@@ -411,13 +686,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void testInvestigatorFacingLinks() throws IOException, CommandException
     {
-        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
-        log("Add investigator to ehr.investigators table.");
-        addInvestigators();
-
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        provideBillingDataAccess();
-
         navigateToFolder(PROJECT_NAME, PI_PORTAL);
         log("Give EHR Lab Read access to PI Portal folder.");
         _permissionsHelper.setPermissions("EHR Lab", "ReaderRole");
@@ -499,10 +767,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void addInvestigators() throws IOException, CommandException
     {
+        Map<String,Object> investigatorsMap = new HashMap<>();
+
+        log("Add investigators to ehr.investigators table.");
+
+        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+
         Connection cn = WebTestHelper.getRemoteApiConnection();
 
         log("Inserting Principal Investigator Jon Snow.");
-
         InsertRowsCommand insertCmd = new InsertRowsCommand("ehr", "investigators");
         Map<String,Object> rowMap = new HashMap<>();
         rowMap.put("firstName", "Jon");
@@ -519,82 +792,112 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap.put("userid", getUserId(INVESTIGATOR.getEmail()));
         insertCmd.addRow(rowMap);
 
-        insertCmd.execute(cn, EHR_FOLDER_PATH);
-
+        insertCmd.execute(cn, EHR_FOLDER_PATH).getRows().forEach(row -> investigatorsMap.put(row.get("emailAddress").toString(), row.get("rowid")));
         log("Investigators inserted in to ehr.investigators table.");
+
+        log("Update ehr_billing.aliases with investigators.");
+        UpdateRowsCommand cmdUpd = new UpdateRowsCommand("ehr_billing", "aliases");
+        Map<String,Object> aliasesRowMap = new HashMap<>();
+        aliasesRowMap.put("rowid", aliasesMap.get(ACCOUNT_ID_1));
+        aliasesRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR.getEmail()));
+        cmdUpd.addRow(aliasesRowMap);
+
+        aliasesRowMap = new HashMap<>();
+        aliasesRowMap.put("rowid", aliasesMap.get(ACCOUNT_ID_2));
+        aliasesRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR_PRINCIPAL.getEmail()));
+        cmdUpd.addRow(aliasesRowMap);
+
+        cmdUpd.execute(cn, PRIVATE_FOLDER_PATH);
+
+        log("Update ehr_billing.project with investigators.");
+        cmdUpd = new UpdateRowsCommand("ehr", "project");
+        Map<String,Object> projRowMap = new HashMap<>();
+        projRowMap.put("project", Integer.valueOf(PROJECT_ID));
+        projRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR.getEmail()));
+        cmdUpd.addRow(projRowMap);
+
+        projRowMap = new HashMap<>();
+        projRowMap.put("project", Integer.valueOf(PROTOCOL_PROJECT_ID));
+        projRowMap.put("investigatorId", investigatorsMap.get(INVESTIGATOR_PRINCIPAL.getEmail()));
+        cmdUpd.addRow(projRowMap);
+
+        cmdUpd.execute(cn, EHR_FOLDER_PATH);
+
     }
 
     private void provideBillingDataAccess() throws IOException, CommandException
     {
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        clickAndWait(Locator.bodyLinkContainingText("Access To Billing Data"));
+        DataRegionTable dataAccessTable = new DataRegionTable("query", getDriver());
+        dataAccessTable.clickInsertNewRow();
         Connection cn = WebTestHelper.getRemoteApiConnection();
 
-        log("Provide data access to Investigator Sansa Stark.");
+        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("User With Access:"), Ext4Helper.TextMatchTechnique.CONTAINS, _userHelper.getDisplayNameForEmail(INVESTIGATOR.getEmail()));
+        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Investigator:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Stark, Sansa");
+        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Project:"), Ext4Helper.TextMatchTechnique.CONTAINS, "640991");
+        _ext4Helper.checkCheckbox("Access to all projects?:");
+        clickButton("Submit",0);
+        checkMessageWindow("Error", "Must choose 'Project' or check 'Access to all projects' but not both.", "OK");
+        _ext4Helper.uncheckCheckbox("Access to all projects?:");
+        clickButton("Submit",0);
 
-        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr_billing", "dataAccess");
-        Map<String,Object> rowMap = new HashMap<>();
-
-        int piUserId = getUserId(INVESTIGATOR_PRINCIPAL.getEmail());
-        int userId = getUserId(INVESTIGATOR.getEmail());
-        rowMap.put("userid", userId);
-        rowMap.put("investigatorId", getInvestigatorId(piUserId));
-        rowMap.put("project", "640991");
-
-        insertCmd.addRow(rowMap);
-
-        insertCmd.execute(cn, PRIVATE_FOLDER_PATH);
+        log("Verify row insert in ehr_billing.dataAccess.");
+        List<String> actualRowData = dataAccessTable.getRowDataAsText(0, "investigatorid", "userId", "project", "alldata");
+        List<String> expectedRowData = Arrays.asList("Stark, Sansa", "investigator", "640991", "No");
+        assertEquals("Data access row not inserted as expected: " , expectedRowData, actualRowData);
     }
 
-    private void viewEstimatedChargesByProject()
+    private void viewBillingQueries()
     {
+        String startDate="09%2F01%2F2011";
+        String endDate="09%2F30%2F2011";
+//        clickAndWait(Locator.bodyLinkContainingText("View Billing Queries"), WAIT_FOR_JAVASCRIPT); //firefox45 on teamcity does not load this page.
+
+        navigateToFolder(PROJECT_NAME, EHR_FOLDER);
+        log("Verify misc charges");
+        beginAt(String.format("query/%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=miscChargesFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", getContainerPath(), startDate, endDate));
+        DataRegionTable miscChargesFeeRates = new DataRegionTable("query", this);
+        List<String> expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-15", "640991", "acct101", "$19.50", "10.0", "$195.00", getDisplayName());
+        List<String> actualRowData = miscChargesFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "totalCost", "createdby");
+        assertEquals("Wrong row data for Misc Charges: ", expectedRowData, actualRowData);
+        assertEquals("One row should be displayed", miscChargesFeeRates.getDataRowCount(), 1);
+
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        log("Verify per diems");
+        beginAt(String.format("query%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=perDiemFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
+        DataRegionTable perDiemFeeRates = new DataRegionTable("query", this);
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-01 00:00", "640991", "acct101", "$26.00", "30.0", "0.3", "$780.00");
+        actualRowData = perDiemFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
+        assertEquals("Wrong row data for Per Diems: ", expectedRowData, actualRowData);
+        assertEquals("One row should be displayed", perDiemFeeRates.getDataRowCount(), 1);
 
-        clickAndWait(Locator.bodyLinkContainingText("Estimated Charges By Project"));
-        _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Center Project"), Ext4Helper.TextMatchTechnique.CONTAINS,"640991");
-
-        setFormElement(Locator.input("startDate"), "09/01/2011");
-        setFormElement(Locator.input("endDate"), "09/30/2011");
-        clickButtonContainingText("Submit", 0);
-
-        DataRegionTable perDiemFeeRatesTable = new DataRegionTable("perDiemFeeRatesQueryRegion", getDriver());
-        List<String> expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-01 00:00", "640991", "acct101", "$26.00", "30.0", "0.3", "$780.00");
-        List<String> actualRowData = perDiemFeeRatesTable.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
-        assertEquals("Wrong row data for Per Diem Rates Table", expectedRowData, actualRowData);
-        assertEquals("One row should be displayed", perDiemFeeRatesTable.getDataRowCount(), 1);
-
-
-        DataRegionTable procedureFeeRatesTable = new DataRegionTable("procedureFeeRatesQueryRegion", getDriver());
-        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "640991", "acct101", "$13.00", "1", "0.3", "$13.00");
-        actualRowData = procedureFeeRatesTable.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost");
-        assertEquals("Wrong row data for Procedure Fee Rates Table", expectedRowData, actualRowData);
-        assertEquals("Two rows should be displayed", procedureFeeRatesTable.getDataRowCount(), 2);
-
-        DataRegionTable miscChargesFeeRatesTable = new DataRegionTable("miscChargesFeeRatesQueryRegion", getDriver());
-        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-15", "640991", "acct101", "$19.50", "10.0", "$195.00");
-        actualRowData = miscChargesFeeRatesTable.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "totalCost");
-        assertEquals("Wrong row data for Per Diem Rates Table", expectedRowData, actualRowData);
-        assertEquals("One row should be displayed", miscChargesFeeRatesTable.getDataRowCount(), 1);
+        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
+        log("Verify blood draws");
+        beginAt(String.format("query%s/executeQuery.view?schemaName=wnprc_billing&query.queryName=procedureFeeRates&query.param.StartDate=%s&query.param.EndDate=%s", PRIVATE_FOLDER_PATH, startDate, endDate));
+        DataRegionTable procedureFeeRates = new DataRegionTable("query", this);
+        expectedRowData = Arrays.asList(PROJECT_MEMBER_ID, "2011-09-27 09:30", "00640991", "acct101", "$13.00", "1", "0.3", "$13.00", " ");
+        actualRowData = procedureFeeRates.getRowDataAsText(0, "Id", "date", "project", "debitedAccount", "unitCost", "quantity", "tierRate", "totalCost", "performedby");
+        assertEquals("Wrong row data for Procedure Fee Rates/Blood Draws: ", expectedRowData, actualRowData);
+        assertEquals("Two rows should be displayed", procedureFeeRates.getDataRowCount(), 2);
     }
 
-    private void viewChargesAdjustmentsNotYetBilled()
+    private void viewChargesAdjustmentsNotYetBilled(int numRows, String filterCol, String filterVal, List<String> expectedRowData)
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
 
         clickAndWait(Locator.bodyLinkContainingText("View Charges and Adjustments Not Yet Billed"));
 
-        setFormElement(Locator.inputByNameContaining("StartDate"), "09/01/2011");
-        setFormElement(Locator.inputByNameContaining("EndDate"), "09/30/2011");
-
-        clickButtonContainingText("Submit");
-
-        waitForText("Charges and Adjustments Not Yet Billed");
-
         DataRegionTable notBilled = new DataRegionTable("query", getDriver());
-        assertEquals("Charge already billed: ", " ", notBilled.getDataAsText(0, "invoiceId"));//assertNull or using Null did not work, got "expected null, but was:< >"
-        assertEquals("Group Name not as expected: ", "Clinical Pathology", notBilled.getDataAsText(0, "groupName"));
-        assertEquals("Item not as expected: ", "vaccine supplies", notBilled.getDataAsText(0, "item"));
-        assertEquals("Quantity not as expected: ", "10.0", notBilled.getDataAsText(0, "quantity"));
-        assertEquals("Unit Cost not as expected: ", "$19.50", notBilled.getDataAsText(0, "unitCost"));
-        assertEquals("Total Cost not as expected: ", "$195.00", notBilled.getDataAsText(0, "totalcost"));
+        notBilled.setFilter(filterCol, "Equals", filterVal);
+        notBilled.setSort("Id", SortDirection.ASC);
+
+        DataRegionTable table = new DataRegionTable("query", getDriver());
+
+        List<String> actualRowData = notBilled.getRowDataAsText(0, "Id", "date", "project", "investigator", "chargeId/name", "chargeId/chargeCategoryId/name", "chargeGroup", "chargetype", "debitedaccount", "quantity", "unitCost", "comment");
+
+        assertEquals("Wrong number of rows for misc charges not billed for '" + filterVal + "': ", numRows, notBilled.getDataRowCount());
+        assertEquals("Wrong row data for misc charges not billed: ", expectedRowData, actualRowData);
     }
 
     private void viewJET()
@@ -647,25 +950,25 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("Id", PROJECT_MEMBER_ID);
         mapWithAnimalId.put("date", "2010-10-23");
         mapWithAnimalId.put("project", PROJECT_ID);
-        mapWithAnimalId.put("chargetype", "Clinical Pathology");
+        mapWithAnimalId.put("chargeGroup", "Clinical Pathology");
         mapWithAnimalId.put("chargeId", "vaccine supplies");
         mapWithAnimalId.put("quantity", "10");
-        mapWithAnimalId.put("chargecategory", "Adjustment");
+        mapWithAnimalId.put("chargetype", "Adjustment");
         mapWithAnimalId.put("comment", "charge 1 with animal id");
 
         Map<String, String> mapWithDebitAcct = new LinkedHashMap<>();
-        mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct.put("date", "2010-10-23");
-        mapWithDebitAcct.put("chargetype", "Business Office");
+        mapWithDebitAcct.put("debitedaccount", ACCOUNT_ID_1);
+        mapWithDebitAcct.put("chargeGroup", "Business Office");
         mapWithDebitAcct.put("chargeId", "Blood draws - Additional Tubes");
         mapWithDebitAcct.put("quantity", "8");
-        mapWithDebitAcct.put("chargecategory", "Adjustment");
+        mapWithDebitAcct.put("chargetype", "Adjustment");
         mapWithDebitAcct.put("comment", "charge 1 without animal id");
 
         Map<String, String> mapWithDebitAcct2 = new LinkedHashMap<>();
-        mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
         mapWithDebitAcct2.put("date", "2010-10-22");
-        mapWithDebitAcct2.put("chargetype", "Clinical Pathology");
+        mapWithDebitAcct2.put("debitedaccount", ACCOUNT_ID_1);
+        mapWithDebitAcct2.put("chargeGroup", "Clinical Pathology");
         mapWithDebitAcct2.put("chargeId", "vaccine supplies");
         mapWithDebitAcct2.put("quantity", "5");
         mapWithDebitAcct2.put("comment", "charge 2 without animal id");
@@ -674,7 +977,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId2.put("Id", PROJECT_MEMBER_ID);
         mapWithAnimalId2.put("date", "2011-09-15");
         mapWithAnimalId2.put("project", PROJECT_ID);
-        mapWithAnimalId2.put("chargetype", "Clinical Pathology");
+        mapWithAnimalId2.put("chargeGroup", "Clinical Pathology");
         mapWithAnimalId2.put("chargeId", "vaccine supplies");
         mapWithAnimalId2.put("quantity", "10");
         mapWithAnimalId2.put("comment", "charge 2 with animal id");
@@ -685,6 +988,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         enterChargesInGrid(1, mapWithAnimalId);
 
+        log("Submit & Reload Form");
+        sleep(5000);
+        submitAndReloadForm();
+
+        log("Enter another Misc. Charges with animal Id");
+        enterChargesInGrid(1, mapWithAnimalId2);
+
         log("Submit the form");
         sleep(5000);
         submitForm();
@@ -693,9 +1003,9 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
         enterChargesInGrid(1, mapWithDebitAcct);
 
-        log("Submit the form");
+        log("Submit & Reload");
         sleep(5000);
-        submitForm();
+        submitAndReloadForm();
 
         log("Enter another Misc. Charges with debit account");
         waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges without Animal Ids"));
@@ -733,24 +1043,37 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         }
     }
 
+    private void submitAndReloadForm()
+    {
+        sleep(2000);
+        clickButton("Submit And Reload", 0);
+        _extHelper.waitForExtDialog("Finalize Form");
+        click(Ext4Helper.Locators.ext4Button("Yes"));
+        waitForTextToDisappear("Saving Changes", 5000);
+    }
+
     private void submitForm()
     {
+//        new WebDriverWait(getDriver(), 15).until(ExpectedConditions.elementToBeClickable(Locator.button("Submit")));
+        sleep(2000);
         clickButton("Submit", 0);
         _extHelper.waitForExtDialog("Finalize Form");
         click(Ext4Helper.Locators.ext4Button("Yes"));
         waitForTextToDisappear("Saving Changes", 5000);
     }
+
     private void addComboBoxRecord(int rowIndex, String colName, String comboBoxSelectionValue, Ext4GridRef miscChargesGrid,
                                    @Nullable Ext4Helper.TextMatchTechnique matchTechnique)
     {
-        Locator chargetype = miscChargesGrid.getCell(rowIndex, colName);
-        click(chargetype);
-        Locator.XPathLocator chargetypeLocator = Ext4Helper.Locators.formItemWithInputNamed(colName);
+        Locator comboCol = miscChargesGrid.getCell(rowIndex, colName);
+        click(comboCol);
+        sleep(2000);
+        Locator.XPathLocator comboColLocator = Ext4Helper.Locators.formItemWithInputNamed(colName);
 
         if (matchTechnique != null)
-            _ext4Helper.selectComboBoxItem(chargetypeLocator, matchTechnique, comboBoxSelectionValue);
+            _ext4Helper.selectComboBoxItem(comboColLocator, matchTechnique, comboBoxSelectionValue);
         else
-            _ext4Helper.selectComboBoxItem(chargetypeLocator, comboBoxSelectionValue);
+            _ext4Helper.selectComboBoxItem(comboColLocator, comboBoxSelectionValue);
 
     }
 
@@ -775,6 +1098,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "budgetEndDate",
                 "affiliate",
                 "investigatorName",
+                "investigatorId",
                 "contact_name",
                 "contact_phone",
                 "contact_email",
@@ -820,7 +1144,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 "oldPk",
                 "name",
                 "chargeCategoryId",
-                "serviceCode",
                 "departmentCode",
                 "comment",
                 "active",
@@ -850,10 +1173,29 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         ImportDataPage importDataPage = new ImportDataPage(getDriver());
         importDataPage.setFile(CHARGEABLE_ITEMS_RATES_ERROR_TSV);
         importDataPage.submitExpectingError();
+        waitForText("Format:");
 
-        assertTextPresent("ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).",
-                "ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).");
+        log("Test for Overlapping date error during data upload");
+        String error1 = "ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).";
+        String error2 = "ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).";
+        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_ERROR_TSV);
 
+        click(Locator.id("uploadFileDiv2Expando"));
+        waitForText("Import Lookups by Alternate Key");
+
+        setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), CHARGEABLE_ITEMS_RATES_ERROR_TSV.getPath());
+        click(Locator.button("Submit"));
+
+        waitForText("ERROR");
+        assertTextPresent("ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).");
+        assertTextPresent("ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).");
+
+        refresh();
+
+        log("Test for Group-Category association during data upload");
+        error1 = "ERROR: 'Scientific Protocol Implementation, Surgery' is not a valid group and category association. If this is a new association, then add this association to ehr_billing.groupCategoryAssociations table by going to 'GROUP CATEGORY ASSOCIATIONS' link on the main Finance page.";
+        error2 = "ERROR: 'Clinical Pathology, Surgery' is not a valid group and category association. If this is a new association, then add this association to ehr_billing.groupCategoryAssociations table by going to 'GROUP CATEGORY ASSOCIATIONS' link on the main Finance page.";
+        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV, error1, error2);
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_UPDATE_TSV, CHARGE_RATES_NUM_UPDATE_ROWS, CHARGEABLE_ITEMS_NUM_UPDATE_ROWS);
 
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
@@ -872,7 +1214,18 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertTextPresent("Medicine A per dose", 2);
         assertTextPresent("vaccine supplies", 3);
 
+    }
 
+    private void attemptUploadWithBadData(File file, String... errors)
+    {
+        click(Locator.id("uploadFileDiv2Expando"));
+        waitForText("Import Lookups by Alternate Key");
+
+        setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), file.getPath());
+        click(Locator.button("Submit"));
+
+        waitForText("ERROR");
+        assertTextPresent(errors);
     }
 
     private void uploadChargeRates(File file, int rateRows, int itemRows)
@@ -897,32 +1250,69 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         assertEquals(itemRows, drt.getDataRowCount());
     }
 
+    private void truncateBillingTables(Connection connection) throws IOException, CommandException
+    {
+        truncateTable(connection, "wnprc_billing", "tierRates");
+        truncateTable(connection, "ehr_billing", "aliases");
+        truncateTable(connection, "ehr_billing", "chargeUnits");
+        truncateTable(connection, "ehr_billing", "chargeRates");
+        truncateTable(connection, "ehr_billing", "chargeableItems");
+        truncateTable(connection, "ehr_billing", "chargeableItemCategories");
+        truncateTable(connection, "wnprc_billing", "groupCategoryAssociations");
+
+    }
+
     private void uploadData() throws IOException, CommandException
     {
+        Connection connection = createDefaultConnection(true);
+        Map<String, Object> responseMap = new HashMap<>();
+
+        truncateBillingTables(connection);
+
         //upload Tier Rates
-        importBulkDataFromFile(TIER_RATES_TSV, "Tier Rates", TIER_RATES_NUM_ROWS);
-        testExpectedRowCount(TIER_RATES_NUM_ROWS);
+        List<Map<String, Object>> tsv = loadTsv(TIER_RATES_TSV);
+        insertTsvData(connection, "wnprc_billing", "tierrates", tsv)
+                .forEach(row -> responseMap.put(row.get("tierRateType").toString(),row.get("rowid")));
 
         //upload Grant Accounts
-        importBulkDataFromFile(ALIASES_TSV, "Grant Accounts - ALL", ALIASES_NUM_ROWS);
-        testExpectedRowCount(ALIASES_NUM_ROWS);
+        tsv = loadTsv(ALIASES_TSV);
+        insertTsvData(connection, "ehr_billing", "aliases", tsv)
+                .forEach(row -> aliasesMap.put(row.get("alias").toString(),row.get("rowid")));
+
+        //upload Charge Units
+        tsv = loadTsv(CHARGE_UNITS_TSV);
+        insertTsvData(connection, "ehr_billing", "chargeUnits", tsv)
+                .forEach(row -> responseMap.put(row.get("groupName").toString(),row.get("active")));
 
         //upload Chargeable Item Categories
-        importBulkDataFromFile(CHARGEABLE_ITEM_CATEGORIES_TSV, "Chargeable Item Categories", CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS);
-        testExpectedRowCount(CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS);
+        tsv = loadTsv(CHARGEABLE_ITEM_CATEGORIES_TSV);
+        insertTsvData(connection, "ehr_billing", "chargeableItemCategories", tsv)
+                .forEach(row -> responseMap.put(row.get("name").toString(),row.get("rowId")));
+
+        //upload Group-Category Associations
+        tsv = loadTsv(GROUP_CATEGORY_ASSOCIATIONS_TSV);
+        insertTsvData(connection, "wnprc_billing", "groupCategoryAssociations", tsv)
+                .forEach(row -> responseMap.put(row.get("chargeGroupName").toString(),row.get("rowid")));
 
         //upload Chargeable Items and Charge Rates
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_TSV, CHARGE_RATES_NUM_ROWS, CHARGEABLE_ITEMS_NUM_ROWS);
 
-        //upload Charge Units
-        importBulkDataFromFile(CHARGE_UNITS_TSV, "Charge Units", CHARGE_UNITS_NUM_ROWS);
-        testExpectedRowCount(CHARGE_UNITS_NUM_ROWS);
     }
 
-    private void testExpectedRowCount(int expectedNumRows)
+    private List<Map<String, Object>> insertTsvData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> tsv) throws IOException, CommandException
     {
-        DataRegionTable results = new DataRegionTable("query", getDriver());
-        assertEquals("Wrong row count", expectedNumRows, results.getDataRowCount());
+        log("Loading tsv data: " + schemaName + "." + queryName);
+        InsertRowsCommand command = new InsertRowsCommand(schemaName,queryName);
+        command.setRows(tsv);
+        SaveRowsResponse response = command.execute(connection, PRIVATE_FOLDER_PATH);
+        return response.getRows();
+    }
+
+    private void truncateTable(Connection connection, String schemaName, String queryName) throws IOException, CommandException
+    {
+        log("Truncating table: " + schemaName + "." + queryName);
+        TruncateTableCommand command = new TruncateTableCommand(schemaName, queryName);
+        command.execute(connection, PRIVATE_FOLDER_PATH);
     }
 
     private void importBulkDataFromFile(File file, String linkText, int numRows)
@@ -1014,10 +1404,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         mapWithAnimalId.put("Id", PROJECT_MEMBER_ID);
         mapWithAnimalId.put("date", "2010-11-22");
         mapWithAnimalId.put("project", PROJECT_ID);
-        mapWithAnimalId.put("chargetype", "Clinical Pathology");
+        mapWithAnimalId.put("chargeGroup", "Clinical Pathology");
         mapWithAnimalId.put("chargeId", "vaccine supplies");
         mapWithAnimalId.put("quantity", "10");
-        mapWithAnimalId.put("chargecategory", "Adjustment");
+        mapWithAnimalId.put("chargetype", "Adjustment");
         mapWithAnimalId.put("comment", "charge 1 with animal id");
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         log("Enter Misc. Charges with animal Id.");
@@ -1580,6 +1970,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     @Test
     public void testClinicalHistoryPanelOptions(){
+        pauseJsErrorChecker();
         beginAtAnimalHistoryTab();
         openClinicalHistoryForAnimal("TEST1020148");
         List<String> expectedLabels = new ArrayList<String>(
@@ -1656,15 +2047,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText("Invoice"));
         DataRegionTable invoice = new DataRegionTable("query", getDriver());
         invoice.clickEditRow(0);
-        setFormElement(Locator.input("invoiceSentOn"), date);
-        setFormElement(Locator.input("paymentReceivedOn"), date);
-        setFormElement(Locator.input("paymentAmountReceived"), amount);
+        setFormElement(Locator.inputByNameContaining("invoiceSentOn"), date);
+        setFormElement(Locator.inputByNameContaining("paymentReceivedOn"), date);
+        setFormElement(Locator.inputByNameContaining("paymentAmountReceived"), amount);
 
         clickButton("Submit",0);
-
-        Window msgWindow = new Window.WindowFinder(this.getDriver()).withTitle("Success").waitFor();
-        assertEquals("Your upload was successful!", "Success", msgWindow.getTitle());
-        msgWindow.clickButton("OK", 0);
 
         invoice = new DataRegionTable("query", getDriver());
         String balance = invoice.getDataAsText(0,"balanceDue");

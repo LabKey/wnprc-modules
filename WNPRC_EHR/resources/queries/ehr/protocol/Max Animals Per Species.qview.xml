@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="protocol"/>
+        <column name="inves"/>
+        <column name="approve"/>
+        <column name="expirationDate/expirationDate"/>
+        <column name="countsBySpecies/Cynomolgus::countsBySpecies"/>
+        <column name="countsBySpecies/Macaque::countsBySpecies"/>
+        <column name="countsBySpecies/Marmoset::countsBySpecies"/>
+        <column name="countsBySpecies/Rhesus::countsBySpecies"/>
+        <column name="pdf"/>
+    </columns>
+    <sorts>
+        <sort column="protocol" />
+    </sorts>
+</customView>

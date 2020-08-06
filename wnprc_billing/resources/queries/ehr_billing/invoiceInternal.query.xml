@@ -8,6 +8,9 @@
                         <item text="Download Invoices" insertPosition="end" requiresSelection="true">
                             <target method="POST">wnprc_billing/DownloadInvoices.view?</target>
                         </item>
+                        <item text="Download Summary Invoices" insertPosition="end" requiresSelection="true">
+                            <target method="POST">wnprc_billing/DownloadSummaryInvoices.view?</target>
+                        </item>
                 </buttonBarOptions>
                 <columns>
                     <column columnName="rowId"/>

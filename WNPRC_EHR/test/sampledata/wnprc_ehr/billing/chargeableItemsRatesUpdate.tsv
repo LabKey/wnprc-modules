@@ -1,4 +1,4 @@
-name	departmentCode	chargeableItemStartDate	chargeableItemEndDate	category	serviceCode	active	comment	unitCost	genCredits	chargeRateStartDate	chargeRateEndDate	allowBlankId
-vaccine supplies	Business Office	1/1/2005	12/31/2050	Misc. Fees	45	true		25.0	true	5/25/2007	01/01/2045	true
-Medicine A per dose	Scientific Protocol Implementation	1/1/2005	12/31/2050	Misc. Fees	46	true		20.75	true	1/1/2007	12/31/2050	false
-Replacement Animal1	Scientific Protocol Implementation	1/1/2005	12/31/2050	Animal Replacement	2	true		30.50	true	1/1/2007	1/1/2045	false
+name	groupName	chargeableItemStartDate	chargeableItemEndDate	category	active	comment	unitCost	genCredits	chargeRateStartDate	chargeRateEndDate	allowBlankId
+vaccine supplies	Business Office	1/1/2005	12/31/2050	Misc. Fees	true		25.0	true	5/25/2007	01/01/2045	true
+Medicine A per dose	Scientific Protocol Implementation	1/1/2005	12/31/2050	Misc. Fees	true		20.75	true	1/1/2007	12/31/2050	false
+Replacement Animal1	Scientific Protocol Implementation	1/1/2005	12/31/2050	Animal Replacement	true		30.50	true	1/1/2007	1/1/2045	false

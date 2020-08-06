@@ -3,8 +3,10 @@
         <column name="Id"/>
         <column name="date"/>
         <column name="virus" />
-        <column name="ViralLoad"/>
+        <column name="AverageViralLoad"/>
         <column name="LogVL"/>
+        <column name="SampleType"/>
+        <column name="Comments"/>
     </columns>
    <sorts>
        <sort column="Id" />

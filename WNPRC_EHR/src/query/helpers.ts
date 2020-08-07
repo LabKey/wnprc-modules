@@ -27,6 +27,19 @@ export const setupValues = (formdata: any[], QCStateLabel: string, valuekey: str
   return newarray;
 };
 
+// jamming this in here for firefox 45 support
+if (!Object.entries) {
+  Object.entries = function( obj ){
+    var ownProps = Object.keys( obj ),
+      i = ownProps.length,
+      resArray = new Array(i); // preallocate the Array
+    while (i--)
+      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+    return resArray;
+  };
+}
+
 export const setupJsonData = (values: any[], schemaName: string, queryName: string) => {
   //for each grouped item (insert, update, delete), set up commands for each diff set.
   let commands =[];

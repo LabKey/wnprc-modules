@@ -163,7 +163,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   };
 
   console.log = function(message) {
-    document.getElementsByClassName("centered-wrapper")[0]['innerHTML'] = message;
+    document.getElementsByClassName("centered-wrapper")[0]['innerHTML'] += message;
   };
 
   function triggerSubmit() {
@@ -180,9 +180,9 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       /*let command = wasSaved || editMode ? "update" : "insert";*/
       setSubmitTextBody("Submitting...");
 
-      console.log(groupCommands(formData));
+      console.log(JSON.stringify(groupCommands(formData)));
       let itemsToInsert = groupCommands(formData);
-      console.log(setupJsonData(itemsToInsert, "study", "feeding"));
+      console.log(JSON.stringify(setupJsonData(itemsToInsert, "study", "feeding")));
       let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
 
       saveRowsDirect(jsonData)

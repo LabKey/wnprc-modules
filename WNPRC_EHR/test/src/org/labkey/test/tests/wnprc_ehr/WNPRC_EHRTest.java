@@ -2117,7 +2117,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
         clickNewButton("submit-all-btn");
         clickNewButton("submit-final");
-        waitForText("Success", 1, 20000);
+        waitForText("Success", 1, 50000);
 
         SelectRowsResponse r = fetchFeedingData();
         JSONObject wt = (JSONObject) r.getRows().get(0).get("amount");

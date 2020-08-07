@@ -128,26 +128,44 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
   const validate = () => {
     return new Promise((resolve, reject) => {
       let promises = [];
-      for (let record of formData) {
-        if (animalInfoCache && animalInfoCache[record["Id"]["value"]]) {
-          let animalRecord = animalInfoCache[record["Id"]["value"]];
-          if (animalRecord["calculated_status"] == "Dead") {
-            setErrorTextExternal("Cannot update dead animal record "+ record["Id"]["value"]);
-            setShowModal("none");
-            setShowModal("error");
-            //return false;
-            resolve(false);
+      try
+      {
+        for (let record of formData)
+        {
+          if (animalInfoCache && animalInfoCache[record["Id"]["value"]])
+          {
+            let animalRecord = animalInfoCache[record["Id"]["value"]];
+            if (animalRecord["calculated_status"] == "Dead")
+            {
+              setErrorTextExternal("Cannot update dead animal record " + record["Id"]["value"]);
+              setShowModal("none");
+              setShowModal("error");
+              //return false;
+              resolve(false);
+            }
           }
-        } else {
-          promises.push(lookupAnimalInfo(record["Id"]["value"]));
+          else
+          {
+            promises.push(lookupAnimalInfo(record["Id"]["value"]));
+          }
         }
-      }
+      } catch(err) {
+           console.log(JSON.stringify(err));
+        }
       Promise.all(promises).then((results) => {
-        for (let result of results) {
-          if (result["calculated_status"] == "Dead") {
-            setErrorTextExternal("Cannot update dead animal record: "+ result["Id"]);
-            resolve(false);
+
+        try
+        {
+          for (let result of results)
+          {
+            if (result["calculated_status"] == "Dead")
+            {
+              setErrorTextExternal("Cannot update dead animal record: " + result["Id"]);
+              resolve(false);
+            }
           }
+        } catch (err) {
+          console.log(JSON.stringify(err));
         }
         resolve(true);
       }).catch((d)=>{
@@ -181,10 +199,16 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       setSubmitTextBody("Submitting...");
 
 
-      console.log(groupCommands(formData));
-      let itemsToInsert = groupCommands(formData);
-      console.log(setupJsonData(itemsToInsert, "study", "feeding"));
-      let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
+      let jsonData;
+      console.log('grouping stuff... but skipping group cmds');
+      try {
+        console.log('grouping stuff')
+        let itemsToInsert = groupCommands(formData);
+        console.log('setting up stuff')
+        jsonData = setupJsonData(itemsToInsert, "study", "feeding");
+      }catch(err) {
+        console.log(JSON.stringify(err))
+      }
 
       console.log('calling save rows');
       saveRowsDirect(jsonData)

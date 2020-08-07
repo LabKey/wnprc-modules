@@ -30,16 +30,21 @@ export const setupValues = (formdata: any[], QCStateLabel: string, valuekey: str
 export const setupJsonData = (values: any[], schemaName: string, queryName: string) => {
   //for each grouped item (insert, update, delete), set up commands for each diff set.
   let commands =[];
-  Object.keys(values).forEach(function(key,index) {
-    let rowsToInsert = setupValues(values[key],'Completed', "value");
-    commands.push({
-      schemaName: schemaName,
-      queryName: queryName,
-      command: key,
-      rows: rowsToInsert
-    })
-  });
+  try
+  {
+    Object.keys(values).forEach(function (key, index) {
+      let rowsToInsert = setupValues(values[key], 'Completed', "value");
+      commands.push({
+        schemaName: schemaName,
+        queryName: queryName,
+        command: key,
+        rows: rowsToInsert
+      })
 
+    });
+  }catch (err) {
+    console.log(JSON.stringify(err))
+  }
   return {
     commands: commands
   };

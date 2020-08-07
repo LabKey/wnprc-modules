@@ -29,7 +29,7 @@
         vertical-align: middle;
     }
     .date-column {
-        width: 110px;
+        white-space: nowrap;
     }
 
     .schedule-nav-link {
@@ -78,7 +78,7 @@
                     </div>
                     <div class="col-sm-2">
                         <label for="endDate">End Date</label>
-                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="endDate" placeholder="Password">
+                        <input type="text" onfocus="setDateOnFocus(this)" onblur="setPlaceholderOnBlur(this)" class="form-control" id="endDate" placeholder="">
                     </div>
                 </div>
             </div>
@@ -93,7 +93,7 @@
         </form>
 
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <div id="navigateByWeek">
                     <br><br>
                     <a class="schedule-nav-link" href="javascript:changeWeek(-1)">&laquo; Previous</a>
@@ -107,9 +107,9 @@
             }
         %>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 In the event of an injury or potential exposure occurring on the weekend that requires a trip the UW Hospital Emergency
-                Department, contact either the Colony Management Supervisor or the Veterinarian on-call, and they will contact the
+                Department, contact<br>either the Colony Management Supervisor or the Veterinarian on-call, and they will contact the
                 appropriate HR representative.
                 <br><br>
             </div>
@@ -118,7 +118,7 @@
             if (!reportMode) {
         %>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <a id="printable-schedule-link" href="#">Printable Schedule</a>
                 <br>
             </div>
@@ -127,12 +127,12 @@
             }
         %>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <div id="onCallTable">Loading schedule...</div>
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <br>
                 Use the above contact information for: <strong>AFTER HOURS (weekdays 4pm-6am), WEEKENDS, and HOLIDAYS</strong>. Contact staff using the phone numbers listed above,
                 calling the bolded number first.
@@ -370,10 +370,6 @@
         let headerRow = document.createElement("tr");
         for (let i = 0; i < onCallSchedule[0].length; i++) {
             let th = document.createElement("th");
-            if(i == 0){
-                th.classList.add("date-column");
-            }
-
             th.classList.add("thin-bordered-table");
             th.classList.add("centered-text-table");
             th.innerHTML = (onCallSchedule[0][i]) ? onCallSchedule[0][i].html : "<strong>NO DATA</strong>";
@@ -384,6 +380,9 @@
             let tr = document.createElement("tr");
             for (let j = 0; j < onCallSchedule[i].length; j++) {
                 let td = document.createElement("td");
+                if (j == 0) {
+                    td.classList.add("date-column");
+                }
                 td.classList.add("thin-bordered-table");
                 td.classList.add("centered-text-table");
                 td.innerHTML = (onCallSchedule[i][j]) ? onCallSchedule[i][j].html : "<strong>NO DATA</strong>";

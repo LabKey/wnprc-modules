@@ -227,7 +227,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                                         //Ext4.Msg.hide();
                                         Ext4.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
                                             if (btn == 'yes'){
-                                                window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
+                                                window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
                                             }
                                             else {
                                                 dataRegion.refresh();
@@ -858,7 +858,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                 text: 'Add Batch of Records',
                 dataRegionName: dataRegionName,
                 handler: function(){
-                    window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {formtype: 'Feeding'});
+                    window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "feeding", null, {formtype: 'Feeding'});
                 }
             });
         },

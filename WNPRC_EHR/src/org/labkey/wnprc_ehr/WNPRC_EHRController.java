@@ -1469,13 +1469,20 @@ public class WNPRC_EHRController extends SpringActionController
             // just to be safe, make sure we're reading the form type regardless of the capitalization
             // (it _should_ be all lowercase, but we should check anyway)
             String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
+            formType = formType != null ? formType.toLowerCase() : null;
 
             switch (formType)
             {
+
+                case "feeding":
+                    newUrl = new ActionURL(String.format("/wnprc_ehr%s/feeding.view",
+                            getContainer().getPath()));
+                    newUrl.addParameters(params);
+                    break;
                 // this is the list of things that need redirected to the dataEntryForm.view in the EHR
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
-                case "Necropsy":
-                case "Breeding Encounter":
+                case "necropsy":
+                case "breeding encounter":
                     newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
                             getContainer().getPath()));
                     // the ExtJS 4 data entry form expects "formType" with a capital 'T'

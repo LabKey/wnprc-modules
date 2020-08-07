@@ -8,29 +8,167 @@
                 <updateUrl />
                 <deleteUrl />
                 <columns>
-                    <column columnName="type">
-                        <columnTitle>Type of Chow</columnTitle>
-                    </column>
-                    <column columnName="amount">
-                    </column>
-                    <column columnName="modified">
-                        <columnTitle>Date Record Last Changed</columnTitle>
-                    </column>
-                    <column columnName="modifiedby">
-                        <columnTitle>Last Changed By</columnTitle>
+                    <column columnName="Id">
+                        <columnTitle>Id</columnTitle>
+                        <shownInInsertView>true</shownInInsertView>
+                        <shownInUpdateView>true</shownInUpdateView>
                     </column>
                     <column columnName="date">
-                        <isHidden>true</isHidden>
+                        <columnTitle>Date</columnTitle>
+                        <shownInInsertView>true</shownInInsertView>
+                        <shownInUpdateView>true</shownInUpdateView>
+                    </column>
+                    <column columnName="type">
+                        <columnTitle>Type of Chow</columnTitle>
+                        <shownInInsertView>true</shownInInsertView>
+                        <shownInUpdateView>true</shownInUpdateView>
+                    </column>
+                    <column columnName="amount">
+                        <columnTitle>Amount</columnTitle>
+                        <shownInInsertView>true</shownInInsertView>
+                        <shownInUpdateView>true</shownInUpdateView>
+                    </column>
+                    <column columnName="remark">
+                        <columnTitle>Remark</columnTitle>
+                        <shownInInsertView>true</shownInInsertView>
+                        <shownInUpdateView>true</shownInUpdateView>
+                    </column>
+                    <column columnName="lsid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="ParticipantSequenceNum">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="animalvisit">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="sourcelsid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="created">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="createdby">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="modified">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="modifiedby">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="dsrowid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="sequencenum">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="description">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="objectid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="parentid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="ts">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="taskid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
                     </column>
                     <column columnName="project">
-                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
                     </column>
                     <column columnName="account">
-                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
                     </column>
                     <column columnName="performedby">
-                        <columnTitle>Entered By</columnTitle>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="requestid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="enddate">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="Dataset">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="Container">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="VisitRowId">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="Folder">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="enddateCoalesced">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="enddatetimeCoalesced">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="dateOnly">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="duration">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="daysElapsed">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="history">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="QCState">
                         <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="ageAtTime">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="housingAtTime">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                    </column>
+                    <column columnName="survivorship">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
                     </column>
                 </columns>
             </table>

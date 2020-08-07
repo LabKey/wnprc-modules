@@ -7,7 +7,7 @@
 require("ehr/triggers").initScript(this);
 
 function onUpsert(helper, scriptErrors, row, oldRow){
-    row.date = new Date();
+    /*row.date = new Date();*/
 }
 
 function setDescription(row, helper){

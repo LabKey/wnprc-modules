@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="restraints" tableDbType="TABLE">
+            <table tableName="restraints" tableDbType="TABLE" useColumnOrder="true">
                 <tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>
                 <insertUrl />
                 <importUrl />
@@ -16,6 +16,14 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>restraint_type</fkTable>
                             <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="weight_objectid">
+                        <columnTitle>Weight ObjectID</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>weight</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
                         </fk>
                     </column>
 

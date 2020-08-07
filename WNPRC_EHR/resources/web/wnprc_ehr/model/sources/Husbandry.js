@@ -455,7 +455,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
         'study.waterAmount':{
             Id:{
                 hidden: true,
-                shownInGrid: false
+                shownInGrid: false,
+                parentConfig: {
+                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    dataIndex: 'Id'
+                }
             },
             date:{
                 xtype: 'datefield',

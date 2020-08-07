@@ -864,7 +864,7 @@ public class TriggerScriptHelper {
         errorMsg.append("This animal has not received the required water for the last three days, requires exception from Vet staff <br>");
         int waterdays =0;
 
-        if (recordsInTransaction != null)
+        if (recordsInTransaction.size() > 0)
         {
             Calendar waterTime = Calendar.getInstance();
             Calendar limitTime = Calendar.getInstance();

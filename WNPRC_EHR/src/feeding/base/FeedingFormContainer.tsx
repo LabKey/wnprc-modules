@@ -162,7 +162,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
     });
   };
 
-  console.log = function(message) {
+  console.error = function(message) {
     document.getElementsByClassName("centered-wrapper")[0]['innerHTML'] += message;
   };
 
@@ -180,9 +180,7 @@ const FeedingFormContainer: React.FunctionComponent<any> = (props) => {
       /*let command = wasSaved || editMode ? "update" : "insert";*/
       setSubmitTextBody("Submitting...");
 
-      console.log(JSON.stringify(groupCommands(formData)));
       let itemsToInsert = groupCommands(formData);
-      console.log(JSON.stringify(setupJsonData(itemsToInsert, "study", "feeding")));
       let jsonData = setupJsonData(itemsToInsert, "study", "feeding");
 
       saveRowsDirect(jsonData)

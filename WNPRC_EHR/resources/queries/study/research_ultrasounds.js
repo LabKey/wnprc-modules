@@ -157,14 +157,6 @@ function getValidMeasurements() {
             label: 'Umbilical Artery Peak Systolic Velocity',
             unit: 'cm/s'
         },
-        ua_end_systolic_velocity_cms: {
-            label: 'Umbilical Artery End Systolic Velocity',
-            unit: 'cm/s'
-        },
-        ua_peak_diastolic_velocity_cms: {
-            label: 'Umbilical Artery Peak Diastolic Velocity',
-            unit: 'cm/s'
-        },
         ua_end_diastolic_velocity_cms: {
             label: 'Umbilical Artery End Diastolic Velocity',
             unit: 'cm/s'
@@ -244,6 +236,14 @@ function getValidMeasurements() {
         gest_sac_mm: {
             label: 'Gestational Sac Diameter',
             unit: 'mm'
+        },
+        peak_systolic_cms: {
+            label: 'Peak Systolic',
+            unit: 'cm/s'
+        },
+        end_diastolic_cms: {
+            label: 'End Diastolic',
+            unit: 'cm/s'
         },
         nuchal_fold: {
             label: 'Nuchal Fold',

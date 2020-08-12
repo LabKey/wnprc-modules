@@ -28,12 +28,10 @@
                     <column columnName="crown_rump_mm"/>
                     <column columnName="biparietal_diameter_mm"/>
                     <column columnName="head_circumference_mm"/>
-
+                    <column columnName="occipital_frontal_diameter_mm"/>
                     <column columnName="abdominal_circumference_mm"/>
-
                     <column columnName="femur_length_mm"/>
-
-                    <column columnName="ua_systolic_velocity_cms"/>
+                    <column columnName="ua_peak_systolic_velocity_cms"/>
                     <column columnName="ua_end_diastolic_velocity_cms"/>
                     <column columnName="ua_systolic_diastolic_ratio"/>
                     <column columnName="lateral_ventricles_mm"/>
@@ -42,8 +40,10 @@
                     <column columnName="max_vertical_pocket_cm"/>
                     <column columnName="amniotic_fluid_index_cm"/>
                     <column columnName="mca_peak_systolic_cms"/>
+                    <column columnName="mca_end_diastolic_cms"/>
                     <column columnName="mca_systolic_diastolic_ratio"/>
                     <column columnName="mca_pulsatility_index"/>
+                    <column columnName="mca_resistive_index"/>
                     <column columnName="cardiac_circumference_mm"/>
                     <column columnName="cardiac_area_cm2"/>
                     <column columnName="chest_circumference_cm"/>
@@ -51,9 +51,8 @@
                     <column columnName="ratio_circumferences"/>
                     <column columnName="ratio_areas"/>
                     <column columnName="estimated_fetal_weight_g"/>
-
                     <column columnName="gest_sac_mm"/>
-                    <column columnName="yolk_sac_diameter_mm"/>
+                    <column columnName="nuchal_fold"/>
                     <column columnName="code">
                         <columnTitle>SNOMED</columnTitle>
                         <fk>

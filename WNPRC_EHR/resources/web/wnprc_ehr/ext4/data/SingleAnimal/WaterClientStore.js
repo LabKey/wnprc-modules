@@ -29,7 +29,7 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.WaterClientStore', {
                 waterMap[id].push({
                     objectid: record.get('objectid'),
                     date: date,
-                    qcstate: record.get('QCState'),
+                    qcstate: record.get('qcstate'),
                     quantity: record.get('quantity')
                 });
             }

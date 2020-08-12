@@ -20,7 +20,8 @@
     WA.frequency AS frequency,
     WA.frequency.meaning AS frequencyMeaning,
     WA.waterSource AS waterSource,
-    true AS actionRequired
+    true AS actionRequired,
+    WA.qcstate AS qcstate
 
 
 FROM study.waterAmount WA
@@ -49,7 +50,8 @@ UNION ALL
     WS.frequency AS frequency,
     WS.freqMeaning AS frequencyMeaning,
     WS.waterSource AS waterSource,
-    (WS.waterSource = 'regulated' OR WS.startDate = WS.origDate) AS actionRequired
+    (WS.waterSource = 'regulated' OR WS.startDate = WS.origDate) AS actionRequired,
+    WS.waterStatus AS qcstate
 
 
 FROM study.waterSchedule WS

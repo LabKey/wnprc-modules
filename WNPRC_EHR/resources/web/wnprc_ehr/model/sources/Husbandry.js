@@ -174,9 +174,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                             var chairingEndTime = Ext4.getCmp('chairingEndTime');
                             var waterLocation = Ext4.getCmp('waterLocation');
                             var startTime = new Date(weightStartTime.getValue());
-                            
-                            chairingStartTime.setValue(startTime);
-                            chairingEndTime.setValue(startTime);
+                            if (!chairingStartTime.getValue()){
+                                 chairingStartTime.setValue(startTime);
+                            }
+                            if (!chairingEndTime.getValue()){
+                                chairingEndTime.setValue(startTime);
+                            }
+
                             waterLocation.setValue(val);
                         }
                     }
@@ -474,8 +478,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             frequency:{
                 allowBlank: false,
-                defaultValue: 'PM',
+                defaultValue: '2',
                 editable: false,
+                editorConfig:{
+                    displayColumn: 'altmeaning'
+                },
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',

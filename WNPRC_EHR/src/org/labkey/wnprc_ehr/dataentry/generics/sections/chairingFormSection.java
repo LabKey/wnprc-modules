@@ -22,6 +22,6 @@ public class chairingFormSection extends SlaveFormSection
 
     @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id", "date", "project","chairingStartTime","chairingEndTime","remarks","location");
+        return Arrays.asList("Id","date","location","chairingStartTime","chairingEndTime","remarks", "project");
     }
 }

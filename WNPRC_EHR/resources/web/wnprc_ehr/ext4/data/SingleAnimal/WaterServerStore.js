@@ -37,7 +37,7 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
 
                 console.log('valuer of queryName '+ r.store.queryName);
 
-                if (r.store.queryName == 'waterAmount') {
+               /* if (r.store.queryName == 'waterAmount') {
 
 
                     let qcState = r.get('qcstate');
@@ -47,26 +47,28 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                         console.log('waterAmount qcStatus ' + qcState);
                         let scheduleQC = EHR.Security.getQCStateByLabel('Scheduled');
                         r.set('qcstate', scheduleQC);
-                        /*r.phantom  = true;
-                        recMap.create.push(r);*/
+                        r.phantom  = true;
+                       // recMap.create.push(r);
                     }
-                }
+                }*/
 
 
                 if (r.phantom ) {
                     console.log ('waterSeverStore dataset '+ r.store.queryName);
                     console.log ('value of r '+ r);
 
+                    // Validate null values for not entering empty records to DB
+                    // Excluding validation of weight because we are allowing null weights
                     switch (r.store.queryName){
-                        case 'waterGiven':
-                            var waterGiven = r.get('waterGiven');
-                            if (waterGiven == null ){
+                        /*case 'weight':
+                            var weight = r.get('weight');
+                            if (weight == null ){
                                 break;
                             }
                             else {
                                 recMap.create.push(r);
                                 break;
-                            }
+                            }*/
                         case 'restraints':
                             var restraintType = r.get('restraintType');
                             if (restraintType == null  || restraintType == ""){
@@ -86,6 +88,18 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                                 break;
                             }
 
+                        case 'waterAmount':
+                            let qcState = r.get('qcstate');
+                            let qcStateLabel = EHR.Security.getQCStateByRowId(qcState).Label;
+                            console.log('waterAmount qcStatus ' + qcState + ' value of ' + r);
+                            if (qcStateLabel == 'In Progress' || qcStateLabel == 'Completed' ) {
+                                console.log('waterAmount qcStatus ' + qcState);
+                                let scheduleQC = EHR.Security.getQCStateByLabel('Scheduled');
+                                r.set('qcstate', scheduleQC.RowId);
+                               // r.phantom  = true;
+                                 recMap.create.push(r);
+                                 break;
+                            }
 
                         default:
                             recMap.create.push(r);

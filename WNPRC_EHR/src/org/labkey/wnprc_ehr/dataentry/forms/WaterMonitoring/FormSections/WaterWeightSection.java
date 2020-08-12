@@ -1,6 +1,5 @@
 package org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections;
 
-import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleFormSection;
 
 import java.util.Arrays;

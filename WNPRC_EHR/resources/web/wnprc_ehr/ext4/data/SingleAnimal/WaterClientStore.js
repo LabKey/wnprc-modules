@@ -13,7 +13,7 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.WaterClientStore', {
         var waterMap = {};
 
         var allRecords = this.getRange();
-        /*for (var idx = 0; idx < allRecords.length; ++idx){
+        for (var idx = 0; idx < allRecords.length; ++idx){
             var record = allRecords[idx];
             if (record.get('quantity') > 0){
                 var id = record.get('Id');
@@ -33,7 +33,7 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.WaterClientStore', {
                     quantity: record.get('quantity')
                 });
             }
-        }*/
+        }
 
         if (!LABKEY.Utils.isEmptyObj(waterMap)){
             waterMap = Ext4.encode(waterMap);

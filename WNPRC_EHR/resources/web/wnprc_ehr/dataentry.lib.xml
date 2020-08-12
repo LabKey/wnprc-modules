@@ -5,7 +5,6 @@
         <script path="/wnprc_ehr/model/sources/BloodDraws.js"/>
         <script path="/wnprc_ehr/model/sources/Default.js"/>
         <script path="/wnprc_ehr/model/sources/Encounter.js"/>
-        <script path="/wnprc_ehr/model/sources/Husbandry.js"/>
         <script path="/wnprc_ehr/model/sources/InRooms.js"/>
         <script path="/wnprc_ehr/model/sources/IrregularObs.js"/>
         <script path="/wnprc_ehr/model/sources/IrregularObs_OKRooms.js"/>

@@ -27,6 +27,10 @@
                         </fk>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
+                    <column columnName="gestation_day">
+                        <columnTitle>Estimated Gestation</columnTitle>
+                        <datatype>varchar</datatype>
+                    </column>
                     <column columnName="project">
                         <fk>
                             <fkDbSchema>ehr</fkDbSchema>

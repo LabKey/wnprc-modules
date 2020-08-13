@@ -22,6 +22,7 @@ export const ToStorybook = () => {
         classname="form-control"
         valuekey="key"
         displaykey="key"
+        required={true}
     />
     )
 };

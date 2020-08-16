@@ -6,6 +6,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableCustomizer;
 import org.labkey.api.data.TableInfo;
@@ -150,23 +151,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
             statusFlags.setDimension(false);
         }
 
-        ColumnInfo sourceMaterialColumn = ti.getColumn("sourceMaterial");
-        if (sourceMaterialColumn != null) {
-            TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo(); // CONSIDER: replace foreignkey instead attempting surgery on this inner columninfo
-            if (sourceMaterialTable instanceof AbstractTableInfo) {
-                var liquidColumn = ((AbstractTableInfo)sourceMaterialTable).getMutableColumn("liquid");
-                if (liquidColumn != null) {
-                    liquidColumn.setLabel("Units");
-                    liquidColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
-                        @Override
-                        public DisplayColumn createRenderer(ColumnInfo colInfo) {
-                            return new ViralLoadUnitsColumn(colInfo);
-                        }
-                    });
-                }
-            }
-        }
-
         BaseColumnInfo batchedColumn = (BaseColumnInfo)ti.getColumn("batched");
 
         if (batchedColumn != null) {
@@ -208,37 +192,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
         customizeButtonBar(ti, AssayProtocolSchema.BATCHES_TABLE_NAME);
     }
 
-    public static class ViralLoadUnitsColumn extends DataColumn {
-        public ViralLoadUnitsColumn(ColumnInfo colInfo) {
-            super(colInfo);
-        }
-
-        @Override
-        public Object getValue(RenderContext ctx) {
-            Object value = super.getValue(ctx);
-            if (value instanceof Boolean) {
-                boolean liquid = (Boolean) value;
-                if (liquid) {
-                    return "mL";
-                }
-                else {
-                    return "mg";
-                }
-            }
-            return "";
-        }
-
-        @Override
-        public Object getDisplayValue(RenderContext ctx) {
-            return getValue(ctx);
-        }
-
-        @Override
-        public String getFormattedValue(RenderContext ctx) {
-            return h(getValue(ctx));
-        }
-    }
-
     public static class ViralLoadBatchedColumn extends DataColumn {
         public ViralLoadBatchedColumn(ColumnInfo colInfo) {
             super(colInfo);
@@ -267,4 +220,5 @@ public class ViralAssayCustomizer implements TableCustomizer {
             return h(getValue(ctx));
         }
     }
+
 }

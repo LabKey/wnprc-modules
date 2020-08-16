@@ -1205,13 +1205,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void attemptUploadWithBadData(File file, String... errors)
     {
-        click(Locator.id("uploadFileDiv2Expando"));
-        waitForText("Import Lookups by Alternate Key");
+        ImportDataPage importDataPage = new ImportDataPage(getDriver());
+        importDataPage.setFile(file);
+        importDataPage.submitExpectingError();
 
-        setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), file.getPath());
-        click(Locator.button("Submit"));
-
-        waitForText("ERROR");
         assertTextPresent(errors);
     }
 

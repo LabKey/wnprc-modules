@@ -65,6 +65,12 @@ WNPRC_EHR.Utils.Lib = (function() {
             // Remove any leading slashes to make the alreadyLoaded cache consistent
             libName = libName.replace(/^\//,'');
 
+            // Hack to avoid double-loading this magic library, which is special-cased in the normal LabKey JS dependency
+            // handling to allow for the new JS API, so it needs to be handled specially here in WNPRC's forked JS
+            // dependency handling too
+            if (libName === 'clientapi_core')
+                return;
+
             // The library hasn't been loaded...
             if (!alreadyLoaded[libName]) {
                 alreadyLoaded[libName] = true; // mark the library as loaded

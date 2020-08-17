@@ -5,12 +5,6 @@ Ext.onReady(createNavMenu);
 
 function createNavMenu()
 {
-    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
-    {
-        createNavMenu.defer(10);
-        return;
-    }
-
     //NOTE: edit these lines to fit your installation
     var container = 'WNPRC/WNPRC_Units/Research_Services/MHC_SSP/Private/MHC_DB/';
 
@@ -66,7 +60,7 @@ function createNavMenu()
             }, this);
         }
 
-        new EHR.ext.NavMenu(cfg);
+        Ext4.create('EHR.NavMenu', cfg);
     }
 }
 

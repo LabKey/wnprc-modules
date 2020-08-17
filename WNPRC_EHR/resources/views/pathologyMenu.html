@@ -2,12 +2,8 @@
     <script type="text/javascript">
         (function() {
             var createNavMenu = function() {
-                if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu) {
-                    createNavMenu.defer(10);
-                    return;
-                }
 
-                new EHR.ext.NavMenu({
+                Ext4.create('EHR.NavMenu', {
                     renderTo: 'pathologyMenu',
                     sections: [
                         {
@@ -26,7 +22,7 @@
                 });
             };
 
-            Ext.onReady(createNavMenu);
+            Ext4.onReady(createNavMenu);
         })();
     </script>
     <body>

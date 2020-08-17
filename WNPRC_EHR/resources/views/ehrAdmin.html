@@ -1,11 +1,11 @@
 <script type="text/javascript">
 
-Ext.onReady(function (){
+Ext4.onReady(function (){
 
 if (LABKEY.Security.currentUser.isAdmin){
     var webpart = <%=webpartContext%>;
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: webpart.wrapperDivId,
         width: 350,
         sections: [

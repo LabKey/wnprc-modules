@@ -1,17 +1,11 @@
 <html>
 <script type="text/javascript">
 
-Ext.onReady(createNavMenu);
+Ext4.onReady(createNavMenu);
 
 function createNavMenu()
 {
-    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
-    {
-        createNavMenu.defer(10);
-        return;
-    }
-
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'animalServices',
         sections: [
             {header: 'All Staff Minutes',
@@ -67,7 +61,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'opServices',
         sections: [
             {header: 'Facilities Management',
@@ -108,7 +102,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'researchServices',
         sections: [
             {header: 'Assay Services',
@@ -141,7 +135,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'directorsOffice',
         sections: [
             {header: 'Misc. Pages',
@@ -154,7 +148,7 @@ function createNavMenu()
     });
 
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'miscPages',
         sections: [
             {header: 'Misc. Pages',

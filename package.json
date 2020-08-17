@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "better-npm-run build",
-    "build-prod": "better-npm-run build-prod"
+    "build-prod": "better-npm-run build-prod",
+    "storybook": "start-storybook",
+    "build-storybook": "build-storybook -c .storybook -o .storybook-out"
   },
   "repository": {
     "type": "git",
@@ -23,6 +25,7 @@
   },
   "homepage": "https://github.com/WNPRC-EHR-Services/wnprc-modules#readme",
   "devDependencies": {
+    "@storybook/react": "^5.3.19",
     "@types/extjs": "^4.2.32",
     "@types/knockout": "^3.4.54",
     "@types/knockout.mapping": "^2.0.33",
@@ -43,25 +46,27 @@
     "@types/uuid": "^3.0.0",
     "@types/webpack": "4.41.10",
     "awesome-typescript-loader": "^3.5.0",
+    "babel-loader": "^8.1.0",
+    "better-npm-run": "0.0.15",
+    "css-loader": "^3.5.2",
     "expose-loader": "^0.7.5",
     "less": "^3.0.4",
+    "scss-loader": "^0.0.1",
+    "style-loader": "^1.1.4",
     "ts-loader": "^6.2.2",
     "ts-node": "^3.3.0",
     "tslint": "^5.10.0",
     "tslint-react": "^3.6.0",
     "typescript": "^3.8.3",
     "webpack": "4.42.1",
-    "webpack-cli": "3.3.11",
-    "better-npm-run": "0.0.15",
-    "style-loader": "^1.1.4",
-    "css-loader": "^3.5.2",
-    "scss-loader": "^0.0.1"
+    "webpack-cli": "3.3.11"
   },
   "dependencies": {
     "@labkey/api": "1.0.0",
     "@wnprc/primate-id": "^1.1.7",
     "blockui": "^1.0.0",
     "bootstrap": "^3.0.0",
+    "dayjs": "^1.8.24",
     "fullcalendar": "^3.0.0",
     "jquery": "^3.5.0",
     "knockout": "3.5.0",
@@ -76,10 +81,10 @@
     "react-bootstrap-typeahead": "^2.0.0-rc.4",
     "react-data-grid": "^2.0.78",
     "react-data-grid-addons": "^2.0.78",
-    "react-dom": "^16.13.1",
-    "react-tabs": "^1.0.0",
-    "react-select": "^3.1.0",
     "react-datepicker": "^3.0.0",
+    "react-dom": "^16.13.1",
+    "react-select": "^3.1.0",
+    "react-tabs": "^1.0.0",
     "rsvp": "~3.3.0",
     "simplefilter": "^1.0.0",
     "toastr": "^2.0.0",
@@ -87,8 +92,7 @@
     "underscore.string": "^3.3.5",
     "urijs": "^1.0.0",
     "uuid": "^3.0.0",
-    "whatwg-fetch": "^2.0.0",
-    "dayjs": "^1.8.24"
+    "whatwg-fetch": "^2.0.0"
   },
   "optionalDependencies": {
     "fsevents": "^1.2.4"

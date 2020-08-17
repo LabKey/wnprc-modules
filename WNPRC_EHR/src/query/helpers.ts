@@ -18,8 +18,8 @@ export const setupValues = (formdata: any[], QCStateLabel: string, valuekey: str
   let newarray = [];
   for (let item of formdata){
     let newobj = {};
-    for (let [key, entry] of Object.entries(item)){
-      let pair = {[key]: entry[valuekey]};
+    for (let key of Object.keys(item)){
+      let pair = {[key]: item[key][valuekey]};
       newobj = {...newobj, ...pair}
     }
     newarray.push(newobj);
@@ -30,16 +30,21 @@ export const setupValues = (formdata: any[], QCStateLabel: string, valuekey: str
 export const setupJsonData = (values: any[], schemaName: string, queryName: string) => {
   //for each grouped item (insert, update, delete), set up commands for each diff set.
   let commands =[];
-  Object.keys(values).forEach(function(key,index) {
-    let rowsToInsert = setupValues(values[key],'Completed', "value");
-    commands.push({
-      schemaName: schemaName,
-      queryName: queryName,
-      command: key,
-      rows: rowsToInsert
-    })
-  });
+  try
+  {
+    Object.keys(values).forEach(function (key, index) {
+      let rowsToInsert = setupValues(values[key], 'Completed', "value");
+      commands.push({
+        schemaName: schemaName,
+        queryName: queryName,
+        command: key,
+        rows: rowsToInsert
+      })
 
+    });
+  }catch (err) {
+    console.log(JSON.stringify(err))
+  }
   return {
     commands: commands
   };
@@ -47,6 +52,7 @@ export const setupJsonData = (values: any[], schemaName: string, queryName: stri
 
 export const saveRowsDirect = (jsonData: jsonDataType) => {
 
+  console.log('in save rows')
   return new Promise((resolve, reject) => {
     let options = {
       commands: jsonData.commands,
@@ -54,6 +60,7 @@ export const saveRowsDirect = (jsonData: jsonDataType) => {
       success: (data) => {resolve(data)},
       failure: (data) => {reject(data)},
     };
+    console.log(JSON.stringify(options));
     Query.saveRows(options);
   });
 };

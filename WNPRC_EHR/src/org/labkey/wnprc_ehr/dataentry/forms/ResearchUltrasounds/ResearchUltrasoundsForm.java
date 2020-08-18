@@ -9,6 +9,7 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsFormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsInstructionsFormSection;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsRestraintsFormSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleTaskForm;
 
 import java.util.ArrayList;
@@ -24,7 +25,8 @@ public class ResearchUltrasoundsForm extends SimpleTaskForm
             new TaskFormSection(),
             new AnimalDetailsFormSection(),
             new ResearchUltrasoundsInstructionsFormSection(),
-            new ResearchUltrasoundsFormSection()
+            new ResearchUltrasoundsFormSection(),
+            new ResearchUltrasoundsRestraintsFormSection()
         ));
 
         for (FormSection section: getFormSections()) {

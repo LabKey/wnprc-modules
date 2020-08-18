@@ -9,6 +9,7 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsFormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsInstructionsFormSection;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.ResearchUltrasoundsRestraintsFormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.FormSections.UltrasoundReviewFormSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleTaskForm;
 
@@ -26,6 +27,7 @@ public class ResearchUltrasoundsReviewForm extends SimpleTaskForm
             new AnimalDetailsFormSection(),
             new ResearchUltrasoundsInstructionsFormSection(),
             new ResearchUltrasoundsFormSection(),
+            new ResearchUltrasoundsRestraintsFormSection(),
             new UltrasoundReviewFormSection()
         ));
 

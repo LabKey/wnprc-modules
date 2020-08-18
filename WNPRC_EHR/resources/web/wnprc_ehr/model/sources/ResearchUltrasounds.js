@@ -1,17 +1,6 @@
 EHR.model.DataModelManager.registerMetadata('ResearchUltrasounds', {
     allQueries: {
-        // Id: {
-        //     shownInGrid: false,
-        //     hidden: true
-        // },
-        // date: {
-        //     shownInGrid: false,
-        //     hidden: true
-        // },
-        // performedby: {
-        //     shownInGrid: false,
-        //     hidden: true
-        // }
+
     },
     byQuery: {
         'study.research_ultrasounds': {
@@ -28,10 +17,24 @@ EHR.model.DataModelManager.registerMetadata('ResearchUltrasounds', {
         },
         'study.ultrasound_review': {
             Id: {
-                parentConfig: {
-                    storeIdentifier: {queryName: 'research_ultrasounds', schemaName: 'study'},
-                    dataIndex: 'Id'
-                },
+                shownInGrid: false,
+                hidden: true
+            },
+            QCState: {
+                shownInGrid: false,
+                hidden: true
+            }
+        },
+        'study.restraints': {
+            Id: {
+                shownInGrid: false,
+                hidden: true
+            },
+            date: {
+                shownInGrid: false,
+                hidden: true
+            },
+            project: {
                 shownInGrid: false,
                 hidden: true
             },

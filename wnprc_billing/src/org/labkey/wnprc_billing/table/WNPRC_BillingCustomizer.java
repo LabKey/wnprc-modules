@@ -88,7 +88,7 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
           chargeType.setFk(QueryForeignKey.from(us, table.getContainerFilter())
                   .container(us.getContainer())
                   .table("chargeUnits")
-                  .key("chargeType")
+                  .key("groupName")
                   .raw(true));
         }
 

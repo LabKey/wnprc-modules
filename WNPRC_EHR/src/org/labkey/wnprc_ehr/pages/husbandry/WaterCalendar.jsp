@@ -216,9 +216,6 @@
                     <!-- /ko -->
                     <div class="panel-body" id="waterException" >
 
-
-
-
                         <form class="form-horizontal scheduleForm">
                             <!-- ko if: lsid() != '' -->
                             <div class="form-group">
@@ -833,22 +830,34 @@
                 var form = ko.mapping.toJS(WebUtils.VM.taskDetails);
                 var taskid = LABKEY.Utils.generateUUID();
                 //var date = form.date.format("Y-m-d H:i:s");
+                debugger;
+                if (form.frequencyCoalesced == "1"){
+                    var insertDate = new Date(form.date);
+                    insertDate.setHours(8);
+                    insertDate.setMinutes(0);
+                }
+                if (form.frequencyCoalesced == "2"){
+                    var insertDate = new Date(form.date);
+                    insertDate.setHours(14);
+                    insertDate.setMinutes(0);
+                }
 
                 if (form.dataSource == "waterOrders"){
                     WebUtils.API.insertRows('study', 'waterAmount', [{
                         taskid:     taskid,
                         Id:         form.animalId,
-                        date:       form.date,
+                        date:       insertDate.toDateString(),
                         assignedTo: form.assignedToCoalesced,
                         project:    form.projectCoalesced,
                         volume:     form.volume,
-                        frequency:  form.frequencyCoalesced
+                        frequency:  form.frequencyCoalesced,
+                        qcstate:    10 //Schedule
                     }]);
                     WebUtils.API.insertRows('ehr', 'tasks', [{
                         taskid:     taskid,
                         title:      "Enter Water Daily Amount",
                         category:   "task",
-                        qcstate:    1,
+                        qcstate:    1, //Complete
                         formType:   "Enter Water Daily Amount"
                        // assignedTo:
                     }])
@@ -861,7 +870,7 @@
                             lsid:               form.lsid,
                             taskId:             form.taskid,
                             objectId:           form.objectIdCoalesced,
-                            date:               form.date,
+                            date:               insertDate.toLocaleTimeString(),
                             frequency:          form.frequency,
                             animalId:           form.animalId,
                             assignedTo:         form.assignedTo,

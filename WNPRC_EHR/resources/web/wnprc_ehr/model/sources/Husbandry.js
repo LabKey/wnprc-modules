@@ -518,10 +518,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     width:90
                 },
                 editorConfig: {
-                    minValue: new Date()
+                    minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                 },
                 setInitialValue: function(v) {
-                    var date = (new Date());
+                    var date = (Ext4.Date.add(new Date(), Ext4.Date.DAY, 1));
                     date.setHours(0);
                     date.setMinutes(0);
                     return v || date;
@@ -537,7 +537,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     width:90
                 },
                 editorConfig: {
-                    minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
+                    minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 2)
                 }
             },
             waterSource:{

@@ -111,7 +111,7 @@
                     <column columnName="volume2">
                         <columnTitle>Volume</columnTitle>
                     </column>
-                    <column columnName="treatmentStatus">
+                    <column columnName="waterStatus">
                         <!--<url>/ehr/taskDetails.view?formtype=${taskid/formtype}&amp;taskid=${taskid}</url>-->
                         <isHidden>false</isHidden>
                         <shownInDetailsView>true</shownInDetailsView>

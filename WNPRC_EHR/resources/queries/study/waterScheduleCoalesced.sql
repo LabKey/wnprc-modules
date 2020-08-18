@@ -1,9 +1,11 @@
 -- UNION ALL faster query
+-- water amount not matching time, need to add water amount according to the time set of the frequency
+-- the date will match as it does with the water schedule.
 
 (SELECT
     WA.id AS animalId,
     WA.date AS date,
-    WA.created AS dateCreated,
+    WA.date AS dateOrdered,
     WA.id.curLocation.area as area,
     WA.id.curLocation.room as room,
     WA.date AS startDateCoalesced,
@@ -32,8 +34,8 @@ UNION ALL
 
 (SELECT
     WS.animalId AS animalId,
-    WS.origDate AS date,
-    WS.created AS dateCreated,
+    WS.origDate AS origDate,
+    WS.date AS dateOrdered,
     WS.area as area,
     WS.room as room,
     WS.startDate AS startDateCoalesced,
@@ -57,6 +59,7 @@ UNION ALL
 FROM study.waterSchedule WS
 WHERE NOT EXISTS (SELECT 1
                     FROM study.waterAmount WAI
-                    WHERE WAI.id = WS.animalId AND WAI.date = WS.date
+                    WHERE WAI.id = WS.animalId AND CAST(WAI.date AS DATE) = CAST(WS.origdate AS DATE)
+                      AND WAI.frequency = WS.frequency
                     )
 )

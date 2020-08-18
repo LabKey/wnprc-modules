@@ -13,7 +13,7 @@
                     </column>
                     <column columnName="date">
                         <columntitle>Start Date</columntitle>
-                        <formatString>yyyy-MM-dd</formatString>
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="enddate">
                         <columntitle>End Date</columntitle>

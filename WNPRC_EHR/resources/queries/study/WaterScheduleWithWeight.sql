@@ -5,7 +5,7 @@ SELECT
     project AS projectCoalesced,
     animalId AS animalId,
     date AS date,
-    dateCreated AS dateCreated,
+    dateOrdered AS dateOrdered,
     startDateCoalesced AS startDateCoalesced,
     volume AS volume,
     dataSource AS dataSource,

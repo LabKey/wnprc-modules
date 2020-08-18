@@ -47,6 +47,7 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
+import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
@@ -1616,6 +1617,7 @@ public class WNPRC_EHRController extends SpringActionController
                         waterAmountRecord.put("taskid", woRow.get("taskid"));
                         waterAmountRecord.put("objectid", event.getObjectId());
                         waterAmountRecord.put("volume", event.getVolume());
+                        waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
                         rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
 
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterAmount");
@@ -1766,7 +1768,7 @@ public class WNPRC_EHRController extends SpringActionController
                     taskRecord.put("taskid", taskId);
                     taskRecord.put("title", "Enter Water Orders");
                     taskRecord.put("category", "task");
-                    taskRecord.put("qcstate", 1);
+                    taskRecord.put("qcstate", EHRService.QCSTATES.Completed.getQCState(getContainer()).getRowId());
                     taskRecord.put("formType","Enter Water Orders");
                     taskRecord.put("assignedTo",getUser().getUserId());
 

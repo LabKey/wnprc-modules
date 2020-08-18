@@ -34,7 +34,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 
             //error if payment received is greater than
             //error if invoice sent date is before billing run date
-            if (helper.getJavaHelper().dateCompare(billingRunDate, invoiceSentDate, format) > 0) {
+            if (invoiceSentDate && helper.getJavaHelper().dateCompare(billingRunDate, invoiceSentDate, format) > 0) {
                 EHR.Server.Utils.addError(scriptErrors, 'invoiceSentDate', "Invoice Sent date" +
                         " date (" + helper.getJavaHelper().formatDate(invoiceSentDate, format, false) + ") is before " +
                         " Billing Run Date (" + helper.getJavaHelper().formatDate(billingRunDate, format, false) + ").", 'ERROR');

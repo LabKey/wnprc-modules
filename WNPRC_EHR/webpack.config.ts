@@ -99,8 +99,44 @@ var feedingConfig = function wp(env: { BUILD_DIR: string }) {
     };
 };
 
+var weightConfig = function wp(env: { BUILD_DIR: string }) {
+
+    return {
+        mode: process.env.NODE_ENV,
+        devtool: 'source-map',
+        entry: './src/weight/app.tsx',
+        externals: {
+            jquery: 'jQuery',
+            urijs: 'URI',
+            LABKEY: 'LABKEY'
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    loader: "ts-loader"
+                },
+                {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader']
+                }
+            ],
+        },
+        output: {
+            filename: 'weight.js',
+            library: 'Weight',
+            libraryExport: 'default',
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
+        },
+    };
+};
+
 declare const module: any;
 module.exports = [
-    breedingConfig, testConfig, feedingConfig
+    breedingConfig, testConfig, feedingConfig, weightConfig
 ];
 

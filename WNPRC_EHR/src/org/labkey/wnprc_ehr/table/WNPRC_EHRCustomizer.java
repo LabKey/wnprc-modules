@@ -35,6 +35,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -139,31 +140,36 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeFeedingTable(AbstractTableInfo ti)
     {
-        Double conv = new Double(.667);
-        Double invconv = new Double(1/conv);
+        // this number is representative of 12/17 ratio
+        Double d = new Double(.705882);
+        Double conv = d;
+        Double invconv = 1/d;
         String chowConversion = "chowConversion";
+        Container ehrContainer = EHRService.get().getEHRStudyContainer(ti.getUserSchema().getContainer());
+        GUID ehrEntityId = ehrContainer.getEntityId();
+        ehrEntityId.toString();
         SQLFragment sql = new SQLFragment("(SELECT " +
-               " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log') " +
+               " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)') " +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower') " +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*" + invconv.toString() + ") || ' log')" +
                 "ELSE " +
                     " 'bad data'" +
                 "END) as ChowConversion)");
         ExprColumn newCol = new ExprColumn(ti, chowConversion, sql, JdbcType.VARCHAR);
         newCol.setLabel("Chow Conversion");
-        newCol.setDescription("This column shows the calculated conversion amount between log and flower chows. The current conversion is 12g log <=> 18g flower.");
+        newCol.setDescription("This column shows the calculated conversion amount between log and flower chows. The current conversion is 12g log <=> 17g flower.");
         ti.addColumn(newCol);
 
         String chowLookup = "chowLookup";
         SQLFragment sql2 = new SQLFragment("(SELECT " +
-                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log') " +
+                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
                 "THEN (CAST (amount as text) || ' log')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)') " +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
                 "THEN (CAST (amount as text) || ' log (gluten-free)')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower') " +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
                 "THEN (CAST (amount as text) || ' flower')" +
                 "ELSE " +
                 " 'bad data'" +
@@ -171,7 +177,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         ExprColumn newCol2 = new ExprColumn(ti, chowLookup, sql2, JdbcType.VARCHAR);
         newCol2.setLabel("Chow Lookup");
         ti.addColumn(newCol2);
-
 
     }
 

@@ -175,15 +175,20 @@ WNPRC_EHR.API = {
 (function() {
     WNPRC_EHR.container = LABKEY.getModuleProperty("ehr", "EHRStudyContainer");
 
-    var qcStore = LABKEY.ext4.Util.getLookupStore({
-        lookup: {
-            schemaName:    'study',
-            queryName:     'QCState',
-            keyColumn:     'RowId',
-            displayColumn: 'Label',
-            container:      WNPRC_EHR.container
-        }
-    });
+    var qcStore;
+
+    WNPRC_EHR.initQCStates = function () {
+        qcStore = LABKEY.ext4.Util.getLookupStore({
+            lookup: {
+                schemaName:    'study',
+                queryName:     'QCState',
+                keyColumn:     'RowId',
+                displayColumn: 'Label',
+                container:      WNPRC_EHR.container
+            }
+        });
+    }
+
 
     // A function to lookup the display value of a QCState based on it's rowid/number/code.
     var getQCStateLabel = function(rowid) {

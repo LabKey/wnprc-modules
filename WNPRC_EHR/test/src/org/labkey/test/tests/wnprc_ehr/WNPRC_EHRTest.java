@@ -511,7 +511,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable jetRegionTable  = new DataRegionTable("query", this);
         assertEquals("Wrong jet item count: ", 1, jetRegionTable.getDataRowCount());
 
-        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "8.00");
+        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "$8.00");
         List<String> actualRowData = jetRegionTable.getRowDataAsText(0, "Project", "Amount");
         assertEquals("Wrong row data for CSV to JET Preview report ", expectedRowData, actualRowData);
     }

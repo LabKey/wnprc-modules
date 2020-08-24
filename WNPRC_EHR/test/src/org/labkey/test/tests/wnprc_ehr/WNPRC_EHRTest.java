@@ -992,7 +992,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sleep(5000);
         submitAndReloadForm();
 
-        waitForElement(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
+        doAndWaitForPageToLoad(() -> {} );
         log("Enter another Misc. Charges with animal Id");
         enterChargesInGrid(1, mapWithAnimalId2);
 
@@ -1031,12 +1031,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Ext4GridRef miscChargesGrid = _helper.getExt4GridForFormSection("Misc. Charges");
         _helper.addRecordToGrid(miscChargesGrid);
 
-        Iterator iterator = items.entrySet().iterator();
-        while (iterator.hasNext())
+        for (Map.Entry<String, String> pair : items.entrySet())
         {
-            Map.Entry pair = (Map.Entry) iterator.next();
-            String colName = pair.getKey().toString();
-            String colValue = pair.getValue().toString();
+            String colName = pair.getKey();
+            String colValue = pair.getValue();
             if (colName.equals("Id") || colName.equals("date") || colName.equals("quantity") || colName.equals("comment"))
                 miscChargesGrid.setGridCell(rowIndex, colName, colValue);
             else

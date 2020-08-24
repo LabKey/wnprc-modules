@@ -3,6 +3,9 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="research_ultrasounds" tableDbType="TABLE">
+                <importTemplates>
+                    <template label="Download Template for Research Ultrasounds with Review" url="/query/exportExcelTemplate.view?schemaName=study&amp;query.queryName=researchUltrasoundsWithReview&amp;captionType=Label&amp;filenamePrefix=researchUltrasoundsWithReview" />
+                </importTemplates>
                 <tableUrl></tableUrl>
                 <importUrl></importUrl>
                 <updateUrl>/ehr/dataEntryForm.view?formType=Research%20Ultrasounds%20Review&amp;taskid=${taskid}</updateUrl>

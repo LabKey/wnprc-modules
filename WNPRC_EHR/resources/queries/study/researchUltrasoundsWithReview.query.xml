@@ -1,0 +1,191 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="researchUltrasoundsWithReview" tableDbType="NOT_IN_DB">
+                <description>Template columns for Research Ultrasounds with Review</description>
+                <columns>
+                    <column columnName="Id">
+                        <columnTitle>Id</columnTitle>
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>date</columnTitle>
+                    </column>
+                    <column columnName="pregnancyid">
+                        <columnTitle>pregnancyid</columnTitle>
+                    </column>
+                    <column columnName="project">
+                        <columnTitle>project</columnTitle>
+                    </column>
+                    <column columnName="account">
+                        <columnTitle>account</columnTitle>
+                    </column>
+                    <column columnName="fetal_heartbeat">
+                        <columnTitle>fetal_heartbeat</columnTitle>
+                    </column>
+                    <column columnName="beats_per_minute">
+                        <columnTitle>beats_per_minute</columnTitle>
+                    </column>
+                    <column columnName="crown_rump_mm">
+                        <columnTitle>crown_rump_mm</columnTitle>
+                    </column>
+                    <column columnName="biparietal_diameter_mm">
+                        <columnTitle>biparietal_diameter_mm</columnTitle>
+                    </column>
+                    <column columnName="head_circumference_mm">
+                        <columnTitle>head_circumference_mm</columnTitle>
+                    </column>
+                    <column columnName="occipital_frontal_diameter_mm">
+                        <columnTitle>occipital_frontal_diameter_mm</columnTitle>
+                    </column>
+                    <column columnName="abdominal_circumference_mm">
+                        <columnTitle>abdominal_circumference_mm</columnTitle>
+                    </column>
+                    <column columnName="femur_length_mm">
+                        <columnTitle>femur_length_mm</columnTitle>
+                    </column>
+                    <column columnName="ua_peak_systolic_velocity_cms">
+                        <columnTitle>ua_peak_systolic_velocity_cms</columnTitle>
+                    </column>
+                    <column columnName="ua_end_diastolic_velocity_cms">
+                        <columnTitle>ua_end_diastolic_velocity_cms</columnTitle>
+                    </column>
+                    <column columnName="ua_systolic_diastolic_ratio">
+                        <columnTitle>ua_systolic_diastolic_ratio</columnTitle>
+                    </column>
+                    <column columnName="lateral_ventricles_mm">
+                        <columnTitle>lateral_ventricles_mm</columnTitle>
+                    </column>
+                    <column columnName="cerebellum_mm">
+                        <columnTitle>cerebellum_mm</columnTitle>
+                    </column>
+                    <column columnName="cisterna_magna_mm">
+                        <columnTitle>cisterna_magna_mm</columnTitle>
+                    </column>
+                    <column columnName="max_vertical_pocket_cm">
+                        <columnTitle>max_vertical_pocket_cm</columnTitle>
+                    </column>
+                    <column columnName="amniotic_fluid_index_cm">
+                        <columnTitle>amniotic_fluid_index_cm</columnTitle>
+                    </column>
+                    <column columnName="mca_peak_systolic_cms">
+                        <columnTitle>mca_peak_systolic_cms</columnTitle>
+                    </column>
+                    <column columnName="mca_end_diastolic_cms">
+                        <columnTitle>mca_end_diastolic_cms</columnTitle>
+                    </column>
+                    <column columnName="mca_systolic_diastolic_ratio">
+                        <columnTitle>mca_systolic_diastolic_ratio</columnTitle>
+                    </column>
+                    <column columnName="mca_pulsatility_index">
+                        <columnTitle>mca_pulsatility_index</columnTitle>
+                    </column>
+                    <column columnName="mca_resistive_index">
+                        <columnTitle>mca_resistive_index</columnTitle>
+                    </column>
+                    <column columnName="cardiac_circumference_mm">
+                        <columnTitle>cardiac_circumference_mm</columnTitle>
+                    </column>
+                    <column columnName="cardiac_area_cm2">
+                        <columnTitle>cardiac_area_cm2</columnTitle>
+                    </column>
+                    <column columnName="chest_circumference_cm">
+                        <columnTitle>chest_circumference_cm</columnTitle>
+                    </column>
+                    <column columnName="chest_area_cm2">
+                        <columnTitle>chest_area_cm2</columnTitle>
+                    </column>
+                    <column columnName="ratio_circumferences">
+                        <columnTitle>ratio_circumferences</columnTitle>
+                    </column>
+                    <column columnName="ratio_areas">
+                        <columnTitle>ratio_areas</columnTitle>
+                    </column>
+                    <column columnName="estimated_fetal_weight_g">
+                        <columnTitle>estimated_fetal_weight_g</columnTitle>
+                    </column>
+                    <column columnName="gest_sac_mm">
+                        <columnTitle>gest_sac_mm</columnTitle>
+                    </column>
+                    <column columnName="peak_systolic_cms">
+                        <columnTitle>peak_systolic_cms</columnTitle>
+                    </column>
+                    <column columnName="end_diastolic_cms">
+                        <columnTitle>end_diastolic_cms</columnTitle>
+                    </column>
+                    <column columnName="nuchal_fold">
+                        <columnTitle>nuchal_fold</columnTitle>
+                    </column>
+                    <column columnName="code">
+                        <columnTitle>code</columnTitle>
+                    </column>
+                    <column columnName="performedby">
+                        <columnTitle>performedby</columnTitle>
+                    </column>
+                    <column columnName="ultrasoundFindings">
+                        <columnTitle>ultrasoundFindings</columnTitle>
+                    </column>
+                    <column columnName="ultrasoundRemarks">
+                        <columnTitle>ultrasoundRemarks</columnTitle>
+                    </column>
+                    <column columnName="restraintType">
+                        <columnTitle>restraintType</columnTitle>
+                    </column>
+                    <column columnName="restraintRemarks">
+                        <columnTitle>restraintRemarks</columnTitle>
+                    </column>
+                    <column columnName="reviewDate">
+                        <columnTitle>reviewDate</columnTitle>
+                    </column>
+                    <column columnName="head">
+                        <columnTitle>head</columnTitle>
+                    </column>
+                    <column columnName="falx">
+                        <columnTitle>falx</columnTitle>
+                    </column>
+                    <column columnName="thalamus">
+                        <columnTitle>thalamus</columnTitle>
+                    </column>
+                    <column columnName="lateral_ventricles">
+                        <columnTitle>lateral_ventricles</columnTitle>
+                    </column>
+                    <column columnName="choroid_plexus">
+                        <columnTitle>choroid_plexus</columnTitle>
+                    </column>
+                    <column columnName="eye">
+                        <columnTitle>eye</columnTitle>
+                    </column>
+                    <column columnName="profile">
+                        <columnTitle>profile</columnTitle>
+                    </column>
+                    <column columnName="four_chamber_heart">
+                        <columnTitle>four_chamber_heart</columnTitle>
+                    </column>
+                    <column columnName="diaphragm">
+                        <columnTitle>diaphragm</columnTitle>
+                    </column>
+                    <column columnName="stomach">
+                        <columnTitle>stomach</columnTitle>
+                    </column>
+                    <column columnName="bowel">
+                        <columnTitle>bowel</columnTitle>
+                    </column>
+                    <column columnName="bladder">
+                        <columnTitle>bladder</columnTitle>
+                    </column>
+                    <column columnName="reviewFindings">
+                        <columnTitle>reviewFindings</columnTitle>
+                    </column>
+                    <column columnName="placenta_notes">
+                        <columnTitle>placenta_notes</columnTitle>
+                    </column>
+                    <column columnName="reviewRemarks">
+                        <columnTitle>reviewRemarks</columnTitle>
+                    </column>
+                    <column columnName="completed">
+                        <columnTitle>completed</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

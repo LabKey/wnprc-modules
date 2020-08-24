@@ -1239,7 +1239,7 @@ EHR.ext.ImportPanel.Buttons = {
                         displayField: 'DisplayName',
                         valueField: 'UserId',
                         ref: 'assignedTo',
-                        tpl : new Ext.XTemplate('<tpl for="."><div class="x4-boundlist-item">{DisplayName:htmlEncode}</div></tpl>')
+                        tpl : new Ext.XTemplate('<tpl for="."><div class="x-combo-list-item"">{DisplayName:htmlEncode}</div></tpl>')
                     }]
                 }]
             });

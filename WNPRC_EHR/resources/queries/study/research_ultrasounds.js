@@ -3,7 +3,97 @@ require("ehr/triggers").initScript(this);
 
 function onInsert(helper, scriptErrors, row, oldRow) {
     let validMeasurements = getValidMeasurements();
-    let insertRows = [];
+    let measurementRows = [];
+    let targetQCState = "Review Required";
+    let taskId = LABKEY.Utils.generateUUID().toUpperCase();
+    row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
+
+    console.log("Object ID - BEFORE: " + row.objectid);
+    // console.log("Generated Object ID: " + objectId);
+
+    console.log("Row: " + JSON.stringify(row));
+
+    //if there are any data for an ultrasound review, then add that record as well
+    //if this is true this is a bulk upload
+    if (row.reviewDate || row.head || row.falx || row.thalamus || row.lateral_ventricles || row.choroid_plexus || row.eye || row.profile || row.four_chamber_heart
+         || row.diaphragm || row.stomach || row.bowel || row.bladder || row.reviewFindings || row.placenta_notes || row.reviewRemarks || row.completed) {
+
+        //Since it's a bulk upload we need to use the taskid and objectid that we created
+        row.taskid = taskId;
+        //row.objectid = objectId;
+
+        if (row.completed) {
+            targetQCState = "Completed";
+        }
+
+        //explicitly set blank boolean values to false
+        let reviewRow = {
+            "Id": row.Id,
+            "date": row.reviewDate,
+            "head": !!row.head,
+            "falx": !!row.falx,
+            "thalamus": !!row.thalamus,
+            "lateral_ventricles": !!row.lateral_ventricles,
+            "choroid_plexus": !!row.choroid_plexus,
+            "eye": !!row.eye,
+            "profile": !!row.profile,
+            "four_chamber_heart": !!row.four_chamber_heart,
+            "diaphragm": !!row.diaphragm,
+            "stomach": !!row.stomach,
+            "bowel": !!row.bowel,
+            "bladder": !!row.bladder,
+            "findings": row.reviewFindings,
+            "placenta_notes": row.placenta_notes,
+            "remarks": row.reviewRemarks,
+            "completed": !!row.completed,
+            "QCStateLabel": targetQCState,
+            "taskid": row.taskid
+        };
+
+        LABKEY.Query.insertRows({
+            schemaName: 'study',
+            queryName: 'ultrasound_review',
+            rows: [reviewRow],
+            scope: this,
+            success: function (results) {
+
+            },
+            failure: function (error) {
+                console.log("Insert rows error for study.ultrasound_review: " + JSON.stringify(error));
+            }
+        });
+    }
+
+    if (row.restraintType || row.restraintRemarks) {
+
+        //Since it's a bulk upload we need to use the taskid and objectid that we created
+        row.taskid = taskId;
+        //row.objectid = objectId;
+
+        let restraintRow = {
+            "Id": row.Id,
+            "date": new Date(row.date),
+            "restraintType": row.restraintType,
+            "remarks": row.restraintRemarks,
+            "QCStateLabel": targetQCState,
+            "taskid": row.taskid
+        };
+
+        LABKEY.Query.insertRows({
+            schemaName: 'study',
+            queryName: 'restraints',
+            rows: [restraintRow],
+            scope: this,
+            success: function (results) {
+
+            },
+            failure: function (error) {
+                console.log("Insert rows error for study.restraints: " + JSON.stringify(error));
+            }
+        });
+    }
+
+    console.log("Object ID: " + row.objectid);
 
     let measurementsToSave = false;
     for (let measurementName in validMeasurements) {
@@ -12,7 +102,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                 row[measurementName] = formatMeasurements(row[measurementName]);
                 let measurements = row[measurementName].split(';');
                 measurements.forEach(function (measurement) {
-                    insertRows.push({
+                    measurementRows.push({
                         Id: row.Id,
                         date: row.date,
                         measurement_name: measurementName,
@@ -20,7 +110,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                         measurement_value: measurement,
                         measurement_unit: validMeasurements[measurementName].unit,
                         ultrasound_id: row.objectid,
-                        QCStateLabel: "Review Required",
+                        QCStateLabel: targetQCState,
                         taskid: row.taskid
                     });
                     measurementsToSave = true;
@@ -30,8 +120,9 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     }
 
     if (measurementsToSave) {
-        WNPRC.Utils.getJavaHelper().insertUltrasoundMeasurements(insertRows);
+        WNPRC.Utils.getJavaHelper().insertRows(measurementRows, "study", "ultrasound_measurements");
     }
+    row.QCStateLabel = targetQCState;
 }
 
 function onUpdate(helper, scriptErrors, row, oldRow) {

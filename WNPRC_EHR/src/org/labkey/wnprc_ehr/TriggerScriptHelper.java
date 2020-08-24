@@ -105,8 +105,8 @@ public class TriggerScriptHelper {
 //        }
     }
 
-    public void insertUltrasoundMeasurements(List<Map<String, Object>> insertRows) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException {
-        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasound_measurements");
+    public void insertRows(List<Map<String, Object>> insertRows, String schema, String table) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException {
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schema, table);
         queryUpdater.insert(insertRows);
     }
 

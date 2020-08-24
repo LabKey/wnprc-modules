@@ -1238,7 +1238,8 @@ EHR.ext.ImportPanel.Buttons = {
                         }),
                         displayField: 'DisplayName',
                         valueField: 'UserId',
-                        ref: 'assignedTo'
+                        ref: 'assignedTo',
+                        tpl : new Ext.XTemplate('<tpl for="."><div class="x4-boundlist-item">{DisplayName:htmlEncode}</div></tpl>')
                     }]
                 }]
             });

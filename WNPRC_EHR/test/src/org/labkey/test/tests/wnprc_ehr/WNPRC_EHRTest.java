@@ -992,6 +992,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         sleep(5000);
         submitAndReloadForm();
 
+        waitForElement(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         log("Enter another Misc. Charges with animal Id");
         enterChargesInGrid(1, mapWithAnimalId2);
 

@@ -6,9 +6,10 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     let measurementRows = [];
     let targetQCState = "Review Required";
     let taskId = LABKEY.Utils.generateUUID().toUpperCase();
+    console.log("Object ID - BEFORE: " + row.objectid);
+
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
 
-    console.log("Object ID - BEFORE: " + row.objectid);
     // console.log("Generated Object ID: " + objectId);
 
     console.log("Row: " + JSON.stringify(row));

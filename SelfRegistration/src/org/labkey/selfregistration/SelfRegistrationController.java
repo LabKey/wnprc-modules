@@ -65,20 +65,6 @@ public class SelfRegistrationController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            return new JspView("/org/labkey/selfregistration/view/hello.jsp");
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root;
-        }
-    }
-
     public static class SelfRegistrationForm {
 
         private String assignedTo;

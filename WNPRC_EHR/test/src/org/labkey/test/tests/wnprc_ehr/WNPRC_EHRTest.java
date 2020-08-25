@@ -1009,7 +1009,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         submitAndReloadForm();
 
         log("Enter another Misc. Charges with debit account");
-        waitForElement(Locator.tagContainingText("label", "Projects / Groups"));
+        waitForElement(Locator.tagContainingText("label", "Assigned To"));
         enterChargesInGrid(1, mapWithDebitAcct2);
 
         log("Submit the form");

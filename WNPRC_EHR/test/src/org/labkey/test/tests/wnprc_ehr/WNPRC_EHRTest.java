@@ -1518,7 +1518,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         sleep(WAIT_FOR_JAVASCRIPT); //For the table to completely load - Teamcity error fix.
         assertEquals("Incorrect number of task rows.", 3, ((Locator) Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "
-                + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a[.='Test weight task']")).findElements(getDriver()).size());
+                + Locator.NOT_HIDDEN + "]//tr[contains(@class, 'labkey-alternate-row') or contains(@class, 'labkey-row')]//a[.='Test weight task']")).findElements(getDriver()).size());
         sleep(1000); //Weird
         stopImpersonating();
 

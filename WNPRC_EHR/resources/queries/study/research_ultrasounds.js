@@ -48,6 +48,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
             "remarks": row.reviewRemarks,
             "completed": !!row.completed,
             "QCStateLabel": targetQCState,
+            "ultrasound_id": row.objectid,
             "taskid": row.taskid
         };
 

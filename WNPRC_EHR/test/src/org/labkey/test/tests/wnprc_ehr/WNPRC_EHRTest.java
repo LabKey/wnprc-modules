@@ -54,13 +54,11 @@ import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TextSearcher;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
-import org.labkey.test.util.ext4cmp.Ext4FileFieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
@@ -71,7 +69,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +76,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.WebTestHelper.buildURL;
-import static org.labkey.test.components.ext4.RadioButton.RadioButton;
 import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
 
 /**
@@ -103,7 +99,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     protected static final String PROJECT_MEMBER_ID = "test2312318"; // PROJECT_ID's single participant
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/aliases.tsv");
-    private static final int ALIASES_NUM_ROWS = 4;
 
     private final File CHARGEABLE_ITEMS_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRates.tsv");
     private final File CHARGEABLE_ITEMS_RATES_ERROR_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemsRatesError.tsv");
@@ -116,16 +111,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private static final int CHARGEABLE_ITEMS_NUM_UPDATE_ROWS = 11;
 
     private final File CHARGEABLE_ITEM_CATEGORIES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeableItemCategories.tsv");
-    private static final int CHARGEABLE_ITEM_CATEGORIES_NUM_ROWS = 11;
 
     private final File GROUP_CATEGORY_ASSOCIATIONS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/groupCategoryAssociations.tsv");
-    private static final int GROUP_CATEGORY_ASSOCIATIONS_NUM_ROWS = 11;
 
     private final File TIER_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/tierRates.tsv");
-    private static final int TIER_RATES_NUM_ROWS = 4;
 
     private final File CHARGE_UNITS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/chargeUnits.tsv");
-    private static final int CHARGE_UNITS_NUM_ROWS = 6;
     private static int BILLING_RUN_COUNT = 0;
 
     protected EHRTestHelper _helper = new EHRTestHelper(this);
@@ -219,11 +210,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private void createFinanceManagementFolders()
     {
-        _containerHelper.createSubfolder(getProjectName(), getProjectName(), "WNPRC_Units", "Collaboration", null);
-        _containerHelper.createSubfolder(getProjectName(), "WNPRC_Units", "Operation_Services", "Collaboration", null);
-        _containerHelper.createSubfolder(getProjectName(), "Operation_Services", "Financial_Management", "Collaboration", null);
-        _containerHelper.createSubfolder(getProjectName(), "Financial_Management", "Private", "Collaboration", null);
-        _containerHelper.createSubfolder(getProjectName(), "Financial_Management", "PI Portal", "Collaboration", null);
+        _containerHelper.createSubfolder(getProjectName(), "WNPRC_Units", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units", "Operation_Services", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services", "Financial_Management", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "Private", "Collaboration");
+        _containerHelper.createSubfolder(getProjectName() + "/WNPRC_Units/Operation_Services/Financial_Management", "PI Portal", "Collaboration");
     }
 
     private void loadBloodBilledByLookup() throws IOException, CommandException
@@ -366,7 +357,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testBilling() throws IOException, CommandException
+    public void testBilling()
     {
         log("Enter misc charges via data entry form.");
         enterCharges();
@@ -413,7 +404,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testBulkEditChargesWithAnimalIds() throws IOException, CommandException
+    public void testBulkEditChargesWithAnimalIds()
     {
         String comment = "Charges with Animal Ids added via bulk edit.";
         String msg = "You are about to set values for 2 fields on 5 records. Do you want to do this?";
@@ -621,7 +612,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Test
-    public void testBulkEditChargesWithoutAnimalIds() throws IOException, CommandException
+    public void testBulkEditChargesWithoutAnimalIds()
     {
         String msg = "You are about to set values for 2 fields on 2 records. Do you want to do this?";
         String comment = "Charges without Animal Ids added via bulk edit.";
@@ -684,7 +675,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         popLocation();
     }
 
-    private void testInvestigatorFacingLinks() throws IOException, CommandException
+    private void testInvestigatorFacingLinks()
     {
         navigateToFolder(PROJECT_NAME, PI_PORTAL);
         log("Give EHR Lab Read access to PI Portal folder.");
@@ -743,26 +734,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             }
         }
         return userid;
-    }
-
-    public int getInvestigatorId(int userId) throws IOException, CommandException
-    {
-        Connection cn = WebTestHelper.getRemoteApiConnection();
-
-        SelectRowsCommand sr = new SelectRowsCommand("ehr", "investigators");
-        sr.addFilter(new Filter("userid", userId));
-        SelectRowsResponse resp = sr.execute(cn, EHR_FOLDER_PATH);
-
-        int investigatorId = -1;
-        List<Map<String, Object>> rows = resp.getRows();
-        if(rows.size() == 1)
-        {
-            for (Map<String, Object> row : rows)
-            {
-                return (int) row.get("rowid");
-            }
-        }
-        return investigatorId;
     }
 
     private void addInvestigators() throws IOException, CommandException
@@ -825,13 +796,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     }
 
-    private void provideBillingDataAccess() throws IOException, CommandException
+    private void provideBillingDataAccess()
     {
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
         clickAndWait(Locator.bodyLinkContainingText("Access To Billing Data"));
         DataRegionTable dataAccessTable = new DataRegionTable("query", getDriver());
         dataAccessTable.clickInsertNewRow();
-        Connection cn = WebTestHelper.getRemoteApiConnection();
 
         _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("User With Access:"), Ext4Helper.TextMatchTechnique.CONTAINS, _userHelper.getDisplayNameForEmail(INVESTIGATOR.getEmail()));
         _ext4Helper.selectComboBoxItem(Ext4Helper.Locators.formItemWithLabelContaining("Investigator:"), Ext4Helper.TextMatchTechnique.CONTAINS, "Stark, Sansa");
@@ -988,15 +958,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.bodyLinkContainingText("Enter Charges with Animal Ids"));
         enterChargesInGrid(1, mapWithAnimalId);
 
-        log("Submit & Reload Form");
-        sleep(5000);
-        submitAndReloadForm();
-
-        waitForElement(Locator.tagContainingText("label", "Projects / Groups"));
-        log("Enter another Misc. Charges with animal Id");
-        enterChargesInGrid(1, mapWithAnimalId2);
-
-        log("Submit the form");
+        log("Submit Form");
         sleep(5000);
         submitForm();
 
@@ -1296,38 +1258,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Truncating table: " + schemaName + "." + queryName);
         TruncateTableCommand command = new TruncateTableCommand(schemaName, queryName);
         command.execute(connection, PRIVATE_FOLDER_PATH);
-    }
-
-    private void importBulkDataFromFile(File file, String linkText, int numRows)
-    {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-
-        clickAndWait(Locator.bodyLinkContainingText(linkText));
-
-        DataRegionTable drt = new DataRegionTable("query", getDriver());
-        drt.clickImportBulkData();
-
-        waitForText("Import Data");
-
-        _ext4Helper.clickTabContainingText("Import Spreadsheet");
-        waitForText("Upload From File");
-        RadioButton().withLabel("Upload From File").find(this.getDriver()).check();
-
-        Ext4FileFieldRef fileField = Ext4FileFieldRef.create(this);
-        fileField.setToFile(file);
-
-        waitAndClick(Ext4Helper.Locators.ext4ButtonContainingText("Upload"));
-
-        checkMessageWindow("Success", "Success! " + numRows + " rows inserted.", "OK");
-    }
-
-    private void performBillingPeriodRun()
-    {
-        navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-
-        performBillingRun("10/01/2010", "10/31/2010",++BILLING_RUN_COUNT);
-        testInvoicedItems();
-        testSummaryReports();
     }
 
     private void performBillingRun(String startDate, String endDate, int billingRunCount)
@@ -1956,7 +1886,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         pauseJsErrorChecker();
         beginAtAnimalHistoryTab();
         openClinicalHistoryForAnimal("TEST1020148");
-        List<String> expectedLabels = new ArrayList<String>(
+        List<String> expectedLabels = new ArrayList<>(
                 Arrays.asList(
                         "Alert",
                         "Antibiotic Sensitivity",
@@ -2016,11 +1946,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForElement(Locator.xpath("//div[@class='x-form-invalid-msg']"), WAIT_FOR_JAVASCRIPT);
     }
 
-    private void selectHistoryTab(String tab)
-    {
-        click(Locator.tagWithText("span", tab));
-    }
-
     private void testPaymentsReceived()
     {
         String date = LocalDateTime.now().format(_dateTimeFormatter);
@@ -2035,6 +1960,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         setFormElement(Locator.inputByNameContaining("paymentAmountReceived"), amount);
 
         clickButton("Submit",0);
+        waitForText("Your upload was successful!");
+        clickButton("OK");
 
         invoice = new DataRegionTable("query", getDriver());
         String balance = invoice.getDataAsText(0,"balanceDue");
@@ -2049,8 +1976,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _customizeViewsHelper.applyCustomView();
         DataRegionTable auditTable =  new DataRegionTable("query", this);
         String auditLog = auditTable.getDataAsText(0,"DataChanges");
-        assertTrue(auditLog.contains("paymentamountreceived:  » 1028.95"));
-        assertTrue(auditLog.contains("balancedue:  » 0.0"));
+        assertTrue("entry didn't contain \"paymentamountreceived:  » 1028.95\"\n" + auditLog, auditLog.contains("paymentamountreceived:  » 1028.95"));
+        assertTrue("entry didn't contain \"balancedue:  » 0.0\"\n" + auditLog, auditLog.contains("balancedue:  » 0.0"));
     }
 
     @Override

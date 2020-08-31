@@ -1,16 +1,15 @@
-<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="org.joda.time.LocalDateTime" %>
-<%@ page import="java.sql.Timestamp" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.data.SimpleFilter" %>
 <%@ page import="org.labkey.webutils.api.json.NumberKeyComparator" %>
+<%@ page import="org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination" %>
+<%@ page import="java.sql.Timestamp" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -99,14 +98,14 @@
         <div class="col-sm-6">
             <dl class="dl-horizontal">
                 <dt>Necropsy Date</dt>
-                <dd><%= necropsyDisplayDate %></dd>
+                <dd><%=h(necropsyDisplayDate)%></dd>
             </dl>
         </div>
 
         <div class="col-sm-6">
             <dl class="dl-horizontal">
                 <dt>Perfusion</dt>
-                <dd><%= necropsy.optString("perfusion_area_fs_value", "-- None --") %></dd>
+                <dd><%=h(necropsy.optString("perfusion_area_fs_value", "-- None --"))%></dd>
             </dl>
         </div>
     </div>
@@ -115,7 +114,7 @@
         <h4>Pathology Unit Notes</h4>
         <hr class="sectionBar"/>
 
-        <div class="container"><%= necropsy.optString("patho_notes", "-- none --").replaceAll("\n", "<br>")%></div>
+        <div class="container"><%=unsafe(h(necropsy.optString("patho_notes", "-- none --")).toString().replaceAll("\n", "<br>"))%></div>
     </div>
 
     <div class="row">

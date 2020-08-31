@@ -1,13 +1,13 @@
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceSchema" %>
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceSchema" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
+    ActionURL url = new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer());
 %>
 <div class="text-center" style="margin-bottom: 10px;">
-    <a class="btn btn-primary" href="<%= url %>">
+    <a class="btn btn-primary" href="<%=h(url)%>">
         <span class="glyphicon glyphicon-home"></span>
         TB Dashboard
     </a>
@@ -55,7 +55,7 @@
     <div class="panel-body">
         <p>Use the table below to finalize pending TB results.</p>
     </div>
-    <lk-querytable params="schema: '<%= WNPRC_ComplianceSchema.NAME %>',
+    <lk-querytable params="schema: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                            query: 'pendingTBResults',
                            rowsAreSelectable: true,
                            actionButtons: actions"
@@ -92,7 +92,7 @@
         WebUtils.VM.submit = function() {
             $resultDialog.modal('hide');
 
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.ResolvePendingTBResultsAPI.class, getContainer()) %>", {
+            WebUtils.API.postJSON(<%=q(new ActionURL(WNPRC_ComplianceController.ResolvePendingTBResultsAPI.class, getContainer()).toString())%>, {
                 pendingTBIds: form.selectedTBIds(),
                 notes: form.notes(),
                 date:  moment(form.date()).format()

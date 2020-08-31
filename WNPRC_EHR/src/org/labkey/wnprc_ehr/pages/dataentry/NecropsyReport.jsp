@@ -1,16 +1,14 @@
+<%@ page import="com.google.common.base.Joiner" %>
 <%@ page import="org.apache.commons.lang3.ObjectUtils" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
-<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="com.google.common.base.Joiner" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
+<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
-
 
 <style type="text/css">
     #report hr.sectionBar {
@@ -127,7 +125,7 @@
         }
     %>
 
-    <h2 class="text-center">Necropsy Report <%= necropsy.optString("caseno", "")%> for <%= necropsy.optString("id", "[unknown animal]") %></h2>
+    <h2 class="text-center">Necropsy Report <%=h(necropsy.optString("caseno", ""))%> for <%=h(necropsy.optString("id", "[unknown animal]"))%></h2>
 
     <div class="row">
         <h4>Necropsy Summary</h4>
@@ -136,35 +134,35 @@
         <div class="col-xs-6">
                 <dl class="dl-horizontal">
                     <dt>Time of Death</dt>
-                    <dd class="dateWithTimeThatNeedsFormatting"><%= necropsy.optString("timeofdeath", NOT_SPECIFIED)%></dd>
+                    <dd class="dateWithTimeThatNeedsFormatting"><%=unsafe(necropsy.optString("timeofdeath", NOT_SPECIFIED))%></dd>
 
                     <dt>Manner of Death</dt>
-                    <dd><%= necropsy.optString("mannerofdeath", NOT_SPECIFIED) %></dd>
+                    <dd><%=unsafe(necropsy.optString("mannerofdeath", NOT_SPECIFIED))%></dd>
 
                     <dt>Cause of Death</dt>
-                    <dd><%= necropsy.optString("causeofdeath", NOT_SPECIFIED)%></dd>
+                    <dd><%=unsafe(necropsy.optString("causeofdeath", NOT_SPECIFIED))%></dd>
 
                     <dt>Performed On</dt>
-                    <dd class="dateWithTimeThatNeedsFormatting"><%= necropsy.optString("date", "")%></dd>
+                    <dd class="dateWithTimeThatNeedsFormatting"><%=h(necropsy.optString("date", ""))%></dd>
                 </dl>
         </div>
 
         <div class="col-xs-6">
             <dl class="dl-horizontal">
                 <dt>Animal Weight</dt>
-                <dd><%= weight %></dd>
+                <dd><%=h(weight)%></dd>
 
                 <dt>Body Condition Score</dt>
-                <dd><%= bcs_score %></dd>
+                <dd><%=unsafe(bcs_score)%></dd>
 
                 <dt>Alopecia Score</dt>
-                <dd><%= alopecia %></dd>
+                <dd><%=unsafe(alopecia)%></dd>
 
                 <dt>Perfusion</dt>
-                <dd><%= necropsy.optString("perfusion_area", NOT_SPECIFIED)%></dd>
+                <dd><%=unsafe(necropsy.optString("perfusion_area", NOT_SPECIFIED))%></dd>
 
                 <dt>Tissue Distribution</dt>
-                <dd><%= necropsy.optString("tissue_distribution", NOT_SPECIFIED)%></dd>
+                <dd><%=unsafe(necropsy.optString("tissue_distribution", NOT_SPECIFIED))%></dd>
 
             </dl>
         </div>
@@ -176,7 +174,7 @@
         <hr class="sectionBar"/>
 
         <div class="container">
-            <%= necropsy.optString("remark", NONE).replaceAll("\n", "<br>") %>
+            <%=unsafe(necropsy.optString("remark", NONE).replaceAll("\n", "<br>"))%>
         </div>
     </div>
 
@@ -204,7 +202,7 @@
                     for (JSONObject morphology : sortedMorphologies) {
                 %>
                 <tr>
-                    <td><%= morphology.optString("remark") %></td>
+                    <td><%=h(morphology.optString("remark"))%></td>
                 </tr>
                 <%
                     }
@@ -222,7 +220,7 @@
         <hr class="sectionBar"/>
 
         <div class="container">
-            <%= necropsy.optString("grossdescription", NONE).replaceAll("\n", "<br>") %>
+            <%=unsafe(necropsy.optString("grossdescription", NONE).replaceAll("\n", "<br>"))%>
         </div>
     </div>
 
@@ -231,7 +229,7 @@
         <hr class="sectionBar"/>
 
         <div class="container">
-            <%= necropsy.optString("histologicaldescription", NONE).replaceAll("\n", "<br>") %>
+            <%=unsafe(necropsy.optString("histologicaldescription", NONE).replaceAll("\n", "<br>"))%>
         </div>
     </div>
 
@@ -263,10 +261,10 @@
                     for (JSONObject organ_weight : organ_weights.toJSONObjectArray()) {
                 %>
                 <tr>
-                    <td><%= organ_weight.optString("tissue_fs_meaning") %></td>
-                    <td><%= organ_weight.optString("qualifier") %></td>
-                    <td><%= organ_weight.optString("weight") %>g</td>
-                    <td><%= organ_weight.optString("remark").replaceAll("\n", "<br>") %></td>
+                    <td><%=h(organ_weight.optString("tissue_fs_meaning"))%></td>
+                    <td><%=h(organ_weight.optString("qualifier"))%></td>
+                    <td><%=h(organ_weight.optString("weight"))%>g</td>
+                    <td><%=unsafe(organ_weight.optString("remark").replaceAll("\n", "<br>"))%></td>
                 </tr>
                 <%
                     }

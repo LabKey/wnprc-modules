@@ -15,10 +15,10 @@
                 <li>
                     TB Results
                     <ul>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.NewUserPage.class, getContainer()).toString()%>">
+                        <li><a href=<%=h(new ActionURL(WNPRC_ComplianceController.NewUserPage.class, getContainer()))%>">
                             Enter TB Results
                         </a></li>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.PendingTBResultsPage.class, getContainer()).toString()%>">
+                        <li><a href="<%=h(new ActionURL(WNPRC_ComplianceController.PendingTBResultsPage.class, getContainer()))%>">
                             View Pending TB Results
                         </a></li>
                     </ul>
@@ -39,13 +39,13 @@
                 <li>
                     Access Reports
                     <ul>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UploadAccessReportPage.class, getContainer()).toString()%>">
+                        <li><a href="<%=h(new ActionURL(WNPRC_ComplianceController.UploadAccessReportPage.class, getContainer()))%>">
                             Upload New Access Report
                         </a></li>
                         <li><a href="{{mostRecentAccessReportSummary}}">
                             View Most Recent Access Report Summary
                         </a></li>
-                        <li><a href="<%= new ActionURL(WNPRC_ComplianceController.UnidentifiedCardsPage.class, getContainer()).toString()%>">
+                        <li><a href="<%=h(new ActionURL(WNPRC_ComplianceController.UnidentifiedCardsPage.class, getContainer()))%>">
                             View Unidentified Cards
                         </a></li>
                     </ul>
@@ -60,19 +60,19 @@
     (function() {
         WebUtils.VM = {
             archivedPersonsURL: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {
-                schemaName: "<%= WNPRC_ComplianceSchema.NAME %>",
+                schemaName: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                 'query.queryName': "ArchivedPersonsList"
             }),
             activePersonsURL: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {
-                schemaName: "<%= WNPRC_ComplianceSchema.NAME %>",
+                schemaName: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                 'query.queryName': "ActivePersonsList"
             }),
             editPersonsURL: LABKEY.ActionURL.buildURL('ehr', 'updateQuery', null, {
-                schemaName: "<%= WNPRC_ComplianceSchema.NAME %>",
+                schemaName: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                 'query.queryName': "persons"
             }),
             mostRecentAccessReportSummary: LABKEY.ActionURL.buildURL('query', 'executeQuery', null, {
-                schemaName: "<%= WNPRC_ComplianceSchema.NAME %>",
+                schemaName: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                 'query.queryName': "MostRecentAccessReportSummary"
             })
         }

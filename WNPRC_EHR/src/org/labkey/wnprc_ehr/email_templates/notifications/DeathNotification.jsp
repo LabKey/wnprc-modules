@@ -1,9 +1,9 @@
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.util.Path" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.util.Path" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.wnprc_ehr.TriggerScriptHelper" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -76,29 +76,29 @@
     <tr>
         <td>Animal ID:</td>
         <td>
-            <a href="<%= hrefForAnimalAbstract %>">
+            <a href="<%=h(hrefForAnimalAbstract)%>">
                 <%= h(Id) %>
             </a>
         </td>
     </tr>
     <tr>
         <td>Sex:</td>
-        <td><%= gender %></td>
+        <td><%=h(gender)%></td>
     </tr>
     <%
         if (isPrenatalDeath && pdRecord != null) {
     %>
     <tr>
         <td>Dam:</td>
-        <td><%= pdRecord.optString("dam", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(pdRecord.optString("dam", NONE_SPECIFIED))%></td>
     </tr>
     <tr>
         <td>Sire:</td>
-        <td><%= pdRecord.optString("sire", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(pdRecord.optString("sire", NONE_SPECIFIED))%></td>
     </tr>
     <tr>
         <td>Conception:</td>
-        <td><%= pdRecord.optString("conception", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(pdRecord.optString("conception", NONE_SPECIFIED))%></td>
     </tr>
     <%
         }
@@ -164,35 +164,35 @@
 <table>
     <tr>
         <td>Necropsy Case Number:</td>
-        <td><%= necropsy.optString("caseno", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(necropsy.optString("caseno", NONE_SPECIFIED))%></td>
     </tr>
     <tr>
         <td>Task ID:</td>
         <td>
-            <a href="<%= ActionURL.getBaseServerURL() + "/ehr/" + getContainer().getPath() + "/taskDetails.view?formtype=" + necropsy.getString("taskid_fs_formtype") + "&taskid=" + taskid%>">
-                <%= necropsy.getString("taskid_fs_rowid") %>
+            <a href="<%=h(ActionURL.getBaseServerURL() + "/ehr/" + getContainer().getPath() + "/taskDetails.view?formtype=" + necropsy.getString("taskid_fs_formtype") + "&taskid=" + taskid)%>">
+                <%=h(necropsy.getString("taskid_fs_rowid"))%>
             </a>
         </td>
     </tr>
     <tr>
         <td>Date of Necropsy:</td>
-        <td><%= necropsy.optString("date", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(necropsy.optString("date", NONE_SPECIFIED))%></td>
     </tr>
     <tr>
         <td>Weight:</td>
-        <td><%= weight %></td>
+        <td><%=unsafe(weight)%></td>
     </tr>
     <tr>
         <td>Time of Death:</td>
-        <td><%= necropsy.optString("timeofdeath", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(necropsy.optString("timeofdeath", NONE_SPECIFIED))%></td>
     </tr>
     <tr>
         <td>Type of Death:</td>
-        <td><%= cause.equals("") ? NONE_SPECIFIED : h(cause) %></td>
+        <td><%=unsafe(cause.equals("") ? NONE_SPECIFIED : cause)%></td>
     </tr>
     <tr>
         <td>Grant #:</td>
-        <td><%= necropsy.optString("account", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(necropsy.optString("account", NONE_SPECIFIED))%></td>
     </tr>
     <tr>
         <td>Animal Replacement Fee:</td>
@@ -209,7 +209,7 @@
                 }
                 else if (feeCategory.equals("Fee")){
             %>
-            <%= (prepaid == null) ? "Animal Replacement fee to be paid (not prepaid animal)" : prepaid %>
+            <%=h(prepaid == null ? "Animal Replacement fee to be paid (not prepaid animal)" : prepaid)%>
 
             <%
                 }
@@ -223,7 +223,7 @@
     </tr>
     <tr>
         <td>Manner of Death:</td>
-        <td><%= necropsy.optString("mannerofdeath", NONE_SPECIFIED) %></td>
+        <td><%=unsafe(necropsy.optString("mannerofdeath", NONE_SPECIFIED))%></td>
     </tr>
     <%
         JSONArray animalDeath = queryFactory.selectRows("study", "deaths", idFilter);
@@ -232,7 +232,7 @@
     %>
     <tr>
         <td>Death Remark:</td>
-        <td><%=deathRemark.equals("") ? NONE_SPECIFIED : h(deathRemark) %></td>
+        <td><%=h(deathRemark)%></td>
         <%
             }
         %>

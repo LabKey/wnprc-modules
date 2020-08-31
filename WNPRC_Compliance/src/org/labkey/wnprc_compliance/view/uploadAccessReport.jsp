@@ -3,10 +3,10 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
+    ActionURL url = new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer());
 %>
 <div class="text-center" style="margin-bottom: 10px;">
-    <a class="btn btn-primary" href="<%= url %>">
+    <a class="btn btn-primary" href="<%=h(url)%>">
         <span class="glyphicon glyphicon-home"></span>
         TB Dashboard
     </a>
@@ -39,7 +39,7 @@
     (function() {
 
         var dropZone = jQuery("#access-report-upload").dropzone({
-            url: "<%= new ActionURL(WNPRC_ComplianceController.UploadAccessReportAPI.class, getContainer()).toString() %>",
+            url: <%=q(new ActionURL(WNPRC_ComplianceController.UploadAccessReportAPI.class, getContainer()).toString())%>,
             method: "post",
             maxFiles: 1,
             init: function() {

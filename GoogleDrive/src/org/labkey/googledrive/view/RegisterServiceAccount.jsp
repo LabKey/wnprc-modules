@@ -1,12 +1,12 @@
+<%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.googledrive.GoogleDriveController" %>
 <%@ page import="org.labkey.googledrive.GoogleDriveSchema" %>
-<%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
     String manageURL = getContextPath() + "/query/" + ContainerManager.getHomeContainer().getEncodedPath() + "/executeQuery.view?schemaName=" + GoogleDriveSchema.NAME + "&query.queryName=service_accounts";
-    String apiURL = new ActionURL(GoogleDriveController.AddAccount.class, getContainer()).toString();
+    ActionURL apiURL = new ActionURL(GoogleDriveController.AddAccount.class, getContainer());
 %>
 
 <div class="panel panel-primary">
@@ -96,7 +96,7 @@
             </div>
 
             <div class="pull-right">
-                <a  class="btn" role="button" href="<%= manageURL %>">Cancel</a>
+                <a  class="btn" role="button" href="<%=h(manageURL)%>">Cancel</a>
                 <button class="btn btn-primary" data-bind="disable: $parent.formIsInvalid, click: submit">Submit</button>
             </div>
         </form>
@@ -160,9 +160,9 @@
             delete data.type;
             data.displayName = form.displayName();
 
-            WebUtils.API.postJSON("<%= apiURL %>", data).then(function() {
+            WebUtils.API.postJSON(<%=q(apiURL.toString())%>, data).then(function() {
                 alert("Success");
-                window.location = "<%= manageURL %>";
+                window.location = <%=q(manageURL)%>;
             }).catch(function(e) {
                 console.error(e);
                 alert("Failed");

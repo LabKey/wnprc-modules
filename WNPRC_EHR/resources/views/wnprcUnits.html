@@ -61,6 +61,7 @@ function createNavMenu()
                 {name: 'Necropsy Schedule',      url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'NecropsySchedule',  'WNPRC/EHR')},
                 {name: 'Case List',              url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'PathologyCaseList', 'WNPRC/EHR')},
                 {name: 'Issue Tracker',          url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/Issue_Tracker/start.view?'},
+                {name: 'Pathology Guides', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/Public/begin.view?'},
                 {name: 'Pathology Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Pathology_Services/begin.view?'}
             ]},
             {header: 'Vet Services',
@@ -96,13 +97,13 @@ function createNavMenu()
             ]},
             {header: 'Human Resources',
             items: [
-                {name: 'Employee DB**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/begin.view?'}
+                {name: 'HR Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/begin.view?'}
                 //{name: 'Travel Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Human_Resources/Issue_Tracker/start.view?'}
             ]},
             {header: 'ITSS',
             items: [
                 {name: 'IT Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Public/begin.view?'},
-                {name: 'Request New User Account', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/IT/Public/insertQueryRow.view?schemaName=lists&query.queryName=New%20User%20Request&query.AccountCreated'},
+                {name: 'User Account Request', url: 'https://go.wisc.edu/hcvxa5'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Issue_Tracker/start.view?'}
             ]},
             {header: 'Purchasing Services',
@@ -167,7 +168,6 @@ function createNavMenu()
                 {name: 'Change WNPRC Password', url: 'https://wprcfs.primate.wisc.edu/changepassword/'},
                 {name: 'Employee List', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=EmployeeList'},
                 {name: 'Guidelines for Protocols', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/page.view?name=ProtocolGuides'},
-                {name: 'Read and Certify SOPs', url: '<%=contextPath%>/EHR_ComplianceDB/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/SOP_submission.view?'},
                 {name: 'View All SOPs', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/SOPs/executeQuery.view?schemaName=Lists&query.queryName=SOPs'},
                 {name: 'View My Requirement Status', url: '<%=contextPath%>/EHR_ComplianceDB/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/My_Requirements.view?'},
                 {name: 'View/Download PDFs of Signs, Posters and Guides', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/executeQuery.view?schemaName=lists&query.queryName=Signs'},
@@ -202,7 +202,7 @@ function createNavMenu()
 </tr>
 <tr style="vertical-align:top">
     <td>
-        <a class="labkey-main-title">
+        <a class="labkey-main-title" href="<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/begin.view">
             Animal Services:
         </a>
         <p/>

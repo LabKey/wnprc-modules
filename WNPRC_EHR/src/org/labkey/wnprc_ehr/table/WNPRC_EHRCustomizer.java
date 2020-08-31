@@ -36,6 +36,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -83,9 +84,13 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 //                customizeRequestsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "project")) {
                 customizeProjectTable((AbstractTableInfo) table);
-            }
+            } else if (matches(table, "study", "feeding")) {
+                customizeFeedingTable((AbstractTableInfo) table);
+            } else if (matches(table, "study", "demographics")) {
+                customizeDemographicsTable((AbstractTableInfo) table);
         }
     }
+}
 
     private void customizeColumns(AbstractTableInfo ti)
     {
@@ -186,6 +191,48 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         newCol.setLabel("Investigator");
         newCol.setDescription("This column shows the name of the investigator on the project. It first checks if there is an investigatorId, and if not defaults to the old inves column.");
         ti.addColumn(newCol);
+    }
+
+    private void customizeFeedingTable(AbstractTableInfo ti)
+    {
+        // this number is representative of 12/17 ratio
+        Double d = new Double(.705882);
+        Double conv = d;
+        Double invconv = 1/d;
+        String chowConversion = "chowConversion";
+        Container ehrContainer = EHRService.get().getEHRStudyContainer(ti.getUserSchema().getContainer());
+        GUID ehrEntityId = ehrContainer.getEntityId();
+        ehrEntityId.toString();
+        SQLFragment sql = new SQLFragment("(SELECT " +
+               " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
+                    "THEN (ROUND(amount*" + invconv.toString() + ") || ' log')" +
+                "ELSE " +
+                    " 'bad data'" +
+                "END) as ChowConversion)");
+        ExprColumn newCol = new ExprColumn(ti, chowConversion, sql, JdbcType.VARCHAR);
+        newCol.setLabel("Chow Conversion");
+        newCol.setDescription("This column shows the calculated conversion amount between log and flower chows. The current conversion is 12g log <=> 17g flower.");
+        ti.addColumn(newCol);
+
+        String chowLookup = "chowLookup";
+        SQLFragment sql2 = new SQLFragment("(SELECT " +
+                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+                "THEN (CAST (amount as text) || ' log')" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                "THEN (CAST (amount as text) || ' log (gluten-free)')" +
+                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
+                "THEN (CAST (amount as text) || ' flower')" +
+                "ELSE " +
+                " 'bad data'" +
+                "END) as ChowLookup)");
+        ExprColumn newCol2 = new ExprColumn(ti, chowLookup, sql2, JdbcType.VARCHAR);
+        newCol2.setLabel("Chow Lookup");
+        ti.addColumn(newCol2);
+
     }
 
     private void customizeBirthTable(AbstractTableInfo ti)
@@ -293,6 +340,22 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col15.setDescription("Shows the total offspring of each animal");
             ds.addColumn(col15);
         }
+    }
+
+    private void customizeDemographicsTable(AbstractTableInfo table)
+    {
+        if (table.getColumn("Feeding") != null)
+            return;
+
+        UserSchema us = getStudyUserSchema(table);
+        if (us == null){
+            return;
+        }
+
+        ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+        col21.setLabel("Feeding");
+        col21.setDescription("Shows most recent feeding type and chow conversion.");
+        table.addColumn(col21);
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)

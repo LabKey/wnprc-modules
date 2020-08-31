@@ -736,6 +736,37 @@ EHR.ext.AdvancedStore = Ext.extend(LABKEY.ext.Store, {
             }
         }
 
+        if (this.queryName == 'Assignment'){
+            var assignmentMap = [];
+            var allRecords = this.getAllRecords();
+            for (var idx = 0; idx < allRecords.length; ++idx){
+                var record = allRecords[idx];
+
+                if (record.get('project'))
+                {
+                    var id = record.get('Id');
+                    var date = record.get('date');
+                    var project = record.get('project');
+                    if (!id || !date || !project)
+                        continue;
+
+                    date = date.format(LABKEY.extDefaultDateFormat);
+
+                    assignmentMap.push({
+                        objectid: record.get('objectid'),
+                        Id : id,
+                        date: date,
+                        qcstate: record.get('QCState'),
+                        project: project
+                    });                    
+                }
+            }
+            
+            if (!LABKEY.Utils.isEmptyObj(assignmentMap)){
+                ret.assignmentsInTransaction = assignmentMap
+            }
+        }
+
         return ret;
     },
 

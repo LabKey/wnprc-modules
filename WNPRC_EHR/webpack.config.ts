@@ -3,17 +3,7 @@ import * as Webpack from 'webpack';
 
 const path = require('path');
 
-// IntelliJ and TsLint get very angry when faced with ambiguity, so this
-// interface constrains our configuration object to using a certain type
-// of loader rule to load modules
-interface Configuration extends Webpack.Configuration {
-    module: {
-        rules: Webpack.NewLoaderRule[];
-    };
-}
-
-declare const module: any;
-module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
+var breedingConfig = function wp(env: { BUILD_DIR: string }){
 
     return {
         devtool: 'source-map',
@@ -24,7 +14,7 @@ module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
         },
         module: {
             rules: [
-                { loader: 'awesome-typescript-loader', test: /\.tsx?$/ },
+                { loader: 'ts-loader', test: /\.tsx?$/ },
                 { loader: 'source-map-loader', options: { enforce: 'pre' }, test: /\.js$/ },
             ],
         },
@@ -40,3 +30,77 @@ module.exports = function wp(env: { BUILD_DIR: string }): Configuration {
         },
     };
 };
+
+var testConfig = function wp(env: { BUILD_DIR: string }) {
+
+    return {
+        devtool: 'source-map',
+        entry: './src/ts/test.tsx',
+        externals: {
+            jquery: 'jQuery',
+            urijs: 'URI',
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    loader: "ts-loader"
+                },
+                {
+                    test: /\.css$/,
+                    loaders: ['style-loader', 'css-loader', 'sass-loader']
+                }
+            ],
+        },
+        output: {
+            filename: 'test.js',
+            library: 'Test',
+            libraryExport: 'default',
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json'],
+        },
+    };
+};
+var feedingConfig = function wp(env: { BUILD_DIR: string }) {
+
+    return {
+        mode: process.env.NODE_ENV,
+        devtool: 'source-map',
+        entry: './src/feeding/base/App.tsx',
+        externals: {
+            jquery: 'jQuery',
+            urijs: 'URI',
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    loader: "ts-loader"
+                },
+                {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader']
+                }
+            ],
+        },
+        output: {
+            filename: 'feeding.js',
+            library: 'Feeding',
+            libraryExport: 'default',
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
+        },
+    };
+};
+
+declare const module: any;
+module.exports = [
+    breedingConfig, testConfig, feedingConfig
+];
+

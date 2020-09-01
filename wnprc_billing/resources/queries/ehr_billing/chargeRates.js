@@ -4,6 +4,7 @@ require("ehr/triggers").initScript(this);
 var validItems = [];
 var validRates = {};
 var chargeableItemCategories = {};
+var groupCategoryAssociations = {};
 
 function onInit(event, helper){
 
@@ -24,6 +25,30 @@ function onInit(event, helper){
         },
         failure: function (error) {
             console.log("Error getting data from ehr_billing.chargeableItemCategories: " + error);
+        }
+    });
+    LABKEY.Query.selectRows({
+        requiredVersion: 9.1,
+        schemaName: 'wnprc_billing',
+        queryName: 'groupCategoryAssociations',
+        columns: ['chargeGroupName, chargeCategoryId'],
+        scope: this,
+        success: function (results) {
+
+            var rows = results.rows;
+
+            for(var i=0; i< rows.length; i++) {
+                var row = rows[i];
+                var chargeGroupName = row["chargeGroupName"]["value"];
+                var chargeCategoryId = row["chargeCategoryId"]["value"];
+                var chargeCategoryAssoc = chargeGroupName + ", " + chargeCategoryId;
+                groupCategoryAssociations[chargeCategoryAssoc] = chargeCategoryAssoc;
+
+                console.log("groupCategoryAssociations[chargeCategoryAssoc] = " + groupCategoryAssociations[chargeCategoryAssoc]);
+            }
+        },
+        failure: function (error) {
+            console.log("Error getting data from ehr_billing.groupCategoryAssociations: " + error);
         }
     });
 
@@ -98,8 +123,13 @@ function onInsert(helper, scriptErrors, row, oldRow) {
         return false;
     }
 
-    if (!chargeableItemCategories[row.category]) {
-        EHR.Server.Utils.addError(scriptErrors, 'chargeCategoryId', row.category + " is not a valid chargeable item category. If this is a new category, please add this category to ehr_billing.chargeableItemCategories.", 'ERROR');
+    var groupCategory = row.groupName + ", " + chargeableItemCategories[row.category];
+
+    if (!groupCategoryAssociations[groupCategory]) {
+
+        var groupCategoryWithChargeName = row.groupName + ", " + row.category;
+
+        EHR.Server.Utils.addError(scriptErrors, 'chargeCategoryId', "'" + groupCategoryWithChargeName + "' is not a valid group and category association. If this is a new association, then add this association to ehr_billing.groupCategoryAssociations table by going to 'GROUP CATEGORY ASSOCIATIONS' link on the main Finance page.", 'ERROR');
         return false;
     }
 
@@ -125,7 +155,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
 
     var isItemUpdate = false;
     for (var i=0; i < validItems.length; i++) {
-        if (validItems[i]["name"] === row.name && validItems[i]["departmentCode"] === row.departmentCode) {
+        if (validItems[i]["name"] === row.name && validItems[i]["departmentCode"] === row.groupName) {
             isItemUpdate = true;
             row.chargeId = validItems[i]["rowid"];
             break;
@@ -162,8 +192,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
         "name": row.name,
         "oldPk": row.oldPk,
         "chargeCategoryId": chargeableItemCategories[row.category],
-        "serviceCode": row.serviceCode,
-        "departmentCode": row.departmentCode,
+        "departmentCode": row.groupName,
         "comment": row.comment,
         "container": row.container,
         "startDate": row.chargeableItemStartDate,

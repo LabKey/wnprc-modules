@@ -1,1 +1,1 @@
-DROP TABLE wnprc_billing.dataAccess;
+DROP TABLE IF EXISTS wnprc_billing.dataAccess;

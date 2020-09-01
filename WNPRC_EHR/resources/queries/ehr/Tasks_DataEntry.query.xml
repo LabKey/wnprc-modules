@@ -150,9 +150,6 @@
                     <!--<item text="Import Data">-->
                         <!--<originalText>Import Data</originalText>-->
                     <!--</item>-->
-                    <item text="Paging">
-                        <originalText>Paging</originalText>
-                    </item>
                 </buttonBarOptions>
             </table>
         </tables>

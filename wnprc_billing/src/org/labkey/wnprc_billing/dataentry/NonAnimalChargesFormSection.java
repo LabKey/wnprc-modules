@@ -44,7 +44,6 @@ public class NonAnimalChargesFormSection extends SimpleFormSection {
     public List<String> getTbarMoreActionButtons()
     {
         List<String> defaultMoreActionButtons = super.getTbarMoreActionButtons();
-        defaultMoreActionButtons.remove("BULKEDIT");
         defaultMoreActionButtons.remove("GUESSPROJECT");
         defaultMoreActionButtons.remove("COPY_IDS");
         return defaultMoreActionButtons;

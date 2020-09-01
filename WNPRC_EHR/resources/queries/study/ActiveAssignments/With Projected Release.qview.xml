@@ -22,7 +22,7 @@
                 <property name="columnTitle" value="Project Avail"/>
             </properties>
         </column>
-        <column name="project/inves">
+        <column name="project/investigatorName">
             <properties>
                 <property name="columnTitle" value="Investigator"/>
             </properties>

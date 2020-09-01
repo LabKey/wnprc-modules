@@ -1,0 +1,9 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="chargeGroupName"/>
+        <column name="chargeCategoryId"/>
+    </columns>
+    <sorts>
+        <sort column="chargeGroupName" descending="false" />
+    </sorts>
+</customView>

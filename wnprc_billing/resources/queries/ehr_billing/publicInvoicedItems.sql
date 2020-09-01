@@ -21,10 +21,9 @@ SELECT i.rowId,
        i.item,
        i.itemCode,
        i.category,
-       i.servicecenter,
        i.project,
        i.project.protocol as protocol,
-       i.project.inves    as projectContact,
+       i.project.investigatorId.investigatorWithName    as projectContact,
        i.debitedaccount,
        i.creditedaccount,
        i.investigatorId,
@@ -48,23 +47,16 @@ WHERE (
                  isMemberOf(da.userid)
                  AND
                  (
-                    da.allData = true
+                    (da.allData = true AND (da.investigatorid = i.project.investigatorId OR da.investigatorid = i.debitedaccount.investigatorId))
                     OR
-                    (da.project = i.project)
-                    OR
-                    (
-                        da.investigatorId = i.investigatorId
-                        OR
-                        da.investigatorId = i.debitedaccount.investigatorId
-                        -- OR da.investigatorId = i.project.investigatorId <!-- TODO: Currently, there is no easy way to add an investigatorId to ehr.project (editing on ehr.project routes to a custom page which has investigatorId as hidden) -->
-                    )
+                    da.project = i.project
                  )
           ) IS NOT NULL
 
           OR
 
          --include if the user is either the project's PI, the account PI, or the financial analyst
-         --   isMemberOf(i.project.investigatorId.userid) OR <!-- TODO: same problem as mentioned above -->
-         isMemberOf(i.debitedaccount.investigatorId)
-            -- OR isMemberOf(i.project.investigatorId.financialAnalyst) <!-- TODO: same problem as mentioned above, also not sure if WNPRC has a concept of financialAnalyst. this column is not included in ehr.investigator table. -->
+         isMemberOf(i.project.investigatorId.userid) OR
+         isMemberOf(i.debitedaccount.investigatorId) OR
+         isMemberOf(i.project.investigatorId.financialAnalyst)
       )

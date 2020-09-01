@@ -1,1 +1,1 @@
-DROP TABLE wnprc_billing.chargeableItemCategories;
+DROP TABLE IF EXISTS wnprc_billing.chargeableItemCategories;

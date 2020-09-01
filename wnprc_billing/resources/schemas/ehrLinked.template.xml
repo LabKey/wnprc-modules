@@ -8,5 +8,6 @@
         <tableName>project</tableName>
         <tableName>protocol</tableName>
         <tableName>investigators</tableName>
+        <tableName>investigatorsWithName</tableName>
     </tables>
 </templateSchema>

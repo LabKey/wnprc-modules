@@ -8,7 +8,6 @@
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="Id">
-                        <displayWidth>40</displayWidth>
                         <fk>
                           <fkDbSchema>study</fkDbSchema>
                           <fkTable>Animal</fkTable>

@@ -7,9 +7,9 @@ SELECT * FROM
       wmisc.billingDate,
       wmisc.project,
       wmisc.debitedAccount,
-      wmisc.chargetype,
+      wmisc.chargetype, --adjustment or reversal
       wmisc.chargeId,
-      wmisc.chargeCategory, --adjustment or reversal
+      wmisc.chargeGroup,
       wmisc.objectid AS sourceRecord,
       wmisc.comment,
       wmisc.objectid,
@@ -39,9 +39,9 @@ SELECT
   wmisc.billingDate,
   wmisc.project,
   wmisc.debitedaccount,
-  wmisc.chargetype,
+  wmisc.chargetype, --adjustment or reversal
   wmisc.chargeId,
-  wmisc.chargeCategory, --adjustment or reversal
+  wmisc.chargeGroup,
   wmisc.objectid AS sourceRecord,
   wmisc.comment,
   wmisc.objectid,

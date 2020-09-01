@@ -260,21 +260,34 @@
                     </div>
 
                     <div class="panel-body" id="measles-form-body">
+                        <div class="col-sm-6">
                         <form class="form-horizontal">
-                            <div class="form-group col-sm-6">
+                            <div class="form-group">
+                                <div class="col-sm-offset-3 col-sm-8">
+                                    <div class="checkbox">
+                                        <label class="control-label">
+                                            <input type="checkbox" data-bind="checked: required"> Required
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-sm-3 control-label">Clearance Date</label>
-                                <div class="col-sm-9">
+                                <div class="col-sm-8">
                                     <input type="text" class="form-control" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
                                 </div>
                             </div>
 
-                            <div class="form-group col-sm-6">
-                                <label class="col-sm-3 control-label">Notes</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" data-bind="textInput: notes">
-                                </div>
-                            </div>
                         </form>
+                        </div>
+                        <div class="col-sm-6">
+                            <form class="form">
+                                <div class="form-group">
+                                    <label class="control-label">Notes</label>
+                                    <textarea rows="4" class="form-control" data-bind="textInput: notes"></textarea>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -426,21 +439,22 @@
             $element: $('#measles-form-body'),
             disabled: ko.observable(),
             notes: ko.observable(''),
-            date: ko.observable(moment())
+            date: ko.observable(''),
+            required: ko.observable(false)
         };
         VM.measlesForm = measlesForm;
 
         (function() {
             measlesForm.clear = function() {
                 measlesForm.notes('');
-                measlesForm.date(moment());
+                measlesForm.date('');
                 measlesForm.disabled(true);
             };
             measlesForm.$element.collapse({toggle: true});
             measlesForm.disabled.subscribe(function(val) {
                 if (val) {
                     measlesForm.notes('');
-                    measlesForm.date(moment());
+                    measlesForm.date('');
                 }
                 measlesForm.$element.collapse(val ? 'hide' : 'show');
             });
@@ -489,9 +503,16 @@
                 };
 
                 if (!measlesForm.disabled()) {
+                    // Enter a blank date if it is blank
+                    if (measlesForm.date() != ''){
+                        var dateCompleted = moment(measlesForm.date()).format();
+                    } else {
+                        var dateCompleted = '';
+                    }
                     submission.data.measlesInfo = {
                         notes: measlesForm.notes(),
-                        dateCompleted: moment(measlesForm.date()).format()
+                        dateCompleted: dateCompleted,
+                        required: measlesForm.required()
                     };
                 }
 
@@ -511,9 +532,16 @@
                 };
 
                 if (!measlesForm.disabled()) {
+                    // Enter a blank date if it is blank
+                    if (measlesForm.date() != ''){
+                        var dateCompleted = moment(measlesForm.date()).format();
+                    } else {
+                        var dateCompleted = '';
+                    }
                     submission.data.measlesInfo = {
                         notes: measlesForm.notes(),
-                        dateCompleted: moment(measlesForm.date()).format()
+                        dateCompleted: dateCompleted,
+                        required: measlesForm.required()
                     };
                 }
 

@@ -20,6 +20,8 @@ public class NecropsyInfoSection extends SimpleFormSection {
                 "caseno",
                 "location",
                 "performedby",
+                "pathologistHistology",
+                "pathologistReview",
                 "assistant",
                 "billing",
                 "tissue_distribution",

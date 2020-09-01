@@ -2,7 +2,7 @@
 server/modules/*
 server/customModules/*
 server/optionalModules/*
-externalModules/labModules/*
-externalModules/onprcEHRModules/mergesync
-externalModules/wnprcModules/webutils
-externalModules/wnprcModules/dbutils
+server/modules/labModules/*
+server/modules/onprcEHRModules/mergesync
+server/modules/wnprcModules/webutils
+server/modules/wnprcModules/dbutils

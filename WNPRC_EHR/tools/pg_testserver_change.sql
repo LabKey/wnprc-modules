@@ -72,6 +72,20 @@ WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'wn
 	      AND p.Name = 'runIntervalInMinutes'
 ;
 
+--disable kinship calculations
+UPDATE    prop.Properties p
+SET       Value = 'false'
+WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'org.labkey.ehr.geneticcalculations'
+  AND p.Name = 'enabled'
+;
+
+--disable ldap sync
+UPDATE    prop.Properties p
+SET       Value = 'false'
+WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'ldk.ldapConfig'
+  AND p.Name = 'enabled'
+;
+
 UPDATE    ehr.module_properties p
 SET       stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu'
 WHERE     p.prop_name = 'site_email'
@@ -140,6 +154,9 @@ WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'Si
 
 
 DELETE FROM ehr.notificationrecipients WHERE (recipient <> 1975 OR recipient <> 1966);
+
+--Delete
+DELETE FROM googledrive.service_accounts WHERE id = '8c4a933c-2f8e-4094-9f43-46e80f14e163';
 
 INSERT INTO ehr.notificationrecipients
 (rowid, notificationtype,            container,                               createdby, created,                   modifiedby, modified,                   recipient)

@@ -1,18 +1,14 @@
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="com.google.common.base.Joiner" %>
-<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.security.SecurityPolicyManager" %>
-<%@ page import="org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService" %>
-<%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
+<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.dbutils.api.exception.MissingPermissionsException" %>
+<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
+<%@ page import="org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -36,8 +32,8 @@
 
     JSONArray currentAssignments = queryFactory.selectRows("study", "CurrentBehaviorAssignments");
 
-    String addBehaviorURL   = (new ActionURL(WNPRC_EHRController.AddBehaviorAssignmentAction.class, getContainer())).toString();
-    String releaseAnimalURL = (new ActionURL(WNPRC_EHRController.ReleaseAnimalFromBehaviorAssignmentAction.class, getContainer())).toString();
+    ActionURL addBehaviorURL   = new ActionURL(WNPRC_EHRController.AddBehaviorAssignmentAction.class, getContainer());
+    ActionURL releaseAnimalURL = new ActionURL(WNPRC_EHRController.ReleaseAnimalFromBehaviorAssignmentAction.class, getContainer());
 %>
 
 <div class="panel panel-primary">
@@ -48,7 +44,7 @@
     <div class="panel-body">
         <p>
             Use this page to manage animal assignments for projects with the folowing availability
-            codes: <%= Joiner.on(", ").join(behaviorAvailabilityCodes) %>.
+            codes: <%=h(Joiner.on(", ").join(behaviorAvailabilityCodes))%>.
         </p>
     </div>
 </div>
@@ -287,7 +283,7 @@
             return target;
         };
 
-        var behaviorProjects = <%= behaviorProjects.toString() %>;
+        var behaviorProjects = <%=behaviorProjects%>;
 
         WebUtils.VM.form = {
             data: {
@@ -413,7 +409,7 @@
                     }
                 });
 
-                WebUtils.API.post("<%= releaseAnimalURL %>", data).then(function() {
+                WebUtils.API.post(<%=q(releaseAnimalURL.toString())%>, data).then(function() {
                     WebUtils.VM.refreshCurrentAssignmentsTable();
                     toastr.success(data.animalId + " successfully released from behavior project.");
                 }).catch(function(e) {
@@ -530,7 +526,7 @@
 
             curAssignmentTable.isLoading(false);
         };
-        processCurrentAssignments(<%= currentAssignments.toString() %>);
+        processCurrentAssignments(<%=currentAssignments%>);
 
         WebUtils.VM.refreshCurrentAssignmentsTable = function() {
             curAssignmentTable.isLoading(true);
@@ -580,7 +576,7 @@
             };
 
             console.log("Submitting data: ", dataToSubmit);
-            WebUtils.API.postJSON("<%= addBehaviorURL %>", dataToSubmit).then(function() {
+            WebUtils.API.postJSON(<%=q(addBehaviorURL.toString())%>, dataToSubmit).then(function() {
                 WebUtils.VM.refreshCurrentAssignmentsTable();
                 WebUtils.VM.form.clearForm();
                 toastr.success("Assignment successfully added.");

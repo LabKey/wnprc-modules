@@ -1,13 +1,13 @@
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceSchema" %>
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceSchema" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
+    ActionURL url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer()));
 %>
 <div class="text-center" style="margin-bottom: 10px;">
-    <a class="btn btn-primary" href="<%= url %>">
+    <a class="btn btn-primary" href="<%=h(url)%>">
         <span class="glyphicon glyphicon-home"></span>
         TB Dashboard
     </a>
@@ -47,7 +47,7 @@
     <div class="panel-body">
         <p>Give this guy a second to load...</p>
     </div>
-    <lk-querytable params="schema: '<%= WNPRC_ComplianceSchema.NAME %>',
+    <lk-querytable params="schema: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                            query: 'unidentifiedCards',
                            rowsAreSelectable: true,
                            actionButtons: actions"
@@ -82,7 +82,7 @@
         WebUtils.VM.submit = function() {
             $exemptDialog.modal('hide');
 
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.MarkCardExemptAPI.class, getContainer()) %>", {
+            WebUtils.API.postJSON(<%=q(new ActionURL(WNPRC_ComplianceController.MarkCardExemptAPI.class, getContainer()).toString())%>, {
                 exemptions: form.selectedCardIds().map(function(id) {
                     return {
                         cardId: id,

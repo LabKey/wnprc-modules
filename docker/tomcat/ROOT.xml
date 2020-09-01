@@ -15,6 +15,7 @@
               maxTotal="40"
               maxActive="40"
               maxIdle="10"
+              maxWaitMillis="120000"
               accessToUnderlyingConnectionAllowed="true"
               validationQuery="SELECT 1"
     />
@@ -29,7 +30,7 @@
               maxIdle="7"
               useInformationSchema="true"
               accessToUnderlyingConnectionAllowed="true"
-              validationQuery="/* ping */"              
+              validationQuery="/* ping */"
     />
     <Resource name="mail/Session" auth="Container"
               type="javax.mail.Session"

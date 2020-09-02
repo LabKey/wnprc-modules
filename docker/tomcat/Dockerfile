@@ -42,6 +42,9 @@ RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[
 RUN mkdir -p conf/Catalina/localhost
 COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
 
+# adding Tomcat custom login pattern
+COPY server8_5_32.xml conf/server.xml
+
 RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml
 

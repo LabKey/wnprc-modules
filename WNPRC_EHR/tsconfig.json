@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES5",
     "jsx": "react",
-    "lib": ["esnext", "dom"],
+    "lib": ["dom","es2017"],
     "sourceMap": false,
     "experimentalDecorators": true,
     "moduleResolution": "node",

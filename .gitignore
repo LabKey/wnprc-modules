@@ -22,3 +22,5 @@ docker/nginx/key.pem
 **/app.js.map
 
 WNPRC_EHR/resources/web/wnprc_ehr/gen/
+
+.storybook-out/

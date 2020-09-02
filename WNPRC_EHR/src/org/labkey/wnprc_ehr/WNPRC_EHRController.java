@@ -1591,10 +1591,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("UpdateWaterAmount")
     @RequiresLogin
-    public class UpdateWaterAmountAction extends ApiAction<WaterAmountRecord>
+    public class UpdateWaterAmountAction extends ApiAction<WaterOrderRecord>
     {
         @Override
-        public Object execute (WaterAmountRecord event, BindException errors) throws Exception{
+        public Object execute (WaterOrderRecord event, BindException errors) throws Exception{
 
             List<Map<String, Object>> WaterAmountRows = getWaterAmountRecord(event.getObjectId());
 
@@ -1617,6 +1617,7 @@ public class WNPRC_EHRController extends SpringActionController
                         waterAmountRecord.put("taskid", woRow.get("taskid"));
                         waterAmountRecord.put("objectid", event.getObjectId());
                         waterAmountRecord.put("volume", event.getVolume());
+                        waterAmountRecord.put("date",event.getDate());
                         waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
                         rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
 
@@ -1852,12 +1853,16 @@ public class WNPRC_EHRController extends SpringActionController
         private String taskId;
         private String objectId;
         private String animalId;
-        private Date endDate;
-        private String dataSource;
         private String project;
+        private Date date;
+        private Date endDate;
+        private long dateInMillis;
+        private Double volume;
+        private String dataSource;
+        private String waterSource;
         private String frequency;
         private String assignedTo;
-        private Double volume;
+
 
         public void setTaskId(String taskId)
         {
@@ -1874,6 +1879,39 @@ public class WNPRC_EHRController extends SpringActionController
             this.animalId = animalId;
         }
 
+        public void setDate(Date date)
+        {
+            this.date = date;
+        }
+        public void setDate(String date)
+        {
+            //DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+            long miliseconds = Long.parseLong(date);
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            calendar.setTimeInMillis(miliseconds);
+            this.date = calendar.getTime();
+        }
+        public void setDateInMillis(long dateInMillis)
+        {
+            if (dateInMillis>0)
+            {
+                java.util.Calendar calendar = java.util.Calendar.getInstance();
+                calendar.setTimeInMillis(dateInMillis);
+                this.date = calendar.getTime();
+            }
+            this.dateInMillis = dateInMillis;
+        }
+
+        public long getDateInMillis()
+        {
+            return dateInMillis;
+        }
+
+        public void setProject(String project)
+        {
+            this.project = project;
+        }
+
         public void setEndDate(Date endDate)
         {
             this.endDate = endDate;
@@ -1884,9 +1922,9 @@ public class WNPRC_EHRController extends SpringActionController
             this.dataSource = dataSource;
         }
 
-        public void setProject(String project)
+        public void setWaterSource(String waterSource)
         {
-            this.project = project;
+            this.waterSource = waterSource;
         }
 
         public void setFrequency(String frequency)
@@ -1919,6 +1957,11 @@ public class WNPRC_EHRController extends SpringActionController
             return animalId;
         }
 
+        public Date getDate()
+        {
+            return date;
+        }
+
         public Date getEndDate()
         {
             return endDate;
@@ -1927,6 +1970,11 @@ public class WNPRC_EHRController extends SpringActionController
         public String getDataSource()
         {
             return dataSource;
+        }
+
+        public String getWaterSource()
+        {
+            return waterSource;
         }
 
         public String getProject()
@@ -1972,7 +2020,7 @@ public class WNPRC_EHRController extends SpringActionController
         return woRows;
     }
 
-    public static class WaterAmountRecord {
+    /*public static class WaterAmountRecord {
 
         private String taskId;
         private String objectId;
@@ -2063,7 +2111,7 @@ public class WNPRC_EHRController extends SpringActionController
             return volume;
         }
 
-    }
+    }*/
 
     private List<Map<String, Object>> getWaterAmountRecord (String objectId) throws java.sql.SQLException{
         List<FieldKey> columns = new ArrayList<>();
@@ -2083,6 +2131,7 @@ public class WNPRC_EHRController extends SpringActionController
         {
             woRows.add(rs.getRowMap());
         }
+        rs.close();
         return woRows;
 
     }

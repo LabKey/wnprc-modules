@@ -416,6 +416,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             assignedTo:{
+                hidden: true,
                 defaultValue: 'researchstaff',
                 lookup:{
                     schemaName: 'ehr_lookups',
@@ -521,10 +522,15 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                 },
                 setInitialValue: function(v) {
+                    debugger;
                     var date = (Ext4.Date.add(new Date(), Ext4.Date.DAY, 1));
                     date.setHours(0);
                     date.setMinutes(0);
                     return v || date;
+                },
+                onExpand: function() {
+                    var value = this.getValue();
+                    this.picker.setValue(Ext.isDate(value) ? value : Ext4.Date.add(new Date(), Ext4.Date.DAY, 1));
                 }
             },
             enddate:{

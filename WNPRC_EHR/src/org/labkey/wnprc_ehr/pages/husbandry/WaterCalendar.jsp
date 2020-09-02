@@ -663,6 +663,7 @@
 
                 WebUtils.VM.requestRowInForm = row;
                 var waterOrder = ko.mapping.toJS(row);
+                debugger;
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
@@ -685,6 +686,11 @@
                             $calendar.fullCalendar('refetchEvents');
 
                             $('#waterInfoPanel').unblock();
+
+                        }if(!response.success){
+                            debugger;
+                            response.errors;
+                            $('#myModal');
 
                         } else {
                             alert('Water cannot be closed')
@@ -714,6 +720,7 @@
 
                 WebUtils.VM.requestRowInForm = row;
                 var waterOrder = ko.mapping.toJS(row);
+                debugger;
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
@@ -748,7 +755,13 @@
 
                             window.open(newWaterOrder,'_blank');
 
-                        } else {
+                        }
+                        if (!response.success){
+                            debugger;
+                            response.errors;
+                            $('#myModal');
+
+                        }else {
                             alert('Water cannot be closed')
                             $('#waterInfoPanel').unblock();
                         }
@@ -870,13 +883,12 @@
                             lsid:               form.lsid,
                             taskId:             form.taskid,
                             objectId:           form.objectIdCoalesced,
-                            date:               insertDate.toLocaleTimeString(),
-                            frequency:          form.frequency,
+                            dateInMillis:         insertDate.getTime(),
+                            frequency:          form.frequencyCoalesced,
                             animalId:           form.animalId,
-                            assignedTo:         form.assignedTo,
+                            assignedTo:         form.assignedToCoalesced,
                             volume:             form.volume,
                             dataSource:         form.dataSource
-
 
                         }),
                         success: LABKEY.Utils.getCallbackWrapper(function (response)

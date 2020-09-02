@@ -62,7 +62,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     //console.log ("value of ObjectId "+oldRow.objectid + " Value of new objectId "+ row.objectid);
 
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
-    if (row.objectid) {
+    if (row.objectid && row.Id && row.date && row.frequency && row.assignedTo) {
         console.log('value of row: '+row + ' '+ row.frequency);
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.objectid);
         if (jsonArray != null) {

@@ -1,0 +1,17 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="chargeUnits" tableDbType="TABLE">
+                <tableTitle>Groups</tableTitle>
+                <columns>
+                    <column columnName="groupName">
+                        <columnTitle>Group</columnTitle>
+                    </column>
+                    <column columnName="servicecenter">
+                        <isHidden>true</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

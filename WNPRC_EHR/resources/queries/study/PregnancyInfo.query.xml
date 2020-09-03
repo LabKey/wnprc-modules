@@ -1,20 +1,13 @@
-<query xmlns="http://labkey.org/data/xml/query">
+<query xmlns="http://labkey.org/data/xml/query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://labkey.org/data/xml ../../../../../../schemas/tableInfo.xsd">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="PregnancyInfo" tableDbType="NOT_IN_DB">
                 <columns>
-                    <column columnName="updatelink">
-                        <columnTitle></columnTitle>
-                        <url>/ehr/dataEntryForm.view?formType=Breeding%20Encounter&amp;taskid=${taskid}</url>
-                        <urlTarget>_blank</urlTarget>
-                    </column>
                     <column columnName="objectid">
                         <isHidden>true</isHidden>
                     </column>
-                    <column columnName="taskid">
-                        <isHidden>true</isHidden>
-                    </column>
-                    <column columnName="id">
+                    <column columnName="Id">
                         <columnTitle>Dam</columnTitle>
                     </column>
                     <column columnName="sireid">
@@ -23,61 +16,70 @@
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
                             <fkTable>animal</fkTable>
-                            <fkColumnName>id</fkColumnName>
+                            <fkColumnName>Id</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
-                    <column columnName="date">
-                        <columnTitle>Breeding Start</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                    <column columnName="date_conception">
+                        <columnTitle>Est. Conception Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
-                    <column columnName="dateend">
-                        <columnTitle>Breeding End</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                    <column columnName="conception_range">
+                        <columnTitle>Conception Range</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
-                    <column columnName="remark">
-                        <columnTitle>Breeding Remark</columnTitle>
-                    </column>
-                    <column columnName="ejaculation">
-                        <columnTitle>Ejaculation Confirmed?</columnTitle>
-                    </column>
-                    <column columnName="conceptiondate">
-                        <columnTitle>Est. Conception</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
-                    </column>
-                    <column columnName="conceptiondate_plus_30">
+                    <column columnName="date_conception_plus_30">
                         <columnTitle>+ 30</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
-                    <column columnName="conceptiondate_plus_60">
+                    <column columnName="date_conception_plus_60">
                         <columnTitle>+ 60</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
-                    <column columnName="conceptiondate_plus_90">
+                    <column columnName="date_conception_plus_90">
                         <columnTitle>+ 90</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
-                    <column columnName="conceptiondate_plus_120">
+                    <column columnName="date_conception_plus_120">
                         <columnTitle>+ 120</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
-                    <column columnName="conceptiondate_plus_150">
+                    <column columnName="date_conception_plus_150">
                         <columnTitle>+ 150</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
-                    <column columnName="conceptiondate_plus_165">
+                    <column columnName="date_conception_plus_165">
                         <columnTitle>+ 165</columnTitle>
-                        <formatString>MM/dd/yyyy</formatString>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="date_due_range">
+                        <columnTitle>Due Date Range</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="gestation_day_range">
+                        <columnTitle>Current Gestation Range (days)</columnTitle>
+                        <formatString>0</formatString>
+                    </column>
+                    <column columnName="date_due">
+                        <columnTitle>Est. Due Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="gestation_day">
-                        <columnTitle>Current Gestation</columnTitle>
+                        <columnTitle>Current Est. Gestation (days)</columnTitle>
                         <formatString>0</formatString>
                     </column>
                     <column columnName="outcome">
                         <columnTitle>Outcome</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>birth_type</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>description</fkDisplayColumnName>
+                        </fk>
                     </column>
                     <column columnName="outcome_date">
                         <columnTitle>Outcome Date/Time</columnTitle>
-                        <formatString>MM/dd/yyyy hh:mm</formatString>
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="outcome_remark">
                         <columnTitle>Outcome Remark</columnTitle>
@@ -88,7 +90,7 @@
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
                             <fkTable>animal</fkTable>
-                            <fkColumnName>id</fkColumnName>
+                            <fkColumnName>Id</fkColumnName>
                         </fk>
                     </column>
                 </columns>

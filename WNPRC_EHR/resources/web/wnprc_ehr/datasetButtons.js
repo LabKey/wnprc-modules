@@ -225,7 +225,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                                     existingRecords: null,
                                     taskRecord: {duedate: duedate, assignedTo: assignedTo, category: 'task', title: title, formType: row.formtype},
                                     success: function(response, options, config){
-                                        Ext4.Msg.hide();
+                                        //Ext4.Msg.hide();
                                         Ext4.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
                                             if (btn == 'yes'){
                                                 window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
@@ -276,128 +276,118 @@ WNPRC_EHR.DatasetButtons = new function(){
         },
 
         /**
-         * Adds a button to a dataRegion that will allow the user to mark Clinpath Runs records as 'reviewed' (which means updating the reviewedBy field).
+         * Handler for Mark Reviewed button that will allow the user to mark Clinpath Runs records as 'reviewed' (which means updating the reviewedBy field).
          * This was intended as a mechanism for vets to indicate that they have viewed clinpath results.
          * @param dataRegionName
-         * @param menu
-         * @param schemaName
-         * @param queryName
-         * @param config
          */
         addMarkReviewedBtn: function(dataRegionName, menu, schemaName, queryName, config){
             config = config || {};
 
             this.addMenuItem(menu, 'Mark Reviewed', function() {
                     var dataRegion = LABKEY.DataRegions[dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
+                var checked = dataRegion.getChecked();
+                if(!checked || !checked.length){
+                    alert('No records selected');
+                    return;
+                }
+                new Ext4.Window({
+                    title: 'Mark Reviewed',
+                    closeAction: 'destroy',
+                    width: 330,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        ref: 'theForm',
+                        bodyStyle: 'padding: 5px;',
+                        items: [{
+                            xtype: 'textfield',
+                            fieldLabel: 'Initials',
+                            id: 'initials-field',
+                            width: 200,
+                            value: LABKEY.Security.currentUser.displayName,
+                            ref: 'initials'
+                        }]
+                    }],
+                    buttons: [{
+                        text:'Submit',
+                        disabled:false,
+                        formBind: true,
+                        ref: '../submit',
+                        scope: this,
+                        handler: function(o){
+                            var win = o.up('window');
+                            var form = win.down('form');
+                            var initials = form.getForm().findField('initials-field').getValue();
+                            if(!initials){
+                                alert('Must enter initials');
+                                return;
+                            }
+
+                            o.ownerCt.ownerCt.close();
+
+                            LABKEY.Query.selectRows({
+                                schemaName: 'study',
+                                queryName: 'clinpathRuns',
+                                filterArray: [
+                                    LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)
+                                ],
+                                scope: this,
+                                success: function(data){
+                                    var toUpdate = [];
+                                    var skipped = [];
+
+                                    if(!data.rows || !data.rows.length){
+                                        dataRegion.selectNone();
+                                        dataRegion.refresh();
+                                        return;
+                                    }
+
+                                    Ext4.each(data.rows, function(row){
+                                        if(!row.dateReviewed)
+                                            toUpdate.push({lsid: row.lsid, dateReviewed: new Date(), reviewedBy: initials});
+                                        else
+                                            skipped.push(row.lsid)
+                                    }, this);
+
+                                    if(toUpdate.length){
+                                        LABKEY.Query.updateRows({
+                                            schemaName: 'study',
+                                            queryName: 'clinpathRuns',
+                                            rows: toUpdate,
+                                            scope: this,
+                                            success: function(){
+                                                dataRegion.selectNone();
+                                                dataRegion.refresh();
+                                            },
+                                            failure: EHR.Utils.onError
+                                        });
+                                    }
+                                    else {
+                                        dataRegion.selectNone();
+                                        dataRegion.refresh();
+                                    }
+
+                                    if(skipped.length){
+                                        alert('One or more rows was skipped because it already has been reviewed');
+                                    }
+                                },
+                                failure: EHR.Utils.onError
+                            });
+                        }
+                    },{
+                        text: 'Close',
+                        handler: function(o){
+                            o.ownerCt.ownerCt.close();
+                        }
+                    }]
+                }).show();
+
+                function onSuccess(data){
+                    if(!data || !data.rows){
                         return;
                     }
-
-                    new Ext.Window({
-                        title: 'Mark Reviewed',
-                        closeAction: 'destory',
-                        width: 330,
-                        autoHeight: true,
-                        items: [{
-                            xtype: 'form',
-                            ref: 'theForm',
-                            bodyStyle: 'padding: 5px;',
-                            items: [{
-                                xtype: 'textfield',
-                                fieldLabel: 'Initials',
-                                width: 200,
-                                value: LABKEY.Security.currentUser.displayName,
-                                ref: 'initials'
-                            }]
-                        }],
-                        buttons: [{
-                            text:'Submit',
-                            disabled:false,
-                            formBind: true,
-                            ref: '../submit',
-                            scope: this,
-                            handler: function(o){
-                                Ext.Msg.wait('Loading...');
-                                var initials = o.ownerCt.ownerCt.theForm.initials.getValue();
-                                if(!initials){
-                                    alert('Must enter initials');
-                                    return;
-                                }
-
-                                o.ownerCt.ownerCt.close();
-
-                                LABKEY.Query.selectRows({
-                                    schemaName: 'study',
-                                    queryName: 'Clinpath Runs',
-                                    filterArray: [
-                                        LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)
-                                    ],
-                                    scope: this,
-                                    success: function(data){
-                                        var toUpdate = [];
-                                        var skipped = [];
-
-                                        if(!data.rows || !data.rows.length){
-                                            Ext.Msg.hide();
-                                            dataRegion.selectNone();
-                                            dataRegion.refresh();
-                                            return;
-                                        }
-
-                                        Ext.each(data.rows, function(row){
-                                            if(!row.dateReviewed)
-                                                toUpdate.push({lsid: row.lsid, dateReviewed: new Date(), reviewedBy: initials});
-                                            else
-                                                skipped.push(row.lsid)
-                                        }, this);
-
-                                        if(toUpdate.length){
-                                            LABKEY.Query.updateRows({
-                                                schemaName: 'study',
-                                                queryName: 'Clinpath Runs',
-                                                rows: toUpdate,
-                                                scope: this,
-                                                success: function(){
-                                                    Ext.Msg.hide();
-                                                    dataRegion.selectNone();
-                                                    dataRegion.refresh();
-                                                },
-                                                failure: EHR.Utils.onError
-                                            });
-                                        }
-                                        else {
-                                            Ext.Msg.hide();
-                                            dataRegion.selectNone();
-                                            dataRegion.refresh();
-                                        }
-
-                                        if(skipped.length){
-                                            alert('One or more rows was skipped because it already has been reviewed');
-                                        }
-                                    },
-                                    failure: EHR.Utils.onError
-                                });
-                            }
-                        },{
-                            text: 'Close',
-                            handler: function(o){
-                                o.ownerCt.ownerCt.close();
-                            }
-                        }]
-                    }).show();
-
-
-
-                    function onSuccess(data){
-                        if(!data || !data.rows){
-                            return;
-                        }
-
-                        Ext.Msg.hide();
-
-                    }
+                    Ext4.Msg.hide();
+                }
                 });
         },
 
@@ -565,7 +555,7 @@ WNPRC_EHR.DatasetButtons = new function(){
         },
 
         /**
-         * This add a button that allows the user to create a task from requested records.  It was originally created to allow users to create Blood Draw or ClinPath
+         * Handler for scheduling task that allows the user to create a task from requested records.  It was originally created to allow users to create Blood Draw or ClinPath
          * tasks from requested records.
          * @param dataRegionName
          * @param menu
@@ -577,426 +567,291 @@ WNPRC_EHR.DatasetButtons = new function(){
 
             this.addMenuItem(menu, 'Schedule '+config.formType+' Task', function() {
                     var dataRegion = LABKEY.DataRegions[dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
+            var checked = dataRegion.getChecked();
+                if(!checked || !checked.length){
+                    alert('No records selected');
+                    return;
+                }
+                Ext4.Msg.wait("Loading...");
+                new Ext4.Window({
+                    width: 400,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        title: 'Schedule ' + formType,
+                        bodyStyle: 'padding: 5px;',
+                        defaults: {
+                            border: false
+                        },
+                        items: [{
+                            html: 'Total Records: '+checked.length+'<br><br>',
+                            tag: 'div'
+                        },{
+                            xtype: 'textfield',
+                            fieldLabel: 'Title',
+                            width: 300,
+                            value: formType,
+                            ref: 'titleField',
+                            id: 'create-task-title'
+                        },{
+                            xtype: 'xdatetime',
+                            fieldLabel: 'Date',
+                            width: 300,
+                            value: new Date(),
+                            ref: 'date',
+                            id: 'create-task-date'
+                        },{
+                            xtype: 'combo',
+                            fieldLabel: 'Assigned To',
+                            id: 'create-task-assigned-to',
+                            width: 300,
+                            value: LABKEY.Security.currentUser.id,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            store: {
+                                type: 'labkey-store',
+                                schemaName: 'core',
+                                queryName: 'PrincipalsWithoutAdmin',
+                                columns: 'UserId,DisplayName',
+                                sort: 'Type,DisplayName',
+                                autoLoad: true
+                            },
+                            displayField: 'DisplayName',
+                            valueField: 'UserId',
+                            ref: 'assignedTo'
+                        }]
+                    }],
+                    buttons: [{
+                        text:'Submit',
+                        disabled:false,
+                        formBind: true,
+                        ref: '../submit',
+                        scope: this,
+                        handler: function(o){
+                            var win = o.up('window');
+                            var form = win.down('form');
+
+                            var date = form.getForm().findField('create-task-date').getValue()
+                            date = date.toGMTString();
+                            if(!date){
+                                alert('Must enter a date');
+                                o.ownerCt.ownerCt.close();
+                            }
+
+                            var assignedTo = form.getForm().findField('create-task-assigned-to').getValue();
+                            if(!assignedTo){
+                                alert('Must assign to someone');
+                                o.ownerCt.ownerCt.close();
+                            }
+                            var title = form.getForm().findField('create-task-title').getValue();
+                            if(!title){
+                                alert('Must enter a title');
+                                o.ownerCt.ownerCt.close();
+                            }
+
+                            o.ownerCt.ownerCt.close();
+
+                            var existingRecords = {};
+                            existingRecords[dataRegion.queryName] = checked;
+
+                            EHR.Utils.createTask({
+                                initialQCState: 'Scheduled',
+                                childRecords: null,
+                                existingRecords: existingRecords,
+                                taskRecord: {date: date, assignedTo: assignedTo, category: 'task', title: title, formType: formType},
+                                success: function(response, options, config){
+                                    Ext4.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
+                                        if(btn == 'yes'){
+                                            window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
+                                        }
+                                        else {
+                                            dataRegion.refresh();
+                                        }
+                                    }, this)
+                                },
+                                failure: function(){
+                                    console.log('failure');
+                                }
+                            });
+                        }
+                    },{
+                        text: 'Close',
+                        handler: function(o){
+                            o.ownerCt.ownerCt.close();
+                            Ext4.Msg.hide();
+                        }
+                    }]
+                }).show();
+
+                function onSuccess(data){
+                    if(!data || !data.rows){
                         return;
                     }
-
-                    //NOTE: it might be a good idea to check that the dates match on input records and enforce this when making a task
-                    //            if(config.enforceDate){
-                    //
-                    //            }
-                    //            else {
-                    //                createWindow();
-                    //            }
-
-                    createWindow();
-
-                    function createWindow(){
-                        new Ext.Window({
-                            title: 'Schedule '+config.formType,
-                            width: 330,
-                            autoHeight: true,
-                            items: [{
-                                xtype: 'form',
-                                ref: 'theForm',
-                                bodyStyle: 'padding: 5px;',
-                                defaults: {
-                                    border: false
-                                },
-                                items: [{
-                                    html: 'Total Records: '+checked.length+'<br><br>',
-                                    tag: 'div'
-                                },{
-                                    xtype: 'textfield',
-                                    fieldLabel: 'Title',
-                                    width: 200,
-                                    value: config.formType,
-                                    ref: 'titleField'
-                                },{
-                                    xtype: 'xdatetime',
-                                    fieldLabel: 'Date',
-                                    width: 200,
-                                    value: new Date(),
-                                    ref: 'date'
-                                },{
-                                    xtype: 'combo',
-                                    fieldLabel: 'Assigned To',
-                                    width: 200,
-                                    value: LABKEY.Security.currentUser.id,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'core',
-                                        queryName: 'PrincipalsWithoutAdmin',
-                                        columns: 'UserId,DisplayName',
-                                        sort: 'Type,DisplayName',
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'DisplayName',
-                                    valueField: 'UserId',
-                                    ref: 'assignedTo'
-                                }]
-                            }],
-                            buttons: [{
-                                text:'Submit',
-                                disabled:false,
-                                formBind: true,
-                                ref: '../submit',
-                                scope: this,
-                                handler: function(o){
-                                    Ext.Msg.wait('Loading...');
-                                    var date = o.ownerCt.ownerCt.theForm.date.getValue();
-                                    date = date.toGMTString();
-                                    if(!date){
-                                        alert('Must enter a date');
-                                        o.ownerCt.ownerCt.close();
-                                    }
-
-                                    var assignedTo = o.ownerCt.ownerCt.theForm.assignedTo.getValue();
-                                    if(!assignedTo){
-                                        alert('Must assign to someone');
-                                        o.ownerCt.ownerCt.close();
-                                    }
-                                    var title = o.ownerCt.ownerCt.theForm.titleField.getValue();
-                                    if(!title){
-                                        alert('Must enter a title');
-                                        o.ownerCt.ownerCt.close();
-                                    }
-
-                                    o.ownerCt.ownerCt.close();
-
-                                    var existingRecords = {};
-                                    existingRecords[dataRegion.queryName] = checked;
-
-                                    EHR.Utils.createTask({
-                                        initialQCState: 'Scheduled',
-                                        childRecords: null,
-                                        existingRecords: existingRecords,
-                                        taskRecord: {date: date, assignedTo: assignedTo, category: 'task', title: title, formType: config.formType},
-                                        success: function(response, options, config){
-                                            Ext.Msg.hide();
-                                            Ext.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
-                                                if(btn == 'yes'){
-                                                    window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
-                                                }
-                                                else {
-                                                    dataRegion.refresh();
-                                                }
-                                            }, this)
-                                        },
-                                        failure: function(){
-                                            console.log('failure');
-                                            Ext.Msg.hide();
-                                        }
-                                    });
-                                }
-                            },{
-                                text: 'Close',
-                                handler: function(o){
-                                    o.ownerCt.ownerCt.close();
-                                }
-                            }]
-                        }).show();
-                    }
-
-                    function onSuccess(data){
-                        if(!data || !data.rows){
-                            return;
-                        }
 
                         Ext.Msg.hide();
 
                     }
                 });
         },
-
         /**
-         * This add a button to a dataset that allows the user to change the QCState of the records, designed to approve or deny blood requests.
+         * This add a handler to a dataset that allows the user to change the QCState of the records, designed to approve or deny blood requests.
          * It also captures values for 'billedBy' and 'instructions'.
-         * @param dataRegionName
-         * @param menu
+         * @param dataRegion
          */
         addChangeBloodQCStateBtn: function(dataRegionName, menu){
             this.addMenuItem(menu, 'Change Request Status', function() {
                     var dataRegion = LABKEY.DataRegions[dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
-                        return;
-                    }
+            var checked = dataRegion.getChecked();
+            if(!checked || !checked.length){
+                alert('No records selected');
+                return;
+            }
 
-                    Ext.Msg.wait('Loading...');
-                    LABKEY.Query.selectRows({
-                        schemaName: dataRegion.schemaName,
-                        queryName: dataRegion.queryName,
-                        columns: 'lsid,dataset/Label,Id,date,requestid,taskid',
-                        filterArray: [LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+            Ext4.Msg.wait('Loading...');
+            LABKEY.Query.selectRows({
+                schemaName: dataRegion.schemaName,
+                queryName: dataRegion.queryName,
+                columns: 'lsid,dataset/Label,Id,date,requestid,taskid',
+                filterArray: [LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+                scope: this,
+                success: onSuccess,
+                failure: EHR.Utils.onError
+            });
+
+            function onSuccess(data){
+                var records = data.rows;
+
+                if(!records || !records.length){
+                    Ext4.Msg.hide();
+                    alert('No records found');
+                    return;
+                }
+
+                Ext4.Msg.hide();
+                new Ext4.Window({
+                    title: 'Change Request Status',
+                    width: 430,
+                    autoHeight: true,
+                    items: [{
+                        xtype: 'form',
+                        ref: 'theForm',
+                        bodyStyle: 'padding: 5px;',
+                        defaults: {
+                            border: false
+                        },
+                        items: [{
+                            html: 'Total Records: '+checked.length+'<br><br>',
+                            tag: 'div'
+                        },{
+                            xtype: 'combo',
+                            fieldLabel: 'Status',
+                            width: 300,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            store: new LABKEY.ext4.Store({
+                                xtype: 'labkey-store',
+                                schemaName: 'study',
+                                queryName: 'qcstate',
+                                columns: 'rowid,label',
+                                sort: 'label',
+                                filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                autoLoad: true
+                            }),
+                            displayField: 'Label',
+                            valueField: 'RowId',
+                            ref: 'qcstate',
+                            id: 'change-blood-qcstate'
+                        },{
+                            xtype: 'combo',
+                            width: 300,
+                            triggerAction: 'all',
+                            mode: 'local',
+                            fieldLabel: 'Billed By (for blood only)',
+                            store: new LABKEY.ext4.Store({
+                                xtype: 'labkey-store',
+                                schemaName: 'ehr_lookups',
+                                queryName: 'blood_billed_by',
+                                columns: 'value,description',
+                                sort: 'title',
+                                autoLoad: true
+                            }),
+                            displayField: 'description',
+                            valueField: 'value',
+                            ref: 'billedby',
+                            id: 'change-blood-billedby'
+                        },{
+                            xtype: 'textarea',
+                            ref: 'instructions',
+                            fieldLabel: 'Instructions',
+                            width: 300,
+                            id: 'change-blood-instructions'
+                        }]
+                    }],
+                    buttons: [{
+                        text:'Submit',
+                        disabled:false,
+                        formBind: true,
+                        ref: '../submit',
                         scope: this,
-                        success: onSuccess,
-                        failure: EHR.Utils.onError
-                    });
+                        handler: function(o){
+                            var win = o.up('window');
+                            var form = win.down('form');
+                            var qc = form.getForm().findField('change-blood-qcstate').getValue();
+                            var billedby = form.getForm().findField('change-blood-billedby').getValue();
+                            var instructions = form.getForm().findField('change-blood-instructions').getValue();
 
-                    function onSuccess(data){
-                        var records = data.rows;
+                            if(!qc && !billedby && !instructions){
+                                alert('Must enter either status, billed by or instructions');
+                                return;
+                            }
 
-                        if(!records || !records.length){
-                            Ext.Msg.hide();
-                            alert('No records found');
-                            return;
+                            Ext4.Msg.wait('Loading...');
+
+                            var multi = new LABKEY.MultiRequest();
+
+                            var toUpdate = {};
+                            var obj;
+                            Ext.each(records, function(rec){
+                                if(!toUpdate[rec['dataset/Label']])
+                                    toUpdate[rec['dataset/Label']] = [];
+
+                                obj = {lsid: rec.lsid};
+                                if(qc)
+                                    obj.QCState = qc;
+                                if(billedby)
+                                    obj.billedby = billedby;
+                                if(instructions)
+                                    obj.instructions = instructions;
+
+                                toUpdate[rec['dataset/Label']].push(obj)
+                            }, this);
+
+                            for(var i in toUpdate){
+                                multi.add(LABKEY.Query.updateRows, {
+                                    schemaName: 'study',
+                                    queryName: i,
+                                    rows: toUpdate[i],
+                                    scope: this,
+                                    failure: EHR.Utils.onError
+                                });
+                            }
+
+                            multi.send(function(){
+                                Ext4.Msg.hide();
+                                dataRegion.selectNone();
+
+                                o.ownerCt.ownerCt.close();
+                                dataRegion.refresh();
+                            }, this);
                         }
-
-                        Ext.Msg.hide();
-                        new Ext.Window({
-                            title: 'Change Request Status',
-                            width: 330,
-                            autoHeight: true,
-                            items: [{
-                                xtype: 'form',
-                                ref: 'theForm',
-                                bodyStyle: 'padding: 5px;',
-                                defaults: {
-                                    border: false
-                                },
-                                items: [{
-                                    html: 'Total Records: '+checked.length+'<br><br>',
-                                    tag: 'div'
-                                },{
-                                    xtype: 'combo',
-                                    fieldLabel: 'Status',
-                                    width: 200,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'study',
-                                        queryName: 'qcstate',
-                                        columns: 'rowid,label',
-                                        sort: 'label',
-                                        filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'Label',
-                                    valueField: 'RowId',
-                                    ref: 'qcstate'
-                                },{
-                                    xtype: 'combo',
-                                    width: 200,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    fieldLabel: 'Billed By (for blood only)',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'ehr_lookups',
-                                        queryName: 'blood_billed_by',
-                                        columns: 'value,description',
-                                        sort: 'title',
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'description',
-                                    valueField: 'value',
-                                    ref: 'billedby'
-                                },{
-                                    xtype: 'textarea',
-                                    ref: 'instructions',
-                                    fieldLabel: 'Instructions',
-                                    width: 200
-                                }]
-                            }],
-                            buttons: [{
-                                text:'Submit',
-                                disabled:false,
-                                formBind: true,
-                                ref: '../submit',
-                                scope: this,
-                                handler: function(o){
-                                    var qc = o.ownerCt.ownerCt.theForm.qcstate.getValue();
-                                    var billedby = o.ownerCt.ownerCt.theForm.billedby.getValue();
-                                    var instructions = o.ownerCt.ownerCt.theForm.instructions.getValue();
-
-                                    if(!qc && !billedby && !instructions){
-                                        alert('Must enter either status, billed by or instructions');
-                                        return;
-                                    }
-
-                                    Ext.Msg.wait('Loading...');
-
-                                    var multi = new LABKEY.MultiRequest();
-
-                                    var toUpdate = {};
-                                    var obj;
-                                    Ext.each(records, function(rec){
-                                        if(!toUpdate[rec['dataset/Label']])
-                                            toUpdate[rec['dataset/Label']] = [];
-
-                                        obj = {lsid: rec.lsid};
-                                        if(qc)
-                                            obj.QCState = qc;
-                                        if(billedby)
-                                            obj.billedby = billedby;
-                                        if(instructions)
-                                            obj.instructions = instructions;
-
-                                        toUpdate[rec['dataset/Label']].push(obj)
-                                    }, this);
-
-                                    for(var i in toUpdate){
-                                        multi.add(LABKEY.Query.updateRows, {
-                                            schemaName: 'study',
-                                            queryName: i,
-                                            rows: toUpdate[i],
-                                            scope: this,
-                                            failure: EHR.Utils.onError
-                                        });
-                                    }
-
-                                    multi.send(function(){
-                                        Ext.Msg.hide();
-                                        dataRegion.selectNone();
-
-                                        o.ownerCt.ownerCt.close();
-                                        dataRegion.refresh();
-                                    }, this);
-                                }
-                            },{
-                                text: 'Close',
-                                handler: function(o){
-                                    o.ownerCt.ownerCt.close();
-                                }
-                            }]
-                        }).show();
-                    }
-                });
-        },
-
-        /**
-         * This add a button to a dataset that allows the user to change the QCState of the records, designed to approve or deny clinpath requests.
-         * @param dataRegionName
-         * @param menu
-         */
-        addChangeQCStateBtn: function(dataRegionName, menu){
-            this.addMenuItem(menu, 'Change Request Status', function() {
-                    var dataRegion = LABKEY.DataRegions[dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
-                        return;
-                    }
-
-                    Ext.Msg.wait('Loading...');
-                    LABKEY.Query.selectRows({
-                        schemaName: dataRegion.schemaName,
-                        queryName: dataRegion.queryName,
-                        columns: 'lsid,dataset/Label,Id,date,requestid,taskid',
-                        filterArray: [LABKEY.Filter.create('lsid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
-                        scope: this,
-                        success: onSuccess,
-                        failure: EHR.Utils.onError
-                    });
-
-                    function onSuccess(data){
-                        var records = data.rows;
-
-                        if(!records || !records.length){
-                            Ext.Msg.hide();
-                            alert('No records found');
-                            return;
+                    },{
+                        text: 'Close',
+                        handler: function(o){
+                            o.ownerCt.ownerCt.close();
                         }
-
-                        Ext.Msg.hide();
-                        new Ext.Window({
-                            title: 'Change Request Status',
-                            width: 330,
-                            autoHeight: true,
-                            items: [{
-                                xtype: 'form',
-                                ref: 'theForm',
-                                bodyStyle: 'padding: 5px;',
-                                defaults: {
-                                    border: false
-                                },
-                                items: [{
-                                    html: 'Total Records: '+checked.length+'<br><br>',
-                                    tag: 'div'
-                                },{
-                                    xtype: 'combo',
-                                    fieldLabel: 'Status',
-                                    width: 200,
-                                    triggerAction: 'all',
-                                    mode: 'local',
-                                    store: new LABKEY.ext.Store({
-                                        xtype: 'labkey-store',
-                                        schemaName: 'study',
-                                        queryName: 'qcstate',
-                                        columns: 'rowid,label',
-                                        sort: 'label',
-                                        filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
-                                        autoLoad: true
-                                    }),
-                                    displayField: 'Label',
-                                    valueField: 'RowId',
-                                    ref: 'qcstate'
-                                }]
-                            }],
-                            buttons: [{
-                                text:'Submit',
-                                disabled:false,
-                                formBind: true,
-                                ref: '../submit',
-                                scope: this,
-                                handler: function(o){
-                                    var qc = o.ownerCt.ownerCt.theForm.qcstate.getValue();
-
-                                    if(!qc){
-                                        alert('Must choose a status');
-                                        return;
-                                    }
-
-                                    Ext.Msg.wait('Loading...');
-
-                                    var multi = new LABKEY.MultiRequest();
-
-                                    var toUpdate = {};
-                                    var obj;
-                                    Ext.each(records, function(rec){
-                                        if(!toUpdate[rec['dataset/Label']])
-                                            toUpdate[rec['dataset/Label']] = [];
-
-                                        obj = {lsid: rec.lsid};
-                                        if(qc)
-                                            obj.QCState = qc;
-
-                                        toUpdate[rec['dataset/Label']].push(obj)
-                                    }, this);
-
-                                    for(var i in toUpdate){
-                                        multi.add(LABKEY.Query.updateRows, {
-                                            schemaName: 'study',
-                                            queryName: i,
-                                            rows: toUpdate[i],
-                                            scope: this,
-                                            failure: EHR.Utils.onError
-                                        });
-                                    }
-
-                                    multi.send(function(){
-                                        Ext.Msg.hide();
-                                        dataRegion.selectNone();
-
-                                        o.ownerCt.ownerCt.close();
-                                        dataRegion.refresh();
-                                    }, this);
-                                }
-                            },{
-                                text: 'Close',
-                                handler: function(o){
-                                    o.ownerCt.ownerCt.close();
-                                }
-                            }]
-                        }).show();
-                    }
+                    }]
+                }).show();
+            }
                 });
         },
 
@@ -1022,42 +877,299 @@ WNPRC_EHR.DatasetButtons = new function(){
          */
         addFeedingTaskBtn: function(dataRegionName, menu){
             this.addMenuItem(menu, 'Add Batch of Records', function() {
-                    window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {formtype: 'Feeding'});
+                window.location = LABKEY.ActionURL.buildURL("ehr", "manageTask", null, {formtype: 'Feeding'});
             });
         },
-        addVVCChangeQCStateBtn: function(dataRegionName, menu){
-            this.addMenuItem(menu, 'Approve VVC Request', function() {
-                    var dataRegion = LABKEY.DataRegions[dataRegionName];
-                    var checked = dataRegion.getChecked();
-                    if(!checked || !checked.length){
-                        alert('No records selected');
+
+        addChangeQCStateBtn: function(dataRegionName, menu){
+            this.addMenuItem(menu, 'Change Request Status', function() {
+                var dataRegion = LABKEY.DataRegions[dataRegionName];
+                var checked = dataRegion.getChecked();
+                if (!checked || !checked.length) {
+                    alert('No records selected');
+                    return;
+                }
+
+                Ext4.Msg.wait('Loading...');
+                LABKEY.Query.selectRows({
+                    schemaName: dataRegion.schemaName,
+                    queryName: dataRegion.queryName,
+                    columns: 'rowid,date,requestid,taskid',
+                    filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+                    scope: this,
+                    success: onSuccess,
+                    failure: EHR.Utils.onError
+                });
+
+                function onSuccess(data) {
+                    var records = data.rows;
+                    Ext4.Msg.hide();
+
+                    if (!records || !records.length) {
+                        Ext4.Msg.hide();
+                        alert('No records found');
                         return;
                     }
 
-                    Ext.Msg.wait('Loading...');
-                    LABKEY.Query.selectRows({
-                        schemaName: dataRegion.schemaName,
-                        queryName: dataRegion.queryName,
-                        columns: 'rowid,date,requestid,taskid',
-                        filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
-                        scope: this,
-                        success: onSuccess,
-                        failure: EHR.Utils.onError
-                    });
+                    new Ext4.Window({
+                        title: 'Approve VVC Request',
+                        width: 430,
+                        autoHeight: true,
+                        items: [{
+                            xtype: 'form',
+                            ref: 'theForm',
+                            bodyStyle: 'padding: 5px;',
+                            defaults: {
+                                border: false
+                            },
+                            items: [{
+                                html: 'Total Records: ' + checked.length + '<br><br>',
+                                tag: 'div'
+                            }, {
+                                xtype: 'combo',
+                                fieldLabel: 'Status',
+                                width: 300,
+                                triggerAction: 'all',
+                                mode: 'local',
+                                store: new LABKEY.ext4.Store({
+                                    xtype: 'labkey-store',
+                                    schemaName: 'study',
+                                    queryName: 'qcstate',
+                                    columns: 'rowid,label',
+                                    sort: 'label',
+                                    //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                    autoLoad: true
+                                }),
+                                id: 'approve-request-qc',
+                                displayField: 'Label',
+                                valueField: 'RowId',
+                                ref: 'qcstate'
+                            }]
+                        }],
+                        buttons: [{
+                            text: 'Submit',
+                            disabled: false,
+                            formBind: true,
+                            ref: '../submit',
+                            scope: this,
+                            handler: function (o) {
+                                var win = o.up('window');
+                                var form = win.down('form');
 
-                    function onSuccess(data){
-                        var records = data.rows;
+                                var qc = form.getForm().findField('approve-request-qc').getValue()
 
-                        if(!records || !records.length){
-                            Ext.Msg.hide();
-                            alert('No records found');
-                            return;
-                        }
+                                if (!qc) {
+                                    alert('Must choose a status');
+                                    return;
+                                }
 
-                        Ext.Msg.hide();
-                        new Ext.Window({
-                            title: 'Approve VVC Request',
-                            width: 330,
+                                Ext4.Msg.wait('Loading...');
+
+                                var multi = new LABKEY.MultiRequest();
+
+                                var toUpdate = {};
+                                var obj;
+                                Ext.each(records, function (rec) {
+                                    if (!toUpdate['vvc'])
+                                        toUpdate['vvc'] = [];
+
+                                    obj = {rowid: rec.rowid};
+                                    if (qc) {
+                                        obj.QCState = qc;
+
+                                    }
+
+                                    toUpdate['vvc'].push(obj)
+                                }, this);
+
+                                for (var i in toUpdate) {
+                                    multi.add(LABKEY.Query.updateRows, {
+                                        schemaName: 'wnprc',
+                                        queryName: i,
+                                        rows: toUpdate[i],
+                                        scope: this,
+                                        failure: EHR.Utils.onError
+                                    });
+                                }
+
+                                multi.send(function () {
+                                    Ext4.Msg.hide();
+                                    dataRegion.selectNone();
+
+                                    o.ownerCt.ownerCt.close();
+                                    dataRegion.refresh();
+                                }, this);
+                            }
+                        }, {
+                            text: 'Close',
+                            handler: function (o) {
+                                o.ownerCt.ownerCt.close();
+                            }
+                        }]
+                    }).show();
+                }
+            });
+
+        },
+                    /**
+                     * This handler will allow the user to basically change the status of the VVC request in batch.
+                     * It is different than Change Request Status button in that it has more QC states listed.
+                     * @param dataRegion
+                     */
+                    approveVVCButtonHandler: function (dataRegion){
+
+                var checked = dataRegion.getChecked();
+                if(!checked || !checked.length){
+                    alert('No records selected');
+                    return;
+                }
+
+                Ext4.Msg.wait('Loading...');
+                LABKEY.Query.selectRows({
+                    schemaName: dataRegion.schemaName,
+                    queryName: dataRegion.queryName,
+                    columns: 'rowid,date,requestid,taskid',
+                    filterArray: [LABKEY.Filter.create('rowid', checked.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF)],
+                    scope: this,
+                    success: onSuccess,
+                    failure: EHR.Utils.onError
+                });
+
+                function onSuccess(data) {
+                    var records = data.rows;
+                    Ext4.Msg.hide();
+
+                    if (!records || !records.length) {
+                        Ext4.Msg.hide();
+                        alert('No records found');
+                        return;
+                    }
+
+                    new Ext4.Window({
+                        title: 'Approve VVC Request',
+                        width: 430,
+                        autoHeight: true,
+                        items: [{
+                            xtype: 'form',
+                            ref: 'theForm',
+                            bodyStyle: 'padding: 5px;',
+                            defaults: {
+                                border: false
+                            },
+                            items: [{
+                                html: 'Total Records: ' + checked.length + '<br><br>',
+                                tag: 'div'
+                            }, {
+                                xtype: 'combo',
+                                fieldLabel: 'Status',
+                                width: 300,
+                                triggerAction: 'all',
+                                mode: 'local',
+                                store: new LABKEY.ext4.Store({
+                                    xtype: 'labkey-store',
+                                    schemaName: 'study',
+                                    queryName: 'qcstate',
+                                    columns: 'rowid,label',
+                                    sort: 'label',
+                                    //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
+                                    autoLoad: true
+                                }),
+                                id: 'approve-request-qc',
+                                displayField: 'Label',
+                                valueField: 'RowId',
+                                ref: 'qcstate'
+                            }]
+                        }],
+                        buttons: [{
+                            text: 'Submit',
+                            disabled: false,
+                            formBind: true,
+                            ref: '../submit',
+                            scope: this,
+                            handler: function (o) {
+                                var win = o.up('window');
+                                var form = win.down('form');
+
+                                var qc = form.getForm().findField('approve-request-qc').getValue()
+
+                                if (!qc) {
+                                    alert('Must choose a status');
+                                    return;
+                                }
+
+                                Ext4.Msg.wait('Loading...');
+
+                                var multi = new LABKEY.MultiRequest();
+
+                                var toUpdate = {};
+                                var obj;
+                                Ext.each(records, function (rec) {
+                                    if (!toUpdate['vvc'])
+                                        toUpdate['vvc'] = [];
+
+                                    obj = {rowid: rec.rowid};
+                                    if (qc) {
+                                        obj.QCState = qc;
+
+                                    }
+
+                                    toUpdate['vvc'].push(obj)
+                                }, this);
+
+                                for (var i in toUpdate) {
+                                    multi.add(LABKEY.Query.updateRows, {
+                                        schemaName: 'wnprc',
+                                        queryName: i,
+                                        rows: toUpdate[i],
+                                        scope: this,
+                                        failure: EHR.Utils.onError
+                                    });
+                                }
+
+                                multi.send(function () {
+                                    Ext4.Msg.hide();
+                                    dataRegion.selectNone();
+
+                                    o.ownerCt.ownerCt.close();
+                                    dataRegion.refresh();
+                                }, this);
+                            }
+                        }, {
+                            text: 'Close',
+                            handler: function (o) {
+                                o.ownerCt.ownerCt.close();
+                            }
+                        }]
+                    }).show();
+                }
+
+            },
+
+            batchCompleteRecords: function (dataRegionName) {
+                var dataRegion = LABKEY.DataRegions[dataRegionName];
+                var checked = dataRegion.getChecked();  //TODO: update to getSelected with callback
+                var checkedInt = checked.map(function(item) {
+                    return parseInt(item, 10);
+                });
+                var checkedJoin = checked.join(";");
+                console.log(checkedJoin);
+                if (!checked || !checked.length) {
+                    Ext4.Msg.alert('Error', 'No records selected');
+                    return;
+                }
+                var filt = [];
+                filt.push(LABKEY.Filter.create('key', checkedJoin, LABKEY.Filter.Types.IN));
+                var uniq = [];
+                LABKEY.Query.selectRows({
+                    schemaName: 'lists',
+                    queryName: 'vl_sample_queue',
+                    filterArray: filt,
+                    success: function (d) {
+                        //check that all records are the same animal id
+                        var toUpdate = d["rows"];
+                        new Ext4.Window({
+                            title: 'Change Request Status',
+                            width: 430,
                             autoHeight: true,
                             items: [{
                                 xtype: 'form',
@@ -1072,22 +1184,32 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 },{
                                     xtype: 'combo',
                                     fieldLabel: 'Status',
-                                    width: 200,
+                                    width: 300,
                                     triggerAction: 'all',
                                     mode: 'local',
-                                    store: new LABKEY.ext.Store({
+                                    store: new LABKEY.ext4.Store({
                                         xtype: 'labkey-store',
-                                        schemaName: 'study',
-                                        queryName: 'qcstate',
-                                        columns: 'rowid,label',
-                                        sort: 'label',
+                                        schemaName: 'lists',
+                                        queryName: 'status',
+                                        columns: 'Key,Status',
+                                        sort: 'Key',
                                         //filterArray: [LABKEY.Filter.create('label', 'Request', LABKEY.Filter.Types.STARTS_WITH)],
                                         autoLoad: true
                                     }),
-                                    displayField: 'Label',
-                                    valueField: 'RowId',
-                                    ref: 'qcstate'
-                                }]
+                                    displayField: 'Status',
+                                    valueField: 'Key',
+                                    ref: 'qcstate',
+                                    id: 'change-vl-qcstate',
+                                    allowBlank: false
+                                }, {
+                                    xtype: 'numberfield',
+                                    ref: 'experiment',
+                                    fieldLabel: 'Experiment #',
+                                    width: 300,
+                                    id: 'enter-experiment-number',
+                                    allowBlank: false
+                                }
+                                ]
                             }],
                             buttons: [{
                                 text:'Submit',
@@ -1095,51 +1217,34 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 formBind: true,
                                 ref: '../submit',
                                 scope: this,
-                                handler: function(o){
-                                    var qc = o.ownerCt.ownerCt.theForm.qcstate.getValue();
+                                handler: function(o) {
+                                    var win = o.up('window');
+                                    var form = win.down('form');
+                                    var qc = form.getForm().findField('change-vl-qcstate').getValue();
+                                    var num = form.getForm().findField('enter-experiment-number').getValue();
+                                    Ext4.Msg.wait('Loading...');
 
-                                    if(!qc){
-                                        alert('Must choose a status');
-                                        return;
-                                    }
-
-                                    Ext.Msg.wait('Loading...');
-
-                                    var multi = new LABKEY.MultiRequest();
-
-                                    var toUpdate = {};
-                                    var obj;
-                                    Ext.each(records, function(rec){
-                                        if(!toUpdate['vvc'])
-                                            toUpdate['vvc'] = [];
-
-                                        obj = {rowid: rec.rowid};
-                                        if(qc)
-                                        {
-                                            obj.QCState = qc;
-
-                                        }
-
-                                        toUpdate['vvc'].push(obj)
+                                    //update qc status
+                                    Ext4.each(toUpdate, function (row) {
+                                        row.Status = qc;
+                                        row.experimentNumber = parseInt(num);
                                     }, this);
 
-                                    for(var i in toUpdate){
-                                        multi.add(LABKEY.Query.updateRows, {
-                                            schemaName: 'wnprc',
-                                            queryName: i,
-                                            rows: toUpdate[i],
+                                    if (toUpdate.length) {
+                                        LABKEY.Query.updateRows({
+                                            schemaName: 'lists',
+                                            queryName: 'vl_sample_queue',
+                                            rows: toUpdate,
                                             scope: this,
+                                            success: function () {
+                                                dataRegion.selectNone();
+                                                dataRegion.refresh();
+                                                Ext4.Msg.hide();
+                                            },
                                             failure: EHR.Utils.onError
                                         });
+
                                     }
-
-                                    multi.send(function(){
-                                        Ext.Msg.hide();
-                                        dataRegion.selectNone();
-
-                                        o.ownerCt.ownerCt.close();
-                                        dataRegion.refresh();
-                                    }, this);
                                 }
                             },{
                                 text: 'Close',
@@ -1148,8 +1253,17 @@ WNPRC_EHR.DatasetButtons = new function(){
                                 }
                             }]
                         }).show();
+
+
+                    },
+                    failure: function() {
+
                     }
                 });
-        }
+
+            },
+
+
+
     }
 };

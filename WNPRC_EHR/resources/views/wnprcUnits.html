@@ -1,23 +1,17 @@
 <html>
 <script type="text/javascript">
-LABKEY.requiresScript("/ehr/ext3/navMenu.js");
-</script>
 
-<script type="text/javascript">
-
-Ext.onReady(createNavMenu);
+Ext4.onReady(createNavMenu);
 
 function createNavMenu()
 {
-    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
-    {
-        createNavMenu.defer(10);
-        return;
-    }
-
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'animalServices',
         sections: [
+            {header: 'All Staff Minutes',
+            items: [
+                {name:'Meeting Notes', url:'<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/begin.view?'}
+            ]},
             {header: 'Behavioral Management',
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Behavioral_Management/Issue_Tracker/start.view?'},
@@ -30,15 +24,17 @@ function createNavMenu()
             ]},
             {header: 'Colony Records',
             items: [
+                {name: 'EHR Users and Initials', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Public/begin.view?'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/Issue_Tracker/start.view?'},
                 {name: 'Colony Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Colony_Records/begin.view?'}
             ]},
             {header: 'Compliance and Training',
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Issue_Tracker/start.view?'},
+                {name: 'Occ Health and Safety Plans', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/Occ_Health_and_Safety_Plans/begin.view'},
                 {name: 'Compliance Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/begin.view?'},
                 {name: 'Trainers Only**', url: '<%=contextPath%>/EHR_ComplianceDB/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/Trainers/training.view?'},
-                {name: 'MSDS Sheets', url: '<%=contextPath%>/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1229'},
+                {name: 'Safety Data Sheets (SDS)', url: '<%=contextPath%>/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1229'},
                 {name: 'Policies', url: '<%=contextPath%>/list/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/grid.view?listId=1387'},
                 {name: 'Management Reports', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Management%20Reports/begin.view?'},
                 {name: 'Occupant Emergency Plan', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/page.view?name=oep'},
@@ -65,7 +61,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'opServices',
         sections: [
             {header: 'Facilities Management',
@@ -76,13 +72,15 @@ function createNavMenu()
             items: [
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Issue_Tracker/start.view?'},
                 {name: 'Internal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Private/begin.view?'},
-                {name: 'PI Portal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/PI Portal/begin.view?'},
-                {name: 'Enter Charges with Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'Charges'})},
-                {name: 'Enter Charges without Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'NonAnimalCharges'})}
+                {name: 'Finance Data Entry', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/Finance_Data_Entry/begin.view?'},
+                {name: 'PI Portal', url: '<%=contextPath%>' + '/project/WNPRC/WNPRC_Units/Operation_Services/Financial_Management/PI Portal/begin.view?'}
+                //{name: 'Enter Charges with Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'Charges'})},
+                //{name: 'Enter Charges without Animal Ids', url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', LABKEY.moduleContext.ehr["EHRStudyContainer"], {formType: 'NonAnimalCharges'})}
             ]},
             {header: 'Grants Management',
             items: [
                 {name: 'Per Diems Report', url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'PerDiems', LABKEY.moduleContext.ehr["EHRStudyContainer"]) },
+                {name: 'Animal Billable Days Report', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=animalBillableDaysReport'},
                 {name: 'P51 Base Grant 2016 Renewal', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/P51_Base_Grant_2016_Renewal/begin.view?'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Grants_Management/Issue_Tracker/start.view?'}
             ]},
@@ -93,7 +91,8 @@ function createNavMenu()
             ]},
             {header: 'ITSS',
             items: [
-                {name: 'Labkey Testing', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Public/begin.view?'},
+                {name: 'IT Homepage', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Public/begin.view?'},
+                {name: 'Request New User Account', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/IT/Public/insertQueryRow.view?schemaName=lists&query.queryName=New%20User%20Request&query.AccountCreated'},
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/IT/Issue_Tracker/start.view?'}
             ]},
             {header: 'Purchasing Services',
@@ -103,7 +102,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'researchServices',
         sections: [
             {header: 'Assay Services',
@@ -126,7 +125,7 @@ function createNavMenu()
                 {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/Issue_Tracker/start.view?'},
                 {name: 'Virology Staff Only**', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/Virology_Services/begin.view?'}
             ]},
-            {header: 'EHR Services',
+            {header: 'IDS Unit',
                 items: [
                     {name: 'Unit Updates', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/begin.view?'},
                     {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Research_Services/EHR_Service/Issue_Tracker/start.view?'},
@@ -136,7 +135,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'directorsOffice',
         sections: [
             {header: 'Misc. Pages',
@@ -149,11 +148,12 @@ function createNavMenu()
     });
 
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'miscPages',
         sections: [
             {header: 'Misc. Pages',
             items: [
+                {name: 'Request New User Account', url: '<%=contextPath%>/query/WNPRC/WNPRC_Units/IT/Public/insertQueryRow.view?schemaName=lists&query.queryName=New%20User%20Request&query.AccountCreated'},
                 {name: 'Change WNPRC Password', url: 'https://wprcfs.primate.wisc.edu/changepassword/'},
                 {name: 'Employee List', url: '<%=contextPath%>/query/WNPRC/EHR/executeQuery.view?schemaName=study&query.queryName=EmployeeList'},
                 {name: 'Guidelines for Protocols', url: '<%=contextPath%>/wiki/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Public/page.view?name=ProtocolGuides'},
@@ -165,13 +165,23 @@ function createNavMenu()
             ]}
         ]
     });
+
+
+
+
+
+
+
+
+
+
 }
 
 </script>
 <body>
 
 <p>
-<!--<div style="display:inline">-->
+<div style="width:1075px">
 <table style="display:inline">
 <tr>
     <td colspan="3">
@@ -230,7 +240,7 @@ function createNavMenu()
     </td>
 </tr>
 </table>
-<!--</div>-->
+</div>
 
 </body>
 </html>

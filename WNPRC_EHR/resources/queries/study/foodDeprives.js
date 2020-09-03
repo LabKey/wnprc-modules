@@ -68,8 +68,9 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
 }
 function beforeUpdate(row, oldRow, scriptErrors){
-    if (row.QCStateLabel=='Started' && oldRow.QCStateLabel=='Scheduled' && !row.depriveStartTime){
+    if (row.QCStateLabel=='Started' && oldRow.QCStateLabel=='Scheduled' && !row.depriveStartTime && !row.depriveStartedBy) {
         EHR.Server.Utils.addError(scriptErrors, 'depriveStartTime', 'Need to enter a start time to start food deprive', 'ERROR');
+        EHR.Server.Utils.addError(scriptErrors, 'depriveStartedBy', 'Need to enter a initials to start food deprive', 'ERROR');
     }
 
     if (row.QCStateLabel=='Complete' && oldRow.QCStateLabel=='Started' && (row.depriveStartTime > row.restoredTime)){

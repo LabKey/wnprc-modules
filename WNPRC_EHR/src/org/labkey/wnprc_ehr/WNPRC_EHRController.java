@@ -27,11 +27,14 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
@@ -51,8 +54,9 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.AdminPermission;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
@@ -80,6 +84,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectExcepti
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
+import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -1248,7 +1253,28 @@ public class WNPRC_EHRController extends SpringActionController
 
     }
 
-    /**
+  
+  public String getVLStatus(User user, Container container, Integer status) throws SQLException
+    {
+      SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
+      QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
+
+      // Define columns to get
+      List<FieldKey> columns = new ArrayList<>();
+      columns.add(FieldKey.fromString("Key"));
+      columns.add(FieldKey.fromString("Status"));
+      // Execute the query
+      String thestatus = null;
+      try ( Results rs = viralLoadQuery.select(columns, filter) )
+      {
+          if (rs.next()){
+              thestatus = rs.getString(FieldKey.fromString("Status"));
+          }
+      }
+      return thestatus;
+  }
+
+  /**
      * Action definition to import historical/test data for the breeding datasets. Called from the web application,
      * not from Java.
      */
@@ -1264,10 +1290,6 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    /**
-     * Action definition for the import dataset test API action. Executes the import based on a pre-defined study
-     * definition. Called from the web application, not from Java.
-     */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
     public static class ImportDatasetMetadataAction extends MutatingApiAction<java.lang.Void>

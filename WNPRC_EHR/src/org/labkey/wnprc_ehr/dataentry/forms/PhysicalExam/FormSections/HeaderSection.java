@@ -7,6 +7,6 @@ import org.labkey.api.ehr.dataentry.SimpleFormSection;
  */
 public class HeaderSection extends SimpleFormSection {
     public HeaderSection() {
-        super("study", "Clinical Encounters", "Header", "ehr-gridpanel");
+        super("study", "Encounters", "Header", "ehr-gridpanel");
     }
 }

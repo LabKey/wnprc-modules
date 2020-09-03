@@ -1,0 +1,17 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="groupCategoryAssocWithCategoryName" tableDbType="NOT_IN_DB">
+                <auditLogging>DETAILED</auditLogging>
+                <columns>
+                    <column columnName="chargeGroupName">
+                        <columnTitle>Group</columnTitle>
+                    </column>
+                    <column columnName="chargeCategoryName">
+                        <columnTitle>Category</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

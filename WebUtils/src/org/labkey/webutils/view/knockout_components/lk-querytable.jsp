@@ -3,7 +3,7 @@
 <template id="lk-querytable">
     <h2>{{title}}</h2>
     <lk-table params="table: table, rowsAreSelectable: rowsAreSelectable, actionButtons: actionButtons,
-    rowClickCallback: rowClickCallback"></lk-table>
+    rowClickCallback: rowClickCallback, rowBackgroundColorClicked: rowBackgroundColorClicked, cursor: cursor"></lk-table>
 </template>
 
 <script>
@@ -25,7 +25,9 @@
                         title: title,
                         table: table,
                         rowsAreSelectable: params.rowsAreSelectable,
-                        rowClickCallback: params.rowClickCallback
+                        rowClickCallback: params.rowClickCallback,
+                        rowBackgroundColorClicked: params.rowBackgroundColorClicked,
+                        cursor: params.cursor
                     };
                 }
             },

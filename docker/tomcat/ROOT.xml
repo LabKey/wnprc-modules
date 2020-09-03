@@ -18,6 +18,19 @@
               accessToUnderlyingConnectionAllowed="true"
               validationQuery="SELECT 1"
     />
+
+    <Resource name="jdbc/mySqlDataSource" auth="Container"
+              type="javax.sql.DataSource"
+              username="${msql.user}"
+              password="${msql.pass}"
+              driverClassName="com.mysql.jdbc.Driver"
+              url="${msql.url}"
+              maxTotal="15"
+              maxIdle="7"
+              useInformationSchema="true"
+              accessToUnderlyingConnectionAllowed="true"
+              validationQuery="/* ping */"              
+    />
     <Resource name="mail/Session" auth="Container"
               type="javax.mail.Session"
               mail.smtp.host="mailserver"

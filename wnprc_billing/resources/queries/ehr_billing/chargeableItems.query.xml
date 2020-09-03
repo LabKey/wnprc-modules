@@ -2,9 +2,6 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="chargeableItems" tableDbType="TABLE">
-                <importTemplates>
-                    <template label="Download Template for Chargeable Items with Rates" url="/query/exportExcelTemplate.view?schemaName=ehr_billing&amp;query.queryName=chargeableItemsWithRates&amp;captionType=Label&amp;filenamePrefix=chargeableItemsWithRatesTemplate" />
-                </importTemplates>
                 <tableTitle>Chargeable Items</tableTitle>
                 <auditLogging>DETAILED</auditLogging>
                 <columns>
@@ -14,11 +11,11 @@
                     </column>
                     <column columnName="departmentCode">
                         <nullable>false</nullable>
-                        <columnTitle>Group Name</columnTitle>
+                        <columnTitle>Group</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>chargeUnits</fkTable>
-                            <fkColumnName>chargetype</fkColumnName>
+                            <fkColumnName>groupName</fkColumnName>
                         </fk>
                     </column>
                     <column columnName="chargeCategoryId">
@@ -28,6 +25,9 @@
                             <fkTable>chargeableItemCategories</fkTable>
                             <fkColumnName>rowid</fkColumnName>
                         </fk>
+                    </column>
+                    <column columnName="name">
+                        <columnTitle>Charge Item</columnTitle>
                     </column>
                 </columns>
             </table>

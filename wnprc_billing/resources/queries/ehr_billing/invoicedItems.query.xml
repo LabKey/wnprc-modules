@@ -2,6 +2,10 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="invoicedItems" tableDbType="TABLE">
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
                 <tableTitle>Invoiced Items</tableTitle>
                 <auditLogging>DETAILED</auditLogging>
                 <columns>

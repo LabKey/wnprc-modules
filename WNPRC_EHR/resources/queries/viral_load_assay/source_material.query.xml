@@ -1,0 +1,17 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="source_material" tableDbType="TABLE">
+                <columns>
+                    <column columnName="liquid" >
+                        <columnTitle>Units</columnTitle>
+                        <displayColumnFactory>
+                            <className>org.labkey.wnprc_ehr.query.ViralLoadUnitsDisplayColumnFactory</className>
+                        </displayColumnFactory>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>
+

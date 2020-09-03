@@ -3,8 +3,18 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="dataaccess" tableDbType="TABLE">
                 <tableTitle>Investigator Data Access</tableTitle>
+                <insertUrl>/wnprc_billing/customDataAccessUpsertPage.view?</insertUrl>
+                <updateUrl>/wnprc_billing/customDataAccessUpsertPage.view?rowid=${rowid}&amp;project=${project}</updateUrl>
                 <columns>
+                    <column columnName="rowid">
+                        <shownInInsertView>false</shownInInsertView>
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <shownInDetailsView>false</shownInDetailsView>
+                        <isKeyField>true</isKeyField>
+                        <isHidden>true</isHidden>
+                    </column>
                     <column columnName="userId">
+                        <nullable>false</nullable>
                         <fk>
                             <fkDbSchema>coreLinked</fkDbSchema> <!-- linked schema coreLinked is expected to be created in Private folder. Use template coreLinked.template.xml to create this linked schema-->
                             <fkTable>Users</fkTable>
@@ -19,17 +29,19 @@
                         </fk>
                     </column>
                     <column columnName="investigatorid">
+                        <nullable>false</nullable>
                         <columnTitle>Investigator</columnTitle>
                         <fk>
                             <fkDbSchema>ehrLinked</fkDbSchema> <!--linked schema ehrLinked is expected in Private folder. Use ehrLinked.template.xml to create this linked schema-->
-                            <fkTable>investigators</fkTable>
+                            <fkTable>investigatorsWithName</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>lastname</fkDisplayColumnName>
+                            <fkDisplayColumnName>investigatorWithName</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="alldata">
                         <columnTitle>Access to all projects?</columnTitle>
-                        <description>True if you want the User to have access to ALL the projects that Investigator has access to (in this case, leave Project field empty). False otherwise.</description>
+                        <description>'Yes' if you want the User to have access to ALL the projects that Investigator has access to (in this case, leave Project field empty). 'No' otherwise.</description>
+                        <formatString>Yes;No;</formatString>
                     </column>
                 </columns>
             </table>

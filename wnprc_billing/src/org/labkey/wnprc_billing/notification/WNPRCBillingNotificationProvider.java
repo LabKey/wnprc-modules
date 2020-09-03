@@ -97,7 +97,7 @@ public class WNPRCBillingNotificationProvider implements BillingNotificationProv
         fields.add(new FieldDescriptor("isExpiredAccount", true, "Expired/Invalid Account", true));
         fields.add(new FieldDescriptor("isAcceptingCharges", true, "Account Not Accepting Charges", true));
         fields.add(new FieldDescriptor("lacksRate", true, "Lacks Rate", true));
-        fields.add(new FieldDescriptor("investigatorLastName", false, "Missing Investigator", true));
+        fields.add(new FieldDescriptor("investigator", false, "Missing Investigator", true));
         fields.add(new FieldDescriptor("matchesProject", true, "Project Does Not Match Assignment", false));
         fields.add(new FieldDescriptor("isAdjustment", true, "Adjustment/Reversal", false));
         fields.add(new FieldDescriptor("isOldCharge", true, "Over 45 Days Old", false));

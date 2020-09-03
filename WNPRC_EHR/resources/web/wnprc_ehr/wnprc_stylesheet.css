@@ -1,0 +1,9 @@
+.x-form-invalid, textarea.x-form-invalid {
+    background-image: url("../ext-3.4.1/resources/images/default/grid/invalid_line.gif");
+    background-repeat: repeat-x;
+    background-position: bottom;
+}
+
+a.point:hover {
+    cursor: pointer;
+}

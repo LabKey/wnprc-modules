@@ -34,7 +34,7 @@ my $from = 'ehr-no-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -59,7 +59,7 @@ my $doSend = 0;
 
 
 #then we find all living animals with multiple active housing records:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -86,7 +86,7 @@ if(@{$results->{rows}}){
 }
 
 #then we find all living animals with multiple active housing records:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -108,7 +108,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all records with potential housing condition problems
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -140,7 +140,7 @@ if(@{$results->{rows}}){
 my $paramVal = localtime( ( time() - ( 7 * 24 * 60 * 60 ) ) );
 $paramVal=sprintf("%02d/%02d/%04d", ($paramVal->mon)+1, $paramVal->mday, $paramVal->year+1900);
 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -162,7 +162,7 @@ if(@{$results->{rows}}){
 
 
 #we find open housing records where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -190,7 +190,7 @@ if(@{$results->{rows}}){
 
 
 #we find living animals without an active housing record
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -217,7 +217,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all records with problems in the calculated_status field
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -243,7 +243,7 @@ if(@{$results->{rows}}){
 }
 
 #then we find all records with problems in the calculated_status field
-#$results = Labkey::Query::selectRows(
+#$results = LabKey::Query::selectRows(
 #    -baseUrl => $baseUrl,
 #    -containerPath => $studyContainer,
 #    -schemaName => 'study',
@@ -270,7 +270,7 @@ if(@{$results->{rows}}){
 
 
 #we find any active assignment where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -292,7 +292,7 @@ if(@{$results->{rows}}){
 }	
 
 #we find any active assignment where the project lacks a valid protocol
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -315,7 +315,7 @@ if(@{$results->{rows}}){
 }
 
 #we find any duplicate active assignments
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -341,7 +341,7 @@ if(@{$results->{rows}}){
 #die;
 
 if($doSend){
-	$results = Labkey::Query::selectRows(
+	$results = LabKey::Query::selectRows(
 	    -baseUrl => $baseUrl,
 	    -requiredVersion => 8.3,
 	    -containerPath => $studyContainer,

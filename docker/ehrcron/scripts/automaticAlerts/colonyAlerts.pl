@@ -34,7 +34,7 @@ my $from = 'ehr-do-not-reply@primate.wisc.edu';
 ############Do not edit below this line
 use strict;
 use warnings;
-use Labkey::Query;
+use LabKey::Query;
 use Net::SMTP;
 use MIME::Lite;
 use Data::Dumper;
@@ -61,7 +61,7 @@ my $email_html = "This email contains a series of automatic alerts about the WNP
 my $results;
 
 #first we find all living animals without a weight:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -89,7 +89,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all occupied cages without dimensions:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -113,7 +113,7 @@ if(@{$results->{rows}}){
 }
 
 #then we list all animals in pc:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -165,7 +165,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all living animals with multiple active housing records:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -191,7 +191,7 @@ if(@{$results->{rows}}){
 }
 
 #then we find all living animals with multiple active housing records:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -210,7 +210,7 @@ if(@{$results->{rows}}){
 }
 
 #then we find all records with potential housing condition problems
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -240,7 +240,7 @@ if(@{$results->{rows}}){
 }
 
 #we find open housing records where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -268,7 +268,7 @@ if(@{$results->{rows}}){
 }
 
 #we find living animals without an active housing record
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -296,7 +296,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all records with problems in the calculated_status field
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -323,7 +323,7 @@ if(@{$results->{rows}}){
 
 #NOTE: depreciated
 ##then we find all records with problems in the calculated_status field
-#$results = Labkey::Query::selectRows(
+#$results = LabKey::Query::selectRows(
 #    -baseUrl => $baseUrl,
 #    -containerPath => $studyContainer,
 #    -schemaName => 'study',
@@ -347,35 +347,35 @@ if(@{$results->{rows}}){
 #}
 
 #then we find all animals lacking any assignments
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
     -queryName => 'Demographics',
-    -viewName => 'No Active Assignments',
+    -viewName => 'No Active Assigns',
     -sort => 'Id',
     -requiredVersion => 8.3,
-    #-debug => 1,
+    -debug => 1,
 );
 
 
 if(@{$results->{rows}}){
 	$email_html .= "<b>WARNING: There are ".@{$results->{rows}}." living animals without any active assignments:</b><br>";
-	
+
 	my @ids;
 
     foreach my $row (@{$results->{rows}}){
-    	push(@ids, $row->{'Id'});   	
+    	push(@ids, $row->{'Id'});
         $email_html .= $row->{'Id'}."<br>";
     };
 
-    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assignments'>Click here to view these animals</a></p>\n";    
+    $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=No Active Assigns'>Click here to view these animals</a></p>\n";
     $email_html .= '<hr>';
 }
 
 
 #we find any active assignment where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -395,7 +395,7 @@ if(@{$results->{rows}}){
 }	
 
 #we find any active assignment where the project lacks a valid protocol
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -416,7 +416,7 @@ if(@{$results->{rows}}){
 }
 
 #we find any duplicate active assignments
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -433,7 +433,7 @@ if(@{$results->{rows}}){
 
 
 #then we find all living siv+ animals not exempt from pair housing (20060202)
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -455,7 +455,7 @@ if(@{$results->{rows}}){
 }
 
 #then we find all living shiv+ animals not exempt from pair housing (20060202)
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -477,7 +477,7 @@ if(@{$results->{rows}}){
 }
 
 #we find open ended treatments where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -498,7 +498,7 @@ if(@{$results->{rows}}){
 
 
 #we find open ended problems where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -519,7 +519,7 @@ if(@{$results->{rows}}){
 
 
 #we find open assignments where the animal is not alive
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -541,7 +541,7 @@ if(@{$results->{rows}}){
 #we find non-continguous housing records
 my $paramVal=sprintf("%02d/%02d/%04d", ($tm->mon)+1, $tm->mday, $tm->year+1900-1);
 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -560,7 +560,7 @@ if(@{$results->{rows}}){
 }	
 
 #we find birth records in the past 90 days missing a gender
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -586,7 +586,7 @@ if(@{$results->{rows}}){
 }
 
 #we find demographics records in the past 90 days missing a gender
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -613,7 +613,7 @@ if(@{$results->{rows}}){
 }
 
 #we find prenatal records in the past 90 days missing a gender
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -640,7 +640,7 @@ if(@{$results->{rows}}){
 }
 
 #we find prenatal records in the past 90 days missing species
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -668,7 +668,7 @@ if(@{$results->{rows}}){
 
 
 #we find all animals that died in the past 90 days where there isnt a weight within 7 days of death:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -690,7 +690,7 @@ if(@{$results->{rows}}){
 }
 
 #we find TB records lacking a results more than 30 days old, but less than 90
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -715,7 +715,7 @@ if(@{$results->{rows}}){
 
 
 #we find protocols nearing the animal limit
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -734,7 +734,7 @@ if(@{$results->{rows}}){
 }
 
 #we find protocols nearing the animal limit
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -756,7 +756,7 @@ if(@{$results->{rows}}){
 #we find protocols expiring soon
 my $days = 14;
 my $day_value = (365 * 3 - $days);
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'ehr',
@@ -776,7 +776,7 @@ if(@{$results->{rows}}){
 }
 
 #we find birth records without a corresponding demographics record
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -796,7 +796,7 @@ if(@{$results->{rows}}){
 }
 
 #we find death records without a corresponding demographics record
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -817,7 +817,7 @@ if(@{$results->{rows}}){
 }
 
 #we find animals with hold codes, but not on pending 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -838,7 +838,7 @@ if(@{$results->{rows}}){
 }
 
 #we find assignments with projected releases today 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -861,7 +861,7 @@ if(@{$results->{rows}}){
 
 
 #we find assignments with projected releases tomorrow 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -888,7 +888,7 @@ $email_html .= "<b>Colony events in the past 5 days:</b><p>";
 
 
 #births in the last 5 days:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -915,7 +915,7 @@ if(@{$results->{rows}}){
 
 
 #deaths in the last 5 days:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -941,7 +941,7 @@ if(@{$results->{rows}}){
 }
 
 #prenatal deaths in the last 5 days:
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -971,7 +971,7 @@ $email_html .= '<hr>';
 
 
 #find the total finalized records with future dates 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -containerPath => $studyContainer,
     -schemaName => 'study',
@@ -1000,7 +1000,7 @@ if(@{$results->{rows}}){
 #close HTML;
 #die;
 
-$results = Labkey::Query::selectRows(
+$results = LabKey::Query::selectRows(
     -baseUrl => $baseUrl,
     -requiredVersion => 8.3,
     -containerPath => $studyContainer,

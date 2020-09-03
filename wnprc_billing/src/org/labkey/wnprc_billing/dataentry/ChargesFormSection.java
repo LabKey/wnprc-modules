@@ -38,12 +38,4 @@ public class ChargesFormSection extends SimpleFormSection
 
         return defaultButtons;
     }
-
-    @Override
-    public List<String> getTbarMoreActionButtons()
-    {
-        List<String> defaultMoreActionButtons = super.getTbarMoreActionButtons();
-        defaultMoreActionButtons.remove("BULKEDIT");
-        return defaultMoreActionButtons;
-    }
 }

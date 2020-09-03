@@ -8,7 +8,6 @@
         <column name="speciesneeded"></column>
         <column name="originneeded"></column>
         <column name="numberofanimals"></column>
-        <column name="dateneeded"></column>
         <column name="QCState"></column>
 
     </columns>

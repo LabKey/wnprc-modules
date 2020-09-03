@@ -1,6 +1,6 @@
 {
   "name": "animalrequests",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Animal request data entry form",
   "main": "index.js",
   "scripts": {

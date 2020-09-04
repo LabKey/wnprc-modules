@@ -4,7 +4,6 @@ import DatePicker from 'react-datepicker';
 import { Form, Field } from 'react-final-form'
 import arrayMutators from 'final-form-arrays'
 import setFieldData from 'final-form-set-field-data';
-import { OnChange } from 'react-final-form-listeners';
 
 import {
     submitAnimalRequest
@@ -19,7 +18,7 @@ const renderField = ({
     }) => (
     <div className="row top-buffer">
         <div className={asyncValidating ? 'async-validating' : ''}>
-            <label className="col-xs-4 form-control-label"> {label}{tooltip && (<sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)} </label>
+            <label className="col-xs-5 form-control-label"> {label}{tooltip && (<sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)} </label>
             <input required className="col-xs-5 form-control-input"  type={type} {...input} />
             {touched && ((error && <span>{error}</span>))}
         </div>
@@ -49,6 +48,7 @@ interface State {
     protocol: Array<any>;
     animal_requests_disposition: Array<any>;
     animal_requests_infectiousdisease: Array<any>;
+    animal_requests_yes_no: Array<any>;
     dataArr: Array<any>;
 }
 
@@ -65,7 +65,8 @@ export class AnimalRequestForm extends React.Component<any,State> {
             getEHRData('ehr_lookups','animal_requests_active_projects','-project','project,enddate'),
             getEHRData('ehr','protocol','-protocol'),
             getEHRData('ehr_lookups','animal_requests_disposition'),
-            getEHRData('ehr_lookups','animal_requests_infectiousdisease')
+            getEHRData('ehr_lookups','animal_requests_infectiousdisease'),
+            getEHRData('ehr_lookups', 'animal_requests_yes_no')
         ];
 
         this.state = {
@@ -80,6 +81,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
             protocol: [{value: ''}],
             animal_requests_disposition: [{value: ''}],
             animal_requests_infectiousdisease: [{value: ''}],
+            animal_requests_yes_no: [{value: ''}],
             dataArr: dataArr
         };
         this.onSubmit = this.onSubmit.bind(this);
@@ -94,7 +96,6 @@ export class AnimalRequestForm extends React.Component<any,State> {
     getSeveralEHRData(dataArr) {
         //fetch and save the data for the dropdown options to our component state
         Promise.all(dataArr).then((data) => {
-            console.log(data);
             for (let val of data) {
                 //TODO remove ts-ignore
                 //@ts-ignore
@@ -102,7 +103,6 @@ export class AnimalRequestForm extends React.Component<any,State> {
             }
         }).then(() => {
             this.setState({loading:false});
-            console.log('All values set!')
         });
     };
 
@@ -175,7 +175,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                             {loading && <div className="loading" />}
                                             <div style={{display:display}} className="card-body">
                                                 <div className="row">
-                                                    <label className="col-xs-4 form-control-label"> PI:</label>
+                                                    <label className="col-xs-5 form-control-label"> PI:</label>
                                                     <Field
                                                         name="principalinvestigator"
                                                         label="PI:"
@@ -212,7 +212,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 >
                                                 </Field>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Species:</label>
+                                                    <label className="col-xs-5 form-control-label">Species:</label>
                                                     <Field
                                                         name="speciesneeded"
                                                         className="col-xs-5 form-control-input"
@@ -225,7 +225,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </Field>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Origin:</label>
+                                                    <label className="col-xs-5 form-control-label">Origin:</label>
                                                     <Field
                                                         name="originneeded"
                                                         className="col-xs-5 form-control-input"
@@ -238,7 +238,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </Field>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Sex:</label>
+                                                    <label className="col-xs-5 form-control-label">Sex:</label>
                                                     <Field
                                                         name="sex"
                                                         className="col-xs-5 form-control-input"
@@ -280,7 +280,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 >
                                                 </Field>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Viral Status:</label>
+                                                    <label className="col-xs-5 form-control-label">Viral Status:</label>
                                                     <Field
                                                         name="viralstatus"
                                                         className="col-xs-5 form-control-input"
@@ -294,7 +294,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 </div>
                                                 <div className="row top-buffer">
                                                     <label
-                                                        className="col-xs-4 form-control-label">
+                                                        className="col-xs-5 form-control-label">
                                                         Infectious Disease:
                                                         <sup><span id="help-tooltip" data-tooltip="Is this an infectious disease project?">?️</span></sup>
                                                     </label>
@@ -310,7 +310,20 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </Field>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Disposition:</label>
+                                                    <label className="col-xs-5 form-control-label">Pregnant Animals Required?:</label>
+                                                    <Field
+                                                      name="pregnantanimalsrequired"
+                                                      className="col-xs-5 form-control-input"
+                                                      component="select"
+                                                      validate={required}
+                                                      required
+                                                    >
+                                                        <option/>
+                                                        <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                    </Field>
+                                                </div>
+                                                <div className="row top-buffer">
+                                                    <label className="col-xs-5 form-control-label">Disposition:</label>
                                                     <Field
                                                         name="disposition"
                                                         className="col-xs-5 form-control-input"
@@ -323,7 +336,19 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </Field>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Date Needed:</label>
+                                                    <label className="col-xs-5 form-control-label">Executive Committee Approval?:</label>
+                                                    <Field
+                                                      name="executivecommitteeapproval"
+                                                      className="col-xs-5 form-control-input"
+                                                      component="select"
+                                                      required
+                                                    >
+                                                        <option/>
+                                                        <DropdownOptions name="animal_requests_yes_no" rowkey="value"/>
+                                                    </Field>
+                                                </div>
+                                                <div className="row top-buffer">
+                                                    <label className="col-xs-5 form-control-label">Date Needed:</label>
                                                     {/*We have to render the datepicker like this because it won't cooperate
                                                        And we also have to do some not-so-sexy css adjustments */}
                                                     <div className="col-xs-5" id="datepicker">
@@ -339,7 +364,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </div>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Project:</label>
+                                                    <label className="col-xs-5 form-control-label">Project:</label>
                                                     <Field
                                                         name="project"
                                                         className="col-xs-5 form-control-input"
@@ -353,7 +378,39 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </Field>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Protocol:</label>
+                                                    <label className="col-xs-5 form-control-label">Anticipated Start Date:
+                                                        <sup><span id="help-tooltip" data-tooltip="Please provide the anticipated start date of the project.">?️</span></sup>
+                                                    </label>
+                                                    <div className="col-xs-5" id="datepicker">
+                                                        <Field
+                                                          name="anticipatedstartdate"
+                                                          className="form-control-input"
+                                                          component={renderDateTimePicker}
+                                                          type="text"
+                                                          validate={required}
+                                                        >
+
+                                                        </Field>
+                                                    </div>
+                                                </div>
+                                                <div className="row top-buffer">
+                                                    <label className="col-xs-5 form-control-label">Anticipated End Date:
+                                                        <sup><span id="help-tooltip" data-tooltip="Please provide the anticipated end date of the project.">?️</span></sup>
+                                                    </label>
+                                                    <div className="col-xs-5" id="datepicker">
+                                                        <Field
+                                                          name="anticipatedenddate"
+                                                          className="form-control-input"
+                                                          component={renderDateTimePicker}
+                                                          type="text"
+                                                          validate={required}
+                                                        >
+
+                                                        </Field>
+                                                    </div>
+                                                </div>
+                                                <div className="row top-buffer">
+                                                    <label className="col-xs-5 form-control-label">Protocol:</label>
                                                     <Field
                                                         name="protocol"
                                                         className="col-xs-5 form-control-input"
@@ -367,7 +424,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </Field>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Account:</label>
+                                                    <label className="col-xs-5 form-control-label">Account:</label>
                                                     <Field
                                                         name="account"
                                                         className="col-xs-5 form-control-input"
@@ -377,7 +434,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     </Field>
                                                 </div>
                                                 <div className="row top-buffer">
-                                                    <label className="col-xs-4 form-control-label">Comments:</label>
+                                                    <label className="col-xs-5 form-control-label">Comments:</label>
                                                     <Field
                                                         name="comments"
                                                         className="col-xs-5 form-control-textarea"

@@ -1,5 +1,4 @@
 var LABKEY = require("labkey");
-var console = require("console");
 
 var Utils = {};
 exports.Utils = Utils;

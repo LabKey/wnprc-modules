@@ -16,9 +16,6 @@ function beforeInsert(row, errors){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
-    if (row.anticipatedenddate <= row.anticipatedstartdate)
-        EHR.Server.Utils.addError(scriptErrors, 'anticipatedstartdate', 'Anticipated start date should be before the anticipated end date.', 'ERROR');
-
     var animalIdsString = row.animalidstooffer;
     if (!animalIdsString){
         return;

@@ -1,4 +1,5 @@
 var LABKEY = require("labkey");
+var console = require("console");
 
 var Utils = {};
 exports.Utils = Utils;
@@ -11,18 +12,19 @@ Utils.lookupGender = function(gCode) {
     return Utils.getJavaHelper().lookupGender(gCode);
 };
 
-Utils.splitIds = function(subjectArray){
-    if (!subjectArray){
-        return [];
+Utils.splitIds = function(subjectIds){
+    var subjectArray = [];
+    if (!subjectIds){
+        return subjectArray;
     }
 
-    //subjectArray = Ext4.String.trim(subjectArray);
-    subjectArray = subjectArray.replace(/[\s,;]+/g, ';');
-    subjectArray = subjectArray.replace(/(^;|;$)/g, '');
-    subjectArray = subjectArray.toLowerCase();
+    subjectIds = subjectIds.trim();
+    subjectIds = subjectIds.replace(/[\s,;]+/g, ';');
+    subjectIds = subjectIds.replace(/(^;|;$)/g, '');
+    subjectIds = subjectIds.toLowerCase();
 
-    if (subjectArray){
-        subjectArray = subjectArray.split(';');
+    if (subjectIds){
+        subjectArray = subjectIds.split(';');
     }
     else {
         subjectArray = [];

@@ -16,12 +16,16 @@ function beforeInsert(row, errors){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
-    var subjectArray = row.animalidstooffer;
-    if (!subjectArray){
+    if (row.anticipatedenddate <= row.anticipatedstartdate)
+        EHR.Server.Utils.addError(scriptErrors, 'anticipatedstartdate', 'Anticipated start date should be before the anticipated end date.', 'ERROR');
+
+    var animalIdsString = row.animalidstooffer;
+    if (!animalIdsString){
         return;
     }
 
-    var subjectArray = WNPRC.Utils.splitIds(subjectArray);
+    //split ids into an array
+    var subjectArray = WNPRC.Utils.splitIds(animalIdsString);
     //after split, check if unique
     if (!WNPRC.Utils.unique(subjectArray))
         EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'Contains duplicate animal ids.', 'ERROR');

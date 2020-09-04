@@ -4,7 +4,6 @@ import DatePicker from 'react-datepicker';
 import { Form, Field } from 'react-final-form'
 import arrayMutators from 'final-form-arrays'
 import setFieldData from 'final-form-set-field-data';
-import { OnChange } from 'react-final-form-listeners';
 
 import {
     submitAnimalRequest

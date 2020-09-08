@@ -160,7 +160,7 @@
             delete data.type;
             data.displayName = form.displayName();
 
-            WebUtils.API.postJSON(<%=q(apiURL.toString())%>, data).then(function() {
+            WebUtils.API.postJSON(<%=q(apiURL)%>, data).then(function() {
                 alert("Success");
                 window.location = <%=q(manageURL)%>;
             }).catch(function(e) {

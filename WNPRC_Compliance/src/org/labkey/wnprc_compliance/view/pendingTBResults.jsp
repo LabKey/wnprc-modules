@@ -1,10 +1,11 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.BeginAction" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.ResolvePendingTBResultsAPI" %>
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceSchema" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    ActionURL url = new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer());
+    ActionURL url = urlFor(BeginAction.class);
 %>
 <div class="text-center" style="margin-bottom: 10px;">
     <a class="btn btn-primary" href="<%=h(url)%>">
@@ -92,7 +93,7 @@
         WebUtils.VM.submit = function() {
             $resultDialog.modal('hide');
 
-            WebUtils.API.postJSON(<%=q(new ActionURL(WNPRC_ComplianceController.ResolvePendingTBResultsAPI.class, getContainer()).toString())%>, {
+            WebUtils.API.postJSON(<%=q(urlFor(ResolvePendingTBResultsAPI.class))%>, {
                 pendingTBIds: form.selectedTBIds(),
                 notes: form.notes(),
                 date:  moment(form.date()).format()

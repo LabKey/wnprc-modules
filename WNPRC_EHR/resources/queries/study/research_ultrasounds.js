@@ -5,23 +5,14 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     let validMeasurements = getValidMeasurements();
     let measurementRows = [];
     let targetQCState = "Review Required";
-    let taskId = LABKEY.Utils.generateUUID().toUpperCase();
-    console.log("Object ID - BEFORE: " + row.objectid);
 
+    row.taskid = row.taskid || LABKEY.Utils.generateUUID().toUpperCase();
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
-
-    // console.log("Generated Object ID: " + objectId);
-
-    console.log("Row: " + JSON.stringify(row));
 
     //if there are any data for an ultrasound review, then add that record as well
     //if this is true this is a bulk upload
     if (row.reviewDate || row.head || row.falx || row.thalamus || row.lateral_ventricles || row.choroid_plexus || row.eye || row.profile || row.four_chamber_heart
          || row.diaphragm || row.stomach || row.bowel || row.bladder || row.reviewFindings || row.placenta_notes || row.reviewRemarks || row.completed) {
-
-        //Since it's a bulk upload we need to use the taskid and objectid that we created
-        row.taskid = taskId;
-        //row.objectid = objectId;
 
         if (row.completed) {
             targetQCState = "Completed";
@@ -68,10 +59,6 @@ function onInsert(helper, scriptErrors, row, oldRow) {
 
     if (row.restraintType || row.restraintRemarks) {
 
-        //Since it's a bulk upload we need to use the taskid and objectid that we created
-        row.taskid = taskId;
-        //row.objectid = objectId;
-
         let restraintRow = {
             "Id": row.Id,
             "date": new Date(row.date),
@@ -94,8 +81,6 @@ function onInsert(helper, scriptErrors, row, oldRow) {
             }
         });
     }
-
-    console.log("Object ID: " + row.objectid);
 
     let measurementsToSave = false;
     for (let measurementName in validMeasurements) {
@@ -163,45 +148,30 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     }
 }
 
-// function setDescription(row, helper){
-//     let description = [];
-//
-//     description.push('Type: Imaging');
-//     if(row.reason) {
-//         description.push('Date: ' + row.date);
-//     }
-//     if(row.fetal_heartbeat) {
-//         description.push('Fetal HB: ' + (!!row.beats_per_minute ? row.beats_per_minute : 'true'));
-//     } else {
-//         description.push('Fetal HB: false');
-//     }
-//     if (row.gest_sac_mm) {
-//         description.push('Gestational Sac (mm): ' + Number(row.gest_sac_mm.toFixed(2)));
-//     }
-//     if(row.crown_rump_mm) {
-//         description.push('Crown Rump (mm): ' + Number(row.crown_rump_mm.toFixed(2)));
-//     }
-//     if (row.biparietal_diameter_mm) {
-//         description.push('Biparietal Diameter (mm): ' + Number(row.biparietal_diameter_mm.toFixed(2)));
-//     }
-//     if (row.femur_length_mm) {
-//         description.push('Femur Length (mm): ' + Number(row.femur_length_mm.toFixed(2)));
-//     }
-//     if (row.yolk_sac_diameter_mm) {
-//         description.push('Yolk Sac Diameter (mm): ' + Number(row.yolk_sac_diameter_mm.toFixed(2)));
-//     }
-//     if (row.head_circumference_mm) {
-//         description.push('Head Circumference (mm): ' + Number(row.head_circumference_mm.toFixed(2)));
-//     }
-//     if (row.followup_required) {
-//         description.push('Followup Required: ' + row.followup_required);
-//     }
-//     if (row.performedby) {
-//         description.push('Performed By: ' + row.performedby);
-//     }
-//
-//     return description;
-// }
+function setDescription(row, helper){
+    let description = [];
+    let validMeasurements = getValidMeasurements();
+
+    description.push('Type: Imaging');
+    description.push("Fetal Heartbeat: " + !!row.fetal_heartbeat);
+    for (let key in row) {
+        if (row.hasOwnProperty(key) && row[key] && validMeasurements.hasOwnProperty(key)) {
+            console.log("Row: " + JSON.stringify(row));
+            console.log("Key: " + key);
+            let measurements = row[key].split(";");
+            let measurementString = "";
+            for (let i = 0; i < measurements.length; i++) {
+                measurementString += measurements[i] + validMeasurements[key]["unit"];
+                if (i + 1 < measurements.length) {
+                    measurementString += ", ";
+                }
+            }
+            description.push(validMeasurements[key]["label"] + ": " + measurementString);
+        }
+    }
+
+    return description;
+}
 
 function formatMeasurements(measurements) {
     let measurementArray = measurements.replace(/[\s,;]+/g, ' ').trim().replace(/[\s]+/g, ';').split(';');

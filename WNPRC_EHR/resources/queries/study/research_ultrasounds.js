@@ -14,21 +14,50 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     let measurementRows = [];
     let targetQCState = "Review Required";
 
+    let isBulkUpload = !row.taskid;
+
+    //make sure a couple of the row properties are set correctly
     row.taskid = row.taskid || LABKEY.Utils.generateUUID().toUpperCase();
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
     row.fetal_heartbeat = !!row.fetal_heartbeat;
+    row.completed = !!row.completed && row.completed.toUpperCase() === "TRUE";
+
+    if (isBulkUpload) {
+        targetQCState = "Completed";
+
+        let taskRow = {
+            "taskid": row.taskid,
+            "category": "Task",
+            "title": "Research Ultrasounds",
+            "formtype": "Research Ultrasounds",
+            "QCStateLabel": targetQCState,
+            "assignedto": LABKEY.Security.currentUser.id,
+            "duedate": new Date(row.date),
+            "container": LABKEY.Security.currentContainer.id,
+            "datecompleted": row.completed ? row.reviewDate : null
+        };
+
+        console.log("Creating taskid for research ultrasounds bulk upload record");
+
+        LABKEY.Query.insertRows({
+            schemaName: 'ehr',
+            queryName: 'tasks',
+            rows: [taskRow],
+            scope: this,
+            success: function (results) {
+
+            },
+            failure: function (error) {
+                console.log("Insert rows error for ehr.tasks: " + JSON.stringify(error));
+            }
+        });
+    }
 
     //if there are any data for an ultrasound review, then add that record as well
-    //if this is true this is a bulk upload
-    row.completed = !!row.completed && row.completed.toUpperCase() === "TRUE";
     if (row.reviewDate || row.head || row.falx || row.thalamus || row.lateral_ventricles || row.choroid_plexus || row.eye || row.profile || row.four_chamber_heart
          || row.diaphragm || row.stomach || row.bowel || row.bladder || row.reviewFindings || row.placenta_notes || row.reviewRemarks || row.completed) {
 
         let validationFailed = false;
-
-        if (row.completed) {
-            targetQCState = "Completed";
-        }
 
         if (!row.restraintType) {
             validationFailed = true;
@@ -96,7 +125,8 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                 "completed": !!row.completed,
                 "QCStateLabel": targetQCState,
                 "ultrasound_id": row.objectid,
-                "taskid": row.taskid
+                "taskid": row.taskid,
+                "is_bulk_upload": isBulkUpload
             };
 
             LABKEY.Query.insertRows({
@@ -167,52 +197,6 @@ function onInsert(helper, scriptErrors, row, oldRow) {
         WNPRC.Utils.getJavaHelper().insertRows(measurementRows, "study", "ultrasound_measurements");
     }
     row.QCStateLabel = targetQCState;
-
-    if (!helper.isValidateOnly()) {
-        LABKEY.Query.selectRows({
-            schemaName: 'ehr',
-            queryName: 'tasks',
-            scope: this,
-            filterArray: [
-                LABKEY.Filter.create('taskid', row.taskid, LABKEY.Filter.Types.EQUAL)],
-            success: function (results) {
-                if (results && results.rows && results.rows.length >= 1) {
-                    //great, do nothing
-                }
-                else {
-                    let taskRow = {
-                        "taskid": row.taskid,
-                        "category": "Task",
-                        "title": "Research Ultrasounds",
-                        "formtype": "Research Ultrasounds",
-                        "QCStateLabel": row.QCStateLabel,
-                        "assignedto": LABKEY.Security.currentUser.id,
-                        "duedate": new Date(row.date),
-                        "container": LABKEY.Security.currentContainer.id,
-                        "datecompleted": row.completed ? row.reviewDate : null
-                    };
-
-                    console.log("Creating taskid for research ultrasounds bulk upload record");
-
-                    LABKEY.Query.insertRows({
-                        schemaName: 'ehr',
-                        queryName: 'tasks',
-                        rows: [taskRow],
-                        scope: this,
-                        success: function (results) {
-
-                        },
-                        failure: function (error) {
-                            console.log("Insert rows error for ehr.tasks: " + JSON.stringify(error));
-                        }
-                    });
-                }
-            },
-            failure: function (error) {
-                console.log("Select rows error for ehr.tasks: " + JSON.stringify(error));
-            }
-        });
-    }
 }
 
 function onUpdate(helper, scriptErrors, row, oldRow) {

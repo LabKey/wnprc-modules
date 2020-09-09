@@ -43,7 +43,6 @@ public class UltrasoundReviewFormSection extends SlaveFormSection
         fieldNames.add("placenta_notes");
         fieldNames.add("remarks");
         fieldNames.add("completed");
-        fieldNames.add("");
         return fieldNames;
     }
 }

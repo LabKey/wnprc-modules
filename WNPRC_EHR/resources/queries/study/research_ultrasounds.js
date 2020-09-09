@@ -14,14 +14,43 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     if (row.reviewDate || row.head || row.falx || row.thalamus || row.lateral_ventricles || row.choroid_plexus || row.eye || row.profile || row.four_chamber_heart
          || row.diaphragm || row.stomach || row.bowel || row.bladder || row.reviewFindings || row.placenta_notes || row.reviewRemarks || row.completed) {
 
-        console.log("Row: " + JSON.stringify(row));
-
         if (row.completed) {
             targetQCState = "Completed";
         }
 
         if (!row.restraintType) {
             EHR.Server.Utils.addError(scriptErrors, "restraintType", "Restraint Type is a required field", "ERROR");
+        }
+        else {
+            LABKEY.Query.selectRows({
+                schemaName: 'ehr_lookups',
+                queryName: 'restraint_type',
+                columns: "type",
+                scope: this,
+                filterArray: [
+                    LABKEY.Filter.create('taskid', row.taskid, LABKEY.Filter.Types.EQUAL)],
+                success: function (results) {
+                    if (results && results.rows && results.rows.length >= 1) {
+                        let restraintFound = false;
+                        let validRestraints = [];
+                        for (let i = 0; i < results.rows.length; i++) {
+                            validRestraints.push(results.rows[i].type);
+                            if (row.restraintType === results.rows[i].type) {
+                                restraintFound = true;
+                            }
+                        }
+                        if (!restraintFound) {
+                            EHR.Server.Utils.addError(scriptErrors, "restraintType", "'" + row.restraintType + "' is not a valid restraint type. Valid restraints are: " + validRestraints.join(", "), "ERROR");
+                        }
+                    }
+                    else {
+                        EHR.Server.Utils.addError(scriptErrors, "restraintType", "There was an error matching the restraint type, please contact an EHR Administrator", "ERROR");
+                    }
+                },
+                failure: function (error) {
+                    console.log("Select rows error for ehr_lookups.restraint_type: " + JSON.stringify(error));
+                }
+            });
         }
 
         if (!row.reviewDate) {

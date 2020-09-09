@@ -1,6 +1,14 @@
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 require("ehr/triggers").initScript(this);
 
+function onInit(event, helper){
+    if (event === "update") {
+        helper.setScriptOptions({
+            allowDatesInDistantPast: true
+        });
+    }
+}
+
 function onInsert(helper, scriptErrors, row, oldRow) {
     let validMeasurements = getValidMeasurements();
     let measurementRows = [];
@@ -8,17 +16,22 @@ function onInsert(helper, scriptErrors, row, oldRow) {
 
     row.taskid = row.taskid || LABKEY.Utils.generateUUID().toUpperCase();
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
+    row.fetal_heartbeat = !!row.fetal_heartbeat;
 
     //if there are any data for an ultrasound review, then add that record as well
     //if this is true this is a bulk upload
+    row.completed = !!row.completed && row.completed.toUpperCase() === "TRUE";
     if (row.reviewDate || row.head || row.falx || row.thalamus || row.lateral_ventricles || row.choroid_plexus || row.eye || row.profile || row.four_chamber_heart
          || row.diaphragm || row.stomach || row.bowel || row.bladder || row.reviewFindings || row.placenta_notes || row.reviewRemarks || row.completed) {
+
+        let validationFailed = false;
 
         if (row.completed) {
             targetQCState = "Completed";
         }
 
         if (!row.restraintType) {
+            validationFailed = true;
             EHR.Server.Utils.addError(scriptErrors, "restraintType", "Restraint Type is a required field", "ERROR");
         }
         else {
@@ -40,10 +53,12 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                             }
                         }
                         if (!restraintFound) {
+                            validationFailed = true;
                             EHR.Server.Utils.addError(scriptErrors, "restraintType", "'" + row.restraintType + "' is not a valid restraint type. Valid restraints are: " + validRestraints.join(", "), "ERROR");
                         }
                     }
                     else {
+                        validationFailed = true;
                         EHR.Server.Utils.addError(scriptErrors, "restraintType", "There was an error matching the restraint type, please contact an EHR Administrator", "ERROR");
                     }
                 },
@@ -54,46 +69,49 @@ function onInsert(helper, scriptErrors, row, oldRow) {
         }
 
         if (!row.reviewDate) {
+            validationFailed = true;
             EHR.Server.Utils.addError(scriptErrors, "reviewDate", "Review Date is required if a review of the ultrasound has occurred", "ERROR");
         }
 
-        //explicitly set blank boolean values to false
-        let reviewRow = {
-            "Id": row.Id,
-            "date": row.reviewDate,
-            "head": !!row.head,
-            "falx": !!row.falx,
-            "thalamus": !!row.thalamus,
-            "lateral_ventricles": !!row.lateral_ventricles,
-            "choroid_plexus": !!row.choroid_plexus,
-            "eye": !!row.eye,
-            "profile": !!row.profile,
-            "four_chamber_heart": !!row.four_chamber_heart,
-            "diaphragm": !!row.diaphragm,
-            "stomach": !!row.stomach,
-            "bowel": !!row.bowel,
-            "bladder": !!row.bladder,
-            "findings": row.reviewFindings,
-            "placenta_notes": row.placenta_notes,
-            "remarks": row.reviewRemarks,
-            "completed": !!row.completed,
-            "QCStateLabel": targetQCState,
-            "ultrasound_id": row.objectid,
-            "taskid": row.taskid
-        };
+        if (!validationFailed) {
+            //explicitly set blank boolean values to false
+            let reviewRow = {
+                "Id": row.Id,
+                "date": row.reviewDate,
+                "head": !!row.head,
+                "falx": !!row.falx,
+                "thalamus": !!row.thalamus,
+                "lateral_ventricles": !!row.lateral_ventricles,
+                "choroid_plexus": !!row.choroid_plexus,
+                "eye": !!row.eye,
+                "profile": !!row.profile,
+                "four_chamber_heart": !!row.four_chamber_heart,
+                "diaphragm": !!row.diaphragm,
+                "stomach": !!row.stomach,
+                "bowel": !!row.bowel,
+                "bladder": !!row.bladder,
+                "findings": row.reviewFindings,
+                "placenta_notes": row.placenta_notes,
+                "remarks": row.reviewRemarks,
+                "completed": !!row.completed,
+                "QCStateLabel": targetQCState,
+                "ultrasound_id": row.objectid,
+                "taskid": row.taskid
+            };
 
-        LABKEY.Query.insertRows({
-            schemaName: 'study',
-            queryName: 'ultrasound_review',
-            rows: [reviewRow],
-            scope: this,
-            success: function (results) {
+            LABKEY.Query.insertRows({
+                schemaName: 'study',
+                queryName: 'ultrasound_review',
+                rows: [reviewRow],
+                scope: this,
+                success: function (results) {
 
-            },
-            failure: function (error) {
-                console.log("Insert rows error for study.ultrasound_review: " + JSON.stringify(error));
-            }
-        });
+                },
+                failure: function (error) {
+                    console.log("Insert rows error for study.ultrasound_review: " + JSON.stringify(error));
+                }
+            });
+        }
     }
 
     if (row.restraintType || row.restraintRemarks) {
@@ -201,6 +219,7 @@ function onUpdate(helper, scriptErrors, row, oldRow) {
     let validMeasurements = getValidMeasurements();
     let updateRows = [];
 
+    row.fetal_heartbeat = !!row.fetal_heartbeat;
     let measurementsToUpdate = false;
     for (let measurementName in validMeasurements) {
         if (validMeasurements.hasOwnProperty(measurementName)) {
@@ -224,12 +243,6 @@ function onUpdate(helper, scriptErrors, row, oldRow) {
 
     if (measurementsToUpdate && !helper.isValidateOnly()) {
         WNPRC.Utils.getJavaHelper().updateUltrasoundMeasurements(updateRows);
-    }
-}
-
-function onUpsert(helper, scriptErrors, row, oldRow) {
-    if (row && row.Id){
-        row.fetal_heartbeat = !!row.fetal_heartbeat;
     }
 }
 

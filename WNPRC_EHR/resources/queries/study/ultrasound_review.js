@@ -1,6 +1,14 @@
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 require("ehr/triggers").initScript(this);
 
+function onInit(event, helper){
+    if (event === "update") {
+        helper.setScriptOptions({
+            allowDatesInDistantPast: true
+        });
+    }
+}
+
 function onUpsert(helper, scriptErrors, row, oldRow) {
 
     //Set the values to false if the box isn't checked

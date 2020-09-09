@@ -3,6 +3,10 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="ultrasounds" tableDbType="TABLE">
+                <tableUrl></tableUrl>
+                <importUrl></importUrl>
+                <updateUrl>/ehr/dataEntryForm.view?formType=Research%20Ultrasounds&amp;taskid=${taskid}</updateUrl>
+                <deleteUrl></deleteUrl>
                 <columns>
                     <column columnName="Id"/>
                     <column columnName="date"/>

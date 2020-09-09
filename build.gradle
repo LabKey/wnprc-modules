@@ -82,7 +82,6 @@ def modules  = [
     project('DeviceProxy'),
     project('GoogleDrive'),
     project('Gringotts'),
-    project('GringottsTest'),
     project('primateid'),
     project('wnprc_billing'),
     project('wnprc_billingpublic'),

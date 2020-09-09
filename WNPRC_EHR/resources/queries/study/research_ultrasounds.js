@@ -14,15 +14,17 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     if (row.reviewDate || row.head || row.falx || row.thalamus || row.lateral_ventricles || row.choroid_plexus || row.eye || row.profile || row.four_chamber_heart
          || row.diaphragm || row.stomach || row.bowel || row.bladder || row.reviewFindings || row.placenta_notes || row.reviewRemarks || row.completed) {
 
+        console.log("Row: " + JSON.stringify(row));
+
         if (row.completed) {
             targetQCState = "Completed";
         }
 
-        if (!!row.restraintType) {
+        if (!row.restraintType) {
             EHR.Server.Utils.addError(scriptErrors, "restraintType", "Restraint Type is a required field", "ERROR");
         }
 
-        if (!!row.reviewDate) {
+        if (!row.reviewDate) {
             EHR.Server.Utils.addError(scriptErrors, "reviewDate", "Review Date is required if a review of the ultrasound has occurred", "ERROR");
         }
 

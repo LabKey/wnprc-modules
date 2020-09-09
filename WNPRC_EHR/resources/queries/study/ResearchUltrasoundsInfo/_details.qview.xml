@@ -10,7 +10,7 @@
         <column name="fetal_heartbeat"/>
         <column name="performedby"/>
         <column name="remark"/>
-        <column name="completed"/>
+        <column name="reviewCompleted"/>
         <column name="taskid"/>
     </columns>
 </customView>

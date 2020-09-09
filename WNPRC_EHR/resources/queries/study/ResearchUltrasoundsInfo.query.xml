@@ -56,20 +56,20 @@
                     <column columnName="remark">
                         <columnTitle>Remark</columnTitle>
                     </column>
-                    <column columnName="completed">
+                    <column columnName="reviewCompleted">
                         <columnTitle>Review Completed</columnTitle>
                         <conditionalFormats>
                             <conditionalFormat>
                                 <filters>
-                                    <filter operator="eq" value="true"/>
+                                    <filter operator="eq" value="Yes"/>
                                 </filters>
-                                <backgroundColor>00CC33</backgroundColor>
+                                <backgroundColor>77DD77</backgroundColor>
                             </conditionalFormat>
                             <conditionalFormat>
                                 <filters>
-                                    <filter operator="eq" value="false"/>
+                                    <filter operator="eq" value="No"/>
                                 </filters>
-                                <backgroundColor>FF0000</backgroundColor>
+                                <backgroundColor>E87060</backgroundColor>
                             </conditionalFormat>
                         </conditionalFormats>
                     </column>

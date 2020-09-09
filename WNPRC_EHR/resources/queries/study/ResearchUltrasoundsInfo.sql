@@ -15,11 +15,16 @@ SELECT ru.objectid
       ,ru.fetal_heartbeat
       ,ru.performedby
       ,ru.remark
-      ,COALESCE((
-                SELECT ur.completed
+      ,CASE
+        WHEN (SELECT ur.completed
                 FROM ultrasound_review ur
-                WHERE ur.taskid = ru.taskid), 'false')
-                AS completed
+                WHERE ur.taskid = ru.taskid) = TRUE THEN 'Yes'
+        WHEN (ru.qcstate.Label = 'Completed') THEN 'N/A (bulk upload)'
+        WHEN (SELECT ur.completed
+                FROM ultrasound_review ur
+                WHERE ur.taskid = ru.taskid) IS FALSE THEN 'No'
+        ELSE 'No'
+      END AS reviewCompleted
       ,ru.taskid
   FROM research_ultrasounds ru
 ORDER BY ru.date DESC

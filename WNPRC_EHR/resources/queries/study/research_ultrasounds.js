@@ -159,7 +159,9 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                     });
                 }
             },
-            failure: LDK.Utils.getErrorCallback()
+            failure: function (error) {
+                console.log("Select rows error for ehr.tasks: " + JSON.stringify(error));
+            }
         });
     }
 }

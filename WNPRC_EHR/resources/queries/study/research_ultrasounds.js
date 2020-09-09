@@ -18,6 +18,14 @@ function onInsert(helper, scriptErrors, row, oldRow) {
             targetQCState = "Completed";
         }
 
+        if (!!row.restraintType) {
+            EHR.Server.Utils.addError(scriptErrors, "restraintType", "Restraint Type is a required field", "ERROR");
+        }
+
+        if (!!row.reviewDate) {
+            EHR.Server.Utils.addError(scriptErrors, "reviewDate", "Review Date is required if a review of the ultrasound has occurred", "ERROR");
+        }
+
         //explicitly set blank boolean values to false
         let reviewRow = {
             "Id": row.Id,
@@ -110,6 +118,50 @@ function onInsert(helper, scriptErrors, row, oldRow) {
         WNPRC.Utils.getJavaHelper().insertRows(measurementRows, "study", "ultrasound_measurements");
     }
     row.QCStateLabel = targetQCState;
+
+    if (!helper.isValidateOnly()) {
+        LABKEY.Query.selectRows({
+            schemaName: 'ehr',
+            queryName: 'tasks',
+            scope: this,
+            filterArray: [
+                LABKEY.Filter.create('taskid', row.taskid, LABKEY.Filter.Types.EQUAL)],
+            success: function (results) {
+                if (results && results.rows && results.rows.length >= 1) {
+                    //great, do nothing
+                }
+                else {
+                    let taskRow = {
+                        "taskid": row.taskid,
+                        "category": "Task",
+                        "title": "Research Ultrasounds",
+                        "formtype": "Research Ultrasounds",
+                        "QCStateLabel": row.QCStateLabel,
+                        "assignedto": LABKEY.Security.currentUser.id,
+                        "duedate": new Date(row.date),
+                        "container": LABKEY.Security.currentContainer.id,
+                        "datecompleted": row.completed ? row.reviewDate : null
+                    };
+
+                    console.log("Creating taskid for research ultrasounds bulk upload record");
+
+                    LABKEY.Query.insertRows({
+                        schemaName: 'ehr',
+                        queryName: 'tasks',
+                        rows: [taskRow],
+                        scope: this,
+                        success: function (results) {
+
+                        },
+                        failure: function (error) {
+                            console.log("Insert rows error for ehr.tasks: " + JSON.stringify(error));
+                        }
+                    });
+                }
+            },
+            failure: LDK.Utils.getErrorCallback()
+        });
+    }
 }
 
 function onUpdate(helper, scriptErrors, row, oldRow) {
@@ -156,8 +208,6 @@ function setDescription(row, helper){
     description.push("Fetal Heartbeat: " + !!row.fetal_heartbeat);
     for (let key in row) {
         if (row.hasOwnProperty(key) && row[key] && validMeasurements.hasOwnProperty(key)) {
-            console.log("Row: " + JSON.stringify(row));
-            console.log("Key: " + key);
             let measurements = row[key].split(";");
             let measurementString = "";
             for (let i = 0; i < measurements.length; i++) {

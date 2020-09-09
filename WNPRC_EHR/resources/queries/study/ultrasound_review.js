@@ -46,7 +46,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 
     if (row.QCStateLabel === "Review Required" && row.completed) {
         EHR.Server.Utils.addError(scriptErrors, null, "You must 'Submit Final' if the interpretation is completed", "ERROR");
-    } else if (row.QCStateLabel === "Completed" && !row.completed) {
+    } else if (row.QCStateLabel === "Completed" && !row.completed && !row.is_bulk_upload) {
         EHR.Server.Utils.addError(scriptErrors, null, "You cannot 'Submit Final' if the interpretation is not completed", "ERROR");
     }
 

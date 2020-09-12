@@ -1,9 +1,12 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.BeginAction" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.NewUserAPI" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.SearchUserAPI" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.UpdatePersonClearanceAPI" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    ActionURL url = new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer());
+    ActionURL url = urlFor(BeginAction.class);
 %>
 <div class="text-center" style="margin-bottom: 10px;">
     <a class="btn btn-primary" href="<%=h(url)%>">
@@ -364,7 +367,7 @@
         };
 
         <%
-            ActionURL searchQuery = new ActionURL(WNPRC_ComplianceController.SearchUserAPI.class, getContainer());
+            ActionURL searchQuery = urlFor(SearchUserAPI.class);
         %>
 
         VM.searchTerm.subscribe(function(query) {
@@ -475,7 +478,7 @@
             var form = ko.mapping.toJS(VM.newUserForm);
 
             if (VM.createNewUser() == 'yes') {
-                submission.url = <%=q(new ActionURL(WNPRC_ComplianceController.NewUserAPI.class, getContainer()).toString())%>;
+                submission.url = <%=q(urlFor(NewUserAPI.class))%>;
 
                 submission.data = {
                     firstName:   form.firstName,
@@ -503,7 +506,7 @@
                 }
             }
             else {
-                submission.url = <%=q(new ActionURL(WNPRC_ComplianceController.UpdatePersonClearanceAPI.class, getContainer()).toString())%>;
+                submission.url = <%=q(urlFor(UpdatePersonClearanceAPI.class))%>;
 
                 submission.data = {
                     personid: VM.selectedPerson()

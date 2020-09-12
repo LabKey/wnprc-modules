@@ -409,7 +409,7 @@
                     }
                 });
 
-                WebUtils.API.post(<%=q(releaseAnimalURL.toString())%>, data).then(function() {
+                WebUtils.API.post(<%=q(releaseAnimalURL)%>, data).then(function() {
                     WebUtils.VM.refreshCurrentAssignmentsTable();
                     toastr.success(data.animalId + " successfully released from behavior project.");
                 }).catch(function(e) {
@@ -576,7 +576,7 @@
             };
 
             console.log("Submitting data: ", dataToSubmit);
-            WebUtils.API.postJSON(<%=q(addBehaviorURL.toString())%>, dataToSubmit).then(function() {
+            WebUtils.API.postJSON(<%=q(addBehaviorURL)%>, dataToSubmit).then(function() {
                 WebUtils.VM.refreshCurrentAssignmentsTable();
                 WebUtils.VM.form.clearForm();
                 toastr.success("Assignment successfully added.");

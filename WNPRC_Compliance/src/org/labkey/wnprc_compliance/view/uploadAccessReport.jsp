@@ -1,9 +1,10 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.BeginAction" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.UploadAccessReportAPI" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    ActionURL url = new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer());
+    ActionURL url = urlFor(BeginAction.class);
 %>
 <div class="text-center" style="margin-bottom: 10px;">
     <a class="btn btn-primary" href="<%=h(url)%>">
@@ -39,7 +40,7 @@
     (function() {
 
         var dropZone = jQuery("#access-report-upload").dropzone({
-            url: <%=q(new ActionURL(WNPRC_ComplianceController.UploadAccessReportAPI.class, getContainer()).toString())%>,
+            url: <%=q(urlFor(UploadAccessReportAPI.class))%>,
             method: "post",
             maxFiles: 1,
             init: function() {

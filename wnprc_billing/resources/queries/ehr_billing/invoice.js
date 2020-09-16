@@ -25,29 +25,33 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             //get invoice sent date
             var invoiceSentDate = EHR.Server.Utils.normalizeDate(row.invoiceSentOn);
 
-            // if payment received date is left empty, use today's date
-            if (!row.paymentReceivedOn)
-                row.paymentReceivedOn = new Date();
-
-            pmtReceivedDate = EHR.Server.Utils.normalizeDate(row.paymentReceivedOn);
+            if (row.paymentAmountReceived && !row.paymentReceivedOn) {
+                EHR.Server.Utils.addError(scriptErrors, 'paymentReceivedOn', "Payment Received On cannot be blank if there is Payment Amount Received amount", 'ERROR');
+                return false;
+            }
 
             //validations
 
             //error if payment received is greater than
             //error if invoice sent date is before billing run date
-            if (helper.getJavaHelper().dateCompare(billingRunDate, invoiceSentDate, format) > 0) {
+            if (invoiceSentDate && helper.getJavaHelper().dateCompare(billingRunDate, invoiceSentDate, format) > 0) {
                 EHR.Server.Utils.addError(scriptErrors, 'invoiceSentDate', "Invoice Sent date" +
                         " date (" + helper.getJavaHelper().formatDate(invoiceSentDate, format, false) + ") is before " +
                         " Billing Run Date (" + helper.getJavaHelper().formatDate(billingRunDate, format, false) + ").", 'ERROR');
                 return false;
             }
 
-            //error if payment received date is before billing run date
-            if (helper.getJavaHelper().dateCompare(billingRunDate, pmtReceivedDate, format) > 0) {
-                EHR.Server.Utils.addError(scriptErrors, 'paymentReceivedOn', "Payment received date" +
-                        " date (" + helper.getJavaHelper().formatDate(pmtReceivedDate, format, false) + ") is before " +
-                        " Billing Run Date (" + helper.getJavaHelper().formatDate(billingRunDate, format, false) + ").", 'ERROR');
-                return false;
+            if (row.paymentReceivedOn) {
+
+                pmtReceivedDate = EHR.Server.Utils.normalizeDate(row.paymentReceivedOn);
+
+                //error if payment received date is before billing run date
+                if (helper.getJavaHelper().dateCompare(billingRunDate, pmtReceivedDate, format) > 0) {
+                    EHR.Server.Utils.addError(scriptErrors, 'paymentReceivedOn', "Payment received date" +
+                            " date (" + helper.getJavaHelper().formatDate(pmtReceivedDate, format, false) + ") is before " +
+                            " Billing Run Date (" + helper.getJavaHelper().formatDate(billingRunDate, format, false) + ").", 'ERROR');
+                    return false;
+                }
             }
 
         },
@@ -57,17 +61,13 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     });
 
     //calculate balanceDue
+    // This simple calculation will suffice. In most cases, payment will be received in full.
+    // In rare cases, there will be max of 2 checks - first check with a major amount, and second check with remaining
+    // missed amount. When the second check is received, paymentAmountReceived will be set to the invoiceAmount marking
+    // full payment received/zero balance due.
+    // See support Ticket 38821.
     if (row.paymentAmountReceived != null) {
-
-        if (oldRow.balanceDue != null) {
-            row.balanceDue = oldRow.balanceDue - row.paymentAmountReceived;
-        }
-        else {
-            row.balanceDue = row.invoiceAmount - row.paymentAmountReceived;
-        }
-    }
-    else {
-        row.balanceDue = row.invoiceAmount;
+        row.balanceDue = row.invoiceAmount - row.paymentAmountReceived;
     }
 
     if(row.balanceDue <= 0) {

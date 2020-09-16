@@ -11,6 +11,8 @@
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
 <%
     Integer year = Calendar.getInstance().get(Calendar.YEAR);
 
@@ -32,6 +34,12 @@
     SimpleQuery necropsyQuery = new SimpleQuery("study", "necropsy", getUser(), getContainer());
     List<JSONObject> necropsies = JsonUtils.getListFromJSONArray(necropsyQuery.getResults(dateFilter).getJSONArray("rows"));
 %>
+
+<style type="text/css">
+    .input-group.date {
+        display: table;
+    }
+</style>
 
 <div class="panel panel-primary">
     <div class="panel-heading"><span>List of Biopsies and Necropsy Cases</span></div>

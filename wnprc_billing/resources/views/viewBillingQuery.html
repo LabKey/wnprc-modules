@@ -1,0 +1,153 @@
+<p>
+    Preview the billing cost query for a given start and end date period.
+    You can optionally select how to aggregate the data or filter for a specific project.
+</p>
+<div id="wnprc_billing_query_form"></div>
+<br/>
+<div id="wnprc_billing_query_web_part"></div>
+
+<script type="text/javascript">
+
+    var webpart = <%=webpartContext%>;
+    var ehrCtx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+
+    Ext4.onReady(function() {
+        var today = new Date();
+        var startDate = EHR_Billing.BillingUtils.getBillingPeriodStart(today);
+        var endDate = EHR_Billing.BillingUtils.getBillingPeriodEnd(today);
+        var qwpCounter = 0;
+        var queryStore = Ext4.create('Ext.data.Store', {
+            fields: ['name', 'label', 'containerPath'],
+            data : [
+                {name: 'ALL', label: '[All]'},
+                {name: 'miscChargesFeeRates', label: 'Misc Charges', containerPath: ehrCtx.EHRStudyContainer},
+                {name: 'perDiemFeeRates', label: 'Per Diems', containerPath: null},
+                {name: 'procedureFeeRates', label: 'Blood Draws', containerPath: null} //since Blood Draws are the only "procedures" at this point
+            ]
+        });
+        Ext4.create('Ext.form.Panel', {
+            renderTo: 'wnprc_billing_query_form',
+            border: false,
+            bodyStyle: 'background-color: transparent;',
+            defaults: {
+                labelWidth: 125,
+                width: 350
+            },
+            items: [{
+                xtype: 'datefield',
+                name: 'startDate',
+                fieldLabel: 'Start Date',
+                allowBlank: false,
+                format: LABKEY.extDefaultDateFormat,
+                value: startDate
+            },{
+                xtype: 'datefield',
+                name: 'endDate',
+                fieldLabel: 'End Date',
+                allowBlank: false,
+                format: LABKEY.extDefaultDateFormat,
+                value: endDate
+            },{
+                xtype: 'combo',
+                name: 'queryName',
+                fieldLabel: 'Billing Query',
+                allowBlank: false,
+                store: queryStore,
+                editable: false,
+                queryMode: 'local',
+                displayField: 'label',
+                valueField: 'name'
+            }, {
+                xtype: 'ehr-projectfield',
+                fieldLabel: 'Project',
+                labelWidth: 125,
+                name: 'project'
+            }, {
+                xtype: 'combo',
+                fieldLabel: 'Account',
+                labelWidth: 125,
+                queryMode: 'local',
+                displayField: 'alias',
+                name: 'alias',
+                store: {
+                    type: 'labkey-store',
+                    schemaName: 'ehr_billing',
+                    queryName: 'aliases',
+                    columns: 'alias',
+                    sort: 'alias',
+                    autoLoad: true
+                }
+            }],
+            dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'bottom',
+                ui: 'footer',
+                id: 'wnprc-view-billing-queries-run-query',
+                style: 'background-color: transparent; padding: 10px 0;',
+                items: [{
+                    text: 'Run Query',
+                    formBind: true,
+                    handler: function(btn) {
+                        var panel = btn.up('panel');
+                        var values = btn.up('form').getForm().getValues();
+                        var selectedQueryRecord = queryStore.findRecord('name', values.queryName, 0, false, true, true);
+                        if (selectedQueryRecord) {
+                            // if selectedQueryRecord is ALL, then add all queries to page
+                            if (selectedQueryRecord.get('name') === 'ALL') {
+                                Ext4.each(queryStore.getRange(), function(record) {
+                                    if (record.get('name') !== 'ALL') {
+                                        panel.addQWP(record, values);
+                                    }
+                                });
+                            }
+                            else {
+                                panel.addQWP(selectedQueryRecord, values);
+                            }
+                        }
+                    }
+                }, {
+                    text: 'Clear All',
+                    id: 'wnprc-view-billing-queries-clear-all',
+                    handler: function(btn) {
+                        Ext4.get('wnprc_billing_query_web_part').update('');
+                        qwpCounter = 0;
+                    }
+                }]
+            }],
+            addQWP: function(queryRecord, values, ) {
+                var title = queryRecord.get('label')
+                        + (values.project ? ', Project: ' + values.project : '')
+                        + (values.alias ? ', Account: ' + values.alias : '')
+                        + ', Start Date: ' + values.startDate + ', End Date: ' + values.endDate;
+                qwpCounter++;
+                var divId = 'wnprc_billing_query_web_part_' + qwpCounter;
+                Ext4.DomHelper.append(Ext4.get('wnprc_billing_query_web_part'), '<div id="' + divId + '"></div>');
+
+                var filter = [];
+                if (values.project) {
+                    filter.push(LABKEY.Filter.create('project', values.project, LABKEY.Filter.Types.EQUAL));
+                }
+                if (values.alias) {
+                    filter.push(LABKEY.Filter.create('debitedAccount', values.alias, LABKEY.Filter.Types.EQUAL))
+                }
+
+                LDK.Utils.getReadOnlyQWP({
+                    renderTo: divId,
+                    frame: 'dialog',
+                    title: title,
+                    dataRegionName: 'billing-qwp-' + qwpCounter,
+                    schemaName: 'wnprc_billing',
+                    queryName: queryRecord.get('name'),
+                    containerPath: queryRecord.get('containerPath'),
+                    parameters: {'StartDate': values.startDate, 'EndDate': values.endDate},
+                    aggregates: [
+                        {column: 'totalCost', type: LABKEY.AggregateTypes.SUM, label: 'Total'}
+                    ],
+                    filters: filter,
+                    allowChooseView: false,
+                    maxRows: 25
+                });
+            }
+        });
+    });
+</script>

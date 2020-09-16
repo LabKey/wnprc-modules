@@ -72,9 +72,6 @@
                     <item text="Import Data">
                         <originalText>Import Data</originalText>
                     </item>
-                    <item text="Page Size">
-                        <originalText>Paging</originalText>
-                    </item>
                     <item text="Delete">
                         <originalText>Delete</originalText>
                     </item>
@@ -87,6 +84,16 @@
                         <item text="Return Distinct Values">
                             <onClick>
                                 EHR.window.GetDistinctWindow.getDistinctHandler(dataRegionName, 'Assignment');
+                            </onClick>
+                        </item>
+                        <item text="Mark Reviewed">
+                            <onClick>
+                                WNPRC_EHR.DatasetButtons.markReviewedButtonHandler(dataRegion);
+                            </onClick>
+                        </item>
+                        <item text="Approve VVC Request">
+                            <onClick>
+                                WNPRC_EHR.DatasetButtons.approveVVCButtonHandler(dataRegion);
                             </onClick>
                         </item>
                     </item>

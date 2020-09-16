@@ -1,0 +1,23 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" canOverride="true">
+    <columns>
+        <column name="well"/>
+        <column name="subjectId" />
+        <column name="date" />
+        <column name="category"/>
+        <column name="assayId" />
+        <column name="viralLoadScientific" />
+        <column name="qcflag" />
+        <column name="sampleType" />
+        <column name="batched" />
+        <column name="Run/RowId">
+            <properties>
+                <property name="columnTitle" value="Run"/>
+            </properties>
+        </column>
+        <column name="workbook" />
+    </columns>
+    <sorts>
+        <sort column="Run/RowId" />
+        <sort column="well96/addressByColumn" />
+    </sorts>
+</customView>

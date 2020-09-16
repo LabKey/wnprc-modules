@@ -4,7 +4,7 @@
 
 
 use strict;
-use Labkey::Query;
+use LabKey::Query;
 use Time::localtime;
 use Net::SMTP;
 use MIME::Lite;
@@ -29,7 +29,7 @@ if ($dataExists) {
  sendEmail();	
 }
 sub getHeavyInfants {
-	$results = Labkey::Query::selectRows(
+	$results = LabKey::Query::selectRows(
 		-baseUrl => $baseUrl,
 		-containerPath => $default_container,
 		-schemaName => 'study',

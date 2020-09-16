@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="miscCharges" tableDbType="TABLE">
+            <table tableName="miscCharges" tableDbType="TABLE" useColumnOrder="true">
                 <javaCustomizer class = "org.labkey.wnprc_billing.table.WNPRC_BillingCustomizer" />
                 <columns>
                     <column columnName="Id">
@@ -11,13 +11,7 @@
                             <fkColumnName>Id</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="QCState">
-                        <fk>
-                            <fkDbSchema>core</fkDbSchema>
-                            <fkTable>qcstate</fkTable>
-                            <fkColumnName>rowid</fkColumnName>
-                        </fk>
-                    </column>
+                    <column columnName="date"/>
                     <column columnName="project">
                         <columnTitle>Project</columnTitle>
                         <fk>
@@ -26,21 +20,21 @@
                             <fkColumnName>project</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="investigator"/>
-                    <column columnName="chargecategory">
+                    <column columnName="debitedaccount">
+                        <columnTitle>Debit Account</columnTitle>
                         <fk>
-                            <fkDbSchema>wnprc_billing</fkDbSchema>
-                            <fkTable>miscChargesType</fkTable>
-                            <fkColumnName>category</fkColumnName>
-                            <fkDisplayColumnName useRawValue="true"/>
+                            <fkDbSchema>ehr_billing_public</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="chargetype">
-                        <columnTitle>Charge Unit</columnTitle>
+                    <column columnName="investigator"/>
+                    <column columnName="chargeGroup">
+                        <columnTitle>Group</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_billing_public</fkDbSchema>
                             <fkTable>chargeUnits</fkTable>
-                            <fkColumnName>chargetype</fkColumnName>
+                            <fkColumnName>groupName</fkColumnName>
                             <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
@@ -53,6 +47,19 @@
                             <fkDisplayColumnName>name</fkDisplayColumnName>
                         </fk>
                     </column>
+                    <column columnName="quantity"/>
+                    <column columnName="unitCost"/>
+                    <column columnName="totalCost"/>
+                    <column columnName="chargetype">
+                        <columnTitle>Adjustment</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc_billing</fkDbSchema>
+                            <fkTable>miscChargesType</fkTable>
+                            <fkColumnName>category</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="comment"/>
                     <column columnName="invoiceId">
                         <columnTitle>Invoice Run Id</columnTitle>
                         <fk>
@@ -71,15 +78,15 @@
                     <column columnName="modified">
                         <isHidden>true</isHidden>
                     </column>
-                    <column columnName="debitedaccount">
-                        <columnTitle>Debit Account</columnTitle>
+
+                    <column columnName="creditedaccount"/>
+                    <column columnName="QCState">
                         <fk>
-                            <fkDbSchema>ehr_billing_public</fkDbSchema>
-                            <fkTable>aliases</fkTable>
-                            <fkColumnName>alias</fkColumnName>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>qcstate</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="creditedaccount"/>
                 </columns>
             </table>
         </tables>

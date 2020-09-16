@@ -118,6 +118,7 @@
       <column columnName="created"/>
       <column columnName="modifiedby"/>
       <column columnName="modified"/>
+      <column columnName="required"/>
     </columns>
   </table>
   <table tableName="persons_measles_clearances" tableDbType="TABLE">

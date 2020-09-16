@@ -1,0 +1,15 @@
+import org.labkey.gradle.util.BuildUtils
+
+dependencies {
+
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
+
+    apiExternal "xerces:xercesImpl:${xercesImplVersion}"
+    apiExternal "org.apache.commons:commons-collections4:${commonsCollections4Version}"
+    apiExternal "joda-time:joda-time:2.8.1"
+    compile "javax.servlet:jsp-api:2.0"
+    compile files(apiJar)
+    external "org.jooq:jooq:3.8.4"
+    external "org.apache.commons:commons-collections4:${commonsCollections4Version}"
+    external "joda-time:joda-time:2.8.1"
+}

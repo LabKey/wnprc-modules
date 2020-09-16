@@ -1,0 +1,13 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="tierRateType"/>
+        <column name="tierRate"/>
+        <column name="startDate"/>
+        <column name="endDate"/>
+        <column name="isActive"/>
+    </columns>
+    <sorts>
+        <sort column="isActive" descending="true" />
+        <sort column="tierRateType" descending="false" />
+    </sorts>
+</customView>

@@ -1,13 +1,14 @@
 SELECT
 persons.personid,
+last_name,
 first_name,
 middle_name,
-last_name,
 date_of_birth,
 cardInfo.employee_number,
 notes,
 tbResults.lastClearance as lastTbClearance,
 measlesResults.lastClearance as measlesClearance,
+measlesResults.mrequired as measlesRequired,
 archived_for_access_purposes as isArchived
 
 FROM persons
@@ -35,6 +36,7 @@ LEFT JOIN (
 
   SELECT
   p_m_map.person_id,
+  m.required as mrequired,
   MAX(m.date) as lastClearance
 
   FROM measles_clearances m
@@ -44,7 +46,7 @@ LEFT JOIN (
     m.id = p_m_map.clearance_id
   )
 
-  GROUP BY (p_m_map.person_id)
+  GROUP BY p_m_map.person_id, m.required
 ) measlesResults
 
 ON measlesResults.person_id = persons.personid;
@@ -59,3 +61,6 @@ LEFT JOIN
         GROUP BY card_info.card_id, card_info.employee_number
     ) cardInfo
 ON (pers_to_card.cardid = cardInfo.card_id)
+
+ORDER BY last_name ASC
+

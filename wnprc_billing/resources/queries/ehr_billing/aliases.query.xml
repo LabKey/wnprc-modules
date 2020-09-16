@@ -28,7 +28,7 @@
                     <nullable>false</nullable>
                     <fk>
                         <fkDbSchema>wnprc_billing</fkDbSchema>
-                        <fkTable>tierRates</fkTable>
+                        <fkTable>activeTierRates</fkTable>
                         <fkColumnName>tierRateType</fkColumnName>
                         <fkDisplayColumnName>tierRate</fkDisplayColumnName>
                     </fk>
@@ -50,8 +50,9 @@
                 <column columnName="investigatorId">
                     <fk>
                         <fkDbSchema>ehrLinked</fkDbSchema>
-                        <fkTable>investigators</fkTable>
+                        <fkTable>investigatorsWithName</fkTable>
                         <fkColumnName>rowid</fkColumnName>
+                        <fkDisplayColumnName>investigatorWithName</fkDisplayColumnName>
                     </fk>
                 </column>
                 <column columnName="fiscalAuthority">
@@ -70,10 +71,12 @@
                 <column columnName="contact_email">
                     <nullable>false</nullable>
                 </column>
+                <column columnName="institution"/>
                 <column columnName="address"/>
                 <column columnName="city"/>
                 <column columnName="state"/>
                 <column columnName="zip"/>
+                <column columnName="billing_contact_info"/>
                 <column columnName="comments"/>
                 <column columnName="po_number"/>
                 <column columnName="po_amount">

@@ -2,6 +2,7 @@
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.BeginAction" %>
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.MarkCardExemptAPI" %>
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceSchema" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -70,7 +71,7 @@
             <div class="panel-heading">Unidentified Cards</div>
 
             <div class="panel-body">
-            <lk-querytable params="schema: '<%=q(WNPRC_ComplianceSchema.NAME)%>',
+            <lk-querytable params="schema: <%=q(WNPRC_ComplianceSchema.NAME)%>,
                                    query: 'unidentifiedCards',
                                    rowsAreSelectable: false,
                                    rowsAreClickable: true,
@@ -235,7 +236,7 @@
 
             //TODO validate here...
             //TODO not sure how this $parent selectedPerson really works here?
-            WebUtils.API.postJSON("<%= new ActionURL(WNPRC_ComplianceController.LinkCardAPI.class, getContainer()) %>", {
+            WebUtils.API.postJSON("<%=q(urlFor(WNPRC_ComplianceController.LinkCardAPI.class))%>", {
                 cardId: cardData.selectedCard[0],
                 personId: personData.selectedPerson
             }).then(function(d) {
@@ -263,7 +264,7 @@
             %>
 
             //TODO allow the user to specify the filter
-            var url = LABKEY.ActionURL.buildURL('<%= searchQuery.getController() %>', '<%= searchQuery.getAction()%>', null, {
+            var url = LABKEY.ActionURL.buildURL(<%=q(searchQuery.getController())%>, <%=q(searchQuery.getAction())%>, null, {
                 query: row.rowData[1]
             });
 

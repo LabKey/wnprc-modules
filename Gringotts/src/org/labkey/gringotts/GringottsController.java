@@ -39,9 +39,9 @@ public class GringottsController extends SpringActionController {
             return new JspView("/org/labkey/gringotts/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 }

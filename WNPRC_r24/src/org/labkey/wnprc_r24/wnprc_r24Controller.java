@@ -43,9 +43,9 @@ public class wnprc_r24Controller extends SpringActionController
             return new JspView("/org/labkey/wnprc_r24/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 }

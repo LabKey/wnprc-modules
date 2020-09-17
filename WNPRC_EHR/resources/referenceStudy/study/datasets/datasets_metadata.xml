@@ -115,4 +115,18 @@
         <description>Contains one row for each ultrasound performed at the center.</description>
         <columns/>
     </table>
+    <table tableName="tissues_sample" tableDbType="TABLE">
+        <columns>
+            <column columnName="collect_before_death">
+                <columnTitle>Collect Before Death</columnTitle>
+                <datatype>boolean</datatype>
+                <description>If true, the tissue should be collected antemortem.</description>
+            </column>
+            <column columnName="collection_order">
+                <columnTitle>Collection Order</columnTitle>
+                <datatype>integer</datatype>
+                <description>This is the order that tissues should appear in the collection list.</description>
+            </column>
+        </columns>
+    </table>
 </tables>

@@ -1672,6 +1672,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             if (event.getDataSource().equals("waterOrders"))
             {
+                Map <String,Object> extraContext = new HashMap<>();
 
                 try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
                 {
@@ -1687,7 +1688,7 @@ public class WNPRC_EHRController extends SpringActionController
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
                         service = ti.getUpdateService();
 
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, extraContext);
                         if (updatedRows.size() != rowToUpdate.size())
                         {
                             throw new QueryUpdateServiceException("Not all rows updated properly");
@@ -1699,12 +1700,21 @@ public class WNPRC_EHRController extends SpringActionController
                     response.put("success", true);
 
                 }
+                catch (BatchValidationException e){
+                    response.put("success", false);
+
+                    response.put("errors", createResponseWriter().getJSON(e).get("errors"));
+                    response.put("extraContext", extraContext);
+
+                }
                 catch (Exception e)
                 {
 
                     response.put("success", false);
 
+
                 }
+
                 finally
                 {
 

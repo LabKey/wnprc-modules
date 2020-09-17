@@ -1037,7 +1037,7 @@ public class TriggerScriptHelper {
 
     }
 
-    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, String frequency, String objectId){
+    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, String frequency, String objectId, Map<String, Object> extraContext){
 
         //TODO: query the table to find the meaning - from the rowid
 
@@ -1124,7 +1124,7 @@ public class TriggerScriptHelper {
                             editURL.addParameter("key", waterRecord.getLsid());
 
 
-                            returnErrors.put("dataSource", waterRecord.getDataSource());
+
 
                             if (waterRecord.getDataSource().equals("waterOrders"))
                             {
@@ -1147,6 +1147,7 @@ public class TriggerScriptHelper {
                                 {
                                     returnErrors.put("field", "frequency");
                                 }
+                                returnErrors.put("dataSource", waterRecord.getDataSource());
                                 returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
                                         " End Date: " + endFormattedDate + " Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "'><b> EDIT</b></a>");
                                 returnErrors.put("objectId", waterRecord.getObjectId());
@@ -1181,16 +1182,29 @@ public class TriggerScriptHelper {
                         //check if waterAmounts are outside the new order interval add warnings to users
                         //In waterAmount StartDate and EndDate are the same
                         if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
-                            returnErrors.put("field", "enddate");
-                            returnErrors.put("severity", "WARN");
-                            returnErrors.put("message", "There are one or more waterAmounts that are outside the new range for the updated water order");
+
+                            // Building link for allow user to edit waterAmounts in future
+                            ActionURL editAmountURL = new ActionURL("EHR", "manageRecord", container);
+                            editAmountURL.addParameter("schemaName", "study");
+                            editAmountURL.addParameter("queryName", waterRecord.getDataSource());
+                            editAmountURL.addParameter("keyField", "lsid");
+                            editAmountURL.addParameter("key", waterRecord.getLsid());
+
+                            returnErrors.put("field", "animalId");
+                            returnErrors.put("severity", "ERROR");
+                            returnErrors.put("message", "This waterAmount is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
+                            returnErrors.put("extraContext", editAmountURL.toString());
+                            extraContext.put("objectId",editAmountURL.toString());
                         }
 
 
                     }
 
                 }
-                errorMap.put(waterRecord.getObjectId(), returnErrors);
+                if (!returnErrors.isEmpty()){
+                    errorMap.put(waterRecord.getObjectId(), returnErrors);
+                }
+
             }
 
         }

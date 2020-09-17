@@ -178,21 +178,26 @@
                     <button class="btn btn-default"  data-toggle="modal" data-target="#myModal"
                             id="enterWaterOrder" params="" disabled>Edit Recurring Water Order</button>
 
+                    <!--  Modal Definition -->
                     <div class="modal fade" id="myModal" role="dialog">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <button type="button" class="close" data-dismiss="modal" data-bind="click: $root.closeModalWindow">&times;</button>
                                     <h4 class="modal-title">Modify Water Order</h4>
                                 </div>
-                                <div class="modal-body">
-                                    <p>Select an option from this window:</p>
-                                    <p>End Date for Water Order: <b>{{date}}</b></p>
+                                <div class="modal-body" id="modal-body">
+                                    <div>Select an option from this window:</div>
+                                    <div>End Date for Water Order: <b>{{date}}</b></div>
+                                    <hr>
+                                    <div>Return Errors from Server:</div>
+                                    <div id = "modelServerResponse"></div>
+
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.endWaterOrder">End Water Order</button>
+                                    <button type="button" class="btn btn-default" data-bind="click: $root.endWaterOrder">End Water Order</button>
                                     <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.enterNewWaterOrder">End and Start New Water Order</button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close Window</button>
+                                    <button type="button" class="btn btn-default" data-bind="click: $root.closeModalWindow" data-dismiss="modal">Close Window</button>
                                 </div>
                             </div>
                         </div>
@@ -535,6 +540,8 @@
                     $('#waterInfo').attr('disabled', 'disabled');
                     $('#enterWaterOrder').attr('disabled', 'disabled');
                     $('#waterInfo').text('Enter Single Day Water');
+                    document.getElementById("modelServerResponse").innerHTML = "";
+                    $('#waterInfoPanel').unblock();
 
                     if (previousCalendarEvent){
                         previousCalendarEvent.color = previousCalendarColor;
@@ -647,6 +654,7 @@
             },
 
             endWaterOrder: function (row){
+                document.getElementById("modelServerResponse").innerHTML = "";
 
                 $('#waterInfoPanel').block({
                     message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
@@ -663,11 +671,10 @@
 
                 WebUtils.VM.requestRowInForm = row;
                 var waterOrder = ko.mapping.toJS(row);
-                debugger;
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
-
+                debugger;
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "CloseWaterOrder", null, {
                         lsid:               waterOrder.lsid,
@@ -687,12 +694,28 @@
 
                             $('#waterInfoPanel').unblock();
 
-                        }if(!response.success){
+                        }else if (response.errors){
+                            debugger;
+                            let jsonArray = response.errors[0].errors;
+                            var returnMessage = "";
+                            if (jsonArray != null){
+                                for (var i = 0; i < jsonArray.length; i++ ){
+                                    var errorObject = jsonArray[i];
+                                    returnMessage += errorObject.message + "<br>";
+                                    
+                                }
+
+                            }
+                            document.getElementById("modelServerResponse").innerHTML = "<p>"+returnMessage+"</p>";
+                            //$('#myModal')
+                            //LABKEY.Utils.alert("Update failed", response.errors);
+                        }
+                        /*if(!response.success){
                             debugger;
                             response.errors;
                             $('#myModal');
 
-                        } else {
+                        }*/ else {
                             alert('Water cannot be closed')
                         }
 
@@ -704,6 +727,7 @@
             },
 
             enterNewWaterOrder: function (row){
+                document.getElementById("modelServerResponse").innerHTML = "";
 
                 $('#waterInfoPanel').block({
                     message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
@@ -772,6 +796,9 @@
                 });
 
             },
+            closeModalWindow: function (row){
+                $('#waterInfoPanel').unblock();
+            }
 
 
 

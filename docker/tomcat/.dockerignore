@@ -7,4 +7,5 @@
 !pipelineConfig.xml
 !public-yum-ol7.repo
 !ROOT.xml
+!server8_5_32.xml
 !wait-for-postgres.sh

@@ -19,7 +19,8 @@
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>husbandry_assigned</fkTable>
-                            <fkColumnName>title</fkColumnName>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
                   <column columnName="date">

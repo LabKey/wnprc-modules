@@ -1,0 +1,15 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="Pregnancies - Current">
+    <columns>
+        <column name="date"/>
+        <column name="enddate"/>
+        <column name="sireid"/>
+        <column name="ejaculation"/>
+        <column name="project"/>
+        <column name="remark"/>
+        <column name="performedby"/>
+        <column name="outcome"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+</customView>

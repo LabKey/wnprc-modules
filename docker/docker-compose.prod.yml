@@ -1,0 +1,17 @@
+version: "3.5"
+
+services:
+  perlscripts:
+    image: wnprcehr/ehrcron:latest
+    depends_on:
+      - "labkey"
+    volumes:
+      - "${BACKUP_DIR}:/backups"
+    networks:
+      - network1
+    environment:
+      LK_BACKGROUND_USER:
+      LK_BACKGROUND_USER_PASSWORD:
+      LK_BASE_URL:
+      TZ: America/Chicago
+  

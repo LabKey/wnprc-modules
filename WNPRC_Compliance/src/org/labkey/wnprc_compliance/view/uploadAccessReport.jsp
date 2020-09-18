@@ -1,3 +1,4 @@
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.BeginAction" %>
 <%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.UploadAccessReportAPI" %>
@@ -18,7 +19,9 @@
         <div class="panel-heading">Upload Access Report</div>
 
         <div class="panel-body">
-            <form id="access-report-upload" class="dropzone"></form>
+            <form id="access-report-upload" class="dropzone">
+                <labkey:csrf/>
+            </form>
         </div>
     </div>
 </div>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<query xmlns="http://labkey.org/data/xml/query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://labkey.org/data/xml ../../../../../../schemas/tableInfo.xsd">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="breeding_encounters" tableDbType="TABLE">
+                <columns>
+                    <column columnName="date">
+                        <columnTitle>Encounter Start Time</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="enddate">
+                        <columnTitle>Encounter End Time</columnTitle>
+                        <nullable>true</nullable>
+                    </column>
+                    <column columnName="Id">
+                        <columnTitle>Female</columnTitle>
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="sireid">
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="ejaculation"/>
+                    <column columnName="project"/>
+                    <column columnName="performedby"/>
+                    <column columnName="remark"/>
+                    <column columnName="outcome"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

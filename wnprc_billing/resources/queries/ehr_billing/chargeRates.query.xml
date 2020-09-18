@@ -14,7 +14,7 @@
                         <fk>
                             <fkDbSchema>ehr_billing</fkDbSchema>
                             <fkTable>chargeUnits</fkTable>
-                            <fkColumnName>chargetype</fkColumnName>
+                            <fkColumnName>groupName</fkColumnName>
                             <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>

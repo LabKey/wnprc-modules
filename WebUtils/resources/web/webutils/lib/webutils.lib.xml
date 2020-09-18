@@ -8,6 +8,7 @@
         <script path="/webutils/lib/utils/Lookup.js"/>
     </library>
     <dependencies>
+        <dependency path="/webutils/lib/bootstrap/bootstrap"/>
         <dependency path="/webutils/lib/c3/c3"/>
         <dependency path="/webutils/lib/ko/knockout"/>
         <dependency path="/webutils/lib/webutils_core/webutils_core"/>

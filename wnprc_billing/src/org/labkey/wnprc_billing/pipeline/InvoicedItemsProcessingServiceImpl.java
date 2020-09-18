@@ -72,7 +72,7 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         colMap.put("chargeId", "chargeId");
         colMap.put("item", "item");
         colMap.put("category", "category");
-        colMap.put("serviceCenter", "serviceCenter");
+        colMap.put("groupName", "groupName");
         return colMap;
     }
 
@@ -93,7 +93,7 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         colMap.put("chargeId", "chargeId");
         colMap.put("item", "item");
         colMap.put("category", "category");
-        colMap.put("serviceCenter", "serviceCenter");
+        colMap.put("groupName", "groupName");
         return colMap;
     }
 
@@ -114,7 +114,7 @@ public class InvoicedItemsProcessingServiceImpl implements InvoicedItemsProcessi
         colMap.put("chargeId", "chargeId");
         colMap.put("item", "item");
         colMap.put("category", "category");
-        colMap.put("serviceCenter", "serviceCenter");
+        colMap.put("groupName", "groupName");
         colMap.put("creditedAccount", "creditedAccount");
         return colMap;
     }

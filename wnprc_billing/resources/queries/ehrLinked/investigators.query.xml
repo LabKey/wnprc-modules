@@ -1,0 +1,19 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="investigators" tableDbType="TABLE">
+                <tableTitle>Investigators</tableTitle>
+                <columns>
+                    <column columnName="userid">
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>Users</fkTable>
+                            <fkColumnName>userid</fkColumnName>
+                            <fkDisplayColumnName>DisplayName</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

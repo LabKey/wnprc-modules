@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id" />
+        <column name="date" />
+        <column name="sireid"/>
+        <column name="breedingencounterid" />
+        <column name="date_conception"/>
+        <column name="date_due"/>
+        <column name="performedby"/>
+        <column name="remark"/>
+        <column name="outcome"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+</customView>

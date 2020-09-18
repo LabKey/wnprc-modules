@@ -33,6 +33,7 @@ import org.labkey.api.ehr.security.EHRStartedAdminPermission;
 import org.labkey.api.ehr.security.EHRStartedDeletePermission;
 import org.labkey.api.ehr.security.EHRStartedInsertPermission;
 import org.labkey.api.ehr.security.EHRStartedUpdatePermission;
+import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.ldk.notification.Notification;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -43,10 +44,14 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
+import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
+import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
+import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
+import org.labkey.wnprc_ehr.buttons.MarkReviewedButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
@@ -56,7 +61,7 @@ import org.labkey.wnprc_ehr.dataentry.forms.Biopsy.BiopsyForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Birth.BirthFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.BloodDrawRequest.BloodDrawRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.BloodDraws.BloodDrawsForm;
-import org.labkey.wnprc_ehr.dataentry.forms.Breeding.BreedingEncounterForm;
+import org.labkey.wnprc_ehr.dataentry.forms.Breeding;
 import org.labkey.wnprc_ehr.dataentry.forms.Clinpath.ClinpathForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ClinpathRequest.ClinpathRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Death.DeathForm;
@@ -94,9 +99,13 @@ import org.labkey.wnprc_ehr.notification.FoodCompletedProblemsNotification;
 import org.labkey.wnprc_ehr.notification.FoodNotCompletedNotification;
 import org.labkey.wnprc_ehr.notification.FoodNotStartedNoonNotification;
 import org.labkey.wnprc_ehr.notification.FoodNotStartedNotification;
+import org.labkey.wnprc_ehr.notification.IrregularObsBehaviorNotification;
+import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
+import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
@@ -105,6 +114,7 @@ import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
+import org.labkey.wnprc_ehr.updates.ModuleUpdate;
 import org.reflections.Reflections;
 
 import java.io.File;
@@ -124,9 +134,11 @@ import java.util.stream.Collectors;
  * Date: 5/16/12
  * Time: 1:52 PM
  */
-public class WNPRC_EHRModule extends ExtendedSimpleModule {
+public class WNPRC_EHRModule extends ExtendedSimpleModule
+{
     public static final String NAME = "WNPRC_EHR";
     public static final String CONTROLLER_NAME = "wnprc_ehr";
+    public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
 
     /**
@@ -145,8 +157,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
      */
     private boolean loadOnStart = false;
 
-    @Override
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
@@ -164,23 +177,29 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     protected void init() {
         TissueSampleTable.registerProperties();
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
-
+        addController(TEST_CONTROLLER_NAME, WNPRC_EHRTestController.class);
+        
         registerRoles();
         registerPermissions();
     }
 
     @Override
-    protected void doStartupAfterSpringConfig(ModuleContext moduleContext) {
+    protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
+    {
+        ModuleUpdate.onStartup(moduleContext, this);
+
         EHRService.get().registerModule(this);
         EHRService.get().registerTableCustomizer(this, WNPRC_EHRCustomizer.class);
         Resource r = getModuleResource("/scripts/wnprc_ehr/wnprc_triggers.js");
         assert r != null;
         EHRService.get().registerTriggerScript(this, r);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("ehr/ehr_ext3_api"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcCoreUtils.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcOverRides.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcReports.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/datasetButtons.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalPortal.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");
@@ -200,6 +219,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.animalSearch, "Unassigned Rhesus Plus MHC Typing", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Unassigned%20Rhesus%20With%20MHC%20Typing"), "Browse Animals");
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.animalSearch, "Unweighed In Past 45 Days", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Unweighed%20Over%2045%20Days"), "Browse Animals");
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.animalSearch, "List Most Recent Body Condition Code For Each Animal in the Colony", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Current Colony Condition"), "Browse Animals");
+        EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.animalSearch, "List Of All Animals On Research Assignments During The Given Date Range", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=totalResearchAssignmentsDuringRange"), "Browse Animals");
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.animalSearch, "Population Summary By Species, Gender and Age", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=colonyPopulationByAge"), "Other Searches");
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.animalSearch, "Find Animals Housed At The Center Over A Date Range", this, DetailsURL.fromString("/ehr/housingOverlaps.view?groupById=1"), "Other Searches");
@@ -216,9 +236,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
         EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "blood");
         EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "foodDeprives");
+        EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "clinPathRuns");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Food Deprives", FoodDeprivesStartForm.NAME), "study", "foodDeprives");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Blood Draws", BloodDrawsForm.NAME), "study", "blood");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromIdsButton(this, "Schedule Blood Draw For Selected", "Blood Draws", BloodDrawsForm.NAME, new String[]{"Blood Draws"}), "study", "demographics");
+        EHRService.get().registerMoreActionsButton(new MarkReviewedButton(this), "study", "clinPathRuns");
+        EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Clinpath"), "study", "clinPathRuns");
+        EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Blood Draws"), "study", "blood");
+        EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Weight"), "study", "demographics");
+        EHRService.get().registerMoreActionsButton(new ChangeBloodQCButton(this), "study", "blood");
 
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
@@ -319,10 +345,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 new FoodNotStartedNotification(this),
                 new FoodNotStartedNoonNotification(this),
                 new FoodNotCompletedNotification(this),
-                new FoodCompletedProblemsNotification(this)
+                new FoodCompletedProblemsNotification(this),
+                new AnimalRequestNotification(this),
+                new ProjectRequestNotification(this),
+                new IrregularObsBehaviorNotification(this),
+                new ViralLoadQueueNotification(this)
         );
 
-        for(Notification notification : notifications) {
+        for (Notification notification : notifications)
+        {
             NotificationService.get().registerNotification(notification);
         }
     }
@@ -362,13 +393,16 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
                 FoodDeprivesStartForm.class,
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
-                ProtocolForm.class,
-                BreedingEncounterForm.class
+                ProtocolForm.class
         );
-
-        for(Class<? extends DataEntryForm> form : forms) {
+        for (Class<? extends DataEntryForm> form : forms)
+        {
             EHRService.get().registerFormType(new DefaultDataEntryFormFactory(form, this));
         }
+
+        // load all the breeding forms (which are embedded in the Breeding class)
+        Breeding.registerDataEntryForms(EHRService.get(), this);
+        Breeding.registerSingleFormOverrides(EHRService.get(), this);
     }
 
     public void registerRoles() {
@@ -428,12 +462,27 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule {
     }
 
     @Override
+   public void afterUpdate(ModuleContext moduleContext)
+   {
+       super.afterUpdate(moduleContext);
+       ModuleUpdate.doAfterUpdate(moduleContext);
+   }
+
+   @Override
+   public void beforeUpdate(ModuleContext moduleContext)
+   {
+       super.beforeUpdate(moduleContext);
+       ModuleUpdate.doBeforeUpdate(moduleContext);
+   }
+
+    @Override
     public void versionUpdate(ModuleContext moduleContext) throws Exception
     {
         LOG.debug("deferring import of study metadata until module startup (after Spring config)");
         forceUpdate = false; // let the version report correctly from now on
         loadOnStart = true;  // indicate that we should load the study metadata on startup
         super.versionUpdate(moduleContext);
+        ModuleUpdate.doVersionUpdate(moduleContext);
     }
 
     @Override

@@ -1,9 +1,7 @@
 -- this query will be used to get the columns for the template
 SELECT
---   "test" AS oldPk,
   ci.name,
   ci.chargeCategoryId AS category,
-  ci.serviceCode,
   ci.departmentCode,
   ci.startDate AS chargeableItemStartDate,
   ci.endDate AS chargeableItemEndDate,

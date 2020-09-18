@@ -32,7 +32,7 @@ EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Even
         if (row.invoiceId) {
 
             var severity = 'INFO';
-            var fields = ['Id', 'project', 'debitedaccount', 'chargetype', 'creditedaccount', 'chargeId', 'quantity', 'unitcost'];
+            var fields = ['Id', 'project', 'debitedaccount', 'chargeGroup', 'creditedaccount', 'chargeId', 'quantity', 'unitcost'];
 
             for (var i = 0; i < fields.length; i++) {
                 if (row[fields[i]] != oldRow[fields[i]]) {

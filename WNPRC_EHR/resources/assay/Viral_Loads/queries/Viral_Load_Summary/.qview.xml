@@ -1,0 +1,21 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" canOverride="true">
+    <columns>
+        <column name="lowestWell"/>
+        <column name="subjectId" />
+        <column name="date" />
+        <column name="category"/>
+        <column name="assayId" />
+        <column name="viralLoad" />
+        <column name="replicates" />
+        <column name="stdDeviation" />
+        <column name="qcflags" />
+        <column name="batched" />
+        <column name="comments" />
+        <column name="Run/RowId">
+            <properties>
+                <property name="columnTitle" value="Run"/>
+            </properties>
+        </column>
+        <column name="workbook" />
+    </columns>
+</customView>

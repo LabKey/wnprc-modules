@@ -8,7 +8,7 @@
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="Id">
-                        <displayWidth>40</displayWidth>
+                        <displayWidth>60</displayWidth>
                         <fk>
                           <fkDbSchema>study</fkDbSchema>
                           <fkTable>Animal</fkTable>
@@ -16,7 +16,8 @@
                         </fk>
                     </column>
                     <column columnName="Room">
-                        <displayWidth>40</displayWidth>
+                        <displayWidth>100</displayWidth>
+                        <columnTitle>Room (current)</columnTitle>
                         <fk>
                           <fkDbSchema>ehr_lookups</fkDbSchema>
                           <fkTable>rooms_quick</fkTable>

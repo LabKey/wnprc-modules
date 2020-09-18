@@ -8,6 +8,9 @@
                 <updateUrl />
                 <deleteUrl />
                 <columns>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
                     <column columnName="parentid">
                         <!--<fk>-->
                             <!--<fkDbSchema>study</fkDbSchema>-->
@@ -58,11 +61,12 @@
                     </column>
                     <column columnName="behavior">
                         <columnTitle>Behavior</columnTitle>
-                        <!--<fk>-->
-                            <!--<fkDbSchema>ehr_lookups</fkDbSchema>-->
-                            <!--<fkTable>obs_behavior</fkTable>-->
-                            <!--<fkColumnName>code</fkColumnName>-->
-                        <!--</fk>-->
+                        <!--<fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>obs_behavior</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName>Title</fkDisplayColumnName>
+                        </fk>-->
                     </column>
                     <column columnName="breeding">
                         <columnTitle>Breeding</columnTitle>

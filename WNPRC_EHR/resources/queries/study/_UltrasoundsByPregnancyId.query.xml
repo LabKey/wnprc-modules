@@ -1,0 +1,30 @@
+<query xmlns="http://labkey.org/data/xml/query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://labkey.org/data/xml ../../../../../../schemas/tableInfo.xsd">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="_UltrasoundsByPregnancyId" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="date"/>
+                    <column columnName="project"/>
+                    <column columnName="restraint"/>
+                    <column columnName="fetal_heartbeat"/>
+                    <column columnName="beats_per_minute"/>
+                    <column columnName="gest_sac_mm"/>
+                    <column columnName="gest_sac_gest_day"/>
+                    <column columnName="crown_rump_mm"/>
+                    <column columnName="crown_rump_gest_day"/>
+                    <column columnName="biparietal_diameter_mm"/>
+                    <column columnName="biparietal_diameter_gest_day"/>
+                    <column columnName="femur_length_mm"/>
+                    <column columnName="femur_length_gest_day"/>
+                    <column columnName="yolk_sac_diameter_mm"/>
+                    <column columnName="head_circumference_mm"/>
+                    <column columnName="code"/>
+                    <column columnName="remark"/>
+                    <column columnName="performedby"/>
+                    <column columnName="followup_required"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

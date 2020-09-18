@@ -1,9 +1,0 @@
-<query xmlns="http://labkey.org/data/xml/query">
-    <metadata>
-        <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="groups" tableDbType="TABLE">
-                <tableTitle>Departments</tableTitle>
-            </table>
-        </tables>
-    </metadata>
-</query>

@@ -3,7 +3,6 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="investigators" tableDbType="TABLE">
                 <tableTitle>Investigators</tableTitle>
-                <titleColumn>lastName</titleColumn>
                 <columns>
                     <column columnName="rowid">
                         <columnTitle>Investigator Id</columnTitle>

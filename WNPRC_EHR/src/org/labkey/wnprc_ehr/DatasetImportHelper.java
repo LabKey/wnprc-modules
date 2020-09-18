@@ -24,7 +24,7 @@ import java.util.Collections;
 /**
  * Helper class to initiate the dataset metadata import
  */
-final class DatasetImportHelper
+public final class DatasetImportHelper
 {
     /**
      * Logger for logging the logs
@@ -38,7 +38,7 @@ final class DatasetImportHelper
      * @param container    Container into which to import the dataset. Expected to have an active study
      * @param studyXmlFile XML file defining the study, including the manifest and the metadata
      */
-    static void importDatasetMetadata(@NotNull User user, @NotNull Container container, @NotNull File studyXmlFile)
+    public static void importDatasetMetadata(@NotNull User user, @NotNull Container container, @NotNull File studyXmlFile)
             throws IOException, SQLException, DatasetImportUtils.DatasetLockExistsException, XmlException, ImportException
     {
         assert container.hasActiveModuleByName("study") : "Study module is not active in the container.";
@@ -62,7 +62,7 @@ final class DatasetImportHelper
      * @param container    Container into which to import the dataset. Expected to have an active study
      * @param studyXmlFile XML file defining the study, including the manifest and the metadata
      */
-    static void safeImportDatasetMetadata(@NotNull User user, @NotNull Container container, @NotNull File studyXmlFile)
+    public static void safeImportDatasetMetadata(@NotNull User user, @NotNull Container container, @NotNull File studyXmlFile)
     {
         try
         {

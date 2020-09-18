@@ -5,6 +5,7 @@
         <column name="project"/>
         <column name="account"/>
         <column name="protocolContact"/>
+        <column name="assignedTo"/>
         <column name="reason"/>
         <column name="remarks"/>
         <column name="depriveStartTime"/>

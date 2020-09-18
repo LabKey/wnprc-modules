@@ -4,11 +4,14 @@
             <table tableName="project" tableDbType="TABLE">
                 <columns>
                     <column columnName="investigatorId">
+                        <columnTitle>Investigator</columnTitle>
+                        <nullable>false</nullable>
                         <isHidden>false</isHidden>
                         <fk>
                             <fkDbSchema>ehr</fkDbSchema>
-                            <fkTable>investigators</fkTable>
+                            <fkTable>investigatorsWithName</fkTable>
                             <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>investigatorWithName</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="account">
@@ -64,7 +67,11 @@
                         <isHidden>true</isHidden>
                     </column>
                     <column columnName="inves">
-                        <columnTitle>Investigator</columnTitle>
+                        <isHidden>true</isHidden>
+                        <columnTitle>Other Investigator</columnTitle>
+                    </column>
+                    <column columnName="inves2">
+                        <isHidden>true</isHidden>
                     </column>
                     <column columnName="reqname">
                         <columnTitle>Requestor Name</columnTitle>

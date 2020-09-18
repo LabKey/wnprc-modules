@@ -6,8 +6,8 @@
                     <column columnName="debitedaccount">
                         <columnTitle>Account Number</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_billing_public</fkDbSchema> <!-- ehr_billing_public Linked Schema is expected -->
-                            <fkTable>aliases</fkTable>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>aliasesWithInvestigators</fkTable>
                             <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
@@ -15,7 +15,7 @@
                         <columnTitle>Project</columnTitle>
                             <fk>
                                 <fkDbSchema>ehr</fkDbSchema>
-                                <fkTable>project</fkTable>
+                                <fkTable>projectsWithInvestigators</fkTable>
                                 <fkColumnName>project</fkColumnName>
                             </fk>
                     </column>

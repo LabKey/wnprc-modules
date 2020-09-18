@@ -1,0 +1,44 @@
+<script type="text/javascript">
+
+    Ext4.onReady(function(){
+
+        var webpart = <%=webpartContext%>;
+        var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
+        if(!ctx)
+            return;
+        
+
+        Ext4.create('Ext.panel.Panel', {
+            renderTo: webpart.wrapperDivId,
+            bodyStyle: 'padding: 10px;',
+            border: false,
+            items: [{
+                html: 'This is the homepage to enter data for WNPRC staff.<br>',
+                border: false,
+                style: 'padding-bottom: 10px;'
+            }, {
+                xtype: 'ldk-navpanel',
+                itemDefaults: {
+                    linkCls: 'none'
+                },
+                sections: [{
+                    header: 'Charges Data Entry',
+                    items: [
+                        {
+                            name: 'Enter Charges with Animal Ids',
+                            url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'Charges'})
+                        },
+                        {
+                            name: 'Enter Charges without Animal Ids',
+                            url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'NonAnimalCharges'})
+                        }
+                    ]
+                }]
+            }]
+        });
+    });
+
+
+
+
+</script>

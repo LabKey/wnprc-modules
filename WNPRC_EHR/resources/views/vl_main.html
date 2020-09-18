@@ -1,18 +1,10 @@
 <html>
 <script type="text/javascript">
 
-LABKEY.requiresScript("/ehr/ext3/navMenu.js");
-
-Ext.onReady(createNavMenu);
+Ext4.onReady(createNavMenu);
 
 function createNavMenu()
 {
-    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
-    {
-        createNavMenu.defer(10);
-        return;
-    }
-
     //NOTE: edit these lines to fit your installation
     var container = '/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB';
 
@@ -56,13 +48,13 @@ function createNavMenu()
             ]
         }
 
-        if(Ext.isArray(assayConfig)){
-            Ext.each(assayConfig, function(row){
+        if(Ext4.isArray(assayConfig)){
+            Ext4.each(assayConfig, function(row){
                 cfg.sections[0].items.push({isAssay: true, schemaName: 'assay', queryName: row.name+' Data', name: row.name+' Data', id: row.id, url: LABKEY.ActionURL.buildURL("assay", "assayResults", container, {rowId: row.id})});
             }, this);
         }
 
-        new EHR.ext.NavMenu(cfg);
+        Ext4.create('EHR.NavMenu', cfg);
     }
 }
 

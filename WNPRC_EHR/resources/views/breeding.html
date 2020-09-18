@@ -1,11 +1,8 @@
 <div id="pregnancy-grid" style="margin-bottom: 20px"></div>
 <div id="pregnancy-detail"></div>
-<div>
-    <button onclick="Breeding.importDatasetData(this)">Import Test Data</button>
-    <button onclick="Breeding.importDatasetMetadata(this)">Import Test Metadata</button>
-</div>
 <script type="application/javascript">
+    const wp = <%=webpartContext%> || {};
     Ext4.onReady(function(){
-        Breeding.render('pregnancy-grid', 'pregnancy-detail');
+        Breeding.render('pregnancy-grid', 'pregnancy-detail', wp.subjects);
     });
 </script>

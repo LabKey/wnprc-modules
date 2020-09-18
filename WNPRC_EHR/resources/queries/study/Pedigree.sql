@@ -28,6 +28,7 @@ CASE (d.gender)
   WHEN 'e' THEN 1
   WHEN 'c' THEN 2
   WHEN 'v' THEN 1
+  WHEN 'h' THEN 2
   ELSE 3
 END
 -- , INTEGER)
@@ -46,7 +47,7 @@ d.species as Species
 
 FROM study.demographics d
 
-WHERE d.gender != '' AND d.gender != 'h'
+WHERE d.gender != '' 
 --AND (d.dam is not NULL or d.sire is not null)
 
 UNION ALL
@@ -56,6 +57,7 @@ SELECT
 p.id as Id,
 p.dam as Dam,
 p.sire as Sire,
+'' as Display,
 CASE (p.gender)
   WHEN 'm' THEN 1
   WHEN 'f' THEN 2
@@ -75,11 +77,7 @@ CAST(p.departdate AS SQL_VARCHAR) as status_code,
 --'Rhesus' as Species
 --null as qcstate
 
-CASE
-  WHEN (p.id LIKE 'r%') THEN 'Rhesus'
-  WHEN (p.id LIKE 'cy%') THEN 'Marmoset'
-  ELSE 'other'
-END AS Species
+p.species AS species
 
 FROM ehr.supplemental_pedigree p
 LEFT JOIN study.demographics d ON (d.id=p.id)

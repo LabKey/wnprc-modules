@@ -1,0 +1,40 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
+   <columns>
+       <column name="project"/>
+       <column name="protocol"/>
+       <column name="account/alias">
+           <properties>
+               <property name="columnTitle" value="Account"/>
+           </properties>
+       </column>
+       <column name="investigatorName"/>
+       <column name="avail"/>
+       <column name="title"/>
+       <column name="research"/>
+       <column name="use_category"/>
+       <column name="reqname"/>
+       <column name="contact_emails"/>
+       <column name="startdate"/>
+       <column name="enddate"/>
+       <column name="projectType"/>
+       <column name="shortname"/>
+       <column name="container"/>
+       <column name="displayName"/>
+       <!--<column name="activeAssignments/activeAssignments">-->
+           <!--<properties>-->
+               <!--<property name="columnTitle" value="Animals Assigned"/>-->
+           <!--</properties>-->
+       <!--</column>-->
+       <!--<column name="lastAssignment/lastAssignmentDate">-->
+           <!--<properties>-->
+               <!--<property name="columnTitle" value="Last Assignment Date"/>-->
+           <!--</properties>-->
+       <!--</column>-->
+   </columns>
+   <!--<filters>-->
+       <!--<filter column="totalAssigned/ActiveAssignments" operator="gt" value="0"/>-->
+   <!--</filters>-->
+   <sorts>
+       <sort column="project" descending="true"/>
+   </sorts>
+</customView>

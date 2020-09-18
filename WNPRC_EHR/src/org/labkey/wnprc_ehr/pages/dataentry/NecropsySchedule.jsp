@@ -16,6 +16,7 @@
 
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.css' />
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.min.js'></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
@@ -60,6 +61,15 @@
         font-size: 20px;
         margin: 0;
     }
+
+    /* Override LK bootstrap */
+    .form-control.knockout-bs-form {
+        width: 100%;
+    }
+    .input-group.date {
+        display: table;
+    }
+
 </style>
 
 <div class="col-xs-12 col-xl-8">
@@ -207,7 +217,7 @@
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Location</label>
                         <div class="col-xs-8">
-                            <select data-bind="value: location" class="form-control">
+                            <select data-bind="value: location" class="form-control knockout-bs-form">
                                 <option value=""></option>
                                 <%
                                     for(JSONObject necropsySuite : necropsySuites) {
@@ -224,7 +234,7 @@
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Pathologist</label>
                         <div class="col-xs-8">
-                            <select data-bind="value: pathologist" class="form-control">
+                            <select data-bind="value: pathologist" class="form-control knockout-bs-form">
                                 <option value=""></option>
                                 <%
                                     for(JSONObject pathologist : pathologistList) {
@@ -242,7 +252,7 @@
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Prosector</label>
                         <div class="col-xs-8">
-                            <select data-bind="value: assistant" class="form-control">
+                            <select data-bind="value: assistant" class="form-control knockout-bs-form">
                                 <option value=""></option>
                                 <%
                                     for(JSONObject pathologist : pathologistList) {

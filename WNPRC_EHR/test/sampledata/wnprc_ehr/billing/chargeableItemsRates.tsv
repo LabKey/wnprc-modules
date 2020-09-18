@@ -1,10 +1,10 @@
-name	departmentCode	chargeableItemStartDate	chargeableItemEndDate	category	serviceCode	active	comment	unitCost	genCredits	chargeRateStartDate	chargeRateEndDate	allowBlankId
-Blood draws	Business Office	1/1/2005	12/31/2050	Blood Draws	45	true	This is a comment 2	10.0	true	1/1/2009	12/31/2040	true
-Blood draws - Additional Tubes	Business Office	1/1/2005	12/31/2050	Blood Draws	20	true		0.5	true	1/1/2009	1/1/2045	true
-Per diems	Business Office	1/1/2005	12/31/2050	Animal Per Diem	21	true		20.0	true	1/1/2007	5/1/2045	false
-Medicine A per dose	Veterinary Services	1/1/2005	12/31/2050	Misc. Fees	46	true		20.75	true	1/1/2007	12/31/2045	false
-Replacement Animal1	Business Office	1/1/2005	12/31/2050	Animal Replacement	2	true		30.50	true	1/1/2007	1/1/2045	false
-Labor -Veterinarian	Scientific Protocol Implementation	1/1/2005	12/31/2050	Clinical Lab Test	52	true	This is another comment	55.25	true	1/1/2007	1/1/2045	true
-vaccine supplies	Clinical Pathology	1/1/2005	12/31/2050	Misc. Fees	45	true	This is a comment 2	15.0	true	1/1/2007	1/1/2045	true
-vaccine supplies	Immunology	1/1/2005	12/31/2050	Misc. Fees	45	false		25.0	true	1/1/2005	12/31/2008	true
-vaccine supplies	Immunology	1/1/2005	12/31/2050	Misc. Fees	45	true		20.0	true	1/1/2009	5/25/2045	true
+name	groupName	chargeableItemStartDate	chargeableItemEndDate	category	active	comment	unitCost	genCredits	chargeRateStartDate	chargeRateEndDate	allowBlankId
+Blood draws	Business Office	1/1/2005	12/31/2050	Blood Draws	true	This is a comment 2	10.0	true	1/1/2009	12/31/2040	true
+Blood draws - Additional Tubes	Business Office	1/1/2005	12/31/2050	Blood Draws	true		0.5	true	1/1/2009	1/1/2045	true
+Per diems	Business Office	1/1/2005	12/31/2050	Animal Per Diem	true		20.0	true	1/1/2007	5/1/2045	false
+Medicine A per dose	Veterinary Services	1/1/2005	12/31/2050	Misc. Fees	true		20.75	true	1/1/2007	12/31/2045	false
+Replacement Animal1	Business Office	1/1/2005	12/31/2050	Animal Replacement	true		30.50	true	1/1/2007	1/1/2045	false
+Labor -Veterinarian	Scientific Protocol Implementation	1/1/2005	12/31/2050	Clinical Lab Test	true	This is another comment	55.25	true	1/1/2007	1/1/2045	true
+vaccine supplies	Clinical Pathology	1/1/2005	12/31/2050	Misc. Fees	true	This is a comment 2	15.0	true	1/1/2007	1/1/2045	true
+vaccine supplies	Immunology	1/1/2005	12/31/2050	Misc. Fees	false		25.0	true	1/1/2005	12/31/2008	true
+vaccine supplies	Immunology	1/1/2005	12/31/2050	Misc. Fees	true		20.0	true	1/1/2009	5/25/2045	true

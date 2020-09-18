@@ -1,0 +1,8 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <filters>
+        <filter column="invoiceId" operator="isblank" value="true"/>
+    </filters>
+    <sorts>
+        <sort column="date" descending="true" />
+    </sorts>
+</customView>

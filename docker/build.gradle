@@ -14,7 +14,7 @@ task("buildEhrcron", group: "Docker", type: Exec, description: "Generates the eh
 task("buildTomcat", group: "Docker", type: Exec, description: "Generates the Tomcat docker image (with R)") {
     workingDir "$projectDir/tomcat"
     executable "docker"
-    args "build", ".", "-t", "wnprcehr/tomcat:latest"
+    args "build", ".", "-t", "wnprcehr/tomcat:18.3"
 }
 
 task("buildLabkey", group: "Docker", description: "Generates the LabKey docker image", dependsOn: ["buildTomcat", "buildEhrcron", "buildPostfix"]) { Task t ->
@@ -23,7 +23,7 @@ task("buildLabkey", group: "Docker", description: "Generates the LabKey docker i
             t.project.exec {
                 workingDir "$projectDir/labkey"
                 executable "docker"
-                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:17.2", "--no-cache"
+                args "build", "--build-arg", "LABKEY_TEAMCITY_USERNAME=${labkeyTeamcityUsername}", "--build-arg", "LABKEY_TEAMCITY_PASSWORD=${labkeyTeamcityPassword}", ".", "-t", "wnprcehr/labkey:18.3", "--no-cache"
             }
         } else {
             logger.warn 'To build the LabKey image from TeamCity, you must specify a username and password in your ~/.gradle/gradle.properties file.'

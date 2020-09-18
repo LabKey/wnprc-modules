@@ -18,6 +18,9 @@
                         <li><a href=<%=h(new ActionURL(WNPRC_ComplianceController.NewUserPage.class, getContainer()))%>">
                             Enter TB Results
                         </a></li>
+                        <li><a href="<%=h(new ActionURL(WNPRC_ComplianceController.EditTBPage.class, getContainer()))%>">
+                            Edit TB Results
+                        </a></li>
                         <li><a href="<%=h(new ActionURL(WNPRC_ComplianceController.PendingTBResultsPage.class, getContainer()))%>">
                             View Pending TB Results
                         </a></li>
@@ -46,7 +49,7 @@
                             View Most Recent Access Report Summary
                         </a></li>
                         <li><a href="<%=h(new ActionURL(WNPRC_ComplianceController.UnidentifiedCardsPage.class, getContainer()))%>">
-                            View Unidentified Cards
+                            Manage Unidentified Cards
                         </a></li>
                     </ul>
                 </li>

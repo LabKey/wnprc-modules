@@ -42,53 +42,53 @@ FROM study.demographics d
 
 --we find the number of active research project assignments
 LEFT JOIN
-    (SELECT T1.Id, count(DISTINCT T1.project) AS Total, group_concat(DISTINCT project) AS Projects
-    FROM study.Assignment T1
-    WHERE T1.qcstate.publicdata = true AND cast(T1.date as date) <= curdate() AND (T1.enddate IS NULL or cast(T1.enddate as date) >= curdate()) AND (T1.project.avail = 'r' OR T1.project.avail = 'n')
-    GROUP BY T1.Id) T1
+    (SELECT Id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects
+    FROM study.Assignment
+    WHERE qcstate.publicdata = true AND cast(date as date) <= curdate() AND (enddate IS NULL or cast(enddate as date) >= curdate()) AND (project.avail = 'r' OR project.avail = 'n')
+    GROUP BY Id) T1
     ON (T1.Id = d.Id)
 
 --we find the number of pending project assignments
 LEFT JOIN
-    (SELECT T2.Id, count(DISTINCT T2.project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment T2 WHERE T2.qcstate.publicdata = true AND cast(T2.date as date) <= curdate() AND (T2.enddate IS NULL or cast(T2.enddate as date) >= curdate()) AND (T2.project.avail = 'p') GROUP BY T2.Id) T2
+    (SELECT Id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment WHERE qcstate.publicdata = true AND cast(date as date) <= curdate() AND (enddate IS NULL or cast(enddate as date) >= curdate()) AND (project.avail = 'p') GROUP BY Id) T2
     ON (T2.Id = d.Id)
 
 --we find the number of active vet project assignments
 LEFT JOIN
-    (SELECT T3.Id, count(DISTINCT T3.project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment T3 WHERE T3.qcstate.publicdata = true AND cast(T3.date as date) <= curdate() AND (T3.enddate IS NULL or cast(T3.enddate as date) >= curdate()) AND T3.project.avail = 'v' GROUP BY T3.Id) T3
+    (SELECT Id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment WHERE qcstate.publicdata = true AND cast(date as date) <= curdate() AND (enddate IS NULL or cast(enddate as date) >= curdate()) AND project.avail = 'v' GROUP BY Id) T3
     ON (T3.Id = d.Id)
 
 --we find the number of active breeding project assignments
 LEFT JOIN
-    (SELECT T9.Id, count(DISTINCT T9.project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment T9 WHERE T9.qcstate.publicdata = true AND cast(T9.date as date) <= curdate() AND (T9.enddate IS NULL or cast(T9.enddate as date) >= curdate()) AND T9.project.avail = 'b' GROUP BY T9.Id) T9
+    (SELECT Id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment WHERE qcstate.publicdata = true AND cast(date as date) <= curdate() AND (enddate IS NULL or cast(enddate as date) >= curdate()) AND project.avail = 'b' GROUP BY Id) T9
     ON (T9.Id = d.Id)
 
 --we find the number of active training project assignments
 LEFT JOIN
-    (SELECT T10.Id, count(DISTINCT T10.project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment T10 WHERE T10.qcstate.publicdata = true AND cast(T10.date as date) <= curdate() AND (T10.enddate IS NULL or cast(T10.enddate as date) >= curdate()) AND T10.project.avail = 't' GROUP BY T10.Id) T10
+    (SELECT Id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment WHERE qcstate.publicdata = true AND cast(date as date) <= curdate() AND (enddate IS NULL or cast(enddate as date) >= curdate()) AND project.avail = 't' GROUP BY Id) T10
     ON (T10.Id = d.Id)
 
 --we find the number of total active project assignments
 LEFT JOIN
-    (SELECT T4.Id, count(DISTINCT T4.project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment T4 WHERE t4.qcstate.publicdata = true AND cast(T4.date as date) <= curdate() AND (T4.enddate IS NULL or cast(T4.enddate as date) >= curdate()) GROUP BY T4.Id) T4
+    (SELECT Id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects FROM study.Assignment WHERE qcstate.publicdata = true AND cast(date as date) <= curdate() AND (enddate IS NULL or cast(enddate as date) >= curdate()) GROUP BY Id) T4
     ON (T4.Id = d.Id)
 
 --we find the number of active stock project assignments
---spf stock animals (20020201)
---conventional stock animals (20070202)
---marmoset stock animals (20070801)
+--spf stock animals (20150902)
+--conventional stock animals (20150903)
+--marmoset stock animals (20150904)
 LEFT JOIN
-    (select t5.id, count(DISTINCT T5.project) AS Total, group_concat(DISTINCT project) AS Projects, group_concat(DISTINCT category) AS categories FROM (
-      SELECT T5.Id, t5.project,
+    (select id, count(DISTINCT project) AS Total, group_concat(DISTINCT project) AS Projects, group_concat(DISTINCT category) AS categories FROM (
+      SELECT Id, project,
         case
-          when project = 20020201 then 'SPF'
-          when project = 20070202 then 'Conventional'
-          when project = 20070801 then 'Marmoset Stock'
+          when project = 20150902 then 'SPF'
+          when project = 20150903 then 'Conventional'
+          when project = 20150904 then 'Marmoset Stock'
           else null
         end as category
-      FROM study.Assignment T5
-      WHERE t5.qcstate.publicdata = true AND cast(T5.date as date) <= curdate() AND (T5.enddate IS NULL or cast(T5.enddate as date) >= curdate()) AND (t5.project = '20020201' OR t5.project = '20070202' OR t5.project = '20070801')
-      ) T5 GROUP BY T5.Id
+      FROM study.Assignment
+      WHERE qcstate.publicdata = true AND cast(date as date) <= curdate() AND (enddate IS NULL or cast(enddate as date) >= curdate())
+      ) filteredAssignment WHERE category IS NOT NULL GROUP BY Id
       ) t5
     ON (T5.Id = d.Id)
 

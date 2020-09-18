@@ -73,8 +73,8 @@ public class InvoicePDF extends FPDF
         List<FormattedLineItem> items = new ArrayList<>();
         Calendar calendarCurrent = Calendar.getInstance();
         Calendar calendarItem = Calendar.getInstance();
-        boolean isFirstItem =true;
-        String currentServiceCenter=null;
+        boolean isFirstItem = true;
+        String currentGroup = null;
         float subTotal = 0;
 
         for (InvoicedItem invoicedItem : invoicedItems)
@@ -83,16 +83,16 @@ public class InvoicePDF extends FPDF
 
             calendarItem.setTime(invoicedItem.getDate());
             boolean isDateChange = isFirstItem || calendarCurrent.get(Calendar.DAY_OF_MONTH) != calendarItem.get(Calendar.DAY_OF_MONTH);
-            boolean isServiceCenterChange = false;
-            if(invoicedItem.getServicecenter()== null){
-                isServiceCenterChange = currentServiceCenter != null;
+            boolean isGroupChange = false;
+            if(invoicedItem.getGroupName()== null){
+                isGroupChange = currentGroup != null;
             }
             else {
-                isServiceCenterChange = !invoicedItem.getServicecenter().equals(currentServiceCenter);
+                isGroupChange = !invoicedItem.getGroupName().equals(currentGroup);
             }
 
             if(includeSubtotal) {
-                if((isDateChange || isServiceCenterChange) && !isFirstItem ){
+                if((isDateChange || isGroupChange) && !isFirstItem ){
                     items.add(new FormattedLineItem(null,"Sub total:", null,   null, subTotal, true));
                     subTotal = 0;
                 }
@@ -100,14 +100,14 @@ public class InvoicePDF extends FPDF
 
             if (isDateChange){
                 items.add(new FormattedLineItem(invoicedItem.getDate(), groupHeader, null, null, null, true));
-                currentServiceCenter = invoicedItem.getServicecenter();
+                currentGroup = invoicedItem.getGroupName();
                 calendarCurrent.setTime(invoicedItem.getDate());
                 isFirstItem = false;
             }
 
-            if (!isDateChange && isServiceCenterChange){
+            if (!isDateChange && isGroupChange){
                 items.add(new FormattedLineItem(null, groupHeader, null, null, null, true));
-                currentServiceCenter = invoicedItem.getServicecenter();
+                currentGroup = invoicedItem.getGroupName();
             }
 
             subTotal += invoicedItem.getTotalCost();
@@ -128,37 +128,76 @@ public class InvoicePDF extends FPDF
         boolean showDetailsWithItem = invoicedItem.getComment() == null;
         String participantId = invoicedItem.getId() == null? "": " - " + invoicedItem.getId();
 
-        FormattedLineItem itemLine = null;
-        FormattedLineItem commentLine = null;
+        List<FormattedLineItem> itemLines = new ArrayList<>();
+        List<FormattedLineItem> commentLines = new ArrayList<>();
 
-        if(invoicedItem.getItem() != null || showDetailsWithItem){
-            itemLine = new FormattedLineItem();
-            itemLine._description = indent + invoicedItem.getItem() + participantId;
-            participantId = "";//don't duplicate on the comment line
+        if (invoicedItem.getItem() != null || showDetailsWithItem) {
+            if (invoicedItem.getItem() != null && invoicedItem.getItem().length() > 60) {
+                FormattedLineItem itemLine = new FormattedLineItem();
+                itemLine._description = indent + invoicedItem.getItem().substring(0, 60);
+                itemLines.add(itemLine);
+                for (int i = 60; i < invoicedItem.getItem().length(); i+= 60) {
+                    itemLine = new FormattedLineItem();
+                    if (i + 60 >= invoicedItem.getItem().length()) {
+                        itemLine._description = indent + invoicedItem.getItem().substring(i) + participantId;
+                    } else {
+                        itemLine._description = indent + invoicedItem.getItem().substring(i, i + 60);
+                    }
+                    itemLines.add(itemLine);
+                }
+            } else {
+                FormattedLineItem itemLine = new FormattedLineItem();
+                itemLine._description = indent + invoicedItem.getItem() + participantId;
+                participantId = "";//don't duplicate on the comment line
+                itemLines.add(itemLine);
+            }
             indent += "  ";
         }
 
-        if(invoicedItem.getComment() != null){
-            commentLine = new FormattedLineItem();
-            if (invoicedItem.getComment().length() > 60)
-                commentLine._description = indent + invoicedItem.getComment().substring(0, 59) + participantId;
-            else
+        if (invoicedItem.getComment() != null) {
+            if (invoicedItem.getComment().length() > 60) {
+                //break the comment up into multiple lines of 60 characters (or less) each
+                //and indent any line after the first
+                //TODO consider making line breaks at word boundaries instead of 60 characters
+                FormattedLineItem commentLine = new FormattedLineItem();
+                commentLine._description = indent + invoicedItem.getComment().substring(0, 60);
+                commentLines.add(commentLine);
+                for (int i = 60; i < invoicedItem.getComment().length(); i+= 58) {
+                    commentLine = new FormattedLineItem();
+                    //only add participantId to the last line of the comment
+                    if (i + 58 >= invoicedItem.getComment().length()) {
+                        commentLine._description = indent + indent + invoicedItem.getComment().substring(i) + participantId;
+                    } else {
+                        commentLine._description = indent + indent + invoicedItem.getComment().substring(i, i + 58);
+                    }
+                    commentLines.add(commentLine);
+                }
+            } else {
+                FormattedLineItem commentLine = new FormattedLineItem();
                 commentLine._description = indent + invoicedItem.getComment() + participantId;
+                commentLines.add(commentLine);
+            }
         }
 
 
-        if(showDetailsWithItem){
-            addDetailsToLineItem(itemLine, invoicedItem);
-        }
-        else{
-            addDetailsToLineItem(commentLine,invoicedItem);
-        }
-        if(itemLine != null){
-            formattedLineItems.add(itemLine);
+        if (showDetailsWithItem) {
+            //only add details to the first line of the item so they're not duplicated for each line
+            addDetailsToLineItem(itemLines.get(0), invoicedItem);
+        } else {
+            //only add details to the first line of the comment so they're not duplicated for each line
+            addDetailsToLineItem(commentLines.get(0), invoicedItem);
         }
 
-        if(commentLine != null){
-            formattedLineItems.add(commentLine);
+        if (itemLines.size() > 0) {
+            for (FormattedLineItem itemLine : itemLines) {
+                formattedLineItems.add(itemLine);
+            }
+        }
+
+        if (commentLines.size() > 0) {
+            for (FormattedLineItem commentLine : commentLines) {
+                formattedLineItems.add(commentLine);
+            }
         }
         return formattedLineItems;
     }
@@ -340,7 +379,7 @@ public class InvoicePDF extends FPDF
             addChargeLine();
             addCreditLine();
             addPaymentInfo();
-            addAccountContact(StringUtils.isNotBlank(alias.getContact_email()) ? alias.getContact_email() : "Contact Email Not Specified");
+            addAccountContact(StringUtils.isNotBlank(alias.getBilling_contact_info()) ? alias.getBilling_contact_info() : "Billing Contact Email Not Specified");
             addBillingDate(invoiceRun.getBillingPeriodStart(), invoiceRun.getBillingPeriodEnd());
             addCols(this.getHeaders());
 
@@ -476,7 +515,8 @@ public class InvoicePDF extends FPDF
         x = right_x;
         setXY(x, y);
         setFont("Arial", Collections.emptySet(), 10);
-        MultiCell(76, 3, alias.getAddress());
+        String address = formatAddess(alias);
+        MultiCell(76, 3, address);
 
         String req_text;
 
@@ -611,6 +651,10 @@ public class InvoicePDF extends FPDF
         setFont(font, Collections.singleton(FontStyle.BOLD), 11);
         String invoiceNo = "INVOICE NO. ";
         invoiceNo += invoice.getInvoiceNumber();
+        if (!alias.getType().toLowerCase().contains("internal"))
+        {
+            invoiceNo += "\nMake check payable to: Wisconsin National Primate Research Center";
+        }
         MultiCell(0, 4, invoiceNo, null, Alignment.LEFT, false);
     }
 
@@ -639,7 +683,6 @@ public class InvoicePDF extends FPDF
 
     }
 
-
     private String addItem(String item)
     {
         if(item != null){
@@ -647,7 +690,6 @@ public class InvoicePDF extends FPDF
         }
         return "";
     }
-
 
     // payment info
     private void addPaymentInfo() throws IOException
@@ -706,7 +748,6 @@ public class InvoicePDF extends FPDF
 
         Cell(17, 4, moneyFormat.format(grandTotal + (grandTotal * tier_rate)), Alignment.RIGHT); //grandtotal plus overhead assessment
     }
-
 
     private void addCols(List<Column> headers) throws IOException
     {
@@ -775,6 +816,30 @@ public class InvoicePDF extends FPDF
             xLocation += header._width;
         }
         return line + 2;
+    }
+
+    private String formatAddess(Alias alias)
+    {
+        //check for pi name before appending (only show on internal invoices)
+        //check for institution before appending
+        //always assume address will be present
+        //check for city/state/zip before appending
+        StringBuilder address = new StringBuilder();
+        if (alias.getType().toLowerCase().contains("internal") && StringUtils.isNotBlank(alias.getInvestigatorName()))
+        {
+            address.append(alias.getInvestigatorName()).append("\n");
+        }
+        if (StringUtils.isNotBlank(alias.getInstitution()))
+        {
+            address.append(alias.getInstitution()).append("\n");
+        }
+        address.append(alias.getAddress());
+        if (StringUtils.isNotBlank(alias.getCity()) && StringUtils.isNotBlank(alias.getState()) && StringUtils.isNotBlank(alias.getZip()))
+        {
+            address.append("\n").append(alias.getCity()).append(", ").append(alias.getState()).append(" ").append(alias.getZip());
+        }
+
+        return address.toString();
     }
 
 }

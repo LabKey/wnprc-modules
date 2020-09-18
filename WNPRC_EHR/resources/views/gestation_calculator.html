@@ -1,0 +1,227 @@
+<html>
+<head>
+    <style>
+        /*form {*/
+        /*    width: 80%;*/
+        /*    margin: 0 auto;*/
+        /*}*/
+
+        label, input {
+            display: inline-block;
+        }
+
+        label {
+            width: 30%;
+            text-align: right;
+        }
+
+        /*label + input {*/
+        /*    width: 30%;*/
+        /*    margin: 0 30% 0 4%;*/
+        /*}*/
+
+        /*input + input {*/
+        /*    float: right;*/
+        /*}*/
+
+        .row {
+            display: flex;
+        }
+
+        .col {
+            flex: 50%;
+            padding: 10px;
+        }
+    </style>
+    <script type="text/javascript">
+        window.onload = function() {
+            populateSpeciesList();
+        }
+
+        function populateSpeciesList() {
+            let select = document.getElementById("species_input");
+            LABKEY.Query.selectRows({
+                schemaName: 'wnprc',
+                queryName: 'getGestationalSpecies',
+                scope: this,
+                success: function(results) {
+                    if (results.rows && results.rows.length) {
+                        for(let i = 0; i < results.rows.length; i++) {
+                            let option = results.rows[i].species;
+                            let optionEl = document.createElement("option");
+                            optionEl.textContent = option;
+                            optionEl.value = option;
+                            select.appendChild(optionEl);
+                        }
+                    } else {
+                        let option = "Error loading species";
+                        let optionEl = document.createElement("option");
+                        optionEl.textContent = option;
+                        optionEl.value = option;
+                        select.appendChild(optionEl);
+                    }
+                },
+                failure: function() {
+                    let option = "Error loading species";
+                    let optionEl = document.createElement("option");
+                    optionEl.textContent = option;
+                    optionEl.value = option;
+                    select.appendChild(optionEl);
+                }
+            });
+        }
+
+        function calculateGestationDays() {
+            let species = document.getElementById("species_input").value;
+            LABKEY.Query.selectRows({
+                schemaName: 'wnprc',
+                queryName: 'getGestationalDay',
+                parameters: {
+                    SPECIES: species,
+                    SEARCH_COLUMN_NAME: "gest_sac_mm",
+                    SEARCH_VALUE: document.getElementById("gestational_sac_input").value
+                },
+                scope: this,
+                success: function(results) {
+                    if (results.rows && results.rows.length) {
+                        document.getElementById("gestational_sac_calculated").value = results.rows[0].gestational_day;
+                    } else {
+                        document.getElementById("gestational_sac_calculated").value = "";
+                    }
+                },
+                failure: EHR.Utils.onFailure
+            });
+            LABKEY.Query.selectRows({
+                schemaName: 'wnprc',
+                queryName: 'getGestationalDay',
+                parameters: {
+                    SPECIES: species,
+                    SEARCH_COLUMN_NAME: "crown_rump_mm",
+                    SEARCH_VALUE: document.getElementById("crown_rump_input").value
+                },
+                scope: this,
+                success: function(results) {
+                    if (results.rows && results.rows.length) {
+                        document.getElementById("crown_rump_calculated").value = results.rows[0].gestational_day;
+                    } else {
+                        document.getElementById("crown_rump_calculated").value = "";
+                    }
+                },
+                failure: EHR.Utils.onFailure
+            });
+            LABKEY.Query.selectRows({
+                schemaName: 'wnprc',
+                queryName: 'getGestationalDay',
+                parameters: {
+                    SPECIES: species,
+                    SEARCH_COLUMN_NAME: "biparietal_diameter_mm",
+                    SEARCH_VALUE: document.getElementById("biparietal_diameter_input").value
+                },
+                scope: this,
+                success: function(results) {
+                    if (results.rows && results.rows.length) {
+                        document.getElementById("biparietal_diameter_calculated").value = results.rows[0].gestational_day;
+                    } else {
+                        document.getElementById("biparietal_diameter_calculated").value = "";
+                    }
+                },
+                failure: EHR.Utils.onFailure
+            });
+            LABKEY.Query.selectRows({
+                schemaName: 'wnprc',
+                queryName: 'getGestationalDay',
+                parameters: {
+                    SPECIES: species,
+                    SEARCH_COLUMN_NAME: "femur_length_mm",
+                    SEARCH_VALUE: document.getElementById("femur_length_input").value
+                },
+                scope: this,
+                success: function(results) {
+                    if (results.rows && results.rows.length) {
+                        document.getElementById("femur_length_calculated").value = results.rows[0].gestational_day;
+                    } else {
+                        document.getElementById("femur_length_calculated").value = "";
+                    }
+                },
+                failure: EHR.Utils.onFailure
+            });
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <form name="gestation_calculator" action="javascript:calculateGestationDays()">
+        <div class="row">
+            <div class="col">
+                <label for="species_input">Species</label>
+                <select id="species_input"></select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <span style="margin-left:25%"><strong>Measurements</strong></span>
+            </div>
+            <div class="col">
+                <span style="margin-left:25%"><strong>Calculated Gestational Days</strong></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="gestational_sac_input">Gestational Sac (mm)</label>
+                <input type="text" id="gestational_sac_input" name="gestational_sac_input">
+            </div>
+            <div class="col">
+                <label for="gestational_sac_calculated">Gestational Sac</label>
+                <input type="text" id="gestational_sac_calculated" readonly tabindex="-1">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="crown_rump_input">Crown Rump (mm)</label>
+                <input type="text" id="crown_rump_input" name="crown_rump_input">
+            </div>
+            <div class="col">
+                <label for="crown_rump_calculated">Crown Rump</label>
+                <input type="text" id="crown_rump_calculated" readonly tabindex="-1">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="biparietal_diameter_input">Biparietal Diameter (mm)</label>
+                <input type="text" id="biparietal_diameter_input" name="biparietal_diameter_input">
+            </div>
+            <div class="col">
+                <label for="biparietal_diameter_calculated">Biparietal Diameter</label>
+                <input type="text" id="biparietal_diameter_calculated" readonly tabindex="-1">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="femur_length_input">Femur Length (mm)</label>
+                <input type="text" id="femur_length_input" name="femur_length_input">
+            </div>
+            <div class="col">
+                <label for="femur_length_calculated">Femur Length</label>
+                <input type="text" id="femur_length_calculated" readonly tabindex="-1">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <button type="submit" style="float:right">Calculate</button>
+            </div>
+            <div class="col">
+                <button type="reset">Clear</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

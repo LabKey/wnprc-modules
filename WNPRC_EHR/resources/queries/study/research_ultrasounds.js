@@ -19,8 +19,23 @@ function onInsert(helper, scriptErrors, row, oldRow) {
     //make sure a couple of the row properties are set correctly
     row.taskid = row.taskid || LABKEY.Utils.generateUUID().toUpperCase();
     row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
-    row.fetal_heartbeat = !!row.fetal_heartbeat;
-    row.completed = !!row.completed && row.completed.toUpperCase() === "TRUE";
+
+    //in case of a bulk upload these values can come in as whatever the user typed into the cell
+    //so we'll try to find the "truthiness" of that value.
+    row.fetal_heartbeat = getTruthiness(row.fetal_heartbeat);
+    row.head = getTruthiness(row.head);
+    row.falx = getTruthiness(row.falx);
+    row.thalamus = getTruthiness(row.thalamus);
+    row.lateral_ventricles = getTruthiness(row.lateral_ventricles);
+    row.choroid_plexus = getTruthiness(row.choroid_plexus);
+    row.eye = getTruthiness(row.eye);
+    row.profile = getTruthiness(row.profile);
+    row.four_chamber_heart = getTruthiness(row.four_chamber_heart);
+    row.diaphragm = getTruthiness(row.diaphragm);
+    row.stomach = getTruthiness(row.stomach);
+    row.bowel = getTruthiness(row.bowel);
+    row.bladder = getTruthiness(row.bladder);
+    row.completed = getTruthiness(row.completed);
 
     if (isBulkUpload) {
         targetQCState = "Completed";
@@ -101,6 +116,8 @@ function onInsert(helper, scriptErrors, row, oldRow) {
             validationFailed = true;
             EHR.Server.Utils.addError(scriptErrors, "reviewDate", "Review Date is required if a review of the ultrasound has occurred", "ERROR");
         }
+
+        console.log("Row: " + JSON.stringify(row));
 
         if (!validationFailed) {
             //explicitly set blank boolean values to false
@@ -395,4 +412,8 @@ function getValidMeasurements() {
     };
 
     return validMeasurements;
+}
+
+function getTruthiness(value) {
+    return (value === true || value == 1 || (!!value && (typeof value === 'string' || value instanceof String) && (value.toUpperCase() === "TRUE" || value.toUpperCase() === "YES")));
 }

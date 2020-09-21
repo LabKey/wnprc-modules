@@ -1,4 +1,5 @@
 {table}
 Filename|Component|Version|Source|License|LabKey Dev|Purpose
 jooq-3.8.4.jar|jOOQ|3.8.4|{link:From GitHub|https://github.com/jOOQ/jOOQ}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Database-mapping for Java
+jaxb-api-2.3.0.jar|jaxb|2.3.0|Oracle|{link:CDDL 1.1|https://oss.oracle.com/licenses/CDDL+GPL-1.1}{link:GPL2w/ CPE|https://oss.oracle.com/licenses/CDDL+GPL-1.1}|klum|Parsing XML
 {table}

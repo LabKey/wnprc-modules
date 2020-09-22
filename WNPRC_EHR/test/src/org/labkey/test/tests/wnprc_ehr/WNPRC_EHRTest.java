@@ -1862,7 +1862,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 .clickCategoryTab("Clinical")
                 .clickReportTab("Weights");
         waitForElement(Locator.xpath("//span[contains(text(), 'Weight Information -')]"));
-        waitForElement(Locator.tagContainingText("th", "Most Recent Weight").notHidden(), WAIT_FOR_PAGE);
+        waitForElement(Locator.tag("th").containing("Most Recent Weight").notHidden());
         waitForElement(Locator.tagWithText("a", "3.73").notHidden()); //first animal
         waitForElement(Locator.tagWithText("a", "3.56").notHidden()); //second animal
 

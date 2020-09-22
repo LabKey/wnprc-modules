@@ -511,8 +511,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 xtype: 'datefield',
                 header: 'Start Date',
                 extFormat: 'Y-m-d',
-                defaultHour: 0,
-                defaultMinutes: 0,
+                /*defaultHour: 0,
+                defaultMinutes: 0,*/
                 allowBlank: false,
                 editable: true,
                 columnConfig: {
@@ -521,13 +521,14 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 editorConfig: {
                     minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
                 },
-                setInitialValue: function(v) {
+                defaultValue: new Date(new Date(Ext4.Date.add(new Date(), Ext4.Date.DAY, 1).setHours(0)).setMinutes(0)),
+                /*setInitialValue: function(v) {
                     debugger;
                     var date = (Ext4.Date.add(new Date(), Ext4.Date.DAY, 1));
                     date.setHours(0);
                     date.setMinutes(0);
                     return v || date;
-                },
+                },*/
                 onExpand: function() {
                     var value = this.getValue();
                     this.picker.setValue(Ext.isDate(value) ? value : Ext4.Date.add(new Date(), Ext4.Date.DAY, 1));

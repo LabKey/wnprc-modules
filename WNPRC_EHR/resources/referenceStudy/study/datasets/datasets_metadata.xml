@@ -334,7 +334,7 @@
             </index>
         </indices>
     </table>
-    <table tableName="tissues_sample" tableDbType="TABLE">
+    <table tableName="tissue_samples" tableDbType="TABLE">
         <columns>
             <column columnName="tissue">
                 <columnTitle>Organ/Tissue</columnTitle>

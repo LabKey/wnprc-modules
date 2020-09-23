@@ -24,11 +24,11 @@ import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.InsertRowsCommand;
+import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.remoteapi.query.SelectRowsCommand;
-import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.remoteapi.query.TruncateTableCommand;
-import org.labkey.remoteapi.query.SaveRowsResponse;
+import org.labkey.remoteapi.query.UpdateRowsCommand;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.SortDirection;
@@ -53,10 +53,10 @@ import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TextSearcher;
 import org.labkey.test.util.ehr.EHRTestHelper;
+import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
-import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -1862,7 +1862,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
                 .clickCategoryTab("Clinical")
                 .clickReportTab("Weights");
         waitForElement(Locator.xpath("//span[contains(text(), 'Weight Information -')]"));
-        waitForElement(Locator.tagContainingText("th", "Most Recent Weight").notHidden());
+        waitForElement(Locator.tag("th").containing("Most Recent Weight").notHidden());
         waitForElement(Locator.tagWithText("a", "3.73").notHidden()); //first animal
         waitForElement(Locator.tagWithText("a", "3.56").notHidden()); //second animal
 

@@ -7,5 +7,7 @@ compileJava {
 
 dependencies {
 //    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:wnprc-modules:WNPRC_EHR", depProjectConfig: "apiCompile")
-    compile project(":server:modules:wnprc-modules:WNPRC_EHR")
+    implementation project(":server:modules:wnprc-modules:WNPRC_EHR")
 }
+
+project.tasks.npmInstall.mustRunAfter("${project.parent.path}:npmInstall")

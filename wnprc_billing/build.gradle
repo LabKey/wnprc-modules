@@ -1,6 +1,7 @@
 import org.labkey.gradle.util.BuildUtils
 
 dependencies {
+    implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
     external "com.koadweb.javafpdf:java-fpdf:${javafpdfVersion}"
     external("org.apache.sanselan:sanselan:${sanselanVersion}")
     external "commons-net:commons-net:${commonsNetVersion}"

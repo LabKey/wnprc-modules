@@ -106,7 +106,6 @@ import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
-import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
@@ -175,10 +174,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     protected void init() {
-        TissueSampleTable.registerProperties();
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
         addController(TEST_CONTROLLER_NAME, WNPRC_EHRTestController.class);
-        
+
         registerRoles();
         registerPermissions();
     }
@@ -260,18 +258,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
 
         BCReportRunner.schedule();
-
-//        for (Container studyContainer : getWNPRCStudyContainers()) {
-//            User user = EHRService.get().getEHRUser(studyContainer);
-//            try {
-//                WNPRC_Schema.ensureStudyShape(user, studyContainer);
-//            }
-//            catch (ChangePropertyDescriptorException e) {
-//                e.printStackTrace();
-//                throw new RuntimeException(e);
-//            }
-//
-//        }
 
         EHRService es = EHRService.get();
         if (loadOnStart) loadLatestDatasetMetadata(es);

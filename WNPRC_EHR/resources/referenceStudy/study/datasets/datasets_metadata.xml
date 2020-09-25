@@ -334,4 +334,90 @@
             </index>
         </indices>
     </table>
+    <table tableName="tissue_samples" tableDbType="TABLE">
+        <columns>
+            <column columnName="tissue">
+                <columnTitle>Organ/Tissue</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="diagnosis">
+                <columnTitle>Diagnosis</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="recipient">
+                <columnTitle>Recipient</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="preservation">
+                <columnTitle>Preservation</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="qualifier">
+                <columnTitle>Qualifier</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="quantity">
+                <columnTitle>Quantity</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="container_type">
+                <columnTitle>Container Type</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="ship_to">
+                <columnTitle>Ship To</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="accountToCharge">
+                <columnTitle>Account To Charge</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="tissueRemarks">
+                <columnTitle>Tissue Remark</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="slideNum">
+                <columnTitle>Cassette Number</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="stain">
+                <columnTitle>Stain</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="pathologist">
+                <columnTitle>Pathologist</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="trimdate">
+                <columnTitle>Trim date </columnTitle>
+                <datatype>timestamp</datatype>
+            </column>
+            <column columnName="trimmed_by">
+                <columnTitle>Trimmed By</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="trim_remarks">
+                <columnTitle>Trim Remarks</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="ship_to_comment">
+                <columnTitle>Ship To Comment</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="lab_sample_id">
+                <columnTitle>Lab Sample ID</columnTitle>
+                <datatype>string</datatype>
+            </column>
+            <column columnName="collect_before_death">
+                <columnTitle>Collect Before Death</columnTitle>
+                <datatype>boolean</datatype>
+                <description>If true, the tissue should be collected antemortem.</description>
+            </column>
+            <column columnName="collection_order">
+                <columnTitle>Collection Order</columnTitle>
+                <datatype>integer</datatype>
+                <description>This is the order that tissues should appear in the collection list.</description>
+            </column>
+        </columns>
+    </table>
 </tables>

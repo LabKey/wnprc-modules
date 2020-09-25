@@ -90,18 +90,20 @@
                     <column columnName="project">
                         <columnTitle>Project</columnTitle>
                     </column>
-                    <column columnName="anticipatedstartdate">
-                        <columnTitle>Anticipated Start Date</columnTitle>
-                    </column>
-                    <column columnName="anticipatedenddate">
-                        <columnTitle>Anticipated End Date</columnTitle>
-                    </column>
                     <column columnName="account">
                         <columnTitle>Account</columnTitle>
                     </column>
                     <column columnName="protocol"></column>
                     <column columnName="comments">
                         <columnTitle>Comments</columnTitle>
+                    </column>
+                    <column columnName="anticipatedstartdate">
+                        <columnTitle>Anticipated Start Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="anticipatedenddate">
+                        <columnTitle>Anticipated End Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="QCState">
                         <columnTitle>Status</columnTitle>

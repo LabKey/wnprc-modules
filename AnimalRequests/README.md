@@ -51,3 +51,4 @@ More information about how the entire form works can be found in the documentati
   * Animal Ids to Offer (for the project)
     * added validation (split ids, duplicates, alive animals)
 * Updated to webpack 4, ts-loader 6
+* Autopopulate account field when a project is selected

@@ -7,5 +7,11 @@ compileJava {
 
 dependencies {
 //    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:wnprc-modules:WNPRC_EHR", depProjectConfig: "apiCompile")
-    compile project(":server:modules:wnprc-modules:WNPRC_EHR")
+    implementation project(":server:modules:wnprc-modules:WNPRC_EHR")
 }
+
+// This is added to eliminate the possibility of a race condition between these two npmInstalls.
+// I have no real evidence or good explanation why there may be interference between these two
+// but we've seen failing builds where these tasks are being executed on parallel threads and
+// have no failures when not using parallel builds.  So, this is just for sanity.
+project.tasks.npmInstall.mustRunAfter("${project.parent.path}:npmInstall")

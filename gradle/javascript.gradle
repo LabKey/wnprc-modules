@@ -6,7 +6,7 @@ if (file("${project.projectDir}/src/java").exists())
         java2ts
     }
     dependencies {
-        java2ts project(':externalModules:wnprc-modules:java2ts')
+        java2ts project(':server:modules:wnprc-modules:java2ts')
     }
     task('java2ts', group: 'JavaScript', type: JavaExec,
             description: 'Generates TypeScript files for certain annotated classes in the Java source') {

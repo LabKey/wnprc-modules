@@ -16,6 +16,7 @@ import org.labkey.api.ldk.table.ButtonConfigFactory;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.util.HtmlString;
 
 import java.util.List;
 
@@ -216,8 +217,8 @@ public class ViralAssayCustomizer implements TableCustomizer {
         }
 
         @Override
-        public String getFormattedValue(RenderContext ctx) {
-            return h(getValue(ctx));
+        public HtmlString getFormattedHtml(RenderContext ctx) {
+            return HtmlString.of(getValue(ctx));
         }
     }
 

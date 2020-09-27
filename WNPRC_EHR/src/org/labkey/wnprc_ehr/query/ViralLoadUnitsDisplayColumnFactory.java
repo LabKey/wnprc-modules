@@ -5,6 +5,7 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.HtmlString;
 
 public class ViralLoadUnitsDisplayColumnFactory implements DisplayColumnFactory
 {
@@ -40,8 +41,8 @@ public class ViralLoadUnitsDisplayColumnFactory implements DisplayColumnFactory
         }
 
         @Override
-        public String getFormattedValue(RenderContext ctx) {
-            return h(getValue(ctx));
+        public HtmlString getFormattedHtml(RenderContext ctx) {
+            return HtmlString.of(getValue(ctx));
         }
     }
 }

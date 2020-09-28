@@ -35,7 +35,7 @@ const renderSelectField = ({
         <div className={asyncValidating ? 'async-validating' : ''}>
             <label className="col-xs-5 form-control-label"> {label}{tooltip && (
             <sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)}: </label>
-            {required ? <select required className="col-xs-5 form-control-input" {...input}> {...options} </select> : <select className="col-xs-5 form-control-input" {...input}> {...options} </select>}
+            <select {...required==true ? required : ''} className="col-xs-5 form-control-input" {...input}> {...options} </select>
             {touched && ((error && <span>{error}</span>))}
         </div>
     </div>
@@ -177,7 +177,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                 let redirectUrl = LABKEY.ActionURL.buildURL('wnprc_ehr','dataEntry.view',LABKEY.Security.currentContainer.path);
                 window.location = redirectUrl;
             }).catch((err) => {
-                console.log(err.exception)
+                alert(err.exception)
             }
         );
     }

@@ -16,27 +16,24 @@ function beforeInsert(row, errors){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
-    var animalIdsString = row.animalidstooffer;
-    if (!animalIdsString){
+    var subjectArray = row.animalidstooffer;
+    if (!subjectArray){
         return;
     }
 
-    //split ids into an array
-    var subjectArray = WNPRC.Utils.splitIds(animalIdsString);
+    var subjectArray = WNPRC.Utils.splitIds(subjectArray);
     //after split, check if unique
     if (!WNPRC.Utils.unique(subjectArray))
         EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'Contains duplicate animal ids.', 'ERROR');
 
     for (var i = 0; i < subjectArray.length; i++) {
         var id = subjectArray[i];
-        console.log(id)
         EHR.Server.Utils.findDemographics({
             participant: id,
             helper: helper,
             scope: this,
             callback: function (data) {
                 if (data) {
-                    console.log(data)
                     if (data['calculated_status'] && data.calculated_status !== 'Alive') {
                         EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') is not alive', 'ERROR');
                     }
@@ -54,11 +51,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
 }
 
-function onComplete(event,errors, helper) {
-
-}
-
-function afterInsert(row, errors){
+function onAfterInsert(helper,errors,row){
     var rowid = row.rowId;
     var hostName = 'https://' + LABKEY.serverName;
     console.log ("animal_requests.js: New request submitted, rowid: "+ rowid);

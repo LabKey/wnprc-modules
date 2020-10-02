@@ -178,6 +178,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                 window.location = redirectUrl;
             }).catch((err) => {
                 alert(err.exception)
+                this.setState({submitted: false});
             }
         );
     }

@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +98,30 @@ public class TriggerScriptHelper {
 //            pregnancyNotification.setParam(PregnancyNotification.objectidsParamName, objectids.get(i));
 //            pregnancyNotification.sendManually(container, user);
 //        }
+    }
+
+    public void setSurgeryProcedureStartEndTimes(String requestId, List<Date> startTimes, List<Date> endTimes) {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("requestid", CompareType.EQUAL, requestId);
+        JSONArray procedureArray = queryFactory.selectRows("study", "surgery_procedure", filter);
+        List<JSONObject> procedures = JsonUtils.getListFromJSONArray(procedureArray);
+
+        Date date = Collections.min(startTimes);
+        Date endDate = Collections.max(endTimes);
+
+        List<Map<String, Object>> updateRows = new ArrayList<>();
+        for (JSONObject row : procedures) {
+            row.put("date", date);
+            row.put("enddate", endDate);
+            updateRows.add(row);
+        }
+
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "surgery_procedure");
+        try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that surgery_procedure date/enddate fields can be updated to correct dates")) {
+            queryUpdater.update(updateRows);
+        } catch (Exception e) {
+            _log.error(e);
+        }
     }
 
     public void updateBreedingOutcome(final List<String> lsids) {

@@ -83,10 +83,12 @@ import org.labkey.webutils.api.json.EnhancedJsonResponse;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
+import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator;
 import org.labkey.wnprc_ehr.calendar.Calendar;
 import org.labkey.wnprc_ehr.calendar.Office365Calendar;
 import org.labkey.wnprc_ehr.calendar.OnCallCalendar;
 import org.labkey.wnprc_ehr.calendar.SurgeryCalendarGoogle;
+import org.labkey.wnprc_ehr.calendar.SurgeryScheduleAuthenticator;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -110,6 +112,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1229,8 +1232,6 @@ public class WNPRC_EHRController extends SpringActionController
         private String requestId;
         private Date start;
         private Date end;
-        private String room;
-        private List<String> rooms;
         private String subject;
         private List<String> categories;
         private String assignedTo;
@@ -1249,16 +1250,6 @@ public class WNPRC_EHRController extends SpringActionController
         public Date getEnd()
         {
             return end;
-        }
-
-        public String getRoom()
-        {
-            return room;
-        }
-
-        public List<String> getRooms()
-        {
-            return rooms;
         }
 
         public String getSubject()
@@ -1294,16 +1285,6 @@ public class WNPRC_EHRController extends SpringActionController
             this.end = end;
         }
 
-        public void setRoom(String room)
-        {
-            this.room = room;
-        }
-
-        public void setRooms(List<String> rooms)
-        {
-            this.rooms = rooms;
-        }
-
         public void setSubject(String title)
         {
             this.subject = title;
@@ -1333,15 +1314,16 @@ public class WNPRC_EHRController extends SpringActionController
         public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
         {
             List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
+            List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
 
             JSONObject response = new JSONObject();
             response.put("success", false);
             Office365Calendar calendar = new Office365Calendar();
             calendar.setUser(getUser());
             calendar.setContainer(getContainer());
-            String apptId = calendar.addEvent(event.getStart(), event.getEnd(), event.getRoom(), event.getSubject(), event.getRequestId(), event.getCategories(), event.getCalendarId());
+            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), roomRows, event.getSubject(), event.getRequestId(), event.getCategories());
 
-            if (apptId != null)
+            if (eventsScheduled)
             {
                 try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
                     /**
@@ -1371,12 +1353,20 @@ public class WNPRC_EHRController extends SpringActionController
                         //Initialize data to be updated and convert it to the necessary format
                         JSONObject surgeryRecord = new JSONObject();
                         surgeryRecord.put("objectid", spRow.get("objectid"));
-                        surgeryRecord.put("apptid", apptId);
+                        //surgeryRecord.put("apptid", apptId);
                         surgeryRecord.put("QCStateLabel", "Scheduled");
                         surgeryRecord.put("taskid", spRow.get("taskid"));
                         surgeryRecord.put("date", event.getStart());
                         surgeryRecord.put("enddate", event.getEnd());
                         updateRecord(surgeryRecord, "study", "surgery_procedure");
+                    }
+
+                    for(Map<String, Object> roomRow: roomRows)
+                    {
+                        JSONObject roomRecord = new JSONObject();
+                        roomRecord.put("rowid", roomRow.get("rowid"));
+                        roomRecord.put("appt_id", roomRow.get("appt_id"));
+                        updateRecord(roomRecord, "wnprc", "procedure_scheduled_rooms");
                     }
 
                     //TODO look into permissions stuff... ti.hasPermission(getUser(), DeletePermission.class);
@@ -1390,10 +1380,25 @@ public class WNPRC_EHRController extends SpringActionController
 
                     transaction.commit();
                     response.put("success", true);
-                } catch (Exception e) {
-                    calendar.cancelEvent(apptId);
-                } finally {
-
+                }
+                catch (Exception e)
+                {
+                    for (Map<String, Object> roomRow : roomRows)
+                    {
+                        String apptId = (String) roomRow.get("appt_id");
+                        if (apptId != null && apptId.length() > 0)
+                        {
+                            String room = (String) roomRow.get("room");
+                            Date start = (Timestamp) roomRow.get("start");
+                            Date end = (Timestamp) roomRow.get("enddate");
+                            calendar.cancelEvent(apptId);
+                            calendar.deleteCanceledRoomEvent(room, start, end);
+                        }
+                    }
+                }
+                finally
+                {
+                    // Nothing to do here
                 }
             }
             return response;
@@ -1415,7 +1420,7 @@ public class WNPRC_EHRController extends SpringActionController
             calendar.setContainer(getContainer());
             try
             {
-                calendar.deleteCanceledRoomEvent(event.getRooms(), event.getStart(), event.getEnd());
+//                calendar.deleteCanceledRoomEvent(event.getRooms(), event.getStart(), event.getEnd());
                 response.put("success", true);
             }
             catch (Exception e)
@@ -1558,6 +1563,29 @@ public class WNPRC_EHRController extends SpringActionController
             }
         }
         return spRows;
+    }
+
+    private List<Map<String, Object>> getSurgeryProcedureRooms(String requestId) throws java.sql.SQLException
+    {
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("rowid"));
+        columns.add(FieldKey.fromString("room"));
+        columns.add(FieldKey.fromString("room/email"));
+        columns.add(FieldKey.fromString("date"));
+        columns.add(FieldKey.fromString("enddate"));
+        columns.add(FieldKey.fromString("appt_id"));
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
+        QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "wnprc", "procedure_scheduled_rooms");
+        List<Map<String, Object>> roomRows = new ArrayList<>();
+        try (Results rs = spQuery.select(columns, filter))
+        {
+            while (rs.next())
+            {
+                roomRows.add(rs.getRowMap());
+            }
+        }
+        return roomRows;
     }
 
     private void insertRecord(JSONObject record, String schema, String table) throws DuplicateKeyException, BatchValidationException, QueryUpdateServiceException, SQLException

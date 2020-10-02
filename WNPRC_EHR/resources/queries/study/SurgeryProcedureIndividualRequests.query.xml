@@ -1,8 +1,8 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <tableTitle>SurgeryProcedure</tableTitle>
             <table tableName="surgery_procedure" tableDbType="TABLE">
+            <tableTitle>SurgeryProcedure</tableTitle>
                 <javaCustomizer>org.labkey.ehr.table.DefaultEHRCustomizer</javaCustomizer>
                 <!--<tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>-->
                 <updateUrl>/ehr/manageRecord.view?schemaName=study&amp;queryName=surgery_procedure&amp;keyField=lsid&amp;key=${lsid}&amp;update=1</updateUrl>

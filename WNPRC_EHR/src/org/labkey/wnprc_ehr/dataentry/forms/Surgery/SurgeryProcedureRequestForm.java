@@ -9,6 +9,7 @@ import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprivesRequest.FormSections.FoodDeprivesRequestFormSections;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.FormSections.SurgeryProcedureRequestSection;
+import org.labkey.wnprc_ehr.dataentry.forms.Surgery.FormSections.SurgeryProcedureRoomsSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleRequestForm;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.AnimalDetailsPanel;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SlaveGridSection;
@@ -29,6 +30,7 @@ public class SurgeryProcedureRequestForm extends SimpleRequestForm
                 new RequestFormSection(),
                 new AnimalDetailsPanel(),
                 new SurgeryProcedureRequestSection(),
+                new SurgeryProcedureRoomsSection(),
                 new SimpleFormSection("study", "Drug Administration", "Treatments", "ehr-gridpanel"),
 //                new SlaveGridSection("study", "Drug Administration", "Drugs")
 //                {

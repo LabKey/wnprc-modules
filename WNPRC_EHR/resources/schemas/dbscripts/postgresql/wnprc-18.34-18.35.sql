@@ -69,6 +69,30 @@ CREATE TABLE wnprc.procedure_calendars
     CONSTRAINT pk_procedure_calendar_id PRIMARY KEY (calendar_id)
 );
 
+DROP TABLE IF EXISTS wnprc.procedure_scheduled_rooms;
+CREATE TABLE wnprc.procedure_scheduled_rooms
+(
+    objectid        entityid NOT NULL,
+    room            VARCHAR(100),
+    room_type       VARCHAR(100),
+    date            TIMESTAMP,
+    enddate         TIMESTAMP,
+    appt_id         VARCHAR(255),
+    requestid       VARCHAR(100),
+
+    -- Default fields for LabKey.
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+
+    CONSTRAINT pk_procedure_scheduled_rooms_rowid PRIMARY KEY (objectid),
+    CONSTRAINT fk_procedure_rooms_room FOREIGN KEY (room) REFERENCES wnprc.procedure_rooms (room),
+    --CONSTRAINT fk_procedure_rooms_type FOREIGN KEY (room_type) REFERENCES wnprc.procedure_categories (category),
+    CONSTRAINT fk_procedure_scheduled_rooms_requestid FOREIGN KEY (requestid) REFERENCES ehr.requests (requestid)
+);
+
 -- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';
 --
 -- INSERT INTO study.qcstate (label, description, container, publicdata)

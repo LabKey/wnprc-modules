@@ -46,12 +46,15 @@ function onInit(event, helper){
 //     console.log('row: ' + JSON.stringify(row));
 // }
 
-function onInsert(helper, scriptErrors, row, oldRow) {
-
-}
+// function onInsert(helper, scriptErrors, row, oldRow) {
+//
+// }
 
 function onAfterUpsert(helper, scriptErrors, row, oldRow){
-    //WNPRC.Utils.getJavaHelper().setSurgeryProcedureStartEndTimes(row.requestid);
+    // console.log('onAfterUpsert - START');
+    // console.log('room row: ' + JSON.stringify(row));
+    // WNPRC.Utils.getJavaHelper().setSurgeryProcedureStartEndTimes(row.requestid, row.date, row.enddate);
+    // console.log('onAfterUpsert - END');
 }
 
 // function onUpdate(row, errors) {
@@ -59,6 +62,14 @@ function onAfterUpsert(helper, scriptErrors, row, oldRow){
 //     console.log('row: ' + JSON.stringify(row));
 // }
 //
-// function onComplete(event,errors, helper) {
-//
-// }
+function onComplete(event,errors, helper) {
+    let roomRows = helper.getRows();
+    let startTimes = [];
+    let endTimes = [];
+    for (let i = 0; i < roomRows.length; i++) {
+        startTimes.push(roomRows[i].row.date);
+        endTimes.push(roomRows[i].row.enddate);
+    }
+    let requestId = roomRows[0].row.requestid;
+    WNPRC.Utils.getJavaHelper().setSurgeryProcedureStartEndTimes(requestId, startTimes, endTimes);
+}

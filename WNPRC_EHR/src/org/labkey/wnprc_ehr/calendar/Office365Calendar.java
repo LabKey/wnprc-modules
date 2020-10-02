@@ -49,6 +49,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
@@ -61,10 +62,12 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -77,19 +80,29 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private User user;
     private Container container;
     private boolean authenticated = false;
+    private static final List<String> baseCalendars;
 
-    public void setUser(User u)
-    {
-        user = u;
+    static {
+        baseCalendars = new ArrayList<>();
+        SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365");
+        DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+        TableInfo ti = schema.getTable("procedure_calendars");
+        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id"), filter, null);
+        Map<String, Object>[] calendars = ts.getMapArray();
+        for (Map<String, Object> calendar : calendars) {
+            baseCalendars.add((String) calendar.get("calendar_id"));
+        }
     }
 
-    public void setContainer(Container c)
-    {
-        container = c;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public void authenticate() throws Exception
-    {
+    public void setContainer(Container container) {
+        this.container = container;
+    }
+
+    public void authenticate() throws Exception {
         if (!authenticated)
         {
             String emailAddress = null;
@@ -180,31 +193,93 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return status != LegacyFreeBusyStatus.Free || !cancelled;
     }
 
-    public String addEvent(Date start, Date end, String room, String subject, String requestId, List<String> categories, String calendarId) throws Exception
+//    public String addEvent(Date start, Date end, String room, String subject, String requestId, List<String> categories, String calendarId) throws Exception
+//    {
+//        authenticate();
+//        String apptId = null;
+//        FolderId folderId = getFolderIdFromCalendarName(calendarId);
+//
+//        SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
+//        DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+//        TableInfo ti = schema.getTable("procedure_rooms");
+//        TableSelector ts = new TableSelector(ti, filter, null);
+//        Map<String, Object> map = ts.getMap();
+//        String roomEmailAddress = (String) map.get("email");
+//        if (isRoomAvailable(roomEmailAddress, start, end))
+//        {
+//            Appointment appt = new Appointment(service);
+//            appt.setStart(start);
+//            appt.setEnd(end);
+//            appt.setSubject(subject);
+//            appt.setBody(new MessageBody(BodyType.Text, requestId));
+//            appt.setCategories(new StringList(categories));
+//            appt.getRequiredAttendees().add(roomEmailAddress);
+//            appt.save(folderId);
+//            apptId = appt.getId().getUniqueId();
+//        }
+//        return apptId;
+//    }
+
+    public boolean addEvents(String calendarId, List<Map<String, Object>> events, String subject, String requestId, List<String> categories) throws Exception
     {
         authenticate();
-        String apptId = null;
-        FolderId folderId = getFolderIdFromCalendarName(calendarId);
 
-        SimplerFilter filter = new SimplerFilter("room", CompareType.EQUAL, room);
-        DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
-        TableInfo ti = schema.getTable("procedure_rooms");
-        TableSelector ts = new TableSelector(ti, filter, null);
-        Map<String, Object> map = ts.getMap();
-        String roomEmailAddress = (String) map.get("email");
-        if (isRoomAvailable(roomEmailAddress, start, end))
+        boolean allRoomsAvailable = true;
+
+        FolderId folderId = getFolderIdFromCalendarName(calendarId);
+        for (Map<String, Object> event : events)
         {
-            Appointment appt = new Appointment(service);
-            appt.setStart(start);
-            appt.setEnd(end);
-            appt.setSubject(subject);
-            appt.setBody(new MessageBody(BodyType.Text, requestId));
-            appt.setCategories(new StringList(categories));
-            appt.getRequiredAttendees().add(roomEmailAddress);
-            appt.save(folderId);
-            apptId = appt.getId().getUniqueId();
+            Date start = (Timestamp) event.get("date");
+            Date end = (Timestamp) event.get("enddate");
+
+            String roomEmailAddress = (String) event.get("room_fs_email");
+            if (isRoomAvailable(roomEmailAddress, start, end))
+            {
+                Appointment appt = new Appointment(service);
+                appt.setStart(start);
+                appt.setEnd(end);
+                appt.setSubject(subject);
+                appt.setBody(new MessageBody(BodyType.Text, requestId));
+                appt.setCategories(new StringList(categories));
+                appt.getRequiredAttendees().add(roomEmailAddress);
+                event.put("appt", appt);
+                event.put("folder_id", folderId);
+            }
+            else
+            {
+                allRoomsAvailable = false;
+                break;
+            }
         }
-        return apptId;
+
+        if (allRoomsAvailable)
+        {
+            try
+            {
+                for (Map<String, Object> event : events)
+                {
+                    Appointment appt = (Appointment) event.get("appt");
+                    appt.save(folderId);
+                    event.put("appt_id", appt.getId().getUniqueId());
+                }
+            }
+            catch (Exception e)
+            {
+                for (Map<String, Object> event : events)
+                {
+                    String apptId = (String) event.get("appt_id");
+                    if (apptId != null && apptId.length() > 0)
+                    {
+                        String room = (String) event.get("room");
+                        Date start = (Timestamp) event.get("start");
+                        Date end = (Timestamp) event.get("enddate");
+                        cancelEvent(apptId);
+                        deleteCanceledRoomEvent(room, start, end);
+                    }
+                }
+            }
+        }
+        return allRoomsAvailable;
     }
 
     public void cancelEvent(String apptId) throws Exception
@@ -235,6 +310,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         appt.delete(DeleteMode.MoveToDeletedItems);
     }
 
+    public void deleteCanceledRoomEvent(String room, Date start, Date end) throws Exception
+    {
+        List<String> rooms = new ArrayList<>(1);
+        rooms.add(room);
+        deleteCanceledRoomEvent(rooms, start, end);
+    }
+
     public void deleteCanceledRoomEvent(List<String> rooms, Date start, Date end) throws Exception
     {
         authenticate();
@@ -263,60 +345,99 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         SimpleQuery requests = sqf.makeQuery("study", "SurgeryProcedureSchedule");
         List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
 
+        Map<String, Boolean> loadedRequests = new HashMap<>();
+
         Map<String, JSONObject> queryResults = new HashMap<>();
         for (JSONObject o : requestList)
         {
             queryResults.put(o.getString("requestid"), o);
         }
 
-        for (int i = 0; i < events.size(); i++) {
+        //TODO group main events (surgeries_scheduled, etc) by requestid (time)
+        Map<String, Map<String, List<Date>>> eventTimesByRequestId = new HashMap<>();
+        for (Appointment event : events)
+        {
+            event.load(PropertySet.FirstClassProperties);
+            String requestId = event.getBody().toString();
+            if (eventTimesByRequestId.get(requestId) == null)
+            {
+                Map<String, List<Date>> eventTimes = new HashMap<>();
+                eventTimes.put("startTimes", new ArrayList<>());
+                eventTimes.put("endTimes", new ArrayList<>());
+                eventTimesByRequestId.put(requestId, eventTimes);
+            }
+            Map<String, List<Date>> eventTimes = eventTimesByRequestId.get(requestId);
+            List<Date> startTimes = eventTimes.get("startTimes");
+            List<Date> endTimes = eventTimes.get("endTimes");
+            startTimes.add(event.getStart());
+            endTimes.add(event.getEnd());
+        }
+
+        for (int i = 0; i < events.size(); i++)
+        {
             Appointment event = events.get(i);
             event.load(PropertySet.FirstClassProperties);
             String requestId = event.getBody().toString();
             JSONObject surgeryInfo = queryResults.get(requestId);
 
-            JSONObject jsonEvent = new JSONObject();
-            jsonEvent.put("title", event.getSubject());
-            jsonEvent.put("start", df.format(event.getStart()));
-            jsonEvent.put("end", df.format(event.getEnd()));
-            jsonEvent.put("calendarId", calendarName);
-            jsonEvent.put("backgroundColor", backgroundColor);
-            jsonEvent.put("id", calendarName + "_" + i);
-            jsonEvent.put("eventId", i);
-
-            //Add data for details panel on Surgery Schedule page
-            JSONObject rawRowData = new JSONObject();
-            if (surgeryInfo != null)
+            if (loadedRequests.get(requestId) == null || !loadedRequests.get(requestId))
             {
-                rawRowData.put("lsid", surgeryInfo.get("lsid"));
-                rawRowData.put("taskid", surgeryInfo.get("taskid"));
-                rawRowData.put("objectid", surgeryInfo.get("objectid"));
-                rawRowData.put("requestid", surgeryInfo.get("requestid"));
-                rawRowData.put("rowid", surgeryInfo.get("rowid"));
-                rawRowData.put("priority", surgeryInfo.get("priority"));
-                rawRowData.put("requestor", surgeryInfo.get("requestor"));
-                rawRowData.put("procedurecategory", surgeryInfo.get("procedurecategory"));
-                rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
-                rawRowData.put("age", surgeryInfo.get("age"));
-                rawRowData.put("animalid", surgeryInfo.get("animalid"));
-                rawRowData.put("created", surgeryInfo.get("created"));
-                rawRowData.put("date", surgeryInfo.get("date"));
-                rawRowData.put("enddate", surgeryInfo.get("enddate"));
-                rawRowData.put("account", surgeryInfo.get("account"));
-                rawRowData.put("cur_room", surgeryInfo.get("cur_room"));
-                rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
-                rawRowData.put("cur_cond", surgeryInfo.get("cur_cond"));
-                rawRowData.put("location", surgeryInfo.get("location"));
-                rawRowData.put("medical", surgeryInfo.get("medical"));
-                rawRowData.put("project", surgeryInfo.get("project"));
-                rawRowData.put("protocol", surgeryInfo.get("protocol"));
-                rawRowData.put("sex", surgeryInfo.get("sex"));
-                rawRowData.put("weight", surgeryInfo.get("weight"));
-                rawRowData.put("comments", surgeryInfo.get("comments"));
-                jsonEvent.put("rawRowData", rawRowData);
-            }
+                JSONObject jsonEvent = new JSONObject();
+                jsonEvent.put("title", event.getSubject());
+                String start, end;
+                if (baseCalendars.contains(calendarName))
+                {
+                    loadedRequests.put(requestId, true);
+                    start = df.format(Collections.min(eventTimesByRequestId.get(requestId).get("startTimes")));
+                    end = df.format(Collections.max(eventTimesByRequestId.get(requestId).get("endTimes")));
+                }
+                else
+                {
+                    start = df.format(event.getStart());
+                    end = df.format(event.getEnd());
+                }
+                jsonEvent.put("start", start);
+                jsonEvent.put("end", end);
+                jsonEvent.put("calendarId", calendarName);
+                jsonEvent.put("backgroundColor", backgroundColor);
+                jsonEvent.put("id", calendarName + "_" + i);
+                jsonEvent.put("eventId", i);
 
-            jsonEvents.put(jsonEvent);
+                //Add data for details panel on Surgery Schedule page
+                JSONObject rawRowData = new JSONObject();
+                if (surgeryInfo != null)
+                {
+                    rawRowData.put("lsid", surgeryInfo.get("lsid"));
+                    rawRowData.put("taskid", surgeryInfo.get("taskid"));
+                    rawRowData.put("objectid", surgeryInfo.get("objectid"));
+                    rawRowData.put("requestid", surgeryInfo.get("requestid"));
+                    rawRowData.put("rowid", surgeryInfo.get("rowid"));
+                    rawRowData.put("priority", surgeryInfo.get("priority"));
+                    rawRowData.put("requestor", surgeryInfo.get("requestor"));
+                    rawRowData.put("procedurecategory", surgeryInfo.get("procedurecategory"));
+                    rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
+                    rawRowData.put("age", surgeryInfo.get("age"));
+                    rawRowData.put("animalid", surgeryInfo.get("animalid"));
+                    rawRowData.put("created", surgeryInfo.get("created"));
+                    //rawRowData.put("date", surgeryInfo.get("date"));
+                    //rawRowData.put("enddate", surgeryInfo.get("enddate"));
+                    rawRowData.put("date", start);
+                    rawRowData.put("enddate", end);
+                    rawRowData.put("account", surgeryInfo.get("account"));
+                    rawRowData.put("cur_room", surgeryInfo.get("cur_room"));
+                    rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
+                    rawRowData.put("cur_cond", surgeryInfo.get("cur_cond"));
+                    rawRowData.put("location", surgeryInfo.get("location"));
+                    rawRowData.put("medical", surgeryInfo.get("medical"));
+                    rawRowData.put("project", surgeryInfo.get("project"));
+                    rawRowData.put("protocol", surgeryInfo.get("protocol"));
+                    rawRowData.put("sex", surgeryInfo.get("sex"));
+                    rawRowData.put("weight", surgeryInfo.get("weight"));
+                    rawRowData.put("comments", surgeryInfo.get("comments"));
+                    jsonEvent.put("rawRowData", rawRowData);
+                }
+                jsonEvents.put(jsonEvent);
+            }
         }
         eventSourceObject.put("events", jsonEvents);
         eventSourceObject.put("backgroundColor", backgroundColor);

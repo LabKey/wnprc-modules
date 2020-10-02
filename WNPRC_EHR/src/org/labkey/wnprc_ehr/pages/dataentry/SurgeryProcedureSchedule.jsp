@@ -15,6 +15,9 @@
 <%@ page import="org.labkey.api.security.GroupManager" %>
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.text.DateFormat" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -131,12 +134,20 @@
         return form.animalid + ' ' + form.procedurename;
     }
 
-    function createJSONEvent(requestObj, isRoomEvent) {
+    function createJSONEvent(requestObj, roomObject) {
+        let start, end;
+        if (!!roomObject) {
+            start = roomObject.date;
+            end = roomObject.enddate;
+        } else {
+            start = requestObj.start;
+            end = requestObj.end;
+        }
         let event = {};
         event.title = requestObj.subject;
-        event.start = requestObj.start;
-        event.end = requestObj.end;
-        event.calendarId = isRoomEvent ? getCalendarNameFromRoom(requestObj.room) : requestObj.calendarId;
+        event.start = start;
+        event.end = end;
+        event.calendarId = !!roomObject ? getCalendarNameFromRoom(roomObject.room) : requestObj.calendarId;
         event.backgroundColor = calendarEvents[event.calendarId].backgroundColor;
         let eventId = calendarEvents[event.calendarId].nextAvailableId++;
         event.id = event.calendarId + '_' + eventId;
@@ -161,7 +172,7 @@
                 requestId: form.requestid,
                 start: form.date,
                 end: form.enddate,
-                room: form.location,
+                roomList: pendingRoomsIndex[form.requestid],
                 subject: getEventSubject(form),
                 categories: 'Surgeries',
                 assignedTo: form.assignedto,
@@ -191,13 +202,21 @@
             }
         });
 
+        // Generate main calendar event
+        let mainEventToAdd = createJSONEvent(requestObj, null);
+        let eventSource = calendar.getEventSourceById(requestObj.calendarId);
+
+        // Generate room events
+        let roomList = requestObj.roomList;
+        let roomEventsToAdd = [];
+        let roomEventSources = [];
+        for (let i = 0; i < roomList.length; i++) {
+            roomEventsToAdd.push(createJSONEvent(requestObj, roomList[i]));
+            roomEventSources.push(calendar.getEventSourceById(getCalendarNameFromRoom(roomList[i].room)));
+        }
+
         // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
         // update the study.surgery_procedure, ehr.request, and ehr.task tables
-        let mainEventToAdd = createJSONEvent(requestObj, false);
-        let roomEventToAdd = createJSONEvent(requestObj, true);
-        let eventSource = calendar.getEventSourceById(requestObj.calendarId);
-        let roomCalendarName = getCalendarNameFromRoom(requestObj.room);
-        let roomEventSource = calendar.getEventSourceById(roomCalendarName);
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("wnprc_ehr", apiAction, null, requestObj),
             success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -206,8 +225,10 @@
                     WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
                     calendarEvents[requestObj.calendarId].events.push(mainEventToAdd);
                     calendar.addEvent(mainEventToAdd, eventSource);
-                    calendarEvents[roomCalendarName].events.push(roomEventToAdd);
-                    calendar.addEvent(roomEventToAdd, roomEventSource);
+                    for (let i = 0; i < roomList.length; i++) {
+                        calendarEvents[getCalendarNameFromRoom(roomList[i].room)].events.push(roomEventsToAdd[i]);
+                        calendar.addEvent(roomEventsToAdd[i], roomEventSources[i]);
+                    }
                 } else {
                     alert('There was an error processing your request.');
                 }
@@ -225,7 +246,16 @@
 
 
 <%
+    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
+
+    SimpleQuery rooms = queryFactory.makeQuery("wnprc", "SurgeryProcedureRoomSchedule", "pending");
+    JSONArray jsonRooms = rooms.getResults().getJSONArray("rows");
+    System.out.println("Printing out all rooms...");
+    System.out.println("Rooms: " + jsonRooms);
+    //TODO FINISH THIS SECTION TO SEND ROOMS!!
+
     SimpleQuery requests = queryFactory.makeQuery("study", "SurgeryProcedureSchedule", "pending");
     JSONArray jsonRequests = requests.getResults().getJSONArray("rows");
     ArrayList<Integer> positionsToRemove = new ArrayList<>();
@@ -318,7 +348,7 @@
                     <dt>Protocol:           </dt> <dd>{{protocol}}</dd>
                     <dt>Surgery Start:      </dt> <dd>{{date}}</dd>
                     <dt>Surgery End:        </dt> <dd>{{enddate}}</dd>
-                    <dt>Surgery Location:   </dt> <dd>{{location}}</dd>
+                    <dt>Surgery Location(s):</dt> <dd>{{rooms}}</dd>
                     <dt>Comments:           </dt> <dd>{{comments}}</dd>
 
                     <%--<!-- ko if: !_.isBlank(cur_room()) && !_.isBlank(cur_cage()) -->--%>
@@ -421,41 +451,21 @@
                     <div class="form-group">
                         <label class="col-xs-4 control-label">Start Time</label>
                         <div class="col-xs-8">
-                            <div class='input-group date' id='datetimepicker1'>
-                                <input type='text' class="form-control" data-bind="dateTimePicker: date"/>
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
+                            <p class="form-control-static">{{date}}</p>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-xs-4 control-label">End Time</label>
                         <div class="col-xs-8">
-                            <div class='input-group date' id='datetimepicker2'>
-                                <input type='text' class="form-control" data-bind="dateTimePicker: enddate"/>
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
+                            <p class="form-control-static">{{enddate}}</p>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-xs-4 control-label">Location</label>
+                        <label class="col-xs-4 control-label">Location(s)</label>
                         <div class="col-xs-8">
-                            <select data-bind="value: location" class="form-control">
-                                <option value=""></option>
-                                <%
-                                    for(JSONObject surgeryRoom : surgeryRooms) {
-                                        String roomName = surgeryRoom.getString("room");
-                                %>
-                                <option value="<%=roomName%>"><%=h(roomName)%></option>
-                                <%
-                                    }
-                                %>
-                            </select>
+                            <p class="form-control-static">{{rooms}}</p>
                         </div>
                     </div>
 
@@ -530,8 +540,19 @@
     let calendar = {};
     let calendarEvents = {};
     let pendingRequestsIndex = {};
+    let pendingRoomsIndex = {};
 
     (function() {
+        let displayDate = function(dateString) {
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
+        };
+        let displayDateTime = function(dateString) {
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY [at] h:mm a');
+        };
+        let displayDateTimeISO = function(dateString) {
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
+        };
+
         var calendarEl = document.getElementById('calendar');
         $(document).ready(function() {
             document.getElementById('calendar-checklist').innerHTML = '';
@@ -672,7 +693,7 @@
                                 jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
                                     if (key in WebUtils.VM.taskDetails) {
                                         if (key === "date" || key === "enddate") {
-                                            value = displayDate(value);
+                                            value = displayDateTimeISO(value);
                                         }
                                         WebUtils.VM.taskDetails[key](value);
                                     }
@@ -711,18 +732,27 @@
             });
         });
 
+        // Build a lookup of rooms
+        let pendingRooms = <%= jsonRooms %>;
+        if (!!pendingRooms) {
+            for (let i = 0; i < pendingRooms.length; i++) {
+                let pendingRoomReqId = pendingRooms[i].requestid;
+                if (!pendingRoomsIndex[pendingRoomReqId]) {
+                    pendingRoomsIndex[pendingRoomReqId] = [];
+                }
+                pendingRooms[i].date = displayDateTimeISO(pendingRooms[i].date);
+                pendingRooms[i].enddate = displayDateTimeISO(pendingRooms[i].enddate);
+                pendingRoomsIndex[pendingRoomReqId].push(pendingRooms[i])
+            }
+        }
+
         // Build a lookup index of requests.
-        var pendingRequests = <%= pendingRequests %>;
+        let pendingRequests = <%= pendingRequests %>;
         jQuery.each(pendingRequests, function(i, request) {
             pendingRequestsIndex[request.requestid] = request;
         });
-        var displayDate = function(dateString) {
-            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
-        };
-        var displayDateTime = function(dateString) {
-            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY [at] h:mm a');
-        };
-        var $scheduleForm = $('.scheduleForm');
+
+        let $scheduleForm = $('.scheduleForm');
         _.extend(WebUtils.VM, {
             disableForm: function() {
                 $scheduleForm.find(":input").attr("disabled", true);
@@ -744,6 +774,7 @@
                 cur_cage:             ko.observable(),
                 cur_cond:             ko.observable(),
                 location:             ko.observable(), // Surgery location
+                rooms:                ko.observable(),
                 medical:              ko.observable(),
                 project:              ko.observable(),
                 protocol:             ko.observable(),
@@ -761,6 +792,7 @@
                 taskid:             '',
                 animalid:           '',
                 location:           '',
+                rooms:              '',
                 priority:           '',
                 date:               '',
                 enddate:            '',
@@ -844,8 +876,8 @@
                 }
                 jQuery.each(request, function(key, value) {
                     if (key in WebUtils.VM.form) {
-                        if (key == "date" || key == "enddate") { //TODO modified???
-                            value = new Date(value);
+                        if (key === "date" || key === "enddate") { //TODO modified???
+                            value = displayDateTimeISO(value);
                         }
                         WebUtils.VM.form[key](value);
                     }

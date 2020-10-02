@@ -68,4 +68,12 @@ public class Graph {
 
         return eventPage.getCurrentPage();
     }
+
+    public static Object isAvailable(String accessToken) {
+        ensureGraphClient(accessToken);
+
+        graphClient.me().calendar();
+
+        return null;
+    }
 }

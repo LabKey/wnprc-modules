@@ -9,3 +9,6 @@ insert into ehr_lookups.lookups (set_name,container,value) select setname, conta
 insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'No' as value from ehr_lookups.lookup_sets where setname='animal_requests_yes_no';
 
 insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'SPF6 (-AAV & -RRV)' as value from ehr_lookups.lookup_sets where setname='viral_status';
+
+alter table wnprc.animal_requests rename column project to optionalproject;
+alter table wnprc.animal_requests add column project integer;

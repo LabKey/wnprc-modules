@@ -16,6 +16,9 @@ function beforeInsert(row, errors){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
+    if (!isNaN(row.optionalproject)){
+        row.project = row.optionalproject
+    }
     var subjectArray = row.animalidstooffer;
     if (!subjectArray){
         return;

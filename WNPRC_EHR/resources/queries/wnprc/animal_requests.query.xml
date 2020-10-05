@@ -87,7 +87,11 @@
                         <columnTitle>Date Needed</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
+                    <column columnName="optionalproject">
+                        <columnTitle>Project</columnTitle>
+                    </column>
                     <column columnName="project">
+                        <shownInUpdateView>false</shownInUpdateView>
                         <columnTitle>Project</columnTitle>
                     </column>
                     <column columnName="account">

@@ -143,9 +143,8 @@ export class AnimalRequestForm extends React.Component<any,State> {
 
     observer = createDecorator(
       {
-          field: 'project', // when the value of foo changes...
+          field: 'optionalproject', // when the value of this field changes...
           updates: {
-              // ...set field "doubleFoo" to twice the value of foo
               account: (val, allValues) => {
                   return this.findAccountByProject(val);
               }
@@ -178,6 +177,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                 window.location = redirectUrl;
             }).catch((err) => {
                 alert(err.exception)
+                this.setState({submitted: false});
             }
         );
     }
@@ -424,7 +424,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
 
                                                 </Field>
                                                 <Field
-                                                    name="project"
+                                                    name="optionalproject"
                                                     label="Project"
                                                     component={renderSelectField}
                                                     validate={required}

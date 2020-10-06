@@ -2,6 +2,9 @@ import org.labkey.gradle.util.BuildUtils
 
 dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:DBUtils", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:WebUtils", depProjectConfig: 'published', depExtension: 'module')
 
     implementation project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"))
     implementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")

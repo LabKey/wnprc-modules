@@ -4,5 +4,9 @@ dependencies {
     implementation project(":server:modules:ehrModules:ehr")
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiJarFile")
-
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"), depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: 'published', depExtension: 'module')
 }

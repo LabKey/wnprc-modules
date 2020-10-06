@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="ultrasound_review" tableDbType="TABLE">
+                <tableUrl></tableUrl>
+                <importUrl></importUrl>
+                <updateUrl>/ehr/dataEntryForm.view?formType=Research%20Ultrasounds%20Review&amp;taskid=${taskid}</updateUrl>
+                <deleteUrl></deleteUrl>
+                <columns>
+                    <column columnName="Id"/>
+                    <column columnName="date"/>
+                    <column columnName="head"/>
+                    <column columnName="falx"/>
+                    <column columnName="thalamus"/>
+                    <column columnName="lateral_ventricles"/>
+                    <column columnName="choroid_plexus"/>
+                    <column columnName="eye"/>
+                    <column columnName="profile"/>
+                    <column columnName="four_chamber_heart"/>
+                    <column columnName="diaphragm"/>
+                    <column columnName="stomach"/>
+                    <column columnName="bowel"/>
+                    <column columnName="bladder"/>
+                    <column columnName="findings"/>
+                    <column columnName="placenta_notes"/>
+                    <column columnName="remarks"/>
+                    <column columnName="completed"/>
+                    <column columnName="ultrasound_id"/>
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>tasks</fkTable>
+                          <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/dataEntryFormDetails.view?formtype=Research%20Ultrasounds%20Task&amp;taskid=${taskid}</url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

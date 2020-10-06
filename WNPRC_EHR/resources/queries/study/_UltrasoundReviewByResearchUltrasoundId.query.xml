@@ -1,0 +1,27 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="_UltrasoundReviewByResearchUltrasoundId" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="date"/>
+                    <column columnName="head"/>
+                    <column columnName="falx"/>
+                    <column columnName="thalamus"/>
+                    <column columnName="lateral_ventricles"/>
+                    <column columnName="choroid_plexus"/>
+                    <column columnName="eye"/>
+                    <column columnName="profile"/>
+                    <column columnName="four_chamber_heart"/>
+                    <column columnName="diaphragm"/>
+                    <column columnName="stomach"/>
+                    <column columnName="bowel"/>
+                    <column columnName="bladder"/>
+                    <column columnName="findings"/>
+                    <column columnName="placenta_notes"/>
+                    <column columnName="remarks"/>
+                    <column columnName="completed"/>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

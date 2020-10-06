@@ -17,3 +17,12 @@ function onUpdate(helper, scriptErrors, row, oldRow) {
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
 }
+
+function setDescription(row, helper){
+    let description = [];
+
+    description.push("Restraint Type: " + row.restraintType);
+    description.push("Remarks: " + row.remarks);
+
+    return description;
+}

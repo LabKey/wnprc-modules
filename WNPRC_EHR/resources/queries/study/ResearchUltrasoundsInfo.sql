@@ -1,7 +1,10 @@
+--Query for the Research Ultrasounds view
+
 SELECT ru.objectid
       ,ru.id
       ,ru.date
       ,ru.pregnancyid
+      --Show the pregnancy status
       ,CASE WHEN EXISTS(SELECT 1 FROM pregnancy_outcomes po WHERE ru.pregnancyid = po.pregnancyid)
               THEN 'Pregnancy Completed'
             WHEN EXISTS(SELECT 1 FROM pregnancies p WHERE ru.pregnancyid = p.lsid)
@@ -16,6 +19,8 @@ SELECT ru.objectid
       ,ru.performedby
       ,ru.remark
       ,CASE
+      --Show if the review is completed or not
+      --This is N/A if the record was bulk uploaded
         WHEN (SELECT ur.completed
                 FROM ultrasound_review ur
                 WHERE ur.taskid = ru.taskid) = TRUE THEN 'Yes'

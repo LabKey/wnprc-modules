@@ -105,6 +105,7 @@ public class TriggerScriptHelper {
 //        }
     }
 
+    // Will insert the given rows into the given schema and table
     public void insertRows(List<Map<String, Object>> insertRows, String schema, String table) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException {
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schema, table);
         queryUpdater.insert(insertRows);

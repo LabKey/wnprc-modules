@@ -1,0 +1,19 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" label="Research Ultrasounds">
+    <columns>
+        <column name="updatelink"/>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="pregnancyid"/>
+        <column name="gestation_day"/>
+        <column name="project"/>
+        <column name="restraint"/>
+        <column name="fetal_heartbeat"/>
+        <column name="performedby"/>
+        <column name="remark"/>
+        <column name="reviewCompleted"/>
+        <column name="taskid"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+</customView>

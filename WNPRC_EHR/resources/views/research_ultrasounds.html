@@ -1,0 +1,8 @@
+<div id="research-ultrasounds-grid" style="margin-bottom: 20px"></div>
+<div id="research-ultrasounds-detail"></div>
+<script type="application/javascript">
+    const wp = <%=webpartContext%> || {};
+    Ext4.onReady(function(){
+        ResearchUltrasounds.render('research-ultrasounds-grid', 'research-ultrasounds-detail', wp.subjects);
+    });
+</script>

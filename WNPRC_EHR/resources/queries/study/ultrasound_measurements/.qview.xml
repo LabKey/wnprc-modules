@@ -1,0 +1,13 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="measurement_label"/>
+        <column name="measurement_value"/>
+        <column name="measurement_unit"/>
+        <column name="taskid"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+</customView>

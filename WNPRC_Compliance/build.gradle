@@ -11,6 +11,11 @@ dependencies {
     external "org.apache.pdfbox:pdfbox:${pdfboxVersion}"
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     jspImplementation project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"))
+
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "published", depExtension: "module")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:wnprc-modules:DBUtils", depProjectConfig: "published", depExtension: "module")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:wnprc-modules:WebUtils", depProjectConfig: "published", depExtension: "module")
+
 }
 
 sourceSets {

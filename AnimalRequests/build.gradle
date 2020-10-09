@@ -1,3 +1,5 @@
+import org.labkey.gradle.util.BuildUtils
+
 apply plugin: 'java'
 apply plugin: 'org.labkey.module'
 compileJava {
@@ -8,6 +10,8 @@ compileJava {
 dependencies {
 //    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:wnprc-modules:WNPRC_EHR", depProjectConfig: "apiCompile")
     implementation project(":server:modules:wnprc-modules:WNPRC_EHR")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:wnprc-modules:WNPRC_EHR", depProjectConfig: "published", depExtension: "module")
+
 }
 
 // This is added to eliminate the possibility of a race condition between these two npmInstalls.

@@ -6,7 +6,7 @@ import {AnimalRequestForm} from "./containers/Forms/AnimalRequestForm";
 
 jQuery(() => {
     ReactDom.render(
-           <AnimalRequestForm/>,
-        document.getElementById('app')
+           <AnimalRequestForm id={'r18051'}/>,
+        document.getElementById('webpart_0')
     );
 });

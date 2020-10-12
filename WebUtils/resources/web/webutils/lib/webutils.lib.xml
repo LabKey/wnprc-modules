@@ -12,5 +12,6 @@
         <dependency path="/webutils/lib/c3/c3"/>
         <dependency path="/webutils/lib/ko/knockout"/>
         <dependency path="/webutils/lib/webutils_core/webutils_core"/>
+        <dependency path="/webutils/lib/react/react"/>
     </dependencies>
 </libraries>

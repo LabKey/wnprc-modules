@@ -50,9 +50,14 @@ interface State {
     animal_requests_disposition: Array<any>;
     animal_requests_infectiousdisease: Array<any>;
     dataArr: Array<any>;
+    test: any
 }
 
-export class AnimalRequestForm extends React.Component<any,State> {
+interface Props {
+    id: string
+}
+
+export class AnimalRequestForm extends React.Component<Props,State> {
     constructor() {
         super();
         //this has to be an array of promises
@@ -80,7 +85,8 @@ export class AnimalRequestForm extends React.Component<any,State> {
             protocol: [{value: ''}],
             animal_requests_disposition: [{value: ''}],
             animal_requests_infectiousdisease: [{value: ''}],
-            dataArr: dataArr
+            dataArr: dataArr,
+            test: document.getElementById('testreact').innerHTML
         };
         this.onSubmit = this.onSubmit.bind(this);
         this.getSeveralEHRData = this.getSeveralEHRData.bind(this);

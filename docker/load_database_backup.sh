@@ -205,7 +205,6 @@ if [[ -z $prod ]]; then
         update prop.properties p set value = 0 where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'runIntervalInMinutes';
         update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'UserPreferencesMap' and p.name = 'RReport.RExe';
         update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
-        update prop.properties p set value = 'ldap://ldap.primate.wisc.edu' where (select s.category from prop.propertysets s where s.set = p.set) = 'LDAPAuthentication' and p.name = 'Servers';
         update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ehr.geneticcalculations' and p.name = 'enabled';
         update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'ldk.ldapConfig' and p.name = 'enabled';
         update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';

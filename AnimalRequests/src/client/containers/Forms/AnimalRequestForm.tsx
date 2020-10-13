@@ -267,7 +267,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     component={renderField}
                                                     label="# of Animals"
                                                     type="number"
-                                                    min="0"
+                                                    min="1"
                                                     validate={required}
                                                     required={true}
                                                     tooltip="Please provide the number of animals needed (integers only)."

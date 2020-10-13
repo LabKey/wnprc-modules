@@ -14,13 +14,13 @@ import {getEHRData} from '../../query/actions';
 const required = value => (value ? undefined : <span data-tooltip="Required">❗️</span>);
 
 const renderField = ({
-        input, label, warnings, tooltip, type, required,
+        input, label, warnings, tooltip, type, required, min,
         meta: { touched, error, warning, asyncValidating }
     }) => (
     <div className="row top-buffer">
         <div className={asyncValidating ? 'async-validating' : ''}>
             <label className="col-xs-5 form-control-label"> {label}{tooltip && (<sup><span id="help-tooltip" data-tooltip={tooltip}>?️</span></sup>)}: </label>
-            <input {...required==true ? required : ''} className={`col-xs-5 form-control-${type}`}  type={type} {...input} />
+            <input min={min} {...required==true ? required : ''} className={`col-xs-5 form-control-${type}`}  type={type} {...input} />
             {touched && ((error && <span>{error}</span>))}
         </div>
     </div>
@@ -267,6 +267,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     component={renderField}
                                                     label="# of Animals"
                                                     type="number"
+                                                    min="0"
                                                     validate={required}
                                                     required={true}
                                                     tooltip="Please provide the number of animals needed (integers only)."

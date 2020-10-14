@@ -7,6 +7,7 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
             },
             date: {
                 allowBlank: false,
+                editable: false,
                 columnConfig: {
                     width:125
                 }

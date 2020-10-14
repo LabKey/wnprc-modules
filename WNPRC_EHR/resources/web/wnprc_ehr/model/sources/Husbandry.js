@@ -259,7 +259,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 editorConfig :{
                     id: 'restraintType',
                     listeners:{
-                        select: function(field, val){
+                        change: function(field, val){
 
 
                             if (field) {
@@ -274,11 +274,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                                         //restraintRemarks.markInvalid("Need a remark");
                                     }
                                 }
-
-                                else{
+                                if (field.value == "None" || field.value == ""){
                                     restraintRemarks.setValue('');
                                     restraintRemarks.hide();
-                                }
+                                }/*else{
+                                    restraintRemarks.setValue('');
+                                    restraintRemarks.hide();
+                                }*/
                             }
 
 
@@ -493,6 +495,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     filterArray: [LABKEY.Filter.create('altmeaning', null, LABKEY.Filter.Types.NONBLANK)]
                 }
 
+            },
+            recordSource:{
+                defaultValue: 'LabWaterForm',
+                editable: false,
+                //hidden: true,
+                shownInGrid: false
             }
         },
         'study.waterOrders':{
@@ -562,7 +570,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             volume:{
                 xtype: 'textfield',
                 header: 'Water Volume (mL)',
-                allowBlank:false,
+                allowBlank: false,
                 columnConfig: {
                     width:140
                 }
@@ -576,7 +584,6 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             frequency:{
                 allowBlank: false,
                 defaultValue: 'Daily - PM',
-                allowBlank: 'false',
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',

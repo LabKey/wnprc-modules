@@ -1,5 +1,7 @@
 package org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections;
 
+import org.labkey.api.ehr.dataentry.SimpleFormSection;
+import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleGridSection;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SlaveGridSection;
 
 import java.util.Arrays;
@@ -7,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WaterSingleDaySlaveSection extends SlaveGridSection
+public class WaterSingleDaySlaveSection extends SimpleGridSection
 {
     public WaterSingleDaySlaveSection(){
         super ("study", "waterAmount", "Order Additional Water for Today");
@@ -20,7 +22,7 @@ public class WaterSingleDaySlaveSection extends SlaveGridSection
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
         // setAllowBulkAdd(true);
     }
-    @Override
+    /*@Override
     public Set<String> getSlaveFields(){
         Set<String> fields = new HashSet<>();
 
@@ -28,9 +30,9 @@ public class WaterSingleDaySlaveSection extends SlaveGridSection
         fields.add("project");
 
         return fields;
-    }
+    }*/
     @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id", "date", "volume", "assignedTo", "project","frequency");
+        return Arrays.asList("Id", "date", "volume", "assignedTo", "project","frequency","recordSource");
     }
 }

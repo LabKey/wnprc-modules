@@ -1607,28 +1607,46 @@ public class WNPRC_EHRController extends SpringActionController
 
             if (event.getDataSource().equals("waterAmount"))
             {
+                ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterAmount");
 
                 try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
                 {
 
-                    for (Map<String, Object> woRow : WaterAmountRows)
+                    if (event.getAction().equals("update"))
                     {
-                        JSONObject waterAmountRecord = new JSONObject();
-                        waterAmountRecord.put("taskid", woRow.get("taskid"));
-                        waterAmountRecord.put("objectid", event.getObjectId());
-                        waterAmountRecord.put("volume", event.getVolume());
-                        waterAmountRecord.put("date",event.getDate());
-                        waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
-                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
-
-                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterAmount");
-                        service = ti.getUpdateService();
-
-                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
-                        if (updatedRows.size() != rowToUpdate.size())
+                        for (Map<String, Object> woRow : WaterAmountRows)
                         {
-                            throw new QueryUpdateServiceException("Not all rows updated properly");
+                            JSONObject waterAmountRecord = new JSONObject();
+                            waterAmountRecord.put("taskid", woRow.get("taskid"));
+                            waterAmountRecord.put("objectid", event.getObjectId());
+                            waterAmountRecord.put("volume", event.getVolume());
+                            waterAmountRecord.put("date", event.getDate());
+                            waterAmountRecord.put("assignedTo", event.getAssignedTo());
+                            waterAmountRecord.put("frequency", event.getFrequency());
+                            waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
+                            rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
+
+
+                            service = ti.getUpdateService();
+
+                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                            if (updatedRows.size() != rowToUpdate.size())
+                            {
+                                throw new QueryUpdateServiceException("Not all rows updated properly");
+                            }
+
                         }
+                    }
+                    if ("delete".equals(event.getAction()))
+                    {
+                        _log.error("Deleting waterAmount with objectId "+ event.getObjectId());
+
+                        SimpleQueryUpdater waterAmountTable = new SimpleQueryUpdater(getUser(),getContainer(),"study", "waterAmount");
+                        JSONObject rowToDelete = new JSONObject();
+                        rowToDelete.put("objectId", event.getObjectId());
+                        waterAmountTable.delete(rowToDelete);
+
+                        
 
                     }
 
@@ -1653,6 +1671,8 @@ public class WNPRC_EHRController extends SpringActionController
         }
 
     }
+
+
 
     @ActionNames("CloseWaterOrder")
     @RequiresLogin
@@ -1860,6 +1880,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     public static class WaterOrderRecord {
 
+
         private String taskId;
         private String objectId;
         private String animalId;
@@ -1872,6 +1893,7 @@ public class WNPRC_EHRController extends SpringActionController
         private String waterSource;
         private String frequency;
         private String assignedTo;
+        private String action;
 
 
         public void setTaskId(String taskId)
@@ -1952,6 +1974,11 @@ public class WNPRC_EHRController extends SpringActionController
             this.assignedTo = assignedTo;
         }
 
+        public void setAction(String action)
+        {
+            this.action = action;
+        }
+
         public String getTaskId()
         {
             return taskId;
@@ -2006,6 +2033,13 @@ public class WNPRC_EHRController extends SpringActionController
         {
             return assignedTo;
         }
+
+        public String getAction()
+        {
+            return action;
+        }
+
+
     }
 
     private List<Map<String, Object>> getWaterOrderRecord (String objectId) throws java.sql.SQLException{

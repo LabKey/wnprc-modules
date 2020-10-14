@@ -91,7 +91,7 @@
                     </column>
                     <column columnName="dateOrdered">
                         <columnTitle>Date Ordered</columnTitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <formatString>yyyy-MM-dd HH:mm:ss</formatString>
                     </column>
                     <column columnName="qcstate">
                         <isHidden>true</isHidden>

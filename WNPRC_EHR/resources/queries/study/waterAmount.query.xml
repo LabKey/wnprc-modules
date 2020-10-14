@@ -46,6 +46,15 @@
                             <fkDisplayColumn>title</fkDisplayColumn>
                         </fk>
                     </column>
+                    <column columnName="recordSource">
+                        <columnTitle>Record Source</columnTitle>
+                        <!--<fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_source</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>-->
+                    </column>
                     <column columnName="qcstate"></column>
 
                 </columns>

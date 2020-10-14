@@ -1043,17 +1043,20 @@ public class TriggerScriptHelper {
 
         String meaningFrequency = getMeaningFromRowid( frequency, "husbandry_frequency" );
         JSONArray arrayOfErrors = new JSONArray();
+        JSONArray extraContextArray = new JSONArray();
 
         Map<String, JSONObject> errorMap = new HashMap<>();
 
+        //Setting interval to start the water schedule, the system generates the calendar thirty days before
         Calendar startInterval = Calendar.getInstance();
         startInterval.setTime(clientStartDate);
         startInterval.add(Calendar.DATE, -30);
         startInterval = DateUtils.truncate(startInterval, Calendar.DATE);
 
         final String intervalLength = "180";
-        final String sortInterval = "15";
+        final String shortInterval = "15";
 
+        //Sending parameters to the query that generates the water schedule from water orders and water amounts
         Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
         parameters.put("NumDays",intervalLength);
         parameters.put("StartDate", startInterval.getTime());
@@ -1069,6 +1072,7 @@ public class TriggerScriptHelper {
         filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
         //filter.addCondition(FieldKey.fromString("frequency"), frequency);
 
+        //Adding all the water records from database to a list of waterRecord objects that can be compared
         TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume"), filter, null);
         waterOrdersFromDatabase.setNamedParameters(parameters);
         waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
@@ -1080,10 +1084,13 @@ public class TriggerScriptHelper {
             if (waterRecord.getObjectId().compareTo(objectId) != 0){
 
                 JSONObject returnErrors = new JSONObject();
+                JSONObject extraContextObject = new JSONObject();
 
                 LocalDate startLoop = convertToLocalDateViaSqlDate(clientStartDate);
                 LocalDate endOfLoop;
 
+                //Open water orders do not  have and end date but to compared we need to add a date to the loop
+                //we used the same date for generating the waterScheduleCoalesced
                 if (clientEndDate ==  null){
                     endOfLoop = convertToLocalDateViaSqlDate(clientStartDate).plusDays(Integer.parseInt(intervalLength));
 
@@ -1092,21 +1099,25 @@ public class TriggerScriptHelper {
                     endOfLoop = convertToLocalDateViaSqlDate(clientEndDate);
                 }
 
-
+                //For loop to compare the new interval for the waterOrder with every record in database
                 for (LocalDate loopDate = startLoop ; !loopDate.isAfter(endOfLoop); loopDate = loopDate.plusDays(1)){
 
                     if (loopDate.compareTo(convertToLocalDateViaSqlDate(waterRecord.getDate()))==0){
 
                         String serverMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency" );
 
+                        //Check frequency compatibility with water orders in the server
                         if (!checkFrequencyCompatibility(serverMeaning, meaningFrequency))
                         {
+
+                            //Formatting the dates to return a legible date for error message 
                             DateTimeFormatter dateFormatted = DateTimeFormatter.ISO_LOCAL_DATE;
                             String startFormatDate = dateFormatted.format(convertToLocalDateViaSqlDate(waterRecord.getStartDateCoalesced()));
                             String endFormattedDate;
 
                             LocalDate endDateFromServer = convertToLocalDateViaSqlDate(waterRecord.getEndDateCoalescedFuture());
 
+                            //If the  date in the server is after the endOfLoop date, we return "Future" as the date
                             if (endDateFromServer.isAfter(endOfLoop))
                             {
                                 endFormattedDate = "Future";
@@ -1116,6 +1127,7 @@ public class TriggerScriptHelper {
                                 endFormattedDate = dateFormatted.format(endDateFromServer);
                             }
 
+                            //Creating the link to allow users to edit the error returned by this function.
                             ActionURL editURL = new ActionURL("EHR", "manageRecord", container);
 
                             editURL.addParameter("schemaName", "study");
@@ -1123,9 +1135,8 @@ public class TriggerScriptHelper {
                             editURL.addParameter("keyField", "lsid");
                             editURL.addParameter("key", waterRecord.getLsid());
 
-
-
-
+                            //Check overlapping waters since they have startDate and endDate
+                            //TODO: add error to extraContext to handle water order within the calendar UI
                             if (waterRecord.getDataSource().equals("waterOrders"))
                             {
 
@@ -1138,7 +1149,8 @@ public class TriggerScriptHelper {
                                     //return error if the clientEndDate is greater than the startDate from the order in the server
                                     //
                                 }
-                                //show error if clientEndDate is less than the enddate of order in the system
+                                //Check if record from database startDate is smaller than the clientEndDate
+                                //New water order overlaps with an existing water order on the system starting earlier than the new order's endDate
                                 else if (Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime() > waterRecord.getStartDateCoalesced().getTime())
                                 {
                                     returnErrors.put("field", "enddate");
@@ -1147,21 +1159,24 @@ public class TriggerScriptHelper {
                                 {
                                     returnErrors.put("field", "frequency");
                                 }
+                                //Adding dataSource, objetcId, severity and message to the exception in case of error
                                 returnErrors.put("dataSource", waterRecord.getDataSource());
                                 returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
                                         " End Date: " + endFormattedDate + " Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "'><b> EDIT</b></a>");
                                 returnErrors.put("objectId", waterRecord.getObjectId());
                                 returnErrors.put("severity", "ERROR");
 
-
                             }
+                            //Performed similar validation with waterAmounts saved in the system
+                            //Any existing waterAmount inside the interval should be left as is
+                            //WaterAmounts outside the modify water order should return an error to the client
                             if (waterRecord.getDataSource().equals("waterAmount")){
 
                                 //check if waterAmounts are outside the new order interval add warnings to users
                                 //In waterAmount StartDate and EndDate are the same
                                 if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
                                     returnErrors.put("field", "enddate");
-                                    returnErrors.put("severity", "WARN");
+                                    returnErrors.put("severity", "ERROR");
                                     returnErrors.put("message", "There are one or more waterAmounts that are outside the new range for the updated water order");
                                 }
 
@@ -1175,34 +1190,49 @@ public class TriggerScriptHelper {
                 }
 
                 //Additional check to informed of any water amounts in the future that wold stay in the system after the water order is modified
-                LocalDate futureWaterAmounts = endOfLoop.plusDays(Integer.parseInt(sortInterval));
-                for (LocalDate additionalAmounts = endOfLoop; !additionalAmounts.isAfter(futureWaterAmounts); additionalAmounts = additionalAmounts.plusDays(1)){
-                    if (waterRecord.getDataSource().equals("waterAmount")){
+                //This validation is outside the previous loop because this waterAmounts will be outside the new date range.
 
-                        //check if waterAmounts are outside the new order interval add warnings to users
-                        //In waterAmount StartDate and EndDate are the same
-                        if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
+                if (waterRecord.getDataSource().equals("waterAmount")){
 
-                            // Building link for allow user to edit waterAmounts in future
-                            ActionURL editAmountURL = new ActionURL("EHR", "manageRecord", container);
-                            editAmountURL.addParameter("schemaName", "study");
-                            editAmountURL.addParameter("queryName", waterRecord.getDataSource());
-                            editAmountURL.addParameter("keyField", "lsid");
-                            editAmountURL.addParameter("key", waterRecord.getLsid());
+                    //check if waterAmounts are outside the new order interval add warnings to users
+                    //In waterAmount StartDate and EndDate are the same
+                    if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
 
-                            returnErrors.put("field", "animalId");
-                            returnErrors.put("severity", "ERROR");
-                            returnErrors.put("message", "This waterAmount is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
-                            returnErrors.put("extraContext", editAmountURL.toString());
-                            extraContext.put("objectId",editAmountURL.toString());
-                        }
+                        // Building link for allow user to edit waterAmounts in future
+                        ActionURL editAmountURL = new ActionURL("EHR", "manageRecord", container);
+                        editAmountURL.addParameter("schemaName", "study");
+                        editAmountURL.addParameter("queryName", waterRecord.getDataSource());
+                        editAmountURL.addParameter("keyField", "lsid");
+                        editAmountURL.addParameter("key", waterRecord.getLsid());
+
+                        //Format date to printed better version of date for returning it to the client
+                        String pattern = "yyyy-MM-dd";
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+                        String htmlDate = simpleDateFormat.format(waterRecord.getDate());
 
 
+                        returnErrors.put("field", "animalId");
+                        returnErrors.put("severity", "ERROR");
+                        //returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
+                        returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
+
+                        extraContextObject.put("date", htmlDate);
+                        extraContextObject.put("objectId",waterRecord.getObjectId());
+                        extraContextObject.put("volume", waterRecord.getVolume());
+
+                        extraContextArray.put(extraContextObject);
+
+
+                        //extraContext.put("objectId",waterRecord.getObjectId());
                     }
 
+
                 }
+
+
                 if (!returnErrors.isEmpty()){
                     errorMap.put(waterRecord.getObjectId(), returnErrors);
+                    extraContext.put("extraContextArray", extraContextArray);
                 }
 
             }

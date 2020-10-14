@@ -17,7 +17,7 @@ FROM study.demographics d
 JOIN (
     SELECT
         s.*,
-        timestampadd('SQL_TSI_MINUTE', ((s.hours * 60) + s.minutes), s.origDate) as date,
+        timestampadd('SQL_TSI_MINUTE', ((s.hours * 60) + s.minutes ), s.origDate) as date,
         CASE
             WHEN (hours >= 6 AND hours < 12) THEN 'AM'
             WHEN (hours < 20 OR hours >= 12) THEN 'PM'
@@ -37,10 +37,10 @@ JOIN (
           t1.id as wanimalid,
 
           COALESCE ( ft.hourofday, ((hour(t1.date) * 100) + minute(t1.date))) as time,
-          (coalesce( ft.hourofday, (hour(t1.date) * 100)) / 100) as hours,
+          (coalesce( (ft.hourofday), (hour(t1.date) * 100)) / 100) as hours,
           CASE
             WHEN ( ft.hourofday IS NOT NULL)
-            THEN (((coalesce(ft.hourofday) / 100.0) - floor(coalesce(ft.hourofday) / 100)) * 100)
+            THEN (((ft.hourofday / 100.0) - floor(ft.hourofday / 100)) * 100)
             ELSE minute(t1.date)
           END as minutes,
 
@@ -48,6 +48,7 @@ JOIN (
           t1.created AS created,
           t1.id.curLocation.area as area,
           t1.id.curLocation.room as room,
+          t1.id.curLocation.cage as cage,
           dr.startDate AS dateRangeStartDate,
           t1.date as startDate,
           timestampdiff('SQL_TSI_DAY', cast(t1.dateOnly as timestamp), dr.dateOnly) + 1  as daysElapsed,

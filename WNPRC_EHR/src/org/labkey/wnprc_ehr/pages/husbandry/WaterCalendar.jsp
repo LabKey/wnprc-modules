@@ -149,6 +149,9 @@
         left: 100%;
         margin-left: -1.4em;
     }
+    .server-return-message {
+        display: none;
+    }
 </style>
 
 <%--<div class="col-xs-12 col-xl-8">--%>
@@ -165,6 +168,7 @@
                         <dt>DataSource:         </dt> <dd>{{dataSource}}</dd>
                         <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
                         <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalId}}</a></dd>
+                        <dt>Location:           </dt> <dd>{{location}}</dd>
                         <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
                         <dt>Volume:             </dt> <dd>{{volume}}</dd>
                         <dt>Project (Account):  </dt> <dd>{{projectCoalesced}}</dd>
@@ -190,8 +194,8 @@
                                     <div>Select an option from this window:</div>
                                     <div>End Date for Water Order: <b>{{date}}</b></div>
                                     <hr>
-                                    <div>Return Errors from Server:</div>
-                                    <div id = "modelServerResponse"></div>
+                                    <div class="server-return-message" id = "returnTitle">Return Errors from Server:</div>
+                                    <div class="server-return-message" id = "modelServerResponse"></div>
 
                                 </div>
                                 <div class="modal-footer">
@@ -392,10 +396,12 @@
                            // date.setDate(date.getDate() - 60);
                             if ($animalId == 'undefined' || $animalId == "null"){
 
+
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", {
                                     "date~gte": startMoment.format('Y-MM-DD'),
                                     "date~lte": endMoment.format('Y-MM-DD'),
-                                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)}
+                                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                                    "waterStatus~eq": ""
                                 }).then(function (data) {
                                     var events = data.rows;
 
@@ -434,7 +440,7 @@
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", {
                                     "date~gte": startMoment.format('Y-MM-DD'),
                                     "date~lte": endMoment.format('Y-MM-DD'),
-                                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                                    "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
                                     "animalid~in": $animalId
                                 }).then(function (data) {
                                     var events = data.rows;
@@ -600,6 +606,8 @@
             })
         };
 
+
+
         // For some reason, type-ahead makes this transparent.  In order to allow bootstrap to "disable" it
         // by greying it out, we need to remove that property.
         //$assignedToField.css('background-color', '');
@@ -615,6 +623,7 @@
                 projectCoalesced:           ko.observable(),
                 animalId:                   ko.observable(),
                 date:                       ko.observable(),
+                location:                   ko.observable(),
                 volume:                     ko.observable(),
                 dataSource:                 ko.observable(),
                 assignedToCoalesced:        ko.observable(),
@@ -696,12 +705,21 @@
 
                         }else if (response.errors){
                             debugger;
-                            let jsonArray = response.errors[0].errors;
+                            document.getElementById("returnTitle").style.display = "block";
+                            document.getElementById("modelServerResponse").style.display = "block";
+
+                            //let jsonArray = response.errors[0].errors;
+                            let jsonArray = response.extraContext.extraContextArray;
                             var returnMessage = "";
                             if (jsonArray != null){
                                 for (var i = 0; i < jsonArray.length; i++ ){
                                     var errorObject = jsonArray[i];
-                                    returnMessage += errorObject.message + "<br>";
+                                    let clientObjectId = Ext4.util.Format.htmlEncode(errorObject.objectId);
+                                    let volume = Ext4.util.Format.htmlEncode(errorObject.volume);
+                                    let date = Ext4.util.Format.htmlEncode(errorObject.date);
+                                    returnMessage += "The is another waterAmount on "+date+" for the volume of "+volume+" " +
+                                            " <button onclick=\"updateWaterAmount('"+clientObjectId+"')\">Update</button> " +
+                                            "<button onclick=\"deleteWaterAmount('"+clientObjectId+"')\">Delete</button><br>";
                                     
                                 }
 
@@ -774,7 +792,7 @@
                             console.log(response.taskId);
 
                             //('ehr', 'dataEntryForm.view', null, {formType: LABKEY.ActionURL.getParameter('formType')})
-                            var newWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', null, {formType: 'Enter Water Daily Amount', 'taskid': response.taskId});
+                            var newWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', null, {formType: 'Enter Water Orders', 'taskid': response.taskId});
                             //schemaName: 'study', 'query.queryName': 'demographicsParentStatus', 'query.Id~eq': this.subjectId})
 
                             window.open(newWaterOrder,'_blank');
@@ -871,27 +889,31 @@
                 var taskid = LABKEY.Utils.generateUUID();
                 //var date = form.date.format("Y-m-d H:i:s");
                 debugger;
+                var insertDate = new Date(form.date);
                 if (form.frequencyCoalesced == "1"){
-                    var insertDate = new Date(form.date);
                     insertDate.setHours(8);
                     insertDate.setMinutes(0);
                 }
                 if (form.frequencyCoalesced == "2"){
-                    var insertDate = new Date(form.date);
+                    insertDate.setHours(14);
+                    insertDate.setMinutes(0);
+                }
+                else{
                     insertDate.setHours(14);
                     insertDate.setMinutes(0);
                 }
 
                 if (form.dataSource == "waterOrders"){
                     WebUtils.API.insertRows('study', 'waterAmount', [{
-                        taskid:     taskid,
-                        Id:         form.animalId,
-                        date:       insertDate.toDateString(),
-                        assignedTo: form.assignedToCoalesced,
-                        project:    form.projectCoalesced,
-                        volume:     form.volume,
-                        frequency:  form.frequencyCoalesced,
-                        qcstate:    10 //Schedule
+                        taskid:         taskid,
+                        Id:             form.animalId,
+                        date:           insertDate.toDateString(),
+                        assignedTo:     form.assignedToCoalesced,
+                        project:        form.projectCoalesced,
+                        volume:         form.volume,
+                        frequency:      form.frequencyCoalesced,
+                        recordSource:   "WaterCalendar",
+                        qcstate:        10 //Schedule
                     }]);
                     WebUtils.API.insertRows('ehr', 'tasks', [{
                         taskid:     taskid,
@@ -915,7 +937,8 @@
                             animalId:           form.animalId,
                             assignedTo:         form.assignedToCoalesced,
                             volume:             form.volume,
-                            dataSource:         form.dataSource
+                            dataSource:         form.dataSource,
+                            action:             "update"
 
                         }),
                         success: LABKEY.Utils.getCallbackWrapper(function (response)
@@ -968,6 +991,75 @@
 
 
     })();
+
+    function deleteWaterAmount(objectId){
+
+        LABKEY.Ajax.request({
+            url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateWaterAmount", null, {
+                objectId:           objectId,
+                dataSource:         "waterAmount",
+                action:             "delete"
+
+            }),
+            success: LABKEY.Utils.getCallbackWrapper(function (response)
+            {
+                if (response.success){
+
+                    // Refresh the calendar view.
+                    //$calendar.fullCalendar('refetchEvents');
+
+                    //$('#waterInfoPanel').unblock();
+
+                } else {
+                    alert('Water Amount cannot be deleted')
+                }
+
+
+            }, this)
+
+        });
+
+    }
+    function updateWaterAmount(objectId){
+
+        var updateWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'manageRecord', null, {
+            schemaName: 'study',
+            queryName:          "Water Amount",
+            keyField:           "objectId",
+            key:                objectId
+        });
+        //schemaName: 'study', 'query.queryName': 'demographicsParentStatus', 'query.Id~eq': this.subjectId})
+
+        window.open(updateWaterOrder,'_blank');
+
+        /*LABKEY.Ajax.request({
+            url: LABKEY.ActionURL.buildURL("EHR", "manageRecord", null, {
+                schema:             "study",
+                queryName:          "waterAmount",
+                //objectId:           objectId,
+                keyField:           "objectId",
+                key:                objectId
+
+            }),
+            success: LABKEY.Utils.getCallbackWrapper(function (response)
+            {
+                if (response.success){
+
+                    // Refresh the calendar view.
+                    //$calendar.fullCalendar('refetchEvents');
+
+                    //$('#waterInfoPanel').unblock();
+
+                } else {
+                    alert('Water Amount cannot be deleted')
+                }
+
+
+            }, this)
+
+        });*/
+
+    }
 
     function ViewModel(){
         var self = this;

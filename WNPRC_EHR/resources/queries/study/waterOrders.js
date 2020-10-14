@@ -59,6 +59,14 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }
 
+    if (!row.frequency){
+        EHR.Server.Utils.addError(scriptErrors, 'frequency', 'Frequency is required when entering new orders.', 'ERROR');
+    }
+
+    if (!row.waterSource){
+        EHR.Server.Utils.addError(scriptErrors, 'waterSource', 'Water Source is required when entering new orders.', 'ERROR');
+    }
+
     //console.log ("value of ObjectId "+oldRow.objectid + " Value of new objectId "+ row.objectid);
 
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {

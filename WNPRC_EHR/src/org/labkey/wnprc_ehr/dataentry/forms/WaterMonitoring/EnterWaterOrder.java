@@ -29,13 +29,13 @@ public class EnterWaterOrder extends SimpleTaskForm
 
         ));
         setStoreCollectionClass("WNPRC.ext.data.WaterStoreCollection");
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Husbandry.js"));
+        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/WaterOrderTask.js"));
         this.addClientDependency(ClientDependency.fromPath("ehr/form/field/BooleanField.js"));
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterServerStore.js"));
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterStoreCollection.js"));
 
         for (FormSection section : this.getFormSections()){
-            section.addConfigSource("Husbandry");
+            section.addConfigSource("WaterOrderTask");
             section.addConfigSource("Encounter");
         }
 
@@ -46,6 +46,8 @@ public class EnterWaterOrder extends SimpleTaskForm
     protected List<String> getButtonConfigs(){
         List<String> buttons = super.getButtonConfigs();
         buttons.add("WNPRC_SUBMIT_FINAL");
+        buttons.remove("WNPRC_SAVE");
+        buttons.remove("WNPRC_SAVE_AND_EXIT");
 
         return buttons;
 

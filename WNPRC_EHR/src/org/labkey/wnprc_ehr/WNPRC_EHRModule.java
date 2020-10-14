@@ -249,6 +249,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultTBDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultClinicalRemarksDataSource(module));
+        EHRService.get().registerLabworkType(new iStatLabworkType(module));
 
         EHRService.get().addModuleRequiringLegacyExt3EditUI(this);
 

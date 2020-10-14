@@ -286,11 +286,11 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       labkeyActionSelectWithPromise(config).then((data)=> {
         //load up the restraints type into state
         newformdatarestraints = [...newformdata];
-          for (var [key, entry] of Object.entries(newformdatarestraints)) {
-            for (var [key2, val] of Object.entries(data["rows"])) {
-              if (val["objectid"] == entry["restraint_objectid"]["value"]){
-                newformdatarestraints[key].restraint.objectid = val["objectid"];
-                newformdatarestraints[key].restraint.value = val["restraintType"];
+          for (var key of Object.keys(newformdatarestraints)) {
+            for (var key2 of Object.keys(data["rows"])) {
+              if (data["rows"][key2]["objectid"] == newformdatarestraints[key]["restraint_objectid"]["value"]){
+                newformdatarestraints[key].restraint.objectid = data["rows"][key2]["objectid"];
+                newformdatarestraints[key].restraint.value = data["rows"][key2]["restraintType"];
               }
           }
         }

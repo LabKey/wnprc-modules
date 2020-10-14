@@ -11,6 +11,14 @@
                             <fkColumnName>objectid</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="restraintType">
+                        <columnTitle>Restraint Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

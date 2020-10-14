@@ -10,6 +10,11 @@ public class restraintFormSection extends SlaveFormSection
     public restraintFormSection(){
         super("study","restraints","Other Restraint");
     }
+
+    public restraintFormSection(String label) {
+        super("study", "restraints", label);
+    }
+
     @Override
     public Set<String> getSlaveFields(){
         Set<String> fields = new HashSet<>();

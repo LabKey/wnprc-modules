@@ -9,28 +9,28 @@ import com.microsoft.aad.msal4j.ITokenCacheAccessContext;
 import com.microsoft.aad.msal4j.MsalException;
 import com.microsoft.aad.msal4j.PublicClientApplication;
 import com.microsoft.aad.msal4j.SilentParameters;
+import org.labkey.api.data.PropertyManager;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public abstract class AzureActiveDirectoryAuthenticator {
+public class AzureActiveDirectoryAuthenticator {
 
     private String applicationId;
     private String upn;
     private String authority;
-    private Set scopes;
+    private Set<String> scopes;
+    private String name;
 
-    public AzureActiveDirectoryAuthenticator(String applicationId, String authority, String upn, Set scopes) {
+
+    public AzureActiveDirectoryAuthenticator(String applicationId, String authority, String upn, String name, Set<String> scopes) {
         this.applicationId = applicationId;
         this.authority = authority;
         this.upn = upn;
+        this.name = name;
         this.scopes = scopes;
     }
 
@@ -40,28 +40,40 @@ public abstract class AzureActiveDirectoryAuthenticator {
 			return null;
 		}
 
-		String dataToInitCache = "";
-		try {
-			dataToInitCache = Files.readString(Path.of("cache.json"), StandardCharsets.US_ASCII);
-		} catch (IOException e) {
-			System.err.println("Error reading from cache.");
-		}
-
-		ITokenCacheAccessAspect persistenceAspect = new TokenPersistence(dataToInitCache);
-
+		PropertyManager.PropertyMap properties = PropertyManager.getEncryptedStore().getWritableProperties(name + ".Credentials", true);
+        String tokenCache = properties.get("TokenCache");
+        ITokenCacheAccessAspect persistenceAspect = new TokenPersistence(tokenCache);
+        IAuthenticationResult result = null;
+        PublicClientApplication app;
 		ExecutorService pool = Executors.newFixedThreadPool(1);
-		PublicClientApplication app;
-		try {
-			// Build the MSAL application object with
-			// app ID and authority
-			app = PublicClientApplication
-                    .builder(applicationId)
-					.authority(authority)
-					.executorService(pool)
-					.setTokenCacheAccessAspect(persistenceAspect)
-					.build();
-		} catch (MalformedURLException e) {
-			return null;
+
+        if (tokenCache != null) {
+			try {
+				// Build the MSAL application object with
+				// app ID and authority
+				app = PublicClientApplication
+						.builder(applicationId)
+						.authority(authority)
+						.executorService(pool)
+						.setTokenCacheAccessAspect(persistenceAspect)
+						.build();
+			}
+			catch (MalformedURLException e) {
+				return null;
+			}
+		} else {
+        	try {
+				// Build the MSAL application object with
+				// app ID and authority
+				app = PublicClientApplication
+						.builder(applicationId)
+						.authority(authority)
+						.executorService(pool)
+						.build();
+			}
+			catch (MalformedURLException e) {
+				return null;
+			}
 		}
 
 		// Create consumer to receive the DeviceCode object
@@ -73,21 +85,21 @@ public abstract class AzureActiveDirectoryAuthenticator {
 		};
 
 		Set<IAccount> accounts = app.getAccounts().join();
-		IAccount cachedAccount = null;
+		IAccount myAccount = null;
 
 		for (IAccount account : accounts) {
 			if (upn.equals(account.username())) {
-				cachedAccount = account;
+				myAccount = account;
+				break;
 			}
 		}
 
 		// Request a token, passing the requested permission scopes
-		IAuthenticationResult result = null;
 		try {
-			if (cachedAccount != null) {
+			if (myAccount != null) {
 				result = app.acquireTokenSilently(
 						SilentParameters
-							.builder(scopes, cachedAccount)
+							.builder(scopes, myAccount)
 							.build()
 						).join();
 			} else {
@@ -110,14 +122,8 @@ public abstract class AzureActiveDirectoryAuthenticator {
 			}
 		}
 
-		String serializedCache = app.tokenCache().serialize();
-
-		try {
-			Files.write(Path.of("cache.json"), serializedCache.getBytes(StandardCharsets.UTF_8));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		properties.put("TokenCache", app.tokenCache().serialize());
+		properties.save();
 
 		pool.shutdown();
 

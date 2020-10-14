@@ -30,10 +30,12 @@ import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
@@ -65,6 +67,7 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
@@ -80,15 +83,16 @@ import org.labkey.security.xml.GroupEnumType;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshRunner;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshScheduler;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
-import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator;
 import org.labkey.wnprc_ehr.calendar.Calendar;
 import org.labkey.wnprc_ehr.calendar.Office365Calendar;
 import org.labkey.wnprc_ehr.calendar.OnCallCalendar;
 import org.labkey.wnprc_ehr.calendar.SurgeryCalendarGoogle;
-import org.labkey.wnprc_ehr.calendar.SurgeryScheduleAuthenticator;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -988,6 +992,113 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+    public static class AzureAccessTokenEvent
+    {
+        private String name;
+        private int refresh_interval;
+        private boolean enabled;
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+        public int getRefresh_interval()
+        {
+            return refresh_interval;
+        }
+
+        public void setRefresh_interval(int refresh_interval)
+        {
+            this.refresh_interval = refresh_interval;
+        }
+
+        public boolean getEnabled()
+        {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled)
+        {
+            this.enabled = enabled;
+        }
+    }
+
+    @ActionNames("getAzureAuthenticationSettings")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class GetAzureAuthenticationSettingsAction extends ReadOnlyApiAction<Object>
+    {
+        public ApiResponse execute(Object form, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+            response.put("accounts", settings.getAllSettings());
+            response.put("success", true);
+
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    @ActionNames("saveAzureAuthenticationSettings")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class SaveAzureAuthenticationSettingsAction extends ApiAction<AzureAccessTokenEvent>
+    {
+        public ApiResponse execute(AzureAccessTokenEvent event, BindException errors) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", true);
+
+            JSONObject record = new JSONObject();
+            record.put("name", event.getName());
+            record.put("refresh_interval", event.getRefresh_interval());
+            record.put("enabled", event.getEnabled());
+
+            try {
+                List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
+
+                //Get the service object based on schema/table
+                TableInfo ti = QueryService.get().getUserSchema(getUser(), ContainerManager.getForPath("/WNPRC"), "wnprc").getTable("azure_accounts");
+                QueryUpdateService service = ti.getUpdateService();
+
+                List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+                if (updatedRows.size() != rowsToUpdate.size()) {
+                    response.put("success", false);
+                    throw new QueryUpdateServiceException("There was an error updating the azure_accounts table.");
+                }
+                AzureAccessTokenRefreshScheduler.get().onSettingsChange(event.getName());
+            } catch (Exception e) {
+                response.put("success", false);
+                throw e;
+            }
+
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    @ActionNames("refreshAzureAccessToken")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class RefreshAzureAccessTokenAction extends ApiAction<AzureAccessTokenEvent>
+    {
+        public ApiResponse execute(AzureAccessTokenEvent event, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            AzureAccessTokenRefreshRunner azureAccessTokenRefreshRunner = new AzureAccessTokenRefreshRunner();
+            azureAccessTokenRefreshRunner.doTokenRefresh(event.getName());
+	        response.put("success", true);
+
+            return new ApiSimpleResponse(response);
+        }
+    }
+
     public static class DateRangeEvent
     {
         private Date startDate;
@@ -1210,7 +1321,7 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-        @ActionNames("SurgeryProcedureSchedule")
+    @ActionNames("SurgeryProcedureSchedule")
     @RequiresLogin()
     public class SurgeryProcedureScheduleAction extends WNPRCJspPageAction
     {
@@ -1321,7 +1432,7 @@ public class WNPRC_EHRController extends SpringActionController
             Office365Calendar calendar = new Office365Calendar();
             calendar.setUser(getUser());
             calendar.setContainer(getContainer());
-            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), roomRows, event.getSubject(), event.getRequestId(), event.getCategories());
+            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), roomRows, event.getSubject(), event.getRequestId());
 
             if (eventsScheduled)
             {
@@ -1392,7 +1503,6 @@ public class WNPRC_EHRController extends SpringActionController
                             Date start = (Timestamp) roomRow.get("start");
                             Date end = (Timestamp) roomRow.get("enddate");
                             calendar.cancelEvent(apptId);
-                            calendar.deleteCanceledRoomEvent(room, start, end);
                         }
                     }
                 }
@@ -1525,12 +1635,12 @@ public class WNPRC_EHRController extends SpringActionController
 
                 if ("Request: Pending".equals(event.getQCStateLabel()))
                 {
-                    String apptid = null;
+                    String eventId = null;
                     if(spRows.size() > 0) {
-                        apptid = (String) spRows.get(0).get("apptid");
+                        eventId = (String) spRows.get(0).get("eventid");
                     }
                     Office365Calendar calendar = new Office365Calendar();
-                    calendar.cancelEvent(apptid, response);
+                    calendar.cancelEvent(eventId, response);
                 }
 
                 transaction.commit();

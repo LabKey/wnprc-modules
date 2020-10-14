@@ -77,20 +77,36 @@ CREATE TABLE wnprc.procedure_scheduled_rooms
     room_type       VARCHAR(100),
     date            TIMESTAMP,
     enddate         TIMESTAMP,
-    appt_id         VARCHAR(255),
+    event_id        VARCHAR(255),
     requestid       VARCHAR(100),
 
     -- Default fields for LabKey.
-    container         entityid NOT NULL,
-    createdby         userid,
-    created           TIMESTAMP,
-    modifiedby        userid,
-    modified          TIMESTAMP,
+    container       entityid NOT NULL,
+    createdby       userid,
+    created         TIMESTAMP,
+    modifiedby      userid,
+    modified        TIMESTAMP,
 
     CONSTRAINT pk_procedure_scheduled_rooms_rowid PRIMARY KEY (objectid),
     CONSTRAINT fk_procedure_rooms_room FOREIGN KEY (room) REFERENCES wnprc.procedure_rooms (room),
     --CONSTRAINT fk_procedure_rooms_type FOREIGN KEY (room_type) REFERENCES wnprc.procedure_categories (category),
     CONSTRAINT fk_procedure_scheduled_rooms_requestid FOREIGN KEY (requestid) REFERENCES ehr.requests (requestid)
+);
+
+DROP TABLE IF EXISTS wnprc.azure_accounts;
+CREATE TABLE wnprc.azure_accounts
+(
+    display_name        VARCHAR(100),
+    account             VARCHAR(100),
+    enabled             BOOLEAN DEFAULT TRUE,
+    refresh_interval    INTEGER,
+    application_id      VARCHAR(100),
+    authority           VARCHAR(100),
+    upn                 VARCHAR(100),
+    name                VARCHAR(100),
+    scopes              VARCHAR(1000),
+
+    CONSTRAINT pk_azure_accounts_name PRIMARY KEY (name)
 );
 
 -- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';

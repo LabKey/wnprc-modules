@@ -916,6 +916,8 @@
                                 eventToRemove.remove();
                             }
 
+                            //TODO What is this doing???
+                            //TODO Might not be necessary??
                             if (eventSourceId !== response.calendar) {
                                 for (let i = calendarEvents[response.calendar].events.length - 1; i >= 0; i--) {
                                     if (calendarEvents[response.calendar].events[i].rawRowData.requestid === eventRequestId) {

@@ -14,6 +14,15 @@ dependencies {
     jspImplementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     jspImplementation "joda-time:joda-time:2.8.1"
+
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ehrModules:Viral_Load_Assay", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:DBUtils", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:WebUtils", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:GoogleDrive", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:WNPRC_Compliance", depProjectConfig: 'published', depExtension: 'module')
+
 }
 configurations.all {
     Configuration config ->

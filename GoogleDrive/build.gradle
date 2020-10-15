@@ -11,4 +11,10 @@ dependencies {
     external 'com.google.apis:google-api-services-drive:v3-rev85-1.23.0'
     jspImplementation project(BuildUtils.getApiProjectPath(project.gradle))
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
+
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: "published", depExtension: "module")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:DBUtils", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:WebUtils", depProjectConfig: 'published', depExtension: 'module')
+
 }

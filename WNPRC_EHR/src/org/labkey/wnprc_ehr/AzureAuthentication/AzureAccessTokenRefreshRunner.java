@@ -6,7 +6,6 @@ import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,7 +19,7 @@ public class AzureAccessTokenRefreshRunner implements Job {
 
     }
 
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         String name = (String) jobDataMap.get("name");
         doTokenRefresh(name);

@@ -123,7 +123,7 @@ public class TriggerScriptHelper {
         }
 
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "surgery_procedure");
-        try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that surgery_procedure date/enddate fields can be updated to correct dates")) {
+        try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that surgery_procedure date/enddate fields can be updated to correct dates/times")) {
             queryUpdater.update(updateRows);
         } catch (Exception e) {
             _log.error(e);

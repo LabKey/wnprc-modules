@@ -46,6 +46,14 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
     return (
       <div>
         <Table responsive="sm" className="animal-info-table">
+          <thead >
+          <tr>
+            <th colSpan={4}>
+              {animalInfo.Id}
+            </th>
+          </tr>
+          <tr></tr>
+          </thead>
           <tbody>
             <tr>
               <td>Id</td>

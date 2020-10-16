@@ -1,0 +1,11 @@
+.animal-info-table {
+    border: 1px solid #B4B4B4;
+}
+
+.animal-info-table > thead {
+    background-color: #F2F2F2;
+}
+.animal-info-table > thead > tr > th {
+    text-align: center;
+    font-weight: bold;
+}

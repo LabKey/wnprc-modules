@@ -1,52 +1,13 @@
 export interface ContextProps {
-  setQueryDetailsExternal: any;
-  queryDetails: any;
-  setFormDataExternal: any;
-  formData: any;
-  animalInfo: any;
-  setAnimalInfoExternal: any;
-  animalInfoState: any;
-  setAnimalInfoStateExternal: any;
-  editMode: any;
-  setEditMode: any;
-  feedingTypes: any;
-  animalIds: any;
-  setAnimalIdsExternal: any;
-  updateFormDataExternal: any;
-  setBulkEditValuesExternal: any;
-  updateAnimalInfoCacheExternal: any;
-  animalInfoCache: any;
-  errorText: any;
-  setErrorTextExternal: any;
+  animalInfo: AnimalInfoProps;
+  setAnimalInfoExternal: (animalInfo: AnimalInfoProps) => void;
+  animalInfoState: AnimalInfoStates;
+  setAnimalInfoStateExternal: (string) => void;
+  updateAnimalInfoCacheExternal: (animalInfo: AnimalInfoProps) => void;
+  animalInfoCache: object;
 }
 
-export interface ConfigProps {
-  schemaName: string;
-  queryName: string;
-  columns?: any;
-  sort?: string;
-  containerPath?: string;
-  filterArray?: Array<any>;
-}
-
-export interface RowMemberObj {
-  value: any;
-  error: string;
-}
-
-export interface RowObj {
-  Id: RowMemberObj;
-  date: RowMemberObj;
-  type?: RowMemberObj;
-  remark: RowMemberObj;
-  amount: RowMemberObj;
-  lsid: RowMemberObj;
-  QCStateLabel?: RowMemberObj;
-  QCState?: RowMemberObj;
-  command: RowMemberObj;
-}
-
-export interface InfoProps {
+export interface AnimalInfoProps {
   Id: string;
   _labkeyurl_Id: string;
   calculated_status: string;
@@ -59,7 +20,7 @@ export interface InfoProps {
   _labkeyurl_birth: string;
 }
 
-export type infoStates =
+export type AnimalInfoStates =
     | "waiting"
     | "loading"
     | "loading-unsuccess"

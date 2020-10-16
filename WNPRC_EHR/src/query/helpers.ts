@@ -143,7 +143,7 @@ export const getAnimalIdsFromLocation = (location) => {
   })
 }
 
-export const lookupAnimalInfo = (id) => {
+export const lookupAnimalInfo = (id:string) => {
   return new Promise ((resolve, reject) => {
     let config = {
       schemaName: "study",

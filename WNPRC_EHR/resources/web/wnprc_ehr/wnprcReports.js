@@ -1264,7 +1264,7 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         });
         var config = {
             xtype: 'ldk-webpartpanel',
-            title: "Abstract: " + animalId,
+            title: "Abstract - " + animalId,
             align: 'stretch',
             frame: true,
             html: getErrorHTML("Error loading abstract."),

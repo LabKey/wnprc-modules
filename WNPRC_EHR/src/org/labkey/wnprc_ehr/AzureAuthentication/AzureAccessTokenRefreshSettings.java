@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.AzureAuthentication;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
@@ -147,6 +148,7 @@ public class AzureAccessTokenRefreshSettings {
         return scopes;
     }
 
+    @NotNull
     public List<String> getNames() {
         List<String> names = new ArrayList<>();
         for (String name : _settings.keySet()) {

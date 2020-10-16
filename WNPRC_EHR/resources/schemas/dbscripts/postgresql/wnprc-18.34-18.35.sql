@@ -106,6 +106,12 @@ CREATE TABLE wnprc.azure_accounts
     name                VARCHAR(100),
     scopes              VARCHAR(1000),
 
+    -- Some of the default fields for LabKey.
+    createdby       userid,
+    created         TIMESTAMP,
+    modifiedby      userid,
+    modified        TIMESTAMP,
+
     CONSTRAINT pk_azure_accounts_name PRIMARY KEY (name)
 );
 

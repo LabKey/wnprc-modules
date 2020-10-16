@@ -1063,16 +1063,10 @@ public class WNPRC_EHRController extends SpringActionController
             try {
                 List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
 
-                //Get the service object based on schema/table
-                TableInfo ti = QueryService.get().getUserSchema(getUser(), ContainerManager.getForPath("/WNPRC"), "wnprc").getTable("azure_accounts");
-                QueryUpdateService service = ti.getUpdateService();
-
-                List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
-                if (updatedRows.size() != rowsToUpdate.size()) {
+                AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+                if (!settings.updateSettings(rowsToUpdate, getUser())) {
                     response.put("success", false);
-                    throw new QueryUpdateServiceException("There was an error updating the azure_accounts table.");
                 }
-                AzureAccessTokenRefreshScheduler.get().onSettingsChange(event.getName());
             } catch (Exception e) {
                 response.put("success", false);
                 throw e;

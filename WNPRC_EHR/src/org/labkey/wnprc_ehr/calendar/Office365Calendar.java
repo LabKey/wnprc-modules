@@ -65,8 +65,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     private String getAccessToken() {
-        PropertyManager.PropertyMap properties = PropertyManager.getEncryptedStore().getWritableProperties(ACCOUNT_NAME + ".Credentials", false);
-        return properties.get("AccessToken");
+        return PropertyManager.getEncryptedStore().getWritableProperties(ACCOUNT_NAME + ".Credentials", false).get("AccessToken");
     }
 
     public Map<String, Boolean> isRoomAvailable(List<String> rooms, Date start, Date end) {

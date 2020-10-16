@@ -109,7 +109,7 @@ Ext4.define('WNPRC.panel.AzureAuthenticationSettingsPanel', {
                     items: [{
                         xtype: 'button',
                         border: true,
-                        text: 'Save ' + results.accounts[i].display_name + ' Settings',
+                        text: 'Save Settings',
                         handler: function (btn) {
                             btn.up('wnprc-azureauthenticationsettingspanel').doSaveSettings(results.accounts[i]);
                         }
@@ -153,7 +153,7 @@ Ext4.define('WNPRC.panel.AzureAuthenticationSettingsPanel', {
             method: 'POST',
             success: LABKEY.Utils.getCallbackWrapper(function (response) {
                 Ext4.Msg.hide();
-                Ext4.Msg.alert('Success', 'Access Token refresh was successful');
+                Ext4.Msg.alert('Success', account.display_name + ' access token refresh was successful');
             }, this),
             failure: LABKEY.Utils.getCallbackWrapper(this.onError, this)
         });

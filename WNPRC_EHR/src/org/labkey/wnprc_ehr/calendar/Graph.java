@@ -38,25 +38,24 @@ public class Graph {
     private static IGraphServiceClient graphClient = null;
     private static SimpleAuthProvider authProvider = null;
     private static DateTimeFormatter isoLocalDateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static DefaultLogger logger = new DefaultLogger();
 
-    private static void ensureGraphClient(String accessToken) {
-        if (graphClient == null) {
-            // Create the auth provider
-            authProvider = new SimpleAuthProvider(accessToken);
+    static {
+		logger.setLoggingLevel(LoggerLevel.ERROR);
+	}
 
-            // Create default logger to only log errors
-            DefaultLogger logger = new DefaultLogger();
-            logger.setLoggingLevel(LoggerLevel.ERROR);
+    private synchronized static void ensureGraphClient(String accessToken) {
+        // Create the auth provider
+        authProvider = new SimpleAuthProvider(accessToken);
 
-            // Build a Graph client
-            graphClient = GraphServiceClient.builder()
-                .authenticationProvider(authProvider)
-                .logger(logger)
-                .buildClient();
-        }
+        // Build a Graph client
+        graphClient = GraphServiceClient.builder()
+            .authenticationProvider(authProvider)
+            .logger(logger)
+            .buildClient();
     }
 
-    public static User getUser(String accessToken) {
+    public synchronized static User getUser(String accessToken) {
         ensureGraphClient(accessToken);
 
         // GET /me to get authenticated user
@@ -68,7 +67,7 @@ public class Graph {
         return me;
     }
 
-    public static List<Calendar> readCalendars(String accessToken) {
+    public synchronized static List<Calendar> readCalendars(String accessToken) {
     	ensureGraphClient(accessToken);
 
     	ICalendarCollectionPage calendarPage = graphClient
@@ -80,7 +79,7 @@ public class Graph {
     	return calendarPage.getCurrentPage();
     }
 
-    public static Event createEvent(String accessToken, String calendarId, Event newEvent) {
+    public synchronized static Event createEvent(String accessToken, String calendarId, Event newEvent) {
     	ensureGraphClient(accessToken);
 
     	Event addedEvent = graphClient
@@ -94,7 +93,7 @@ public class Graph {
     	return addedEvent;
     }
 
-    public static List<Event> readRoomEvents(String accessToken, String roomEmailAddress, String start, String end) {
+    public synchronized static List<Event> readRoomEvents(String accessToken, String roomEmailAddress, String start, String end) {
     	ensureGraphClient(accessToken);
 
     	// Use HeaderOption to specify that we want the event body to be text rather than html
@@ -120,7 +119,7 @@ public class Graph {
         return events;
     }
 
-    public static Event readEvent(String accessToken, String eventId) {
+    public synchronized static Event readEvent(String accessToken, String eventId) {
     	ensureGraphClient(accessToken);
 
     	List<Option> options = new LinkedList<>();
@@ -145,7 +144,7 @@ public class Graph {
     	return event;
 	}
 
-    public static List<Event> readEvents(String accessToken, String calendarId, String start, String end) {
+    public synchronized static List<Event> readEvents(String accessToken, String calendarId, String start, String end) {
         ensureGraphClient(accessToken);
 
         List<Event> events = new ArrayList<>();
@@ -175,7 +174,7 @@ public class Graph {
         return events;
     }
 
-    public static Event updateEvent(String accessToken, String eventId, Event event) {
+    public synchronized static Event updateEvent(String accessToken, String eventId, Event event) {
     	ensureGraphClient(accessToken);
 
     	Event updatedEvent = graphClient
@@ -187,7 +186,7 @@ public class Graph {
     	return updatedEvent;
     }
 
-    public static void deleteEvent(String accessToken, String eventId) {
+    public synchronized static void deleteEvent(String accessToken, String eventId) {
     	ensureGraphClient(accessToken);
 
     	graphClient
@@ -197,7 +196,7 @@ public class Graph {
     		.delete();
     }
 
-    public static Map<String, Boolean> getAvailability(String accessToken, List<String> attendees, ZonedDateTime start, ZonedDateTime end) {
+    public synchronized static Map<String, Boolean> getAvailability(String accessToken, List<String> attendees, ZonedDateTime start, ZonedDateTime end) {
     	ensureGraphClient(accessToken);
 
     	List<Option> options = new LinkedList<Option>();
@@ -278,17 +277,17 @@ public class Graph {
     	return attendees;
     }
 
-    private static List<Option> addPreferTextHeader(List<Option> options) {
+    private synchronized static List<Option> addPreferTextHeader(List<Option> options) {
     	options.add(new HeaderOption("Prefer", "outlook.body-content-type=\"text\""));
     	return options;
     }
 
-    private static List<Option> addPreferCentralTimeZone(List<Option> options) {
+    private synchronized static List<Option> addPreferCentralTimeZone(List<Option> options) {
     	options.add(new HeaderOption("Prefer", "outlook.timezone=\"America/Chicago\""));
     	return options;
     }
 
-    private static List<Option> addDateFilters(List<Option> options, String start, String end) {
+    private synchronized static List<Option> addDateFilters(List<Option> options, String start, String end) {
     	if (start != null && end != null) {
     		options.add(new QueryOption("filter", "start/datetime ge '" + start + "' and end/datetime lt '" + end + "'"));
     	} else if (start != null) {

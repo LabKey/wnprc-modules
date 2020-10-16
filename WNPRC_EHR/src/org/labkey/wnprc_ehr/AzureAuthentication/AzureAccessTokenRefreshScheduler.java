@@ -21,6 +21,7 @@ public class AzureAccessTokenRefreshScheduler {
     private static final Logger _log = Logger.getLogger(AzureAccessTokenRefreshScheduler.class);
     private static Map<String, JobDetail> _jobs = new HashMap<>();
     private Map<String, Integer> _frequencies = new HashMap<>();
+    private Map<String, Boolean> _enabled = new HashMap<>();
 
     private AzureAccessTokenRefreshScheduler() {
 
@@ -48,6 +49,7 @@ public class AzureAccessTokenRefreshScheduler {
                 }
 
                 _frequencies.put(name, settings.getRefreshInterval(name));
+                _enabled.put(name, settings.isEnabled(name));
 
                 Trigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity(AzureAccessTokenRefreshScheduler.class.getCanonicalName() + "_" + name, AzureAccessTokenRefreshScheduler.class.getCanonicalName() + "_" + name)
@@ -70,6 +72,7 @@ public class AzureAccessTokenRefreshScheduler {
         if (_jobs.get(name) != null) {
             try {
                 StdSchedulerFactory.getDefaultScheduler().deleteJob(_jobs.get(name).getKey());
+                _enabled.put(name, false);
                 _log.info("Azure access token refresh for '" + settings.getDisplayName(name) + "'  unscheduled");
             } catch (Exception e) {
                 _log.error("Error unscheduling Azure access token refresh for '" + settings.getDisplayName(name) + "'", e);
@@ -87,12 +90,11 @@ public class AzureAccessTokenRefreshScheduler {
         } else {
             if (_jobs.get(name) == null) {
                 schedule(name);
-            } else {
-                if (!_frequencies.get(name).equals(settings.getRefreshInterval(name))) {
-                    unschedule(name);
-                    schedule(name);
-                }
-                //this indicates it is already scheduled with the correct frequency
+            } else if (!_enabled.get(name) && settings.isEnabled(name)) {
+                schedule(name);
+            } else if (!_frequencies.get(name).equals(settings.getRefreshInterval(name))) {
+                unschedule(name);
+                schedule(name);
             }
         }
     }

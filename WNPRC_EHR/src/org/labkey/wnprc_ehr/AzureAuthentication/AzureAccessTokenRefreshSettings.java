@@ -1,32 +1,44 @@
 package org.labkey.wnprc_ehr.AzureAuthentication;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.security.User;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+
+import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
 
 public class AzureAccessTokenRefreshSettings {
 
-    private Map<String, Map<String, Object>> _settings;
+    private static Map<String, Map<String, Object>> _settings = null;
 
     public AzureAccessTokenRefreshSettings() {
-        _settings = createSettingsMap();
+        if (_settings == null) {
+            refreshSettingsMap();
+        }
     }
 
-    private Map<String, Map<String, Object>> createSettingsMap() {
-        Map<String, Map<String, Object>> settingsMap = new HashMap<>();
+    private void refreshSettingsMap() {
+        _settings = new TreeMap<>();
 
         DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
         TableInfo ti = schema.getTable("azure_accounts");
@@ -48,10 +60,57 @@ public class AzureAccessTokenRefreshSettings {
         Map<String, Object>[] azureAccounts = ts.getMapArray();
 
         for (int i = 0; i < azureAccounts.length; i++) {
-            settingsMap.put((String) azureAccounts[i].get("name"), azureAccounts[i]);
+            _settings.put((String) azureAccounts[i].get("name"), azureAccounts[i]);
+        }
+    }
+
+    public boolean updateSettings(List<Map<String, Object>> newSettings, User user) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException {
+
+        for (Map<String, Object> accountSettings : newSettings) {
+            if (accountSettings.get("name") == null) {
+                return false;
+            }
         }
 
-        return settingsMap;
+        //Get the service object based on schema/table
+        TableInfo ti = QueryService.get().getUserSchema(user, ContainerManager.getForPath("/WNPRC"), "wnprc").getTable("azure_accounts");
+        QueryUpdateService service = ti.getUpdateService();
+
+        List<Map<String, Object>> updatedSettings = service.updateRows(user, getContainer(), newSettings, newSettings, null, null);
+        if (updatedSettings.size() != newSettings.size()) {
+            throw new QueryUpdateServiceException("There was an error updating the azure_accounts table.");
+        }
+
+        for (Map<String, Object> accountSettings : newSettings) {
+            if (StringUtils.isNotBlank((String) accountSettings.get("display_name"))) {
+                _settings.get(accountSettings.get("name")).put("display_name", accountSettings.get("display_name"));
+            }
+            if (StringUtils.isNotBlank((String) accountSettings.get("account"))) {
+                _settings.get(accountSettings.get("name")).put("account", accountSettings.get("account"));
+            }
+            if (accountSettings.get("enabled") != null) {
+                _settings.get(accountSettings.get("name")).put("enabled", accountSettings.get("enabled"));
+            }
+            if (accountSettings.get("refresh_interval") != null && (Integer) accountSettings.get("refresh_interval") >= 0) {
+                _settings.get(accountSettings.get("name")).put("refresh_interval", accountSettings.get("refresh_interval"));
+            }
+            if (StringUtils.isNotBlank((String) accountSettings.get("application_id"))) {
+                _settings.get(accountSettings.get("name")).put("application_id", accountSettings.get("application_id"));
+            }
+            if (StringUtils.isNotBlank((String) accountSettings.get("authority"))) {
+                _settings.get(accountSettings.get("name")).put("authority", accountSettings.get("authority"));
+            }
+            if (StringUtils.isNotBlank((String) accountSettings.get("upn"))) {
+                _settings.get(accountSettings.get("name")).put("upn", accountSettings.get("upn"));
+            }
+            if (StringUtils.isNotBlank((String) accountSettings.get("scopes"))) {
+                _settings.get(accountSettings.get("name")).put("scopes", accountSettings.get("scopes"));
+            }
+
+            AzureAccessTokenRefreshScheduler.get().onSettingsChange((String) accountSettings.get("name"));
+        }
+
+        return true;
     }
 
     public String getDisplayName(String name) {

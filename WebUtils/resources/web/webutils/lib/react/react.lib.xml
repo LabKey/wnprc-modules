@@ -1,5 +1,0 @@
-<libraries xmlns="http://labkey.org/clientLibrary/xml/">
-    <library compileInProductionMode="false">
-        <script path="/webutils/lib/react/app.js"/>
-    </library>
-</libraries>

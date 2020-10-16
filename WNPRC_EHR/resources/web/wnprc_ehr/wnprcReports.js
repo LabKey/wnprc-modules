@@ -3,6 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
+
 Ext4.namespace('EHR.reports');
 
 //this contains WNPRC-specific reports that should be loaded on the animal history page
@@ -1263,100 +1264,32 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         });
         var config = {
             xtype: 'ldk-webpartpanel',
-            title: "Another panel" + animalId,
+            title: "Abstract: " + animalId,
             align: 'stretch',
             frame: true,
-            html: getErrorHTML("Please enable the WebUtils module to view this visualization."),
+            html: getErrorHTML("Error loading abstract."),
             style: 'margin-bottom: 20px'
         };
-
-        function getAnimalDemographics(animalId){
-            return new Promise ((resolve, reject) => {
-                LABKEY.Query.selectRows({
-                    schemaName: 'study',
-                    queryName: 'demographics',
-                    viewName: 'Abstract',
-                    filterArray: [LABKEY.Filter.create('id', animalId, LABKEY.Filter.Types.EQUAL)],
-                    success: (data) => {
-                        resolve(data)
-                    }
-                })
-            })
+        var elementHTML = '';
+        for (var i = 0; i < animalList.length; i ++){
+            elementHTML += '<div id="abstract-section' + animalList[i] + '"></div>'
         }
-        let promises = [];
-        for (let i = 0; i < animalList.length; i++){
-            promises.push(getAnimalDemographics(animalList[i]));
-        }
-
-
-        function constructAbstractTableBody(rows)
-        {
-            //for the length of the array, {<tr><td><td><td><td></td>}, {<tr><td><td><td><td></tr>}
-            // => transform to {<tr><td><td><td><td><td><td><td><td></tr>},
-            //can we alter the structure the server sends back? prob not.
-        }
-
-        //creates a react element meant for a table entry
-        function createElement(result, dataIndex, label){
-            return React.createElement("tr", null,
-                        React.createElement("td", null, label),
-                            React.createElement("td", null,
-                                React.createElement("a", { href: result.rows[0]["_labkeyurl_"+dataIndex] }, result.rows[0][dataIndex])))
-        }
-
-        function getFieldMetadata(name, fieldsMetaData) {
-            for (let i = 0; i < fieldsMetaData.length; i++){
-                if (fieldsMetaData[i].name == name){
-                    return fieldsMetaData[i];
-                }
-            }
-        }
-
         Ext4.apply(config, {
-            html: '<p id="testreact">' + animalId + '</p>',
+            html: elementHTML,
             listeners: {
                 afterrender: {
                     fn: function () {
-                        LABKEY.requiresScript("/webutils/lib/react/react.production.min.js",true, function() {
-                            LABKEY.requiresScript("/webutils/lib/react/react-dom.production.min.js",true, function() {
+                        console.log('adding script...')
+                        LABKEY.requiresScript("/wnprc_ehr/gen/abstract.js",true, function() {
+                            for (var i = 0; i < animalList.length; i ++){
+                                Abstract.renderAnimalAbstract(animalList[i])
+                            }
 
-                                Promise.all(promises).then( results => {
-                                    let uls = [];
-                                    for (let result of results) {
-                                        if (!result.rows.length > 0){
-                                            return;
-                                        }
-                                        let items = [];
-                                        let resultRow = result.rows[0];
-                                        let fieldsMetaData = result.metaData.fields;
-                                        for (let prop in resultRow){
-                                            if (!/^_labkey/.test(prop)){
-                                                let fieldMetaData = getFieldMetadata(prop.toString(), fieldsMetaData);
-                                                let label = fieldMetaData.caption;
-                                                if (!fieldMetaData.isHidden)
-                                                    items.push(createElement(result, prop.toString(), label))
-                                            }
-                                        }
-                                        uls.push(React.createElement("div", null, React.createElement("div", null,
-                                                React.createElement("div", null,
-                                                        React.createElement("table", { responsive: "sm", className: "animal-info-table table" },
-                                                                React.createElement("tbody", null, items
-                                                                )))
-
-                                                )))
-                                    }
-                                    let wholeel = React.createElement("div", null, uls);
-                                    ReactDOM.render(wholeel, document.getElementById('testreact'))
-
-                                })
-
-                            });
                         });
                     }
                 }
             }
         });
-        tab.add(config)
-        /*LABKEY.requiresScript("/webutils/lib/react/app.js",true, function() {});*/
+        tab.add(config);
     }
 })();

@@ -4,17 +4,9 @@ require("ehr/triggers").initScript(this);
 
 //FYI: Get's called on every single key press!
 function onInit(event, helper){
-    // console.log('onInit');
-    // helper.registerRowProcessor(function(helper, row) {
-    //     if (!row)
-    //         return;
-    //
-    //     if (!row.requestId || !row.protocol)
-    //     {
-    //         return;
-    //     }
-    // })
-
+    helper.setScriptOptions({
+         allowFutureDates: true
+     });
 }
 //
 // function onBeforeInsert(row, errors){
@@ -70,6 +62,9 @@ function onComplete(event,errors, helper) {
         startTimes.push(roomRows[i].row.date);
         endTimes.push(roomRows[i].row.enddate);
     }
-    let requestId = roomRows[0].row.requestid;
-    WNPRC.Utils.getJavaHelper().setSurgeryProcedureStartEndTimes(requestId, startTimes, endTimes);
+    console.log(JSON.stringify(roomRows));
+    if (roomRows.length > 0) {
+        let requestId = roomRows[0].row.requestid;
+        WNPRC.Utils.getJavaHelper().setSurgeryProcedureStartEndTimes(requestId, startTimes, endTimes);
+    }
 }

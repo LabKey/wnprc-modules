@@ -76,7 +76,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return availability;
     }
 
-    public boolean addEvents(String calendarId, List<Map<String, Object>> roomRequests, String subject, String requestId) {
+    public boolean addEvents(String calendarId, List<Map<String, Object>> roomRequests, String subject, String requestId, JSONObject response) {
         boolean allRoomsAvailable = true;
 
         for (Map<String, Object> roomRequest : roomRequests) {
@@ -88,6 +88,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             rooms.add(roomEmailAddress);
             if (!isRoomAvailable(rooms, start, end).get(roomEmailAddress)) {
                 allRoomsAvailable = false;
+                response.put("error", "Room " + roomEmailAddress != null ? roomEmailAddress.substring(0, roomEmailAddress.indexOf("@")) : "null" + " is not available at the requested time");
                 break;
             }
         }
@@ -103,8 +104,11 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
                 List<Attendee> attendees = Graph.buildAttendeeList(roomEmailAddress);
                 Event newEvent = Graph.buildEvent(startTime, endTime, subject, requestId, attendees);
-                Graph.createEvent(getAccessToken(), BASE_CALENDARS.get(calendarId), newEvent);
+                Event createdEvent = Graph.createEvent(getAccessToken(), BASE_CALENDARS.get(calendarId), newEvent);
+                roomRequest.put("event_id", createdEvent.id);
             }
+        } else {
+
         }
         return allRoomsAvailable;
     }
@@ -120,8 +124,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         Graph.deleteEvent(getAccessToken(), eventId);
 
         List<String> rooms = event.attendees.stream().map(attendee -> attendee.emailAddress.address).collect(Collectors.toList());
-        ZonedDateTime start = ZonedDateTime.parse(event.start.dateTime);
-        ZonedDateTime end = ZonedDateTime.parse(event.end.dateTime);
+        LocalDateTime start = LocalDateTime.parse(event.start.dateTime);
+        LocalDateTime end = LocalDateTime.parse(event.end.dateTime);
 
         response.put("rooms", rooms);
         response.put("start", start);

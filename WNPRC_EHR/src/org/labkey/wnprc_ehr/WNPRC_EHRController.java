@@ -1426,7 +1426,7 @@ public class WNPRC_EHRController extends SpringActionController
             Office365Calendar calendar = new Office365Calendar();
             calendar.setUser(getUser());
             calendar.setContainer(getContainer());
-            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), roomRows, event.getSubject(), event.getRequestId());
+            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), roomRows, event.getSubject(), event.getRequestId(), response);
 
             if (eventsScheduled)
             {
@@ -1469,8 +1469,8 @@ public class WNPRC_EHRController extends SpringActionController
                     for(Map<String, Object> roomRow: roomRows)
                     {
                         JSONObject roomRecord = new JSONObject();
-                        roomRecord.put("rowid", roomRow.get("rowid"));
-                        roomRecord.put("appt_id", roomRow.get("appt_id"));
+                        roomRecord.put("objectid", roomRow.get("objectid"));
+                        roomRecord.put("event_id", roomRow.get("event_id"));
                         updateRecord(roomRecord, "wnprc", "procedure_scheduled_rooms");
                     }
 
@@ -1488,21 +1488,20 @@ public class WNPRC_EHRController extends SpringActionController
                 }
                 catch (Exception e)
                 {
-                    for (Map<String, Object> roomRow : roomRows)
+                    try
                     {
-                        String apptId = (String) roomRow.get("appt_id");
-                        if (apptId != null && apptId.length() > 0)
+                        for (Map<String, Object> roomRow : roomRows)
                         {
-                            String room = (String) roomRow.get("room");
-                            Date start = (Timestamp) roomRow.get("start");
-                            Date end = (Timestamp) roomRow.get("enddate");
-                            calendar.cancelEvent(apptId);
+                            String eventId = (String) roomRow.get("event_id");
+                            if (eventId != null && eventId.length() > 0)
+                            {
+                                calendar.cancelEvent(eventId);
+                            }
                         }
+                    } catch (Exception ex) {
+                        response.put("error", "There was an error, but some of the events may have still been created in outlook. " +
+                                "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");
                     }
-                }
-                finally
-                {
-                    // Nothing to do here
                 }
             }
             return response;
@@ -1672,12 +1671,12 @@ public class WNPRC_EHRController extends SpringActionController
     private List<Map<String, Object>> getSurgeryProcedureRooms(String requestId) throws java.sql.SQLException
     {
         List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("rowid"));
+        columns.add(FieldKey.fromString("objectid"));
         columns.add(FieldKey.fromString("room"));
         columns.add(FieldKey.fromString("room/email"));
         columns.add(FieldKey.fromString("date"));
         columns.add(FieldKey.fromString("enddate"));
-        columns.add(FieldKey.fromString("appt_id"));
+        columns.add(FieldKey.fromString("event_id"));
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "wnprc", "procedure_scheduled_rooms");

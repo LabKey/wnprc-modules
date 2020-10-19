@@ -1466,13 +1466,16 @@ public class WNPRC_EHRController extends SpringActionController
                         updateRecord(surgeryRecord, "study", "surgery_procedure");
                     }
 
+                    List<Map<String, Object>> updatedRoomRows = new ArrayList<>();
                     for(Map<String, Object> roomRow: roomRows)
                     {
                         JSONObject roomRecord = new JSONObject();
                         roomRecord.put("objectid", roomRow.get("objectid"));
                         roomRecord.put("event_id", roomRow.get("event_id"));
-                        updateRecord(roomRecord, "wnprc", "procedure_scheduled_rooms");
+                        updatedRoomRows.add(roomRecord);
                     }
+                    //update all rows at the same time so that the trigger script can update the surgery
+                    updateRecords(updatedRoomRows, "wnprc", "procedure_scheduled_rooms");
 
                     //TODO look into permissions stuff... ti.hasPermission(getUser(), DeletePermission.class);
 
@@ -1503,32 +1506,6 @@ public class WNPRC_EHRController extends SpringActionController
                                 "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");
                     }
                 }
-            }
-            return response;
-        }
-    }
-
-    @ActionNames("SurgeryProcedureDeleteRoomEvent")
-    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
-    @RequiresLogin()
-    public class SurgeryProcedureDeleteRoomEventAction extends ApiAction<SurgeryProcedureEvent>
-    {
-        @Override
-        public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
-        {
-            JSONObject response = new JSONObject();
-            response.put("success", false);
-            Office365Calendar calendar = new Office365Calendar();
-            calendar.setUser(getUser());
-            calendar.setContainer(getContainer());
-            try
-            {
-//                calendar.deleteCanceledRoomEvent(event.getRooms(), event.getStart(), event.getEnd());
-                response.put("success", true);
-            }
-            catch (Exception e)
-            {
-                //TODO error logging?
             }
             return response;
         }
@@ -1591,6 +1568,7 @@ public class WNPRC_EHRController extends SpringActionController
         public Object execute(SurgeryProcedureChangeStatusEvent event, BindException errors) throws Exception
         {
             List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
+            List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
 
             JSONObject response = new JSONObject();
             response.put("success", false);
@@ -1628,12 +1606,15 @@ public class WNPRC_EHRController extends SpringActionController
 
                 if ("Request: Pending".equals(event.getQCStateLabel()))
                 {
-                    String eventId = null;
-                    if(spRows.size() > 0) {
-                        eventId = (String) spRows.get(0).get("eventid");
-                    }
                     Office365Calendar calendar = new Office365Calendar();
-                    calendar.cancelEvent(eventId, response);
+                    for (Map<String, Object> roomRow : roomRows)
+                    {
+                        String eventId = (String) roomRow.get("event_id");
+                        if (eventId != null && eventId.length() > 0)
+                        {
+                            calendar.cancelEvent(eventId, response);
+                        }
+                    }
                 }
 
                 transaction.commit();
@@ -1706,10 +1687,7 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    private void updateRecord(JSONObject record, String schema, String table) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
-    {
-        List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
-
+    private void updateRecords(List<Map<String, Object>> rowsToUpdate, String schema, String table) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException {
         //Get the service object based on schema/table
         TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), schema).getTable(table);
         QueryUpdateService service = ti.getUpdateService();
@@ -1718,6 +1696,12 @@ public class WNPRC_EHRController extends SpringActionController
         if (updatedRows.size() != rowsToUpdate.size()) {
             throw new QueryUpdateServiceException("Not all " + schema + "." + table + " rows updated properly");
         }
+    }
+
+    private void updateRecord(JSONObject record, String schema, String table) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
+        updateRecords(rowsToUpdate, schema, table);
     }
 
     public static class FetchCalendarEvent

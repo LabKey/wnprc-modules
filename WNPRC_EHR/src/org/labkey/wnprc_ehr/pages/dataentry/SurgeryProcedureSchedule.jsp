@@ -899,8 +899,6 @@
                 let eventId = selectedEvent.id;
                 let eventSourceId = selectedEvent.source.id;
                 let eventRequestId = selectedEvent.extendedProps.rawRowData.requestid;
-                selectedEvent = {};
-                selectedId = null;
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                         requestId: WebUtils.VM.taskDetails.requestid(),
@@ -916,66 +914,60 @@
                                 eventToRemove.remove();
                             }
 
-                            //TODO What is this doing???
-                            //TODO Might not be necessary??
-                            if (eventSourceId !== response.calendar) {
-                                for (let i = calendarEvents[response.calendar].events.length - 1; i >= 0; i--) {
-                                    if (calendarEvents[response.calendar].events[i].rawRowData.requestid === eventRequestId) {
-                                        let calEventToRemove = calendar.getEventById(calendarEvents[response.calendar].events[i].id);
-                                        calendarEvents[response.calendar].events.splice(i, 1);
-                                        if (calEventToRemove) {
-                                            calEventToRemove.remove();
+                            //new code start
+                            let removedEventArray = [];
+                            for (let i = 0; i < eventRooms.length; i++) {
+                                for (let j = calendarEvents[eventRooms[i]].events.length - 1; j >= 0; j--) {
+                                    if (calendarEvents[eventRooms[i]].events[j].rawRowData.requestid === eventRequestId) {
+                                        let roomEventToRemove = calendar.getEventById(calendarEvents[eventRooms[i]].events[j].id)
+                                        removedEventArray = removedEventArray.concat(calendarEvents[eventRooms[i]].events.splice(j, 1));
+                                        if (roomEventToRemove) {
+                                            roomEventToRemove.remove();
                                         }
                                     }
                                 }
                             }
 
-                            LABKEY.Ajax.request({
-                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureDeleteRoomEvent", null, {
-                                    rooms: response.rooms,
-                                    start: response.start,
-                                    end: response.end
-                                }),
-                                success: LABKEY.Utils.getCallbackWrapper(function (response)
-                                {
-                                    let removedEventArray = [];
-                                    if (response.success) {
-                                        for (let i = 0; i < eventRooms.length; i++) {
-                                            for (let j = calendarEvents[eventRooms[i]].events.length - 1; j >= 0 ; j--) {
-                                                if (calendarEvents[eventRooms[i]].events[j].rawRowData.requestid === eventRequestId) {
-                                                    let roomEventToRemove = calendar.getEventById(calendarEvents[eventRooms[i]].events[j].id)
-                                                    removedEventArray = calendarEvents[eventRooms[i]].events.splice(j, 1);
-                                                    if (roomEventToRemove) {
-                                                        roomEventToRemove.remove();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        let removedEvent = removedEventArray.length > 0 ? removedEventArray[0] : null;
-                                        if (removedEvent) {
-                                            let newPendingRequestRow = new WebUtils.Models.TableRow({
-                                                data: [
-                                                        removedEvent.rawRowData.rowid,
-                                                        removedEvent.rawRowData.priority,
-                                                        removedEvent.rawRowData.animalid,
-                                                        removedEvent.rawRowData.requestor,
-                                                        displayDate(removedEvent.rawRowData.created),
-                                                        displayDateTime(removedEvent.rawRowData.date),
-                                                        displayDateTime(removedEvent.rawRowData.enddate)
-                                                ],
-                                                otherData: removedEvent.rawRowData,
-                                                warn: (removedEvent.rawRowData.priority === 'ASAP'),
-                                                err:  (removedEvent.rawRowData.priority === 'Stat'),
-                                                success: (removedEvent.rawRowData.priority === 'Routine')
-                                            });
-                                            WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
-                                            pendingRequestsIndex[removedEvent.rawRowData.requestid] = removedEvent.rawRowData;
-                                        }
-                                    } else {
-                                        alert('There was an error while trying to cancel the event.');
-                                    }
-                                }, this)
-                            });
+                            let removedEvent = removedEventArray.length > 0 ? removedEventArray[0] : null;
+                            if (removedEvent) {
+                                let newPendingRequestRow = new WebUtils.Models.TableRow({
+                                    data: [
+                                        removedEvent.rawRowData.rowid,
+                                        removedEvent.rawRowData.priority,
+                                        removedEvent.rawRowData.animalid,
+                                        removedEvent.rawRowData.requestor,
+                                        displayDate(removedEvent.rawRowData.created),
+                                        displayDateTime(removedEvent.rawRowData.date),
+                                        displayDateTime(removedEvent.rawRowData.enddate)
+                                    ],
+                                    otherData: removedEvent.rawRowData,
+                                    warn: (removedEvent.rawRowData.priority === 'ASAP'),
+                                    err: (removedEvent.rawRowData.priority === 'Stat'),
+                                    success: (removedEvent.rawRowData.priority === 'Routine')
+                                });
+                                WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
+                                pendingRequestsIndex[removedEvent.rawRowData.requestid] = removedEvent.rawRowData;
+                            }
+                            //new code end
+
+                            selectedEvent = {};
+                            selectedId = null;
+
+
+
+                            // //TODO THIS IS IF AN EVENT IS CANCELLED BY CLICKING ON A ROOM, RATHER THAN THE MAIN EVENT!!!!!!!!
+                            // if (eventSourceId !== response.calendar) {
+                            //     for (let i = calendarEvents[response.calendar].events.length - 1; i >= 0; i--) {
+                            //         if (calendarEvents[response.calendar].events[i].rawRowData.requestid === eventRequestId) {
+                            //             let calEventToRemove = calendar.getEventById(calendarEvents[response.calendar].events[i].id);
+                            //             calendarEvents[response.calendar].events.splice(i, 1);
+                            //             if (calEventToRemove) {
+                            //                 calEventToRemove.remove();
+                            //             }
+                            //         }
+                            //     }
+                            // }
+
                         } else {
                             alert('There was an error while trying to cancel the event.');
                         }

@@ -107,8 +107,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 Event createdEvent = Graph.createEvent(getAccessToken(), BASE_CALENDARS.get(calendarId), newEvent);
                 roomRequest.put("event_id", createdEvent.id);
             }
-        } else {
-
         }
         return allRoomsAvailable;
     }
@@ -127,7 +125,15 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         LocalDateTime start = LocalDateTime.parse(event.start.dateTime);
         LocalDateTime end = LocalDateTime.parse(event.end.dateTime);
 
-        response.put("rooms", rooms);
+        if (response.get("rooms") != null) {
+            JSONArray previousRooms = (JSONArray) response.get("rooms");
+            for (String room : rooms) {
+                previousRooms.put(room);
+            }
+            response.put("rooms", previousRooms);
+        } else {
+            response.put("rooms", rooms);
+        }
         response.put("start", start);
         response.put("end", end);
         response.put("calendar", event.calendar.name);

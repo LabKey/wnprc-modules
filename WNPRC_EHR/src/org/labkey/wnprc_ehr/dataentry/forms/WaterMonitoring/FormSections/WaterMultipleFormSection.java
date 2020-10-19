@@ -30,6 +30,7 @@ public class WaterMultipleFormSection extends SimpleGridSection
 
         defaultButtons.add(0,"ADDSCHEDULEDWATERS");
         defaultButtons.add(1,"CHANGETIME");
+        //TODO: remove add button from the form.
         //defaultButtons.remove("ADDRECORD");
        
         return defaultButtons;

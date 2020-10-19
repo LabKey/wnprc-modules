@@ -43,7 +43,7 @@
                                 <filters>
                                     <filter operator="lt" value="20"/>
                                 </filters>
-                                <backgroundColor>00CCFF</backgroundColor>
+                                <backgroundColor>E74C3C</backgroundColor>
                             </conditionalFormat>
                         </conditionalFormats>
                     </column>

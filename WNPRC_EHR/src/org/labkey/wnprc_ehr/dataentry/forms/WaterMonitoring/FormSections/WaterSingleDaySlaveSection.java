@@ -33,6 +33,6 @@ public class WaterSingleDaySlaveSection extends SimpleGridSection
     }*/
     @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id", "date", "volume", "assignedTo", "project","frequency","recordSource");
+        return Arrays.asList("Id", "date", "volume", "assignedTo", "project","frequency","recordSource","waterSource","provideFruit");
     }
 }

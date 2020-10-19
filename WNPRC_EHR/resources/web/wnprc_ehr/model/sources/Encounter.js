@@ -6,6 +6,7 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
                 editable: false
             },
             date: {
+                xtype: 'datefield',
                 allowBlank: false,
                 editable: false,
                 columnConfig: {

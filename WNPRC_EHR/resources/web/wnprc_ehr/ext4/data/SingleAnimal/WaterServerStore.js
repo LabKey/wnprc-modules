@@ -60,7 +60,7 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                     // Validate null values for not entering empty records to DB
                     // Excluding validation of weight because we are allowing null weights
                     switch (r.store.queryName){
-                        /*case 'weight':
+                        case 'weight':
                             var weight = r.get('weight');
                             if (weight == null ){
                                 break;
@@ -68,7 +68,7 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                             else {
                                 recMap.create.push(r);
                                 break;
-                            }*/
+                            }
                         case 'restraints':
                             var restraintType = r.get('restraintType');
                             if (restraintType == null  || restraintType == ""){

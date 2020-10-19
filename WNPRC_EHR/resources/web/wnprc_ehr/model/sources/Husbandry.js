@@ -111,7 +111,27 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             }
 
         },
-        'study.weight':{
+        'study.singleGeneralEncounter':{
+            Id:{
+                parentConfig: null
+            },
+            date: {
+                xtype: 'xdatetime',
+                noSaveInTemplateByDefault: true,
+                columnConfig: {
+                    fixed: true,
+                    width: 130
+                },
+                editorConfig: {
+                    id: 'encounterDateTime',
+                    defaultHour: 10,
+                    defaultMinutes: 0,
+                    dateConfig: {
+                        maxValue: new Date(),
+                        minValue: new Date(),
+                    }
+                },
+            },
             project: {
                 xtype: 'wnprc-projectentryfield',
                 editable : true,
@@ -125,23 +145,18 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 columnConfig: {
                     width: 120
                 }
+            }
+        },
+        'study.weight':{
+            Id:{
+                parentConfig: {
+                    storeIdentifier: {queryName: 'singleGeneralEncounter', schemaName: 'study'},
+                    dataIndex: 'Id'
+                },
+                hidden : true
             },
-            date: {
-                xtype: 'xdatetime',
-                noSaveInTemplateByDefault: true,
-                columnConfig: {
-                    fixed: true,
-                    width: 130
-                },
-                editorConfig: {
-                    id: 'weightDateTime',
-                    defaultHour: 10,
-                    defaultMinutes: 0,
-                    dateConfig: {
-                        maxValue: new Date(),
-                        minValue: new Date(),
-                    }
-                },
+            date:{
+                hidden: true
             },
             weight:{
                 allowBlank :true
@@ -169,7 +184,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     id : 'location',
                     listeners: {
                         change: function (field, val) {
-                            var weightStartTime = Ext4.getCmp('weightDateTime');
+                            var weightStartTime = Ext4.getCmp('encounterDateTime');
                             var chairingStartTime = Ext4.getCmp('chairingStartTime');
                             var chairingEndTime = Ext4.getCmp('chairingEndTime');
                             var waterLocation = Ext4.getCmp('waterLocation');
@@ -367,6 +382,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 shownInGrid: true,
                 editable: false,
                 defaultValue: 'Implant Maintenance'
+            },
+            remark:{
+                shownInGrid: true
             }
 
         },
@@ -445,7 +463,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 hidden: true,
                 shownInGrid: false,
                 parentConfig: {
-                    storeIdentifier: {queryName: 'weight', schemaName: 'study'},
+                    storeIdentifier: {queryName: 'singleGeneralEncounter', schemaName: 'study'},
                     dataIndex: 'Id'
                 }
             },
@@ -501,6 +519,17 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 editable: false,
                 //hidden: true,
                 shownInGrid: false
+            },
+            provideFruit:{
+                defaultValue: 'none',
+                allowBlank: false,
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'husbandry_fruit',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+                    sort: 'sort_order'
+                }
             }
         },
         'study.waterOrders':{

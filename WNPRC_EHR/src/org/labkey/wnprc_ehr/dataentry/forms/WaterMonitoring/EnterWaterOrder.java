@@ -24,8 +24,7 @@ public class EnterWaterOrder extends SimpleTaskForm
         super(ctx, owner, NAME,  NAME, WNPRCConstants.DataEntrySections.CLINICAL_SPI, Arrays.asList(
                 new TaskFormSection(),
                 new AnimalDetailsFormSection(),
-                new WaterOrderFormSection(),
-                new WaterSingleDaySlaveSection()
+                new WaterOrderFormSection()
 
         ));
         setStoreCollectionClass("WNPRC.ext.data.WaterStoreCollection");

@@ -15,7 +15,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
   const { animalInfo, infoState } = props;
 
   if (infoState == "waiting") {
-    return <div id="animal-info-empty">Select a record with a valid animal id.</div>;
+    return <div id="animal-info-empty">Loading...</div>;
   }
 
   if (infoState == "loading-unsuccess") {
@@ -53,7 +53,9 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               </td>
               <td>Most Recent Alopecia Score</td>
               <td>
+                <a href={animalInfo["_labkeyurl_mostRecentAlopeciaScore/score"]}>
                   {animalInfo["mostRecentAlopeciaScore/score"]}
+                </a>
               </td>
             </tr>
             <tr>
@@ -65,11 +67,23 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               </td>
               <td>Most Recent BCS</td>
               <td>
-                {animalInfo["mostRecentBodyConditionScore/score"]}
+                <a href={animalInfo["_labkeyurl_mostRecentBodyConditionScore/score"]}>
+                  {animalInfo["mostRecentBodyConditionScore/score"]}
+                </a>
               </td>
             </tr>
-            <tr>
-              <td>Gender</td>
+          <tr>
+            <td>Room</td>
+            <td>
+              <a href={animalInfo["_labkeyurl_/curLocation/room"]}>{animalInfo["Id/curLocation/room"]}</a>
+            </td>
+            <td>Cage</td>
+            <td>
+              <a href={animalInfo["_labkeyurl_/curLocation/cage"]}>{animalInfo["Id/curLocation/cage"]}</a>
+            </td>
+          </tr>
+          <tr>
+            <td>Gender</td>
               <td>
                 <a href={animalInfo._labkeyurl_genderd}>{animalInfo.gender}</a>
               </td>
@@ -99,11 +113,9 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               </td>
             </tr>
           <tr>
+            <td>Sire</td>
             <td>
-              Avail
-            </td>
-            <td>
-              {animalInfo.avail}
+              <a href={animalInfo._labkeyurl_sire}>{animalInfo.sire}</a>
             </td>
             <td>Weight Date</td>
             <td>
@@ -119,11 +131,78 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             </td>
           </tr>
           <tr>
-              <td>Medical</td>
+            <td>Avail</td>
+            <td>
+              {animalInfo.avail}
+            </td>
+            <td>Hold</td>
+            <td>
+              {animalInfo.hold}
+            </td>
+          </tr>
+          <tr>
+            <td>Age</td>
+            <td>
+              {animalInfo["Id/age/AgeFriendly"]}
+            </td>
+            <td>Birth</td>
+            <td>
+              <a href={animalInfo._labkeyurl_birth}>
+                {animalInfo.birth}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Origin</td>
+            <td>
+              <a href={animalInfo._labkeyurl_origin}>
+                {animalInfo.origin}
+              </a>
+
+            </td>
+            <td># of Animals In Cage</td>
+            <td>
+              {animalInfo["Id/numRoommates/AnimalsInCage"]}
+            </td>
+          </tr>
+          <tr>
+            <td>Medical</td>
               <td></td>
               <td>Medical Obs</td>
               <td></td>
             </tr>
+          <tr>
+            <td>Current Behavior(s)</td>
+            <td>
+              {animalInfo["Id/CurrentBehavior/currentBehaviors"]}
+            </td>
+            <td>Death</td>
+            <td>
+              <a href={animalInfo._labkeyurl_death}>
+                {animalInfo.death}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Most Recent Arrival</td>
+            <td>
+              <a href={animalInfo["_labkeyurl_Id/MostRecentArrival/MostRecentArrival"]}>{animalInfo["Id/MostRecentArrival/MostRecentArrival"]}</a>
+            </td>
+            <td>Most Recent Departure</td>
+            <td>
+              <a href={animalInfo["_labkeyurl_Id/MostRecentDeparture/MostRecentDeparture"]}>{animalInfo["Id/MostRecentDeparture/MostRecentDeparture"]}</a>
+            </td>
+          </tr>
+          <tr>
+            <td>Most Recent TB Date</td>
+            <td>
+              <a href={animalInfo["_labkeyurl_Id/MostRecentTB/MostRecentTBDate"]}>{animalInfo["Id/MostRecentTB/MostRecentTBDate"]}</a>
+            </td>
+            <td>Replacement prepaid by</td>
+            <td>
+              {animalInfo["prepaid"]}
+            </td>
+          </tr>
           </tbody>
         </Table>
       </div>

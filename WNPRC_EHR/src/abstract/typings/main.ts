@@ -18,7 +18,15 @@ export interface AnimalInfoProps {
   _labkeyurl_dam: string;
   birth: string;
   _labkeyurl_birth: string;
+  age: string;
   avail:string
+  sire: string;
+  _labkeyurl_sire: string;
+  hold: string;
+  origin: string;
+  _labkeyurl_origin: string;
+  death: string;
+  _labkeyurl_death: string;
 }
 
 export type AnimalInfoStates =

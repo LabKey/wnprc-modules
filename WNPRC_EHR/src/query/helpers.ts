@@ -148,6 +148,7 @@ export const lookupAnimalInfo = (id:string) => {
     let config = {
       schemaName: "study",
       queryName: "demographics",
+      viewName: "Abstract",
       sort: "-date",
       filterArray: [Filter.create("Id", id, Filter.Types.EQUAL)],
     };

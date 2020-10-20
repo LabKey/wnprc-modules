@@ -89,9 +89,16 @@
                 <property name="columnTitle" value="Last TB Date"/>
             </properties>
         </column>
+        <column name="Feeding/TypeOfChow"/>
+        <column name="Feeding/chowConversion"/>
         <column name="medical"/>
         <column name="prepaid"/>
         <column name="Id/CurrentBehavior/currentBehaviors"/>
+        <column name="mostRecentAlopeciaScore/score"/>
+        <column name="mostRecentBodyConditionScore/score"/>
+        <column name="avail"/>
+        <column name="Id/numRoommates/AnimalsInCage"/>
+        <column name="Id/age"/>
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

@@ -162,7 +162,7 @@ public class Graph {
             .byId(calendarId)
             .events()
             .buildRequest(options)
-            .select("id,subject,organizer,start,end,body")
+            .select("id,subject,organizer,start,end,body,attendees")
             .get();
 
         // Page through to get all events (default is 10 per page)

@@ -64,6 +64,9 @@
         <column name="Id/CurrentBehavior/currentBehaviors"/>
         <column name="Feeding/TypeOfChow"/>
         <column name="Feeding/chowConversion"/>
+        <column name="mostRecentAlopeciaScore/score"/>
+        <column name="mostRecentBodyConditionScore/score"/>
+        <column name="avail"/>
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

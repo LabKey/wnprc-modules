@@ -289,18 +289,34 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeDemographicsTable(AbstractTableInfo table)
     {
-        if (table.getColumn("Feeding") != null)
-            return;
-
         UserSchema us = getStudyUserSchema(table);
         if (us == null){
             return;
         }
 
-        ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
-        col21.setLabel("Feeding");
-        col21.setDescription("Shows most recent feeding type and chow conversion.");
-        table.addColumn(col21);
+        if (table.getColumn("Feeding") == null)
+        {
+            ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+            col21.setLabel("Feeding");
+            col21.setDescription("Shows most recent feeding type and chow conversion.");
+            table.addColumn(col21);
+        }
+
+        if (table.getColumn("mostRecentAlopeciaScore") == null)
+        {
+            ColumnInfo col16 = getWrappedIdCol(us, table, "mostRecentAlopeciaScore", "demographicsMostRecentAlopecia");
+            col16.setLabel("Alopecia Score");
+            col16.setDescription("Calculates the most recent alopecia score for each animal");
+            table.addColumn(col16);
+        }
+
+        if (table.getColumn("mostRecentBodyConditionScore") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentBodyConditionScore", "demographicsMostRecentBodyConditionScore");
+            col.setLabel("Most Recent BCS");
+            col.setDescription("Returns the participant's most recent body condition score");
+            table.addColumn(col);
+        }
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)

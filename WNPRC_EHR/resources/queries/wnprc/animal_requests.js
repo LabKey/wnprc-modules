@@ -26,10 +26,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Anticipated end date is before anticipated start date.')
     }
     if (row.anticipatedstartdate < row.dateneeded ){
-        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Date needed should be greater than anticipated start date.')
-    }
-    if (row.anticipatedenddate < row.dateneeded){
-        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Date needed should be greater than anticipated end date.')
+        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Anticipated start date is before date needed.')
     }
 
     //sanitize 'animalidstooffer' field

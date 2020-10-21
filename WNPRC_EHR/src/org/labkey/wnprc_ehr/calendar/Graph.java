@@ -154,6 +154,7 @@ public class Graph {
         options = addPreferTextHeader(options);
     	options = addPreferCentralTimeZone(options);
     	options = addDateFilters(options, start, end);
+    	options.add(new QueryOption("expand", "calendar"));
 
         // GET /me/events
         IEventCollectionPage eventPage = graphClient

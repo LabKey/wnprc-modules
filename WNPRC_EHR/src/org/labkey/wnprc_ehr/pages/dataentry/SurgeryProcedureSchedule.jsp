@@ -370,7 +370,7 @@
                 <%--<a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>--%>
             </div>
         </div>
-        <div class="panel panel-primary">
+        <div id="calendar-selection" class="panel panel-primary">
             <div class="panel-heading"><span>Calendar Selection</span></div>
             <div class="panel-body">
                 <div id="calendar-checklist"></div>
@@ -379,7 +379,7 @@
     </div>
 
     <div class="col-xs-12 col-md-8">
-        <div class="panel panel-primary">
+        <div id="procedure-calendar" class="panel panel-primary">
             <div class="panel-heading"><span>Calendar</span></div>
             <div class="panel-body">
                 <div id="calendar"></div>
@@ -607,9 +607,8 @@
                             let checkbox = document.createElement('input');
                             let label = document.createElement('label');
                             let description = document.createTextNode(data.rows[i].display_name);
-                            let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                             let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                            let loading = document.createElement('img');
 
                             div.id = data.rows[i].calendar_id + '_checkbox';
 
@@ -632,27 +631,48 @@
                             label.style.marginTop = '3px';
                             label.appendChild(description);
 
-                            svg.setAttribute('width', '25px');
-                            svg.setAttribute('height', '15px');
-                            svg.style.marginLeft = '5px';
-                            svg.style.marginRight = '5px';
+                            legend.setAttribute('width', '25px');
+                            legend.setAttribute('height', '15px');
+                            legend.style.marginLeft = '5px';
+                            legend.style.marginRight = '5px';
                             rect.style.fill = data.rows[i].default_bg_color;
                             rect.setAttribute('width', '25px');
                             rect.setAttribute('height', '15px');
-                            svg.appendChild(rect);
-
-                            loading.src = '<%=getContextPath()%>/_images/ajax-loading.gif';
-                            loading.id = data.rows[i].calendar_id + '_loading';
-                            loading.style.marginLeft = '5px';
+                            legend.appendChild(rect);
 
                             div.appendChild(checkbox);
-                            div.appendChild(svg);
+                            div.appendChild(legend);
                             div.appendChild(label);
-                            div.appendChild(loading);
 
                             calendarChecklist.appendChild(div);
                         }
                     }
+
+                    $('#calendar-selection').block({
+                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
+                        css: {
+                            border: 'none',
+                            padding: '15px',
+                            backgroundColor: '#000',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .5,
+                            color: '#fff'
+                        }
+                    });
+
+                    $('#procedure-calendar').block({
+                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
+                        css: {
+                            border: 'none',
+                            padding: '15px',
+                            backgroundColor: '#000',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .5,
+                            color: '#fff'
+                        }
+                    });
 
                     calendar = new FullCalendar.Calendar(calendarEl, {
                         plugins: ['dayGrid', 'timeGrid', 'bootstrap'],
@@ -706,27 +726,24 @@
                     calendar.render();
 
                     if (data.rows && data.rows.length > 0) {
-                        for (let i = 0; i < data.rows.length; i++) {
-                            let calId = data.rows[i].calendar_id;
-
-                            LABKEY.Ajax.request({
-                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", data.rows[i].api_action, null, {
-                                    calendarId:         data.rows[i].calendar_id,
-                                    calendarType:       data.rows[i].calendar_type,
-                                    backgroundColor:    data.rows[i].default_bg_color
-                                }),
-                                success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                    if (response.success) {
-                                        document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/check.png';
-                                        let calEvents = JSON.parse(response.events);
-                                        calendarEvents[calId] = calEvents;
-                                        calendar.addEventSource(calEvents);
-                                    } else {
-                                        document.getElementById(calId + '_loading').src = '<%=getContextPath()%>/_images/delete.png';
+                        LABKEY.Ajax.request({
+                            url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureEvents", null, null),
+                            success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                if (response.success) {
+                                    for (let cal in response.events) {
+                                        if (response.events.hasOwnProperty(cal)) {
+                                            calendarEvents[cal] = response.events[cal];
+                                            calendar.addEventSource(response.events[cal]);
+                                        }
                                     }
-                                }, this)
-                            });
-                        }
+                                }
+                                else {
+                                    alert("Houston, we have a problem: " + response.exception);
+                                }
+                                $('#calendar-selection').unblock();
+                                $('#procedure-calendar').unblock();
+                            }, this)
+                        });
                     }
                 }
             });

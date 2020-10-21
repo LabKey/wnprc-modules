@@ -1157,13 +1157,18 @@ public class WNPRC_EHRController extends SpringActionController
                     onCallSchedule[i + 1][1] = new JSONObject().put("html", WordUtils.capitalizeFully(startDate.plusDays(i).getDayOfWeek().toString()));
                 }
 
+                Calendar onCallCalendar = new OnCallCalendar(getUser(), getContainer());
+                java.time.LocalDate start = event.getStartDate().toInstant().atZone(ZoneId.of("America/Chicago")).toLocalDate();
+                java.time.LocalDate end = event.getEndDate().toInstant().atZone(ZoneId.of("America/Chicago")).toLocalDate();
+                JSONObject allEvents = onCallCalendar.getEventsAsJson(start, end);
+
                 //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
                 for (int i = 0; i < onCallCalendars.length; i++) {
                     JSONArray events = new JSONArray();
                     boolean calendarReadSuccessful = true;
                     try {
                         Map<String, Object> row = onCallCalendars[i];
-                        JSONObject calendarData = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
+                        JSONObject calendarData = (JSONObject) allEvents.get(row.get("calendar_id"));
                         events = calendarData.getJSONArray("events");
                     } catch (Exception e) {
                         _log.error("Error retrieving events from on-call calendar with calendarId: " + onCallCalendars[i].get("calendar_id"));
@@ -1262,22 +1267,6 @@ public class WNPRC_EHRController extends SpringActionController
 
         Map<String, Object>[] onCallCalendars = new Map[authorizedCalendars.size()];
         return authorizedCalendars.toArray(onCallCalendars);
-    }
-
-    private JSONObject fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType, String backgroundColor, Date startDate, Date endDate) throws Exception
-    {
-        calendar.setUser(getUser());
-        calendar.setContainer(getContainer());
-        JSONObject events = null;
-        if (calendarType.equalsIgnoreCase("Office365Resource"))
-        {
-            events = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.ROOM, startDate, endDate);
-        }
-        else
-        {
-            events = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.CALENDAR, startDate, endDate);
-        }
-        return events;
     }
 
     public abstract class WNPRCJspPageAction extends SimpleJspPageAction
@@ -1423,7 +1412,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             JSONObject response = new JSONObject();
             response.put("success", false);
-            Office365Calendar calendar = new Office365Calendar();
+            Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
             calendar.setUser(getUser());
             calendar.setContainer(getContainer());
             boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), roomRows, event.getSubject(), event.getRequestId(), response);
@@ -1606,7 +1595,7 @@ public class WNPRC_EHRController extends SpringActionController
 
                 if ("Request: Pending".equals(event.getQCStateLabel()))
                 {
-                    Office365Calendar calendar = new Office365Calendar();
+                    Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
                     for (Map<String, Object> roomRow : roomRows)
                     {
                         String eventId = (String) roomRow.get("event_id");
@@ -1708,7 +1697,6 @@ public class WNPRC_EHRController extends SpringActionController
     {
         private String calendarId;
         private String calendarType;
-        private String backgroundColor;
 
         public String getCalendarId()
         {
@@ -1729,22 +1717,12 @@ public class WNPRC_EHRController extends SpringActionController
         {
             this.calendarType = calendarType;
         }
-
-        public String getBackgroundColor()
-        {
-            return backgroundColor;
-        }
-
-        public void setBackgroundColor(String backgroundColor)
-        {
-            this.backgroundColor = backgroundColor;
-        }
     }
 
-    @ActionNames("FetchSurgeryProcedureOutlookEvents")
+    @ActionNames("FetchSurgeryProcedureEvents")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
-    public class FetchSurgeryProcedureOutlookEventsAction extends ApiAction<FetchCalendarEvent>
+    public class FetchSurgeryProcedureEventsAction extends ApiAction<FetchCalendarEvent>
     {
         @Override
         public Object execute(FetchCalendarEvent event, BindException errors)
@@ -1754,9 +1732,23 @@ public class WNPRC_EHRController extends SpringActionController
 
             try
             {
-                JSONObject office365Events = fetchCalendarEvents(new Office365Calendar(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor(), null, null);
-                String office365EventsString = office365Events.toString();
-                response = generateSurgeryProcedureEventsResponse(response, office365EventsString);
+                Calendar surgeryCalendar = new Office365Calendar(getUser(), getContainer());
+                JSONObject office365Events = surgeryCalendar.getEventsAsJson(null, null);
+
+                surgeryCalendar = new SurgeryCalendarGoogle(getUser(), getContainer());
+                JSONObject googleEvents = surgeryCalendar.getEventsAsJson(null, null);
+
+                JSONObject allEvents = new JSONObject();
+
+                for (Map.Entry entry : office365Events.entrySet()) {
+                    allEvents.put((String) entry.getKey(), entry.getValue());
+                }
+
+                for (Map.Entry entry : googleEvents.entrySet()) {
+                    allEvents.put((String) entry.getKey(), entry.getValue());
+                }
+
+                response = generateSurgeryProcedureEventsResponse(response, allEvents);
             }
             catch (Exception e)
             {
@@ -1770,37 +1762,10 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    @ActionNames("FetchSurgeryProcedureGoogleEvents")
-    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
-    @RequiresLogin()
-    public class FetchSurgeryProcedureGoogleEventsAction extends ApiAction<FetchCalendarEvent>
+    private JSONObject generateSurgeryProcedureEventsResponse(JSONObject response, JSONObject events)
     {
-        @Override
-        public Object execute(FetchCalendarEvent event, BindException errors)
-        {
-            JSONObject response = new JSONObject();
-            response.put("success", false);
-
-            try
-            {
-                JSONObject googleEvents = fetchCalendarEvents(new SurgeryCalendarGoogle(), event.getCalendarId(), event.getCalendarType(), event.getBackgroundColor(), null, null);
-                String googleEventsString = googleEvents.toString();
-                response = generateSurgeryProcedureEventsResponse(response, googleEventsString);
-            }
-            catch (Exception e)
-            {
-                //TODO add logging
-                response.put("success", false);
-            }
-
-            return response;
-        }
-    }
-
-    private JSONObject generateSurgeryProcedureEventsResponse(JSONObject response, String eventString)
-    {
-        response.put("events", eventString);
-        if (eventString != null && eventString.trim().length() > 0)
+        response.put("events", events);
+        if (events != null)
         {
             response.put("success", true);
         }

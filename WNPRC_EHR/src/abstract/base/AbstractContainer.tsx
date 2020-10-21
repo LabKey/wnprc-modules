@@ -30,7 +30,7 @@ const AbstractContainer: React.FunctionComponent<any> = (props) => {
 
   return (
     <>
-      <div className="col-xs-6">
+      <div className="col-xs-12">
         <AnimalInfoPane animalInfo={animalInfo} infoState={animalInfoState} />
       </div>
       <div className="clear"></div>

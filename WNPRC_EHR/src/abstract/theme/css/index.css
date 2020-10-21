@@ -1,5 +1,6 @@
 .animal-info-table {
     border: 1px solid #B4B4B4;
+    max-width: 750px;
 }
 
 .animal-info-table > thead {
@@ -12,4 +13,9 @@
 
 .animal-info-table > tbody > tr > td {
     width: 25%;
+}
+
+/*give the 3rd column a border*/
+.animal-info-table > tbody > tr>:nth-child(3) {
+    border-left: 1px solid #B4B4B4;
 }

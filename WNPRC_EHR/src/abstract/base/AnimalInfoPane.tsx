@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Table } from "react-bootstrap";
 import {AnimalInfoProps} from '../typings/main';
-//import Spinner from "./Spinner";
+import EHRSpinner from "../../components/EHRSpinner";
 
 interface PaneProps {
   animalInfo: AnimalInfoProps;
@@ -15,7 +15,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
   const { animalInfo, infoState } = props;
 
   if (infoState == "waiting") {
-    return <div id="animal-info-empty">Loading...</div>;
+    return <div id="animal-info-empty"><EHRSpinner text={'loading...'}></EHRSpinner></div>;
   }
 
   if (infoState == "loading-unsuccess") {
@@ -59,11 +59,9 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               </td>
             </tr>
             <tr>
-              <td>Status</td>
+              <td>Gender</td>
               <td>
-                <a href={animalInfo._labkeyurl_calculated_status}>
-                  {animalInfo.calculated_status}
-                </a>
+                <a href={animalInfo._labkeyurl_genderd}>{animalInfo.gender}</a>
               </td>
               <td>Most Recent BCS</td>
               <td>
@@ -83,10 +81,10 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             </td>
           </tr>
           <tr>
-            <td>Gender</td>
-              <td>
-                <a href={animalInfo._labkeyurl_genderd}>{animalInfo.gender}</a>
-              </td>
+            <td>Avail</td>
+            <td>
+              {animalInfo.avail}
+            </td>
               <td>Condition</td>
               <td>
                 <a href={animalInfo["_labkeyurl_Id/curLocation/cond"]}>
@@ -158,11 +156,12 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               <a href={animalInfo._labkeyurl_origin}>
                 {animalInfo.origin}
               </a>
-
             </td>
-            <td># of Animals In Cage</td>
+            <td>Death</td>
             <td>
-              {animalInfo["Id/numRoommates/AnimalsInCage"]}
+              <a href={animalInfo._labkeyurl_death}>
+                {animalInfo.death}
+              </a>
             </td>
           </tr>
           <tr>
@@ -176,11 +175,9 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             <td>
               {animalInfo["Id/CurrentBehavior/currentBehaviors"]}
             </td>
-            <td>Death</td>
+            <td># of Animals In Cage</td>
             <td>
-              <a href={animalInfo._labkeyurl_death}>
-                {animalInfo.death}
-              </a>
+              {animalInfo["Id/numRoommates/AnimalsInCage"]}
             </td>
           </tr>
           <tr>

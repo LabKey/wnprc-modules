@@ -46,6 +46,8 @@ More information about how the entire form works can be found in the documentati
 * Added new fields:
   * Pregnant animals required
   * Anticipated Start Date
+    * added validation to check that this comes after 'date needed' field.
+    * also made sure the end date comes after the start date
   * Anticipated End date
   * Executive Committee Approval
   * Animal Ids to Offer (for the project)

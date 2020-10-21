@@ -16,9 +16,23 @@ function beforeInsert(row, errors){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
+    //updates the project field if its an actual project
     if (!isNaN(row.optionalproject)){
         row.project = row.optionalproject
     }
+
+    //sanity checks for date fields
+    if (row.anticipatedstartdate > row.anticipatedenddate) {
+        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Anticipated end date is before anticipated start date.')
+    }
+    if (row.anticipatedstartdate < row.dateneeded ){
+        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Date needed should be greater than anticipated start date.')
+    }
+    if (row.anticipatedenddate < row.dateneeded){
+        EHR.Server.Utils.addError(scriptErrors, 'dateneeded', 'Date needed should be greater than anticipated end date.')
+    }
+
+    //sanitize 'animalidstooffer' field
     var subjectArray = row.animalidstooffer;
     if (!subjectArray){
         return;

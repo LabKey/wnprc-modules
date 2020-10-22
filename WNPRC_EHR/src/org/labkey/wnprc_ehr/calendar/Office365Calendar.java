@@ -200,6 +200,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private JSONObject getJsonEventList(List<Event> events) {
         JSONObject allJsonData = new JSONObject();
         JSONObject allJsonEvents = new JSONObject();
+        Map<String, String> parentIds = new HashMap<>();
 
         //Get all existing rows in the study.surgery_procedure table (and lots of other auxiliary data for each row)
         //to match with the request ids of the incoming events list
@@ -258,8 +259,10 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             JSONObject surgeryInfo = queryResults.get(requestId);
             List<Attendee> attendees = event.attendees;
 
+            List<String> rooms = new ArrayList<>();
             //Process each event multiple times. Once for each attendee, and then once to put on the base calendar
             for (int j = 0; j <= attendees.size(); j++) {
+                boolean isBaseCalendar = false;
                 Attendee attendee = j < attendees.size() ? attendees.get(j) : null;
                 String currentCalName = attendee != null ? attendee.emailAddress.address : getCalendarsById().get(event.calendar.id);
                 //If the surgeries account is listed as an attendee for some reason, then skip it
@@ -269,15 +272,22 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     continue;
                 }
 
+                if (getBaseCalendars().get(currentCalName) != null) {
+                    isBaseCalendar = true;
+                } else {
+                    rooms.add(currentCalName);
+                }
+
                 //only restrict the base calendars to not having duplicate events
-                if (getBaseCalendars().get(currentCalName) == null || loadedRequests.get(requestId) == null || !loadedRequests.get(requestId)) {
+                if (!isBaseCalendar || loadedRequests.get(requestId) == null || !loadedRequests.get(requestId)) {
                     JSONObject jsonEvent = new JSONObject();
                     jsonEvent.put("title", event.subject);
                     String start, end;
-                    if (getBaseCalendars().get(currentCalName) != null) {
+                    if (isBaseCalendar) {
                         loadedRequests.put(requestId, true);
                         start = dtf.format(Collections.min(eventTimesByRequestId.get(requestId).get("startTimes")));
                         end = dtf.format(Collections.max(eventTimesByRequestId.get(requestId).get("endTimes")));
+                        parentIds.put(requestId, currentCalName + "_" + ((JSONArray) allJsonEvents.get(currentCalName)).length());
                     } else {
                         start = dtf.format(LocalDateTime.parse(event.start.dateTime));
                         end = dtf.format(LocalDateTime.parse(event.end.dateTime));
@@ -311,6 +321,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                         rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
                         rawRowData.put("cur_cond", surgeryInfo.get("cur_cond"));
                         rawRowData.put("location", surgeryInfo.get("location"));
+                        rawRowData.put("rooms", surgeryInfo.get("rooms"));
                         rawRowData.put("medical", surgeryInfo.get("medical"));
                         rawRowData.put("project", surgeryInfo.get("project"));
                         rawRowData.put("protocol", surgeryInfo.get("protocol"));
@@ -321,7 +332,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     }
                     ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);
                 }
-
+            }
+            //Populate the parentId for each of the rooms (the id of the event on the base calendar)
+            for (String room : rooms) {
+                JSONArray roomEvents = allJsonEvents.getJSONArray(room);
+                JSONObject roomEvent = roomEvents.getJSONObject(roomEvents.length() - 1);
+                JSONObject rawRowData = roomEvent.getJSONObject("rawRowData");
+                rawRowData.put("parentid", parentIds.get(rawRowData.get("requestid")));
             }
         }
 

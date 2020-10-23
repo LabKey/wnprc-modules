@@ -55,6 +55,7 @@ import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.Assignment.AssignmentForm;
 import org.labkey.wnprc_ehr.dataentry.forms.BehaviorAbstract.BehaviorAbstractForm;
+import org.labkey.wnprc_ehr.dataentry.forms.NecropsyAbstract.NecropsyAbstractForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Biopsy.BiopsyForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Birth.BirthFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.BloodDrawRequest.BloodDrawRequestForm;
@@ -64,7 +65,6 @@ import org.labkey.wnprc_ehr.dataentry.forms.Clinpath.ClinpathForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ClinpathRequest.ClinpathRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Death.DeathForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDepriveCompleteForm;
-import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FoodDeprivesStartForm;
 import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprivesRequest.FoodDeprivesRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Housing.HousingForm;
 import org.labkey.wnprc_ehr.dataentry.forms.HousingRequest.HousingRequestForm;
@@ -265,7 +265,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
         EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "foodDeprives");
         EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "clinPathRuns");
-        EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Food Deprives", FoodDeprivesStartForm.NAME), "study", "foodDeprives");
+        EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Food Deprives", FoodDeprivesRequestForm.NAME), "study", "foodDeprives");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Blood Draws", BloodDrawsForm.NAME), "study", "blood");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromIdsButton(this, "Schedule Blood Draw For Selected", "Blood Draws", BloodDrawsForm.NAME, new String[]{"Blood Draws"}), "study", "demographics");
         EHRService.get().registerMoreActionsButton(new MarkReviewedButton(this), "study", "clinPathRuns");
@@ -398,6 +398,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 InRoomsForm.class,
                 IrregularObservationsFormType.class,
                 MPRForm.class,
+                NecropsyAbstractForm.class,
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
                 PhysicalExamNWMForm.class,
@@ -412,7 +413,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 VVCRequestForm.class,
                 VVCForm.class,
                 WeightForm.class,
-                FoodDeprivesStartForm.class,
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
                 ProtocolForm.class

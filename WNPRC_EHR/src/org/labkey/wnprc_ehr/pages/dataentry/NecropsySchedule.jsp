@@ -106,6 +106,7 @@
                     <dt>Nx Location:        </dt> <dd>{{displayLocation}}</dd>
                     <dt>Who Delivers to Nx: </dt> <dd>{{who_delivers}}</dd>
                     <dt>Delivery Comment:   </dt> <dd>{{delivery_comment}}</dd>
+                    <dt>Pathology Notes:   </dt> <dd>{{remark}}</dd>
 
                     <!-- ko if: !_.isBlank(cur_room()) && !_.isBlank(cur_cage()) -->
                     <dt>Current Room:       </dt> <dd>{{cur_room}}</dd>
@@ -430,6 +431,7 @@
                 protocol:             ko.observable(),
                 sex:                  ko.observable(),
                 weight:               ko.observable(),
+                remark:                ko.observable()
             },
             form: ko.mapping.fromJS({
                 lsid:        '',

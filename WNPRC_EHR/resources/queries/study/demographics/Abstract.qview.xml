@@ -99,6 +99,7 @@
         <column name="avail"/>
         <column name="Id/numRoommates/AnimalsInCage"/>
         <column name="Id/age"/>
+        <column name="mostRecentNecropsyAbstract/remark"/>
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

@@ -296,18 +296,18 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (table.getColumn("Feeding") == null)
         {
-            ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
-            col21.setLabel("Feeding");
-            col21.setDescription("Shows most recent feeding type and chow conversion.");
-            table.addColumn(col21);
+            ColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+            col.setLabel("Feeding");
+            col.setDescription("Shows most recent feeding type and chow conversion.");
+            table.addColumn(col);
         }
 
         if (table.getColumn("mostRecentAlopeciaScore") == null)
         {
-            ColumnInfo col16 = getWrappedIdCol(us, table, "mostRecentAlopeciaScore", "demographicsMostRecentAlopecia");
-            col16.setLabel("Alopecia Score");
-            col16.setDescription("Calculates the most recent alopecia score for each animal");
-            table.addColumn(col16);
+            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentAlopeciaScore", "demographicsMostRecentAlopecia");
+            col.setLabel("Alopecia Score");
+            col.setDescription("Calculates the most recent alopecia score for each animal");
+            table.addColumn(col);
         }
 
         if (table.getColumn("mostRecentBodyConditionScore") == null)
@@ -315,6 +315,13 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             ColumnInfo col = getWrappedIdCol(us, table, "mostRecentBodyConditionScore", "demographicsMostRecentBodyConditionScore");
             col.setLabel("Most Recent BCS");
             col.setDescription("Returns the participant's most recent body condition score");
+            table.addColumn(col);
+        }
+        if (table.getColumn("mostRecentNecropsyAbstract") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentNecropsyAbstract", "demographicsmostRecentNecropsyAbstract");
+            col.setLabel("Most Recent Necropsy Abstract");
+            col.setDescription("Returns the participant's most recent necropsy abstract with notes");
             table.addColumn(col);
         }
     }

@@ -120,7 +120,7 @@
                         <columnTitle>Condition</columnTitle>
                     </column>
                     <column columnName="origin">
-                        <columnTitle>Origin</columnTitle>
+                        <columnTitle>Source/Vendor</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>source</fkTable>

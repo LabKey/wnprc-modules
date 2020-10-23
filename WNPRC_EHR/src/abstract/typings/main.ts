@@ -23,10 +23,10 @@ export interface AnimalInfoProps {
   sire: string;
   _labkeyurl_sire: string;
   hold: string;
-  origin: string;
-  _labkeyurl_origin: string;
   death: string;
   _labkeyurl_death: string;
+  medical: string;
+  _labkeyurl_medical: string;
 }
 
 export type AnimalInfoStates =

@@ -43,7 +43,7 @@
         <column name="hold"/>
         <column name="dam"/>
         <column name="sire"/>
-        <column name="origin"/>
+        <column name="Id/DataSet/Birth/origin"/>
         <!--<column name="Id/MostRecentArrival/MostRecentArrival">-->
             <!--<properties>-->
                 <!--<property name="columnTitle" value="Most Recent Arrival"/>-->

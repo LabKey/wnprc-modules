@@ -39,8 +39,8 @@ public class NecropsyAbstractForm extends SimpleTaskForm
     protected List<String> getButtonConfigs()
     {
         List<String> ret = super.getButtonConfigs();
-        //this is actually submit final
-        ret.add("SUBMIT");
+        //this is actually submit final, and puts the QC state into Completed
+        ret.add("WNPRC_SUBMIT_FINAL");
 
         return ret;
 

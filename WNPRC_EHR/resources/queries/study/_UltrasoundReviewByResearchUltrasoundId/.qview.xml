@@ -1,0 +1,24 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+   <columns>
+       <column name="date" />
+       <column name="head" />
+       <column name="falx" />
+       <column name="thalamus" />
+       <column name="lateral_ventricles" />
+       <column name="choroid_plexus" />
+       <column name="eye" />
+       <column name="profile" />
+       <column name="four_chamber_heart" />
+       <column name="diaphragm" />
+       <column name="stomach" />
+       <column name="bowel" />
+       <column name="bladder" />
+       <column name="findings" />
+       <column name="placenta_notes" />
+       <column name="remarks" />
+       <column name="completed" />
+   </columns>
+   <sorts>
+       <sort column="date" descending="true"/>
+   </sorts>
+</customView>

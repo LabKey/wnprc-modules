@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar {
@@ -136,6 +137,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
     public boolean addEvents(String calendarId, List<Map<String, Object>> roomRequests, String subject, String requestId, JSONObject response) {
         boolean allRoomsAvailable = true;
+        List<Event> addedEvents = new ArrayList<>();
 
         for (Map<String, Object> roomRequest : roomRequests) {
             Date start = (Timestamp) roomRequest.get("date");
@@ -146,7 +148,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             rooms.add(roomEmailAddress);
             if (!isRoomAvailable(rooms, start, end).get(roomEmailAddress)) {
                 allRoomsAvailable = false;
-                response.put("error", "Room " + roomEmailAddress != null ? roomEmailAddress.substring(0, roomEmailAddress.indexOf("@")) : "null" + " is not available at the requested time");
+                response.put("error", "Room " + (roomEmailAddress != null ? roomEmailAddress.substring(0, roomEmailAddress.indexOf("@")) : "null") + " is not available at the requested time." +
+                        "\nIf you just cancelled an event in this room at the requested time, it may not have freed up the time slot yet. Please try again momentarily.");
                 break;
             }
         }
@@ -164,37 +167,18 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 Event newEvent = Graph.buildEvent(startTime, endTime, subject, requestId, attendees);
                 Event createdEvent = Graph.createEvent(getAccessToken(), getBaseCalendars().get(calendarId), newEvent);
                 roomRequest.put("event_id", createdEvent.id);
+                createdEvent.calendar = new com.microsoft.graph.models.extensions.Calendar();
+                createdEvent.calendar.id = getBaseCalendars().get(calendarId);
+                addedEvents.add(createdEvent);
             }
         }
+        JSONObject addedEventsJson = getJsonEventList(addedEvents);
+        response.put("events", addedEventsJson);
         return allRoomsAvailable;
     }
 
     public void cancelEvent(String eventId) {
-        JSONObject response = new JSONObject();
-        response.put("success", false);
-        cancelEvent(eventId, response);
-    }
-
-    public void cancelEvent(String eventId, JSONObject response) {
-        Event event = Graph.readEvent(getAccessToken(), eventId);
         Graph.deleteEvent(getAccessToken(), eventId);
-
-        List<String> rooms = event.attendees.stream().map(attendee -> attendee.emailAddress.address).collect(Collectors.toList());
-        LocalDateTime start = LocalDateTime.parse(event.start.dateTime);
-        LocalDateTime end = LocalDateTime.parse(event.end.dateTime);
-
-        if (response.get("rooms") != null) {
-            JSONArray previousRooms = (JSONArray) response.get("rooms");
-            for (String room : rooms) {
-                previousRooms.put(room);
-            }
-            response.put("rooms", previousRooms);
-        } else {
-            response.put("rooms", rooms);
-        }
-        response.put("start", start);
-        response.put("end", end);
-        response.put("calendar", event.calendar.name);
     }
 
     private JSONObject getJsonEventList(List<Event> events) {
@@ -257,6 +241,10 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             String requestId = event.body.content;
 
             JSONObject surgeryInfo = queryResults.get(requestId);
+            //Skip the event if there's not a corresponding record in the study.surgery_procedure dataset
+            if (surgeryInfo == null) {
+                continue;
+            }
             List<Attendee> attendees = event.attendees;
 
             List<String> rooms = new ArrayList<>();
@@ -283,11 +271,12 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     JSONObject jsonEvent = new JSONObject();
                     jsonEvent.put("title", event.subject);
                     String start, end;
+                    String id = UUID.randomUUID().toString();
                     if (isBaseCalendar) {
                         loadedRequests.put(requestId, true);
                         start = dtf.format(Collections.min(eventTimesByRequestId.get(requestId).get("startTimes")));
                         end = dtf.format(Collections.max(eventTimesByRequestId.get(requestId).get("endTimes")));
-                        parentIds.put(requestId, currentCalName + "_" + ((JSONArray) allJsonEvents.get(currentCalName)).length());
+                        parentIds.put(requestId, id);
                     } else {
                         start = dtf.format(LocalDateTime.parse(event.start.dateTime));
                         end = dtf.format(LocalDateTime.parse(event.end.dateTime));
@@ -296,8 +285,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     jsonEvent.put("end", end);
                     jsonEvent.put("calendarId", currentCalName);
                     jsonEvent.put("backgroundColor", getCalendarColors().get(currentCalName));
-                    jsonEvent.put("id", currentCalName + "_" + ((JSONArray) allJsonEvents.get(currentCalName)).length());
-                    jsonEvent.put("eventId", ((JSONArray) allJsonEvents.get(currentCalName)).length());
+                    jsonEvent.put("id", id);
 
                     //Add data for details panel on Surgery Schedule page
                     JSONObject rawRowData = new JSONObject();

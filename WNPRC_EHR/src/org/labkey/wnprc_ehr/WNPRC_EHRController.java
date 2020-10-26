@@ -1503,18 +1503,12 @@ public class WNPRC_EHRController extends SpringActionController
     public static class SurgeryProcedureChangeStatusEvent
     {
         private String requestid;
-        private String taskid;
         private String qcstatelabel;
         private String statuschangereason;
 
         public String getRequestId()
         {
             return requestid;
-        }
-
-        public String getTaskId()
-        {
-            return taskid;
         }
 
         public String getQCStateLabel()
@@ -1530,11 +1524,6 @@ public class WNPRC_EHRController extends SpringActionController
         public void setRequestId(String requestid)
         {
             this.requestid = requestid;
-        }
-
-        public void setTaskId(String taskid)
-        {
-            this.taskid = taskid;
         }
 
         public void setQCStateLabel(String qcstatelabel)
@@ -1558,9 +1547,11 @@ public class WNPRC_EHRController extends SpringActionController
         {
             List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
             List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
+            String taskId = spRows.size() > 0 ? (String) spRows.get(0).get("taskid") : null;
 
             JSONObject response = new JSONObject();
             response.put("success", false);
+            response.put("roomList", new JSONArray());
 
             try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
                 /**
@@ -1589,7 +1580,7 @@ public class WNPRC_EHRController extends SpringActionController
                  * Update task record
                  */
                 JSONObject taskRecord = new JSONObject();
-                taskRecord.put("taskid", event.getTaskId());
+                taskRecord.put("taskid", taskId);
                 taskRecord.put("QCStateLabel", event.getQCStateLabel());
                 updateRecord(taskRecord, "ehr", "tasks");
 
@@ -1601,7 +1592,8 @@ public class WNPRC_EHRController extends SpringActionController
                         String eventId = (String) roomRow.get("event_id");
                         if (eventId != null && eventId.length() > 0)
                         {
-                            calendar.cancelEvent(eventId, response);
+                            calendar.cancelEvent(eventId);
+                            response.getJSONArray("roomList").put(roomRow);
                         }
                     }
                 }
@@ -1623,7 +1615,7 @@ public class WNPRC_EHRController extends SpringActionController
     {
         List<FieldKey> columns = new ArrayList<>();
         columns.add(FieldKey.fromString("objectid"));
-        columns.add(FieldKey.fromString("apptid"));
+        columns.add(FieldKey.fromString("taskid"));
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
@@ -1647,6 +1639,7 @@ public class WNPRC_EHRController extends SpringActionController
         columns.add(FieldKey.fromString("date"));
         columns.add(FieldKey.fromString("enddate"));
         columns.add(FieldKey.fromString("event_id"));
+        columns.add(FieldKey.fromString("requestid"));
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "wnprc", "procedure_scheduled_rooms");

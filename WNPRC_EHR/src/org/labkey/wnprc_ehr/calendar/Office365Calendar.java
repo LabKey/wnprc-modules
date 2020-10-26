@@ -332,7 +332,6 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
         for (Map.Entry<String, Object> entry : allJsonData.entrySet()) {
             ((JSONObject) entry.getValue()).put("events", allJsonEvents.get(entry.getKey()));
-            ((JSONObject) entry.getValue()).put("nextAvailableId", ((JSONArray) allJsonEvents.get(entry.getKey())).length());
         }
 
         return allJsonData;

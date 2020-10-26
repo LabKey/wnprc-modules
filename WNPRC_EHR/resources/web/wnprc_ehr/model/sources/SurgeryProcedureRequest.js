@@ -16,7 +16,7 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                     plugins: ['wnprc-animalfield']
                 }
             },
-            apptid: {
+            event_id: {
                 hidden: true
             },
             procedurecategory: {

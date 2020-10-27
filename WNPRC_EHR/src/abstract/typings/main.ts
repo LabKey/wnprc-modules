@@ -13,7 +13,7 @@ export interface AnimalInfoProps {
   calculated_status: string;
   _labkeyurl_calculated_status: string;
   gender: string;
-  _labkeyurl_genderd: string;
+  _labkeyurl_gender: string;
   dam: string;
   _labkeyurl_dam: string;
   birth: string;
@@ -27,6 +27,8 @@ export interface AnimalInfoProps {
   _labkeyurl_death: string;
   medical: string;
   _labkeyurl_medical: string;
+  origin: string;
+  _labkeyurl_origin: string;
 }
 
 export type AnimalInfoStates =

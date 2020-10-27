@@ -37,7 +37,7 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
 
                 console.log('valuer of queryName '+ r.store.queryName);
 
-               /* if (r.store.queryName == 'waterAmount') {
+                if (r.store.queryName == 'waterAmount') {
 
 
                     let qcState = r.get('qcstate');
@@ -46,11 +46,11 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                     if (qcStateLabel == 'In Progress' || qcStateLabel == 'Completed' ) {
                         console.log('waterAmount qcStatus ' + qcState);
                         let scheduleQC = EHR.Security.getQCStateByLabel('Scheduled');
-                        r.set('qcstate', scheduleQC);
+                        r.set('qcstate', scheduleQC.RowId);
                         r.phantom  = true;
                        // recMap.create.push(r);
                     }
-                }*/
+                }
 
 
                 if (r.phantom ) {

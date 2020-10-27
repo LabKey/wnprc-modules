@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WaterSingleDaySlaveSection extends SimpleGridSection
+public class WaterSingleDaySlaveSection extends SlaveGridSection
 {
     public WaterSingleDaySlaveSection(){
         super ("study", "waterAmount", "Order Additional Water for Today");
@@ -22,7 +22,7 @@ public class WaterSingleDaySlaveSection extends SimpleGridSection
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
         // setAllowBulkAdd(true);
     }
-    /*@Override
+    @Override
     public Set<String> getSlaveFields(){
         Set<String> fields = new HashSet<>();
 
@@ -30,7 +30,7 @@ public class WaterSingleDaySlaveSection extends SimpleGridSection
         fields.add("project");
 
         return fields;
-    }*/
+    }
     @Override
     public List<String> getFieldNames(){
         return Arrays.asList("Id", "date", "volume", "assignedTo", "project","frequency","recordSource","waterSource","provideFruit");

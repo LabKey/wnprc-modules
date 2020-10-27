@@ -54,6 +54,7 @@ public class EnterWater extends SimpleTaskForm
     protected List<String> getButtonConfigs(){
         List<String> buttons = super.getButtonConfigs();
         buttons.add("WNPRC_SUBMIT_FINAL");
+        buttons.add("BASICSUBMIT");
 
         return buttons;
 

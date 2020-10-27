@@ -111,7 +111,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             }
 
         },
-        'study.singleGeneralEncounter':{
+        'study.encounters':{
             Id:{
                 parentConfig: null
             },
@@ -132,6 +132,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     }
                 },
             },
+            enddate:{
+                hidden: true
+            },
             project: {
                 xtype: 'wnprc-projectentryfield',
                 editable : true,
@@ -145,6 +148,51 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 columnConfig: {
                     width: 120
                 }
+            },
+            type:{
+                defaultValue: 'Husbandry',
+                editable: false,
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'encounter_types',
+                    keyColumn: 'value',
+                    displayColumn: 'value',
+                    sort: 'sort_order'
+                }
+            },
+            account:{
+                hidden: true
+            },
+            performedby:{
+                hidden: false,
+                defaultValue: LABKEY.Security.currentUser.displayName
+            },
+            ts:{
+                hidden: true
+            },
+            serviceRequested:{
+                hidden: true
+            },
+            title:{
+                hidden: true
+            },
+            caseno:{
+                hidden: true
+            },
+            restraint:{
+                hidden: true
+            },
+            daterequested:{
+                hidden: true
+            },
+            restraintDuration:{
+                hidden: true
+            },
+            major:{
+                hidden: true
+            },
+            remark:{
+                hidden: true
             }
         },
         'study.weight':{
@@ -472,7 +520,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 header: 'Date',
                 extFormat: 'Y-m-d',
                 allowBlank: false,
-                editable: true,
+                editable: false,
                 columnConfig: {
                     width:110
                 },
@@ -529,6 +577,15 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     keyColumn: 'value',
                     displayColumn: 'title',
                     sort: 'sort_order'
+                }
+            },
+            QCState:{
+                shownInGrid: true,
+                setInitialValue: function(v){
+                    var qc;
+                    if(!v && EHR.Security.getQCStateByLabel('In Progress'))
+                        qc = EHR.Security.getQCStateByLabel('In Progress').RowId;
+                    return v || qc;
                 }
             }
         },

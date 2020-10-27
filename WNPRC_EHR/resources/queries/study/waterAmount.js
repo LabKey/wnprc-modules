@@ -15,9 +15,13 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         rowDate.setHours(0,0,0,0);
         if (rowDate.getTime() !== today.getTime()){
             EHR.Server.Utils.addError (scriptErrors,'date','Additional water in this form can only be requested for the same date', 'ERROR');
-            
-            
         }
+        row.date = rowDate;
+        console.log("value of qcstate waterAmount " + row.qcstate);
+        row.qcstate = 10;
+        row.QCStateLabel = 'Scheduled'
+        console.log("value of qcstate waterAmount after setting 10 " + row.qcstate);
+
     }
 
 }

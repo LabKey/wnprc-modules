@@ -38,9 +38,14 @@ function onInit(event, helper){
 //     console.log('row: ' + JSON.stringify(row));
 // }
 
-// function onInsert(helper, scriptErrors, row, oldRow) {
-//
-// }
+function onInsert(helper, scriptErrors, row, oldRow) {
+    if (!row.room) {
+            EHR.Server.Utils.addError(scriptErrors, "room", "Room is a required field", "ERROR");
+    }
+    if (!row.enddate) {
+            EHR.Server.Utils.addError(scriptErrors, "enddate", "Enddate is a required field", "ERROR");
+    }
+}
 
 function onAfterUpsert(helper, scriptErrors, row, oldRow){
     // console.log('onAfterUpsert - START');

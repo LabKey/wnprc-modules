@@ -21,8 +21,6 @@ import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -32,12 +30,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar {
 
@@ -48,9 +43,9 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private static Map<String, String> CALENDARS_BY_ID = null;
     private static Map<String, String> CALENDAR_COLORS = null;
     private static final String AZURE_NAME = "ProcedureCalendar";
-    public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     public static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
+    //Populate the calendar maps when the object is first created
     public Office365Calendar(User user, Container container) {
         setUser(user);
         setContainer(container);
@@ -67,6 +62,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         this.container = container;
     }
 
+    //Gets the access token from the property manager. The access token is kept up to date via a scheduled job
     private String getAccessToken() {
         return PropertyManager.getEncryptedStore().getWritableProperties(AZURE_NAME + ".Credentials", false).get("AccessToken");
     }
@@ -75,6 +71,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return getBaseCalendars(false);
     }
 
+    //Gets the base calendars (surgeries_scheduled, surgeries_on_hold, procedures_scheduled, procedures_on_hold)
     private synchronized Map<String, String> getBaseCalendars(boolean refresh) {
         if (BASE_CALENDARS == null || refresh) {
             BASE_CALENDARS = new HashMap<>();

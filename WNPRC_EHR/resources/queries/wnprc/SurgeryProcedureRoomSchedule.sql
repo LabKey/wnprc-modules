@@ -1,6 +1,5 @@
 SELECT objectid,
        room,
-       room_type,
        date,
        enddate,
        event_id,

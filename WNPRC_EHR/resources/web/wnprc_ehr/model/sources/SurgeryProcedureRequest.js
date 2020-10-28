@@ -16,9 +16,6 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                     plugins: ['wnprc-animalfield']
                 }
             },
-            event_id: {
-                hidden: true
-            },
             procedurecategory: {
                 editorConfig: {
                     plugins: ['wnprc-procedurefield']
@@ -26,9 +23,6 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
             },
             procedurename: {
                 xtype: 'wnprc-surgeryprocedurenamefield'
-            },
-            location: {
-                xtype: 'wnprc-surgeryprocedureroomfield'
             },
             date: {
                 defaultValue: Ext4.Date.add(new Date()),//'2018-12-05 11:00 AM',
@@ -112,6 +106,20 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                     xtype: 'ehr-snomedcombo',
                     defaultSubset: 'Drugs and Procedures'
                 }
+            }
+        },
+        'wnprc.procedure_scheduled_rooms': {
+            objectid: {
+                hidden: true
+            },
+            event_id: {
+                hidden: true
+            },
+            created: {
+                hidden: true
+            },
+            modified: {
+                hidden: true
             }
         }
     }

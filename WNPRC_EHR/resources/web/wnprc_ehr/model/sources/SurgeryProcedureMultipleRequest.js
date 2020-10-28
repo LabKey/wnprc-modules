@@ -24,9 +24,6 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureMultipleRequest', {
             procedurename: {
                 xtype: 'wnprc-surgeryprocedurenamefield'
             },
-            location: {
-                xtype: 'wnprc-surgeryprocedureroomfield'
-            },
             date: {
                 editorConfig: {
                     dateConfig: {

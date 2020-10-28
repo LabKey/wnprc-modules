@@ -74,7 +74,6 @@ CREATE TABLE wnprc.procedure_scheduled_rooms
 (
     objectid        entityid NOT NULL,
     room            VARCHAR(100),
-    room_type       VARCHAR(100),
     date            TIMESTAMP,
     enddate         TIMESTAMP,
     event_id        VARCHAR(255),

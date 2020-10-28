@@ -190,7 +190,10 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               {animalInfo["prepaid"]}
             </td>
             <td>Pathology Notes</td>
-            <td>{animalInfo["mostRecentNecropsyAbstract/project"]}; {animalInfo["mostRecentNecropsyAbstract/remark"]}</td>
+            <td>
+              { animalInfo["mostRecentNecropsyAbstract/project"] != null && (animalInfo["mostRecentNecropsyAbstract/project"] + '; ' ) }
+                {animalInfo["mostRecentNecropsyAbstract/remark"]}
+            </td>
 
           </tr>
           </tbody>

@@ -507,13 +507,22 @@
 </div>
 
 <script>
-    let selectedId;
     let selectedEvent = {};
     let calendar = {};
     let calendarEvents = {};
     let pendingRequestsIndex = {};
 
     (function() {
+        document.addEventListener("click", function() {
+            selectedEvent = {};
+            calendar.rerenderEvents();
+            for (let key in WebUtils.VM.taskDetails) {
+                if (key != 'animalLink') {
+                    WebUtils.VM.taskDetails[key](null);
+                }
+            }
+        }, true);
+
         let displayDate = function(dateString) {
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
         };
@@ -667,7 +676,7 @@
                             }
 
                             let backgroundBrightness = lightOrDark(info.el.style.backgroundColor);
-                            if (info.event.id === selectedId) {
+                            if (info.event.id === selectedEvent.id) {
                                 info.el.classList.add('event-text-' + backgroundBrightness);
                                 info.el.classList.add('event-selected');
                             } else {
@@ -678,7 +687,6 @@
                             return checkedCalendars.includes(info.event.extendedProps.calendarId);
                         },
                         eventClick: function(info) {
-                            selectedId = info.event.id;
                             selectedEvent = info.event;
                             if (info.event.extendedProps && info.event.extendedProps.rawRowData) {
                                 jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
@@ -868,65 +876,67 @@
                 scheduleSurgeryProcedure('SurgeryProcedureChangeStatus', requestObj);
             },
             cancelEvent: function() {
-                let eventId = (selectedEvent.extendedProps.rawRowData.parentid) ? selectedEvent.extendedProps.rawRowData.parentid : selectedEvent.id;
-                let eventRequestId = selectedEvent.extendedProps.rawRowData.requestid;
-                LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
-                        requestId: WebUtils.VM.taskDetails.requestid(),
-                        QCStateLabel: 'Request: Pending'
-                    }),
-                    success: LABKEY.Utils.getCallbackWrapper(function (response)
-                    {
-                        if (response.success) {
-                            let eventRooms = response.roomList;
-                            let eventToRemove = calendar.getEventById(eventId);
-                            if (eventToRemove) {
-                                eventToRemove.remove();
-                            }
+                let cancel = confirm("Are you sure you'd like to cancel this surgery? This will move it back into the pending requests.");
+                if (cancel === true && selectedEvent.id) {
+                    let eventId = (selectedEvent.extendedProps.rawRowData.parentid) ? selectedEvent.extendedProps.rawRowData.parentid : selectedEvent.id;
+                    let eventRequestId = selectedEvent.extendedProps.rawRowData.requestid;
+                    LABKEY.Ajax.request({
+                        url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
+                            requestId: WebUtils.VM.taskDetails.requestid(),
+                            QCStateLabel: 'Request: Pending'
+                        }),
+                        success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                            if (response.success) {
+                                let eventRooms = response.roomList;
+                                let eventToRemove = calendar.getEventById(eventId);
+                                if (eventToRemove) {
+                                    eventToRemove.remove();
+                                }
 
-                            //new code start
-                            let removedEventArray = [];
-                            for (let i = 0; i < eventRooms.length; i++) {
-                                let eventRoom = eventRooms[i].room_fs_email;
-                                for (let j = calendarEvents[eventRoom].events.length - 1; j >= 0; j--) {
-                                    if (calendarEvents[eventRoom].events[j].rawRowData.requestid === eventRequestId) {
-                                        let roomEventToRemove = calendar.getEventById(calendarEvents[eventRoom].events[j].id)
-                                        removedEventArray = removedEventArray.concat(calendarEvents[eventRoom].events.splice(j, 1));
-                                        if (roomEventToRemove) {
-                                            roomEventToRemove.remove();
+                                //new code start
+                                let removedEventArray = [];
+                                for (let i = 0; i < eventRooms.length; i++) {
+                                    let eventRoom = eventRooms[i].room_fs_email;
+                                    for (let j = calendarEvents[eventRoom].events.length - 1; j >= 0; j--) {
+                                        if (calendarEvents[eventRoom].events[j].rawRowData.requestid === eventRequestId) {
+                                            let roomEventToRemove = calendar.getEventById(calendarEvents[eventRoom].events[j].id)
+                                            removedEventArray = removedEventArray.concat(calendarEvents[eventRoom].events.splice(j, 1));
+                                            if (roomEventToRemove) {
+                                                roomEventToRemove.remove();
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            if (eventToRemove) {
-                                let newPendingRequestRow = new WebUtils.Models.TableRow({
-                                    data: [
-                                        eventToRemove.extendedProps.rawRowData.rowid,
-                                        eventToRemove.extendedProps.rawRowData.priority,
-                                        eventToRemove.extendedProps.rawRowData.animalid,
-                                        eventToRemove.extendedProps.rawRowData.requestor,
-                                        displayDate(eventToRemove.extendedProps.rawRowData.created),
-                                        displayDateTime(eventToRemove.extendedProps.rawRowData.date),
-                                        displayDateTime(eventToRemove.extendedProps.rawRowData.enddate)
-                                    ],
-                                    otherData: eventToRemove.extendedProps.rawRowData,
-                                    warn: (eventToRemove.extendedProps.rawRowData.priority === 'ASAP'),
-                                    err: (eventToRemove.extendedProps.rawRowData.priority === 'Stat'),
-                                    success: (eventToRemove.extendedProps.rawRowData.priority === 'Routine')
-                                });
-                                WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
-                                pendingRequestsIndex[eventToRemove.extendedProps.rawRowData.requestid] = eventToRemove.extendedProps.rawRowData;
-                            }
-                            //new code end
+                                if (eventToRemove) {
+                                    let newPendingRequestRow = new WebUtils.Models.TableRow({
+                                        data: [
+                                            eventToRemove.extendedProps.rawRowData.rowid,
+                                            eventToRemove.extendedProps.rawRowData.priority,
+                                            eventToRemove.extendedProps.rawRowData.animalid,
+                                            eventToRemove.extendedProps.rawRowData.requestor,
+                                            displayDate(eventToRemove.extendedProps.rawRowData.created),
+                                            displayDateTime(eventToRemove.extendedProps.rawRowData.date),
+                                            displayDateTime(eventToRemove.extendedProps.rawRowData.enddate)
+                                        ],
+                                        otherData: eventToRemove.extendedProps.rawRowData,
+                                        warn: (eventToRemove.extendedProps.rawRowData.priority === 'ASAP'),
+                                        err: (eventToRemove.extendedProps.rawRowData.priority === 'Stat'),
+                                        success: (eventToRemove.extendedProps.rawRowData.priority === 'Routine')
+                                    });
+                                    WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
+                                    pendingRequestsIndex[eventToRemove.extendedProps.rawRowData.requestid] = eventToRemove.extendedProps.rawRowData;
+                                }
+                                //new code end
 
-                            selectedEvent = {};
-                            selectedId = null;
-                        } else {
-                            alert('There was an error while trying to cancel the event.');
-                        }
-                    }, this)
-                });
+                                selectedEvent = {};
+                            }
+                            else {
+                                alert('There was an error while trying to cancel the event.');
+                            }
+                        }, this)
+                    });
+                }
             },
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>

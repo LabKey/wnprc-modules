@@ -191,8 +191,12 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             </td>
             <td>Pathology Notes</td>
             <td>
-              { animalInfo["mostRecentNecropsyAbstract/project"] != null && (animalInfo["mostRecentNecropsyAbstract/project"] + '; ' ) }
-                {animalInfo["mostRecentNecropsyAbstract/remark"]}
+              {animalInfo["mostRecentNecropsyAbstract/remark"]}
+              { animalInfo["mostRecentNecropsyAbstract/project"] != null &&
+                (
+                  (<span id="animal-abstract-project"><a href={animalInfo["_labkeyurl_mostRecentNecropsyAbstract/project"]}>{animalInfo["mostRecentNecropsyAbstract/project"]}</a></span>)
+                )
+              }
             </td>
 
           </tr>

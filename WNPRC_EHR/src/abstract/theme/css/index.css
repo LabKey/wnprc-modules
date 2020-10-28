@@ -19,3 +19,10 @@
 .animal-info-table > tbody > tr>:nth-child(3) {
     border-left: 1px solid #B4B4B4;
 }
+
+#animal-abstract-project::before {
+    content: ' ('
+}
+#animal-abstract-project::after {
+    content: ')'
+}

@@ -48,7 +48,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
               <a href={animalInfo._labkeyurl_Id}>{animalInfo.Id}</a>
             </td>
             <td>Pathology Notes</td>
-            <td>{animalInfo["mostRecentNecropsyAbstract/remark"]}</td>
+            <td>{animalInfo["mostRecentNecropsyAbstract/project"]}; {animalInfo["mostRecentNecropsyAbstract/remark"]}</td>
           </tr>
           <tr>
             <td>Room</td>

@@ -22,7 +22,6 @@ SELECT a.lsid
      , a.project
      , a.project.protocol          AS protocol
      , a.account
-     , a.location
      , a.requestid.qcstate         AS qcstate
      , a.statuschangereason
      , a.comments

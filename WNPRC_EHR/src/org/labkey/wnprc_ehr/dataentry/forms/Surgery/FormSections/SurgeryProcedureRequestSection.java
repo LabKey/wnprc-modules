@@ -24,7 +24,6 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
                 "enddate",
                 "procedurecategory",
                 "procedurename",
-                "location",
                 "project",
                 "account",
                 "surgeon",

@@ -48,15 +48,6 @@
                         </fk>
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="location">
-                        <columnTitle>Location</columnTitle>
-                        <fk>
-                            <fkDbSchema>wnprc</fkDbSchema>
-                            <fkTable>procedure_rooms</fkTable>
-                            <fkColumnName>room</fkColumnName>
-                        </fk>
-                        <nullable>false</nullable>
-                    </column>
                     <column columnName="project">
                         <columnTitle>Project</columnTitle>
                         <fk>

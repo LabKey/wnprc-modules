@@ -747,7 +747,6 @@
                 cur_room:             ko.observable(),
                 cur_cage:             ko.observable(),
                 cur_cond:             ko.observable(),
-                location:             ko.observable(), // Surgery location
                 rooms:                ko.observable(),
                 medical:              ko.observable(),
                 project:              ko.observable(),
@@ -765,7 +764,6 @@
                 requestid:          '',
                 taskid:             '',
                 animalid:           '',
-                location:           '',
                 rooms:              '',
                 priority:           '',
                 date:               '',

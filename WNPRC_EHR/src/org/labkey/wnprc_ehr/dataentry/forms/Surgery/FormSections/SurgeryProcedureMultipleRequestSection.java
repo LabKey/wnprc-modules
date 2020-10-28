@@ -25,7 +25,6 @@ public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
                 "enddate",
                 "procedurecategory",
                 "procedurename",
-                "location",
                 "project",
                 "account",
                 "surgeon",

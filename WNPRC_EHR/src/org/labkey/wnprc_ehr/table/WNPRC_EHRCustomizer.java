@@ -416,11 +416,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col.setDescription("Returns the participant's most recent body condition score");
             table.addColumn(col);
         }
-        if (table.getColumn("mostRecentNecropsyAbstract") == null)
+        if (table.getColumn("necropsyAbstractNotes") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentNecropsyAbstract", "demographicsmostRecentNecropsyAbstract");
-            col.setLabel("Most Recent Necropsy Abstract");
-            col.setDescription("Returns the participant's most recent necropsy abstract with notes");
+            ColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
+            col.setLabel("Necropsy Abstract Notes");
+            col.setDescription("Returns the participant's necropsy abstract remarks and projects");
             table.addColumn(col);
         }
     }

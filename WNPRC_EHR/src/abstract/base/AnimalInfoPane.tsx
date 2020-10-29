@@ -30,6 +30,11 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
     );
   }
 
+  //jsx doesn't respect new lines in a string
+  let splitText = function(text) {
+    return text.split ('\n').map ((item, i) => <div key={i}>{item}</div>);
+  }
+
   if (infoState == "loading-success") {
     return (
       <div>
@@ -191,12 +196,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             </td>
             <td>Pathology Notes</td>
             <td>
-              {animalInfo["mostRecentNecropsyAbstract/remark"]}
-              { animalInfo["mostRecentNecropsyAbstract/project"] != null &&
-                (
-                  (<span id="animal-abstract-project"><a href={animalInfo["_labkeyurl_mostRecentNecropsyAbstract/project"]}>{animalInfo["mostRecentNecropsyAbstract/project"]}</a></span>)
-                )
-              }
+              {splitText(animalInfo["necropsyAbstractNotes/remark"])}
             </td>
 
           </tr>

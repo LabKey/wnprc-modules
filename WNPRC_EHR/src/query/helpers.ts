@@ -2,6 +2,7 @@ interface jsonDataType {
   commands: Array<any>;
 }
 import {Query,ActionURL,Filter} from '@labkey/api';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 
 export const groupCommands = (values: Array<any>) => {
   return values.reduce((acc, item) => {
@@ -86,7 +87,7 @@ export const checkEditMode = () => {
 };
 
 export function labkeyActionSelectWithPromise(
-    options
+    options: SelectRowsOptions
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     options.success = (data) => {resolve(data)};

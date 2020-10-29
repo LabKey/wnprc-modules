@@ -156,7 +156,6 @@ export const lookupAnimalInfo = (id:string) => {
     labkeyActionSelectWithPromise(config)
       .then((data) => {
         if (data["rows"][0]) {
-          console.table(data["rows"][0])
           resolve(data["rows"][0])
         } else {
           reject(data);

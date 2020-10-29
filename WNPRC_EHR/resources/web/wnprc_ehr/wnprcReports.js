@@ -1162,7 +1162,6 @@ EHR.reports['abstract'] = function(panel, tab){
             listeners: {
                 afterrender: {
                     fn: function () {
-                        console.log('adding script...')
                         LABKEY.requiresScript("/wnprc_ehr/gen/abstract.js",true, function() {
                             for (var i = 0; i < animalList.length; i ++){
                                 Abstract.renderAnimalAbstract(animalList[i])

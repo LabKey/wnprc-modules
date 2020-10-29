@@ -3,6 +3,7 @@
     <columns>
         <column name="Id"/>
         <column name="gender"/>
+        <column name="gender/meaning"/>
         <!--<column name="status">-->
             <!--<properties>-->
                 <!--<property name="columnTitle" value="Status"/>-->
@@ -44,6 +45,7 @@
         <column name="dam"/>
         <column name="sire"/>
         <column name="origin"/>
+        <column name="origin/meaning"/>
         <!--<column name="Id/MostRecentArrival/MostRecentArrival">-->
             <!--<properties>-->
                 <!--<property name="columnTitle" value="Most Recent Arrival"/>-->
@@ -89,9 +91,17 @@
                 <property name="columnTitle" value="Last TB Date"/>
             </properties>
         </column>
+        <column name="Feeding/TypeOfChow"/>
+        <column name="Feeding/chowConversion"/>
         <column name="medical"/>
         <column name="prepaid"/>
         <column name="Id/CurrentBehavior/currentBehaviors"/>
+        <column name="mostRecentAlopeciaScore/score"/>
+        <column name="mostRecentBodyConditionScore/score"/>
+        <column name="avail"/>
+        <column name="Id/numRoommates/AnimalsInCage"/>
+        <column name="Id/age"/>
+        <column name="necropsyAbstractNotes/remark"/>
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

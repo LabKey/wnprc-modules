@@ -51,6 +51,11 @@ public class SimpleQueryUpdater {
         return this.upsert(rows);
     }
 
+    public List<CaseInsensitiveMapWrapper<Object>> delete(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
+        List<Map<String, Object>> rows = makeRowsCaseInsensitive(rowArray);
+        return this.delete(rows);
+    }
+
     /**
      * Inserts a row into the table. It does the entire thing as a transaction, so any failure
      * will result in no data being inserted.
@@ -191,14 +196,13 @@ public class SimpleQueryUpdater {
         return updatedRows;
     }
 
-    public List<CaseInsensitiveMapWrapper<Object>> delete(Map<String, Object>... rowArray) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
-        List<Map<String, Object>> rowsToDelete = makeRowsCaseInsensitive(rowArray);
+    public List<CaseInsensitiveMapWrapper<Object>> delete(List<Map<String, Object>> rows) throws QueryUpdateServiceException, SQLException, InvalidKeyException, BatchValidationException {
         List<CaseInsensitiveMapWrapper<Object>> rowsToReturn = new ArrayList<>();
 
         // Wrap everything in a transaction to make both UPDATE and INSERT operations atomic together.
         try(DbScope.Transaction transaction = tableInfo.getSchema().getScope().ensureTransaction()) {
-            if (rowsToDelete.size() > 0) {
-                List<Map<String, Object>> deletedRows = service.deleteRows(user, container, rowsToDelete, null, null);
+            if (rows.size() > 0) {
+                List<Map<String, Object>> deletedRows = service.deleteRows(user, container, rows, null, null);
 
                 // Check to make sure that the QueryUpdateService doesn't try to delete as much as it can, and not throw
                 // an error for the rows that it couldn't.

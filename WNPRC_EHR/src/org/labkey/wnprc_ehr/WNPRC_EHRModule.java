@@ -79,6 +79,9 @@ import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamNWM.PhysicalExamNWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamOWM.PhysicalExamOWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProblemList.ProblemListForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProcedureRequest.ProcedureRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsForm;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsReviewForm;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsTaskForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
@@ -266,6 +269,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/animalPortal.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/animalWaterCalendar.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");
@@ -455,6 +459,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 FoodDeprivesStartForm.class,
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
+                ProtocolForm.class,
+                ResearchUltrasoundsForm.class,
+                ResearchUltrasoundsTaskForm.class,
+                ResearchUltrasoundsReviewForm.class
                 ProtocolForm.class,
                 EnterWater.class,
                 EnterMultipleWater.class,

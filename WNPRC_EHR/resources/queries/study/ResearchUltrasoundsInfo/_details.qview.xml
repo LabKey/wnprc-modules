@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
+    <columns>
+        <column name="objectid"/>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="pregnancyid"/>
+        <column name="gestation_day"/>
+        <column name="project"/>
+        <column name="restraint"/>
+        <column name="fetal_heartbeat"/>
+        <column name="performedby"/>
+        <column name="remark"/>
+        <column name="reviewCompleted"/>
+        <column name="taskid"/>
+    </columns>
+</customView>

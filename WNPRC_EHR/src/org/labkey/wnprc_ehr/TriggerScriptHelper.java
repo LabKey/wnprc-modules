@@ -31,8 +31,12 @@ import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryHelper;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -78,6 +82,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by jon on 7/13/16.
@@ -210,6 +216,81 @@ public class TriggerScriptHelper {
 //            pregnancyNotification.setParam(PregnancyNotification.objectidsParamName, objectids.get(i));
 //            pregnancyNotification.sendManually(container, user);
 //        }
+    }
+
+    // Will insert the given rows into the given schema and table
+    public void insertRows(List<Map<String, Object>> insertRows, String schema, String table) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException {
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schema, table);
+        queryUpdater.insert(insertRows);
+    }
+
+    public void updateUltrasoundMeasurements(List<Map<String, Object>> updatedRows) throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException, InvalidKeyException {
+        if (updatedRows != null && updatedRows.size() > 0) {
+            String ultrasoundId = (String) updatedRows.get(0).get("ultrasound_id");
+
+            List<Map<String, Object>> rowsToDelete = new ArrayList<>();
+            List<Map<String, Object>> rowsToInsert = new ArrayList<>();
+
+            final double THRESHOLD = .001;
+
+            for (Map<String, Object> updatedRow : updatedRows) {
+                Pattern separator = Pattern.compile(";");
+                List<Double> newMeasurements = separator.splitAsStream((String) updatedRow.get("measurements_string")).map(Double::parseDouble).collect(Collectors.toList());
+                List<JSONObject> existingMeasurements = getMeasurements(ultrasoundId, (String) updatedRow.get("measurement_name"));
+
+                for (int i = 0; i < existingMeasurements.size(); i++) {
+                    for (int j = 0; j < newMeasurements.size(); j++) {
+                        if (Math.abs(existingMeasurements.get(i).getDouble("measurement_value") - newMeasurements.get(j)) < THRESHOLD) {
+                            existingMeasurements.remove(i--);
+                            newMeasurements.remove(j);
+                            break;
+                        }
+                    }
+                }
+
+                for (JSONObject existingMeasurement : existingMeasurements) {
+                    rowsToDelete.add(existingMeasurement);
+                }
+
+                for (Double newMeasurement : newMeasurements) {
+                    JSONObject newRow = new JSONObject();
+                    newRow.put("Id", updatedRow.get("Id"));
+                    newRow.put("date", updatedRow.get("date"));
+                    newRow.put("measurement_name", updatedRow.get("measurement_name"));
+                    newRow.put("measurement_label", updatedRow.get("measurement_label"));
+                    newRow.put("measurement_value", newMeasurement);
+                    newRow.put("measurement_unit", updatedRow.get("measurement_unit"));
+                    newRow.put("ultrasound_id", updatedRow.get("ultrasound_id"));
+                    newRow.put("taskid", updatedRow.get("taskid"));
+                    newRow.put("QCStateLabel", updatedRow.get("QCStateLabel"));
+                    rowsToInsert.add(newRow);
+                }
+            }
+
+            SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "ultrasound_measurements");
+            if (rowsToDelete.size() > 0) {
+                queryUpdater.delete(rowsToDelete);
+            }
+            if (rowsToInsert.size() > 0) {
+                queryUpdater.insert(rowsToInsert);
+            }
+//            try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that ultrasound followup_required field can be changed to false")) {
+//                queryUpdater.update(rowsToUpdate);
+//            } catch (Exception e) {
+//                _log.error(e);
+//            }
+        }
+    }
+
+    private List<JSONObject> getMeasurements(String ultrasoundId, String measurementName) {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("ultrasound_id", CompareType.EQUAL, ultrasoundId);
+        filter.addCondition("measurement_name", CompareType.EQUAL, measurementName);
+
+        JSONArray ultrasound_measurements = queryFactory.selectRows("study", "ultrasound_measurements", filter);
+        List<JSONObject> measurementsList = JsonUtils.getListFromJSONArray(ultrasound_measurements);
+
+        return measurementsList;
     }
 
     public void updateBreedingOutcome(final List<String> lsids) {
@@ -1110,7 +1191,7 @@ public class TriggerScriptHelper {
                         if (!checkFrequencyCompatibility(serverMeaning, meaningFrequency))
                         {
 
-                            //Formatting the dates to return a legible date for error message 
+                            //Formatting the dates to return a legible date for error message
                             DateTimeFormatter dateFormatted = DateTimeFormatter.ISO_LOCAL_DATE;
                             String startFormatDate = dateFormatted.format(convertToLocalDateViaSqlDate(waterRecord.getStartDateCoalesced()));
                             String endFormattedDate;
@@ -1638,7 +1719,7 @@ public class TriggerScriptHelper {
 
     public String changeWaterScheduled(String animalId, Date clientDate, String waterSource){
         String returnMessage = null;
-        
+
 
 
         return returnMessage;

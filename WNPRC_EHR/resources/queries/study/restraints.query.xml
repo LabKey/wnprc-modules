@@ -2,13 +2,15 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="restraints" tableDbType="TABLE" useColumnOrder="true">
-                <tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>
-                <insertUrl />
-                <importUrl />
-                <updateUrl />
-                <deleteUrl />
-                <titleColumn>caseno</titleColumn>
                 <columns>
+                    <column columnName="weight_objectid">
+                        <columnTitle>Weight ObjectID</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>weight</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="restraintType">
                         <columnTitle>Restraint Type</columnTitle>
                         <description>Restraint Type</description>
@@ -18,15 +20,6 @@
                             <fkColumnName>type</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="weight_objectid">
-                        <columnTitle>Weight ObjectID</columnTitle>
-                        <fk>
-                            <fkDbSchema>study</fkDbSchema>
-                            <fkTable>weight</fkTable>
-                            <fkColumnName>objectid</fkColumnName>
-                        </fk>
-                    </column>
-
                 </columns>
                 <tableTitle>restraints</tableTitle>
             </table>

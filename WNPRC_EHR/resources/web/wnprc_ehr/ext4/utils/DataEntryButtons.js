@@ -605,8 +605,26 @@
      * This is a wrapper on the Request button to allow .
      */
     var RequestButtonName = 'WNPRC_REQUEST';
-    registerBtn(RequestButtonName, _.extend(getBtn("REQUEST"), {
-        disableOn: 'ERROR'
+    let requestBtn = getBtn("REQUEST");
+    let defaultHandler = requestBtn.handler;
+    registerBtn(RequestButtonName, _.extend(requestBtn, {
+        disableOn: 'ERROR',
+        handler: function(btn) {
+            //let store = Ext4.StoreMgr.get('wnprc||procedure_scheduled_rooms');
+            let storeCount = Ext4.StoreMgr.getCount();
+            for (let i = 0; i < storeCount; i++) {
+                let store = Ext4.StoreMgr.getAt(i);
+                if (store.storeId && store.storeId.includes("procedure_scheduled_rooms")) {
+                    if (store.getCount() > 0) {
+                        defaultHandler(btn);
+                    } else {
+                        Ext4.Msg.alert("ERROR", "The Surgery/Procedure request must contain at least 1 room.");
+                    }
+                    break;
+                }
+                Ext4.Msg.alert("ERROR", "The 'room' store could not be found. Please report this issue to an administrator");
+            }
+        }
     }));
 
     /*

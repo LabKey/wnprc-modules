@@ -513,15 +513,19 @@
     let pendingRequestsIndex = {};
 
     (function() {
-        document.addEventListener("click", function() {
-            selectedEvent = {};
-            calendar.rerenderEvents();
-            for (let key in WebUtils.VM.taskDetails) {
-                if (key != 'animalLink') {
-                    WebUtils.VM.taskDetails[key](null);
-                }
-            }
-        }, true);
+        let calendarEl = document.getElementById('calendar');
+
+        // calendarEl.addEventListener("click", function(clickEvent) {
+        //     if (clickEvent.target.type !== "button") {
+        //         selectedEvent = {};
+        //         for (let key in WebUtils.VM.taskDetails) {
+        //             if (key != 'animalLink') {
+        //                 WebUtils.VM.taskDetails[key](null);
+        //             }
+        //         }
+        //         calendar.rerenderEvents();
+        //     }
+        // }, true);
 
         let displayDate = function(dateString) {
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
@@ -533,7 +537,6 @@
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
         };
 
-        var calendarEl = document.getElementById('calendar');
         $(document).ready(function() {
             document.getElementById('calendar-checklist').innerHTML = '';
 

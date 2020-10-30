@@ -31,7 +31,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
   }
 
   //jsx doesn't respect new lines in a string
-  let splitText = function(text) {
+  const splitText = function(text:string) {
     if (text) {
       return text.split ('\n').map ((item, i) => <div key={i}>{item}</div>);
     }

@@ -33,6 +33,8 @@ import org.labkey.api.ehr.security.EHRStartedAdminPermission;
 import org.labkey.api.ehr.security.EHRStartedDeletePermission;
 import org.labkey.api.ehr.security.EHRStartedInsertPermission;
 import org.labkey.api.ehr.security.EHRStartedUpdatePermission;
+import org.labkey.api.ehr.history.DefaultClinicalRemarksDataSource;
+import org.labkey.api.ehr.history.iStatLabworkType;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.ldk.notification.Notification;
@@ -248,6 +250,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultTBDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultClinicalRemarksDataSource(this));
+        EHRService.get().registerLabworkType(new iStatLabworkType(this));
 
         EHRService.get().addModuleRequiringLegacyExt3EditUI(this);
 

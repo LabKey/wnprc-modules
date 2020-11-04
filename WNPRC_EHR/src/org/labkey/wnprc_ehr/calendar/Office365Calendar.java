@@ -39,11 +39,12 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private User user;
     private Container container;
 
-    private static Map<String, String> BASE_CALENDARS = null;
-    private static Map<String, String> CALENDARS_BY_ID = null;
-    private static Map<String, String> CALENDAR_COLORS = null;
+    private Map<String, String> BASE_CALENDARS = null;
+    private Map<String, String> CALENDARS_BY_ID = null;
+    private Map<String, String> CALENDAR_COLORS = null;
     private static final String AZURE_NAME = "ProcedureCalendar";
     public static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    public static final String DEFAULT_BG_COLOR = "#3788D8";
 
     //Populate the calendar maps when the object is first created
     public Office365Calendar(User user, Container container) {
@@ -67,13 +68,9 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return PropertyManager.getEncryptedStore().getWritableProperties(AZURE_NAME + ".Credentials", false).get("AccessToken");
     }
 
-    private synchronized Map<String, String> getBaseCalendars() {
-        return getBaseCalendars(false);
-    }
-
     //Gets the base calendars (surgeries_scheduled, surgeries_on_hold, procedures_scheduled, procedures_on_hold)
-    private synchronized Map<String, String> getBaseCalendars(boolean refresh) {
-        if (BASE_CALENDARS == null || refresh) {
+    private synchronized Map<String, String> getBaseCalendars() {
+        if (BASE_CALENDARS == null) {
             BASE_CALENDARS = new HashMap<>();
             SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365");
             DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
@@ -88,11 +85,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     private synchronized Map<String, String> getCalendarsById() {
-        return getCalendarsById(false);
-    }
-
-    private synchronized Map<String, String> getCalendarsById(boolean refresh) {
-        if (CALENDARS_BY_ID == null || refresh) {
+        if (CALENDARS_BY_ID == null) {
             CALENDARS_BY_ID = new HashMap<>();
             SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365");
             DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
@@ -107,11 +100,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     private synchronized Map<String, String> getCalendarColors() {
-        return getCalendarColors(false);
-    }
-
-    private synchronized Map<String, String> getCalendarColors(boolean refresh) {
-        if (CALENDAR_COLORS == null || refresh) {
+        if (CALENDAR_COLORS == null) {
             CALENDAR_COLORS = new HashMap<>();
             SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.IN, List.of("Office365", "Office365Resource"));
             TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("procedure_calendars_and_rooms");
@@ -194,7 +183,9 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
         for (JSONObject calendar : calendarList) {
             JSONObject eventSource = new JSONObject();
-            eventSource.put("backgroundColor", getCalendarColors().get(calendar.getString("calendar_id")));
+            String bgColor = getCalendarColors().get(calendar.getString("calendar_id"));
+            eventSource.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
+            eventSource.put("textColor", getTextColor(eventSource.getString("backgroundColor")));
             eventSource.put("id", calendar.getString("calendar_id"));
             allJsonData.put(calendar.getString("calendar_id"), eventSource);
 
@@ -281,39 +272,42 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     jsonEvent.put("start", start);
                     jsonEvent.put("end", end);
                     jsonEvent.put("calendarId", currentCalName);
-                    jsonEvent.put("backgroundColor", getCalendarColors().get(currentCalName));
+                    String bgColor = getCalendarColors().get(currentCalName);
+                    jsonEvent.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
+                    jsonEvent.put("textColor", getTextColor(jsonEvent.getString("backgroundColor")));
                     jsonEvent.put("id", id);
 
                     //Add data for details panel on Surgery Schedule page
-                    JSONObject rawRowData = new JSONObject();
+                    JSONObject extendedProps = new JSONObject();
                     if (surgeryInfo != null) {
-                        rawRowData.put("lsid", surgeryInfo.get("lsid"));
-                        rawRowData.put("taskid", surgeryInfo.get("taskid"));
-                        rawRowData.put("objectid", surgeryInfo.get("objectid"));
-                        rawRowData.put("requestid", surgeryInfo.get("requestid"));
-                        rawRowData.put("rowid", surgeryInfo.get("rowid"));
-                        rawRowData.put("priority", surgeryInfo.get("priority"));
-                        rawRowData.put("requestor", surgeryInfo.get("requestor"));
-                        rawRowData.put("procedurecategory", surgeryInfo.get("procedurecategory"));
-                        rawRowData.put("procedurename", surgeryInfo.get("procedurename"));
-                        rawRowData.put("age", surgeryInfo.get("age"));
-                        rawRowData.put("animalid", surgeryInfo.get("animalid"));
-                        rawRowData.put("created", surgeryInfo.get("created"));
-                        rawRowData.put("date", start);
-                        rawRowData.put("enddate", end);
-                        rawRowData.put("account", surgeryInfo.get("account"));
-                        rawRowData.put("cur_room", surgeryInfo.get("cur_room"));
-                        rawRowData.put("cur_cage", surgeryInfo.get("cur_cage"));
-                        rawRowData.put("cur_cond", surgeryInfo.get("cur_cond"));
-                        rawRowData.put("location", surgeryInfo.get("location"));
-                        rawRowData.put("rooms", surgeryInfo.get("rooms"));
-                        rawRowData.put("medical", surgeryInfo.get("medical"));
-                        rawRowData.put("project", surgeryInfo.get("project"));
-                        rawRowData.put("protocol", surgeryInfo.get("protocol"));
-                        rawRowData.put("sex", surgeryInfo.get("sex"));
-                        rawRowData.put("weight", surgeryInfo.get("weight"));
-                        rawRowData.put("comments", surgeryInfo.get("comments"));
-                        jsonEvent.put("rawRowData", rawRowData);
+                        extendedProps.put("lsid", surgeryInfo.get("lsid"));
+                        extendedProps.put("taskid", surgeryInfo.get("taskid"));
+                        extendedProps.put("objectid", surgeryInfo.get("objectid"));
+                        extendedProps.put("requestid", surgeryInfo.get("requestid"));
+                        extendedProps.put("rowid", surgeryInfo.get("rowid"));
+                        extendedProps.put("priority", surgeryInfo.get("priority"));
+                        extendedProps.put("requestor", surgeryInfo.get("requestor"));
+                        extendedProps.put("procedurecategory", surgeryInfo.get("procedurecategory"));
+                        extendedProps.put("procedurename", surgeryInfo.get("procedurename"));
+                        extendedProps.put("age", surgeryInfo.get("age"));
+                        extendedProps.put("animalid", surgeryInfo.get("animalid"));
+                        extendedProps.put("created", surgeryInfo.get("created"));
+                        extendedProps.put("date", start);
+                        extendedProps.put("enddate", end);
+                        extendedProps.put("account", surgeryInfo.get("account"));
+                        extendedProps.put("cur_room", surgeryInfo.get("cur_room"));
+                        extendedProps.put("cur_cage", surgeryInfo.get("cur_cage"));
+                        extendedProps.put("cur_cond", surgeryInfo.get("cur_cond"));
+                        extendedProps.put("location", surgeryInfo.get("location"));
+                        extendedProps.put("rooms", surgeryInfo.get("rooms"));
+                        extendedProps.put("medical", surgeryInfo.get("medical"));
+                        extendedProps.put("project", surgeryInfo.get("project"));
+                        extendedProps.put("protocol", surgeryInfo.get("protocol"));
+                        extendedProps.put("sex", surgeryInfo.get("sex"));
+                        extendedProps.put("weight", surgeryInfo.get("weight"));
+                        extendedProps.put("comments", surgeryInfo.get("comments"));
+                        extendedProps.put("selected", false);
+                        jsonEvent.put("extendedProps", extendedProps);
                     }
                     ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);
                 }
@@ -322,8 +316,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             for (String room : rooms) {
                 JSONArray roomEvents = allJsonEvents.getJSONArray(room);
                 JSONObject roomEvent = roomEvents.getJSONObject(roomEvents.length() - 1);
-                JSONObject rawRowData = roomEvent.getJSONObject("rawRowData");
-                rawRowData.put("parentid", parentIds.get(rawRowData.get("requestid")));
+                JSONObject extendedProps = roomEvent.getJSONObject("extendedProps");
+                extendedProps.put("parentid", parentIds.get(extendedProps.get("requestid")));
             }
         }
 

@@ -25,7 +25,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class OnCallCalendar extends GoogleCalendar
 {
     private static final String CALENDAR_UUID = "a3c471b4-6636-4b83-a65c-a33e2606a1ac";
-    private static final String BG_COLOR = "#34abeb";
+    private static final String DEFAULT_BG_COLOR = "#34abeb";
     private Map<String, String> CALENDAR_IDS = null;
 
     public OnCallCalendar(User user, Container container) {
@@ -95,9 +95,8 @@ public class OnCallCalendar extends GoogleCalendar
             }
         }
         eventSourceObject.put("events", jsonEvents);
-        eventSourceObject.put("backgroundColor", BG_COLOR);
+        eventSourceObject.put("backgroundColor", DEFAULT_BG_COLOR);
         eventSourceObject.put("id", calendarId);
-        eventSourceObject.put("nextAvailableId", jsonEvents.length());
 
         return eventSourceObject;
     }

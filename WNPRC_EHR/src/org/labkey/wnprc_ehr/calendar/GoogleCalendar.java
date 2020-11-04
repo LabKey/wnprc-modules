@@ -20,9 +20,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.dbutils.api.SimplerFilter;
 
 import java.io.ByteArrayInputStream;
@@ -32,9 +30,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Calendar
 {
@@ -62,6 +60,7 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
 
     private static final int MAX_EVENT_RESULTS = 2500;
     protected static final String CALENDAR_UUID = null;
+    protected static final String DEFAULT_BG_COLOR = "#a1fffa";
     protected Map<String, String> CALENDAR_IDS = null;
     protected Map<String, String> CALENDAR_COLORS = null;
 
@@ -135,22 +134,23 @@ public abstract class GoogleCalendar implements org.labkey.wnprc_ehr.calendar.Ca
             Event event = items.get(i);
 
             JSONObject jsonEvent = new JSONObject();
+            jsonEvent.put("id", UUID.randomUUID().toString());
             jsonEvent.put("title", event.getSummary());
             jsonEvent.put("start", event.getStart().getDate() != null ? event.getStart().getDate() : event.getStart().getDateTime());
             jsonEvent.put("end", event.getEnd().getDate() != null ? event.getEnd().getDate() : event.getEnd().getDateTime());
             jsonEvent.put("htmlLink", event.getHtmlLink());
             jsonEvent.put("calendarId", calendarId);
             jsonEvent.put("calendarName", calendarName);
-            jsonEvent.put("backgroundColor", getCalendarColors().get(calendarId));
-            jsonEvent.put("eventId", i);
-            jsonEvent.put("eventListSize", events.size());
+            String bgColor = getCalendarColors().get(calendarId);
+            jsonEvent.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
+            jsonEvent.put("textColor", getTextColor(jsonEvent.getString("backgroundColor")));
 
             jsonEvents.put(jsonEvent);
         }
         eventSourceObject.put("events", jsonEvents);
         eventSourceObject.put("backgroundColor", getCalendarColors().get(calendarId));
+        eventSourceObject.put("textColor", getTextColor(eventSourceObject.getString("backgroundColor")));
         eventSourceObject.put("id", calendarId);
-        eventSourceObject.put("nextAvailableId", jsonEvents.length());
 
         return eventSourceObject;
     }

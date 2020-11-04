@@ -15,21 +15,13 @@
 <%@ page import="org.labkey.api.security.GroupManager" %>
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
 <%@ page import="java.text.DateFormat" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
     public void addClientDependencies(ClientDependencies dependencies) {
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.css");
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.css");
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.css");
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.css");
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/core/main.min.js");
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/daygrid/main.min.js");
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/timegrid/main.min.js");
-        dependencies.add("/webutils/lib/fullcalendar-4.4.0/packages/bootstrap/main.min.js");
+        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.css");
+        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.js");
     }
 %>
 
@@ -82,6 +74,7 @@
 </style>
 
 <script type="text/javascript">
+    //from https://awik.io/determine-color-bright-dark-using-javascript/
     function lightOrDark(color) {
 
         // Variables for red, green, blue values
@@ -124,10 +117,6 @@
 
             return 'dark';
         }
-    }
-
-    function getCalendarNameFromRoom(room) {
-        return room + '@primate.wisc.edu';
     }
 
     function getEventSubject(form) {
@@ -210,6 +199,7 @@
             }, this),
             failure: LABKEY.Utils.getCallbackWrapper(function (response)
             {
+                alert("Something went wrong: " + JSON.stringify(response));
                 $('#scheduleRequestForm').unblock();
             }, this)
         });
@@ -300,6 +290,12 @@
 
 <div class="col-xs-12 col-xl-10">
     <div class="col-xs-12 col-md-4">
+        <div id="calendar-selection" class="panel panel-primary">
+            <div class="panel-heading"><span>Calendar Selection</span></div>
+            <div class="panel-body">
+                <div id="calendar-checklist"></div>
+            </div>
+        </div>
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Surgery Details</span></div>
             <div class="panel-body" data-bind="with: taskDetails">
@@ -340,12 +336,6 @@
                 <%--<a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>--%>
                 <%--<a class="btn btn-default" href="{{$parent.viewNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">View Record</a>--%>
                 <%--<a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>--%>
-            </div>
-        </div>
-        <div id="calendar-selection" class="panel panel-primary">
-            <div class="panel-heading"><span>Calendar Selection</span></div>
-            <div class="panel-body">
-                <div id="calendar-checklist"></div>
             </div>
         </div>
     </div>
@@ -515,17 +505,19 @@
     (function() {
         let calendarEl = document.getElementById('calendar');
 
-        // calendarEl.addEventListener("click", function(clickEvent) {
-        //     if (clickEvent.target.type !== "button") {
-        //         selectedEvent = {};
-        //         for (let key in WebUtils.VM.taskDetails) {
-        //             if (key != 'animalLink') {
-        //                 WebUtils.VM.taskDetails[key](null);
-        //             }
-        //         }
-        //         calendar.rerenderEvents();
-        //     }
-        // }, true);
+        calendarEl.addEventListener("click", function(clickEvent) {
+            if (clickEvent.target.type !== "button" && clickEvent.target.parentElement.type !== "button") {
+                if (selectedEvent.id) {
+                    calendar.getEventById(selectedEvent.id).setExtendedProp("selected", false);
+                }
+                selectedEvent = {};
+                for (let key in WebUtils.VM.taskDetails) {
+                    if (key != 'animalLink') {
+                        WebUtils.VM.taskDetails[key](null);
+                    }
+                }
+            }
+        }, true);
 
         let displayDate = function(dateString) {
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
@@ -563,13 +555,12 @@
                             if (calendarEvents) {
                                 for (let cal in calendarEvents) {
                                     if (calendarEvents.hasOwnProperty(cal)) {
-                                        document.getElementById(cal).checked = isChecked;
+                                        let calCheckbox = document.getElementById(cal);
+                                        if (calCheckbox.checked != isChecked) {
+                                            calCheckbox.click();
+                                        }
                                     }
                                 }
-                            }
-
-                            if (calendar) {
-                                calendar.rerenderEvents();
                             }
                         });
 
@@ -603,7 +594,13 @@
                             checkbox.value = '';
                             checkbox.addEventListener('change', function() {
                                 if (calendar) {
-                                    calendar.rerenderEvents();
+                                    let events = calendarEvents[this.id].events;
+                                    let displayProp = this.checked ? "auto" : "none";
+                                    calendar.batchRendering(() => {
+                                        for (let i = 0; i < events.length; i++) {
+                                            calendar.getEventById(events[i].id).setProp("display", displayProp);
+                                        }
+                                    });
                                 }
                             });
 
@@ -658,41 +655,31 @@
                     });
 
                     calendar = new FullCalendar.Calendar(calendarEl, {
-                        plugins: ['dayGrid', 'timeGrid', 'bootstrap'],
                         themeSystem: 'bootstrap',
-                        defaultView: 'dayGridMonth',
-                        header: {
+                        initialView: 'dayGridMonth',
+                        //rerenderDelay: 50,
+                        headerToolbar: {
                             left: 'prev,next today',
                             center: 'title',
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
                         },
-                        eventRender: function(info) {
-                            let checkedCalendars = [];
-
-                            if (data.rows && data.rows.length > 0) {
-                                for (let i = 0; i < data.rows.length; i++) {
-
-                                    if (document.getElementById(data.rows[i].calendar_id).checked) {
-                                        checkedCalendars.push(data.rows[i].calendar_id);
-                                    }
-                                }
-                            }
-
-                            let backgroundBrightness = lightOrDark(info.el.style.backgroundColor);
-                            if (info.event.id === selectedEvent.id) {
-                                info.el.classList.add('event-text-' + backgroundBrightness);
-                                info.el.classList.add('event-selected');
+                        eventClassNames: function (arg) {
+                            if (arg.event.extendedProps.selected) {
+                                return ["event-selected"];
                             } else {
-                                info.el.classList.add('event-text-' + backgroundBrightness);
-                                info.el.classList.remove('event-selected');
+                                return [];
                             }
-
-                            return checkedCalendars.includes(info.event.extendedProps.calendarId);
                         },
                         eventClick: function(info) {
+                            //TODO REMOVE LOGGING
+                            console.log(info.event.id);
+                            if (selectedEvent.id) {
+                                calendar.getEventById(selectedEvent.id).setExtendedProp("selected", false);
+                            }
+                            info.event.setExtendedProp("selected", true);
                             selectedEvent = info.event;
-                            if (info.event.extendedProps && info.event.extendedProps.rawRowData) {
-                                jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
+                            if (info.event.extendedProps) {
+                                jQuery.each(info.event.extendedProps, function (key, value) {
                                     if (key in WebUtils.VM.taskDetails) {
                                         if (key === "date" || key === "enddate") {
                                             value = displayDateTimeISO(value);
@@ -701,7 +688,6 @@
                                     }
                                 });
                             }
-                            calendar.rerenderEvents();
                         }
                     });
 
@@ -722,6 +708,11 @@
                                 else {
                                     alert("Houston, we have a problem: " + response.exception);
                                 }
+                                $('#calendar-selection').unblock();
+                                $('#procedure-calendar').unblock();
+                            }, this),
+                            failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                alert("Something went wrong: " + JSON.stringify(response));
                                 $('#calendar-selection').unblock();
                                 $('#procedure-calendar').unblock();
                             }, this)
@@ -881,8 +872,8 @@
             cancelEvent: function() {
                 let cancel = confirm("Are you sure you'd like to cancel this surgery? This will move it back into the pending requests.");
                 if (cancel === true && selectedEvent.id) {
-                    let eventId = (selectedEvent.extendedProps.rawRowData.parentid) ? selectedEvent.extendedProps.rawRowData.parentid : selectedEvent.id;
-                    let eventRequestId = selectedEvent.extendedProps.rawRowData.requestid;
+                    let eventId = (selectedEvent.extendedProps.parentid) ? selectedEvent.extendedProps.parentid : selectedEvent.id;
+                    let eventRequestId = selectedEvent.extendedProps.requestid;
                     LABKEY.Ajax.request({
                         url: LABKEY.ActionURL.buildURL("wnprc_ehr", "SurgeryProcedureChangeStatus", null, {
                             requestId: WebUtils.VM.taskDetails.requestid(),
@@ -901,7 +892,7 @@
                                 for (let i = 0; i < eventRooms.length; i++) {
                                     let eventRoom = eventRooms[i].room_fs_email;
                                     for (let j = calendarEvents[eventRoom].events.length - 1; j >= 0; j--) {
-                                        if (calendarEvents[eventRoom].events[j].rawRowData.requestid === eventRequestId) {
+                                        if (calendarEvents[eventRoom].events[j].extendedProps.requestid === eventRequestId) {
                                             let roomEventToRemove = calendar.getEventById(calendarEvents[eventRoom].events[j].id)
                                             removedEventArray = removedEventArray.concat(calendarEvents[eventRoom].events.splice(j, 1));
                                             if (roomEventToRemove) {
@@ -914,21 +905,21 @@
                                 if (eventToRemove) {
                                     let newPendingRequestRow = new WebUtils.Models.TableRow({
                                         data: [
-                                            eventToRemove.extendedProps.rawRowData.rowid,
-                                            eventToRemove.extendedProps.rawRowData.priority,
-                                            eventToRemove.extendedProps.rawRowData.animalid,
-                                            eventToRemove.extendedProps.rawRowData.requestor,
-                                            displayDate(eventToRemove.extendedProps.rawRowData.created),
-                                            displayDateTime(eventToRemove.extendedProps.rawRowData.date),
-                                            displayDateTime(eventToRemove.extendedProps.rawRowData.enddate)
+                                            eventToRemove.extendedProps.rowid,
+                                            eventToRemove.extendedProps.priority,
+                                            eventToRemove.extendedProps.animalid,
+                                            eventToRemove.extendedProps.requestor,
+                                            displayDate(eventToRemove.extendedProps.created),
+                                            displayDateTime(eventToRemove.extendedProps.date),
+                                            displayDateTime(eventToRemove.extendedProps.enddate)
                                         ],
-                                        otherData: eventToRemove.extendedProps.rawRowData,
-                                        warn: (eventToRemove.extendedProps.rawRowData.priority === 'ASAP'),
-                                        err: (eventToRemove.extendedProps.rawRowData.priority === 'Stat'),
-                                        success: (eventToRemove.extendedProps.rawRowData.priority === 'Routine')
+                                        otherData: eventToRemove.extendedProps,
+                                        warn: (eventToRemove.extendedProps.priority === 'ASAP'),
+                                        err: (eventToRemove.extendedProps.priority === 'Stat'),
+                                        success: (eventToRemove.extendedProps.priority === 'Routine')
                                     });
                                     WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
-                                    pendingRequestsIndex[eventToRemove.extendedProps.rawRowData.requestid] = eventToRemove.extendedProps.rawRowData;
+                                    pendingRequestsIndex[eventToRemove.extendedProps.requestid] = eventToRemove.extendedProps;
                                 }
                                 //new code end
 

@@ -186,7 +186,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         initTest.updateEHRFormFrameworkTypes();
 
-        /*initTest.loadBloodBilledByLookup();
+        initTest.loadBloodBilledByLookup();
         initTest.addFinanceRelatedWebParts();
         initTest.clickFolder("Private");
         initTest.loadEHRBillingTableDefinitions();
@@ -208,7 +208,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder("PI Portal");
         initTest.addBillingPublicWebParts();
 
-        initTest.uploadBillingDataAndVerify();*/
+        initTest.uploadBillingDataAndVerify();
     }
 
     private void uploadBillingDataAndVerify() throws Exception

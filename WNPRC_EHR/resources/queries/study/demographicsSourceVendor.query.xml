@@ -1,0 +1,18 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <description>Lookup first occurrence of arrival or birth</description>
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="demographicsSourceVendor" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="source">
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>source</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

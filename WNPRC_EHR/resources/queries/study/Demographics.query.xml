@@ -220,6 +220,11 @@
                     </column>
                     <column columnName="geographic_origin">
                         <columnTitle>Geographic Origin</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>geographic_origins</fkTable>
+                            <fkColumnName>meaning</fkColumnName>
+                        </fk>
                     </column>
                     <!--<column columnName="behavior">
                         <isHidden>true</isHidden>

@@ -103,6 +103,11 @@
         <column name="Id/age"/>
         <column name="necropsyAbstractNotes/remark"/>
         <column name="geographic_origin"/>
+        <column name="sourceVendor/source"/>
+        <column name="sourceVendor/source/meaning"/>
+        <column name="sourceVendor/source/SourceState"/>
+        <column name="sourceVendor/source/SourceCity"/>
+        <column name="sourceVendor/source/SourceCountry"/>
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

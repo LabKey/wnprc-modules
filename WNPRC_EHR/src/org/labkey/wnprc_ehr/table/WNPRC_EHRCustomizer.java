@@ -423,6 +423,13 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col.setDescription("Returns the participant's necropsy abstract remarks and projects");
             table.addColumn(col);
         }
+        if (table.getColumn("sourceVendor") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "sourceVendor", "demographicsSourceVendor");
+            col.setLabel("Original source/vendor");
+            col.setDescription("Returns the animal's original source");
+            table.addColumn(col);
+        }
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)

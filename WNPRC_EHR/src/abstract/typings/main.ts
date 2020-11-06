@@ -27,8 +27,8 @@ export interface AnimalInfoProps {
   _labkeyurl_death: string;
   medical: string;
   _labkeyurl_medical: string;
-  origin: string;
-  _labkeyurl_origin: string;
+  geographic_origin: string;
+  _labkeyurl_geographic_origin: string;
 }
 
 export type AnimalInfoStates =

@@ -2000,6 +2000,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         animalHistoryPage.clickReportTab("Clinical History");
         waitForElement(Locator.tagContainingText("div", "No records found since:"), 20000);
 
+    }
+
+    @Test
+    public void testAnimalAbstract() {
+        goToEHRFolder();
+        waitAndClickAndWait(Locator.linkWithText("Animal History"));
+
+        AnimalHistoryPage<AnimalHistoryPage> animalHistoryPage = new AnimalHistoryPage<>(getDriver());
+
         log("Verify abstract shows with single animal");
         animalHistoryPage
                 .selectSingleAnimalSearch()

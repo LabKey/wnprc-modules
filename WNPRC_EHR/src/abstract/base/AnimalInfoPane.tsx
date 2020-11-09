@@ -37,23 +37,6 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
     }
   }
 
-  const constructGeographicOrigin = () => {
-    let state =animalInfo["sourceVendor/source/SourceState"];
-    let city = animalInfo["sourceVendor/source/SourceCity"];
-    let country = animalInfo["sourceVendor/source/SourceCountry"];
-    let geographicOrigin = "";
-
-    if (state && country) {
-      geographicOrigin = state + ", " + country;
-    } else if (city && country) {
-      geographicOrigin = city + ", " + country;
-    } else if (country) {
-      geographicOrigin = country;
-    }
-
-    return geographicOrigin;
-  }
-
   if (infoState == "loading-success") {
     return (
       <div>
@@ -193,13 +176,10 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
           <tr>
             <td>Ancestry/Stalk</td>
             <td>
-              <a href={animalInfo._labkeyurl_geographic_origin}>{animalInfo.geographic_origin}</a>
             </td>
             <td>Geographic Origin</td>
             <td>
-              <a href={animalInfo["_labkeyurl_sourceVendor/source"]}>
-                {constructGeographicOrigin()}
-              </a>
+                <a href={animalInfo._labkeyurl_geographic_origin}>{animalInfo.geographic_origin}</a>
             </td>
           </tr>
           <tr>

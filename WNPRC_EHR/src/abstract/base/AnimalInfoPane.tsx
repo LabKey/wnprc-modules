@@ -179,7 +179,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             </td>
             <td>Geographic Origin</td>
             <td>
-                <a href={animalInfo._labkeyurl_geographic_origin}>{animalInfo.geographic_origin}</a>
+                <a href={animalInfo["_labkeyurl_geographicOrigin/geographic_origin"]}>{animalInfo["geographicOrigin/geographic_origin"]}</a>
             </td>
           </tr>
           <tr>

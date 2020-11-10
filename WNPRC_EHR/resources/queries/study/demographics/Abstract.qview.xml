@@ -77,7 +77,7 @@
         <column name="avail"/>
         <column name="Id/numRoommates/AnimalsInCage"/>
         <column name="necropsyAbstractNotes/remark"/>
-        <column name="geographic_origin"/>
+        <column name="geographicOrigin/geographic_origin"/>
         <column name="sourceVendor/source"/>
         <column name="sourceVendor/source/meaning"/>
     </columns>

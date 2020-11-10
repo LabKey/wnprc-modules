@@ -430,6 +430,13 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col.setDescription("Returns the animal's original source");
             table.addColumn(col);
         }
+        if (table.getColumn("geographicOrigin") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "geographicOrigin", "demographicsGeographicOrigin");
+            col.setLabel("Geographic origin");
+            col.setDescription("Returns the animal's geographic origin from arrivals or birth");
+            table.addColumn(col);
+        }
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)

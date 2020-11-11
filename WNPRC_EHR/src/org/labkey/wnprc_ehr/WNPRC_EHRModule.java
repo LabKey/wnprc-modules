@@ -55,6 +55,7 @@ import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.Assignment.AssignmentForm;
 import org.labkey.wnprc_ehr.dataentry.forms.BehaviorAbstract.BehaviorAbstractForm;
+import org.labkey.wnprc_ehr.dataentry.forms.NecropsyAbstract.NecropsyAbstractForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Biopsy.BiopsyForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Birth.BirthFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.BloodDrawRequest.BloodDrawRequestForm;
@@ -402,6 +403,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 InRoomsForm.class,
                 IrregularObservationsFormType.class,
                 MPRForm.class,
+                NecropsyAbstractForm.class,
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
                 PhysicalExamNWMForm.class,

@@ -90,9 +90,41 @@ let feedingConfig = function wp(env: { BUILD_DIR: string }) {
         output: {
             filename: 'feeding.js',
             library: 'Feeding',
-            libraryExport: 'default',
             libraryTarget: 'umd',
-            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen'),
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
+        },
+    };
+};
+var abstractConfig = function wp(env: { BUILD_DIR: string }) {
+
+    return {
+        mode: process.env.NODE_ENV,
+        devtool: 'source-map',
+        entry: './src/abstract/base/App.tsx',
+        externals: {
+            jquery: 'jQuery',
+            urijs: 'URI',
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    loader: "ts-loader"
+                },
+                {
+                    test: /\.css$/i,
+                    use: ['style-loader', 'css-loader']
+                }
+            ],
+        },
+        output: {
+            filename: 'abstract.js',
+            library: 'Abstract',
+            libraryTarget: 'umd',
+            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen'),
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
@@ -130,5 +162,5 @@ let researchUltrasoundsConfig = function wp(env: { BUILD_DIR: string }) {
 
 declare const module: any;
 module.exports = [
-    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig
+    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig
 ];

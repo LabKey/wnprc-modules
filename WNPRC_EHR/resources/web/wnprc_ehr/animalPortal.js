@@ -74,8 +74,7 @@ EHR.reports.AnimalPortal =  function(panel2,tab) {
                                     hasInsert = true;
                                 }
                             }
-                            if (hasInsert)
-                            {
+                            if (hasInsert) {
                                 panel.add({
                                     xtype: 'ldk-webpartpanel',
                                     title: 'Animal Portal for ' + animalIds,
@@ -92,24 +91,90 @@ EHR.reports.AnimalPortal =  function(panel2,tab) {
                                         },
                                         {
                                             xtype: 'button',
-                                            text: 'Create folder',
-                                            handler: function ()
-                                            {
+                                            style: 'margin-left: 10px;',
+                                            border: true,
+                                            text: 'Create folders',
+                                            handler: function () {
                                                 animalFolder.createDirectory({
                                                     path: "/@files/" + animalIds + "/",
-                                                    success: function ()
-                                                    {
-                                                        console.log("folder created for " + animalIds);
-                                                        handler(location.id);
+                                                    success: function () {
+                                                        const folders = [
+                                                            "Ultrasounds",
+                                                            "Radiology Reports",
+                                                            "Misc Docs",
+                                                            "Images",
+                                                            "Lab Reports",
+                                                            "Anesthesia Reports"
+                                                        ];
+                                                        var createdCount = 0;
+                                                        folders.forEach(function (folder) {
+                                                            animalFolder.createDirectory({
+                                                                path: "/@files/" + animalIds + "/" + folder,
+                                                                success: function () {
+                                                                    console.log("created " + folder + " folder for " + animalIds);
+                                                                    createdCount++;
+                                                                    if (createdCount === folders.length) {
+                                                                        handler(location.id);
+                                                                    }
+                                                                    console.log("folder created for " + animalIds);
+
+                                                                    var createYears = 0;
+                                                                    if (folder === "Ultrasounds"){
+                                                                        let year = new Date().getFullYear();
+                                                                        animalFolder.createDirectory({
+                                                                            path: "/@files/" + animalIds + "/" + folder + "/" + year,
+                                                                            comment: "Create a folder per ultrasound date inside year's folder",
+                                                                            success: function (){
+                                                                                console.log("created " + folder + " folder for " + animalIds);
+                                                                                createYears++;
+                                                                                if (createYears === folders.length) {
+                                                                                    handler(location.id);
+                                                                                }
+                                                                                console.log("folder created for " + animalIds);
+
+                                                                                var createDateFolder = 0;
+                                                                                let today = new Date();
+                                                                                let monthNumber = today.getMonth() + 1;
+                                                                                let dateString = today.getFullYear() + "-" + monthNumber + "-" + today.getDate();
+                                                                                animalFolder.createDirectory({
+                                                                                    path: "/@files/" + animalIds + "/" + folder + "/" + year + "/" + dateString,
+                                                                                    comment: "Create a folder per ultrasound date inside year's folder",
+                                                                                    success: function (){
+                                                                                        console.log("created " + dateString + " folder for " + animalIds);
+                                                                                        createDateFolder++;
+                                                                                        if (createDateFolder === folders.length) {
+                                                                                            handler(location.id);
+                                                                                        }
+                                                                                        console.log("folder created for " + animalIds);
+
+                                                                                    },
+                                                                                    failure: function (error) {
+                                                                                        console.log("failed to created" + folder + " folder" + error.status)
+                                                                                    }
+                                                                                })
+
+
+                                                                            },
+                                                                            failure: function (error) {
+                                                                                console.log("failed to created" + folder + " folder" + error.status)
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                },
+                                                                failure: function (error) {
+                                                                    console.log("failed to created" + folder + " folder" + error.status)
+                                                                }
+                                                            })
+
+
+                                                        }),
+                                                                console.log("folder created for " + animalIds);
                                                     },
-                                                    failure: function (error)
-                                                    {
+                                                    failure: function (error) {
                                                         console.log("failed to created folder" + error.status)
                                                     }
                                                 })
-
                                             }
-
                                         }]
                                 });
                             }

@@ -435,18 +435,41 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeDemographicsTable(AbstractTableInfo table)
     {
-        if (table.getColumn("Feeding") != null)
-            return;
-
         UserSchema us = getStudyUserSchema(table);
         if (us == null){
             return;
         }
 
-        ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
-        col21.setLabel("Feeding");
-        col21.setDescription("Shows most recent feeding type and chow conversion.");
-        table.addColumn(col21);
+        if (table.getColumn("Feeding") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+            col.setLabel("Feeding");
+            col.setDescription("Shows most recent feeding type and chow conversion.");
+            table.addColumn(col);
+        }
+
+        if (table.getColumn("mostRecentAlopeciaScore") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentAlopeciaScore", "demographicsMostRecentAlopecia");
+            col.setLabel("Alopecia Score");
+            col.setDescription("Calculates the most recent alopecia score for each animal");
+            table.addColumn(col);
+        }
+
+        if (table.getColumn("mostRecentBodyConditionScore") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentBodyConditionScore", "demographicsMostRecentBodyConditionScore");
+            col.setLabel("Most Recent BCS");
+            col.setDescription("Returns the participant's most recent body condition score");
+            table.addColumn(col);
+        }
+        if (table.getColumn("necropsyAbstractNotes") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
+            col.setLabel("Necropsy Abstract Notes");
+            col.setDescription("Returns the participant's necropsy abstract remarks and projects");
+            table.addColumn(col);
+        }
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)

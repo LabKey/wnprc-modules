@@ -74,11 +74,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
 
         let validationFailed = false;
 
-        if (!row.restraintType) {
-            validationFailed = true;
-            EHR.Server.Utils.addError(scriptErrors, "restraintType", "Restraint Type is a required field", "ERROR");
-        }
-        else {
+        if (!!row.restraintType) {
             LABKEY.Query.selectRows({
                 schemaName: 'ehr_lookups',
                 queryName: 'restraint_type',
@@ -415,5 +411,5 @@ function getValidMeasurements() {
 }
 
 function getTruthiness(value) {
-    return (value === true || value == 1 || (!!value && (typeof value === 'string' || value instanceof String) && (value.toUpperCase() === "TRUE" || value.toUpperCase() === "YES")));
+    return (value === true || value == 1 || (!!value && (typeof value === 'string' || value instanceof String) && (value.toUpperCase().trim() === "TRUE" || value.toUpperCase().trim() === "YES")));
 }

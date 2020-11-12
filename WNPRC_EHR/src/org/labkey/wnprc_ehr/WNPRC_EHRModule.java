@@ -87,8 +87,8 @@ import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasou
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsReviewForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsTaskForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
-import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryProcedureMultipleRequestForm;
-import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryProcedureRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.SurgeryProcedureMultipleRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.SurgeryProcedureRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Treatments.TreatmentsForm;

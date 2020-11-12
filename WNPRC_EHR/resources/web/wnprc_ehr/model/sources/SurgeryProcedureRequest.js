@@ -100,7 +100,20 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
             }
         },
         'study.drug': {
+            Id: {
+                shownInGrid: false,
+                hidden: true
+            },
+            project: {
+                shownInGrid: false,
+                hidden: true
+            },
+            account: {
+                shownInGrid: false,
+                hidden: true
+            },
             code: {
+                header: 'Drug',
                 //shownInGrid: false,
                 editorConfig: {
                     xtype: 'ehr-snomedcombo',
@@ -121,6 +134,20 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
             modified: {
                 hidden: true
             }
+        },
+        'study.foodDeprives': {
+            Id: {
+                shownInGrid: false,
+                hidden: true
+            },
+            project: {
+                shownInGrid: false,
+                hidden: true
+            },
+            account: {
+                shownInGrid: false,
+                hidden: true
+            },
         }
     }
 });

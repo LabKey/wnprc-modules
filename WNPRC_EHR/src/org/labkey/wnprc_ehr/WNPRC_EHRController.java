@@ -1426,17 +1426,19 @@ public class WNPRC_EHRController extends SpringActionController
                     //TODO get other info from jsp
                     for(Map<String, Object> spRow : spRows)
                     {
-                        String taskId = UUID.randomUUID().toString();
-                        spRow.put("taskid", taskId);
-                        JSONObject taskRecord = new JSONObject();
-                        taskRecord.put("taskid", taskId);
-                        taskRecord.put("title", "SurgeryProcedure");
-                        taskRecord.put("category", "task");
-                        taskRecord.put("assignedto", event.getAssignedTo());
-                        taskRecord.put("QCStateLabel", "Scheduled");
-                        taskRecord.put("duedate", "");
-                        taskRecord.put("formtype", "SurgeryProcedure");
-                        insertRecord(taskRecord, "ehr", "tasks");
+                        String taskId = spRow.get("taskid") != null ? (String) spRow.get("taskid") : UUID.randomUUID().toString();
+                        if (spRow.get("taskid") == null) {
+                            spRow.put("taskid", taskId);
+                            JSONObject taskRecord = new JSONObject();
+                            taskRecord.put("taskid", taskId);
+                            taskRecord.put("title", "SurgeryProcedure");
+                            taskRecord.put("category", "task");
+                            taskRecord.put("assignedto", event.getAssignedTo());
+                            taskRecord.put("QCStateLabel", "Scheduled");
+                            taskRecord.put("duedate", "");
+                            taskRecord.put("formtype", "SurgeryProcedure");
+                            insertRecord(taskRecord, "ehr", "tasks");
+                        }
                     }
 
                     /**
@@ -1494,6 +1496,7 @@ public class WNPRC_EHRController extends SpringActionController
                         response.put("error", "There was an error, but some of the events may have still been created in outlook. " +
                                 "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");
                     }
+                    response.put("error", e.getMessage());
                 }
             }
             return response;

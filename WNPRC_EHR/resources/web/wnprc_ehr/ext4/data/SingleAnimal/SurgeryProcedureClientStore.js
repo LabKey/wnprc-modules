@@ -10,14 +10,14 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SurgeryProcedureClientStore', {
         var self = this;
         var extraContent = this.callParent(arguments) || {};
 
-        if (this.getRange().length == 1) {
-            var rec = this.getAt(0);
-
-            // If this is a request, allow dates in the distant future.
-            if ( WNPRC.ExtUtils.getQCStateLabel(rec.get("QCState")).match(/request/i) ) {
-                extraContent.allowRequestsInDistantFuture = true;
-            }
-        }
+        // if (this.getRange().length == 1) {
+        //     var rec = this.getAt(0);
+        //
+        //     // If this is a request, allow dates in the distant future.
+        //     if ( WNPRC.ExtUtils.getQCStateLabel(rec.get("QCState")).match(/request/i) ) {
+        //         extraContent.allowRequestsInDistantFuture = true;
+        //     }
+        // }
 
         return extraContent;
     }

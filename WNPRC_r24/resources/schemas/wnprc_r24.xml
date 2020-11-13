@@ -355,6 +355,8 @@
             <column columnName="CreatedBy"/>
             <column columnName="Modified"/>
             <column columnName="ModifiedBy"/>
+            <column columnName="PrimateId"/>
+            <column columnName="WeightMvIndicator"/>
         </columns>
     </table>
 </tables>

@@ -21,7 +21,6 @@ services:
       - network1
     environment:
       TZ: America/Chicago
-      POSTGRES_PASSWORD: "${PG_PASS}"
     command: postgres -c log_directory=/logs -c config_file=/conf/postgresql.conf -c hba_file=/conf/pg_hba.conf
     stop_signal: SIGTERM
     stop_grace_period: "120s"
@@ -46,7 +45,7 @@ services:
       - network1
 
   labkey:
-    image: wnprcehr/labkey:20.6
+    image: wnprcehr/labkey:18.3
     depends_on:
       - "mailserver"
       - "postgres"

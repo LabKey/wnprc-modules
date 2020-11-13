@@ -87,6 +87,11 @@
                 valueField: 'UserId',
                 value: userId,
                 queryMode: 'local',
+                listConfig: {
+                    getInnerTpl: function (displayField) {
+                        return '{[LABKEY.Utils.encodeHtml(values.' + displayField + ')]}';
+                    }
+                },
                 store: {
                     type: 'labkey-store',
                     schemaName: 'coreLinked',
@@ -103,6 +108,11 @@
                 displayField: 'investigatorWithName',
                 valueField: 'rowid',
                 value: investigatorId,
+                listConfig: {
+                    getInnerTpl: function (displayField) {
+                        return '{[LABKEY.Utils.encodeHtml(values.' + displayField + ')]}';
+                    }
+                },
                 queryMode: 'local',
                 store: {
                     type: 'labkey-store',
@@ -129,6 +139,11 @@
                 displayField: 'project',
                 value: project,
                 queryMode: 'local',
+                listConfig: {
+                    getInnerTpl: function (displayField) {
+                        return '{[LABKEY.Utils.encodeHtml(values.' + displayField + ')]}';
+                    }
+                },
                 store: {
                     type: 'labkey-store',
                     schemaName: 'ehrLinked',

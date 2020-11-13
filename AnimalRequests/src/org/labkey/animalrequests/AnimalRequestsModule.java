@@ -24,15 +24,9 @@ public class AnimalRequestsModule extends DefaultModule
     }
 
     @Override
-    public double getVersion()
-    {
-        return 17.21;
-    }
-
-    @Override
     public boolean hasScripts()
     {
-        return true;
+        return false;
     }
 
     @Override
@@ -76,6 +70,6 @@ public class AnimalRequestsModule extends DefaultModule
     @NotNull
     public Set<String> getSchemaNames()
     {
-        return Collections.singleton(AnimalRequestsSchema.NAME);
+        return Collections.emptySet();
     }
 }

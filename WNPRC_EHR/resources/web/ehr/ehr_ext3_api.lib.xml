@@ -3,7 +3,6 @@
         <script path="ehr/ext3/ExtOverrides.js"/>
         <script path="ehr/ext3/ehrMetaHelper.js"/>
         <script path="ehr/ext3/Ext3Utils.js"/>
-        <script path="ehr/ext3/navMenu.js"/>
         <script path="ehr/ext3/databind.js"/>
         <script path="ehr/ext3/ehrStore.js"/>
 

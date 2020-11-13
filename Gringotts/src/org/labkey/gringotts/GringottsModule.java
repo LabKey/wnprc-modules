@@ -38,8 +38,8 @@ public class GringottsModule extends ExtendedSimpleModule {
     }
 
     @Override
-    public double getVersion() {
-        return 15.11;
+    public Double getSchemaVersion() {
+        return 20.000;
     }
 
     @Override

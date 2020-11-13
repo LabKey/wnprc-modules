@@ -33,9 +33,9 @@ sourceSets {
 
 configurations {
     apiExternal
-    apiCompile.extendsFrom(apiExternal)
+    apiImplementation.extendsFrom(apiExternal)
     external
-    compile.extendsFrom(external)
+    implementation.extendsFrom(external)
 }
 
 //TODO: Check where are warning in the ApiKey, DeviceProxy and DbUtils 
@@ -48,16 +48,16 @@ configurations {
 //}
 
 dependencies {
-    apiCompile 'org.jetbrains:annotations:15.0'
-    apiCompile project(BuildUtils.getApiProjectPath(project.gradle))
-    apiCompile project(":server:modules:wnprc-modules:java2ts")
+    apiImplementation 'org.jetbrains:annotations:15.0'
+    apiImplementation project(BuildUtils.getApiProjectPath(project.gradle))
+    apiImplementation project(":server:modules:wnprc-modules:java2ts")
 
-    compile 'org.jetbrains:annotations:15.0'
-    compile "junit:junit:${junitVersion}"
-    compile project(BuildUtils.getApiProjectPath(project.gradle))
-    compile project(BuildUtils.getInternalProjectPath(project.gradle))
-    compile project(":server:modules:LabDevKitModules:LDK")
-    compile project(":server:modules:wnprc-modules:java2ts")
+    implementation 'org.jetbrains:annotations:15.0'
+    implementation "junit:junit:${junitVersion}"
+    implementation project(BuildUtils.getApiProjectPath(project.gradle))
+    implementation project(BuildUtils.getInternalProjectPath(project.gradle))
+    implementation project(":server:modules:LabDevKitModules:LDK")
+    implementation project(":server:modules:wnprc-modules:java2ts")
 }
 
 project.evaluationDependsOn(BuildUtils.getInternalProjectPath(project.gradle))

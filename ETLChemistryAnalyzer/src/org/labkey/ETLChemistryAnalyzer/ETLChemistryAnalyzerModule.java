@@ -59,7 +59,7 @@ public class ETLChemistryAnalyzerModule extends DefaultModule
     @Override
     protected void init()
     {
-        addController(ETLChemistryAnalyzerController.NAME, ETLChemistryAnalyzerController.class);
+        addController(ETLChemistryAnalyzerController.NAME.toLowerCase(), ETLChemistryAnalyzerController.class);
     }
 
     @Override

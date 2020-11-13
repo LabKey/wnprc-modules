@@ -1,13 +1,13 @@
-import org.labkey.gradle.util.BuildUtils;
+import org.labkey.gradle.util.BuildUtils
 
 dependencies {
     external "com.koadweb.javafpdf:java-fpdf:${javafpdfVersion}"
     external("org.apache.sanselan:sanselan:${sanselanVersion}")
 
 
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ehrModules:ehr_billing", depProjectConfig: "apiCompile")
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiCompile")
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiCompile")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:ehr_billing", depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: "apiJarFile")
 }
 
 sourceSets {

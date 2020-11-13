@@ -6,7 +6,7 @@ FROM alpine:latest as download
 ARG LABKEY_TEAMCITY_PASSWORD
 ARG LABKEY_TEAMCITY_USERNAME
 ARG WNPRC_BRANCH=master
-ARG LABKEY_VERSION=20.6
+ARG LABKEY_VERSION=20.7
 ARG LABKEY_IS_PREMIUM=true
 
 WORKDIR /tmp/labkey
@@ -33,8 +33,8 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
-    elif [ "$LABKEY_VERSION" = 20.6 ] ; then \
-            LABKEY_TEAMCITY_CONFIG="LabKey_206Release_Premium_SnapshotInstallers" ; \
+    elif [ "$LABKEY_VERSION" = 20.7 ] ; then \
+            LABKEY_TEAMCITY_CONFIG="LabKey_207Release_Premium_SnapshotInstallers" ; \
             LABKEY_SNAPSHOT="Beta-" ; \
             LABKEY_DISTRIBUTION="wisc" ; \
             LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
@@ -50,7 +50,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
 # -----------------------------------------------------------------------------
 # MAIN IMAGE BUILD DEFINITION
 
-FROM wnprcehr/tomcat:20.6
+FROM wnprcehr/tomcat:20.7
 
 # copy in LabKey from the other stage of the build and copy in the jars to tomcat
 ENV LABKEY_HOME /usr/local/labkey

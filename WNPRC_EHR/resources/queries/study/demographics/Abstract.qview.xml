@@ -1,42 +1,20 @@
 <!--NOTE: even though this view is not used by ONPRC, the test expects it to be present and it should remain here-->
-<customView xmlns="http://labkey.org/data/xml/queryCustomView" hidden="true">
+<customView xmlns="http://labkey.org/data/xml/queryCustomView" >
     <columns>
         <column name="Id"/>
-        <column name="gender"/>
-        <column name="gender/meaning"/>
-        <column name="calculated_status">
+        <column name="mostRecentAlopeciaScore/score">
             <properties>
-                <property name="columnTitle" value="Status"/>
+                <property name="columnTitle" value="Most Recent Alopecia Score"/>
             </properties>
         </column>
-        <column name="Id/activeAssignments/Availability">
-            <properties>
-                <property name="columnTitle" value="Avail"/>
-            </properties>
-        </column>
-        <column name="birth"/>
-        <column name="Id/age/AgeFriendly">
-            <properties>
-                <property name="columnTitle" value="Age"/>
-            </properties>
-        </column>
-        <column name="death"/>
-        <column name="Id/MostRecentArrival/MostRecentArrival">
-            <properties>
-                <property name="columnTitle" value="Most Recent Arrival"/>
-            </properties>
-        </column>
-        <column name="Id/MostRecentDeparture/MostRecentDeparture">
-            <properties>
-                <property name="columnTitle" value="Most Recent Departure"/>
-            </properties>
-        </column>
-        <column name="hold"/>
-        <column name="dam"/>
-        <column name="sire"/>
         <column name="Id/curLocation/room">
             <properties>
                 <property name="columnTitle" value="Room"/>
+            </properties>
+        </column>
+        <column name="mostRecentBodyConditionScore/score">
+            <properties>
+                <property name="columnTitle" value="Most Recent BCS"/>
             </properties>
         </column>
         <column name="Id/curLocation/cage">
@@ -44,9 +22,36 @@
                 <property name="columnTitle" value="Cage"/>
             </properties>
         </column>
+        <column name="Id/MostRecentWeight/MostRecentWeight">
+            <properties>
+                <property name="columnTitle" value="Current Weight (kg)"/>
+            </properties>
+        </column>
+        <column name="gender"/>
+        <column name="Id/MostRecentWeight/MostRecentWeightDate">
+            <properties>
+                <property name="columnTitle" value="Weight Date"/>
+            </properties>
+        </column>
+        <column name="calculated_status">
+            <properties>
+                <property name="columnTitle" value="Status"/>
+            </properties>
+        </column>
+        <column name="hold"/>
+        <column name="Id/activeAssignments/Availability">
+            <properties>
+                <property name="columnTitle" value="Avail"/>
+            </properties>
+        </column>
         <column name="Id/curLocation/cond">
             <properties>
                 <property name="columnTitle" value="Condition"/>
+            </properties>
+        </column>
+        <column name="Id/age/AgeFriendly">
+            <properties>
+                <property name="columnTitle" value="Age"/>
             </properties>
         </column>
         <column name="Id/numRoommates/AnimalsInCage">
@@ -54,34 +59,44 @@
                 <property name="columnTitle" value="# Animals In Cage"/>
             </properties>
         </column>
-        <column name="Id/MostRecentWeight/MostRecentWeight">
+        <column name="birth"/>
+        <column name="Id/CurrentBehavior/currentBehaviors"/>
+        <column name="dam"/>
+        <column name="death"/>
+        <column name="sire"/>
+        <column name="origin/source">
             <properties>
-                <property name="columnTitle" value="Current Weight (kg)"/>
+                <property name="columnTitle" value="Source/Vendor"/>
             </properties>
         </column>
-        <column name="Id/MostRecentWeight/MostRecentWeightDate">
+        <column name="geographic_origin/geographic_origin"/>
+        <column name="necropsyAbstractNotes/remark">
             <properties>
-                <property name="columnTitle" value="Weight Date"/>
+                <property name="columnTitle" value="Ancestry"/>
+            </properties>
+        </column>
+        <column name="medical"/>
+        <column name="Id/MostRecentArrival/MostRecentArrival">
+            <properties>
+                <property name="columnTitle" value="Most Recent Arrival"/>
             </properties>
         </column>
         <column name="Id/MostRecentTB/MostRecentTBDate">
             <properties>
-                <property name="columnTitle" value="Last TB Date"/>
+                <property name="columnTitle" value="Most Recent TB Date"/>
             </properties>
         </column>
-        <column name="medical"/>
+        <column name="Id/MostRecentDeparture/MostRecentDeparture">
+            <properties>
+                <property name="columnTitle" value="Most Recent Departure"/>
+            </properties>
+        </column>
         <column name="prepaid"/>
-        <column name="Id/CurrentBehavior/currentBehaviors"/>
-        <column name="mostRecentAlopeciaScore/score"/>
-        <column name="mostRecentBodyConditionScore/score"/>
-        <column name="avail"/>
-        <column name="Id/numRoommates/AnimalsInCage"/>
-        <column name="necropsyAbstractNotes/remark"/>
-        <column name="geographicOrigin/geographic_origin"/>
-        <column name="sourceVendor/source"/>
-        <column name="sourceVendor/source/meaning"/>
+        <column name="necropsyAbstractNotes/remark">
+            <properties>
+                <property name="columnTitle" value="Pathology Notes"/>
+            </properties>
+        </column>
+
     </columns>
-    <sorts>
-        <sort column="Id" descending="false"/>
-    </sorts>
 </customView>

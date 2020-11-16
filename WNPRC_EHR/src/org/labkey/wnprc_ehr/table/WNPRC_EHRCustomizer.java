@@ -423,16 +423,16 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col.setDescription("Returns the participant's necropsy abstract remarks and projects");
             table.addColumn(col);
         }
-        if (table.getColumn("sourceVendor") == null)
+        if (table.getColumn("origin") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "sourceVendor", "demographicsSourceVendor");
+            ColumnInfo col = getWrappedIdCol(us, table, "origin", "demographicsSourceVendor");
             col.setLabel("Original source/vendor");
             col.setDescription("Returns the animal's original source");
             table.addColumn(col);
         }
-        if (table.getColumn("geographicOrigin") == null)
+        if (table.getColumn("geographic_origin") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "geographicOrigin", "demographicsGeographicOrigin");
+            ColumnInfo col = getWrappedIdCol(us, table, "geographic_origin", "demographicsGeographicOrigin");
             col.setLabel("Geographic origin");
             col.setDescription("Returns the animal's geographic origin from arrivals or birth");
             table.addColumn(col);

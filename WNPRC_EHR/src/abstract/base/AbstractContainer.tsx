@@ -3,10 +3,10 @@ import { useEffect, useContext } from "react";
 import { AppContext } from "./ContextProvider";
 import "../theme/css/index.css";
 import {
-  lookupAnimalInfo,
+  labkeyActionSelectWithPromise,
 } from "../../query/helpers";
 import AnimalInfoPane from "./AnimalInfoPane";
-import {AnimalInfoProps} from "../typings/main";
+import {Filter} from '@labkey/api';
 
 const AbstractContainer: React.FunctionComponent<any> = (props) => {
   const {
@@ -18,7 +18,15 @@ const AbstractContainer: React.FunctionComponent<any> = (props) => {
   } = useContext(AppContext);
 
   useEffect(()=> {
-    lookupAnimalInfo(props.id).then((d:AnimalInfoProps) => {
+    let config = {
+      schemaName: "study",
+      queryName: "demographics",
+      viewName: "Abstract",
+      sort: "-date",
+      filterArray: [Filter.create("Id", props.id, Filter.Types.EQUAL)],
+      requiredVersion: 17.1,
+    };
+    labkeyActionSelectWithPromise(config).then((d) => {
       setAnimalInfoExternal(d);
       setAnimalInfoStateExternal("loading-success");
       updateAnimalInfoCacheExternal(d)

@@ -14,7 +14,7 @@ FROM (
                       max(w.date) AS DateChanged
 
                   FROM study.bcs w
-                      WHERE m.score is not null
+                      WHERE w.score is not null
                   GROUP BY w.id
               ) t JOIN study.bcs m ON m.Id = t.Id AND t.DateChanged = m.date;
 

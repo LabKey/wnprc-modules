@@ -199,7 +199,7 @@ public class Graph {
     public synchronized static Map<String, Boolean> getAvailability(String accessToken, List<String> attendees, ZonedDateTime start, ZonedDateTime end) {
     	ensureGraphClient(accessToken);
 
-    	List<Option> options = new LinkedList<Option>();
+    	List<Option> options = new LinkedList<>();
     	options = addPreferCentralTimeZone(options);
 
     	List<ScheduleInformation> scheduleInfos = new ArrayList<>();

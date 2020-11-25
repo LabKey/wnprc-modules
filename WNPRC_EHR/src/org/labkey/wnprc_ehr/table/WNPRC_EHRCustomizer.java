@@ -437,73 +437,63 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             table.addColumn(col);
         }
         // Here we want a custom query since the getWrappedIdCol model did not work for us for the following requirements:
-        //1. Show the geographic origin if the query is able to calculate it.
-        //2. Show blank (and not the broken lookup with the id inside of <angle brackets>) if we don't have the info.
-        //3. Have the text be a link when we have a value to show.
+        // 1. Show the geographic origin if the query is able to calculate it.
+        // 2. Show blank (and not the broken lookup with the id inside of <angle brackets>) if we don't have the info.
+        // 3. Have the text be a link when we have a value to show.
         if (table.getColumn("geographic_origin") == null)
         {
             String geographicOrigin = "geographic_origin";
-            TableInfo ti = getStudyUserSchema(table).getTable("arrival");
 
             TableInfo birth = getRealTableForDataset(table, "Birth");
             TableInfo arrival = getRealTableForDataset(table, "Arrival");
 
+            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.geographic_origin as origin, " +
+                        "a.date as date," +
+                        "a.participantid as participantid " +
+                    "FROM studydataset." +arrival.getName() + " a " +
 
-            SQLFragment sql = new SQLFragment("(SELECT case when w.origin = 'cen'" +
-                    "       then 'domestic'" +
-                    "       else" +
-                    "           w.origin" +
-                    "    end as geographic_origin " +
-                    " FROM ");
-            sql.append("(SELECT m.origin, m.participantid, t.DateChanged FROM  ");
+                    "WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
 
-            sql.append("(SELECT min(w.date) as DateChanged, w.participantid as id FROM   ");
+                    "UNION ALL " +
 
-            sql.append("( SELECT a.geographic_origin as origin, ");
-                    sql.append("a.date as date,");
-            sql.append("a.participantid as participantid");
-            sql.append("   FROM ");
-            sql.append("studydataset." +arrival.getName() + " a");
-            //sql.append(ti);
-            sql.append(" WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " );
+                    "SELECT " +
+                        "b.origin as origin," +
+                        "b.date as date," +
+                        "b.participantid as participantid " +
+                    "FROM studydataset." + birth.getName() + " b " +
 
-            sql.append(" UNION ALL ");
+                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
 
-            sql.append("SELECT b.origin as origin,");
-                    sql.append("b.date as date,");
-            sql.append("b.participantid as participantid");
-                   sql.append( "   FROM ");
-            sql.append("studydataset." + birth.getName() +" b");
-            // ExprColumn.STR_TABLE_ALIAS is referring to the table that's getting the column injected, which is the demographics table
-            sql.append(" WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid ");
-            sql.append(") w ");
+            String theQuery = "(" +
+                    "SELECT " +
+                        "CASE WHEN w.origin = 'cen'" +
+                            "THEN 'domestic'" +
+                            "ELSE w.origin " +
+                        "END AS geographic_origin " +
+                    "FROM " +
 
-            //GROUP BY w.id
+                        "(SELECT " +
+                            "m.origin, " +
+                            "m.participantid, " +
+                            "t.DateChanged " +
+                        "FROM " +
+                            "(SELECT " +
+                                "min(w.date) as DateChanged, " +
+                                "w.participantid as id " +
+                            "FROM " +
+                                arrivalAndBirthUnion+ " w " +
+                            "GROUP BY w.participantid " +
+                            ") t JOIN " +
+                                arrivalAndBirthUnion + " m " +
+                            "ON m.participantid = t.id and t.DateChanged = m.date) w " +
+                    ")";
 
-            sql.append(" GROUP BY w.participantid  ");
-            sql.append(" ) t JOIN ");
 
-            sql.append("( SELECT a.geographic_origin as origin, ");
-                    sql.append("a.date as date,");
-            sql.append("a.participantid as participantid");
-            sql.append("   FROM ");
-            sql.append("studydataset." +arrival.getName() + " a");
-            //sql.append(ti);
-            sql.append(" WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " );
-
-            sql.append(" UNION ALL ");
-
-            sql.append("SELECT b.origin as origin,");
-                    sql.append("b.date as date,");
-            sql.append("b.participantid as participantid");
-            sql.append("   FROM ");
-            sql.append("studydataset." + birth.getName() +" b");
-            // ExprColumn.STR_TABLE_ALIAS is referring to the table that's getting the column injected, which is the demographics table
-            sql.append(" WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid ");
-            sql.append(") m ");
-
-            sql.append(" ON m.participantid = t.id and t.DateChanged = m.date) w ");
-            sql.append(")");
+            SQLFragment sql = new SQLFragment(theQuery);
 
             ExprColumn newCol = new ExprColumn(table, geographicOrigin, sql, JdbcType.VARCHAR);
             String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=geographic_origins&meaning=${geographic_origin}";

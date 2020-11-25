@@ -15,6 +15,7 @@
  */
 package org.labkey.wnprc_ehr.table;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -30,6 +31,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
@@ -37,6 +39,9 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.Study;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
@@ -56,6 +61,7 @@ import java.util.Collections;
  */
 public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 {
+    protected static final Logger _log = Logger.getLogger(WNPRC_EHRCustomizer.class);
     public WNPRC_EHRCustomizer()
     {
 
@@ -430,12 +436,93 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col.setDescription("Returns the animal's original source");
             table.addColumn(col);
         }
+        // Here we want a custom query since the getWrappedIdCol model did not work for us for the following requirements:
+        //1. Show the geographic origin if the query is able to calculate it.
+        //2. Show blank (and not the broken lookup with the id inside of <angle brackets>) if we don't have the info.
+        //3. Have the text be a link when we have a value to show.
         if (table.getColumn("geographic_origin") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "geographic_origin", "demographicsGeographicOrigin");
-            col.setLabel("Geographic origin");
-            col.setDescription("Returns the animal's geographic origin from arrivals or birth");
-            table.addColumn(col);
+            String geographicOrigin = "geographic_origin";
+            TableInfo ti = getStudyUserSchema(table).getTable("arrival");
+
+            TableInfo birth = getRealTableForDataset(table, "Birth");
+            TableInfo arrival = getRealTableForDataset(table, "Arrival");
+
+
+
+            SQLFragment sql = new SQLFragment("(SELECT w.origin from ");
+            sql.append("( SELECT a.geographic_origin as origin " +
+                    "   FROM ");
+            sql.append("studydataset." +arrival.getName() + " a");
+            //sql.append(ti);
+            sql.append(" WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " );
+
+            sql.append(" UNION ALL ");
+
+            sql.append("SELECT b.origin as origin" +
+                    "   FROM ");
+            sql.append("studydataset." + birth.getName() +" b");
+            // ExprColumn.STR_TABLE_ALIAS is referring to the table that's getting the column injected, which is the demographics table
+            sql.append(" WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid ");
+            sql.append(") w ");
+
+            //GROUP BY w.id
+
+            sql.append(" LIMIT 1 ) ");
+
+            SQLFragment sql2 = new SQLFragment("(SELECT m.origin from ");
+            sql2.append("( SELECT a.geographic_origin as origin " +
+                    "   FROM ");
+            sql2.append("studydataset." +arrival.getName() + " a");
+            //sql.append(ti);
+            sql2.append(" WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " );
+
+            sql2.append(" UNION ALL ");
+
+            sql2.append("SELECT b.origin as origin" +
+                    "   FROM ");
+            sql2.append("studydataset." + birth.getName() +" b");
+            // ExprColumn.STR_TABLE_ALIAS is referring to the table that's getting the column injected, which is the demographics table
+            sql2.append(" WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid ");
+            sql2.append(") m ");
+
+            sql2.append(" LIMIT 1 ) ");
+
+            ExprColumn newCol = new ExprColumn(table, geographicOrigin, sql2, JdbcType.VARCHAR);
+            newCol.setLabel("Geographic Origin");
+            newCol.setDescription("This column is the geographic origin");
+            table.addColumn(newCol);
+        }
+    }
+
+    private TableInfo getRealTableForDataset(AbstractTableInfo ti, String label)
+    {
+        Container ehrContainer = EHRService.get().getEHRStudyContainer(ti.getUserSchema().getContainer());
+        if (ehrContainer == null)
+            return null;
+
+        Dataset ds;
+        Study s = StudyService.get().getStudy(ehrContainer);
+        if (s == null)
+            return null;
+
+        ds = s.getDatasetByLabel(label);
+        if (ds == null)
+        {
+            // NOTE: this seems to happen during study import on TeamCity.  It does not seem to happen during normal operation
+            _log.info("A dataset was requested that does not exist: " + label + " in container: " + ehrContainer.getPath());
+            StringBuilder sb = new StringBuilder();
+            for (Dataset d : s.getDatasets())
+            {
+                sb.append(d.getName() + ", ");
+            }
+            _log.info("datasets present: " + sb.toString());
+
+            return null;
+        }
+        else
+        {
+            return StorageProvisioner.createTableInfo(ds.getDomain());
         }
     }
 

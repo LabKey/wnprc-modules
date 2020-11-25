@@ -69,7 +69,7 @@
                 <property name="columnTitle" value="Source/Vendor"/>
             </properties>
         </column>
-        <column name="geographic_origin/geographic_origin"/>
+        <column name="geographic_origin"/>
         <column name="necropsyAbstractNotes/remark">
             <properties>
                 <property name="columnTitle" value="Ancestry"/>

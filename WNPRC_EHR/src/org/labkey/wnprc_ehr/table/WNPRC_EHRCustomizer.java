@@ -449,18 +449,30 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo arrival = getRealTableForDataset(table, "Arrival");
 
 
+            SQLFragment sql = new SQLFragment("(SELECT case when w.origin = 'cen'" +
+                    "       then 'domestic'" +
+                    "       else" +
+                    "           w.origin" +
+                    "    end as geographic_origin " +
+                    " FROM ");
+            sql.append("(SELECT m.origin, m.participantid, t.DateChanged FROM  ");
 
-            SQLFragment sql = new SQLFragment("(SELECT w.origin from ");
-            sql.append("( SELECT a.geographic_origin as origin " +
-                    "   FROM ");
+            sql.append("(SELECT min(w.date) as DateChanged, w.participantid as id FROM   ");
+
+            sql.append("( SELECT a.geographic_origin as origin, ");
+                    sql.append("a.date as date,");
+            sql.append("a.participantid as participantid");
+            sql.append("   FROM ");
             sql.append("studydataset." +arrival.getName() + " a");
             //sql.append(ti);
             sql.append(" WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " );
 
             sql.append(" UNION ALL ");
 
-            sql.append("SELECT b.origin as origin" +
-                    "   FROM ");
+            sql.append("SELECT b.origin as origin,");
+                    sql.append("b.date as date,");
+            sql.append("b.participantid as participantid");
+                   sql.append( "   FROM ");
             sql.append("studydataset." + birth.getName() +" b");
             // ExprColumn.STR_TABLE_ALIAS is referring to the table that's getting the column injected, which is the demographics table
             sql.append(" WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid ");
@@ -468,27 +480,34 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
             //GROUP BY w.id
 
-            sql.append(" LIMIT 1 ) ");
+            sql.append(" GROUP BY w.participantid  ");
+            sql.append(" ) t JOIN ");
 
-            SQLFragment sql2 = new SQLFragment("(SELECT m.origin from ");
-            sql2.append("( SELECT a.geographic_origin as origin " +
-                    "   FROM ");
-            sql2.append("studydataset." +arrival.getName() + " a");
+            sql.append("( SELECT a.geographic_origin as origin, ");
+                    sql.append("a.date as date,");
+            sql.append("a.participantid as participantid");
+            sql.append("   FROM ");
+            sql.append("studydataset." +arrival.getName() + " a");
             //sql.append(ti);
-            sql2.append(" WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " );
+            sql.append(" WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " );
 
-            sql2.append(" UNION ALL ");
+            sql.append(" UNION ALL ");
 
-            sql2.append("SELECT b.origin as origin" +
-                    "   FROM ");
-            sql2.append("studydataset." + birth.getName() +" b");
+            sql.append("SELECT b.origin as origin,");
+                    sql.append("b.date as date,");
+            sql.append("b.participantid as participantid");
+            sql.append("   FROM ");
+            sql.append("studydataset." + birth.getName() +" b");
             // ExprColumn.STR_TABLE_ALIAS is referring to the table that's getting the column injected, which is the demographics table
-            sql2.append(" WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid ");
-            sql2.append(") m ");
+            sql.append(" WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid ");
+            sql.append(") m ");
 
-            sql2.append(" LIMIT 1 ) ");
+            sql.append(" ON m.participantid = t.id and t.DateChanged = m.date) w ");
+            sql.append(")");
 
-            ExprColumn newCol = new ExprColumn(table, geographicOrigin, sql2, JdbcType.VARCHAR);
+            ExprColumn newCol = new ExprColumn(table, geographicOrigin, sql, JdbcType.VARCHAR);
+            String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=geographic_origins&meaning=${geographic_origin}";
+            newCol.setURL(StringExpressionFactory.createURL(url));
             newCol.setLabel("Geographic Origin");
             newCol.setDescription("This column is the geographic origin");
             table.addColumn(newCol);

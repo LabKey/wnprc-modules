@@ -1,0 +1,20 @@
+import org.labkey.gradle.util.BuildUtils
+
+dependencies {
+    implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
+    external "com.koadweb.javafpdf:java-fpdf:${javafpdfVersion}"
+    external("org.apache.sanselan:sanselan:${sanselanVersion}")
+    external "commons-net:commons-net:${commonsNetVersion}"
+
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:EHR_Purchasing", depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ehrModules:EHR_Purchasing", depProjectConfig: "published", depExtension: "module")
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['resources']
+        }
+        java { srcDirs = ['src'] }
+    }
+}

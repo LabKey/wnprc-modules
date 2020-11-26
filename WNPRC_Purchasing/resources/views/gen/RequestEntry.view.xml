@@ -1,0 +1,20 @@
+
+<view xmlns="http://labkey.org/data/xml/view"
+    
+      frame="none"
+      title="WNPRC Purchasing"
+>
+    <permissions>
+        <permission name="read"/>
+    </permissions>
+    <dependencies>
+        <dependency path="clientapi"/>
+        <dependency path="vis/vis"/>
+        <dependency path="vis/genericChart/genericChartHelper.js"/>
+    
+        
+        <dependency path="WNPRC_Purchasing/gen/RequestEntry.js"/>
+        
+    
+    </dependencies>
+</view>

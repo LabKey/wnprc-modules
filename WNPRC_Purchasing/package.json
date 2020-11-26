@@ -1,0 +1,24 @@
+{
+  "name": "WNPRC_Purchasing",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "npm ci",
+    "build": "npm run build-dev",
+    "start": "cross-env NODE_ENV=development webpack-dev-server --config webpack/dev.config.js",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development LK_MODULE_CONTAINER=platform LK_MODULE=WNPRC_Purchasing webpack --config node_modules/@labkey/build/webpack/dev.config.js --progress --profile --colors",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production PROD_SOURCE_MAP=source-map LK_MODULE_CONTAINER=platform LK_MODULE=WNPRC_PURCHASING webpack --config node_modules/@labkey/build/webpack/prod.config.js --progress --profile --colors",
+    "clean": "rimraf resources/web/WNPRC_Purchasing/gen && rimraf resources/views/gen && rimraf resources/views/app.html && rimraf resources/views/app.view.xml"
+  },
+  "moduleFileExtensions": [
+    "js",
+    "ts",
+    "tsx"
+  ],
+  "dependencies": {
+    "@labkey/components": "1.2.0"
+  },
+  "devDependencies": {
+    "@labkey/build": "0.4.0"
+  }
+}

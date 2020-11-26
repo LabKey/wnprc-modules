@@ -1,0 +1,15 @@
+<div id="<%=h('wnprc_purchasing-report')%>"></div>
+<script type="text/javascript">
+
+    Ext4.onReady(function()
+    {
+        var webpart = <%=webpartContext%>;
+        var qwp = new LABKEY.QueryWebPart({
+            renderTo: webpart.wrapperDivId,
+            schemaName: 'ehr_purchasing',
+            queryName: 'purchasingRequests'
+        });
+
+        qwp.render();
+    });
+</script>

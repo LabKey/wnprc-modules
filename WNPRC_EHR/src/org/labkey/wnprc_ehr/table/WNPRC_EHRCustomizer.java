@@ -470,26 +470,20 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
             String theQuery = "(" +
                     "SELECT " +
-                        "CASE WHEN w.origin = 'cen'" +
+                        "CASE WHEN origin = 'cen'" +
                             "THEN 'domestic'" +
-                            "ELSE w.origin " +
+                            "ELSE origin " +
                         "END AS geographic_origin " +
                     "FROM " +
-
                         "(SELECT " +
-                            "m.origin, " +
-                            "m.participantid, " +
-                            "t.DateChanged " +
+                            "min(w.date) as DateChanged, " +
+                            "w.participantid as id " +
                         "FROM " +
-                            "(SELECT " +
-                                "min(w.date) as DateChanged, " +
-                                "w.participantid as id " +
-                            "FROM " +
-                                arrivalAndBirthUnion+ " w " +
-                            "GROUP BY w.participantid " +
-                            ") t JOIN " +
-                                arrivalAndBirthUnion + " m " +
-                            "ON m.participantid = t.id and t.DateChanged = m.date) w " +
+                            arrivalAndBirthUnion+ " w " +
+                        "GROUP BY w.participantid " +
+                        ") t JOIN " +
+                            arrivalAndBirthUnion + " m " +
+                        "ON m.participantid = t.id and t.DateChanged = m.date " +
                     ")";
 
 

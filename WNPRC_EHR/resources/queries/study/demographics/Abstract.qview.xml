@@ -64,7 +64,7 @@
         <column name="dam"/>
         <column name="death"/>
         <column name="sire"/>
-        <column name="origin/source">
+        <column name="origin">
             <properties>
                 <property name="columnTitle" value="Source/Vendor"/>
             </properties>

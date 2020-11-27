@@ -429,12 +429,114 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             col.setDescription("Returns the participant's necropsy abstract remarks and projects");
             table.addColumn(col);
         }
+        if (table.getColumn("origin_code") == null)
+        {
+            String origin = "origin_code";
+            TableInfo birth = getRealTableForDataset(table, "Birth");
+            TableInfo arrival = getRealTableForDataset(table, "Arrival");
+
+            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.source as source, " +
+                        "a.date as date," +
+                        "a.participantid as participantid " +
+                    "FROM studydataset." +arrival.getName() + " a " +
+
+                    "WHERE a.source is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.origin as source," +
+                        "b.date as date," +
+                        "b.participantid as participantid " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT " +
+                        /*"(SELECT meaning from ehr_lookups.source where code = source) as source " +*/
+                        "source " +
+                    "FROM " +
+                        "(SELECT " +
+                            "min(w.date) as DateChanged, " +
+                            "w.participantid as id " +
+                        "FROM " +
+                            arrivalAndBirthUnion+ " w " +
+                        "GROUP BY w.participantid " +
+                        ") t JOIN " +
+                            arrivalAndBirthUnion + " m " +
+                        "ON m.participantid = t.id and t.DateChanged = m.date " +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, origin, sql, JdbcType.VARCHAR);
+            //String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}";
+
+            //newCol.setURL(StringExpressionFactory.createURL(url));
+            newCol.setLabel("code for the source/vendor");
+            newCol.setDescription("Returns the animal's original source code");
+            table.addColumn(newCol);
+        }
         if (table.getColumn("origin") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "origin", "demographicsSourceVendor");
-            col.setLabel("Original source/vendor");
-            col.setDescription("Returns the animal's original source");
-            table.addColumn(col);
+            String origin = "origin";
+            TableInfo birth = getRealTableForDataset(table, "Birth");
+            TableInfo arrival = getRealTableForDataset(table, "Arrival");
+
+            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.source as source, " +
+                        "a.date as date," +
+                        "a.participantid as participantid " +
+                    "FROM studydataset." +arrival.getName() + " a " +
+
+                    "WHERE a.source is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.origin as source," +
+                        "b.date as date," +
+                        "b.participantid as participantid " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT " +
+                        "(SELECT meaning from ehr_lookups.source where code = source) as source " +
+                        /*"source " +*/
+                    "FROM " +
+                        "(SELECT " +
+                            "min(w.date) as DateChanged, " +
+                            "w.participantid as id " +
+                        "FROM " +
+                            arrivalAndBirthUnion+ " w " +
+                        "GROUP BY w.participantid " +
+                        ") t JOIN " +
+                            arrivalAndBirthUnion + " m " +
+                        "ON m.participantid = t.id and t.DateChanged = m.date " +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            //another option is selecting a diff display?
+            ExprColumn newCol = new ExprColumn(table, origin, sql, JdbcType.VARCHAR);
+            String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin_code}";
+
+            newCol.setURL(StringExpressionFactory.createURL(url));
+            newCol.setLabel("Original source/vendor");
+            newCol.setDescription("Returns the animal's original source");
+            table.addColumn(newCol);
         }
         // Here we want a custom query since the getWrappedIdCol model did not work for us for the following requirements:
         // 1. Show the geographic origin if the query is able to calculate it.

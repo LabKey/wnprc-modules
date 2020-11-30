@@ -1,0 +1,21 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB">
+                <tableTitle>Purchase Requests</tableTitle>
+                <columns>
+                    <column columnName="account"/>
+                    <column columnName="requestStatus"/>
+                    <column columnName="requestDate"/>
+                    <column columnName="requester"/>
+                    <column columnName="totalCost"/>
+                </columns>
+<!--                <buttonBarOptions position="both" includeStandardButtons="true">-->
+<!--                    <item text="Create Request" insertPosition="end" requiresSelection="false">-->
+<!--                        <onClick>Laboratory.Assay.manageAssayBtn(dataRegion, 'PurchasingRequestsOverview')</onClick>-->
+<!--                    </item>-->
+<!--                </buttonBarOptions>-->
+            </table>
+        </tables>
+    </metadata>
+</query>

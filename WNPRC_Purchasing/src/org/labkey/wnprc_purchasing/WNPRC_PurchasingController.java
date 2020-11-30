@@ -37,17 +37,6 @@ public class WNPRC_PurchasingController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-//    @RequiresPermission(ReadPermission.class)
-//    public class BeginAction extends SimpleViewAction
-//    {
-//        public ModelAndView getView(Object o, BindException errors)
-//        {
-//            return new JspView("/org/labkey/wnprc_purchasing/view/PurchasingLandingPage.jsp");
-//        }
-//
-//        public void addNavTrail(NavTree root) { }
-//    }
-
     @RequiresPermission(ReadPermission.class)
     public class PurchasingRequestAction extends SimpleViewAction
     {

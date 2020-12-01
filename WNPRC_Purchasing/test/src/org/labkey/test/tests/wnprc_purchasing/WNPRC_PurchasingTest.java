@@ -27,8 +27,8 @@ import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.InDevelopment;
+import org.labkey.test.categories.CustomModules;
+import org.labkey.test.categories.EHR;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
 import org.labkey.test.util.PostgresOnlyTest;
@@ -44,7 +44,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
-@Category({InDevelopment.class})
+@Category({CustomModules.class, EHR.class})
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     private static final String FOLDER_TYPE = "WNPRC Purchasing";

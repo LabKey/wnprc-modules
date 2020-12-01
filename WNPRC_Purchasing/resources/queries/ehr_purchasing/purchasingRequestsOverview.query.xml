@@ -10,11 +10,6 @@
                     <column columnName="requester"/>
                     <column columnName="totalCost"/>
                 </columns>
-<!--                <buttonBarOptions position="both" includeStandardButtons="true">-->
-<!--                    <item text="Create Request" insertPosition="end" requiresSelection="false">-->
-<!--                        <onClick>Laboratory.Assay.manageAssayBtn(dataRegion, 'PurchasingRequestsOverview')</onClick>-->
-<!--                    </item>-->
-<!--                </buttonBarOptions>-->
             </table>
         </tables>
     </metadata>

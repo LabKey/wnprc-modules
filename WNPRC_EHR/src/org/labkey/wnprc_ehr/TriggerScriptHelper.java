@@ -4,28 +4,22 @@ import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.commons.lang3.time.DateUtils;
-import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.LookupColumn;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.JdbcType;
-import org.labkey.api.data.Results;
 import org.labkey.api.data.Selector;
-import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.ehr.EHRService;
-import org.labkey.api.ldk.notification.NotificationSection;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -37,15 +31,11 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryUpdateServiceException;
-import org.labkey.api.query.DetailsURL;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Result;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.SimpleQueryFactory;
@@ -63,7 +53,6 @@ import org.labkey.wnprc_ehr.notification.VvcNotification;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -75,9 +64,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -1118,15 +1105,26 @@ public class TriggerScriptHelper {
 
     }
 
-    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, String frequency, String objectId, Map<String, Object> extraContext){
-
-        //TODO: query the table to find the meaning - from the rowid
+    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, String frequency, String waterSource, String objectId, Integer project, Map<String, Object> extraContext){
 
         String meaningFrequency = getMeaningFromRowid( frequency, "husbandry_frequency" );
         JSONArray arrayOfErrors = new JSONArray();
         JSONArray extraContextArray = new JSONArray();
+        JSONObject returnErrors = new JSONObject();
+        boolean existingOrder = false;
 
         Map<String, JSONObject> errorMap = new HashMap<>();
+
+        //TODO: Check is the animal is at least one time in the WaterSchedule Table
+        if(checkIfAnimalInCondition(animalId,clientStartDate).size()==0){
+
+            returnErrors.put("field", "id");
+            returnErrors.put("severity","ERROR");
+            returnErrors.put("message","Animal not in waterScheduledAnimals table, contact compliance staff to enter new animals into the water monitoring system");
+
+            //returnMessage = "Error animal not in WaterScheduleAnimal table or is already in "+waterSource +" condition";
+
+        }
 
         //Setting interval to start the water schedule, the system generates the calendar thirty days before
         Calendar startInterval = Calendar.getInstance();
@@ -1151,6 +1149,7 @@ public class TriggerScriptHelper {
         TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
         filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
+        filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
         //filter.addCondition(FieldKey.fromString("frequency"), frequency);
 
         //Adding all the water records from database to a list of waterRecord objects that can be compared
@@ -1158,14 +1157,20 @@ public class TriggerScriptHelper {
         waterOrdersFromDatabase.setNamedParameters(parameters);
         waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
+       // JSONObject returnErrors = new JSONObject();
+        JSONObject extraContextObject = new JSONObject();
 
         for (WaterDataBaseRecord waterRecord : waterRecords)
         {
             //If the record is updated it should allow to enter new information.
             if (waterRecord.getObjectId().compareTo(objectId) != 0){
 
-                JSONObject returnErrors = new JSONObject();
-                JSONObject extraContextObject = new JSONObject();
+                //Checking id the animal already has a water order, if so the function will not add an
+                //entry to the waterScheduledAnimals
+                if (waterRecord.getDataSource().equals("waterOrders"))
+                {
+                    existingOrder = true;
+                }
 
                 LocalDate startLoop = convertToLocalDateViaSqlDate(clientStartDate);
                 LocalDate endOfLoop;
@@ -1220,8 +1225,6 @@ public class TriggerScriptHelper {
                             //TODO: add error to extraContext to handle water order within the calendar UI
                             if (waterRecord.getDataSource().equals("waterOrders"))
                             {
-
-
                                 //show error when the clientStartDate is greater than an order already in the system, the overlap is
                                 //at the beginning of the new order
                                 if (clientStartDate.getTime() > waterRecord.getStartDateCoalesced().getTime())
@@ -1260,14 +1263,9 @@ public class TriggerScriptHelper {
                                     returnErrors.put("severity", "ERROR");
                                     returnErrors.put("message", "There are one or more waterAmounts that are outside the new range for the updated water order");
                                 }
-
-
                             }
                         }
-
                     }
-
-
                 }
 
                 //Additional check to informed of any water amounts in the future that wold stay in the system after the water order is modified
@@ -1306,14 +1304,84 @@ public class TriggerScriptHelper {
 
                         //extraContext.put("objectId",waterRecord.getObjectId());
                     }
-
-
                 }
-
-
                 if (!returnErrors.isEmpty()){
                     errorMap.put(waterRecord.getObjectId(), returnErrors);
                     extraContext.put("extraContextArray", extraContextArray);
+                }
+            }
+        }
+
+        //JSONObject returnErrors = new JSONObject();
+        if (returnErrors.isEmpty() && !existingOrder)
+        {
+            //Closing existing lixit order in the system and adding a record in the waterScheduleAnimals table
+            TableInfo waterOrders = getTableInfo("study","waterOrders");
+            SimpleFilter filterOrders = new SimpleFilter (FieldKey.fromString("Id"), animalId);
+            filterOrders.addCondition(FieldKey.fromString("waterSource"),"lixit", CompareType.EQUAL);
+            filterOrders.addCondition(FieldKey.fromString("enddateCoalesced"),clientStartDate,CompareType.DATE_GTE);
+
+            TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "id", "date","frequency","enddateCoalesced"),filterOrders,null);
+            Map <String,Object>[] waterOrderObject = waterOrderRecords.getMapArray();
+            List<Map<String, Object>> toUpdate = new ArrayList<>();
+            List<Map<String, Object>> oldKeys = new ArrayList<>();
+
+            if (waterOrderObject.length > 0){
+               // JSONObject returnErrors = new JSONObject();
+
+                for (Map<String,Object> waterOrderMap : waterOrderObject){
+
+                    String lsid = ConvertHelper.convert(waterOrderMap.get("lsid"), String.class);
+
+                    Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
+                    updateWaterOrder.put("lsid", lsid);
+                    updateWaterOrder.put("enddate",clientStartDate);
+                    updateWaterOrder.put("skipWaterRegulationCheck", true);
+                    toUpdate.add(updateWaterOrder);
+
+                    Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
+                    keyMap.put("lsid", lsid);
+                    oldKeys.add(keyMap);
+                }
+                
+            }
+
+            //TODO: only change water schedule animals if they are not in Lixit
+            String animalCondition = checkIfAnimalInCondition(animalId,clientStartDate).get(animalId);
+            if (animalCondition.equals("lixit")){
+                List<Map<String, Object>> rowToAdd = null;
+
+                JSONObject scheduledAnimalRecord = new JSONObject();
+                scheduledAnimalRecord.put("date", clientStartDate);
+                scheduledAnimalRecord.put("id", animalId);
+                scheduledAnimalRecord.put("condition", waterSource);
+                scheduledAnimalRecord.put("project", project);
+
+                rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+
+                try
+                {
+                    if(!toUpdate.isEmpty()){
+                        Container container = getContainer();
+                        User user = getUser();
+                        List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, null, null);
+                        if (updateRows.isEmpty()){
+                            returnErrors.put("field", "Id");
+                            returnErrors.put("severity", "ERROR");
+                            returnErrors.put("message", "Error closing Lixit/Ad Lib orders.");
+
+                        }
+
+                    }
+                    insertRows(rowToAdd, "study", "waterScheduledAnimals");
+                }
+                catch (Exception e)
+                {
+                    returnErrors.put("field", "project");
+                    returnErrors.put("severity", "ERROR");
+                    returnErrors.put("message", "Error changing condition.");
+
+                    errorMap.put(objectId, returnErrors);
                 }
 
             }
@@ -1688,8 +1756,9 @@ public class TriggerScriptHelper {
         return returnMeaning;
     }
 
-    public boolean checkIfAnimalIsRestricted (String animalId, Date clientDate){
-        boolean isAnimalRestricted = false;
+    public Map<String,String> checkIfAnimalInCondition(String animalId, Date clientDate)
+    {
+        Map<String,String> returnCondition = new HashMap<>();
 
         Calendar filterDate = Calendar.getInstance();
         filterDate.setTime(clientDate);
@@ -1697,7 +1766,13 @@ public class TriggerScriptHelper {
         TableInfo waterGiven = getTableInfo("study","waterScheduledAnimals");
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), animalId);
         filter.addCondition(FieldKey.fromString("date"), filterDate.getTime(),CompareType.DATE_LTE);
-        TableSelector rawAnimals = new TableSelector(waterGiven, PageFlowUtil.set("id", "date", "condition"),filter, null);
+
+        Sort sort = new Sort();
+        sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.DESC, false);
+
+
+        TableSelector rawAnimals = new TableSelector(waterGiven, PageFlowUtil.set("id", "date", "condition"),filter, sort);
+        rawAnimals.setMaxRows(1);
         Map<String, Object>[] animalsFromServer = rawAnimals.getMapArray();
 
         //updating and adding waters from server, objectid will take are of any duplicates
@@ -1706,23 +1781,152 @@ public class TriggerScriptHelper {
             for (Map<String, Object> animalRestricted : animalsFromServer)
             {
                 String condition = ConvertHelper.convert(animalRestricted.get("condition"), String.class);
-                if (condition.equals("scheduled")){
-                    isAnimalRestricted = true;
-                }
+                returnCondition.put(animalId, ConvertHelper.convert(animalRestricted.get("condition"), String.class));
+
             }
+        }
+        return  returnCondition;
+    }
+
+    //This function will always have lixit as the waterSource
+    //TODO: Change retorun to errorArray
+    public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, Map<String, Object> extraContext) throws Exception
+    {
+        String returnMessage = null;
+        JSONArray arrayOfErrors = new JSONArray();
+        JSONArray extraContextArray = new JSONArray();
+        JSONObject returnErrors = new JSONObject();
+
+
+        Map<String, JSONObject> errorMap = new HashMap<>();
+
+        if(checkIfAnimalInCondition(animalId,startDate).size()==0 || checkIfAnimalInCondition(animalId,startDate).get(animalId).equals("lixit")){
+            returnErrors.put("field","waterSource");
+            returnErrors.put("severity", "ERROR");
+            returnErrors.put("message", "Error animal not in WaterScheduleAnimal table or is already in "+waterSource +" condition");
+            arrayOfErrors.put(returnErrors);
+            //errorMap.put(animalId, returnErrors);
 
         }
 
+        TableInfo waterOrders = getTableInfo("study","waterOrders");
+        SimpleFilter filter = new SimpleFilter (FieldKey.fromString("id"), animalId);
+        filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
+        filter.addCondition(FieldKey.fromString("enddateCoalesced"),startDate,CompareType.DATE_GTE);
 
-        return  isAnimalRestricted;
+        TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "id", "date","volume","frequency","enddateCoalesced"),filter,null);
+        Map <String,Object>[] waterOrderObjects = waterOrderRecords.getMapArray();
+        List<Map<String, Object>> toUpdate = new ArrayList<>();
+        List<Map<String, Object>> oldKeys = new ArrayList<>();
+
+        if (waterOrderObjects.length >0)
+        {
+
+
+
+            for (Map<String, Object> waterOrderMap : waterOrderObjects)
+            {
+
+                String lsid = ConvertHelper.convert(waterOrderMap.get("lsid"), String.class);
+
+                Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
+                updateWaterOrder.put("lsid", lsid);
+                updateWaterOrder.put("enddate", startDate);
+                updateWaterOrder.put("skipWaterRegulationCheck", true);
+                toUpdate.add(updateWaterOrder);
+
+                Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
+                keyMap.put("lsid", lsid);
+                oldKeys.add(keyMap);
+                returnErrors.put("field", "waterSource");
+                returnErrors.put("severity", "INFO");
+                returnErrors.put("message", "This one or more water orders that will be closed and the animal will be switch to Lixit");
+                JSONObject extraContextObject = new JSONObject();
+
+                extraContextObject.put("date",waterOrderMap.get("date"));
+                extraContextObject.put("volume", waterOrderMap.get("volume"));
+                String frequencyMeaning = getMeaningFromRowid(waterOrderMap.get("frequency").toString(), "husbandry_frequency");
+                extraContextObject.put("frequency", frequencyMeaning);
+
+                arrayOfErrors.put(returnErrors);
+                extraContextArray.put(extraContextObject);
+
+                //errorMap.put(animalId, returnErrors);
+            }
+
+
+        }
+
+        List<Map<String, Object>> rowToAdd = null;
+
+
+        JSONObject scheduledAnimalRecord = new JSONObject();
+        scheduledAnimalRecord.put("date", startDate);
+        scheduledAnimalRecord.put("id",animalId);
+        scheduledAnimalRecord.put("condition",waterSource);
+        scheduledAnimalRecord.put("project", project);
+
+        rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+        //ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterScheduledAnimals");
+        //service = ti.getUpdateService();
+
+        //if(errorMap.get(animalId)!= null &&  !"ERROR".equals(errorMap.get(animalId).get("severity")))
+        if(arrayOfErrors.length() > 0 &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
+        {
+            try
+            {
+                if (!toUpdate.isEmpty())
+                {
+                    Container container = getContainer();
+                    User user = getUser();
+                    List<Map<String, Object>> updatedRows = waterOrders.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, null);
+                    if (updatedRows.isEmpty())
+                    {
+                        returnErrors.put("field", "project");
+                        returnErrors.put("severity", "ERROR");
+                        returnErrors.put("message", "Error closing water orders ");
+                        arrayOfErrors.put(returnErrors);
+                        //errorMap.put(animalId, returnErrors);
+                    }
+                }
+                insertRows(rowToAdd, "study", "waterScheduledAnimals");
+            }
+            catch (Exception e)
+            {
+                returnErrors.put("field", "project");
+                returnErrors.put("severity", "ERROR");
+                returnErrors.put("message", "Error adding animal to waterScheduleAnimals table "+e.getMessage());
+                arrayOfErrors.put(returnErrors);
+                //errorMap.put(animalId, returnErrors);
+
+            }
+        }
+        if (extraContextArray.length()>0){
+            extraContext.put("extraContextArray", extraContextArray);
+        }
+
+        /*errorMap.forEach((objectIdString, JSONObject)->{
+            arrayOfErrors.put(JSONObject);
+        });*/
+
+        return arrayOfErrors;
     }
 
-    public String changeWaterScheduled(String animalId, Date clientDate, String waterSource){
-        String returnMessage = null;
+    public String returnHighestError (JSONArray arrayOfErrors){
+        String highestError = "INFO";
+        for (int i = 0; i < arrayOfErrors.length();i++ ){
+            JSONObject error = arrayOfErrors.getJSONObject(i);
+            if ("ERROR".equals(error.get("severity"))){
+                highestError = "ERROR";
+            }else if ("WARN".equals(error.get("severity")) && !"ERROR".equals(highestError)){
+                highestError = "WARN";
+            } else if ("INFO".equals(error.get("severity")) && (!"ERROR".equals(highestError) || !"WARN".equals(highestError))){
+                highestError = "INFO";
+            }
+        }
+        return highestError;
 
 
-
-        return returnMessage;
     }
 
 

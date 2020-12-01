@@ -462,7 +462,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 ProtocolForm.class,
                 ResearchUltrasoundsForm.class,
                 ResearchUltrasoundsTaskForm.class,
-                ResearchUltrasoundsReviewForm.class
+                ResearchUltrasoundsReviewForm.class,
                 ProtocolForm.class,
                 EnterWater.class,
                 EnterMultipleWater.class,

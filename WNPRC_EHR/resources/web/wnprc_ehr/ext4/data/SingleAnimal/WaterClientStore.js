@@ -15,7 +15,7 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.WaterClientStore', {
         var allRecords = this.getRange();
         for (var idx = 0; idx < allRecords.length; ++idx){
             var record = allRecords[idx];
-            if (record.get('quantity') > 0){
+            if (record.get('volume') > 0){
                 var id = record.get('Id');
                 var date = record.get('date');
                 if (!id || !date)

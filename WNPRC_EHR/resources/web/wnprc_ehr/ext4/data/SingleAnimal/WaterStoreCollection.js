@@ -17,9 +17,17 @@ Ext4.define('WNPRC.ext.data.WaterStoreCollection', {
         }
 
         store = Ext4.create('WNPRC.ext.data.WaterServerStore', storeConfig);
+        //this.getErrorMessages(false);
 
         this.addServerStore(store);
 
         return store;
+    },
+    //Overwritting the getErrorMessages to display INFO messages.
+    getErrorMessages: function (){
+        let ret = this.callParent(false);
+        return ret;
+
+
     }
 });

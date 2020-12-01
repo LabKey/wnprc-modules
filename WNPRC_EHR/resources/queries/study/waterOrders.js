@@ -23,11 +23,11 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             }
         });
         var animalRestricted = false;
-        animalRestricted = WNPRC.Utils.getJavaHelper().checkIfAnimalIsRestricted(row.Id, row.date);
+        animalRestricted = WNPRC.Utils.getJavaHelper().checkIfAnimalInCondition(row.Id, row.date);
 
-        if (!animalRestricted){
-            EHR.Server.Utils.addError(scriptErrors,'Id', 'Animal not assigned to water restriction protocol or condition as Lixit/Ad lib', 'ERROR');
-        }
+        /*if (!animalRestricted && !row.skipWaterRegulationCheck){
+            EHR.Server.Utils.addError(scriptErrors,'Id', 'Animal not assigned to water restriction protocol or is already in ' + row.waterSource + ' condition.', 'ERROR');
+        }*/
 
 
 
@@ -40,6 +40,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
     var rowDate = new Date(row.date);
     rowDate.setHours(0,0,0,0);
+    EHR.Server.Utils.removeTimeFromDate(row,scriptErrors,"date");
 
     console.log("Value of date " + rowDate + " "+ rowDate.getTime());
     //console.log("Value of start date " + row.startdate);
@@ -59,8 +60,15 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors,'endDate', 'EndDate cannot be before StartDate', 'ERROR');
     }
 
-    if (!row.frequency){
-        EHR.Server.Utils.addError(scriptErrors, 'frequency', 'Frequency is required when entering new orders.', 'ERROR');
+    if (!row.frequency && row.waterSource == 'regulated'){
+        EHR.Server.Utils.addError(scriptErrors, 'frequency', 'Frequency is required when entering regulated water orders.', 'ERROR');
+    }
+    if (!row.volume && row.waterSource == 'regulated'){
+        EHR.Server.Utils.addError(scriptErrors, 'volume', 'Volume is required when entering regulated water orders.', 'ERROR');
+    }
+
+    if (!row.assignedTo && row.waterSource == 'regulated'){
+        EHR.Server.Utils.addError(scriptErrors, 'assignedTo', 'Assigned To is required when entering regulated water orders.', 'ERROR');
     }
 
     if (!row.waterSource){
@@ -68,11 +76,11 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
 
     //console.log ("value of ObjectId "+oldRow.objectid + " Value of new objectId "+ row.objectid);
-
+   console.log ('skipWaterRegulation '+ row.skipWaterRegulationCheck);
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
-    if (row.objectid && row.Id && row.date && row.frequency && row.assignedTo) {
-        console.log('value of row: '+row + ' '+ row.frequency);
-        let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.objectid, this.extraContext);
+    if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck) {
+        console.log('value of row: ' + row + ' frequency ' + row.frequency + ' value of waterSource ' + row.waterSource);
+        let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.waterSource, row.objectid, row.project, this.extraContext);
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {
                 var errorObject = JSON.parse(jsonArray[i]);
@@ -80,12 +88,37 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
             }
         }
+        row.date = rowDate;
     }
 
-    if (oldRow && oldRow.waterSource == 'regulated' && row.waterSource == 'lixit'){
-        let changeMessage = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource);
-        if (changeMessage == 'Error'){
-            EHR.Server.Utils.addError(scriptErrors,'id', 'Problems changing water scheduled animals', 'WARN');
+    //if (oldRow && oldRow.waterSource == 'regulated' && row.waterSource == 'lixit'){
+    //TODO: by pass water regulation to change water order to lixit and also chnage the water regulated animals data
+    if ( row.waterSource == 'lixit' && !row.skipWaterRegulationCheck){
+
+        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, this.extraContext);
+        let jsonExtraContext = this.extraContext.extraContextArray;
+
+        if (jsonArray != null){
+            for (var i=0; i < jsonArray.length; i++){
+                let errorObject = JSON.parse(jsonArray[i]);
+                EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message, errorObject.severity);
+
+            }
+            console.log(" Printing Extra Context" + jsonExtraContext);
+            if (jsonExtraContext != null){
+                for (var i = 0; i < jsonExtraContext.length; i++){
+                    let extraContextObject = jsonExtraContext[i];
+                    let date =  extraContextObject.date;
+                    let dateOnly = new Date(date.getTime());
+                    dateOnly = dateOnly.getFullYear()+ "-" +dateOnly.getMonth()+ "-" + dateOnly.getDate();
+                    let infoMessage = "Water Order for "+ row.Id + " started on " + dateOnly + " with frequency of " + extraContextObject.frequency + " and volume of " + extraContextObject.volume + "ml will close.";
+                    console.log(infoMessage);
+                    EHR.Server.Utils.addError(scriptErrors,"waterSource",infoMessage,"INFO")
+
+                }
+
+            }
+
         }
     }
 

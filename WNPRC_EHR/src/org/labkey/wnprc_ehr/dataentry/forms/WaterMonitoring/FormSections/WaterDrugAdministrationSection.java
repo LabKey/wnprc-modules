@@ -17,12 +17,21 @@ public class WaterDrugAdministrationSection extends SlaveGridSection
         addClientDependency(ClientDependency.fromPath("ehr/form/field/SnomedCombo.js"));
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
        // setAllowBulkAdd(true);
+        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
     }
     public WaterDrugAdministrationSection(String title){
         super ("study", "drug", title);
         //this.addConfigSource("WNPRC_Request");
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
         // setAllowBulkAdd(true);
+    }
+    @Override
+    public List<String> getTbarButtons(){
+
+        List<String> defaultButtons = super.getTbarButtons();
+        defaultButtons.add(1,"CHANGETIME");
+
+        return defaultButtons;
     }
     @Override
     public Set<String> getSlaveFields(){

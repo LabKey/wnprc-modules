@@ -412,6 +412,20 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 hidden: true,
                 shownInGrid:false,
             },
+            date:{
+                xtype: 'xdatetime',
+                header: 'Date',
+                //extFormat: 'Y-m-d HH:mm',
+                allowBlank: false,
+                hidden: false,
+                shownInGrid: true,
+                //editable: false,
+                editorConfig: {
+                    dateConfig: {
+                        minValue: new Date(),
+                    }
+                },
+            },
             project:{
                 hidden: true,
                 shownInGrid:false
@@ -562,10 +576,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
 
             },
+            waterSource: {
+                defaultValue: 'regulated',
+            },
             recordSource:{
                 defaultValue: 'LabWaterForm',
                 editable: false,
-                //hidden: true,
+                hidden: true,
                 shownInGrid: false
             },
             provideFruit:{
@@ -580,7 +597,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             QCState:{
-                shownInGrid: true,
+                shownInGrid: false,
                 setInitialValue: function(v){
                     var qc;
                     if(!v && EHR.Security.getQCStateByLabel('In Progress'))
@@ -656,19 +673,19 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             volume:{
                 xtype: 'textfield',
                 header: 'Water Volume (mL)',
-                allowBlank: false,
+                //allowBlank: false,
                 columnConfig: {
                     width:140
                 }
             },
             assignedTo:{
-                allowBlank: false,
+                //allowBlank: false,
                 columnConfig: {
                     width:120
                 }
             },
             frequency:{
-                allowBlank: false,
+                //allowBlank: false,
                 defaultValue: 'Daily - PM',
                 lookup:{
                     schemaName: 'ehr_lookups',

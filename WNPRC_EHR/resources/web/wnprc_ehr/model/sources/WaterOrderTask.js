@@ -17,6 +17,10 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
                     width:120
                 },
             },
+            account:{
+                hidden: true,
+                shownInGrid: false
+            },
             date:{
                 xtype: 'datefield',
                 header: 'Start Date',
@@ -29,9 +33,9 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
                     width:90
                 },
                 editorConfig: {
-                    minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
+                    minValue: new Date()
                 },
-                defaultValue: new Date(new Date(Ext4.Date.add(new Date(), Ext4.Date.DAY, 1).setHours(0)).setMinutes(0)),
+                defaultValue: new Date(new Date().setHours(0)).setMinutes(0),
                 /*setInitialValue: function(v) {
                     debugger;
                     var date = (Ext4.Date.add(new Date(), Ext4.Date.DAY, 1));
@@ -70,7 +74,7 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
             volume:{
                 xtype: 'textfield',
                 header: 'Water Volume (mL)',
-                allowBlank: false,
+                //allowBlank: false,
                 columnConfig: {
                     width:140
                 }
@@ -83,7 +87,7 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
             },
             frequency:{
                 allowBlank: false,
-                //defaultValue: 'Daily - PM',
+                defaultValue: 'Daily - PM',
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',
@@ -138,10 +142,6 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
                 columnConfig: {
                     width:140
                 }
-            },
-            project:{
-                /*hidden: true,
-                shownInGrid: false*/
             },
             assignedTo:{
                 allowBlank: false

@@ -35,7 +35,7 @@ public class EnterWaterOrder extends SimpleTaskForm
 
         for (FormSection section : this.getFormSections()){
             section.addConfigSource("WaterOrderTask");
-            section.addConfigSource("Encounter");
+
         }
 
         // setStoreCollectionClass("EHR.data.WaterStore");

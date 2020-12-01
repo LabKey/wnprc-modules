@@ -16,7 +16,7 @@
         <column name="hold"/>
         <column name="dam"/>
         <column name="sire"/>
-        <column name="origin/source"/>
+        <column name="origin"/>
         <column name="birth"/>
         <column name="death"/>
         <!--<column name="Id/MostRecentArrival/MostRecentArrival">-->

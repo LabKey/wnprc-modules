@@ -41,13 +41,13 @@ public class WNPRC_PurchasingModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return null;
     }
 
     @Override
     public boolean hasScripts()
     {
-        return true;
+        return false;
     }
 
     @Override

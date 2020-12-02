@@ -30,8 +30,6 @@ public class WNPRC_PurchasingContainerListener implements ContainerListener
     @Override
     public void containerCreated(Container c, User user)
     {
-        //populate qc state data upon WNPRC_Purchasing folder creation
-        WNPRC_PurchasingManager.get().addQCStatus(c, user);
     }
 
     @Override

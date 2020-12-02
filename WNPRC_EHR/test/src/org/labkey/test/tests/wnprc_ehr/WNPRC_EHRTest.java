@@ -36,6 +36,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
+import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.ImportDataPage;
@@ -83,7 +84,7 @@ import static org.labkey.test.util.Ext4Helper.TextMatchTechnique.CONTAINS;
  * NOTE: EHRApiTest may be a better location for tests designed to test server-side trigger scripts
  * or similar business logic.
  */
-@Category({CustomModules.class, EHR.class})
+@Category({CustomModules.class, EHR.class, WNPRC_EHR.class})
 public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnlyTest
 {
     public static final String PROJECT_NAME = "WNPRC_TestProject";

@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
 
@@ -68,6 +69,9 @@ public class WNPRC_PurchasingModule extends DefaultModule
     {
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_PurchasingContainerListener());
+
+        FolderTypeManager.get().registerFolderType(this, new WNPRC_PurchasingFolderType(this));
+
     }
 
     @Override

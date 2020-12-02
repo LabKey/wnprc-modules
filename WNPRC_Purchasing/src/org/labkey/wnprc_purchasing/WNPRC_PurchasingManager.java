@@ -48,6 +48,16 @@ public class WNPRC_PurchasingManager
         return _instance;
     }
 
+    public void addLineItems(Container c, User user)
+    {
+        addData(c, user, "ehr_purchasing", "lineItemStatus", "lineItemStatus.tsv");
+    }
+
+    public void addItemUnits(Container c, User user)
+    {
+        addData(c, user, "ehr_purchasing", "itemUnits", "itemUnits.tsv");
+    }
+
     public void addQCStatus(Container c, User user)
     {
         addData(c, user, "core", "QCState", "QCStatus.tsv");

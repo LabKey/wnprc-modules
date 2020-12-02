@@ -27,10 +27,12 @@ import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
+import org.labkey.test.categories.WNPRC_EHR;
+import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
+import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 
 import java.io.File;
@@ -44,7 +46,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
-@Category({EHR.class})
+@Category({EHR.class, WNPRC_EHR.class})
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     private static final String FOLDER_TYPE = "WNPRC Purchasing";
@@ -56,8 +58,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private int _requesterUserId;
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_purchasing/aliases.tsv");
-    private final File ITEM_UNITS_TSV = TestFileUtils.getSampleData("wnprc_purchasing/itemUnits.tsv");
-    private final File LINE_ITEM_STATUS_TSV = TestFileUtils.getSampleData("wnprc_purchasing/lineItemStatus.tsv");
     private final File SHIPPING_INFO_TSV = TestFileUtils.getSampleData("wnprc_purchasing/shippingInfo.tsv");
     private final File VENDOR_TSV = TestFileUtils.getSampleData("wnprc_purchasing/vendor.tsv");
 
@@ -93,6 +93,11 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         goToProjectHome();
 
+        log("Adding WNPRC Purchasing webpart");
+        new SiteNavBar(getDriver()).enterPageAdminMode();
+        (new PortalHelper(this)).addWebPart("WNPRC Purchasing");
+        new SiteNavBar(getDriver()).exitPageAdminMode();
+
         log("Uploading purchasing data");
         uploadPurchasingData();
 
@@ -124,15 +129,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         Connection connection = getRemoteApiConnection(true);
         Map<String, Object> responseMap = new HashMap<>();
 
-        List<Map<String, Object>> tsv = loadTsv(ITEM_UNITS_TSV);
-        insertData(connection, "ehr_purchasing", "itemUnits", tsv)
-                .forEach(row -> responseMap.put(row.get("itemUnit").toString(), row.get("rowid")));
-
-        tsv = loadTsv(LINE_ITEM_STATUS_TSV);
-        insertData(connection, "ehr_purchasing", "lineItemStatus", tsv)
-                .forEach(row -> responseMap.put(row.get("status").toString(), row.get("rowid")));
-
-        tsv = loadTsv(SHIPPING_INFO_TSV);
+        List<Map<String, Object>> tsv = loadTsv(SHIPPING_INFO_TSV);
         insertData(connection, "ehr_purchasing", "shippingInfo", tsv)
                 .forEach(row -> responseMap.put(row.get("attentionTo").toString(), row.get("rowid")));
 

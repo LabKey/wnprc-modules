@@ -5,6 +5,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.CustomModules;
 import org.labkey.test.categories.EHR;
+import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.pages.list.EditListDefinitionPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.tests.ehr.ComplianceTrainingTest;
@@ -17,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@Category({CustomModules.class, EHR.class})
+@Category({CustomModules.class, EHR.class, WNPRC_EHR.class})
 public class WNPRCComplianceTrainingTest extends ComplianceTrainingTest implements PostgresOnlyTest
 {
     @Override

@@ -50,10 +50,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private static final String FOLDER_TYPE = "WNPRC Purchasing";
 
     private static final String REQUESTER_USER = "purchaserequester@test.com";
-    private String _adminUserId;
+    private int _adminUserId;
 
     private static final String ADMIN_USER = "purchaseadmin@test.com";
-    private String _requesterUserId;
+    private int _requesterUserId;
 
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_purchasing/aliases.tsv");
     private final File ITEM_UNITS_TSV = TestFileUtils.getSampleData("wnprc_purchasing/itemUnits.tsv");
@@ -86,10 +86,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         _containerHelper.createProject(getProjectName(), FOLDER_TYPE);
 
         log("Creating a purchasing admin user");
-        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().toString();
+        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
 
         log("Creating a purchasing requester user");
-        _requesterUserId = _userHelper.createUser(REQUESTER_USER).getUserId().toString();
+        _requesterUserId = _userHelper.createUser(REQUESTER_USER).getUserId().intValue();
 
         goToProjectHome();
 
@@ -106,12 +106,12 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         List<Map<String, Object>> userAcctAssocRows = new ArrayList<>();
 
         Map<String, Object> userAcctRow = new HashMap<>();
-        userAcctRow.put("userId", Integer.parseInt(_requesterUserId));
+        userAcctRow.put("userId", _requesterUserId);
         userAcctRow.put("account", ACCT_100);
         userAcctAssocRows.add(userAcctRow);
 
         userAcctRow = new HashMap<>();
-        userAcctRow.put("userId", Integer.parseInt(_requesterUserId));
+        userAcctRow.put("userId", _requesterUserId);
         userAcctRow.put("account", ACCT_101);
         userAcctAssocRows.add(userAcctRow);
 

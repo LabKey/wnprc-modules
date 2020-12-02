@@ -44,7 +44,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
-@Category({CustomModules.class, EHR.class})
+@Category({EHR.class})
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     private static final String FOLDER_TYPE = "WNPRC Purchasing";

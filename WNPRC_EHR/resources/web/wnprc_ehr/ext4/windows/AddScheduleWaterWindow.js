@@ -225,7 +225,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 assignedto:         row.getValue('assignedTo'),
                 waterSource:        row.getValue('waterSource'),
                 treatmentId:        row.getValue('objectid'),
-                dateordered:        row.getValue('dateOrdered')
+                dateOrdered:        row.getValue('dateOrdered')
 
             });
             tempModel.phantom = false;
@@ -239,7 +239,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                     assignedto:         row.getValue('assignedTo'),
                     waterSource:        row.getValue('waterSource'),
                     treatmentId:        row.getValue('objectid'),
-                    dateordered:        row.getValue('dateOrdered')
+                    dateOrdered:        row.getValue('dateOrdered')
 
                 });
                 fruitModel.phantom = false;

@@ -15,7 +15,7 @@
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="dateOrdered">
-                        <formatString>yyyy-MM-dd HH:mm:ss</formatString>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="performedby">
                         <columnTitle>Performed By</columnTitle>

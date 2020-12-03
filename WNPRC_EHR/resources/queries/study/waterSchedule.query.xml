@@ -20,7 +20,7 @@
                         <isHidden>true</isHidden>
                     </column>
                     <column columnName="date">
-                        <formatString>yyyy-MM-dd hh:mm:ss</formatString>
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="Id">
                         <fk>

@@ -30,7 +30,8 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.WaterClientStore', {
                     objectid: record.get('objectid'),
                     date: date,
                     qcstate: record.get('qcstate'),
-                    volume: record.get('volume')
+                    volume: record.get('volume'),
+                    assignedto: record.get('assignedto')
                 });
             }
         }

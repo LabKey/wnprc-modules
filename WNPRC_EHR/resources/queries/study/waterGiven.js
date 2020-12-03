@@ -132,11 +132,12 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                     EHR.Server.Utils.addError(scriptErrors, 'performedby', "Must add Performed By", errorQC)
             }
 
-            var msg = WNPRC.Utils.getJavaHelper().checkScheduledWaterTask(waters);
+            //TODO: move validation to water amount to make sure not PN waters are requested after 1:30PM
+            /*var msg = WNPRC.Utils.getJavaHelper().checkScheduledWaterTask(waters);
             if (msg != null){
                 EHR.Server.Utils.addError(scriptErrors, 'date', msg, errorQC);
                 //EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, errorQC);
-            }
+            }*/
 
             if (row.volume)
                 {

@@ -8,6 +8,7 @@ function onInit(event, helper){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
+    console.log("print oldRow "+ oldRow);
 
     if (row.Id){
         EHR.Server.Utils.findDemographics({
@@ -93,9 +94,9 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
     //if (oldRow && oldRow.waterSource == 'regulated' && row.waterSource == 'lixit'){
     //TODO: by pass water regulation to change water order to lixit and also chnage the water regulated animals data
-    if ( row.waterSource == 'lixit' && !row.skipWaterRegulationCheck){
+    if ( row.waterSource == 'lixit' && !row.skipWaterRegulationCheck && !oldRow){
 
-        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, this.extraContext);
+        let jsonArray = WNPRC.Utils.getJavaHelper().changeWaterScheduled(row.id,row.date,row.waterSource, row.project, row.objectid,this.extraContext);
         let jsonExtraContext = this.extraContext.extraContextArray;
 
         if (jsonArray != null){

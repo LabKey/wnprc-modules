@@ -71,7 +71,7 @@ EHR.model.DataModelManager.registerMetadata('Encounter', {
             treatmentid: {
                 hidden: true
             },
-            dateordered:{
+            dateOrdered:{
                 hidden: true
             }
 

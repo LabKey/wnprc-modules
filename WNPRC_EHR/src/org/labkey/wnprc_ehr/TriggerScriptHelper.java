@@ -781,6 +781,9 @@ public class TriggerScriptHelper {
         Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
         notification.sendManually(ehrContainer,user);
     }
+
+    //Method to check is an afternoon water 1:30 PM
+    //TODO: this method should be called from water amounts, when staff is requesting more water to be done by animal care in the PM
     public String checkScheduledWaterTask(List<Map<String, Object>> recordsInTransaction)
     {
         int i=0;
@@ -816,7 +819,7 @@ public class TriggerScriptHelper {
 
                             //Check the value for the schedule qcstate
                             int tempOrdinal = EHRService.QCSTATES.Scheduled.ordinal();
-                            if (ConvertHelper.convert(map.get("assignto"), String.class).equals("animalcare") && (qcState-1) == EHRService.QCSTATES.Scheduled.ordinal())
+                            if (ConvertHelper.convert(map.get("assignedto"), String.class).equals("animalcare") && (qcState-1) == EHRService.QCSTATES.Scheduled.ordinal())
                                 i++;
                         }
                     }
@@ -1789,13 +1792,12 @@ public class TriggerScriptHelper {
     }
 
     //This function will always have lixit as the waterSource
-    //TODO: Change retorun to errorArray
-    public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, Map<String, Object> extraContext) throws Exception
+    public JSONArray changeWaterScheduled(String animalId, Date startDate, String waterSource, Integer project, String objectId, Map<String, Object> extraContext) throws Exception
     {
-        String returnMessage = null;
         JSONArray arrayOfErrors = new JSONArray();
         JSONArray extraContextArray = new JSONArray();
         JSONObject returnErrors = new JSONObject();
+
 
 
         Map<String, JSONObject> errorMap = new HashMap<>();
@@ -1812,9 +1814,9 @@ public class TriggerScriptHelper {
         TableInfo waterOrders = getTableInfo("study","waterOrders");
         SimpleFilter filter = new SimpleFilter (FieldKey.fromString("id"), animalId);
         filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
-        filter.addCondition(FieldKey.fromString("enddateCoalesced"),startDate,CompareType.DATE_GTE);
+        filter.addCondition(FieldKey.fromString("enddateCoalescedFuture"),startDate,CompareType.DATE_GT);
 
-        TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "id", "date","volume","frequency","enddateCoalesced"),filter,null);
+        TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "objectid","id", "date","volume","frequency","enddateCoalescedFuture"),filter,null);
         Map <String,Object>[] waterOrderObjects = waterOrderRecords.getMapArray();
         List<Map<String, Object>> toUpdate = new ArrayList<>();
         List<Map<String, Object>> oldKeys = new ArrayList<>();
@@ -1843,7 +1845,7 @@ public class TriggerScriptHelper {
                 returnErrors.put("message", "This one or more water orders that will be closed and the animal will be switch to Lixit");
                 JSONObject extraContextObject = new JSONObject();
 
-                extraContextObject.put("date",waterOrderMap.get("date"));
+                extraContextObject.put("date", waterOrderMap.get("date"));
                 extraContextObject.put("volume", waterOrderMap.get("volume"));
                 String frequencyMeaning = getMeaningFromRowid(waterOrderMap.get("frequency").toString(), "husbandry_frequency");
                 extraContextObject.put("frequency", frequencyMeaning);
@@ -1851,7 +1853,6 @@ public class TriggerScriptHelper {
                 arrayOfErrors.put(returnErrors);
                 extraContextArray.put(extraContextObject);
 
-                //errorMap.put(animalId, returnErrors);
             }
 
 
@@ -1871,7 +1872,7 @@ public class TriggerScriptHelper {
         //service = ti.getUpdateService();
 
         //if(errorMap.get(animalId)!= null &&  !"ERROR".equals(errorMap.get(animalId).get("severity")))
-        if(arrayOfErrors.length() > 0 &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
+        if( arrayOfErrors.length() > 0 &&  !"ERROR".equals(returnHighestError(arrayOfErrors)))
         {
             try
             {

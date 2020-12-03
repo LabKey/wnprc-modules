@@ -1,22 +1,17 @@
 SELECT
-
-    w.score,
     w.id,
-    w.DateChanged
-    /*timestampdiff('SQL_TSI_DAY', w.DateChanged, now()) AS DaysSinceFeedingChange,*/
+    w.MostRecentBCSDate,
+    (SELECT max(score)
+     FROM study.bcs w2
+     WHERE w.id=w2.id AND w.MostRecentBCSDate=w2.date
+    ) AS score
 
 FROM (
+         SELECT
+             w.Id AS Id,
+             max(w.date) AS MostRecentBCSDate
+         FROM study.bcs w
+         WHERE  w.score is not null
+         GROUP BY w.id
+     ) w
 
-         SELECT m.Id, m.score, t.DateChanged
-         FROM (
-                  SELECT
-                      w.Id AS Id,
-                      max(w.date) AS DateChanged
-
-                  FROM study.bcs w
-                      WHERE w.score is not null
-                  GROUP BY w.id
-              ) t JOIN study.bcs m ON m.Id = t.Id AND t.DateChanged = m.date;
-
-
-) w

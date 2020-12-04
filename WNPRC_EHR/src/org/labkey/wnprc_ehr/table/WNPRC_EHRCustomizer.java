@@ -457,19 +457,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     ")";
 
             String theQuery = "(" +
-                    "SELECT " +
-                        "(SELECT meaning from ehr_lookups.source where code = source) as meaning " +
-                        /*"source " +*/
-                    "FROM " +
-                        "(SELECT " +
-                            "min(w.date) as DateChanged, " +
-                            "w.participantid as id " +
-                        "FROM " +
-                            arrivalAndBirthUnion+ " w " +
-                        "GROUP BY w.participantid " +
-                        ") t JOIN " +
-                            arrivalAndBirthUnion + " m " +
-                        "ON m.participantid = t.id and t.DateChanged = m.date " +
+                    "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
                     ")";
 
 
@@ -481,7 +469,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             //newCol.setURL(StringExpressionFactory.createURL(url));
             newCol.setLabel("Source/Vendor");
             newCol.setDescription("Returns the animal's original source from an arrival or birth record.");
-            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=source&query.meaning~eq=${origin}"));
+            UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
+            newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "source", "code", "meaning"));
+            newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}"));
             table.addColumn(newCol);
         }
         // Here we want a custom query since the getWrappedIdCol model did not work for us for the following requirements:
@@ -519,19 +509,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String theQuery = "(" +
                     "SELECT " +
                         "CASE WHEN origin = 'cen'" +
-                            "THEN 'domestic'" +
-                            "ELSE origin " +
+                        "THEN 'domestic' " +
+                        "ELSE origin " +
                         "END AS geographic_origin " +
-                    "FROM " +
-                        "(SELECT " +
-                            "min(w.date) as DateChanged, " +
-                            "w.participantid as id " +
-                        "FROM " +
-                            arrivalAndBirthUnion+ " w " +
-                        "GROUP BY w.participantid " +
-                        ") t JOIN " +
-                            arrivalAndBirthUnion + " m " +
-                        "ON m.participantid = t.id and t.DateChanged = m.date " +
+                    "FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
                     ")";
 
 

@@ -409,18 +409,46 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (table.getColumn("mostRecentAlopeciaScore") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentAlopeciaScore", "demographicsMostRecentAlopecia");
-            col.setLabel("Alopecia Score");
-            col.setDescription("Calculates the most recent alopecia score for each animal");
-            table.addColumn(col);
+            String mostRecentAlopeciaScore = "mostRecentAlopeciaScore";
+            TableInfo alopecia = getRealTableForDataset(table, "alopecia");
+
+            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+            String theQuery  = "( " +
+                    "(SELECT " +
+                        "a.score as score " +
+                    "FROM studydataset." +alopecia.getName() + " a " +
+                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Alopecia Score");
+            newCol.setDescription("Calculates the most recent alopecia score for each animal");
+            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
+            table.addColumn(newCol);
         }
 
         if (table.getColumn("mostRecentBodyConditionScore") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentBodyConditionScore", "demographicsMostRecentBodyConditionScore");
-            col.setLabel("Most Recent BCS");
-            col.setDescription("Returns the participant's most recent body condition score");
-            table.addColumn(col);
+            String mostRecentBodyConditionScore = "mostRecentBodyConditionScore";
+            TableInfo bcs = getRealTableForDataset(table, "bcs");
+
+            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+            String theQuery  = "( " +
+                    "(SELECT " +
+                    "a.score as score " +
+                    "FROM studydataset." +bcs.getName() + " a " +
+                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mostRecentBodyConditionScore, sql, JdbcType.VARCHAR);
+            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=body_condition_scores"));
+            newCol.setLabel("Most Recent BCS");
+            newCol.setDescription("Returns the participant's most recent body condition score");
+            table.addColumn(newCol);
         }
         if (table.getColumn("necropsyAbstractNotes") == null)
         {
@@ -432,8 +460,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         if (table.getColumn("origin") == null)
         {
             String origin = "origin";
-            TableInfo birth = getRealTableForDataset(table, "Birth");
-            TableInfo arrival = getRealTableForDataset(table, "Arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
 
             // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
             String arrivalAndBirthUnion = "( " +
@@ -482,8 +510,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         {
             String geographicOrigin = "geographic_origin";
 
-            TableInfo birth = getRealTableForDataset(table, "Birth");
-            TableInfo arrival = getRealTableForDataset(table, "Arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
 
             // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
             String arrivalAndBirthUnion = "( " +
@@ -527,7 +555,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
     }
 
-    private TableInfo getRealTableForDataset(AbstractTableInfo ti, String label)
+    private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)
     {
         Container ehrContainer = EHRService.get().getEHRStudyContainer(ti.getUserSchema().getContainer());
         if (ehrContainer == null)
@@ -538,11 +566,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         if (s == null)
             return null;
 
-        ds = s.getDatasetByLabel(label);
+        ds = s.getDatasetByName(name);
         if (ds == null)
         {
             // NOTE: this seems to happen during study import on TeamCity.  It does not seem to happen during normal operation
-            _log.info("A dataset was requested that does not exist: " + label + " in container: " + ehrContainer.getPath());
+            _log.info("A dataset was requested that does not exist: " + name + " in container: " + ehrContainer.getPath());
             StringBuilder sb = new StringBuilder();
             for (Dataset d : s.getDatasets())
             {

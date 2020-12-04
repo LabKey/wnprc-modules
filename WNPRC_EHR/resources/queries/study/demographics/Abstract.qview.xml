@@ -2,7 +2,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView" >
     <columns>
         <column name="Id"/>
-        <column name="mostRecentAlopeciaScore/score">
+        <column name="mostRecentAlopeciaScore">
             <properties>
                 <property name="columnTitle" value="Most Recent Alopecia Score"/>
             </properties>
@@ -12,7 +12,7 @@
                 <property name="columnTitle" value="Room"/>
             </properties>
         </column>
-        <column name="mostRecentBodyConditionScore/score">
+        <column name="mostRecentBodyConditionScore">
             <properties>
                 <property name="columnTitle" value="Most Recent BCS"/>
             </properties>

@@ -6,7 +6,7 @@
         <transform type="RemoteQueryTransformStep" id="step1">
             
             <description>Copy weight rows to be deleted to local table</description>
-            <source remoteSource="Desktop" schemaName="study" queryName="R24WeightsDeletedSrc" timestampColumnName="modified">
+            <source remoteSource="ProductionEHRServer" schemaName="study" queryName="R24WeightsDeletedSrc" timestampColumnName="modified">
                 <sourceColumns>
                     <column>objectid</column>
                     <column>modified</column>

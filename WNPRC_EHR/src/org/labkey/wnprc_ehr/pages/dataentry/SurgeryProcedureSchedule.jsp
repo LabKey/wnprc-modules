@@ -74,6 +74,86 @@
 </style>
 
 <script type="text/javascript">
+
+    function createModalSelectDiv(label, id, selectedOption) {
+        let mainDiv = document.createElement("div");
+        mainDiv.classList.add("form-group");
+        let labelEl = document.createElement("label");
+        labelEl.htmlFor = id;
+        labelEl.classList.add("col-xs-4");
+        labelEl.classList.add("control-label");
+        labelEl.innerHTML = label;
+        let middleDiv = document.createElement("div");
+        middleDiv.classList.add("col-xs-8");
+        let inputDiv = document.createElement("div");
+        inputDiv.classList.add("input-group");
+        let selectEl = document.createElement("select");
+        selectEl.classList.add("form-control");
+        selectEl.id = id;
+        selectEl.name = id;
+
+        let keys = Object.keys(calendarEvents);
+        keys.sort();
+        for (let i = 0; i < keys.length; i++) {
+            if (calendarEvents.hasOwnProperty(keys[i])) {
+                if (calendarEvents[keys[i]].roomCalendar) {
+                    let optionEl = document.createElement("option");
+                    optionEl.value = calendarEvents[keys[i]].id;
+                    optionEl.innerHTML = calendarEvents[keys[i]].displayName;
+                    if (calendarEvents[keys[i]].id === selectedOption) {
+                        optionEl.selected = true;
+                    }
+                    selectEl.appendChild(optionEl);
+                }
+            }
+        }
+
+        inputDiv.appendChild(selectEl);
+        middleDiv.appendChild(inputDiv);
+        mainDiv.appendChild(labelEl);
+        mainDiv.appendChild(middleDiv);
+
+        return mainDiv;
+    }
+
+    function createModalDiv(label, inputType, id, value) {
+        let mainDiv = document.createElement("div");
+        mainDiv.classList.add("form-group");
+        let labelEl = document.createElement("label");
+        labelEl.htmlFor = id;
+        labelEl.classList.add("col-xs-4");
+        labelEl.classList.add("control-label");
+        labelEl.innerHTML = label;
+        let middleDiv = document.createElement("div");
+        middleDiv.classList.add("col-xs-8");
+        let inputDiv = document.createElement("div");
+        inputDiv.classList.add("input-group");
+        let inputEl = document.createElement("input");
+        inputEl.type = inputType;
+        inputEl.classList.add("form-control");
+        inputEl.id = id;
+        inputEl.name = id;
+        inputEl.value = value;
+
+        inputDiv.appendChild(inputEl);
+        middleDiv.appendChild(inputDiv);
+        mainDiv.appendChild(labelEl);
+        mainDiv.appendChild(middleDiv);
+
+        return mainDiv;
+    }
+
+    function dateToDateInputField(date) {
+        let year = date.getFullYear();
+        let month = ("0" + (date.getMonth() + 1)).slice(-2);
+        let day = ("0" + date.getDate()).slice(-2);
+        let hours = ("0" + date.getHours()).slice(-2);
+        let minutes = ("0" + date.getMinutes()).slice(-2);
+        let value = year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+
+        return value;
+    }
+
     //from https://awik.io/determine-color-bright-dark-using-javascript/
     function lightOrDark(color) {
 
@@ -204,6 +284,102 @@
             }, this)
         });
     }
+
+    function updateEvent() {
+        let mainEvent = selectedEvent;
+        if (selectedEvent.extendedProps.parentid) {
+            mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
+        }
+
+        selectedEvent = {};
+        for (let key in WebUtils.VM.taskDetails) {
+            if (key != 'animalLink') {
+                WebUtils.VM.taskDetails[key](null);
+            }
+        }
+
+        let roomIds = [];
+        if (mainEvent.extendedProps.childids) {
+            roomIds = mainEvent.extendedProps.childids;
+        }
+
+        let roomNames = [];
+        let roomEmails = [];
+        let objectIds = [];
+        let starts = [];
+        let ends = [];
+
+        let roomEvents = [];
+        for (let i = 0; i < roomIds.length; i++) {
+            roomEvents.push(calendar.getEventById(roomIds[i]));
+
+            let roomEmail = document.getElementById("modalRoomField_" + i).value;
+            let roomName = calendarEvents[roomEmail].room;
+
+            roomNames.push(roomName);
+            roomEmails.push(roomEmail);
+            objectIds.push(roomEvents[i].extendedProps.objectid);
+            starts.push(new Date(document.getElementById("modalStartField_" + i).value));
+            ends.push(new Date(document.getElementById("modalEndField_" + i).value));
+        }
+
+        let requestObj = {};
+        requestObj.calendarId = mainEvent.extendedProps.calendarId;
+        requestObj.requestId = mainEvent.extendedProps.requestid;
+        requestObj.subject = document.getElementById("modalTitleField").value;
+        requestObj.roomNames = roomNames;
+        requestObj.roomEmails = roomEmails;
+        requestObj.objectIds = objectIds;
+        requestObj.starts = starts;
+        requestObj.ends = ends;
+
+        console.log(requestObj);
+
+        LABKEY.Ajax.request({
+            url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateSurgeryProcedure", null, requestObj),
+            success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                if (response.success) {
+                    //First remove the 'old' events from the calendarEvents object as well as on fullcalendar
+                    mainEvent.remove();
+                    for (let i = 0; i < roomIds.length; i++) {
+                        let roomEventToRemove = calendar.getEventById(roomIds[i]);
+                        for (let j = calendarEvents[roomEmails[i]].events.length - 1; j >= 0; j--) {
+                            if (calendarEvents[roomEmails[i]].events[j].extendedProps.requestid === requestObj.requestId) {
+                                calendarEvents[roomEmails[i]].events.splice(j, 1);
+                                if (roomEventToRemove) {
+                                    roomEventToRemove.remove();
+                                }
+                            }
+                        }
+                    }
+
+                    //Then add the updated events back to the calendarEvents object as well as on the fullcalendar
+                    for (let cal in response.events) {
+                        if (response.events.hasOwnProperty(cal)) {
+                            for (let i = 0; i < response.events[cal].events.length; i++) {
+                                let event = response.events[cal].events[i];
+                                calendarEvents[cal].events.push(event);
+                                let eventSource = calendar.getEventSourceById(cal);
+                                calendar.addEvent(event, eventSource);
+                            }
+                        }
+                    }
+                }
+                else {
+                    alert("Houston, we have a problem: " + response.error);
+                }
+                $('#calendar-selection').unblock();
+                $('#procedure-calendar').unblock();
+            }, this),
+            failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                alert("Something went wrong: " + JSON.stringify(response));
+                $('#calendar-selection').unblock();
+                $('#procedure-calendar').unblock();
+            }, this)
+        });
+
+        return requestObj;
+    }
 </script>
 
 
@@ -291,14 +467,14 @@
 <div class="col-xs-12 col-xl-10">
     <div class="col-xs-12 col-md-4">
         <div id="calendar-selection" class="panel panel-primary">
-            <div class="panel-heading"><span>Calendar Selection</span></div>
-            <div class="panel-body">
+            <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#calendar-selection-collapsible" aria-controls="calendar-selection-collapsible" aria-expanded="true">Calendar Selection</a></div>
+            <div class="panel-body collapse in" id="calendar-selection-collapsible" aria-expanded="true">
                 <div id="calendar-checklist"></div>
             </div>
         </div>
         <div class="panel panel-primary">
-            <div class="panel-heading"><span>Surgery Details</span></div>
-            <div class="panel-body" data-bind="with: taskDetails">
+            <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#surgery-details-collapsible" aria-controls="surgery-details-collapsible" aria-expanded="true">Surgery Details</a></div>
+            <div class="panel-body collapse in" id="surgery-details-collapsible" aria-expanded="true" data-bind="with: taskDetails">
                 <%--<!-- ko ifnot: taskid() != '' -->--%>
                 <p><em>Please click on a Surgery in the Calendar to view details for that Surgery.</em></p>
                 <%--<!-- /ko -->--%>
@@ -329,7 +505,8 @@
                 <%--<!-- /ko -->--%>
                 <%--<!-- ko if: hold() -->--%>
                 <div style="text-align: right;">
-                    <button class="btn btn-danger" data-bind="click: $root.cancelEvent">Cancel</button>
+                    <a class="btn btn-default" href="#" onclick="WebUtils.VM.editEvent()" data-bind="css: { disabled: _.isBlank(taskid()) }">Edit</a>
+                    <a class="btn btn-danger" href="#" onclick="WebUtils.VM.cancelEvent()" data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>
                 </div>
                 <%--<a class="btn btn-default" href="{{$parent.cancelEvent}}"         data-bind="css: { disabled: _.isBlank(taskid()) }">Cancel</a>--%>
                 <%--<!-- /ko -->--%>
@@ -494,6 +671,24 @@
             </div>
         </div>
     </div>
+
+    <div id="eventModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 id="eventModalTitle" class="modal-title"></h4>
+                </div>
+                <div id="modalBody" class="modal-body">
+                    <form id="modalForm" class="form-horizontal" /></form>
+                    <button type="button" class="btn btn-primary" onclick="updateEvent()">Update Event</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -508,7 +703,10 @@
         calendarEl.addEventListener("click", function(clickEvent) {
             if (clickEvent.target.type !== "button" && clickEvent.target.parentElement.type !== "button") {
                 if (selectedEvent.id) {
-                    calendar.getEventById(selectedEvent.id).setExtendedProp("selected", false);
+                    let event = calendar.getEventById(selectedEvent.id);
+                    if (event) {
+                        event.setExtendedProp("selected", false);
+                    }
                 }
                 selectedEvent = {};
                 for (let key in WebUtils.VM.taskDetails) {
@@ -674,7 +872,10 @@
                             //TODO REMOVE LOGGING
                             console.log(info.event.id);
                             if (selectedEvent.id) {
-                                calendar.getEventById(selectedEvent.id).setExtendedProp("selected", false);
+                                let event = calendar.getEventById(selectedEvent.id);
+                                if (event) {
+                                    event.setExtendedProp("selected", false);
+                                }
                             }
                             info.event.setExtendedProp("selected", true);
                             selectedEvent = info.event;
@@ -688,6 +889,27 @@
                                     }
                                 });
                             }
+
+                            // $("#eventModalTitle").html(info.event.title);
+                            //
+                            // let startYear = info.event.start.getFullYear();
+                            // let startMonth = ("0" + info.event.start.getMonth() + 1).slice(-2);
+                            // let startDay = ("0" + info.event.start.getDate()).slice(-2);
+                            // let startHours = ("0" + info.event.start.getHours()).slice(-2);
+                            // let startMinutes = ("0" + info.event.start.getMinutes()).slice(-2);
+                            // let startValue = startYear + "-" + startMonth + "-" + startDay + "T" + startHours + ":" + startMinutes;
+                            //
+                            // let endYear = info.event.end.getFullYear();
+                            // let endMonth = ("0" + info.event.end.getMonth() + 1).slice(-2);
+                            // let endDay = ("0" + info.event.end.getDate()).slice(-2);
+                            // let endHours = ("0" + info.event.end.getHours()).slice(-2);
+                            // let endMinutes = ("0" + info.event.end.getMinutes()).slice(-2);
+                            // let endValue = endYear + "-" + endMonth + "-" + endDay + "T" + endHours + ":" + endMinutes;
+                            //
+                            // document.getElementById("eventModalTitleField").value = info.event.title;
+                            // document.getElementById("eventModalStartField").value = startValue;
+                            // document.getElementById("eventModalEndField").value = endValue;
+                            // $("#eventModal").modal();
                         }
                     });
 
@@ -931,6 +1153,53 @@
                         }, this)
                     });
                 }
+            },
+            editEvent: function() {
+                $("#eventModalTitle").html(selectedEvent.title);
+
+                let mainEvent = selectedEvent;
+                if (selectedEvent.extendedProps.parentid) {
+                    mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
+                }
+
+                let roomIds = [];
+                if (mainEvent.extendedProps.childids) {
+                    roomIds = mainEvent.extendedProps.childids;
+                }
+                
+                let formDiv = document.getElementById("modalForm");
+
+                while (formDiv.firstChild) {
+                    formDiv.removeChild(formDiv.lastChild);
+                }
+
+                let titleDiv = createModalDiv("Title", "text", "modalTitleField", mainEvent.title);
+                formDiv.appendChild(titleDiv);
+                formDiv.appendChild(document.createElement("hr"));
+
+                for (let i = 0; i < roomIds.length; i++) {
+                    let roomEvent = calendar.getEventById(roomIds[i]);
+
+                    let startValue = dateToDateInputField(roomEvent.start);
+                    let endValue = dateToDateInputField(roomEvent.end);
+                    let calendarId = roomEvent.extendedProps.calendarId;
+
+                    let roomDiv = createModalSelectDiv("Room", "modalRoomField_" + i, calendarId);
+                    let startDiv = createModalDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
+                    let endDiv = createModalDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
+
+                    if (i > 0) {
+                        formDiv.appendChild(document.createElement("hr"));
+                    }
+                    formDiv.appendChild(roomDiv);
+                    formDiv.appendChild(startDiv);
+                    formDiv.appendChild(endDiv);
+                }
+
+                //document.getElementById("eventModalTitleField").value = selectedEvent.title;
+                //document.getElementById("eventModalStartField").value = startValue;
+                //document.getElementById("eventModalEndField").value = endValue;
+                $("#eventModal").modal();
             },
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>

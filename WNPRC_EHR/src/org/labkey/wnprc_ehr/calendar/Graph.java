@@ -1,5 +1,7 @@
 package org.labkey.wnprc_ehr.calendar;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import com.microsoft.graph.logger.DefaultLogger;
 import com.microsoft.graph.logger.LoggerLevel;
@@ -243,13 +246,24 @@ public class Graph {
 
     // Helper methods below
 
-    public static Event buildEvent(ZonedDateTime start, ZonedDateTime end, String subject, String body, List<Attendee> attendees) {
+    public static Event buildEvent(ZonedDateTime start, ZonedDateTime end, String subject, Properties bodyProps, List<Attendee> attendees) throws IOException {
     	Event event = new Event();
-    	event.subject = subject;
+    	if (subject != null) {
+			event.subject = subject;
+		}
     	ItemBody eventBody = new ItemBody();
     	eventBody.contentType = BodyType.TEXT;
-    	eventBody.content = body;
-    	event.body = eventBody;
+
+    	if (bodyProps != null) {
+			String body;
+			try (StringWriter writer = new StringWriter()) {
+				bodyProps.store(writer, "DO NOT edit any of the below text");
+				body = writer.getBuffer().toString();
+			}
+			eventBody.content = body;
+			event.body = eventBody;
+		}
+
     	DateTimeTimeZone eventStart = new DateTimeTimeZone();
     	eventStart.dateTime = start.format(isoLocalDateTimeFormatter);
     	eventStart.timeZone = start.getZone().toString();

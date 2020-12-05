@@ -9,8 +9,10 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
@@ -20,6 +22,8 @@ import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,8 +34,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar {
@@ -121,7 +128,26 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return availability;
     }
 
-    public boolean addEvents(String calendarId, List<Map<String, Object>> roomRequests, String subject, String requestId, JSONObject response) {
+    public boolean updateEvents(String baseCalendarName, List<Event> events, JSONObject response, boolean returnEvents) throws IOException {
+        List<Event> updatedEvents = new ArrayList<>();
+        for (Event event : events) {
+            Event updatedEvent = Graph.updateEvent(getAccessToken(), event.id, event);
+            updatedEvent.calendar = new com.microsoft.graph.models.extensions.Calendar();
+            updatedEvent.calendar.id = getBaseCalendars().get(baseCalendarName);
+            updatedEvents.add(updatedEvent);
+        }
+
+        if (returnEvents) {
+            JSONObject updatedEventsJson = getJsonEventList(updatedEvents);
+            response.put("events", updatedEventsJson);
+        }
+        return true;
+    }
+
+    public boolean addEvents(String calendarId, List<Map<String, Object>> roomRequests, String subject, String requestId, JSONObject response) throws IOException {
+        if (response == null) {
+            response = new JSONObject();
+        }
         boolean allRoomsAvailable = true;
         List<Event> addedEvents = new ArrayList<>();
 
@@ -150,7 +176,12 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 ZonedDateTime endTime = ZonedDateTime.ofInstant(end.toInstant(), ZoneId.of("America/Chicago"));
 
                 List<Attendee> attendees = Graph.buildAttendeeList(roomEmailAddress);
-                Event newEvent = Graph.buildEvent(startTime, endTime, subject, requestId, attendees);
+
+                Properties props = new Properties();
+                props.setProperty("requestid", requestId);
+                props.setProperty("objectid", (String) roomRequest.get("objectid"));
+
+                Event newEvent = Graph.buildEvent(startTime, endTime, subject, props, attendees);
                 Event createdEvent = Graph.createEvent(getAccessToken(), getBaseCalendars().get(calendarId), newEvent);
                 roomRequest.put("event_id", createdEvent.id);
                 createdEvent.calendar = new com.microsoft.graph.models.extensions.Calendar();
@@ -167,16 +198,26 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         Graph.deleteEvent(getAccessToken(), eventId);
     }
 
-    private JSONObject getJsonEventList(List<Event> events) {
+    private JSONObject getJsonEventList(List<Event> events) throws IOException {
         JSONObject allJsonData = new JSONObject();
         JSONObject allJsonEvents = new JSONObject();
         Map<String, String> parentIds = new HashMap<>();
+        Map<String, JSONArray> childIds = new HashMap<>();
 
         //Get all existing rows in the study.surgery_procedure table (and lots of other auxiliary data for each row)
         //to match with the request ids of the incoming events list
+        Properties eventProps = new Properties();
+
+        Set<String> requestIds = new HashSet<>();
+        for (Event event : events) {
+            eventProps.load(new StringReader(event.body.content));
+            requestIds.add(eventProps.getProperty("requestid"));
+        }
+        SimpleFilter sf = new SimpleFilter(FieldKey.fromString("requestid"), requestIds, CompareType.IN);
+
         SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
         SimpleQuery requests = sqf.makeQuery("study", "SurgeryProcedureSchedule");
-        List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults().getJSONArray("rows"));
+        List<JSONObject> requestList = JsonUtils.getListFromJSONArray(requests.getResults(sf).getJSONArray("rows"));
 
         SimpleQuery allCalendars = sqf.makeQuery("wnprc", "procedure_calendars_and_rooms");
         List<JSONObject> calendarList = JsonUtils.getListFromJSONArray(allCalendars.getResults().getJSONArray("rows"));
@@ -187,11 +228,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             eventSource.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
             eventSource.put("textColor", getTextColor(eventSource.getString("backgroundColor")));
             eventSource.put("id", calendar.getString("calendar_id"));
+            eventSource.put("baseCalendar", "Office365".equalsIgnoreCase(calendar.getString("calendar_type")));
+            eventSource.put("roomCalendar", "Office365Resource".equalsIgnoreCase(calendar.getString("calendar_type")));
+            eventSource.put("displayName", calendar.getString("display_name"));
+            eventSource.put("room", calendar.getString("room"));
             allJsonData.put(calendar.getString("calendar_id"), eventSource);
 
-            if (allJsonEvents.get(calendar.getString("calendar_id")) == null) {
-                allJsonEvents.put(calendar.getString("calendar_id"), new JSONArray());
-            }
+            allJsonEvents.computeIfAbsent(calendar.getString("calendar_id"), key -> new JSONArray());
         }
 
         //Used to keep track of which events have already been loaded onto the base calendars, so that
@@ -200,16 +243,17 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         //into a single event for the base calendars
         Map<String, Boolean> loadedRequests = new HashMap<>();
 
-        Map<String, JSONObject> queryResults = new HashMap<>();
+        Map<String, JSONObject> surgeryRequestResults = new HashMap<>();
         for (JSONObject o : requestList) {
-            queryResults.put(o.getString("requestid"), o);
+            surgeryRequestResults.put(o.getString("requestid"), o);
         }
 
         //Load all of the start and end times, organized by request id
         //This will help with getting the right start/end times for the full combined events
         Map<String, Map<String, List<LocalDateTime>>> eventTimesByRequestId = new HashMap<>();
         for (Event event : events) {
-            String requestId = event.body.content;
+            eventProps.load(new StringReader(event.body.content));
+            String requestId = eventProps.getProperty("requestid");
             if (eventTimesByRequestId.get(requestId) == null) {
                 Map<String, List<LocalDateTime>> eventTimes = new HashMap<>();
                 eventTimes.put("startTimes", new ArrayList<>());
@@ -226,9 +270,11 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
         for (int i = 0; i < events.size(); i++) {
             Event event = events.get(i);
-            String requestId = event.body.content;
+            eventProps.load(new StringReader(event.body.content));
+            String requestId = eventProps.getProperty("requestid");
+            String objectId = eventProps.getProperty("objectid");
 
-            JSONObject surgeryInfo = queryResults.get(requestId);
+            JSONObject surgeryInfo = surgeryRequestResults.get(requestId);
             //Skip the event if there's not a corresponding record in the study.surgery_procedure dataset
             if (surgeryInfo == null) {
                 continue;
@@ -236,6 +282,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             List<Attendee> attendees = event.attendees;
 
             List<String> rooms = new ArrayList<>();
+            String baseCalendar = null;
             //Process each event multiple times. Once for each attendee, and then once to put on the base calendar
             for (int j = 0; j <= attendees.size(); j++) {
                 boolean isBaseCalendar = false;
@@ -250,6 +297,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
                 if (getBaseCalendars().get(currentCalName) != null) {
                     isBaseCalendar = true;
+                    baseCalendar = currentCalName;
                 } else {
                     rooms.add(currentCalName);
                 }
@@ -264,10 +312,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                         loadedRequests.put(requestId, true);
                         start = dtf.format(Collections.min(eventTimesByRequestId.get(requestId).get("startTimes")));
                         end = dtf.format(Collections.max(eventTimesByRequestId.get(requestId).get("endTimes")));
+
                         parentIds.put(requestId, id);
                     } else {
                         start = dtf.format(LocalDateTime.parse(event.start.dateTime));
                         end = dtf.format(LocalDateTime.parse(event.end.dateTime));
+
+                        childIds.computeIfAbsent(requestId, key -> new JSONArray()).put(id);
                     }
                     jsonEvent.put("start", start);
                     jsonEvent.put("end", end);
@@ -282,7 +333,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     if (surgeryInfo != null) {
                         extendedProps.put("lsid", surgeryInfo.get("lsid"));
                         extendedProps.put("taskid", surgeryInfo.get("taskid"));
-                        extendedProps.put("objectid", surgeryInfo.get("objectid"));
+                        extendedProps.put("objectid", isBaseCalendar ? surgeryInfo.get("objectid") : objectId);
                         extendedProps.put("requestid", surgeryInfo.get("requestid"));
                         extendedProps.put("rowid", surgeryInfo.get("rowid"));
                         extendedProps.put("priority", surgeryInfo.get("priority"));
@@ -317,8 +368,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 JSONArray roomEvents = allJsonEvents.getJSONArray(room);
                 JSONObject roomEvent = roomEvents.getJSONObject(roomEvents.length() - 1);
                 JSONObject extendedProps = roomEvent.getJSONObject("extendedProps");
-                extendedProps.put("parentid", parentIds.get(extendedProps.get("requestid")));
+                extendedProps.put("parentid", parentIds.get(requestId));
             }
+            //Populate the childIds for the baseCalendar (the ids of the events on the room calendars)
+            JSONArray calendarEvents = allJsonEvents.getJSONArray(baseCalendar);
+            JSONObject calendarEvent = calendarEvents.getJSONObject(calendarEvents.length() - 1);
+            JSONObject extendedProps = calendarEvent.getJSONObject("extendedProps");
+            extendedProps.put("childids", childIds.get(requestId));
         }
 
         for (Map.Entry<String, Object> entry : allJsonData.entrySet()) {
@@ -328,7 +384,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return allJsonData;
     }
 
-    private JSONObject getCalendarEvents(String start, String end) {
+    private JSONObject getCalendarEvents(String start, String end) throws IOException {
         JSONObject jsonEvents = getJsonEventList(getCalendarAppointments(start, end));
         return jsonEvents;
     }
@@ -350,13 +406,13 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 //        return Graph.readRoomEvents(getAccessToken(), roomId, start, end);
 //    }
 
-    public JSONObject getEventsAsJson(LocalDate startDate, LocalDate endDate) {
+    public JSONObject getEventsAsJson(LocalDate startDate, LocalDate endDate) throws IOException {
         String start = startDate != null
                 ? startDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                : LocalDate.now().minusYears(1).withDayOfMonth(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+                : LocalDate.now().minusMonths(3).withDayOfMonth(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
         String end = endDate != null
                 ? endDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                : LocalDate.now().plusYears(2).plusMonths(1).withDayOfMonth(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+                : LocalDate.now().plusYears(1).plusMonths(1).withDayOfMonth(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
         return getCalendarEvents(start, end);
     }
 }

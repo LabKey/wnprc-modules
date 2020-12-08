@@ -8,6 +8,7 @@ function onInit(event, helper){
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
+    console.log (" recordSource value " +row.recordSource);
     if (row.recordSource=="LabWaterForm"){
         var today = new Date();
         today.setHours(0,0,0,0);
@@ -21,6 +22,19 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         row.qcstate = 10;
         row.QCStateLabel = 'Scheduled'
         console.log("value of qcstate waterAmount after setting 10 " + row.qcstate);
+
+        console.log ("value of assignedTo "+ row.assignedTo)
+        if (row.assignedTo == "animalcare"){
+            let map = helper.getProperty('waterInTransaction');
+            let waters = [];
+            if (map && map[row.id]) {
+                 waters = map[row.id];
+            }
+
+            console.log ("got into if");
+           // WNPRC.Utils.getJavaHelper().checkScheduledWaterTask(waters);
+
+        }
 
     }
 

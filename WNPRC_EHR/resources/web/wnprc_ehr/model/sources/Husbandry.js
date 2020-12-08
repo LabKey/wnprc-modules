@@ -544,6 +544,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
                 }
             },
+            objectid:{
+                setInitialValue: function(v, rec) {
+                    return v || LABKEY.Utils.generateUUID();
+                }
+            },
             volume:{
                 xtype: 'numberfield',
                 header: 'Volume (mL)',

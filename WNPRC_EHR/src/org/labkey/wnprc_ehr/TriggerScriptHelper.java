@@ -839,6 +839,13 @@ public class TriggerScriptHelper {
         return null;
     }
 
+    //Method to validate if a water order is assignedTo animalcare and is added after 1:30PM
+    //This method will be called from the waterAmount triggerScript
+    public String checkUploadTime (){
+
+        return null;
+    }
+
     public void updateWaterRow(String performedby, String parentId) throws Exception{
 
         if (parentId != null)

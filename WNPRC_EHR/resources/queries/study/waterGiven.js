@@ -4,7 +4,7 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 //EHR.Server.Utils = require("ehr/utils").EHR.Server.Utils;
 
 function onInit(event, helper){
-    helper.decodeExtraContextProperty('waterInTransaction');
+   // helper.decodeExtraContextProperty('waterInTransaction');
 
     helper.setScriptOptions({
         allowDeadIds: true,
@@ -14,7 +14,7 @@ function onInit(event, helper){
         isSkipAssignmentCheck: true
     });
 
-    helper.registerRowProcessor(function(helper, row){
+    /*helper.registerRowProcessor(function(helper, row){
         if (!row)
             return;
 
@@ -51,7 +51,7 @@ function onInit(event, helper){
             }, this);
         }
         if (shouldAdd){
-            /*waterInTransaction[row.Id].push({
+            /!*waterInTransaction[row.Id].push({
                 objectid: row.objectid,
                 date: row.date,
                 qcstate: row.qcstate,
@@ -60,7 +60,7 @@ function onInit(event, helper){
                 volume: row.volume,
                 lsid: row.lsid
 
-            });*/
+            });*!/
             //console.log (i+' inside loop water in Transaction '+ waterInTransaction[i].date+ ' '+ waterInTransaction[i].Id +' '+ waterInTransaction[i].assignto);
             //console.log (waterInTransaction[i].objectid+ ' '+waterInTransaction[i].volume);
         }
@@ -69,7 +69,7 @@ function onInit(event, helper){
 
 
         helper.setProperty('waterInTransaction', waterInTransaction);
-    });
+    });*/
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow) {

@@ -71,6 +71,20 @@
         bottom: -4px;
         pointer-events: none;
     }
+
+    .placeholder-event:before {
+        border: 3px solid limegreen;
+        border-radius: 6px;
+        background: none;
+        content: "";
+        display: block;
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        pointer-events: none;
+    }
 </style>
 
 <script type="text/javascript">
@@ -291,12 +305,7 @@
             mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
         }
 
-        selectedEvent = {};
-        for (let key in WebUtils.VM.taskDetails) {
-            if (key != 'animalLink') {
-                WebUtils.VM.taskDetails[key](null);
-            }
-        }
+        clearSelectedEvent();
 
         let roomIds = [];
         if (mainEvent.extendedProps.childids) {
@@ -379,6 +388,32 @@
         });
 
         return requestObj;
+    }
+
+    function clearSelectedEvent() {
+        selectedEvent = {};
+        for (let key in WebUtils.VM.taskDetails) {
+            if (key != 'animalLink') {
+                WebUtils.VM.taskDetails[key](null);
+            }
+        }
+    }
+
+    function addToPlaceholderEvents(email, placeholderEvent) {
+        if (!placeholderEvents[email]) {
+            placeholderEvents[email] = [];
+        }
+        placeholderEvents[email].push(placeholderEvent);
+    }
+
+    function clearPlaceholderEvents() {
+        placeholderEvents = {};
+        let index = 0;
+        let oldPlaceholders = calendar.getEventById("PLACEHOLDER_" + index);
+        while (oldPlaceholders) {
+            oldPlaceholders.remove();
+            oldPlaceholders = calendar.getEventById("PLACEHOLDER_" + ++index);
+        }
     }
 </script>
 
@@ -693,9 +728,11 @@
 
 <script>
     let selectedEvent = {};
+    let placeholderEvents = {};
     let calendar = {};
     let calendarEvents = {};
     let pendingRequestsIndex = {};
+    let pendingRoomsIndex = {};
 
     (function() {
         let calendarEl = document.getElementById('calendar');
@@ -708,12 +745,7 @@
                         event.setExtendedProp("selected", false);
                     }
                 }
-                selectedEvent = {};
-                for (let key in WebUtils.VM.taskDetails) {
-                    if (key != 'animalLink') {
-                        WebUtils.VM.taskDetails[key](null);
-                    }
-                }
+                clearSelectedEvent();
             }
         }, true);
 
@@ -792,11 +824,17 @@
                             checkbox.value = '';
                             checkbox.addEventListener('change', function() {
                                 if (calendar) {
-                                    let events = calendarEvents[this.id].events;
+                                    let calId = this.id;
+                                    let events = calendarEvents[calId].events;
                                     let displayProp = this.checked ? "auto" : "none";
                                     calendar.batchRendering(() => {
                                         for (let i = 0; i < events.length; i++) {
                                             calendar.getEventById(events[i].id).setProp("display", displayProp);
+                                        }
+                                        if (placeholderEvents[calId]) {
+                                            for (let i = 0; i < placeholderEvents[calId].length; i++) {
+                                                calendar.getEventById(placeholderEvents[calId][i].id).setProp("display", displayProp);
+                                            }
                                         }
                                     });
                                 }
@@ -862,7 +900,9 @@
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
                         },
                         eventClassNames: function (arg) {
-                            if (arg.event.extendedProps.selected) {
+                            if (arg.event.id.startsWith("PLACEHOLDER")) {
+                                return ["placeholder-event"];
+                            } else if (arg.event.extendedProps.selected) {
                                 return ["event-selected"];
                             } else {
                                 return [];
@@ -948,6 +988,14 @@
         let pendingRequests = <%= pendingRequests %>;
         jQuery.each(pendingRequests, function(i, request) {
             pendingRequestsIndex[request.requestid] = request;
+        });
+
+        let pendingRooms = <%= jsonRooms %>;
+        jQuery.each(pendingRooms, function(i, request) {
+            if (!pendingRoomsIndex[request.requestid]) {
+                pendingRoomsIndex[request.requestid] = [];
+            }
+            pendingRoomsIndex[request.requestid].push(request);
         });
 
         let $scheduleForm = $('.scheduleForm');
@@ -1036,8 +1084,24 @@
                 })
             }),
             requestTableClickAction: function(row) {
+                clearPlaceholderEvents();
+
                 WebUtils.VM.requestRowInForm = row;
                 WebUtils.VM.updateForm(row.otherData.requestid);
+
+                let request = pendingRequestsIndex[row.otherData.requestid];
+                let rooms = pendingRoomsIndex[row.otherData.requestid];
+
+                for (let i = 0; i < rooms.length; i++) {
+                    let placeholderEvent = {};
+                    placeholderEvent.title = rooms[i].room + " placeholder";
+                    placeholderEvent.start = new Date(rooms[i].date);
+                    placeholderEvent.end = new Date(rooms[i].enddate);
+                    placeholderEvent.backgroundColor = rooms[i].default_bg_color;
+                    placeholderEvent.id = "PLACEHOLDER_" + i;
+                    addToPlaceholderEvents(rooms[i].email, placeholderEvent);
+                    calendar.addEvent(placeholderEvent, rooms[i].email);
+                }
             }
         });
         WebUtils.VM.taskDetails.animalLink = ko.pureComputed(function() {
@@ -1064,9 +1128,10 @@
                         observable('');
                     }
                 });
+                clearPlaceholderEvents();
             },
             updateForm: function(requestid) {
-                var request = pendingRequestsIndex[requestid];
+                let request = pendingRequestsIndex[requestid];
                 if (!_.isObject(request)) {
                     return;
                 }
@@ -1145,7 +1210,7 @@
                                 }
                                 //new code end
 
-                                selectedEvent = {};
+                                clearSelectedEvent();
                             }
                             else {
                                 alert('There was an error while trying to cancel the event.');

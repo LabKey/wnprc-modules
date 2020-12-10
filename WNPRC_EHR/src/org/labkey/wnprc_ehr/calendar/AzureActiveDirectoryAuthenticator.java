@@ -9,7 +9,9 @@ import com.microsoft.aad.msal4j.ITokenCacheAccessContext;
 import com.microsoft.aad.msal4j.MsalException;
 import com.microsoft.aad.msal4j.PublicClientApplication;
 import com.microsoft.aad.msal4j.SilentParameters;
+import org.apache.log4j.Logger;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.wnprc_ehr.WNPRC_EHRController;
 
 import java.net.MalformedURLException;
 import java.util.Set;
@@ -19,6 +21,7 @@ import java.util.function.Consumer;
 
 public class AzureActiveDirectoryAuthenticator {
 
+	private static Logger _log = Logger.getLogger(WNPRC_EHRController.class);
     private String applicationId;
     private String upn;
     private String authority;
@@ -81,6 +84,7 @@ public class AzureActiveDirectoryAuthenticator {
 		// the URL the user logs into and the device code to enter
 		Consumer<DeviceCode> deviceCodeConsumer = (DeviceCode deviceCode) -> {
 			// Print the login information to the console
+			_log.warn(deviceCode.message());
 			System.out.println(deviceCode.message());
 		};
 

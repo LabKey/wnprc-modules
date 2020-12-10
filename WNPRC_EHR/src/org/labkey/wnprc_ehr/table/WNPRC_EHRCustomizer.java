@@ -412,7 +412,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String mostRecentAlopeciaScore = "mostRecentAlopeciaScore";
             TableInfo alopecia = getRealTableForDataset(table, "alopecia");
 
-            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
             String theQuery  = "( " +
                     "(SELECT " +
                         "a.score as score " +
@@ -434,7 +433,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String mostRecentBodyConditionScore = "mostRecentBodyConditionScore";
             TableInfo bcs = getRealTableForDataset(table, "bcs");
 
-            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
             String theQuery  = "( " +
                     "(SELECT " +
                     "a.score as score " +
@@ -485,7 +483,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     ")";
 
             String theQuery = "(" +
-                    "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
+                    "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date DESC LIMIT 1" +
                     ")";
 
 

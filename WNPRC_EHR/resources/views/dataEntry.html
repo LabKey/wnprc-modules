@@ -684,11 +684,11 @@
                             title:   'Request Surgery or Procedure',
                             queries: ['surgery_procedure']
                         },
-                        {
-                            url:     makeExt4DataEntryURL("SurgeryProcedureMultipleRequest"),
-                            title:   'Request Multiple Surgeries or Procedures',
-                            queries: ['surgery_procedure']
-                        },
+                        // { TODO add back in later
+                        //     url:     makeExt4DataEntryURL("SurgeryProcedureMultipleRequest"),
+                        //     title:   'Request Multiple Surgeries or Procedures',
+                        //     queries: ['surgery_procedure']
+                        // },
                         {
                             url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'SurgeryProcedureSchedule', ctx['EHRStudyContainer']),
                             title:   'Schedule Surgeries and Procedures',

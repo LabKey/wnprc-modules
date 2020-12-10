@@ -46,9 +46,8 @@ import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.view.template.ClientDependency;
-import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshRunner;
-import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshScheduler;
 import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshRunnable;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
 import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
@@ -323,10 +322,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         //Schedule jobs to refresh the access tokens for all Microsoft Azure accounts
         AzureAccessTokenRefreshSettings azureAccessTokenRefreshSettings = new AzureAccessTokenRefreshSettings();
         List<String> azureNames = azureAccessTokenRefreshSettings.getNames();
-        AzureAccessTokenRefreshRunner azureAccessTokenRefreshRunner = new AzureAccessTokenRefreshRunner();
         for (String name : azureNames) {
-            AzureAccessTokenRefreshScheduler.get().schedule(name);
-            azureAccessTokenRefreshRunner.doTokenRefresh(name);
+            Thread refreshThread = new Thread(new AzureAccessTokenRefreshRunnable(name));
+            refreshThread.setDaemon(true);
+            refreshThread.start();
         }
     }
 

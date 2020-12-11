@@ -461,7 +461,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo arrival = getRealTableForDataset(table, "arrival");
 
-            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+            // Here we want a union of the birth and arrival tables to get the origin of the animal
             String arrivalAndBirthUnion = "( " +
                     "SELECT " +
                         "a.source as source, " +
@@ -549,6 +549,48 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             newCol.setURL(StringExpressionFactory.createURL(url));
             newCol.setLabel("Geographic Origin");
             newCol.setDescription("This column is the geographic origin");
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("ancestry") == null)
+        {
+            String ancestry = "ancestry";
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            // Here we want a union of the birth and arrival tables to get the ancestry of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.ancestry as ancestry, " +
+                        "a.date as date," +
+                        "a.participantid as participantid " +
+                    "FROM studydataset." + arrival.getName() + " a " +
+
+                    "WHERE a.ancestry is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.ancestry as ancestry," +
+                        "b.date as date," +
+                        "b.participantid as participantid " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.ancestry is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT ancestry FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, ancestry, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Ancestry");
+            newCol.setDescription("Returns the animal's ancestry.");
+            UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
+            newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "ancestry", "rowid", "value"));
+            newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${ancestry}"));
             table.addColumn(newCol);
         }
     }

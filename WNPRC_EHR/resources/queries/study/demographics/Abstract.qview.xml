@@ -70,11 +70,7 @@
             </properties>
         </column>
         <column name="geographic_origin"/>
-        <column name="necropsyAbstractNotes/remark">
-            <properties>
-                <property name="columnTitle" value="Ancestry"/>
-            </properties>
-        </column>
+        <column name="ancestry"/>
         <column name="medical"/>
         <column name="Id/MostRecentArrival/MostRecentArrival">
             <properties>

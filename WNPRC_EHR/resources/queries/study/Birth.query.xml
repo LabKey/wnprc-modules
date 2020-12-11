@@ -105,6 +105,15 @@
                             <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
+                    <column columnName="ancestry">
+                        <columnTitle>Ancestry</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>ancestry</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                            <fkDisplayColumnName>value</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="sire">
                         <columnTitle>Sire</columnTitle>
                         <!--<fk>-->

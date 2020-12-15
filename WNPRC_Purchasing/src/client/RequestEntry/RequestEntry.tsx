@@ -14,23 +14,34 @@
  * limitations under the License.
  */
 import React from 'react'
-import {
-    Alert,
-} from "@labkey/components";
+import {RequestOrderPanel} from "../components/RequestOrderPanel";
+import {RequestOrderModel} from "../model";
 
 type State = {
+    model: RequestOrderModel
     hasRequestEntryPermission?: boolean,
     isLoadingModel: boolean,
     message?: string,
 }
 
-export class App extends React.Component<{}, State> {
+type Props = {
+    model?: RequestOrderModel
+}
 
-    constructor(props) {
+export class App extends React.PureComponent<Props, State> {
+
+    constructor(props)
+    {
         super(props);
+
+        this.state = {
+            isLoadingModel: true,
+            model: RequestOrderModel.create({})
+        };
     }
 
     render() {
-        return <Alert>{'Work in progress...'}</Alert>
+        const { model } = this.state;
+        return <RequestOrderPanel model={model}/>
     }
 }

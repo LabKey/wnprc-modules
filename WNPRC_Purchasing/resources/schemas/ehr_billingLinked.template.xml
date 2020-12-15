@@ -1,0 +1,8 @@
+<!--Linked Schema named ehr_billingLinked with this template to be created in the Purchasing folder targeting Finance folder-->
+
+<templateSchema xmlns="http://labkey.org/data/xml/externalSchema"
+                sourceSchemaName="ehr_billing">
+    <tables>
+        <tableName>aliases</tableName>
+    </tables>
+</templateSchema>

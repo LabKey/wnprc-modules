@@ -4,7 +4,13 @@
             <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB">
                 <tableTitle>Purchase Requests</tableTitle>
                 <columns>
-                    <column columnName="account"/>
+                    <column columnName="account">
+                        <fk>
+                            <fkDbSchema>ehr_billingLinked</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="requestStatus"/>
                     <column columnName="requestDate"/>
                     <column columnName="requester"/>

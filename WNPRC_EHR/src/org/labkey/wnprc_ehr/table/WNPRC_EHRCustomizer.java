@@ -593,6 +593,46 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${ancestry}"));
             table.addColumn(newCol);
         }
+        if (table.getColumn("birth") == null)
+        {
+            String birthColumn = "birth";
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            // Here we want a union of the birth and arrival tables to get the ancestry of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.birth as birth, " +
+                        "a.participantid as participantid, " +
+                        "a.modified as modified " +
+                    "FROM studydataset." + arrival.getName() + " a " +
+
+                    "WHERE a.birth is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.date as birth," +
+                        "b.participantid as participantid, " +
+                        "b.modified as modified " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.date is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT birth FROM " + arrivalAndBirthUnion + " w ORDER BY w.modified DESC LIMIT 1" +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, birthColumn, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Birth");
+            newCol.setDescription("Returns the animal's birth date.");
+            //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=study&query.queryName=Birth&query.Id~eq={id}"));
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)

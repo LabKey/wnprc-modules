@@ -623,10 +623,10 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @ActionNames("getChanges")
     @CSRF(CSRF.Method.POST)
-    public class GetChangeLists extends ReadOnlyApiAction<Void>
+    public class GetChangeLists extends ReadOnlyApiAction<Object>
     {
         @Override
-        public ApiResponse execute(Void form, BindException errors) throws Exception
+        public ApiResponse execute(Object form, BindException errors) throws Exception
         {
             Map<String, Object> props = new HashMap<>();
 
@@ -668,10 +668,10 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @RequiresLogin
     @ActionNames("getColonyPopulationPerMonth")
-    public class GetPopulationPerMonth extends ReadOnlyApiAction<Void>
+    public class GetPopulationPerMonth extends ReadOnlyApiAction<Object>
     {
         @Override
-        public ApiResponse execute(Void form, BindException errors)
+        public ApiResponse execute(Object form, BindException errors)
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
             Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
@@ -1143,10 +1143,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UploadBCReports")
-    public class uploadBCReportAction extends MutatingApiAction<Void>
+    public class uploadBCReportAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors) throws NotFoundException
+        public Object execute(Object form, BindException errors) throws NotFoundException
         {
             BCReportManager manager = new BCReportManager(getUser(), getContainer());
             manager.uploadReports();
@@ -1176,10 +1176,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("ScheduleBCReports")
-    public class ScheduleBCReportsAction extends MutatingApiAction<Void>
+    public class ScheduleBCReportsAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors)
+        public Object execute(Object form, BindException errors)
         {
             BCReportRunner.schedule();
             return new JSONObject();
@@ -1188,10 +1188,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UnscheduleBCReports")
-    public class UnscheduleBCReportsAction extends MutatingApiAction<Void>
+    public class UnscheduleBCReportsAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors)
+        public Object execute(Object form, BindException errors)
         {
             BCReportRunner.unschedule();
             return new JSONObject();
@@ -1205,7 +1205,7 @@ public class WNPRC_EHRController extends SpringActionController
     @SuppressWarnings("unused")
     @RequiresLogin
     @ActionNames("manageWnprcTask")
-    public class ManageWnprcTaskAction extends SimpleRedirectAction<java.lang.Void>
+    public class ManageWnprcTaskAction extends SimpleRedirectAction<Object>
     {
         // these constants are here to hopefully prevent us from mistyping the capitalization
         // later in the method. also, they should be different enough to avoid one-off typos
@@ -1214,7 +1214,7 @@ public class WNPRC_EHRController extends SpringActionController
         private static final String LOWERCASE_FORMTYPE = "formtype";
 
         @Override
-        public @Nullable URLHelper getRedirectURL(Void aVoid)
+        public @Nullable URLHelper getRedirectURL(Object aVoid)
         {
             ActionURL oldUrl = getViewContext().getActionURL();
             ActionURL newUrl;
@@ -1280,10 +1280,10 @@ public class WNPRC_EHRController extends SpringActionController
      */
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetDataAction extends MutatingApiAction<java.lang.Void>
+    public static class ImportDatasetDataAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(java.lang.Void aVoid, BindException errors)
+        public Object execute(Object aVoid, BindException errors)
         {
             // TODO: create, parse, and load some test data
             return new ApiSimpleResponse("success", true);
@@ -1292,10 +1292,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @SuppressWarnings("unused")
     @RequiresPermission(AdminPermission.class)
-    public static class ImportDatasetMetadataAction extends MutatingApiAction<java.lang.Void>
+    public static class ImportDatasetMetadataAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(java.lang.Void aVoid, BindException errors) throws Exception
+        public Object execute(Object aVoid, BindException errors) throws Exception
         {
             Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
             assert module != null;

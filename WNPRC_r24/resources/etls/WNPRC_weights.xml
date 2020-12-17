@@ -6,7 +6,11 @@
         <transform id="step1" type="org.labkey.di.pipeline.TransformTask">
             <description>Copy to target</description>
             <source schemaName="wnprc_r24" queryName="WeightStaging"/>
-            <destination schemaName="study" queryName="weight" targetOption="merge"/>
+            <destination schemaName="study" queryName="weight" targetOption="merge">
+                <columnTransforms>
+                    <column source="animalId" target="id"/>
+                </columnTransforms>
+            </destination>
         </transform>
     </transforms>
 

@@ -5,7 +5,24 @@
     <transforms>
         <transform type="RemoteQueryTransformStep" id="step1">
             <description>Copy to target</description>
-            <source remoteSource="ProductionEHRServer" schemaName="study" queryName="R24DemographicsSrc" />
+            <source remoteSource="ProductionEHRServer" schemaName="study" queryName="R24DemographicsSrc">
+                <sourceColumns>
+                    <column>animalId</column>
+                    <column>primateId</column>
+                    <column>birth</column>
+                    <column>death</column>
+                    <column>status</column>
+                    <column>objectid</column>
+                    <column>species</column>
+                    <column>sourceColony</column>
+                    <column>currentColony</column>
+                    <column>gender</column>
+                    <column>dam</column>
+                    <column>sire</column>
+                    <column>modified</column>
+                    <column>date</column>
+                </sourceColumns>
+            </source>
             <destination schemaName="study" queryName="Demographics" targetOption="merge">
                 <columnTransforms>
                     <column source="animalId" target="Id"/>

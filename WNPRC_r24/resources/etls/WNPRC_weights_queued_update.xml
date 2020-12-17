@@ -17,7 +17,7 @@
         <transform type="RemoteQueryTransformStep" id="step2">
 
             <description>Copy weights to local table</description>
-            <source remoteSource="Desktop" schemaName="study" queryName="R24WeightsSrc" timestampColumnName="modified">
+            <source remoteSource="ProductionEHRServer" schemaName="study" queryName="R24WeightsSrc" timestampColumnName="modified">
                 <sourceColumns>
                     <column>AnimalId</column>
                     <column>primateId</column>

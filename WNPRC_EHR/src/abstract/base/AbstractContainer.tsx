@@ -21,7 +21,7 @@ const AbstractContainer: React.FunctionComponent<any> = (props) => {
     let config = {
       schemaName: "study",
       queryName: "demographics",
-      viewName: "Abstract",
+      viewName: "AbstractSingleAnimal",
       sort: "-date",
       filterArray: [Filter.create("Id", props.id, Filter.Types.EQUAL)],
       requiredVersion: 17.1,

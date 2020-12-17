@@ -47,6 +47,14 @@ let constructArrayForTable = (animalInfo) => {
     let firstItemVal = animalInfo["rows"][0][firstKey];
     let secondItemVal = animalInfo["rows"][0][secondKey];
 
+    //cover the case where value could be an array
+    if (Array.isArray(firstItemVal) && firstItemVal.length > 0){
+      firstItemVal = firstItemVal[0];
+    }
+    if (Array.isArray(secondItemVal) && secondItemVal.length > 0){
+      secondItemVal = secondItemVal[0];
+    }
+
     let items = [];
     items[0] = {
       'label': firstItemMetadata["caption"],

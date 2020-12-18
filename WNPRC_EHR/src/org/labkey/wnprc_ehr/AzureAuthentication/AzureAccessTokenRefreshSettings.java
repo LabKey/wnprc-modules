@@ -1,8 +1,8 @@
 package org.labkey.wnprc_ehr.AzureAuthentication;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
-
 public class AzureAccessTokenRefreshSettings {
 
     private static Map<String, Map<String, Object>> _settings = null;
@@ -38,7 +36,7 @@ public class AzureAccessTokenRefreshSettings {
         }
     }
 
-    private void refreshSettingsMap() {
+    public static void refreshSettingsMap() {
         _settings = new TreeMap<>();
 
         DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
@@ -60,8 +58,8 @@ public class AzureAccessTokenRefreshSettings {
         TableSelector ts = new TableSelector(ti, colMap.values(), null, null);
         Map<String, Object>[] azureAccounts = ts.getMapArray();
 
-        for (int i = 0; i < azureAccounts.length; i++) {
-            _settings.put((String) azureAccounts[i].get("name"), azureAccounts[i]);
+        for (Map<String, Object> account : azureAccounts) {
+            _settings.put((String) account.get("name"), account);
         }
     }
 
@@ -77,38 +75,9 @@ public class AzureAccessTokenRefreshSettings {
         TableInfo ti = QueryService.get().getUserSchema(user, ContainerManager.getForPath("/WNPRC"), "wnprc").getTable("azure_accounts");
         QueryUpdateService service = ti.getUpdateService();
 
-        List<Map<String, Object>> updatedSettings = service.updateRows(user, getContainer(), newSettings, newSettings, null, null);
+        List<Map<String, Object>> updatedSettings = service.updateRows(user, ContainerManager.getForPath("/WNPRC"), newSettings, newSettings, null, null);
         if (updatedSettings.size() != newSettings.size()) {
             throw new QueryUpdateServiceException("There was an error updating the azure_accounts table.");
-        }
-
-        for (Map<String, Object> accountSettings : newSettings) {
-            if (StringUtils.isNotBlank((String) accountSettings.get("display_name"))) {
-                _settings.get(accountSettings.get("name")).put("display_name", accountSettings.get("display_name"));
-            }
-            if (StringUtils.isNotBlank((String) accountSettings.get("account"))) {
-                _settings.get(accountSettings.get("name")).put("account", accountSettings.get("account"));
-            }
-            if (accountSettings.get("enabled") != null) {
-                _settings.get(accountSettings.get("name")).put("enabled", accountSettings.get("enabled"));
-            }
-            if (accountSettings.get("refresh_interval") != null && (Integer) accountSettings.get("refresh_interval") >= 0) {
-                _settings.get(accountSettings.get("name")).put("refresh_interval", accountSettings.get("refresh_interval"));
-            }
-            if (StringUtils.isNotBlank((String) accountSettings.get("application_id"))) {
-                _settings.get(accountSettings.get("name")).put("application_id", accountSettings.get("application_id"));
-            }
-            if (StringUtils.isNotBlank((String) accountSettings.get("authority"))) {
-                _settings.get(accountSettings.get("name")).put("authority", accountSettings.get("authority"));
-            }
-            if (StringUtils.isNotBlank((String) accountSettings.get("upn"))) {
-                _settings.get(accountSettings.get("name")).put("upn", accountSettings.get("upn"));
-            }
-            if (StringUtils.isNotBlank((String) accountSettings.get("scopes"))) {
-                _settings.get(accountSettings.get("name")).put("scopes", accountSettings.get("scopes"));
-            }
-
-            AzureAccessTokenRefreshScheduler.get().onSettingsChange((String) accountSettings.get("name"));
         }
 
         return true;

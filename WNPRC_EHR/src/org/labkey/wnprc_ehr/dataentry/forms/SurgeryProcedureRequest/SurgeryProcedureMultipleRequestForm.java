@@ -39,7 +39,7 @@ public class SurgeryProcedureMultipleRequestForm extends SimpleRequestForm
         buttons.addAll(super.getButtonConfigs());
 
         buttons.remove("REQUEST");
-        buttons.add("WNPRC_REQUEST");
+        buttons.add("ROOM_SCHEDULING_REQUEST");
 
         return buttons;
     }

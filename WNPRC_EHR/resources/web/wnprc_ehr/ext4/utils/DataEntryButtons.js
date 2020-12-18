@@ -605,9 +605,17 @@
      * This is a wrapper on the Request button to allow .
      */
     var RequestButtonName = 'WNPRC_REQUEST';
-    let requestBtn = getBtn("REQUEST");
+    registerBtn(RequestButtonName, _.extend(getBtn("REQUEST"), {
+        disableOn: 'ERROR'
+    }));
+
+    /*
+     * This is a wrapper on the WNPRC Request button to allow for verifying that there are rooms present in the request.
+     */
+    let roomRequestButtonName = 'ROOM_SCHEDULING_REQUEST';
+    let requestBtn = getBtn("WNPRC_REQUEST");
     let defaultHandler = requestBtn.handler;
-    registerBtn(RequestButtonName, _.extend(requestBtn, {
+    registerBtn(roomRequestButtonName, _.extend(requestBtn, {
         disableOn: 'ERROR',
         handler: function(btn) {
             //let store = Ext4.StoreMgr.get('wnprc||procedure_scheduled_rooms');
@@ -618,7 +626,7 @@
                     if (store.getCount() > 0) {
                         defaultHandler(btn);
                     } else {
-                        Ext4.Msg.alert("ERROR", "The Surgery/Procedure request must contain at least 1 room.");
+                        Ext4.Msg.alert("ERROR", "This request must contain at least 1 room.");
                     }
                     break;
                 }

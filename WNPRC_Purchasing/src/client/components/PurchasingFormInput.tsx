@@ -14,7 +14,7 @@ export class PurchasingFormInput extends React.PureComponent<PurchasingFormInput
         return (
             <Row>
                 <Col xs={12} md={7} style={{marginTop:'20px', marginLeft:'20px', marginBottom:'10px'}}>
-                    <Col xs={3} lg={2}>
+                    <Col xs={4} lg={3}>
                         <label>{label}</label>
                         {required ? ' *' : ''}
                     </Col>

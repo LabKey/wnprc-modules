@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { FC }  from 'react';
 import { Form, Panel } from 'react-bootstrap';
-import {RequestOrderModel} from '../model';
-import {PurchasingFormInput} from "./PurchasingFormInput";
+import { RequestOrderModel } from '../model';
+import { PurchasingFormInput } from "./PurchasingFormInput";
+import { Query } from "@labkey/api";
 
 interface Props {
     model: RequestOrderModel;
@@ -16,6 +17,7 @@ export class RequestOrderPanel extends React.PureComponent<Props> {
     onInputChange = evt => {
         const id = evt.target.id;
         let value = evt.target.value;
+        this.setState({value: value});
     };
 
     render() {
@@ -48,23 +50,70 @@ interface InputProps {
     onChange: (evt) => void;
 }
 
-function AccountInput(props: InputProps) {
-    return (
-        <div>
-            <PurchasingFormInput
-                label="Account to charge"
-                required={true}
-            >
+interface InputState {
+    value: any
+    dropDownVals?: any
+}
 
-            {/*    TODO: change textarea to a lookup dropdown*/}
-            <textarea
-                style={{resize:'none', width: '400px', height: '30px'}}
-                value={props.model.account || ''}
-                onChange={props.onChange}
-            />
-            </PurchasingFormInput>
-        </div>
-    );
+export class AccountInput extends React.PureComponent<InputProps, InputState> {
+
+    constructor(props) {
+        super(props);
+        this.state= {
+            value:'',
+            dropDownVals:[]
+        }
+        this.getDropdownOptions('ehr_billingLinked', 'aliases', 'alias');
+    }
+
+    onChange  = evt => {
+        const id = evt.target.id;
+        let value = evt.target.value;
+        this.setState({value: value});
+    };
+
+    async getDropdownOptions(schemaName: string, queryName: string, colName: string) {
+        await Query.selectRows({
+            schemaName: schemaName,
+            queryName: queryName,
+            columns: colName,
+            // filterArray: [
+            //     Filter.create()
+            // ]
+            scope: this,
+            success: function (results) {
+                if (results && results.rows)
+                {
+                    const x = []
+                    Object.assign(x, results.rows.map((row, index) => {
+                        return (
+                            <option key={index + "-" + row[colName]} value={row[colName]}>{row[colName]}</option>
+                        );
+                    }));
+                    this.setState({
+                        dropDownVals: x
+                    })
+                }
+            }
+        })
+    };
+
+    render() {
+        const { dropDownVals } = this.state;
+        return (
+            <div>
+                <PurchasingFormInput
+                    label="Account to charge"
+                    required={true}
+                >
+                    <select style={{resize: 'none', width: '400px', height: '30px'}} value={this.state.value}
+                            onChange={this.onChange}>
+                        {dropDownVals}
+                    </select>
+                </PurchasingFormInput>
+            </div>
+        );
+    }
 }
 
 function VendorInput(props: InputProps) {
@@ -90,7 +139,7 @@ function BusinessPurposeInput(props: InputProps) {
     return (
         <div>
             <PurchasingFormInput
-                label="Business Purpose"
+                label="Business purpose"
                 required={true}
             >
                 <textarea
@@ -107,7 +156,7 @@ function SpecialInstructionInput(props: InputProps) {
     return (
         <div>
             <PurchasingFormInput
-                label="Special Instructions"
+                label="Special instructions"
                 required={false}
             >
                 <textarea
@@ -124,7 +173,7 @@ function ShippingDestinationInput(props: InputProps) {
     return (
         <div>
             <PurchasingFormInput
-                label="Shipping Destination"
+                label="Shipping destination"
                 required={true}
             >
 
@@ -143,7 +192,7 @@ function DeliveryAttentionInput(props: InputProps) {
     return (
         <div>
             <PurchasingFormInput
-                label="Delivery Attention To"
+                label="Delivery attention to"
                 required={false}
             >
                 <textarea

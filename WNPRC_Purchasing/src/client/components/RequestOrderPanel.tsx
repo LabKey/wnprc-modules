@@ -1,6 +1,6 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from 'react';
-import { Form, Panel } from 'react-bootstrap';
-import { RequestOrderModel } from '../model';
+import { Form, Panel, Modal, Button } from 'react-bootstrap';
+import { RequestOrderModel, VendorModel} from '../model';
 import { PurchasingFormInput } from "./PurchasingFormInput";
 import { Query } from "@labkey/api";
 import { Draft, produce } from 'immer';
@@ -30,11 +30,19 @@ export const RequestOrderPanel : FC<Props> = (props) => {
             <Panel.Heading>Request Order</Panel.Heading>
             <Form>
                 <AccountInput value={model.account} onChange={onValueChange}/>
-                <VendorInput value={model.vendor} onChange={onInputChange}/>
-                <BusinessPurposeInput value={model.purpose} onChange={onInputChange}/>
-                <SpecialInstructionInput value={model.comments} onChange={onInputChange}/>
-                <ShippingDestinationInput value={model.shippingDestination} onChange={onInputChange}/>
-                <DeliveryAttentionInput value={model.deliveryAttentionTo} onChange={onInputChange}/>
+                {
+                    model.account === "Other" &&
+                    <AccountOtherInput value={model.accountOther} onChange={onValueChange}/>
+                }
+                <VendorInput value={model.vendorName} onChange={onValueChange}/>
+                {/*{*/}
+                {/*    model.vendorName === "Other" &&*/}
+                {/*    <VendorPopupModal></VendorPopupModal>*/}
+                {/*}*/}
+                <BusinessPurposeInput value={model.purpose} onChange={onValueChange}/>
+                <SpecialInstructionInput value={model.comments} onChange={onValueChange}/>
+                <ShippingDestinationInput value={model.shippingDestination} onChange={onValueChange}/>
+                <DeliveryAttentionInput value={model.deliveryAttentionTo} onChange={onValueChange}/>
             </Form>
         </Panel>
     );
@@ -68,11 +76,17 @@ function getDropdownOptions(schemaName: string, queryName: string, colName: stri
     })
 }
 
-const createOptions = (rows: Array<InputRow>, colName: string) => {
+const createOptions = (rows: Array<InputRow>, colName: string, addOtherOption:boolean) => {
     if (!rows)
         return undefined;
 
-    return rows.map((row, index) => {
+    let options = [];
+    Object.assign(options, rows);
+    if (addOtherOption) {
+        options[rows.length] = {[colName]: 'Other'};
+    }
+
+    return options.map((row, index) => {
         return (
             <option key={index + "-" + row[colName]} value={row[colName]}>{row[colName]}</option>
         );
@@ -90,7 +104,7 @@ export const AccountInput : FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'alias'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'alias', true), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('account', evt.target.value);
@@ -102,10 +116,41 @@ export const AccountInput : FC<InputProps> = (props) => {
                 label="Account to charge"
                 required={true}
             >
-                <select style={{resize: 'none', width: '400px', height: '30px'}} value={value}
-                        onChange={onValueChange}>
-                    {options}
+                <select
+                    style={{resize: 'none', width: '400px', height: '30px'}}
+                    value={value}
+                    onChange={onValueChange}
+                    placeholder="Please provide the purpose for this purchasing request (Required)"
+                >
+                {options}
                 </select>
+            </PurchasingFormInput>
+        </div>
+    );
+}
+
+export const AccountOtherInput : FC<InputProps> = (props) => {
+
+    const { onChange, value } = props;
+
+    const onTextChange = useCallback((evt) => {
+        onChange('accountOther', evt.target.value);
+    },[]);
+
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Account & Principal Investigator"
+                required={true}
+            >
+                <textarea
+                    style={{resize: 'none', width: '400px', height: '60px'}}
+                    value={value}
+                    onChange={onTextChange}
+                    id="account-and-pi-id"
+                    placeholder="You selected 'Other' account, please provide account and principal investigator (Required)"
+                >
+                </textarea>
             </PurchasingFormInput>
         </div>
     );
@@ -122,7 +167,7 @@ const VendorInput : FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'vendorName'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'vendorName', true), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('vendorName', evt.target.value);
@@ -142,6 +187,50 @@ const VendorInput : FC<InputProps> = (props) => {
         </div>
     );
 }
+
+// interface VendorInputProps {
+//     vendorInfo: VendorModel;
+//     onChange: (vendorInfo: VendorModel) => void;
+// }
+
+// const VendorPopupModal: FC<VendorInputProps> = (props) => {
+//     const { vendorInfo } = props;
+//
+//     const [show, setShow] = useState(false);
+//
+//     const handleClose = () => setShow(false);
+//     const handleShow = () => setShow(true);
+//     const inputHandler =(evt) => {
+//         evt.target.value
+//     }
+//
+//     return (
+//         <>
+//             <Button
+//                 style={{marginLeft: '310px'}}
+//                 variant="primary" onClick={handleShow}>
+//                 Add Vendor
+//             </Button>
+//             <Modal show={show} onHide={handleClose} backdrop="static">
+//                 <Modal.Header closeButton>
+//                     <Modal.Title>Add new vendor</Modal.Title>
+//                 </Modal.Header>
+//                 <Modal.Body>
+//                     <input type='text' value='this.state.username' id='username' onChange='inputHandler' />
+//
+//                 </Modal.Body>
+//                 <Modal.Footer>
+//                     <Button variant="secondary" onClick={handleClose}>
+//                         Cancel
+//                     </Button>
+//                     <Button variant="primary" onClick={handleClose}>
+//                         Apply
+//                     </Button>
+//                 </Modal.Footer>
+//             </Modal>
+//         </>
+//     );
+// }
 
 const BusinessPurposeInput: FC<InputProps> = (props) => {
 
@@ -205,7 +294,7 @@ const ShippingDestinationInput: FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress', false), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('streetAddress', evt.target.value);

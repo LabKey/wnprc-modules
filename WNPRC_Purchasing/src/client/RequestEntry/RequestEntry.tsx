@@ -17,16 +17,9 @@ import React, {FC, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
 import {RequestOrderModel} from "../model";
 
-type Props = {
-    requestOrderModel?: RequestOrderModel,
-    requestOrderModelChange ?: (requestOrderModel: RequestOrderModel) => void
-}
-
-// export const App : FC<Props> = (props) => {
 export const App : FC = () => {
 
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
-    // const [requestOrderModelChange, setRequestOrderModelChange] = useState<RequestOrderModel>(RequestOrderModel.create({}));
     const [hasRequestEntryPermission, setHasRequestEntryPermission] = useState<boolean>();
     const [isLoadingModel, setLoadingModel] = useState<boolean>(true);
     const [message, setMessage] = useState<string>();
@@ -37,13 +30,8 @@ export const App : FC = () => {
     }, [requestOrderModel]);
 
     const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {
-        setRequestOrderModel(requestOrderModel);
+        setRequestOrderModel(model);
     }, [requestOrderModel]);
-
-
-    // requestOrderModelChange((model: RequestOrderModel) => {
-    //     setModel(model)
-    // });
 
     return <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
 }

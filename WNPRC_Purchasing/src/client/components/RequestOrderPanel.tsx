@@ -30,11 +30,11 @@ export const RequestOrderPanel : FC<Props> = (props) => {
             <Panel.Heading>Request Order</Panel.Heading>
             <Form>
                 <AccountInput value={model.account} onChange={onValueChange}/>
-                {/*<VendorInput model={model} onChange={this.onInputChange}/>*/}
-                {/*<BusinessPurposeInput model={model} onChange={this.onInputChange}/>*/}
-                {/*<SpecialInstructionInput model={model} onChange={this.onInputChange}/>*/}
-                {/*<ShippingDestinationInput model={model} onChange={this.onInputChange}/>*/}
-                {/*<DeliveryAttentionInput model={model} onChange={this.onInputChange}/>*/}
+                <VendorInput value={model.vendor} onChange={onInputChange}/>
+                <BusinessPurposeInput value={model.purpose} onChange={onInputChange}/>
+                <SpecialInstructionInput value={model.comments} onChange={onInputChange}/>
+                <ShippingDestinationInput value={model.shippingDestination} onChange={onInputChange}/>
+                <DeliveryAttentionInput value={model.deliveryAttentionTo} onChange={onInputChange}/>
             </Form>
         </Panel>
     );
@@ -93,8 +93,7 @@ export const AccountInput : FC<InputProps> = (props) => {
     const options = useMemo(() => createOptions(dropDownVals, 'alias'), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
-        let value = evt.target.value;
-        onChange('account', value);
+        onChange('account', evt.target.value);
     },[]);
 
     return (
@@ -112,91 +111,140 @@ export const AccountInput : FC<InputProps> = (props) => {
     );
 }
 
-// function VendorInput(props: InputProps) {
-//     return (
-//         <div>
-//             <PurchasingFormInput
-//                 label="Vendor"
-//                 required={true}
-//             >
-//
-//                 {/*    TODO: change textarea to a lookup dropdown*/}
-//                 <textarea
-//                     style={{resize:'none', width: '400px', height: '30px'}}
-//                     value={props.model.vendor || ''}
-//                     onChange={props.onChange}
-//                 />
-//             </PurchasingFormInput>
-//         </div>
-//     );
-// }
-//
-// function BusinessPurposeInput(props: InputProps) {
-//     return (
-//         <div>
-//             <PurchasingFormInput
-//                 label="Business purpose"
-//                 required={true}
-//             >
-//                 <textarea
-//                     style={{resize:'none', width: '400px', height: '90px'}}
-//                     value={props.model.purpose || ''}
-//                     onChange={props.onChange}
-//                 />
-//             </PurchasingFormInput>
-//         </div>
-//     );
-// }
-//
-// function SpecialInstructionInput(props: InputProps) {
-//     return (
-//         <div>
-//             <PurchasingFormInput
-//                 label="Special instructions"
-//                 required={false}
-//             >
-//                 <textarea
-//                     style={{resize:'none', width: '400px', height: '90px'}}
-//                     value={props.model.comments || ''}
-//                     onChange={props.onChange}
-//                 />
-//             </PurchasingFormInput>
-//         </div>
-//     );
-// }
-//
-// function ShippingDestinationInput(props: InputProps) {
-//     return (
-//         <div>
-//             <PurchasingFormInput
-//                 label="Shipping destination"
-//                 required={true}
-//             >
-//
-//                 {/*    TODO: change textarea to a lookup dropdown*/}
-//                 <textarea
-//                     style={{resize:'none', width: '400px', height: '30px'}}
-//                     value={props.model.shippingDestination || ''}
-//                     onChange={props.onChange}
-//                 />
-//             </PurchasingFormInput>
-//         </div>
-//     );
-// }
-//
-// function DeliveryAttentionInput(props: InputProps) {
-//     return (
-//         <div>
-//             <PurchasingFormInput
-//                 label="Delivery attention to"
-//                 required={false}
-//             >
-//                 <textarea
-//                     style={{resize:'none', width: '400px', height: '30px'}}
-//                     value={props.model.deliveryAttentionTo || ''}
-//                     onChange={props.onChange}
-//                 />
-//             </PurchasingFormInput>
-//         </div>
-//     );
-// }
+const VendorInput : FC<InputProps> = (props) => {
+
+    const { onChange, value } = props;
+    const [dropDownVals, setDropDownVals] = useState<Array<any>>();
+
+    useEffect(() => {
+        getDropdownOptions('ehr_purchasing', 'vendor', 'vendorName').then(vals => {
+            setDropDownVals(vals)
+        });
+    }, []);
+
+    const options = useMemo(() => createOptions(dropDownVals, 'vendorName'), [dropDownVals]);
+
+    const onValueChange = useCallback((evt) => {
+        onChange('vendorName', evt.target.value);
+    },[]);
+
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Vendor"
+                required={true}
+            >
+                <select style={{resize: 'none', width: '400px', height: '30px'}} value={value}
+                        onChange={onValueChange}>
+                    {options}
+                </select>
+            </PurchasingFormInput>
+        </div>
+    );
+}
+
+const BusinessPurposeInput: FC<InputProps> = (props) => {
+
+    const { onChange, value } = props;
+
+    const onTextChange = useCallback((evt) => {
+        onChange('purpose', evt.target.value);
+    },[]);
+
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Business purpose"
+                required={true}
+            >
+                <textarea
+                    style={{resize:'none', width: '400px', height: '90px'}}
+                    value={value}
+                    onChange={onTextChange}
+                    id="business-purpose-id"
+                    placeholder="Please provide the purpose for this purchasing request (Required)"
+                />
+            </PurchasingFormInput>
+        </div>
+    );
+}
+
+const SpecialInstructionInput: FC<InputProps> = (props) => {
+
+    const { onChange, value } = props;
+    const onTextChange = useCallback((evt) => {
+        onChange('comments', evt.target.value);
+    },[]);
+
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Special instructions"
+                required={false}
+            >
+                <textarea
+                    style={{resize:'none', width: '400px', height: '90px'}}
+                    value={value}
+                    onChange={onTextChange}
+                    id="special-instructions-id"
+                    placeholder="Please add any special instructions or comments (Optional)"
+                />
+            </PurchasingFormInput>
+        </div>
+    );
+}
+
+const ShippingDestinationInput: FC<InputProps> = (props) => {
+
+    const { onChange, value } = props;
+    const [dropDownVals, setDropDownVals] = useState<Array<any>>();
+
+    useEffect(() => {
+        getDropdownOptions('ehr_purchasing', 'shippingInfo', 'streetAddress').then(vals => {
+            setDropDownVals(vals)
+        });
+    }, []);
+
+    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress'), [dropDownVals]);
+
+    const onValueChange = useCallback((evt) => {
+        onChange('streetAddress', evt.target.value);
+    },[]);
+
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Shipping destination"
+                required={true}
+            >
+                <select style={{resize: 'none', width: '400px', height: '30px'}} value={value}
+                        onChange={onValueChange}>
+                    {options}
+                </select>
+            </PurchasingFormInput>
+        </div>
+    );
+}
+
+const DeliveryAttentionInput: FC<InputProps> = (props) => {
+    const { onChange, value } = props;
+    const onTextChange = useCallback((evt) => {
+        onChange('comments', evt.target.value);
+    },[]);
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Delivery attention to"
+                required={false}
+            >
+                <textarea
+                    style={{resize:'none', width: '400px', height: '60px'}}
+                    value={value}
+                    onChange={onTextChange}
+                    id="delivery-attn-id"
+                    placeholder="Name of the person package delivery should be addressed to (Required)"
+                />
+            </PurchasingFormInput>
+        </div>
+    );
+}

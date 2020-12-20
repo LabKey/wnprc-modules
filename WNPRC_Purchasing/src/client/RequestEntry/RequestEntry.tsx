@@ -13,35 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react'
+import React, {FC, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
 import {RequestOrderModel} from "../model";
 
-type State = {
-    model: RequestOrderModel
-    hasRequestEntryPermission?: boolean,
-    isLoadingModel: boolean,
-    message?: string,
-}
-
 type Props = {
-    model?: RequestOrderModel
+    requestOrderModel?: RequestOrderModel,
+    requestOrderModelChange ?: (requestOrderModel: RequestOrderModel) => void
 }
 
-export class App extends React.PureComponent<Props, State> {
+// export const App : FC<Props> = (props) => {
+export const App : FC = () => {
 
-    constructor(props)
-    {
-        super(props);
+    const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
+    // const [requestOrderModelChange, setRequestOrderModelChange] = useState<RequestOrderModel>(RequestOrderModel.create({}));
+    const [hasRequestEntryPermission, setHasRequestEntryPermission] = useState<boolean>();
+    const [isLoadingModel, setLoadingModel] = useState<boolean>(true);
+    const [message, setMessage] = useState<string>();
+    const [onChange, setOnChange] = useState<any>();
 
-        this.state = {
-            isLoadingModel: true,
-            model: RequestOrderModel.create({})
-        };
-    }
+    useEffect(() => {
+        setRequestOrderModel(requestOrderModel);
+    }, [requestOrderModel]);
 
-    render() {
-        const { model } = this.state;
-        return <RequestOrderPanel model={model}/>
-    }
+    const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {
+        setRequestOrderModel(requestOrderModel);
+    }, [requestOrderModel]);
+
+
+    // requestOrderModelChange((model: RequestOrderModel) => {
+    //     setModel(model)
+    // });
+
+    return <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
 }

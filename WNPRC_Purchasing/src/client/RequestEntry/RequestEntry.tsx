@@ -15,11 +15,13 @@
  */
 import React, {FC, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
-import {RequestOrderModel} from "../model";
+import {LineItemModel, RequestOrderModel} from "../model";
+import {LineItemsPanel} from "../components/LineItemsPanel";
 
 export const App : FC = () => {
 
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
+    const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create({})]);
     const [hasRequestEntryPermission, setHasRequestEntryPermission] = useState<boolean>();
     const [isLoadingModel, setLoadingModel] = useState<boolean>(true);
     const [message, setMessage] = useState<string>();
@@ -27,11 +29,21 @@ export const App : FC = () => {
 
     useEffect(() => {
         setRequestOrderModel(requestOrderModel);
-    }, [requestOrderModel]);
+        setLineItems(lineItems);
+    }, [requestOrderModel, lineItems]);
 
     const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {
         setRequestOrderModel(model);
     }, [requestOrderModel]);
 
-    return <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
+    const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
+        // setRequestOrderModel(model);
+    }, [lineItems]);
+
+    return (
+        <>
+            <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
+            <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems}/>
+        </>
+    )
 }

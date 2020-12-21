@@ -2,8 +2,9 @@ import React, {FC, useCallback, useEffect, useMemo, useState} from 'react';
 import { Form, Panel, Modal, Button } from 'react-bootstrap';
 import { RequestOrderModel, VendorModel} from '../model';
 import { PurchasingFormInput } from "./PurchasingFormInput";
-import { Query } from "@labkey/api";
 import { Draft, produce } from 'immer';
+import { getDropdownOptions } from "../action";
+import { createOptions } from "./Utils";
 
 interface Props {
     model: RequestOrderModel;
@@ -48,49 +49,9 @@ export const RequestOrderPanel : FC<Props> = (props) => {
     );
 }
 
-interface InputRow {
-    [key: string]: string
-}
-
 interface InputProps {
     value: any;
     onChange: (colName, value) => void;
-}
-
-function getDropdownOptions(schemaName: string, queryName: string, colName: string) : Promise<any> {
-    return new Promise((resolve, reject) => {
-        Query.selectRows({
-            schemaName: schemaName,
-            queryName: queryName,
-            columns: colName,
-            // filterArray: [
-            //     Filter.create()
-            // ]
-            success: function (results) {
-                if (results && results.rows)
-                {
-                    resolve(results.rows);
-                }
-            }
-        })
-    })
-}
-
-const createOptions = (rows: Array<InputRow>, colName: string, addOtherOption:boolean) => {
-    if (!rows)
-        return undefined;
-
-    let options = [];
-    Object.assign(options, rows);
-    if (addOtherOption) {
-        options[rows.length] = {[colName]: 'Other'};
-    }
-
-    return options.map((row, index) => {
-        return (
-            <option key={index + "-" + row[colName]} value={row[colName]}>{row[colName]}</option>
-        );
-    });
 }
 
 export const AccountInput : FC<InputProps> = (props) => {
@@ -122,6 +83,7 @@ export const AccountInput : FC<InputProps> = (props) => {
                     onChange={onValueChange}
                     placeholder="Please provide the purpose for this purchasing request (Required)"
                 >
+                <option hidden value="">Select</option>
                 {options}
                 </select>
             </PurchasingFormInput>
@@ -181,6 +143,7 @@ const VendorInput : FC<InputProps> = (props) => {
             >
                 <select style={{resize: 'none', width: '400px', height: '30px'}} value={value}
                         onChange={onValueChange}>
+                    <option hidden value="">Select</option>
                     {options}
                 </select>
             </PurchasingFormInput>
@@ -308,6 +271,7 @@ const ShippingDestinationInput: FC<InputProps> = (props) => {
             >
                 <select style={{resize: 'none', width: '400px', height: '30px'}} value={value}
                         onChange={onValueChange}>
+                    <option hidden value="">Select</option>
                     {options}
                 </select>
             </PurchasingFormInput>

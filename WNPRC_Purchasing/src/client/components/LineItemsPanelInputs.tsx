@@ -13,7 +13,7 @@ export const DescriptionInput: FC<InputProps> = (props) => {
 
     const onTextChange = useCallback((evt) => {
         onChange('item', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <textarea
@@ -41,7 +41,7 @@ export const UnitInput : FC<InputProps> = (props) => {
 
     const onValueChange = useCallback((evt) => {
         onChange('unit', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <select style={{resize: 'none', position:'absolute', marginLeft:'45px', width: '100px', height: '30px'}} value={value}
@@ -63,7 +63,7 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
     const onTextChange = useCallback((evt) => {
         onChange('unitPrice', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <input
@@ -71,6 +71,7 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
             value={value}
             onChange={onTextChange}
             id="unit-price-id"
+            type='number'
         />
     );
 }
@@ -81,7 +82,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 
     const onTextChange = useCallback((evt) => {
         onChange('quantity', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <input
@@ -89,6 +90,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
             value={value}
             onChange={onTextChange}
             id="unit-quantity-id"
+            type='number'
         />
     );
 }
@@ -102,7 +104,7 @@ interface SubtotalInputProps {
 export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
 
     const { onChange, unitPrice, quantity } = props;
-    const [subtotal, setSubtotal] = useState<number>();
+    const [subtotal, setSubtotal] = useState<number>(0);
 
     useEffect(() => {
         if (unitPrice  && quantity) {
@@ -110,18 +112,17 @@ export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
         }
     },[]);
 
-    // const onTextChange = useCallback((evt) => {
-    //     onChange('subTotal', evt.target.value);
-    // },[]);
+    useMemo(() => {
+        setSubtotal(unitPrice * quantity);
+    }, [unitPrice, quantity]);
 
     return (
         <input
             style={{resize: 'none', position:'absolute', marginLeft:'510px', width: '120px', height: '30px'}}
             value={subtotal}
             disabled={true}
-            placeholder='price x quantity'
-            // onChange={onTextChange}
             id="item-subtotal-id"
+            type='number'
         />
     );
 }

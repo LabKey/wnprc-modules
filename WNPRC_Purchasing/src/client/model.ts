@@ -24,7 +24,7 @@ export class RequestOrderModel {
         if (defaultSettings) {
             return new RequestOrderModel({ ...defaultSettings });
         } else {
-            return new RequestOrderModel({ ...raw.options });
+            return new RequestOrderModel({ ...raw });
         }
     }
 }
@@ -55,7 +55,7 @@ export class VendorModel {
         if (defaultSettings) {
             return new VendorModel({ ...defaultSettings });
         } else {
-            return new VendorModel({ ...raw.options });
+            return new VendorModel({ ...raw });
         }
     }
 }
@@ -83,7 +83,7 @@ export class LineItemModel {
         if (defaultSettings) {
             return new LineItemModel({ ...defaultSettings });
         } else {
-            return new LineItemModel({ ...raw.options });
+            return new LineItemModel({ ...raw });
         }
     }
 }

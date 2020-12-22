@@ -7,25 +7,24 @@ import { LineItemRow } from "./LineItemRow";
 interface Props {
     lineItems: Array<LineItemModel>;
     onChange: (lineItems: Array<LineItemModel>) => void;
-    rowIndex: number;
 }
 
 export const LineItemsPanel : FC<Props> = (props) => {
 
-    const { lineItems, onChange, rowIndex } = props;
+    const { lineItems, onChange } = props;
 
     const lineItemRowChange = useCallback((lineItem) => {
 
-        const updatedLineItems = produce(lineItems, (draft: Draft<Props>) => {
-            draft.lineItems[lineItem.rowIndex] = lineItem;
+        const updatedLineItems = produce(lineItems, (draft: Draft<LineItemModel>) => {
+            draft[lineItem.rowIndex] = lineItem;
         });
 
         onChange(updatedLineItems);
-    },[]);
+    },[lineItems, onChange]);
 
     const onButtonClick = () => {
         const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
-            draft.push(LineItemModel.create({rowIndex: rowIndex}))
+            draft.push(LineItemModel.create({rowIndex: lineItems.length}))
         });
         onChange(updatedLineItems);
     }
@@ -50,7 +49,7 @@ export const LineItemsPanel : FC<Props> = (props) => {
             <div>
                 {
                     lineItems.map(lineItem => {
-                        return <LineItemRow model={lineItem} onInputChange={lineItemRowChange}/>
+                        return <LineItemRow key={"line-item-" + lineItem.rowIndex} model={lineItem} onInputChange={lineItemRowChange}/>
                     })
                 }
             </div>

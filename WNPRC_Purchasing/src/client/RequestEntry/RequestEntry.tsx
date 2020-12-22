@@ -17,6 +17,7 @@ import React, {FC, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
 import {LineItemModel, RequestOrderModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
+import {Draft, produce} from "immer";
 
 export const App : FC = () => {
 
@@ -31,21 +32,20 @@ export const App : FC = () => {
     useEffect(() => {
         setRequestOrderModel(requestOrderModel);
         setLineItems(lineItems);
-    }, [requestOrderModel, lineItems]);
+    }, []);
 
     const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {
         setRequestOrderModel(model);
-    }, [requestOrderModel]);
+    }, []);
 
     const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
         setLineItems(lineItemArray);
-        setLineItemRowIndex(lineItemArray.length-1)
-    }, [lineItems]);
+    }, []);
 
     return (
         <>
             <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
-            <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems} rowIndex={lineItemRowIndex}/>
+            <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems}/>
         </>
     )
 }

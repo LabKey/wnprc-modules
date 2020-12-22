@@ -21,7 +21,8 @@ import {LineItemsPanel} from "../components/LineItemsPanel";
 export const App : FC = () => {
 
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
-    const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create({})]);
+    const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create({rowIndex: 0})]);
+    const [lineItemRowIndex, setLineItemRowIndex] = useState<number>(0);
     const [hasRequestEntryPermission, setHasRequestEntryPermission] = useState<boolean>();
     const [isLoadingModel, setLoadingModel] = useState<boolean>(true);
     const [message, setMessage] = useState<string>();
@@ -37,13 +38,14 @@ export const App : FC = () => {
     }, [requestOrderModel]);
 
     const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
-        // setRequestOrderModel(model);
+        setLineItems(lineItemArray);
+        setLineItemRowIndex(lineItemArray.length-1)
     }, [lineItems]);
 
     return (
         <>
             <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
-            <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems}/>
+            <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems} rowIndex={lineItemRowIndex}/>
         </>
     )
 }

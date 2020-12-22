@@ -15,10 +15,15 @@ export const RequestOrderPanel : FC<Props> = (props) => {
 
     const { model, onInputChange } = props;
 
+    const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
+
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
             draft[colName] = value;
         });
+        if (updatedModel.account === 'Other') {
+            setShowOtherAcct(true);
+        }
         onInputChange(updatedModel);
     },[]);
 
@@ -32,7 +37,7 @@ export const RequestOrderPanel : FC<Props> = (props) => {
             <Form>
                 <AccountInput value={model.account} onChange={onValueChange}/>
                 {
-                    model.account === "Other" &&
+                    (showOtherAcct || model.account === "Other") &&
                     <AccountOtherInput value={model.accountOther} onChange={onValueChange}/>
                 }
                 <VendorInput value={model.vendorName} onChange={onValueChange}/>

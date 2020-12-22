@@ -1,6 +1,6 @@
 import {LineItemModel, RequestOrderModel} from "../model";
 import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
-import { Panel, Col, Row, Button, Checkbox } from 'react-bootstrap';
+import { Panel, Col, Row, Button } from 'react-bootstrap';
 import {Draft, produce} from "immer";
 import {getDropdownOptions} from "../action";
 import {createOptions} from "./Utils";
@@ -8,15 +8,27 @@ import {createOptions} from "./Utils";
 interface Props {
     lineItems: Array<LineItemModel>;
     onChange: (lineItems: Array<LineItemModel>) => void;
+    rowIndex: number;
 }
 
 export const LineItemsPanel : FC<Props> = (props) => {
 
-    const { lineItems, onChange } = props;
+    const { lineItems, onChange, rowIndex } = props;
 
+    const lineItemRowChange = useCallback((lineItem) => {
 
-    const addRowHandler = (evt) => {
+        const updatedLineItems = produce(lineItems, (draft: Draft<Props>) => {
+            draft.lineItems[lineItem.rowIndex] = lineItem;
+        });
 
+        onChange(updatedLineItems);
+    },[]);
+
+    const onButtonClick = () => {
+        const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
+            draft.push(LineItemModel.create({rowIndex: rowIndex}))
+        });
+        onChange(updatedLineItems);
     }
 
     return(
@@ -26,15 +38,32 @@ export const LineItemsPanel : FC<Props> = (props) => {
             onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
         >
             <Panel.Heading>Specify Items</Panel.Heading>
-            <Row style={{marginTop:'15px', marginBottom:'15px', marginLeft:'15px'}}>
-                <Col xs={4}>Part no./Item description *</Col>
-                <Col xs={1}>Unit *</Col>
-                <Col lg={1}>Unit price *</Col>
-                <Col lg={1}>Quantity *</Col>
-                <Col lg={1}>Subtotal</Col>
-                <Col lg={2}>Controlled substance</Col>
-            </Row>
-            <LineItemRow model={LineItemModel.create({})} onInputChange={addRowHandler}/>
+            <div>
+                <Row style={{marginTop:'15px', marginBottom:'15px', marginLeft:'15px'}}>
+                    <Col xs={4}>Part no./Item description *</Col>
+                    <Col xs={1}>Unit *</Col>
+                    <Col lg={1}>Unit price *</Col>
+                    <Col lg={1}>Quantity *</Col>
+                    <Col lg={1}>Subtotal</Col>
+                    <Col lg={2}>Controlled substance</Col>
+                </Row>
+            </div>
+            <div>
+                {
+                    lineItems.map(lineItem => {
+                        return <LineItemRow model={lineItem} onInputChange={lineItemRowChange}/>
+                    })
+                }
+            </div>
+            <div>
+                <Button
+                    size="sm"
+                    style={{marginLeft:'15px', marginBottom:'15px'}}
+                    onClick={onButtonClick}
+                >
+                    Add another item
+                </Button>
+            </div>
         </Panel>
     );
 }
@@ -47,8 +76,6 @@ interface LineItemProps {
 export const LineItemRow: FC<LineItemProps> = (props) => {
 
     const { model, onInputChange } = props;
-    const [showRow, setShowRow] = useState<boolean>(false);
-
 
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
@@ -56,13 +83,6 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
         });
         onInputChange(updatedModel);
     },[]);
-
-    const addRowHandler = () => {
-
-    }
-    const onButtonClick = () => {
-        setShowRow(true);
-    }
 
     return(
         <>
@@ -76,16 +96,6 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                     <ControlledSubstance value={model.controlledSubstance} onChange={onValueChange}></ControlledSubstance>
                 </Col>
             </Row>
-            {
-                showRow ? <LineItemRow model={LineItemModel.create({})} onInputChange={addRowHandler}/> : null
-            }
-            <Button
-                size="sm"
-                style={{marginLeft:'15px', marginBottom:'15px'}}
-                onClick={onButtonClick}
-            >
-                Add another item
-            </Button>
         </>
     )
 }

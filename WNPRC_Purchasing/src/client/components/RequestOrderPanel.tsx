@@ -24,7 +24,7 @@ export const RequestOrderPanel : FC<Props> = (props) => {
             setShowOtherAcct(true);
         }
         onInputChange(updatedModel);
-    },[]);
+    },[model, onInputChange]);
 
     return (
         <Panel

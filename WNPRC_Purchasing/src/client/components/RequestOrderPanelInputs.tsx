@@ -23,7 +23,7 @@ export const AccountInput : FC<InputProps> = (props) => {
 
     const onValueChange = useCallback((evt) => {
         onChange('account', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <div>
@@ -51,7 +51,7 @@ export const AccountOtherInput : FC<InputProps> = (props) => {
 
     const onTextChange = useCallback((evt) => {
         onChange('accountOther', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <div>
@@ -87,7 +87,7 @@ export const VendorInput : FC<InputProps> = (props) => {
 
     const onValueChange = useCallback((evt) => {
         onChange('vendorName', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <div>
@@ -155,7 +155,7 @@ export const BusinessPurposeInput: FC<InputProps> = (props) => {
 
     const onTextChange = useCallback((evt) => {
         onChange('purpose', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <div>
@@ -180,7 +180,7 @@ export const SpecialInstructionInput: FC<InputProps> = (props) => {
     const { onChange, value } = props;
     const onTextChange = useCallback((evt) => {
         onChange('comments', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <div>
@@ -215,7 +215,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
 
     const onValueChange = useCallback((evt) => {
         onChange('streetAddress', evt.target.value);
-    },[]);
+    },[onChange]);
 
     return (
         <div>
@@ -237,7 +237,7 @@ export const DeliveryAttentionInput: FC<InputProps> = (props) => {
     const { onChange, value } = props;
     const onTextChange = useCallback((evt) => {
         onChange('comments', evt.target.value);
-    },[]);
+    },[onChange]);
     return (
         <div>
             <PurchasingFormInput

@@ -1,19 +1,22 @@
 import React from 'react';
-import { Col, Row } from 'react-bootstrap';
+import {Col, Row} from 'react-bootstrap';
 
-interface PurchasingFormInputProps {
+interface PurchasingFormInputProps
+{
     label: string;
     required?: boolean;
     colSize?: number;
 }
 
-export class PurchasingFormInput extends React.PureComponent<PurchasingFormInputProps, any> {
-    render() {
-        const { label, required, children } = this.props;
+export class PurchasingFormInput extends React.PureComponent<PurchasingFormInputProps, any>
+{
+    render()
+    {
+        const {label, required, children} = this.props;
 
         return (
             <Row>
-                <Col xs={12} md={7} style={{marginTop:'20px', marginLeft:'20px', marginBottom:'10px'}}>
+                <Col xs={12} md={7} style={{marginTop: '20px', marginLeft: '20px', marginBottom: '10px'}}>
                     <Col xs={4} lg={3}>
                         <label>{label}</label>
                         {required ? ' *' : ''}

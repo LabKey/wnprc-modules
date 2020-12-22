@@ -1,16 +1,17 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { getDropdownOptions } from "../action";
-import { createOptions } from "./Utils";
-import { PurchasingFormInput } from "./PurchasingFormInput";
+import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
+import {getDropdownOptions} from "../action";
+import {createOptions} from "./Utils";
+import {PurchasingFormInput} from "./PurchasingFormInput";
 
-interface InputProps {
+interface InputProps
+{
     value: any;
     onChange: (colName, value) => void;
 }
 
-export const AccountInput : FC<InputProps> = (props) => {
+export const AccountInput: FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const {onChange, value} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
@@ -23,7 +24,7 @@ export const AccountInput : FC<InputProps> = (props) => {
 
     const onValueChange = useCallback((evt) => {
         onChange('account', evt.target.value);
-    },[onChange]);
+    }, [onChange]);
 
     return (
         <div>
@@ -45,13 +46,13 @@ export const AccountInput : FC<InputProps> = (props) => {
     );
 }
 
-export const AccountOtherInput : FC<InputProps> = (props) => {
+export const AccountOtherInput: FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const {onChange, value} = props;
 
     const onTextChange = useCallback((evt) => {
         onChange('accountOther', evt.target.value);
-    },[onChange]);
+    }, [onChange]);
 
     return (
         <div>
@@ -72,9 +73,9 @@ export const AccountOtherInput : FC<InputProps> = (props) => {
     );
 }
 
-export const VendorInput : FC<InputProps> = (props) => {
+export const VendorInput: FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const {onChange, value} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
@@ -87,7 +88,7 @@ export const VendorInput : FC<InputProps> = (props) => {
 
     const onValueChange = useCallback((evt) => {
         onChange('vendorName', evt.target.value);
-    },[onChange]);
+    }, [onChange]);
 
     return (
         <div>
@@ -151,11 +152,11 @@ export const VendorInput : FC<InputProps> = (props) => {
 
 export const BusinessPurposeInput: FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const {onChange, value} = props;
 
     const onTextChange = useCallback((evt) => {
         onChange('purpose', evt.target.value);
-    },[onChange]);
+    }, [onChange]);
 
     return (
         <div>
@@ -164,7 +165,7 @@ export const BusinessPurposeInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    style={{resize:'none', width: '400px', height: '90px'}}
+                    style={{resize: 'none', width: '400px', height: '90px'}}
                     value={value}
                     onChange={onTextChange}
                     id="business-purpose-id"
@@ -177,10 +178,10 @@ export const BusinessPurposeInput: FC<InputProps> = (props) => {
 
 export const SpecialInstructionInput: FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const {onChange, value} = props;
     const onTextChange = useCallback((evt) => {
         onChange('comments', evt.target.value);
-    },[onChange]);
+    }, [onChange]);
 
     return (
         <div>
@@ -189,7 +190,7 @@ export const SpecialInstructionInput: FC<InputProps> = (props) => {
                 required={false}
             >
                 <textarea
-                    style={{resize:'none', width: '400px', height: '90px'}}
+                    style={{resize: 'none', width: '400px', height: '90px'}}
                     value={value}
                     onChange={onTextChange}
                     id="special-instructions-id"
@@ -202,7 +203,7 @@ export const SpecialInstructionInput: FC<InputProps> = (props) => {
 
 export const ShippingDestinationInput: FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const {onChange, value} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
@@ -215,7 +216,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
 
     const onValueChange = useCallback((evt) => {
         onChange('streetAddress', evt.target.value);
-    },[onChange]);
+    }, [onChange]);
 
     return (
         <div>
@@ -234,18 +235,18 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
 }
 
 export const DeliveryAttentionInput: FC<InputProps> = (props) => {
-    const { onChange, value } = props;
+    const {onChange, value} = props;
     const onTextChange = useCallback((evt) => {
         onChange('comments', evt.target.value);
-    },[onChange]);
+    }, [onChange]);
     return (
         <div>
             <PurchasingFormInput
                 label="Delivery attention to"
-                required={false}
+                required={true}
             >
                 <textarea
-                    style={{resize:'none', width: '400px', height: '60px'}}
+                    style={{resize: 'none', width: '400px', height: '60px'}}
                     value={value}
                     onChange={onTextChange}
                     id="delivery-attn-id"

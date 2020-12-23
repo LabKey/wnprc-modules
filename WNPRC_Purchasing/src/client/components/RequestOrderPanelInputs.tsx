@@ -20,7 +20,7 @@ export const AccountInput: FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'alias', true), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'alias', true, false), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('account', evt.target.value);
@@ -84,7 +84,7 @@ export const VendorInput: FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'vendorName', true), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'vendorName', true, false), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('vendorName', evt.target.value);
@@ -209,12 +209,12 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getDropdownOptions('ehr_purchasing', 'shippingInfo', 'streetAddress').then(vals => {
+        getDropdownOptions('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias').then(vals => {
             setDropDownVals(vals)
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress', false), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress', false, true, 'shippingAlias'), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('shippingDestination', evt.target.value);

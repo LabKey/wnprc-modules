@@ -4,7 +4,7 @@ interface InputRow {
     [key: string]: string
 }
 
-export const createOptions = (rows: Array<InputRow>, colName: string, addOtherOption:boolean) => {
+export const createOptions = (rows: Array<InputRow>, colName: string, addOtherOption: boolean, hasFormatColumn: boolean, formatColName ?: string) => {
     if (!rows)
         return undefined;
 
@@ -17,7 +17,11 @@ export const createOptions = (rows: Array<InputRow>, colName: string, addOtherOp
 
     return options.map((row, index) => {
         return (
-            <option key={index + "-" + row[colName]} value={row[colName]}>{row[colName]}</option>
+            <option key={index + "-" + row[colName]} value={row[colName]}>
+                {
+                    row[colName] + (hasFormatColumn ? " (" + row[formatColName] + ")" : '')
+                }
+            </option>
         );
     });
 }

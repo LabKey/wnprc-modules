@@ -1,11 +1,11 @@
 import {Query} from "@labkey/api";
 
-export function getDropdownOptions(schemaName: string, queryName: string, colName: string) : Promise<any> {
+export function getDropdownOptions(schemaName: string, queryName: string, colNames: string) : Promise<any> {
     return new Promise((resolve, reject) => {
         Query.selectRows({
             schemaName: schemaName,
             queryName: queryName,
-            columns: colName,
+            columns: colNames,
             // filterArray: [
             //     Filter.create()
             // ]

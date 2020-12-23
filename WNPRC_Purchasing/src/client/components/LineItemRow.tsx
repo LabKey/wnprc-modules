@@ -1,9 +1,10 @@
 import {LineItemModel} from "../model";
-import React, {FC, useCallback, useMemo} from "react";
+import React, {FC, useCallback} from "react";
 import {Col, Row} from 'react-bootstrap';
 import {Draft, produce} from "immer";
 import {faTimesCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import '../RequestEntry/RequestEntry.scss';
 import {
     ControlledSubstance,
     DescriptionInput,
@@ -17,12 +18,13 @@ interface LineItemProps
 {
     model: LineItemModel;
     onInputChange: (model: LineItemModel) => void;
-    onDelete: (index: number) => void;
+    onDelete: (rowIndex: number) => void;
+    rowIndex: number;
 }
 
 export const LineItemRow: FC<LineItemProps> = (props) => {
 
-    const {model, onInputChange, onDelete} = props;
+    const {model, onInputChange, onDelete, rowIndex} = props;
 
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<LineItemModel>) => {
@@ -31,13 +33,13 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
         onInputChange(updatedModel);
     }, [model, onInputChange]);
 
-    const onDeleteRow = useMemo((): any => {
-        onDelete(model.rowIndex);
-    }, [onDelete]);
+    const onDeleteRow = useCallback((): any => {
+        onDelete(rowIndex);
+    }, [onDelete, rowIndex]);
 
     return (
         <>
-            <Row key={'line-item-row-' + model.rowIndex} style={{
+            <Row key={'line-item-row-' + rowIndex} style={{
                 marginTop: '20px',
                 marginBottom: '15px',
                 marginLeft: '15px',
@@ -55,10 +57,10 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                 <Col xs={2}>
                     <span
                         style={{marginLeft:'100%'}}
-                      id={'delete-line-item-row-' + model.rowIndex} title={'Delete row'} className="field-icon"
+                      id={'delete-line-item-row-' + rowIndex} title={'Delete row'} className="field-icon"
                       onClick={onDeleteRow}
                     >
-                        <FontAwesomeIcon icon={faTimesCircle} color={'gray'}/>
+                        <FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle} color={'gray'}/>
                     </span>
                 </Col>
             </Row>

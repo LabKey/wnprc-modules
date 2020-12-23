@@ -25,15 +25,16 @@ export const LineItemsPanel: FC<Props> = (props) => {
         onChange(updatedLineItems);
     }, [lineItems, onChange]);
 
-    const deleteRow = useCallback((index) => {
-        const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
-            const x = index;
+    const onDeleteRow = useCallback((indexToDelete) => {
+
+        const updatedLineItems = produce(lineItems, (draft: Draft<LineItemModel>) => {
+            delete draft[indexToDelete];
         });
         onChange(updatedLineItems);
 
     }, [lineItems, onChange]);
 
-    const onButtonClick = () => {
+    const onClickAddRow = () => {
         const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
             draft.push(LineItemModel.create({rowIndex: lineItems.length}))
         });
@@ -60,15 +61,15 @@ export const LineItemsPanel: FC<Props> = (props) => {
             </div>
             <div>
                 {
-                    lineItems.map(lineItem => {
-                        return <LineItemRow key={"line-item-" + lineItem.rowIndex} model={lineItem}
-                                            onInputChange={lineItemRowChange} onDelete={deleteRow}/>
+                    lineItems.map((lineItem, idx) => {
+                        return <LineItemRow rowIndex={idx} key={"line-item-" + idx} model={lineItem}
+                                            onInputChange={lineItemRowChange} onDelete={onDeleteRow}/>
                     })
                 }
             </div>
             <div style={{height: '30px'}}>
                <span style={{marginLeft: '20px', marginBottom: '15px'}} id='add-line-item-row' title={'Add row'}
-                     className="field-icon" onClick={onButtonClick}>
+                     className="field-icon" onClick={onClickAddRow}>
                     <FontAwesomeIcon icon={faPlusCircle} color={'green'}/> Add item
                 </span>
             </div>

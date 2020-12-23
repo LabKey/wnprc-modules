@@ -66,7 +66,6 @@ export class LineItemModel {
      */
     [immerable] = true;
 
-    readonly rowIndex: number
     readonly item: string
     readonly controlledSubstance: boolean
     readonly itemUnit: string

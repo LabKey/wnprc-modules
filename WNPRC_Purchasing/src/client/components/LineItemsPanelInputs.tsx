@@ -133,7 +133,7 @@ export const ControlledSubstance: FC<InputProps> = (props) => {
     const { onChange, value } = props;
 
     const onInputChange = useCallback((evt) => {
-        onChange('controlledSubstance', evt.target.value);
+        onChange('controlledSubstance', evt.target.checked);
     },[onChange]);
 
     return (

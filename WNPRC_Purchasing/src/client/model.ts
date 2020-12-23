@@ -67,7 +67,7 @@ export class LineItemModel {
     [immerable] = true;
 
     readonly item: string
-    readonly controlledSubstance: boolean
+    readonly controlledSubstance: boolean = false
     readonly itemUnit: string
     readonly quantity: number
     readonly unitPrice: number

@@ -17,6 +17,7 @@ import React, {FC, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
 import {LineItemModel, RequestOrderModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
+import '../RequestEntry/RequestEntry.scss';
 
 export const App : FC = () => {
 

@@ -17,7 +17,7 @@ export const DescriptionInput: FC<InputProps> = (props) => {
 
     return (
         <input
-            style={{width: '100%', marginLeft:'-3%'}}
+            className='line-item-row-input description-input'
             value={value}
             onChange={onTextChange}
             id="item-description-id"
@@ -44,8 +44,11 @@ export const UnitInput : FC<InputProps> = (props) => {
     },[onChange]);
 
     return (
-        <select style={{width: '100%'}} value={value}
-                onChange={onValueChange}>
+        <select
+            className='line-item-row-input unit-input'
+            value={value}
+            onChange={onValueChange}
+        >
             <option hidden value="">Select</option>
             {options}
         </select>
@@ -67,7 +70,7 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            style={{width:'100%', marginLeft:'5%'}}
+            className='line-item-row-input unit-price-input'
             value={value}
             onChange={onTextChange}
             id="unit-price-id"
@@ -86,7 +89,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            style={{width:'100%', marginLeft:'10%'}}
+            className='line-item-row-input quantity-input'
             value={value}
             onChange={onTextChange}
             id="unit-quantity-id"
@@ -103,7 +106,7 @@ interface SubtotalInputProps {
 
 export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
 
-    const { onChange, unitPrice, quantity } = props;
+    const { unitPrice, quantity } = props;
     const [subtotal, setSubtotal] = useState<number>(0);
 
     useEffect(() => {
@@ -118,7 +121,7 @@ export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
 
     return (
         <input
-            style={{width:'100%', marginLeft:'12%'}}
+            className='line-item-row-input subtotal-input'
             value={subtotal}
             disabled={true}
             id="item-subtotal-id"
@@ -137,7 +140,7 @@ export const ControlledSubstance: FC<InputProps> = (props) => {
 
     return (
         <input
-            style={{width:'100%', marginLeft:'-25%'}}
+            className='line-item-row-input controlled-sub-input'
             type="checkbox"
             checked={value}
             onChange={onInputChange}

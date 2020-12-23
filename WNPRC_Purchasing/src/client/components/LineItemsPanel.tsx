@@ -50,7 +50,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
         >
             <Panel.Heading>Specify Items</Panel.Heading>
             <div>
-                <Row style={{marginTop: '15px', marginBottom: '15px', marginLeft: '15px'}}>
+                <Row className="line-item-row-header">
                     <Col xs={4}>Part no./Item description *</Col>
                     <Col xs={1}>Unit *</Col>
                     <Col xs={1}>Unit price *</Col>
@@ -67,10 +67,10 @@ export const LineItemsPanel: FC<Props> = (props) => {
                     })
                 }
             </div>
-            <div style={{height: '30px'}}>
-               <span style={{marginLeft: '20px', marginBottom: '15px'}} id='add-line-item-row' title={'Add row'}
-                     className="field-icon" onClick={onClickAddRow}>
-                    <FontAwesomeIcon icon={faPlusCircle} color={'green'}/> Add item
+            <div className="add-item">
+               <span id='add-line-item-row' title={'Add item'}
+                     className="add-item-icon" onClick={onClickAddRow}>
+                    <FontAwesomeIcon className='fa-faPlusCircle' icon={faPlusCircle} color={'green'}/> Add item
                 </span>
             </div>
         </Panel>

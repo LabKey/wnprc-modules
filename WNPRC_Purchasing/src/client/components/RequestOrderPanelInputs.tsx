@@ -33,7 +33,7 @@ export const AccountInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <select
-                    style={{resize: 'none', width: '400px', height: '30px'}}
+                    className='account-input'
                     value={value}
                     onChange={onValueChange}
                     placeholder="Please provide the purpose for this purchasing request (Required)"
@@ -61,7 +61,7 @@ export const AccountOtherInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    style={{resize: 'none', width: '400px', height: '60px'}}
+                    className='account-input other-account-input'
                     value={value}
                     onChange={onTextChange}
                     id="account-and-pi-id"
@@ -96,8 +96,10 @@ export const VendorInput: FC<InputProps> = (props) => {
                 label="Vendor"
                 required={true}
             >
-                <select style={{resize: 'none', width: '400px', height: '30px'}} value={value}
-                        onChange={onValueChange}>
+                <select className='vendor-input'
+                        value={value}
+                        onChange={onValueChange}
+                >
                     <option hidden value="">Select</option>
                     {options}
                 </select>
@@ -165,7 +167,7 @@ export const BusinessPurposeInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    style={{resize: 'none', width: '400px', height: '90px'}}
+                    className='business-purpose-input'
                     value={value}
                     onChange={onTextChange}
                     id="business-purpose-id"
@@ -190,7 +192,7 @@ export const SpecialInstructionInput: FC<InputProps> = (props) => {
                 required={false}
             >
                 <textarea
-                    style={{resize: 'none', width: '400px', height: '90px'}}
+                    className='special-instr-input'
                     value={value}
                     onChange={onTextChange}
                     id="special-instructions-id"
@@ -215,7 +217,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
     const options = useMemo(() => createOptions(dropDownVals, 'streetAddress', false), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
-        onChange('streetAddress', evt.target.value);
+        onChange('shippingDestination', evt.target.value);
     }, [onChange]);
 
     return (
@@ -224,8 +226,10 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
                 label="Shipping destination"
                 required={true}
             >
-                <select style={{resize: 'none', width: '400px', height: '30px'}} value={value}
-                        onChange={onValueChange}>
+                <select className='shipping-dest-input'
+                        value={value}
+                        onChange={onValueChange}
+                >
                     <option hidden value="">Select</option>
                     {options}
                 </select>
@@ -237,7 +241,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
 export const DeliveryAttentionInput: FC<InputProps> = (props) => {
     const {onChange, value} = props;
     const onTextChange = useCallback((evt) => {
-        onChange('comments', evt.target.value);
+        onChange('deliveryAttentionTo', evt.target.value);
     }, [onChange]);
     return (
         <div>
@@ -246,7 +250,7 @@ export const DeliveryAttentionInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    style={{resize: 'none', width: '400px', height: '60px'}}
+                    className='delivery-attn-input'
                     value={value}
                     onChange={onTextChange}
                     id="delivery-attn-id"

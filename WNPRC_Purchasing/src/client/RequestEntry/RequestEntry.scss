@@ -1,0 +1,72 @@
+
+.fa-faTimesCircle:hover {
+  color: red;
+}
+
+.fa-faPlusCircle:hover {
+  font-size:16.5px;
+}
+
+.line-item-row {
+  margin: 1%;
+  border: 1px solid #d3d3d3;
+  padding: 0.65%;
+}
+
+.line-item-row-header {
+  margin: 1%;
+}
+
+.add-item {
+  height: 30px;
+}
+
+.add-item-icon {
+  margin-left: 1%;
+  margin-bottom: 1%;
+}
+
+.delete-item-icon {
+  margin-left: 100%;
+}
+
+.line-item-row-input {
+  width: 100%;
+}
+
+.description-input {
+  margin-left: -3%;
+}
+
+.unit-input, .unit-price-input, .quantity-input {
+  margin-left: -6%;
+}
+
+.subtotal-input {
+  margin-left: -4%;
+}
+
+.controlled-sub-input {
+  margin-left: -25% !important;
+}
+
+.request-order-form-row {
+  margin-top: 1%;
+  margin-left: 1%;
+  margin-bottom: 0.50%;
+}
+
+.account-input, .vendor-input, .shipping-dest-input {
+  resize: none;
+  width: 60%;
+}
+
+.other-account-input {
+  height: 60px;
+}
+
+.business-purpose-input, .special-instr-input, .delivery-attn-input {
+  resize: none;
+  width: 60%;
+  height: 90px;
+}

@@ -4,7 +4,7 @@ import {Col, Row} from 'react-bootstrap';
 import {Draft, produce} from "immer";
 import {faTimesCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import '../RequestEntry/RequestEntry.scss';
+
 import {
     ControlledSubstance,
     DescriptionInput,
@@ -39,15 +39,7 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
 
     return (
         <>
-            <Row key={'line-item-row-' + rowIndex} style={{
-                marginTop: '20px',
-                marginBottom: '15px',
-                marginLeft: '15px',
-                border: 'solid 1px',
-                borderColor: '#d3d3d3',
-                marginRight: '15px',
-                padding: '10px'
-            }}>
+            <Row className='line-item-row' key={'line-item-row-' + rowIndex}>
                 <Col xs={4}><DescriptionInput value={model.item} onChange={onValueChange}/></Col>
                 <Col xs={1}><UnitInput value={model.itemUnit} onChange={onValueChange}/></Col>
                 <Col xs={1}><UnitPriceInput value={model.unitPrice} onChange={onValueChange}/></Col>
@@ -56,8 +48,7 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                 <Col xs={2}><ControlledSubstance value={model.controlledSubstance} onChange={onValueChange}/></Col>
                 <Col xs={2}>
                     <span
-                        style={{marginLeft:'100%'}}
-                      id={'delete-line-item-row-' + rowIndex} title={'Delete row'} className="field-icon"
+                      id={'delete-line-item-row-' + rowIndex} title={'Delete item'} className="delete-item-icon"
                       onClick={onDeleteRow}
                     >
                         <FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle} color={'gray'}/>

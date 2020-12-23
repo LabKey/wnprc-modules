@@ -8,7 +8,7 @@ interface Props
 
 export function PurchasingFormInputLabel(props: Props)
 {
-    const {label, required} = this.props;
+    const {label, required} = props;
     return (
         <>
             <span>

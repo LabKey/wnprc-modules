@@ -16,7 +16,7 @@ export class PurchasingFormInput extends React.PureComponent<PurchasingFormInput
 
         return (
             <Row>
-                <Col xs={12} md={7} style={{marginTop: '20px', marginLeft: '20px', marginBottom: '10px'}}>
+                <Col xs={12} md={7} className='request-order-form-row'>
                     <Col xs={4} lg={3}>
                         <label>{label}</label>
                         {required ? ' *' : ''}

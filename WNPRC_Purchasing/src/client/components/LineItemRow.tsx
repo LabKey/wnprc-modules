@@ -43,20 +43,22 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                 marginLeft: '15px',
                 border: 'solid 1px',
                 borderColor: '#d3d3d3',
-                marginRight: '30px',
+                marginRight: '15px',
                 padding: '10px'
             }}>
-                <Col>
-                    <DescriptionInput value={model.item} onChange={onValueChange}/>
-                    <UnitInput value={model.itemUnit} onChange={onValueChange}/>
-                    <UnitPriceInput value={model.unitPrice} onChange={onValueChange}/>
-                    <UnitQuantityInput value={model.quantity} onChange={onValueChange}/>
-                    <SubtotalInput unitPrice={model.unitPrice} quantity={model.quantity} onChange={onValueChange}/>
-                    <ControlledSubstance value={model.controlledSubstance} onChange={onValueChange}/>
-                    <span style={{height: '20px', marginTop: '5px', marginLeft: '1200px', position: 'absolute'}}
-                          id={'delete-line-item-row-' + model.rowIndex} title={'Delete row'} className="field-icon"
-                          onClick={onDeleteRow}>
-                        <FontAwesomeIcon icon={faTimesCircle} color={'red'}/>
+                <Col xs={4}><DescriptionInput value={model.item} onChange={onValueChange}/></Col>
+                <Col xs={1}><UnitInput value={model.itemUnit} onChange={onValueChange}/></Col>
+                <Col xs={1}><UnitPriceInput value={model.unitPrice} onChange={onValueChange}/></Col>
+                <Col xs={1}><UnitQuantityInput value={model.quantity} onChange={onValueChange}/></Col>
+                <Col xs={1}><SubtotalInput unitPrice={model.unitPrice} quantity={model.quantity} onChange={onValueChange}/></Col>
+                <Col xs={2}><ControlledSubstance value={model.controlledSubstance} onChange={onValueChange}/></Col>
+                <Col xs={2}>
+                    <span
+                        style={{marginLeft:'100%'}}
+                      id={'delete-line-item-row-' + model.rowIndex} title={'Delete row'} className="field-icon"
+                      onClick={onDeleteRow}
+                    >
+                        <FontAwesomeIcon icon={faTimesCircle} color={'gray'}/>
                     </span>
                 </Col>
             </Row>

@@ -42,7 +42,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
 
     return (
         <Panel
-            className='domain-form-panel panel panel-default'
+            className='panel panel-default'
             expanded={true}
             onToggle={function () {
             }} // this is added to suppress JS warning about providing an expanded prop without onToggle
@@ -52,10 +52,10 @@ export const LineItemsPanel: FC<Props> = (props) => {
                 <Row style={{marginTop: '15px', marginBottom: '15px', marginLeft: '15px'}}>
                     <Col xs={4}>Part no./Item description *</Col>
                     <Col xs={1}>Unit *</Col>
-                    <Col lg={1}>Unit price *</Col>
-                    <Col lg={1}>Quantity *</Col>
-                    <Col lg={1}>Subtotal</Col>
-                    <Col lg={2}>Controlled substance</Col>
+                    <Col xs={1}>Unit price *</Col>
+                    <Col xs={1}>Quantity *</Col>
+                    <Col xs={1}>Subtotal</Col>
+                    <Col xs={2}>Controlled substance</Col>
                 </Row>
             </div>
             <div>
@@ -69,7 +69,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
             <div style={{height: '30px'}}>
                <span style={{marginLeft: '20px', marginBottom: '15px'}} id='add-line-item-row' title={'Add row'}
                      className="field-icon" onClick={onButtonClick}>
-                    <FontAwesomeIcon icon={faPlusCircle} color={'green'}/>
+                    <FontAwesomeIcon icon={faPlusCircle} color={'green'}/> Add item
                 </span>
             </div>
         </Panel>

@@ -16,8 +16,8 @@ export const DescriptionInput: FC<InputProps> = (props) => {
     },[onChange]);
 
     return (
-        <textarea
-            style={{resize:'none', width: '575px', height: '30px'}}
+        <input
+            style={{width: '100%', marginLeft:'-3%'}}
             value={value}
             onChange={onTextChange}
             id="item-description-id"
@@ -44,7 +44,7 @@ export const UnitInput : FC<InputProps> = (props) => {
     },[onChange]);
 
     return (
-        <select style={{resize: 'none', position:'absolute', marginLeft:'45px', width: '100px', height: '30px'}} value={value}
+        <select style={{width: '100%'}} value={value}
                 onChange={onValueChange}>
             <option hidden value="">Select</option>
             {options}
@@ -67,7 +67,7 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            style={{resize: 'none', position:'absolute', marginLeft:'200px', width: '120px', height: '30px'}}
+            style={{width:'100%', marginLeft:'5%'}}
             value={value}
             onChange={onTextChange}
             id="unit-price-id"
@@ -86,7 +86,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            style={{resize: 'none', position:'absolute', marginLeft:'355px', width: '120px', height: '30px'}}
+            style={{width:'100%', marginLeft:'10%'}}
             value={value}
             onChange={onTextChange}
             id="unit-quantity-id"
@@ -118,7 +118,7 @@ export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
 
     return (
         <input
-            style={{resize: 'none', position:'absolute', marginLeft:'510px', width: '120px', height: '30px'}}
+            style={{width:'100%', marginLeft:'12%'}}
             value={subtotal}
             disabled={true}
             id="item-subtotal-id"
@@ -137,7 +137,7 @@ export const ControlledSubstance: FC<InputProps> = (props) => {
 
     return (
         <input
-            style={{marginLeft: '725px', position:'absolute', marginTop:'10px'}}
+            style={{width:'100%', marginLeft:'-25%'}}
             type="checkbox"
             checked={value}
             onChange={onInputChange}

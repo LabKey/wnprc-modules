@@ -71,7 +71,7 @@ export class LineItemModel {
     readonly itemUnit: string
     readonly quantity: number
     readonly unitPrice: number
-    readonly subTotal: number
+    readonly subTotal: number = 0
     readonly status?: string
 
     constructor(values?: Partial<LineItemModel>) {

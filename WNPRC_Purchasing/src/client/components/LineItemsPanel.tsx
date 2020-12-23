@@ -67,6 +67,21 @@ export const LineItemsPanel: FC<Props> = (props) => {
                     })
                 }
             </div>
+            <div>
+                <Row>
+                    <Col xs={4}></Col>
+                    <Col xs={1}></Col>
+                    <Col xs={1}></Col>
+                    <Col className='calc-total' xs={1}>Total:</Col>
+                    <Col className='calc-total-val' xs={1}>
+                        {
+                            lineItems.reduce( function(accumulatedVal,lineItem){
+                                return (lineItem.unitPrice && lineItem.quantity) ? (accumulatedVal + (lineItem.unitPrice * lineItem.quantity)) : accumulatedVal }, 0)
+                        }
+                    </Col>
+                    <Col xs={1}></Col>
+                </Row>
+            </div>
             <div className="add-item">
                <span id='add-line-item-row' title={'Add item'}
                      className="add-item-icon" onClick={onClickAddRow}>

@@ -93,7 +93,6 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
             value={value}
             onChange={onTextChange}
             id="unit-quantity-id"
-            type='number'
         />
     );
 }
@@ -101,7 +100,6 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 interface SubtotalInputProps {
     unitPrice: number;
     quantity: number;
-    onChange: (colName, value) => void;
 }
 
 export const SubtotalInput: FC<SubtotalInputProps> = (props) => {

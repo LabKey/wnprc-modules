@@ -44,7 +44,7 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                 <Col xs={1}><UnitInput value={model.itemUnit} onChange={onValueChange}/></Col>
                 <Col xs={1}><UnitPriceInput value={model.unitPrice} onChange={onValueChange}/></Col>
                 <Col xs={1}><UnitQuantityInput value={model.quantity} onChange={onValueChange}/></Col>
-                <Col xs={1}><SubtotalInput unitPrice={model.unitPrice} quantity={model.quantity} onChange={onValueChange}/></Col>
+                <Col xs={1}><SubtotalInput unitPrice={model.unitPrice} quantity={model.quantity}/></Col>
                 <Col xs={2}><ControlledSubstance value={model.controlledSubstance} onChange={onValueChange}/></Col>
                 <Col xs={2}>
                     <span

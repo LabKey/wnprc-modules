@@ -48,7 +48,11 @@ export const LineItemsPanel: FC<Props> = (props) => {
             onToggle={function () {
             }} // this is added to suppress JS warning about providing an expanded prop without onToggle
         >
-            <Panel.Heading>Specify Items</Panel.Heading>
+            <div className='bg-primary'>
+                <Panel.Heading>
+                    <div className="panel-title">Specify Items</div>
+                </Panel.Heading>
+            </div>
             <div>
                 <Row className="line-item-row-header">
                     <Col xs={4}>Part no./Item description *</Col>

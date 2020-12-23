@@ -41,7 +41,11 @@ export const RequestOrderPanel: FC<Props> = (props) => {
             onToggle={function () {
             }} // this is added to suppress JS warning about providing an expanded prop without onToggle
         >
-            <Panel.Heading>Request Order</Panel.Heading>
+            <div className='bg-primary'>
+            <Panel.Heading>
+                <div className='panel-title'>Request Order</div>
+            </Panel.Heading>
+            </div>
             <Form>
                 <AccountInput value={model.account} onChange={onValueChange}/>
                 {

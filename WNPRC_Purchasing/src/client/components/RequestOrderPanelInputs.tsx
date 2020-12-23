@@ -20,7 +20,7 @@ export const AccountInput: FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'alias', true, false), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'alias', true), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('account', evt.target.value);
@@ -84,7 +84,7 @@ export const VendorInput: FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'vendorName', true, false), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'vendorName', true), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('vendorName', evt.target.value);
@@ -214,7 +214,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress', false, true, 'shippingAlias'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress', false, 'shippingAlias'), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('shippingDestination', evt.target.value);

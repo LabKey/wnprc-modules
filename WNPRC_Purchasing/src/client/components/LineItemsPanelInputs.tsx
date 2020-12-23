@@ -37,7 +37,7 @@ export const UnitInput : FC<InputProps> = (props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'itemUnit', false, false), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'itemUnit', false), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('unit', evt.target.value);

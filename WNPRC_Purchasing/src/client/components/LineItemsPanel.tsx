@@ -50,7 +50,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
         >
             <div className='bg-primary'>
                 <Panel.Heading>
-                    <div className="panel-title">Specify Items</div>
+                    <div className='panel-title'>Specify Items</div>
                 </Panel.Heading>
             </div>
             <div>

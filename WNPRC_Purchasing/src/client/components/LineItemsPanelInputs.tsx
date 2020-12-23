@@ -64,16 +64,17 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
     const { onChange, value } = props;
 
-    const onTextChange = useCallback((evt) => {
+    const onValueChange = useCallback((evt) => {
         onChange('unitPrice', evt.target.value);
     },[onChange]);
 
     return (
         <input
-            className='line-item-row-input unit-price-input'
+            className= 'line-item-row-input unit-price-input'
             value={value}
-            onChange={onTextChange}
+            onChange={onValueChange}
             id="unit-price-id"
+            pattern="[0-9]*"
             type='number'
         />
     );
@@ -83,7 +84,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 
     const { onChange, value } = props;
 
-    const onTextChange = useCallback((evt) => {
+    const onValueChange = useCallback((evt) => {
         onChange('quantity', evt.target.value);
     },[onChange]);
 
@@ -91,8 +92,10 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
         <input
             className='line-item-row-input quantity-input'
             value={value}
-            onChange={onTextChange}
+            onChange={onValueChange}
+            pattern="[0-9]*"
             id="unit-quantity-id"
+            type='number'
         />
     );
 }

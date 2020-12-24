@@ -9,7 +9,6 @@ interface InputProps
     onChange: (colName, value) => void;
 }
 
-export const Purchasing
 export const AccountInput: FC<InputProps> = (props) => {
 
     const {onChange, value} = props;

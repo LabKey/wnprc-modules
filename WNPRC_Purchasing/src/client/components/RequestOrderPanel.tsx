@@ -1,11 +1,12 @@
 import React, {FC, useCallback, useState} from 'react';
 import {Form, Panel} from 'react-bootstrap';
-import {RequestOrderModel} from '../model';
+import {RequestOrderModel, VendorModel} from '../model';
 import {Draft, produce} from 'immer';
 import {
     AccountInput, AccountOtherInput, VendorInput, BusinessPurposeInput,
     SpecialInstructionInput, ShippingDestinationInput, DeliveryAttentionInput
 } from "./RequestOrderPanelInputs";
+import {VendorPopupModal} from "./VendorInputModal";
 
 interface Props
 {
@@ -18,6 +19,10 @@ export const RequestOrderPanel: FC<Props> = (props) => {
     const {model, onInputChange} = props;
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
+
+    const onVendorAdd = useCallback((newVendor : VendorModel) => {
+
+    }, []);
 
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
@@ -53,10 +58,10 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                     <AccountOtherInput value={model.accountOther} onChange={onValueChange}/>
                 }
                 <VendorInput value={model.vendorName} onChange={onValueChange}/>
-                {/*{*/}
-                {/*    model.vendorName === "Other" &&*/}
-                {/*    <VendorPopupModal></VendorPopupModal>*/}
-                {/*}*/}
+                {
+                    model.vendorName === "Other" &&
+                    <VendorPopupModal showPopup={true} vendorModel={VendorModel.create({})} onChange={onVendorAdd}/>
+                }
                 <BusinessPurposeInput value={model.purpose} onChange={onValueChange}/>
                 <SpecialInstructionInput value={model.comments} onChange={onValueChange}/>
                 <ShippingDestinationInput value={model.shippingDestination} onChange={onValueChange}/>

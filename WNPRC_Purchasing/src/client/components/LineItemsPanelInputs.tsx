@@ -1,6 +1,6 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
 import {getDropdownOptions} from "../action";
-import {createOptions} from "./Utils";
+import {createOptions, formatCurrency} from "./Utils";
 
 interface InputProps {
     value: any;
@@ -17,7 +17,7 @@ export const DescriptionInput: FC<InputProps> = (props) => {
 
     return (
         <input
-            className='line-item-row-input description-input'
+            className='line-item-row-input description-input form-control'
             value={value}
             onChange={onTextChange}
             id="item-description-id"
@@ -45,7 +45,7 @@ export const UnitInput : FC<InputProps> = (props) => {
 
     return (
         <select
-            className='line-item-row-input unit-input'
+            className='line-item-row-input unit-input form-control'
             value={value}
             onChange={onValueChange}
         >
@@ -70,7 +70,7 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            className= 'line-item-row-input unit-price-input'
+            className= 'line-item-row-input unit-price-input form-control'
             value={value}
             onChange={onValueChange}
             id="unit-price-id"
@@ -90,7 +90,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            className='line-item-row-input quantity-input'
+            className='line-item-row-input quantity-input form-control'
             value={value}
             onChange={onValueChange}
             pattern="[0-9]*"
@@ -122,8 +122,8 @@ export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
 
     return (
         <input
-            className='line-item-row-input subtotal-input'
-            value={subtotal}
+            className='line-item-row-input subtotal-input form-control'
+            value={formatCurrency(subtotal)}
             disabled={true}
             id="item-subtotal-id"
             type='number'

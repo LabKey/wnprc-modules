@@ -29,3 +29,26 @@ export class PurchasingFormInput extends React.PureComponent<PurchasingFormInput
         );
     }
 }
+
+export class VendorFormInput extends React.PureComponent<PurchasingFormInputProps, any>
+{
+    render()
+    {
+        const {label, required, children} = this.props;
+
+        return (
+            <Row>
+                <Col xs={12} className='request-order-form-row'>
+                    <Col xs={4}>
+                        <label>{label}</label>
+                        {required ? ' *' : ''}
+                    </Col>
+                    <Col xs={8}>
+                        {children}
+                    </Col>
+                </Col>
+            </Row>
+        );
+    }
+}
+

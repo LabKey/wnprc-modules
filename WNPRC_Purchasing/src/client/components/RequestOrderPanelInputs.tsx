@@ -9,6 +9,7 @@ interface InputProps
     onChange: (colName, value) => void;
 }
 
+export const Purchasing
 export const AccountInput: FC<InputProps> = (props) => {
 
     const {onChange, value} = props;
@@ -33,7 +34,7 @@ export const AccountInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <select
-                    className='account-input'
+                    className='account-input form-control'
                     value={value}
                     onChange={onValueChange}
                     placeholder="Please provide the purpose for this purchasing request (Required)"
@@ -61,7 +62,7 @@ export const AccountOtherInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    className='account-input other-account-input'
+                    className='account-input other-account-input form-control'
                     value={value}
                     onChange={onTextChange}
                     id="account-and-pi-id"
@@ -96,7 +97,7 @@ export const VendorInput: FC<InputProps> = (props) => {
                 label="Vendor"
                 required={true}
             >
-                <select className='vendor-input'
+                <select className='vendor-input form-control'
                         value={value}
                         onChange={onValueChange}
                 >
@@ -107,50 +108,6 @@ export const VendorInput: FC<InputProps> = (props) => {
         </div>
     );
 }
-
-// interface VendorInputProps {
-//     vendorInfo: VendorModel;
-//     onChange: (vendorInfo: VendorModel) => void;
-// }
-
-// export const VendorPopupModal: FC<VendorInputProps> = (props) => {
-//     const { vendorInfo } = props;
-//
-//     const [show, setShow] = useState(false);
-//
-//     const handleClose = () => setShow(false);
-//     const handleShow = () => setShow(true);
-//     const inputHandler =(evt) => {
-//         evt.target.value
-//     }
-//
-//     return (
-//         <>
-//             <Button
-//                 style={{marginLeft: '310px'}}
-//                 variant="primary" onClick={handleShow}>
-//                 Add Vendor
-//             </Button>
-//             <Modal show={show} onHide={handleClose} backdrop="static">
-//                 <Modal.Header closeButton>
-//                     <Modal.Title>Add new vendor</Modal.Title>
-//                 </Modal.Header>
-//                 <Modal.Body>
-//                     <input type='text' value='this.state.username' id='username' onChange='inputHandler' />
-//
-//                 </Modal.Body>
-//                 <Modal.Footer>
-//                     <Button variant="secondary" onClick={handleClose}>
-//                         Cancel
-//                     </Button>
-//                     <Button variant="primary" onClick={handleClose}>
-//                         Apply
-//                     </Button>
-//                 </Modal.Footer>
-//             </Modal>
-//         </>
-//     );
-// }
 
 export const BusinessPurposeInput: FC<InputProps> = (props) => {
 
@@ -167,7 +124,7 @@ export const BusinessPurposeInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    className='business-purpose-input'
+                    className='business-purpose-input form-control'
                     value={value}
                     onChange={onTextChange}
                     id="business-purpose-id"
@@ -192,7 +149,7 @@ export const SpecialInstructionInput: FC<InputProps> = (props) => {
                 required={false}
             >
                 <textarea
-                    className='special-instr-input'
+                    className='special-instr-input form-control'
                     value={value}
                     onChange={onTextChange}
                     id="special-instructions-id"
@@ -226,7 +183,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
                 label="Shipping destination"
                 required={true}
             >
-                <select className='shipping-dest-input'
+                <select className='shipping-dest-input form-control'
                         value={value}
                         onChange={onValueChange}
                 >
@@ -250,7 +207,7 @@ export const DeliveryAttentionInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    className='delivery-attn-input'
+                    className='delivery-attn-input form-control'
                     value={value}
                     onChange={onTextChange}
                     id="delivery-attn-id"

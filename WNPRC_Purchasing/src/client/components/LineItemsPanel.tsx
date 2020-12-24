@@ -5,6 +5,7 @@ import {Draft, produce} from "immer";
 import {LineItemRow} from "./LineItemRow";
 import {faPlusCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {formatCurrency} from "./Utils";
 
 interface Props
 {
@@ -79,8 +80,8 @@ export const LineItemsPanel: FC<Props> = (props) => {
                     <Col className='calc-total' xs={1}>Total:</Col>
                     <Col className='calc-total-val' xs={1}>
                         {
-                            lineItems.reduce( function(accumulatedVal,lineItem){
-                                return (lineItem.unitPrice && lineItem.quantity) ? (accumulatedVal + (lineItem.unitPrice * lineItem.quantity)) : accumulatedVal }, 0)
+                            formatCurrency(lineItems.reduce( function(accumulatedVal,lineItem){
+                                return (lineItem.unitPrice && lineItem.quantity) ? (accumulatedVal + (lineItem.unitPrice * lineItem.quantity)) : accumulatedVal }, 0))
                         }
                     </Col>
                     <Col xs={1}></Col>

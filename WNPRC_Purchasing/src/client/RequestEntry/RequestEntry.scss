@@ -68,7 +68,7 @@
 .business-purpose-input, .special-instr-input, .delivery-attn-input {
   resize: none;
   width: 60%;
-  height: 90px;
+  height: 90px !important;
 }
 
 .calc-total {
@@ -79,4 +79,13 @@
 .calc-total-val {
   margin-left:-4.50%;
   font-weight: bold;
+}
+
+.vendor-new-input {
+  width: 80%;
+}
+.vendor-new-text-area-input {
+  resize: none;
+  width: 80%;
+  height: 60px !important;
 }

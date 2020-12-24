@@ -25,3 +25,12 @@ export const createOptions = (rows: Array<InputRow>, colName: string, addOtherOp
         );
     });
 }
+
+export const formatCurrency = (value: number) => {
+    const formatter = new Intl.NumberFormat("en-US", {
+        style: "decimal",
+        currency: "USD",
+        minimumFractionDigits: 2
+    });
+    return formatter.format(value);
+}

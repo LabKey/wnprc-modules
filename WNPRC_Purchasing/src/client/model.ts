@@ -62,6 +62,22 @@ export class VendorModel {
             return new VendorModel({ ...raw });
         }
     }
+
+    static getDisplayVersion(vendorModel: VendorModel) : string {
+        let newVendorStr = '';
+        newVendorStr += vendorModel.vendorName ? ('Vendor name: ' + vendorModel.vendorName + "\n") : '';
+        newVendorStr += vendorModel.streetAddress ? ('Street address: ' + vendorModel.streetAddress + "\n") : '';
+        newVendorStr += vendorModel.city ? ('City: ' + vendorModel.city + "\n") : '';
+        newVendorStr += vendorModel.state ? ('State: ' + vendorModel.state + "\n") : '';
+        newVendorStr += vendorModel.zip ? ('Zip: ' + vendorModel.zip + "\n") : '';
+        newVendorStr += vendorModel.country ? ('Country: ' + vendorModel.country + "\n") : '';
+        newVendorStr += vendorModel.phoneNumber ? ('Phone number: ' + vendorModel.phoneNumber + "\n") : '';
+        newVendorStr += vendorModel.faxNumber ? ('Fax Number: ' + vendorModel.faxNumber + "\n") : '';
+        newVendorStr += vendorModel.email ? ('Email: ' + vendorModel.email+ "\n") : '';
+        newVendorStr += vendorModel.url ? ('Company website: ' + vendorModel.url + "\n") : '';
+        newVendorStr += vendorModel.notes ? ('Notes: ' + vendorModel.notes + "\n") : '';
+        return newVendorStr;
+    }
 }
 
 export class LineItemModel {

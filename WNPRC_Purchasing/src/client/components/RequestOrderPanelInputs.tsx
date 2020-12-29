@@ -1,7 +1,10 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
+import {Button} from 'react-bootstrap';
 import {getDropdownOptions} from "../action";
-import {createOptions} from "./Utils";
+import {createOptions, formatCurrency} from "./Utils";
 import {PurchasingFormInput} from "./PurchasingFormInput";
+import {VendorModel} from "../model";
+import {VendorPopupModal} from "./VendorInputModal";
 
 interface InputProps
 {
@@ -217,4 +220,42 @@ export const DeliveryAttentionInput: FC<InputProps> = (props) => {
             </PurchasingFormInput>
         </div>
     );
+}
+
+interface VendorDisplayProps {
+    displayValue: string;
+}
+export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
+
+    const {displayValue} = props;
+
+    // const onVendorEdit = useCallback(() => {
+    //
+    // }, []);
+    //
+    // const onClickEditNewVendor = useCallback(() => {
+    //     return <VendorPopupModal showPopup={true} vendorModel={vendorModel} onVendorChange={onVendorEdit}/>
+    // }, []);
+
+    return (
+            // hasValues &&
+            <>
+                <div>
+                    <PurchasingFormInput
+                            label="Other/New Vendor"
+                            required={false}
+                    >
+                    <textarea
+                            className='new-vendor-display form-control'
+                            value={displayValue}
+                            id="new-vendor-display"
+                            disabled={true}
+                    />
+                    </PurchasingFormInput>
+                    {/*<Button style={{marginLeft: '16.5%'}} variant="primary" onClick={onClickEditNewVendor}>*/}
+                    {/*    Edit new vendor*/}
+                    {/*</Button>*/}
+                </div>
+            </>
+    )
 }

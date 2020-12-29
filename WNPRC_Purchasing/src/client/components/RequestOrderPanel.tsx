@@ -4,7 +4,7 @@ import {RequestOrderModel, VendorModel} from '../model';
 import {Draft, produce} from 'immer';
 import {
     AccountInput, AccountOtherInput, VendorInput, BusinessPurposeInput,
-    SpecialInstructionInput, ShippingDestinationInput, DeliveryAttentionInput
+    SpecialInstructionInput, ShippingDestinationInput, DeliveryAttentionInput, NewVendorDisplay
 } from "./RequestOrderPanelInputs";
 import {VendorPopupModal} from "./VendorInputModal";
 
@@ -83,7 +83,13 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                 />
                 {
                     model.vendorName === "Other" &&
-                    <VendorPopupModal showPopup={true} vendorModel={model.newVendor} onVendorChange={onVendorAdd}/>
+                    <>
+                        <VendorPopupModal showPopup={true} vendorModel={model.newVendor} onVendorChange={onVendorAdd}/>
+                        {
+                            model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&
+                                <NewVendorDisplay displayValue={VendorModel.getDisplayVersion(model.newVendor)}/>
+                        }
+                    </>
                 }
                 <BusinessPurposeInput
                     value={model.purpose}

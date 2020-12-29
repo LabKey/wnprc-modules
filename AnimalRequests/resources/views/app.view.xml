@@ -4,6 +4,5 @@
     </permissions>
     <dependencies>
         <dependency path="animalrequests/app/app.js"/>
-        <dependency path="animalrequests/app/app.css"/>
     </dependencies>
 </view>

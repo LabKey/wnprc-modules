@@ -22,8 +22,11 @@ export const RequestOrderPanel: FC<Props> = (props) => {
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
     const onVendorAdd = useCallback((newVendor : VendorModel) => {
-
-    }, []);
+        const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
+            draft['newVendor'] = newVendor;
+        })
+        onInputChange(updatedModel);
+    }, [model]);
 
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
@@ -32,7 +35,7 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                 let updatedErrors = model.errors.filter((field) => field.fieldName !== colName);
                 draft['errors'] = updatedErrors;
             }
-            if (draft['errors'].length === 0) {
+            if (draft['errors'] && draft['errors'].length === 0) {
                 draft['errorMsg'] = undefined;
             }
         });
@@ -80,7 +83,7 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                 />
                 {
                     model.vendorName === "Other" &&
-                    <VendorPopupModal showPopup={true} vendorModel={VendorModel.create({})} onChange={onVendorAdd}/>
+                    <VendorPopupModal showPopup={true} vendorModel={model.newVendor} onVendorChange={onVendorAdd}/>
                 }
                 <BusinessPurposeInput
                     value={model.purpose}

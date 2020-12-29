@@ -10,7 +10,7 @@ export class RequestOrderModel {
     readonly accountOther: string;
     readonly mdNumber: string;
     readonly vendorName: string;
-    readonly newVendor?: VendorModel;
+    readonly newVendor?: VendorModel = VendorModel.create({});
     readonly purpose: string;
     readonly shippingDestination: string;
     readonly deliveryAttentionTo: string;

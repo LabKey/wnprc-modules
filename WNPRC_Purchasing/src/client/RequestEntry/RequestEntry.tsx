@@ -39,12 +39,9 @@ export const App : FC = () => {
         setLineItems(lineItems);
     }, []);
 
-    const requestOrderModelChange = useCallback((model:RequestOrderModel, vendorModel?:VendorModel)=> {
+    const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {
         setRequestOrderModel(model);
-        if (requestOrderModel.vendorName === 'Other') {
-            setNewVendorModel(vendorModel);
-        }
-    }, []);
+    }, [requestOrderModel]);
 
     const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
         let numOfErrors = 0;

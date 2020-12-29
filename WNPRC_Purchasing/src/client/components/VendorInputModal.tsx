@@ -40,15 +40,20 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
             if (errors.length > 0) {
                 draft.errors = errors;
                 draft.errorMsg = "Unable to save, missing required field(s).";
+                setShow(true);
             }
-            setShow(true);
         });
         onVendorChange(updatedModel);
 
     }, [vendorModel, onVendorChange]);
 
-    const handleClose = useCallback((vendorModel: VendorModel) => {
-        onVendorChange(VendorModel.create({}));
+    const handleClose = useCallback(() => {
+        // scenario when user enters a new vendor, and then hits Cancel, in which case, cleanup and create and empty new vendor
+            onVendorChange(VendorModel.create({}));
+
+        // else {
+        //     onVendorChange(vendorModel);
+        // }
         setShow(false);
 
     }, [vendorModel, onVendorChange]);
@@ -73,7 +78,7 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
         <>
             <Modal show={show} onHide={handleClose} backdrop="static">
                 <Modal.Header closeButton>
-                    <Modal.Title>Add new vendor</Modal.Title>
+                    <Modal.Title>New vendor</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>

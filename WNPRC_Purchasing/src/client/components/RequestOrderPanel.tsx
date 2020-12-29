@@ -38,6 +38,10 @@ export const RequestOrderPanel: FC<Props> = (props) => {
             if (draft['errors'] && draft['errors'].length === 0) {
                 draft['errorMsg'] = undefined;
             }
+            // if 'Other' was selected before, during which user added a New vendor from the popup, and then user decided to select a different vendor - then do cleanup on newVendor obj
+            if (colName === 'vendorName' && value !== 'Other') {
+                draft['newVendor'] = VendorModel.create({});
+            }
         });
         if (updatedModel.account === 'Other')
         {
@@ -47,6 +51,7 @@ export const RequestOrderPanel: FC<Props> = (props) => {
         {
             setShowOtherAcct(false);
         }
+
         onInputChange(updatedModel);
     }, [model, onInputChange]);
 
@@ -87,7 +92,7 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                         <VendorPopupModal showPopup={true} vendorModel={model.newVendor} onVendorChange={onVendorAdd}/>
                         {
                             model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&
-                                <NewVendorDisplay displayValue={VendorModel.getDisplayVersion(model.newVendor)}/>
+                                <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
                         }
                     </>
                 }

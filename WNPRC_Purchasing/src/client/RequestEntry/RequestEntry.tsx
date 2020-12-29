@@ -24,7 +24,8 @@ import produce, {Draft} from "immer";
 export const App : FC = () => {
 
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
-    const [newVendorModel, setNewVendorModel] = useState<VendorModel>(VendorModel.create({}));
+    const [showNewVendor, setShowNewVendor] = useState<boolean>(false);
+
     const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create({})]);
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
     const [lineItemRowIndex, setLineItemRowIndex] = useState<number>(0);

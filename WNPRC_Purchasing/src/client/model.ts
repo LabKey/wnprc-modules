@@ -17,6 +17,7 @@ export class RequestOrderModel {
     readonly comments?: string;
     readonly errorMsg?: string;
     readonly errors?: any;
+    readonly showNewVendor: boolean = false;
 
     constructor(values?: Partial<RequestOrderModel>) {
         Object.assign(this, values);

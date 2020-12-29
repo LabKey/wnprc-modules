@@ -5,6 +5,7 @@ import {createOptions, formatCurrency} from "./Utils";
 import {PurchasingFormInput} from "./PurchasingFormInput";
 import {VendorModel} from "../model";
 import {VendorPopupModal} from "./VendorInputModal";
+import produce, {Draft} from "immer";
 
 interface InputProps
 {
@@ -223,39 +224,49 @@ export const DeliveryAttentionInput: FC<InputProps> = (props) => {
 }
 
 interface VendorDisplayProps {
-    displayValue: string;
+    vendorModel: VendorModel;
+    onVendorChange: (vendorModel: VendorModel) => void;
 }
 export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
 
-    const {displayValue} = props;
+    const {vendorModel, onVendorChange} = props;
+    const [show, setShow] = useState<boolean>(false);
 
-    // const onVendorEdit = useCallback(() => {
-    //
-    // }, []);
-    //
-    // const onClickEditNewVendor = useCallback(() => {
-    //     return <VendorPopupModal showPopup={true} vendorModel={vendorModel} onVendorChange={onVendorEdit}/>
-    // }, []);
+    const onVendorEdit = useCallback((changedVendorModel: VendorModel) => {
+
+        // const updatedModel = produce(vendorModel, (draft:Draft<VendorModel>) => {
+        //     draft['newVendor'] = changedVendorModel;
+        // })
+        onVendorChange(changedVendorModel);
+
+    }, [vendorModel, onVendorChange]);
+
+    const onClickEditNewVendor = useCallback(() => {
+        setShow(true);
+    }, []);
 
     return (
-            // hasValues &&
-            <>
-                <div>
-                    <PurchasingFormInput
-                            label="Other/New Vendor"
-                            required={false}
-                    >
-                    <textarea
-                            className='new-vendor-display form-control'
-                            value={displayValue}
-                            id="new-vendor-display"
-                            disabled={true}
-                    />
-                    </PurchasingFormInput>
-                    {/*<Button style={{marginLeft: '16.5%'}} variant="primary" onClick={onClickEditNewVendor}>*/}
-                    {/*    Edit new vendor*/}
-                    {/*</Button>*/}
-                </div>
-            </>
+        <>
+            <div>
+                <PurchasingFormInput
+                        label="Other Vendor"
+                        required={false}
+                >
+                <textarea
+                        className='new-vendor-display form-control'
+                        value={VendorModel.getDisplayVersion(vendorModel)}
+                        id="new-vendor-display"
+                        disabled={true}
+                />
+                </PurchasingFormInput>
+                <Button className='edit-other-vendor-button btn btn-default' variant="primary" onClick={onClickEditNewVendor}>
+                    {
+                        show &&
+                        <VendorPopupModal showPopup={show} vendorModel={vendorModel} onVendorChange={onVendorEdit}/>
+                    }
+                    Edit other vendor
+                </Button>
+            </div>
+        </>
     )
 }

@@ -3,7 +3,7 @@ import {Button} from 'react-bootstrap';
 import {getDropdownOptions} from "../action";
 import {createOptions, formatCurrency} from "./Utils";
 import {PurchasingFormInput} from "./PurchasingFormInput";
-import {VendorModel} from "../model";
+import {RequestOrderModel, VendorModel} from "../model";
 import {VendorPopupModal} from "./VendorInputModal";
 import produce, {Draft} from "immer";
 
@@ -78,10 +78,19 @@ export const AccountOtherInput: FC<InputProps> = (props) => {
     );
 }
 
-export const VendorInput: FC<InputProps> = (props) => {
+interface VendorInputProps
+{
+    onChange: (colName, value) => void;
+    hasError?: boolean;
+    model: RequestOrderModel
+    onModelChange: (model: RequestOrderModel) => void;
+}
 
-    const {onChange, value, hasError} = props;
+export const VendorInput: FC<VendorInputProps> = (props) => {
+
+    const {onChange, hasError, model, onModelChange} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
+    const [showPopup, setShowPopup] = useState<boolean>(false);
 
     useEffect(() => {
         getDropdownOptions('ehr_purchasing', 'vendor', 'vendorName').then(vals => {
@@ -91,9 +100,31 @@ export const VendorInput: FC<InputProps> = (props) => {
 
     const options = useMemo(() => createOptions(dropDownVals, 'vendorName', true), [dropDownVals]);
 
+    const onChangeShowPopup = useCallback((show) => {
+        setShowPopup(show);
+    },[]);
+
+    const onClickEditNewVendor = useCallback(() => {
+        setShowPopup(true);
+    },[]);
+
     const onValueChange = useCallback((evt) => {
-        onChange('vendorName', evt.target.value);
-    }, [onChange]);
+        const val = evt.target.value;
+        if (val === 'Other') {
+            setShowPopup(true);
+        }
+        else {
+            setShowPopup(false);
+        }
+        onChange('vendorName', val);
+    }, [onChange, hasError, model, onModelChange]);
+
+    const onVendorAdd = useCallback((newVendor : VendorModel) => {
+        const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
+            draft['newVendor'] = newVendor;
+        })
+        onModelChange(updatedModel);
+    }, [onChange, hasError, model, onModelChange]);
 
     return (
         <div>
@@ -102,13 +133,27 @@ export const VendorInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <select className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                        value={value}
+                        value={model.vendorName}
                         onChange={onValueChange}
                 >
                     <option hidden value="">Select</option>
                     {options}
                 </select>
             </PurchasingFormInput>
+            {
+                showPopup &&
+                <VendorPopupModal showPopup={showPopup} vendorModel={model.newVendor} onVendorChange={onVendorAdd} onChangeShowPopup={onChangeShowPopup}/>
+            }
+            {
+                model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&
+               <>
+                <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
+                   <Button className='edit-other-vendor-button btn btn-default' variant="primary" onClick={onClickEditNewVendor}>
+                   Edit other vendor
+                   </Button>
+               </>
+            }
+
         </div>
     );
 }
@@ -243,27 +288,18 @@ export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
     }, []);
 
     return (
-        <>
-            <div>
-                <PurchasingFormInput
-                        label="Other Vendor"
-                        required={false}
-                >
+        <div>
+            <PurchasingFormInput
+                label="Other Vendor"
+                required={false}
+            >
                 <textarea
-                        className='new-vendor-display form-control'
-                        value={VendorModel.getDisplayVersion(vendorModel)}
-                        id="new-vendor-display"
-                        disabled={true}
+                    className='new-vendor-display form-control'
+                    value={VendorModel.getDisplayVersion(vendorModel)}
+                    id="new-vendor-display"
+                    disabled={true}
                 />
-                </PurchasingFormInput>
-                <Button className='edit-other-vendor-button btn btn-default' variant="primary" onClick={onClickEditNewVendor}>
-                    {
-                        show &&
-                        <VendorPopupModal showPopup={show} vendorModel={vendorModel} onVendorChange={onVendorEdit}/>
-                    }
-                    Edit other vendor
-                </Button>
-            </div>
-        </>
+            </PurchasingFormInput>
+        </div>
     )
 }

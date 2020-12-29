@@ -7,11 +7,12 @@ import produce, {Draft} from "immer";
 interface VendorInputProps {
     vendorModel: VendorModel;
     onVendorChange: (vendorModel: VendorModel) => void;
-    showPopup: boolean
+    showPopup: boolean,
+    onChangeShowPopup: (showPopup: boolean) => void;
 }
 
 export const VendorPopupModal: FC<VendorInputProps> = (props) => {
-    const { vendorModel, onVendorChange, showPopup } = props;
+    const { vendorModel, onVendorChange, showPopup, onChangeShowPopup } = props;
 
     const [show, setShow] = useState(showPopup);
 
@@ -44,16 +45,18 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
             }
         });
         onVendorChange(updatedModel);
+        onChangeShowPopup(false);
 
     }, [vendorModel, onVendorChange]);
 
     const handleClose = useCallback(() => {
-        // scenario when user enters a new vendor, and then hits Cancel, in which case, cleanup and create and empty new vendor
-            onVendorChange(VendorModel.create({}));
 
-        // else {
-        //     onVendorChange(vendorModel);
-        // }
+        // scenario when user hits Cancel without Saving and there is no new vendor data, then cleanup and create and empty new vendor
+        if (VendorModel.getDisplayVersion(vendorModel).length == 0) {
+            onVendorChange(VendorModel.create({}));
+        }
+
+        onChangeShowPopup(false);
         setShow(false);
 
     }, [vendorModel, onVendorChange]);

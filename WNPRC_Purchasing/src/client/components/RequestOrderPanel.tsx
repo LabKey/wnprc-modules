@@ -21,12 +21,9 @@ export const RequestOrderPanel: FC<Props> = (props) => {
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
-    const onVendorAdd = useCallback((newVendor : VendorModel) => {
-        const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
-            draft['newVendor'] = newVendor;
-        })
-        onInputChange(updatedModel);
-    }, [model]);
+    const onModelChange = useCallback((changedModel: RequestOrderModel) => {
+        onInputChange(changedModel);
+    },[model]);
 
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
@@ -82,20 +79,11 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                     />
                 }
                 <VendorInput
-                    value={model.vendorName}
                     hasError={model.errors && model.errors.find((field) => field.fieldName === 'vendorName')}
                     onChange={onValueChange}
+                    model={model}
+                    onModelChange={onModelChange}
                 />
-                {
-                    model.vendorName === "Other" &&
-                    <>
-                        <VendorPopupModal showPopup={true} vendorModel={model.newVendor} onVendorChange={onVendorAdd}/>
-                        {
-                            model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&
-                                <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
-                        }
-                    </>
-                }
                 <BusinessPurposeInput
                     value={model.purpose}
                     hasError={model.errors && model.errors.find((field) => field.fieldName === 'purpose')}

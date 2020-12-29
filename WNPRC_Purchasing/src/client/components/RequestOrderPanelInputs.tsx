@@ -234,9 +234,6 @@ export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
 
     const onVendorEdit = useCallback((changedVendorModel: VendorModel) => {
 
-        // const updatedModel = produce(vendorModel, (draft:Draft<VendorModel>) => {
-        //     draft['newVendor'] = changedVendorModel;
-        // })
         onVendorChange(changedVendorModel);
 
     }, [vendorModel, onVendorChange]);

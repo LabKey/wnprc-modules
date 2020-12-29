@@ -84,8 +84,17 @@
 .vendor-new-input {
   width: 80%;
 }
+
 .vendor-new-text-area-input {
   resize: none;
   width: 80%;
   height: 60px !important;
+}
+
+$red-border:            rgba(160, 80, 76, 1);
+$red-shadow:            rgba(160, 80, 76, 0.5);
+
+.field-validation-error {
+  border-color: $red-border;
+  box-shadow: inset 0 0 5px 0 $red-shadow, 0 0 5px 0 $red-shadow;
 }

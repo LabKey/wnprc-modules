@@ -5,11 +5,12 @@ import {createOptions, formatCurrency} from "./Utils";
 interface InputProps {
     value: any;
     onChange: (colName, value) => void;
+    hasError?: boolean;
 }
 
 export const DescriptionInput: FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const { onChange, value, hasError } = props;
 
     const onTextChange = useCallback((evt) => {
         onChange('item', evt.target.value);
@@ -17,7 +18,7 @@ export const DescriptionInput: FC<InputProps> = (props) => {
 
     return (
         <input
-            className='line-item-row-input description-input form-control'
+            className= {'line-item-row-input description-input form-control ' + (hasError ? 'field-validation-error' : '')}
             value={value}
             onChange={onTextChange}
             id="item-description-id"
@@ -27,7 +28,7 @@ export const DescriptionInput: FC<InputProps> = (props) => {
 
 export const UnitInput : FC<InputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     //TODO: only want getDropdownOptions to be called once, and not at each Item Row rendering
@@ -40,12 +41,12 @@ export const UnitInput : FC<InputProps> = (props) => {
     const options = useMemo(() => createOptions(dropDownVals, 'itemUnit', false), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
-        onChange('unit', evt.target.value);
+        onChange('itemUnit', evt.target.value);
     },[onChange]);
 
     return (
         <select
-            className='line-item-row-input unit-input form-control'
+            className={'line-item-row-input unit-input form-control ' + (hasError ? 'field-validation-error' : '')}
             value={value}
             onChange={onValueChange}
         >
@@ -58,11 +59,12 @@ export const UnitInput : FC<InputProps> = (props) => {
 interface NumericInputProps {
     value: number;
     onChange: (colName, value) => void;
+    hasError?: boolean;
 }
 
 export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const { onChange, value, hasError } = props;
 
     const onValueChange = useCallback((evt) => {
         onChange('unitPrice', evt.target.value);
@@ -70,7 +72,7 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            className= 'line-item-row-input unit-price-input form-control'
+            className= {'line-item-row-input unit-price-input form-control ' + (hasError ? 'field-validation-error' : '')}
             value={value}
             onChange={onValueChange}
             id="unit-price-id"
@@ -82,7 +84,7 @@ export const UnitPriceInput: FC<NumericInputProps> = (props) => {
 
 export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 
-    const { onChange, value } = props;
+    const { onChange, value, hasError } = props;
 
     const onValueChange = useCallback((evt) => {
         onChange('quantity', evt.target.value);
@@ -90,7 +92,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 
     return (
         <input
-            className='line-item-row-input quantity-input form-control'
+            className={'line-item-row-input quantity-input form-control ' + (hasError ? 'field-validation-error' : '')}
             value={value}
             onChange={onValueChange}
             pattern="[0-9]*"

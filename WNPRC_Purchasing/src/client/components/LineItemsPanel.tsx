@@ -11,16 +11,17 @@ interface Props
 {
     lineItems: Array<LineItemModel>;
     onChange: (lineItems: Array<LineItemModel>) => void;
+    errorMsg?: string;
 }
 
 export const LineItemsPanel: FC<Props> = (props) => {
 
-    const {lineItems, onChange} = props;
+    const {lineItems, onChange, errorMsg} = props;
 
-    const lineItemRowChange = useCallback((lineItem) => {
+    const lineItemRowChange = useCallback((lineItem, updatedRowIndex) => {
 
         const updatedLineItems = produce(lineItems, (draft: Draft<LineItemModel>) => {
-            draft[lineItem.rowIndex] = lineItem;
+            draft[updatedRowIndex] = lineItem;
         });
 
         onChange(updatedLineItems);
@@ -37,7 +38,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
 
     const onClickAddRow = () => {
         const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
-            draft.push(LineItemModel.create({rowIndex: lineItems.length}))
+            draft.push(LineItemModel.create({}))
         });
         onChange(updatedLineItems);
     }
@@ -67,8 +68,11 @@ export const LineItemsPanel: FC<Props> = (props) => {
             <div>
                 {
                     lineItems.map((lineItem, idx) => {
-                        return <LineItemRow rowIndex={idx} key={"line-item-" + idx} model={lineItem}
-                                            onInputChange={lineItemRowChange} onDelete={onDeleteRow}/>
+                        return <LineItemRow
+                            rowIndex={idx} key={"line-item-" + idx}
+                            model={lineItem}
+                            onInputChange={lineItemRowChange}
+                            onDelete={onDeleteRow}/>
                     })
                 }
             </div>
@@ -93,6 +97,11 @@ export const LineItemsPanel: FC<Props> = (props) => {
                     <FontAwesomeIcon className='fa-faPlusCircle' icon={faPlusCircle} color={'green'}/> Add item
                 </span>
             </div>
+            {errorMsg &&
+            <div className='alert alert-danger'>
+                {errorMsg}
+            </div>
+            }
         </Panel>
     );
 }

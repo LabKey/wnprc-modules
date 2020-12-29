@@ -7,11 +7,12 @@ interface InputProps
 {
     value: any;
     onChange: (colName, value) => void;
+    hasError?: boolean;
 }
 
 export const AccountInput: FC<InputProps> = (props) => {
 
-    const {onChange, value} = props;
+    const {onChange, value, hasError} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
@@ -33,7 +34,7 @@ export const AccountInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <select
-                    className='account-input form-control'
+                    className={'account-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onValueChange}
                     placeholder="Please provide the purpose for this purchasing request (Required)"
@@ -48,7 +49,7 @@ export const AccountInput: FC<InputProps> = (props) => {
 
 export const AccountOtherInput: FC<InputProps> = (props) => {
 
-    const {onChange, value} = props;
+    const {onChange, value, hasError} = props;
 
     const onTextChange = useCallback((evt) => {
         onChange('accountOther', evt.target.value);
@@ -61,7 +62,7 @@ export const AccountOtherInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    className='account-input other-account-input form-control'
+                    className={'account-input other-account-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onTextChange}
                     id="account-and-pi-id"
@@ -75,7 +76,7 @@ export const AccountOtherInput: FC<InputProps> = (props) => {
 
 export const VendorInput: FC<InputProps> = (props) => {
 
-    const {onChange, value} = props;
+    const {onChange, value, hasError} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
@@ -96,7 +97,7 @@ export const VendorInput: FC<InputProps> = (props) => {
                 label="Vendor"
                 required={true}
             >
-                <select className='vendor-input form-control'
+                <select className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
                         value={value}
                         onChange={onValueChange}
                 >
@@ -110,7 +111,7 @@ export const VendorInput: FC<InputProps> = (props) => {
 
 export const BusinessPurposeInput: FC<InputProps> = (props) => {
 
-    const {onChange, value} = props;
+    const {onChange, value, hasError} = props;
 
     const onTextChange = useCallback((evt) => {
         onChange('purpose', evt.target.value);
@@ -123,7 +124,7 @@ export const BusinessPurposeInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    className='business-purpose-input form-control'
+                    className={'business-purpose-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onTextChange}
                     id="business-purpose-id"
@@ -161,7 +162,7 @@ export const SpecialInstructionInput: FC<InputProps> = (props) => {
 
 export const ShippingDestinationInput: FC<InputProps> = (props) => {
 
-    const {onChange, value} = props;
+    const {onChange, value, hasError} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
@@ -182,9 +183,10 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
                 label="Shipping destination"
                 required={true}
             >
-                <select className='shipping-dest-input form-control'
-                        value={value}
-                        onChange={onValueChange}
+                <select
+                    className={'shipping-dest-input form-control ' + (hasError ? 'field-validation-error' : '')}
+                    value={value}
+                    onChange={onValueChange}
                 >
                     <option hidden value="">Select</option>
                     {options}
@@ -195,7 +197,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
 }
 
 export const DeliveryAttentionInput: FC<InputProps> = (props) => {
-    const {onChange, value} = props;
+    const {onChange, value, hasError} = props;
     const onTextChange = useCallback((evt) => {
         onChange('deliveryAttentionTo', evt.target.value);
     }, [onChange]);
@@ -206,7 +208,7 @@ export const DeliveryAttentionInput: FC<InputProps> = (props) => {
                 required={true}
             >
                 <textarea
-                    className='delivery-attn-input form-control'
+                    className={'delivery-attn-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onTextChange}
                     id="delivery-attn-id"

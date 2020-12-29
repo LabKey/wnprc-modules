@@ -15,6 +15,8 @@ export class RequestOrderModel {
     readonly shippingDestination: string;
     readonly deliveryAttentionTo: string;
     readonly comments?: string;
+    readonly errorMsg?: string;
+    readonly errors?: any;
 
     constructor(values?: Partial<RequestOrderModel>) {
         Object.assign(this, values);
@@ -46,6 +48,8 @@ export class VendorModel {
     readonly email?: string;
     readonly url?: string;
     readonly notes?: string;
+    readonly errorMsg?: string;
+    readonly errors?: any;
 
     constructor(values?: Partial<VendorModel>) {
         Object.assign(this, values);
@@ -66,13 +70,14 @@ export class LineItemModel {
      */
     [immerable] = true;
 
-    readonly item: string
-    readonly controlledSubstance: boolean = false
-    readonly itemUnit: string
-    readonly quantity: number
-    readonly unitPrice: number
-    readonly subTotal: number = 0
-    readonly status?: string
+    readonly item: string;
+    readonly controlledSubstance: boolean = false;
+    readonly itemUnit: string;
+    readonly quantity: number;
+    readonly unitPrice: number;
+    readonly subTotal: number = 0;
+    readonly status?: string;
+    readonly errors?: any;
 
     constructor(values?: Partial<LineItemModel>) {
         Object.assign(this, values);

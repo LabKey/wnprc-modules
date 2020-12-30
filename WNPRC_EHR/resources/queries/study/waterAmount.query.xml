@@ -21,6 +21,14 @@
                     <column columnName="volume">
                         <columnTitle>Volume (mL)</columnTitle>
                     </column>
+                    <column columnName="provideFruit">
+                        <columnTitle>Provide Fruit</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_fruit</fkTable>
+                            <fkColumnName>Value</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="assignedTo">
                         <columnTitle>Assigned To</columnTitle>
                         <fk>

@@ -4,7 +4,7 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 //EHR.Server.Utils = require("ehr/utils").EHR.Server.Utils;
 
 function onInit(event, helper){
-   // helper.decodeExtraContextProperty('waterInTransaction');
+    helper.decodeExtraContextProperty('waterInTransaction');
 
     helper.setScriptOptions({
         allowDeadIds: true,
@@ -14,7 +14,7 @@ function onInit(event, helper){
         isSkipAssignmentCheck: true
     });
 
-    /*helper.registerRowProcessor(function(helper, row){
+    helper.registerRowProcessor(function(helper, row){
         if (!row)
             return;
 
@@ -27,7 +27,9 @@ function onInit(event, helper){
 
         var waterInTransaction = helper.getProperty('waterInTransaction');
         waterInTransaction = waterInTransaction || [];
-        console.log ('size of water in Transaction '+ waterInTransaction);
+        waterInTransaction[row.Id] = waterInTransaction[row.Id] || [];
+
+        console.log ('size of water in Transaction '+ waterInTransaction.length);
         //waterInTransaction[] = waterInTransaction[] || [];
         console.log ('water in Transaction '+ waterInTransaction[0]);
 
@@ -38,8 +40,8 @@ function onInit(event, helper){
             var shouldAdd = true;
             LABKEY.ExtAdapter.each(waterInTransaction[row.Id], function (r){
                 if (r.objectid == row.objectid){
-                    if (r.quantity != row.quantity){
-                        r.quantity = row.quantity;
+                    if (r.volume != row.volume){
+                        r.volume = row.volume;
                     }
                     else {
                         shouldAdd = false;
@@ -51,16 +53,17 @@ function onInit(event, helper){
             }, this);
         }
         if (shouldAdd){
-            /!*waterInTransaction[row.Id].push({
+            waterInTransaction[row.Id].push({
                 objectid: row.objectid,
                 date: row.date,
+                datasource: row.datasource,
                 qcstate: row.qcstate,
-                assignto: row.assignto,
+                assignedto: row.assignedto,
                 parentid: row.parentid,
                 volume: row.volume,
                 lsid: row.lsid
 
-            });*!/
+            });
             //console.log (i+' inside loop water in Transaction '+ waterInTransaction[i].date+ ' '+ waterInTransaction[i].Id +' '+ waterInTransaction[i].assignto);
             //console.log (waterInTransaction[i].objectid+ ' '+waterInTransaction[i].volume);
         }
@@ -69,7 +72,7 @@ function onInit(event, helper){
 
 
         helper.setProperty('waterInTransaction', waterInTransaction);
-    });*/
+    });
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
@@ -109,6 +112,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             {
                 waters = map[row.Id];
                 /*for (var i=0;i<map.length; i++ ){
+                    console.log ('value of map '+ map[i]);
                     waters.push (map[i]);
                     console.log ("map in JS "+map[i].objectid + " " + map[i].volume);
                 }*/
@@ -165,6 +169,18 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         }
         if (row.waterSource == 'lixit' && !row.remarks){
             EHR.Server.Utils.addError(scriptErrors, 'remarks', 'Add remark for connecting lixit', 'WARN');
+        }
+        console.log ('value outside if statement '+ row.treatmentId);
+
+        if (row.treatmentId != null && row.id && row.performedby && row.volume){
+            //TODO: called function to change QC for water amount
+            console.log('value of dataSource ' + row.dataSource);
+            console.log('value of treatmentId ' + row.treatmentId);
+            console.log('extra context '+ waters);
+            
+            WNPRC.Utils.getJavaHelper().changeWaterAmountQC(row.treatmentId, waters);
+            //row.remarks=
+
         }
 
 

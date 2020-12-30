@@ -138,7 +138,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             queryName: 'waterScheduleCoalesced',
             parameters: {NumDays: 1, StartDate: new Date()},
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
-            columns: 'animalid,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dateOrdered',
+            columns: 'animalid,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dataSource,dateOrdered',
             filterArray: filtersArray,
             scope: this,
             success: this.loadWater,
@@ -207,30 +207,56 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
         //LDK.Assert.assertNotEmpty('Unable to find targetStore in AddScheduledTreatmentsWindow', this.targetStore);
 
         var records = [];
+        let waterRecord = new Map();
+        let waterObjects = {};
         //var performedby = this.down('#performedBy').getValue();
 
 
         Ext4.Array.each(results.rows, function(sr){
             var row = new LDK.SelectRowsRow(sr);
+            let animalId = row.getValue('animalid');
             var dateCurrentTime = new Date();
             var modelDate = new Date (row.getValue('date'));
             modelDate.setHours(dateCurrentTime.getHours());
             modelDate.setMinutes(dateCurrentTime.getMinutes());
 
+            let waterObject = {treatmentId: row.getValue('objectid'), volume: row.getValue('volume')};
+
+            let previousVolume = 0;
+            let previousTreatmentId = '';
+
+            if (waterRecord.has(animalId) && waterRecord.get(animalId).raw.model == 'waterRecord'){
+                previousVolume = waterRecord.get(animalId).get('volume');
+                previousTreatmentId = ';' + waterRecord.get(animalId).get('treatmentId');
+                //waterObjects.push({treatmentId:waterRecord.get(animalId).get('treatmentId'), volume: waterRecord.get(animalId).get('volume')});
+                //waterObjects[animalId].push(waterObject);
+            }
+
+            if (!waterObjects[animalId]){
+                waterObjects[animalId] = [];
+            }
+            waterObjects[animalId].push(waterObject);
+
             var tempModel = this.targetStore.createModel({
                 Id:                 row.getValue('animalid'),
                 date:               modelDate,
-                volume:             row.getValue('volume'),
+                volume:             row.getValue('volume') + previousVolume,
                 project:            row.getValue('project'),
                 assignedto:         row.getValue('assignedTo'),
                 waterSource:        row.getValue('waterSource'),
-                treatmentId:        row.getValue('objectid'),
-                dateOrdered:        row.getValue('dateOrdered')
+                treatmentId:        row.getValue('objectid') + previousTreatmentId,
+                dataSource:         row.getValue('dataSource'),
+                dateOrdered:        row.getValue('dateOrdered'),
+                model:              'waterRecord',
+                waterObjects:       waterObjects[animalId]
+
 
             });
+
             tempModel.phantom = false;
-            records.push(tempModel);
-            if ( row.getValue('provideFruit') != 'none' && row.getValue('provideFruit') != 'null'){
+            waterRecord.set(animalId,tempModel);
+
+            if ( row.getValue('provideFruit') != 'none' && row.getValue('provideFruit') != null){
                 var fruitModel = this.targetStore.createModel({
                     Id:                 row.getValue('animalid'),
                     date:               modelDate,
@@ -239,14 +265,23 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                     assignedto:         row.getValue('assignedTo'),
                     waterSource:        row.getValue('waterSource'),
                     treatmentId:        row.getValue('objectid'),
-                    dateOrdered:        row.getValue('dateOrdered')
+                    dataSource:         row.getValue('dataSource'),
+                    dateOrdered:        row.getValue('dateOrdered'),
+                    model:              'fruitRecord'
 
                 });
                 fruitModel.phantom = false;
-                records.push(fruitModel);
+                waterRecord.set(animalId+'fruit',fruitModel);
 
             }
+
+
+
         }, this);
+
+        waterRecord.forEach(function (value,key) {
+            records.push(value);
+        })
 
         this.targetStore.add(records);
         Ext4.Msg.hide();

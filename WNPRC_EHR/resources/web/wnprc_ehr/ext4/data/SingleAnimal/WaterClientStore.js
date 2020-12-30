@@ -28,10 +28,14 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.WaterClientStore', {
 
                 waterMap[id].push({
                     objectid: record.get('objectid'),
+                    treatmentId: record.get('treatmentId'),
                     date: date,
                     qcstate: record.get('qcstate'),
                     volume: record.get('volume'),
-                    assignedto: record.get('assignedto')
+                    assignedto: record.get('assignedto'),
+                    datasource: record.raw.dataSource,
+                    //remove waterobjects and use treamentIds to complete
+                    waterObjects: record.raw.waterObjects
                 });
             }
         }

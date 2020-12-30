@@ -59,6 +59,9 @@
     SimpleQuery husbandryFrequency = queryFactory.makeQuery("ehr_lookups", "husbandry_frequency");
     List<JSONObject> husbandryFrequencyList= JsonUtils.getSortedListFromJSONArray(husbandryFrequency.getResults().getJSONArray("rows"),"meaning");
 
+    SimpleQuery husbandryFruit = queryFactory.makeQuery("ehr_lookups", "husbandry_fruit");
+    List<JSONObject> husbandryFruitList= JsonUtils.getSortedListFromJSONArray(husbandryFruit.getResults().getJSONArray("rows"),"title");
+
     //TODO: Query WaterCoalesce for all future water for the next 60 days
     SimpleQuery futureWaters = queryFactory.makeQuery("study", "waterScheduleCoalesced");
     List<JSONObject> waterList = JsonUtils.getListFromJSONArray(futureWaters.getResults().getJSONArray("rows"));
@@ -171,6 +174,7 @@
                         <dt>Location:           </dt> <dd>{{location}}</dd>
                         <dt>Assigned to:        </dt> <dd>{{assignedToTitleCoalesced}}</dd>
                         <dt>Volume:             </dt> <dd>{{volume}}</dd>
+                        <dt>Provide Fruit:      </dt> <dd>{{provideFruitTitle}}</dd>
                         <dt>Project (Account):  </dt> <dd>{{projectCoalesced}}</dd>
                         <dt>Date:               </dt> <dd>{{displayDate}}</dd>
                         <dt>Frequency:          </dt> <dd>{{frequencyMeaningCoalesced}}</dd>
@@ -270,6 +274,26 @@
                                     <%--<p class="form-control-static">{{volumeCoalesced}}</p>--%>
                                 </div>
 
+                            </div>
+                            <div class="from-group">
+                                <label class="col-xs-4 control-label">Provide Fruit:</label>
+                                <div class="col-xs-8">
+                                    <p>
+                                        <select data-bind="value: provideFruit" class="form-control">
+                                            <%--<option value="">{{frequencyMeaningCoalesced}}</option>--%>
+                                            <%
+                                                for(JSONObject frequency : husbandryFruitList) {
+                                                    String value = frequency.getString("value");
+                                                    String title = frequency.getString("title");
+                                            %>
+                                            <option value="<%=value%>"><%=h(title)%></option>
+                                            <%
+                                                }
+                                            %>
+                                        </select>
+                                    </p>
+
+                                </div>
                             </div>
                             <!-- /ko -->
 
@@ -408,14 +432,14 @@
                                     callback(events.map(function (row) {
                                         var volume;
                                         if (row.volume) {
-                                            volume = row.volume;
+                                            volume = row.volume + 'mL';
                                         }
                                         else {
-                                            volume = 0;
+                                            volume = "On Lixit";
                                         }
 
                                         var eventObj = {
-                                            title: row.animalId + ' ' + volume + 'ml',
+                                            title: row.animalId + ' ' + volume,
                                             start: row.date,
                                             allDay: true,
                                             // vol: row.volume,
@@ -436,7 +460,10 @@
                                         return eventObj;
                                     }))
                                 })
-                            }else{
+                            }
+                            //Render calendat for one animal of a group of animals
+                            //Display panel in the animal history
+                            else{
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", {
                                     "date~gte": startMoment.format('Y-MM-DD'),
                                     "date~lte": endMoment.format('Y-MM-DD'),
@@ -448,14 +475,14 @@
                                     callback(events.map(function (row) {
                                         var volume;
                                         if (row.volume) {
-                                            volume = row.volume;
+                                            volume = row.volume+ 'ml';
                                         }
                                         else {
-                                            volume = 0;
+                                            volume = 'On Lixit';
                                         }
 
                                         var eventObj = {
-                                            title: row.animalId + ' ' + volume + 'ml',
+                                            title: row.animalId + ' ' + volume,
                                             start: row.date,
                                             allDay: true,
                                             // vol: row.volume,
@@ -625,6 +652,8 @@
                 date:                       ko.observable(),
                 location:                   ko.observable(),
                 volume:                     ko.observable(),
+                provideFruit:               ko.observable(),
+                provideFruitTitle:          ko.observable(),
                 dataSource:                 ko.observable(),
                 assignedToCoalesced:        ko.observable(),
                 assignedToTitleCoalesced:   ko.observable(),
@@ -911,8 +940,10 @@
                         assignedTo:     form.assignedToCoalesced,
                         project:        form.projectCoalesced,
                         volume:         form.volume,
+                        provideFruit:   form.provideFruit,
                         frequency:      form.frequencyCoalesced,
                         recordSource:   "WaterCalendar",
+                        waterSource:    "regulated",
                         qcstate:        10 //Schedule
                     }]);
                     WebUtils.API.insertRows('ehr', 'tasks', [{
@@ -937,7 +968,9 @@
                             animalId:           form.animalId,
                             assignedTo:         form.assignedToCoalesced,
                             volume:             form.volume,
+                            provideFruit:       form.provideFruit,
                             dataSource:         form.dataSource,
+                            waterSource:        "regulated",
                             action:             "update"
 
                         }),

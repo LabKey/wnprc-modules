@@ -9,6 +9,8 @@ SELECT
     dateOrdered AS dateOrdered,
     startDateCoalesced AS startDateCoalesced,
     volume AS volume,
+    provideFruit AS provideFruit,
+    provideFruitTitle AS provideFruitTitle,
     dataSource AS dataSource,
     assignedTo AS assignedToCoalesced,
     assignedToTitle AS assignedToTitleCoalesced,

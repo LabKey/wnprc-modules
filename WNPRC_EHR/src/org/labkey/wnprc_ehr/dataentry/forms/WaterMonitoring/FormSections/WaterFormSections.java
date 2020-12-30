@@ -32,7 +32,7 @@ public class WaterFormSections extends SlaveFormSection
 
     @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id", "date", "volume","location","route", "project","frequency","provideFruit","remarks","performedby","waterSource","assignedTo");
+        return Arrays.asList("Id", "date", "volume","location","route", "project","frequency","provideFruit","remarks","performedby","waterSource","assignedTo","treatmentId");
     }
 
 

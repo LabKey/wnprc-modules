@@ -512,8 +512,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 xtype: 'ehr-remarkfield'
             },
 
-            treatmentid: {
-                hidden: true
+            treatmentId: {
+                hidden: true,
+                defaultValue: null
             },
             dateordered:{
                 hidden: true

@@ -24,16 +24,22 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         console.log("value of qcstate waterAmount after setting 10 " + row.qcstate);
 
         console.log ("value of assignedTo "+ row.assignedTo)
-        if (row.assignedTo == "animalcare"){
-            let map = helper.getProperty('waterInTransaction');
-            let waters = [];
-            if (map && map[row.id]) {
-                 waters = map[row.id];
+        if (row.assignedTo == "animalcare" && row.volume){
+            let errorMessage = WNPRC.Utils.getJavaHelper().checkUploadTime(row.id,row.date,row.recordSource,row.assignedTo, 'waterAmount');
+            if (errorMessage != null){
+                EHR.Server.Utils.addError(scriptErrors,'assignedTo',errorMessage,'INFO');
             }
+        }
+        if (row.volume && row.waterSource == "regulated"){
+            let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterSchedule(row.id,row.date,row.objectid);
+            if (jsonArray != null){
+                for (var i = 0; i < jsonArray.length; i++ ){
+                    let errorObject = JSON.parse(jsonArray[i]);
+                    EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message,errorObject.severity);
 
-            console.log ("got into if");
-           // WNPRC.Utils.getJavaHelper().checkScheduledWaterTask(waters);
-
+                }
+            }
+            
         }
 
     }

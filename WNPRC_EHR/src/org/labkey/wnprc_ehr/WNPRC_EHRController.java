@@ -1620,6 +1620,7 @@ public class WNPRC_EHRController extends SpringActionController
                             waterAmountRecord.put("taskid", woRow.get("taskid"));
                             waterAmountRecord.put("objectid", event.getObjectId());
                             waterAmountRecord.put("volume", event.getVolume());
+                            waterAmountRecord.put("provideFruit", event.getProvideFruit());
                             waterAmountRecord.put("date", event.getDate());
                             waterAmountRecord.put("assignedTo", event.getAssignedTo());
                             waterAmountRecord.put("frequency", event.getFrequency());
@@ -1889,6 +1890,7 @@ public class WNPRC_EHRController extends SpringActionController
         private Date endDate;
         private long dateInMillis;
         private Double volume;
+        private String provideFruit;
         private String dataSource;
         private String waterSource;
         private String frequency;
@@ -1969,6 +1971,11 @@ public class WNPRC_EHRController extends SpringActionController
             this.volume = volume;
         }
 
+        public void setProvideFruit(String provideFruit)
+        {
+            this.provideFruit = provideFruit;
+        }
+
         public void setAssignedTo(String assignedTo)
         {
             this.assignedTo = assignedTo;
@@ -2027,6 +2034,11 @@ public class WNPRC_EHRController extends SpringActionController
         public Double getVolume()
         {
             return volume;
+        }
+
+        public String getProvideFruit()
+        {
+            return provideFruit;
         }
 
         public String getAssignedTo()

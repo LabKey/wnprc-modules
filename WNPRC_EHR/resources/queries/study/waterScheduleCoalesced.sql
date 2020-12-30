@@ -15,6 +15,7 @@
     WA.assignedTo AS assignedTo,
     WA.assignedTo.title AS assignedToTitle,
     WA.provideFruit AS provideFruit,
+    WA.provideFruit.title AS provideFruitTitle,
     'waterAmount' AS dataSource,
     WA.objectid AS objectid,
     WA.taskid AS taskid,
@@ -28,7 +29,7 @@
 
 
 FROM study.waterAmount WA
-WHERE WA.date >= curdate()
+--WHERE WA.date >= curdate()
 )
 
 UNION ALL
@@ -46,6 +47,7 @@ UNION ALL
     WS.assignedTo AS assignedTo,
     WS.assignedToTittle AS assignedToTitle,
     WS.provideFruit AS provideFruit,
+    WS.provideFruitTitle AS provideFruitValue,
     'waterOrders' AS dataSource,
     WS.objectid AS objectid,
     WS.taskid AS taskid,

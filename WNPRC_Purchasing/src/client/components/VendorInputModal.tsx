@@ -1,5 +1,5 @@
 import {VendorModel} from "../model";
-import React, {FC, useCallback, useState} from "react";
+import React, {FC, useCallback, useEffect, useState} from "react";
 import {Button, Modal, Form} from 'react-bootstrap';
 import {VendorFormInput} from "./PurchasingFormInput";
 import produce, {Draft} from "immer";
@@ -15,29 +15,34 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
     const { vendorModel, onVendorChange, showPopup, onChangeShowPopup } = props;
 
     const [show, setShow] = useState(showPopup);
+    const [updatedNewVendor, setUpdatedNewVendor] = useState<VendorModel>(VendorModel.create({}));
+
+    useEffect(() => {
+        setUpdatedNewVendor(vendorModel);
+    }, []);
 
     const onAddingNewVendor = useCallback(() => {
         const errors = [];
         setShow(false);
-        if (!vendorModel.vendorName) {
+        if (!updatedNewVendor.vendorName) {
             errors.push({fieldName: 'vendorName'})
         }
-        if (!vendorModel.streetAddress) {
+        if (!updatedNewVendor.streetAddress) {
             errors.push({fieldName: 'streetAddress'})
         }
-        if (!vendorModel.city) {
+        if (!updatedNewVendor.city) {
             errors.push({fieldName: 'city'})
         }
-        if (!vendorModel.state) {
+        if (!updatedNewVendor.state) {
             errors.push({fieldName: 'state'})
         }
-        if (!vendorModel.country) {
+        if (!updatedNewVendor.country) {
             errors.push({fieldName: 'country'})
         }
-        if (!vendorModel.country) {
+        if (!updatedNewVendor.country) {
             errors.push({fieldName: 'zip'})
         }
-        const updatedModel = produce(vendorModel, (draft: Draft<VendorModel>) => {
+        const updatedModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
             if (errors.length > 0) {
                 draft.errors = errors;
                 draft.errorMsg = "Unable to save, missing required field(s).";
@@ -47,7 +52,7 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
         onVendorChange(updatedModel);
         onChangeShowPopup(false);
 
-    }, [vendorModel, onVendorChange]);
+    }, [updatedNewVendor, onVendorChange]);
 
     const handleClose = useCallback(() => {
 
@@ -55,17 +60,18 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
         if (VendorModel.getDisplayVersion(vendorModel).length == 0) {
             onVendorChange(VendorModel.create({}));
         }
-
+        else {
+            setUpdatedNewVendor(vendorModel);
+        }
         onChangeShowPopup(false);
         setShow(false);
 
     }, [vendorModel, onVendorChange]);
 
-    const handleShow = () => setShow(true);
     const onInputChange = useCallback((colName, value) => {
-        const updatedVendorModel = produce(vendorModel, (draft: Draft<VendorModel>) => {
-            if (vendorModel.errors && vendorModel.errors.length > 0) {
-                let updatedErrors = vendorModel.errors.filter((field) => field.fieldName !== colName);
+        const updatedVendorModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
+            if (updatedNewVendor.errors && updatedNewVendor.errors.length > 0) {
+                let updatedErrors = updatedNewVendor.errors.filter((field) => field.fieldName !== colName);
                 draft['errors'] = updatedErrors;
             }
             if (draft['errors'] && draft['errors'].length === 0) {
@@ -74,8 +80,8 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
             draft[colName] = value;
         });
 
-        onVendorChange(updatedVendorModel);
-    }, [vendorModel, onVendorChange]);
+        setUpdatedNewVendor(updatedVendorModel);
+    }, [updatedNewVendor, onVendorChange]);
 
     return (
         <>
@@ -89,83 +95,83 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
                             required={true}
                             column={'vendorName'}
                             columnTitle={'Vendor Name'}
-                            value={vendorModel.vendorName}
+                            value={updatedNewVendor.vendorName}
                             onChange={onInputChange}
-                            hasError={vendorModel.errors && vendorModel.errors.find((field) => field.fieldName === 'vendorName')}
+                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'vendorName')}
                         />
                         <NewVendorTextArea
                             required={true}
                             column={'streetAddress'}
                             columnTitle={'Street Address'}
-                            value={vendorModel.streetAddress}
+                            value={updatedNewVendor.streetAddress}
                             onChange={onInputChange}
-                            hasError={vendorModel.errors && vendorModel.errors.find((field) => field.fieldName === 'streetAddress')}
+                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'streetAddress')}
                         />
                         <NewVendorInput
                             required={true}
                             column={'city'}
                             columnTitle={'City'}
-                            value={vendorModel.city}
+                            value={updatedNewVendor.city}
                             onChange={onInputChange}
-                            hasError={vendorModel.errors && vendorModel.errors.find((field) => field.fieldName === 'city')}
+                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'city')}
                         />
                         <NewVendorInput
                             required={true}
                             column={'state'}
                             columnTitle={'State'}
-                            value={vendorModel.state}
+                            value={updatedNewVendor.state}
                             onChange={onInputChange}
-                            hasError={vendorModel.errors && vendorModel.errors.find((field) => field.fieldName === 'state')}
+                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'state')}
                         />
                         <NewVendorInput
                             required={true}
                             column={'country'}
                             columnTitle={'Country'}
-                            value={vendorModel.country}
+                            value={updatedNewVendor.country}
                             onChange={onInputChange}
-                            hasError={vendorModel.errors && vendorModel.errors.find((field) => field.fieldName === 'country')}
+                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'country')}
                         />
                         <NewVendorInput
                             required={true}
                             column={'zip'}
                             columnTitle={'Zip Code'}
-                            value={vendorModel.zip}
+                            value={updatedNewVendor.zip}
                             onChange={onInputChange}
-                            hasError={vendorModel.errors && vendorModel.errors.find((field) => field.fieldName === 'zip')}
+                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'zip')}
                         />
                         <NewVendorInput
                             required={false}
                             column={'phoneNumber'}
                             columnTitle={'Phone'}
-                            value={vendorModel.phoneNumber}
+                            value={updatedNewVendor.phoneNumber}
                             onChange={onInputChange}
                         />
                         <NewVendorInput
                             required={false}
                             column={'faxNumber'}
                             columnTitle={'Fax'}
-                            value={vendorModel.faxNumber}
+                            value={updatedNewVendor.faxNumber}
                             onChange={onInputChange}
                         />
                         <NewVendorInput
                             required={false}
                             column={'email'}
                             columnTitle={'Email'}
-                            value={vendorModel.email}
+                            value={updatedNewVendor.email}
                             onChange={onInputChange}
                         />
                         <NewVendorTextArea
                             required={false}
                             column={'url'}
                             columnTitle={'Company website'}
-                            value={vendorModel.url}
+                            value={updatedNewVendor.url}
                             onChange={onInputChange}
                         />
                         <NewVendorTextArea
                             required={false}
                             column={'notes'}
                             columnTitle={'Notes'}
-                            value={vendorModel.notes}
+                            value={updatedNewVendor.notes}
                             onChange={onInputChange}
                         />
                     </Form>

@@ -4,7 +4,7 @@ interface InputRow {
     [key: string]: string
 }
 
-export const createOptions = (rows: Array<InputRow>, colName: string, addOtherOption: boolean, formatColName ?: string) => {
+export const createOptions = (rows: Array<InputRow>, keyCol: string, displayCol: string, addOtherOption: boolean, formatColName ?: string) => {
     if (!rows)
         return undefined;
 
@@ -12,14 +12,14 @@ export const createOptions = (rows: Array<InputRow>, colName: string, addOtherOp
 
     Object.assign(options, rows)
     if (addOtherOption) {
-        options[rows.length] = {[colName]: 'Other'};
+        options[rows.length] = {[displayCol]: 'Other'};
     }
 
-    return options.map((row, index) => {
+    return options.map((row) => {
         return (
-            <option key={index + "-" + row[colName]} value={row[colName]}>
+            <option key={row[keyCol] + "-" + row[displayCol]} value={row[keyCol]}>
                 {
-                    row[colName] + (formatColName && row[formatColName] ? " (" + row[formatColName] + ")" : '')
+                    row[displayCol] + (formatColName && row[formatColName] ? " (" + row[formatColName] + ")" : '')
                 }
             </option>
         );
@@ -30,7 +30,7 @@ export const formatCurrency = (value: number) => {
     const formatter = new Intl.NumberFormat("en-US", {
         style: "decimal",
         currency: "USD",
-        minimumFractionDigits: 2
+        maximumFractionDigits: 2
     });
     return formatter.format(value);
 }

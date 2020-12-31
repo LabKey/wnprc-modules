@@ -15,11 +15,12 @@
  */
 import React, {FC, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
-import {LineItemModel, RequestOrderModel, VendorModel} from "../model";
+import {LineItemModel, RequestOrderModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
 import '../RequestEntry/RequestEntry.scss';
 import {ActionURL, getServerContext} from "@labkey/api";
 import produce, {Draft} from "immer";
+import {submitRequest} from "../actions";
 
 export const App : FC = () => {
 
@@ -72,6 +73,7 @@ export const App : FC = () => {
 
         //if required values are not provided, then set errorMessage for the panel and errors on each field to highlight boxes in red
         let msg = "Unable to submit request, missing required field(s).";
+
         //catch errors for Request Order panel
         const requestOrderErrors = [];
         if (!requestOrderModel.account) {
@@ -80,8 +82,8 @@ export const App : FC = () => {
         if (requestOrderModel.account === 'Other' && !requestOrderModel.accountOther) {
             requestOrderErrors.push({fieldName: 'accountOther'});
         }
-        if (!requestOrderModel.vendorName) {
-            requestOrderErrors.push({fieldName: 'vendorName'});
+        if (!requestOrderModel.vendor) {
+            requestOrderErrors.push({fieldName: 'vendor'});
         }
         if (!requestOrderModel.purpose) {
             requestOrderErrors.push({fieldName: 'purpose'});
@@ -135,6 +137,12 @@ export const App : FC = () => {
         }
 
         //if no errors then save
+        if (requestOrderErrors.length == 0 && !hasLineItemError) {
+
+            //TODO : navigate
+            submitRequest(requestOrderModel, lineItems).then(r => console.log(r));
+        }
+
     }, [requestOrderModel, lineItems]);
 
     return (

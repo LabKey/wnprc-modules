@@ -4,9 +4,8 @@ import {RequestOrderModel, VendorModel} from '../model';
 import {Draft, produce} from 'immer';
 import {
     AccountInput, AccountOtherInput, VendorInput, BusinessPurposeInput,
-    SpecialInstructionInput, ShippingDestinationInput, DeliveryAttentionInput, NewVendorDisplay
+    SpecialInstructionInput, ShippingDestinationInput, DeliveryAttentionInput,
 } from "./RequestOrderPanelInputs";
-import {VendorPopupModal} from "./VendorInputModal";
 
 interface Props
 {
@@ -79,7 +78,7 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                     />
                 }
                 <VendorInput
-                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'vendorName')}
+                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'vendor')}
                     onChange={onValueChange}
                     model={model}
                     onModelChange={onModelChange}

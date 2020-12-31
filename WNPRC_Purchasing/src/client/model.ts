@@ -8,16 +8,14 @@ export class RequestOrderModel {
 
     readonly account: string;
     readonly accountOther: string;
-    readonly mdNumber: string;
-    readonly vendorName: string;
+    readonly vendor: number; //rowId of ehr_purchasing.vendor
     readonly newVendor?: VendorModel = VendorModel.create({});
     readonly purpose: string;
-    readonly shippingDestination: string;
+    readonly shippingDestination: number; //rowId of ehr_purchasing.shippingInfo
     readonly deliveryAttentionTo: string;
     readonly comments?: string;
     readonly errorMsg?: string;
     readonly errors?: any;
-    readonly showNewVendor: boolean = false;
 
     constructor(values?: Partial<RequestOrderModel>) {
         Object.assign(this, values);
@@ -89,7 +87,7 @@ export class LineItemModel {
 
     readonly item: string;
     readonly controlledSubstance: boolean = false;
-    readonly itemUnit: string;
+    readonly itemUnit: number; //rowId of ehr_purchasing.itemUnits
     readonly quantity: number;
     readonly unitPrice: number;
     readonly subTotal: number = 0;

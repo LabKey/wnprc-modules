@@ -1,7 +1,7 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
 import {Button} from 'react-bootstrap';
-import {getDropdownOptions} from "../action";
-import {createOptions, formatCurrency} from "./Utils";
+import {getDropdownOptions} from "../actions";
+import {createOptions} from "./Utils";
 import {PurchasingFormInput} from "./PurchasingFormInput";
 import {RequestOrderModel, VendorModel} from "../model";
 import {VendorPopupModal} from "./VendorInputModal";
@@ -20,12 +20,12 @@ export const AccountInput: FC<InputProps> = (props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getDropdownOptions('ehr_billingLinked', 'aliases', 'alias').then(vals => {
+        getDropdownOptions('ehr_billingLinked', 'aliases', 'alias, rowid').then(vals => {
             setDropDownVals(vals)
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'alias', true), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'rowid', 'alias', true), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('account', evt.target.value);
@@ -93,12 +93,12 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
     const [showPopup, setShowPopup] = useState<boolean>(false);
 
     useEffect(() => {
-        getDropdownOptions('ehr_purchasing', 'vendor', 'vendorName').then(vals => {
+        getDropdownOptions('ehr_purchasing', 'vendor', 'vendorName, rowId').then(vals => {
             setDropDownVals(vals)
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'vendorName', true), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'vendorName', true), [dropDownVals]);
 
     const onChangeShowPopup = useCallback((show) => {
         setShowPopup(show);
@@ -116,7 +116,7 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
         else {
             setShowPopup(false);
         }
-        onChange('vendorName', val);
+        onChange('vendor', val);
     }, [onChange, hasError, model, onModelChange]);
 
     const onVendorAdd = useCallback((newVendor : VendorModel) => {
@@ -133,7 +133,7 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
                 required={true}
             >
                 <select className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                        value={model.vendorName}
+                        value={model.vendor}
                         onChange={onValueChange}
                 >
                     <option hidden value="">Select</option>
@@ -215,12 +215,12 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getDropdownOptions('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias').then(vals => {
+        getDropdownOptions('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias, rowId').then(vals => {
             setDropDownVals(vals)
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'streetAddress', false, 'shippingAlias'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'streetAddress', false, 'shippingAlias'), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('shippingDestination', evt.target.value);

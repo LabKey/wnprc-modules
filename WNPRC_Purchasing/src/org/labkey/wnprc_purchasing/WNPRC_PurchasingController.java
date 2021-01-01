@@ -16,24 +16,32 @@
 
 package org.labkey.wnprc_purchasing;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.junit.runner.Request;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.security.ActionNames;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.api.DataType;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.module.ModuleHtmlView;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
-import org.labkey.api.module.ModuleHtmlView;
-import org.labkey.api.module.ModuleLoader;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
@@ -62,20 +70,40 @@ public class WNPRC_PurchasingController extends SpringActionController
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
-            return null;
+            BatchValidationException validationErrors = new BatchValidationException();
+            UserSchema us = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing");
+            TableInfo ti = us.getTable("purchasingRequests");
+            String requestId = UUID.randomUUID().toString().toUpperCase();
+            List<Map<String, Object>> rows = new ArrayList<>();
+
+             Map<String, Object> row = new CaseInsensitiveHashMap<>();
+             row.put("requestId", requestId);
+             row.put("vendorId", requestForm.getVendor());
+             row.put("account", requestForm.getAccount());
+             row.put("shippingInfo", requestForm.getShippingDestination());
+             row.put("justification", requestForm.getPurpose());
+             row.put("shippingAttentionTo", requestForm.getDeliveryAttentionTo());
+             row.put("comments", requestForm.getComments());
+             row.put("assignedTo", getUser().getUserId()); //TODO : change, this will be set to purchasing admin
+             rows.add(row);
+             WNPRC_PurchasingManager.get().insertData(getContainer(), getUser(), ti, rows);
+
+
+            return success();
         }
     }
 
     public static class RequestForm
     {
         Object[] _lineItems;
-        String _account;
+        Integer _account;
         String _accountOther;
-        String _vendorName;
+        Integer _vendor;
         String _purpose;
-        String _shippingDestination;
+        Integer _shippingDestination;
         String _deliveryAttentionTo;
         String _comments;
+        Boolean _hasNewVendor;
         String _newVendorName;
         String _newVendorStreetAddress;
         String _newVendorCity;
@@ -88,19 +116,6 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _newVendorUrl;
         String _newVendorNotes;
 
-        public RequestOrder getRequestOrder()
-        {
-            return _requestOrder;
-        }
-
-        public void setRequestOrder(RequestOrder requestOrder)
-        {
-            _requestOrder = requestOrder;
-        }
-
-        RequestOrder _requestOrder;
-
-
         public Object[] getLineItems()
         {
             return _lineItems;
@@ -111,12 +126,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             _lineItems = lineItems;
         }
 
-        public String getAccount()
+        public Integer getAccount()
         {
             return _account;
         }
 
-        public void setAccount(String account)
+        public void setAccount(Integer account)
         {
             _account = account;
         }
@@ -131,14 +146,14 @@ public class WNPRC_PurchasingController extends SpringActionController
             _accountOther = accountOther;
         }
 
-        public String getVendorName()
+        public Integer getVendor()
         {
-            return _vendorName;
+            return _vendor;
         }
 
-        public void setVendorName(String vendorName)
+        public void setVendor(Integer vendor)
         {
-            _vendorName = vendorName;
+            _vendor = vendor;
         }
 
         public String getPurpose()
@@ -151,12 +166,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             _purpose = purpose;
         }
 
-        public String getShippingDestination()
+        public Integer getShippingDestination()
         {
             return _shippingDestination;
         }
 
-        public void setShippingDestination(String shippingDestination)
+        public void setShippingDestination(Integer shippingDestination)
         {
             _shippingDestination = shippingDestination;
         }
@@ -179,6 +194,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setComments(String comments)
         {
             _comments = comments;
+        }
+
+        public Boolean getHasNewVendor()
+        {
+            return _hasNewVendor;
+        }
+
+        public void setHasNewVendor(Boolean hasNewVendor)
+        {
+            _hasNewVendor = hasNewVendor;
         }
 
         public String getNewVendorName()
@@ -292,88 +317,6 @@ public class WNPRC_PurchasingController extends SpringActionController
         }
     }
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public class RequestOrder
-    {
-        String _account;
-        String _accountOther;
-        String _vendorName;
-        String _purpose;
-        String _shippingDestination;
-        String _deliveryAttentionTo;
-        String _comments;
-
-        public String getAccount()
-        {
-            return _account;
-        }
-
-        public void setAccount(String account)
-        {
-            _account = account;
-        }
-
-        public String getAccountOther()
-        {
-            return _accountOther;
-        }
-
-        public void setAccountOther(String accountOther)
-        {
-            _accountOther = accountOther;
-        }
-
-        public String getVendorName()
-        {
-            return _vendorName;
-        }
-
-        public void setVendorName(String vendorName)
-        {
-            _vendorName = vendorName;
-        }
-
-        public String getPurpose()
-        {
-            return _purpose;
-        }
-
-        public void setPurpose(String purpose)
-        {
-            _purpose = purpose;
-        }
-
-        public String getShippingDestination()
-        {
-            return _shippingDestination;
-        }
-
-        public void setShippingDestination(String shippingDestination)
-        {
-            _shippingDestination = shippingDestination;
-        }
-
-        public String getDeliveryAttentionTo()
-        {
-            return _deliveryAttentionTo;
-        }
-
-        public void setDeliveryAttentionTo(String deliveryAttentionTo)
-        {
-            _deliveryAttentionTo = deliveryAttentionTo;
-        }
-
-        public String getComments()
-        {
-            return _comments;
-        }
-
-        public void setComments(String comments)
-        {
-            _comments = comments;
-        }
-    }
-    
     public class LineItem
     {
         String _item;

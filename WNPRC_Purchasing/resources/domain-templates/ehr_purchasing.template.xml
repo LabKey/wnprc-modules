@@ -11,9 +11,6 @@
                     <dat:description>User will be required to fill out this column when 'Account to charge' is 'Other' on the Request Entry form</dat:description>
                     <dat:rangeURI>string</dat:rangeURI>
                 </dat:column>
-                <dat:column columnName="mdNumber">
-                    <dat:rangeURI>string</dat:rangeURI>
-                </dat:column>
             </dat:columns>
         </table>
     </template>

@@ -1,5 +1,5 @@
 import {Query, Ajax, Utils, ActionURL} from "@labkey/api";
-import {LineItemModel, RequestOrderModel} from "./model";
+import {LineItemModel, RequestOrderModel, VendorModel} from "./model";
 
 export function getDropdownOptions(schemaName: string, queryName: string, colNames: string) : Promise<any> {
     return new Promise((resolve, reject) => {
@@ -28,12 +28,13 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
             jsonData: {
                 account: requestOrder.account,
                 accountOther: requestOrder.accountOther,
-                vendorName: requestOrder.vendor,
+                vendor: requestOrder.vendor,
                 purpose: requestOrder.purpose,
                 shippingDestination: requestOrder.shippingDestination,
                 deliveryAttentionTo: requestOrder.deliveryAttentionTo,
                 comments: requestOrder.comments,
                 lineItems: lineItems,
+                hasNewVendor: VendorModel.getDisplayVersion(requestOrder.newVendor) ? true : false,
                 newVendorName: requestOrder.newVendor.vendorName,
                 newVendorStreetAddress: requestOrder.newVendor.streetAddress,
                 newVendorCity: requestOrder.newVendor.city,

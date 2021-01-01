@@ -71,6 +71,12 @@ public class WNPRC_PurchasingManager
         File dataFile = ((FileResource) resource).getFile();
         TabLoader tabLoader = new TabLoader(dataFile, true);
         List<Map<String, Object>> data = tabLoader.load();
+
+        insertData(c, user, table, data);
+    }
+
+    public void insertData(Container c, User user, TableInfo table, List<Map<String, Object>> data)
+    {
         BatchValidationException errors = new BatchValidationException();
 
         try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())

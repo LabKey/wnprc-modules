@@ -1,6 +1,6 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
 import {Button} from 'react-bootstrap';
-import {getDropdownOptions} from "../actions";
+import {getData} from "../actions";
 import {createOptions} from "./Utils";
 import {PurchasingFormInput} from "./PurchasingFormInput";
 import {RequestOrderModel, VendorModel} from "../model";
@@ -20,7 +20,7 @@ export const AccountInput: FC<InputProps> = (props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getDropdownOptions('ehr_billingLinked', 'aliases', 'alias, rowid').then(vals => {
+        getData('ehr_billingLinked', 'aliases', 'alias, rowid').then(vals => {
             setDropDownVals(vals)
         });
     }, []);
@@ -93,7 +93,7 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
     const [showPopup, setShowPopup] = useState<boolean>(false);
 
     useEffect(() => {
-        getDropdownOptions('ehr_purchasing', 'vendor', 'vendorName, rowId').then(vals => {
+        getData('ehr_purchasing', 'vendor', 'vendorName, rowId').then(vals => {
             setDropDownVals(vals)
         });
     }, []);
@@ -122,8 +122,10 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
     const onVendorAdd = useCallback((newVendor : VendorModel) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
             draft['newVendor'] = newVendor;
-        })
-        onModelChange(updatedModel);
+        });
+        if (!newVendor.errors) {
+            onModelChange(updatedModel);
+        }
     }, [onChange, hasError, model, onModelChange]);
 
     return (
@@ -142,10 +144,10 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
             </PurchasingFormInput>
             {
                 showPopup &&
-                <VendorPopupModal showPopup={showPopup} vendorModel={model.newVendor} onVendorChange={onVendorAdd} onChangeShowPopup={onChangeShowPopup}/>
+                <VendorPopupModal vendorList={options} showPopup={showPopup} vendorModel={model.newVendor} onVendorChange={onVendorAdd} onChangeShowPopup={onChangeShowPopup}/>
             }
             {
-                model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&
+                model.vendor === 'Other' && model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&
                <>
                 <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
                    <Button className='edit-other-vendor-button btn btn-default' variant="primary" onClick={onClickEditNewVendor}>
@@ -215,7 +217,7 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getDropdownOptions('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias, rowId').then(vals => {
+        getData('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias, rowId').then(vals => {
             setDropDownVals(vals)
         });
     }, []);
@@ -274,18 +276,7 @@ interface VendorDisplayProps {
 }
 export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
 
-    const {vendorModel, onVendorChange} = props;
-    const [show, setShow] = useState<boolean>(false);
-
-    const onVendorEdit = useCallback((changedVendorModel: VendorModel) => {
-
-        onVendorChange(changedVendorModel);
-
-    }, [vendorModel, onVendorChange]);
-
-    const onClickEditNewVendor = useCallback(() => {
-        setShow(true);
-    }, []);
+    const {vendorModel} = props;
 
     return (
         <div>

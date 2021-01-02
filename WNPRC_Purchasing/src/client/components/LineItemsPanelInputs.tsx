@@ -1,5 +1,5 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
-import {getDropdownOptions} from "../actions";
+import {getData} from "../actions";
 import {createOptions, formatCurrency} from "./Utils";
 
 interface InputProps {
@@ -31,9 +31,9 @@ export const UnitInput : FC<InputProps> = (props) => {
     const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
-    //TODO: only want getDropdownOptions to be called once, and not at each Item Row rendering
+    //TODO: only want getData to get dropdown options to be called once, and not at each Item Row rendering
     useEffect(() => {
-        getDropdownOptions('ehr_purchasing', 'itemUnits', 'itemUnit, rowId').then(vals => {
+        getData('ehr_purchasing', 'itemUnits', 'itemUnit, rowId').then(vals => {
             setDropDownVals(vals)
         });
     }, []);

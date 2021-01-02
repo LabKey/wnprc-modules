@@ -1,7 +1,7 @@
 import {Query, Ajax, Utils, ActionURL} from "@labkey/api";
 import {LineItemModel, RequestOrderModel, VendorModel} from "./model";
 
-export function getDropdownOptions(schemaName: string, queryName: string, colNames: string) : Promise<any> {
+export function getData(schemaName: string, queryName: string, colNames: string) : Promise<any> {
     return new Promise((resolve, reject) => {
         Query.selectRows({
             schemaName: schemaName,
@@ -34,7 +34,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 deliveryAttentionTo: requestOrder.deliveryAttentionTo,
                 comments: requestOrder.comments,
                 lineItems: lineItems,
-                hasNewVendor: VendorModel.getDisplayVersion(requestOrder.newVendor) ? true : false,
+                hasNewVendor: (requestOrder.vendor === 'Other' && VendorModel.getDisplayVersion(requestOrder.newVendor)) ? true : false,
                 newVendorName: requestOrder.newVendor.vendorName,
                 newVendorStreetAddress: requestOrder.newVendor.streetAddress,
                 newVendorCity: requestOrder.newVendor.city,

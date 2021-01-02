@@ -5,6 +5,7 @@ import {VendorFormInput} from "./PurchasingFormInput";
 import produce, {Draft} from "immer";
 
 interface VendorInputProps {
+    vendorList: any;
     vendorModel: VendorModel;
     onVendorChange: (vendorModel: VendorModel) => void;
     showPopup: boolean,
@@ -12,7 +13,7 @@ interface VendorInputProps {
 }
 
 export const VendorPopupModal: FC<VendorInputProps> = (props) => {
-    const { vendorModel, onVendorChange, showPopup, onChangeShowPopup } = props;
+    const { vendorList, vendorModel, onVendorChange, showPopup, onChangeShowPopup } = props;
 
     const [show, setShow] = useState(showPopup);
     const [updatedNewVendor, setUpdatedNewVendor] = useState<VendorModel>(VendorModel.create({}));
@@ -50,8 +51,13 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
             }
         });
         onVendorChange(updatedModel);
-        onChangeShowPopup(false);
-
+        setUpdatedNewVendor(updatedModel);
+        if (errors.length > 0) {
+            onChangeShowPopup(true);
+        }
+        else {
+            onChangeShowPopup(false);
+        }
     }, [updatedNewVendor, onVendorChange]);
 
     const handleClose = useCallback(() => {
@@ -185,9 +191,9 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
                     </Button>
                 </Modal.Footer>
                 {
-                    vendorModel.errorMsg &&
+                    (updatedNewVendor.errorMsg) &&
                     <div className='alert alert-danger'>
-                        {vendorModel.errorMsg}
+                        {updatedNewVendor.errorMsg}
                     </div>
                 }
 

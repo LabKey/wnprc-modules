@@ -16,6 +16,7 @@ export class RequestOrderModel {
     readonly comments?: string;
     readonly errorMsg?: string;
     readonly errors?: any;
+    readonly qcState?: number;
 
     constructor(values?: Partial<RequestOrderModel>) {
         Object.assign(this, values);
@@ -49,6 +50,7 @@ export class VendorModel {
     readonly notes?: string;
     readonly errorMsg?: string;
     readonly errors?: any;
+    readonly qcState?: number;
 
     constructor(values?: Partial<VendorModel>) {
         Object.assign(this, values);

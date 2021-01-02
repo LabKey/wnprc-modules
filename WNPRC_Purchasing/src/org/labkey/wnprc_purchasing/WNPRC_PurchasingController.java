@@ -16,20 +16,16 @@
 
 package org.labkey.wnprc_purchasing;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.json.JSONObject;
+import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.SimpleResponse;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.data.DbScope;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.api.DataType;
-import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.list.ListService;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.query.BatchValidationException;
-import org.labkey.api.query.QueryService;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -37,11 +33,8 @@ import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
@@ -70,26 +63,12 @@ public class WNPRC_PurchasingController extends SpringActionController
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
-            BatchValidationException validationErrors = new BatchValidationException();
-            UserSchema us = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing");
-            TableInfo ti = us.getTable("purchasingRequests");
-            String requestId = UUID.randomUUID().toString().toUpperCase();
-            List<Map<String, Object>> rows = new ArrayList<>();
+           WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
 
-             Map<String, Object> row = new CaseInsensitiveHashMap<>();
-             row.put("requestId", requestId);
-             row.put("vendorId", requestForm.getVendor());
-             row.put("account", requestForm.getAccount());
-             row.put("shippingInfo", requestForm.getShippingDestination());
-             row.put("justification", requestForm.getPurpose());
-             row.put("shippingAttentionTo", requestForm.getDeliveryAttentionTo());
-             row.put("comments", requestForm.getComments());
-             row.put("assignedTo", getUser().getUserId()); //TODO : change, this will be set to purchasing admin
-             rows.add(row);
-             WNPRC_PurchasingManager.get().insertData(getContainer(), getUser(), ti, rows);
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
 
-
-            return success();
+            return response;
         }
     }
 
@@ -317,13 +296,14 @@ public class WNPRC_PurchasingController extends SpringActionController
         }
     }
 
-    public class LineItem
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    public static class LineItem
     {
         String _item;
         Boolean _controlledSubstance;
         String _itemUnit;
-        Double _quantity;
-        Double _unitPrice;
+        Number _quantity;
+        Number _unitCost;
 
         public String getItem()
         {
@@ -355,28 +335,33 @@ public class WNPRC_PurchasingController extends SpringActionController
             _itemUnit = itemUnit;
         }
 
-        public Double getQuantity()
+        public Boolean getControlledSubstance()
+        {
+            return _controlledSubstance;
+        }
+
+        public Number getQuantity()
         {
             return _quantity;
         }
 
-        public void setQuantity(Double quantity)
+        public void setQuantity(Number quantity)
         {
             _quantity = quantity;
         }
 
-        public Double getUnitPrice()
+        public Number getUnitCost()
         {
-            return _unitPrice;
+            return _unitCost;
         }
 
-        public void setUnitPrice(Double unitPrice)
+        public void setUnitCost(Number unitCost)
         {
-            _unitPrice = unitPrice;
+            _unitCost = unitCost;
         }
     }
 
-    public class NewVendor
+    public static class NewVendor
     {
         String _vendorName;
         String _streetAddress;

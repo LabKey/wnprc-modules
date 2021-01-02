@@ -8,7 +8,7 @@ export class RequestOrderModel {
 
     readonly account: string;
     readonly accountOther: string;
-    readonly vendor: number; //rowId of ehr_purchasing.vendor
+    readonly vendor: string; //rowId of ehr_purchasing.vendor
     readonly newVendor?: VendorModel = VendorModel.create({});
     readonly purpose: string;
     readonly shippingDestination: number; //rowId of ehr_purchasing.shippingInfo
@@ -89,7 +89,7 @@ export class LineItemModel {
     readonly controlledSubstance: boolean = false;
     readonly itemUnit: number; //rowId of ehr_purchasing.itemUnits
     readonly quantity: number;
-    readonly unitPrice: number;
+    readonly unitCost: number;
     readonly subTotal: number = 0;
     readonly status?: string;
     readonly errors?: any;

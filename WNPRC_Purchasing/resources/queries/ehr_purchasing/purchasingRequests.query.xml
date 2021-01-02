@@ -17,6 +17,9 @@
                             <fkTable>aliases</fkTable>
                         </fk>
                     </column>
+                    <column columnName="otherAcctAndInves">
+                        <columnTitle>Other Acct and Investigator</columnTitle>
+                    </column>
                     <column columnName="shippingInfoId">
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>

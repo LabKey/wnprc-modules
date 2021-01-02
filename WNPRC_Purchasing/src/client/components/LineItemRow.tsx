@@ -10,7 +10,7 @@ import {
     DescriptionInput,
     SubtotalInput,
     UnitInput,
-    UnitPriceInput,
+    UnitCostInput,
     UnitQuantityInput
 } from "./LineItemsPanelInputs";
 
@@ -58,9 +58,9 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                     />
                 </Col>
                 <Col xs={1}>
-                    <UnitPriceInput
-                        value={model.unitPrice}
-                        hasError={model.errors && model.errors.find((field) => field.fieldName === 'unitPrice')}
+                    <UnitCostInput
+                        value={model.unitCost}
+                        hasError={model.errors && model.errors.find((field) => field.fieldName === 'unitCost')}
                         onChange={onValueChange}
                     />
                 </Col>
@@ -71,7 +71,7 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                         onChange={onValueChange}
                     />
                 </Col>
-                <Col xs={1}><SubtotalInput unitPrice={model.unitPrice} quantity={model.quantity}/></Col>
+                <Col xs={1}><SubtotalInput unitCost={model.unitCost} quantity={model.quantity}/></Col>
                 <Col xs={2}><ControlledSubstance value={model.controlledSubstance} onChange={onValueChange}/></Col>
                 <Col xs={2}>
                     <span

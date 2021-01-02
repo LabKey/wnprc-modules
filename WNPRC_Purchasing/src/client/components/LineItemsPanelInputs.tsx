@@ -62,20 +62,20 @@ interface NumericInputProps {
     hasError?: boolean;
 }
 
-export const UnitPriceInput: FC<NumericInputProps> = (props) => {
+export const UnitCostInput: FC<NumericInputProps> = (props) => {
 
     const { onChange, value, hasError } = props;
 
     const onValueChange = useCallback((evt) => {
-        onChange('unitPrice', evt.target.value);
+        onChange('unitCost', evt.target.value);
     },[onChange]);
 
     return (
         <input
-            className= {'line-item-row-input unit-price-input form-control ' + (hasError ? 'field-validation-error' : '')}
+            className= {'line-item-row-input unit-Cost-input form-control ' + (hasError ? 'field-validation-error' : '')}
             value={value}
             onChange={onValueChange}
-            id="unit-price-id"
+            id="unit-Cost-id"
             pattern="[0-9]*"
             type='number'
         />
@@ -103,24 +103,24 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
 }
 
 interface SubtotalInputProps {
-    unitPrice: number;
+    unitCost: number;
     quantity: number;
 }
 
 export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
 
-    const { unitPrice, quantity } = props;
+    const { unitCost, quantity } = props;
     const [subtotal, setSubtotal] = useState<number>(0);
 
     useEffect(() => {
-        if (unitPrice  && quantity) {
-            setSubtotal(unitPrice * quantity);
+        if (unitCost  && quantity) {
+            setSubtotal(unitCost * quantity);
         }
     },[]);
 
     useMemo(() => {
-        setSubtotal(unitPrice * quantity);
-    }, [unitPrice, quantity]);
+        setSubtotal(unitCost * quantity);
+    }, [unitCost, quantity]);
 
     return (
         <input

@@ -113,8 +113,8 @@ export const App : FC = () => {
             if (!lineItems[i].itemUnit) {
                 lineItemErrors.push({fieldName: 'itemUnit'});
             }
-            if (!lineItems[i].unitPrice) {
-                lineItemErrors.push({fieldName: 'unitPrice'});
+            if (!lineItems[i].unitCost) {
+                lineItemErrors.push({fieldName: 'unitCost'});
             }
             if (!lineItems[i].quantity) {
                 lineItemErrors.push({fieldName: 'quantity'});
@@ -140,7 +140,12 @@ export const App : FC = () => {
         if (requestOrderErrors.length == 0 && !hasLineItemError) {
 
             //TODO : navigate
-            submitRequest(requestOrderModel, lineItems).then(r => console.log(r));
+            submitRequest(requestOrderModel, lineItems).then(r => {
+                if (r.success) {
+                    //navigate to purchasing overview grid/main page
+                    window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
+                }
+            });
         }
 
     }, [requestOrderModel, lineItems]);

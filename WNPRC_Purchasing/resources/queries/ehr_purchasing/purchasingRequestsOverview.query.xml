@@ -1,20 +1,24 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB">
+            <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB" useColumnOrder="true">
                 <tableTitle>Purchase Requests</tableTitle>
                 <columns>
+                    <column columnName="rowId">
+                        <columnTitle>Request No.</columnTitle>
+                    </column>
+                    <column columnName="requestDate">
+                        <formatString>Date</formatString>
+                    </column>
                     <column columnName="account">
                         <fk>
                             <fkDbSchema>ehr_billingLinked</fkDbSchema>
                             <fkTable>aliases</fkTable>
-                            <fkColumnName>alias</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="requestStatus"/>
-                    <column columnName="requestDate"/>
                     <column columnName="requester"/>
                     <column columnName="totalCost"/>
+                    <column columnName="requestStatus"/>
                 </columns>
             </table>
         </tables>

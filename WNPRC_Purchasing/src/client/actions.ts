@@ -26,9 +26,9 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
             url: ActionURL.buildURL('WNPRC_Purchasing', 'submitRequest.api'),
             method: 'POST',
             jsonData: {
-                account: requestOrder.account,
+                account: requestOrder.account !== 'Other' ? requestOrder.account : undefined,
                 accountOther: requestOrder.accountOther,
-                vendor: requestOrder.vendor,
+                vendor: requestOrder.vendor !== 'Other' ? requestOrder.vendor : undefined,
                 purpose: requestOrder.purpose,
                 shippingDestination: requestOrder.shippingDestination,
                 deliveryAttentionTo: requestOrder.deliveryAttentionTo,
@@ -47,8 +47,8 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 newVendorUrl: requestOrder.newVendor.url,
                 newVendorNotes: requestOrder.newVendor.notes
             },
-            success: Utils.getCallbackWrapper(({ data }) => {
-                resolve(data);
+            success: Utils.getCallbackWrapper(response => {
+                resolve(response);
             }),
             failure: Utils.getCallbackWrapper(error => {
                 console.error(`Failed to submit request.`, error);

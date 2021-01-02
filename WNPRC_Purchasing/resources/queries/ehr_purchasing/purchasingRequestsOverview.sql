@@ -1,11 +1,13 @@
-SELECT pr.account,
-       pr.qcStatus         AS requestStatus,
+SELECT pr.rowId,
+       pr.account,
+       pr.qcState        AS requestStatus,
        pr.created          AS requestDate,
        pr.createdBy        AS requestor,
-       sum(items.unitCost) AS totalCost
+       round(sum(items.quantity * items.unitCost), 2) AS totalCost
 FROM ehr_purchasing.purchasingRequests pr
 LEFT JOIN ehr_purchasing.lineItems items ON pr.requestId = items.requestId
-GROUP BY pr.account,
-         pr.qcStatus,
+GROUP BY pr.rowId,
+         pr.account,
+         pr.qcstate,
          pr.created,
          pr.createdBy

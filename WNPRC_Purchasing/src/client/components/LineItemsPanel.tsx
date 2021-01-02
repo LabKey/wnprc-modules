@@ -59,7 +59,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
                 <Row className="line-item-row-header">
                     <Col xs={4}>Part no./Item description *</Col>
                     <Col xs={1}>Unit *</Col>
-                    <Col xs={1}>Unit price *</Col>
+                    <Col xs={1}>Unit Cost *</Col>
                     <Col xs={1}>Quantity *</Col>
                     <Col xs={1}>Subtotal</Col>
                     <Col xs={2}>Controlled substance</Col>
@@ -85,7 +85,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
                     <Col className='calc-total-val' xs={1}>
                         {
                             formatCurrency(lineItems.reduce( function(accumulatedVal,lineItem){
-                                return (lineItem.unitPrice && lineItem.quantity) ? (accumulatedVal + (lineItem.unitPrice * lineItem.quantity)) : accumulatedVal }, 0))
+                                return (lineItem.unitCost && lineItem.quantity) ? (accumulatedVal + (lineItem.unitCost * lineItem.quantity)) : accumulatedVal }, 0))
                         }
                     </Col>
                     <Col xs={1}></Col>

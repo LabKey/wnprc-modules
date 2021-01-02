@@ -16,6 +16,7 @@
                             <fkTable>aliases</fkTable>
                         </fk>
                     </column>
+                    <column columnName="OtherAcctAndInves"/>
                     <column columnName="requester"/>
                     <column columnName="totalCost"/>
                     <column columnName="requestStatus"/>

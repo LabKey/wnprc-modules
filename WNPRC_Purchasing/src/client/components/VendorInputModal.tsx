@@ -3,6 +3,7 @@ import React, {FC, useCallback, useEffect, useState} from "react";
 import {Button, Modal, Form} from 'react-bootstrap';
 import {VendorFormInput} from "./PurchasingFormInput";
 import produce, {Draft} from "immer";
+import {is} from "immer/dist/utils/common";
 
 interface VendorInputProps {
     vendorList: any;
@@ -25,7 +26,9 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
     const onAddingNewVendor = useCallback(() => {
         const errors = [];
         setShow(false);
-        if (!updatedNewVendor.vendorName) {
+        const isDuplicateVendor = vendorList.findIndex(vendor => vendor.vendorName === updatedNewVendor.vendorName) >= 0;
+
+        if (!updatedNewVendor.vendorName || isDuplicateVendor) {
             errors.push({fieldName: 'vendorName'})
         }
         if (!updatedNewVendor.streetAddress) {
@@ -40,13 +43,19 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
         if (!updatedNewVendor.country) {
             errors.push({fieldName: 'country'})
         }
-        if (!updatedNewVendor.country) {
+        if (!updatedNewVendor.zip) {
             errors.push({fieldName: 'zip'})
         }
         const updatedModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
             if (errors.length > 0) {
                 draft.errors = errors;
-                draft.errorMsg = "Unable to save, missing required field(s).";
+                let msg = 'Please fix error(s) before saving:  ';
+                if (isDuplicateVendor){
+                    msg += "duplicate vendor, ";
+                }
+                msg += "missing required field(s).";
+
+                draft.errorMsg = msg;
                 setShow(true);
             }
         });

@@ -144,7 +144,7 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
             </PurchasingFormInput>
             {
                 showPopup &&
-                <VendorPopupModal vendorList={options} showPopup={showPopup} vendorModel={model.newVendor} onVendorChange={onVendorAdd} onChangeShowPopup={onChangeShowPopup}/>
+                <VendorPopupModal vendorList={dropDownVals} showPopup={showPopup} vendorModel={model.newVendor} onVendorChange={onVendorAdd} onChangeShowPopup={onChangeShowPopup}/>
             }
             {
                 model.vendor === 'Other' && model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&

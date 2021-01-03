@@ -3,7 +3,6 @@ import React, {FC, useCallback, useEffect, useState} from "react";
 import {Button, Modal, Form} from 'react-bootstrap';
 import {VendorFormInput} from "./PurchasingFormInput";
 import produce, {Draft} from "immer";
-import {is} from "immer/dist/utils/common";
 
 interface VendorInputProps {
     vendorList: any;

@@ -25,15 +25,8 @@ import {getData, submitRequest} from "../actions";
 export const App : FC = () => {
 
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
-    const [showNewVendor, setShowNewVendor] = useState<boolean>(false);
-
     const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create({})]);
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
-    const [lineItemRowIndex, setLineItemRowIndex] = useState<number>(0);
-    const [hasRequestEntryPermission, setHasRequestEntryPermission] = useState<boolean>();
-    const [isLoadingModel, setLoadingModel] = useState<boolean>(true);
-    const [message, setMessage] = useState<string>();
-    const [onChange, setOnChange] = useState<any>();
 
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {

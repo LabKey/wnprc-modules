@@ -31,12 +31,11 @@ export const UnitInput : FC<InputProps> = (props) => {
     const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
-    //TODO: only want getData to get dropdown options to be called once, and not at each Item Row rendering
     useEffect(() => {
         getData('ehr_purchasing', 'itemUnits', 'itemUnit, rowId').then(vals => {
             setDropDownVals(vals)
         });
-    }, []);
+    }, [dropDownVals]);
 
     const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'itemUnit', false), [dropDownVals]);
 

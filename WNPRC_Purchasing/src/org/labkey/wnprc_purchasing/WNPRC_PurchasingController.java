@@ -17,13 +17,10 @@
 package org.labkey.wnprc_purchasing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.action.SimpleResponse;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.exp.list.ListService;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.security.RequiresPermission;
@@ -32,9 +29,6 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
@@ -58,7 +52,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class SubmitRequestAction extends MutatingApiAction<RequestForm>
+    public class SubmitNewRequestAction extends MutatingApiAction<RequestForm>
     {
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
@@ -82,6 +76,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         Integer _shippingDestination;
         String _deliveryAttentionTo;
         String _comments;
+        String _qcState;
         Boolean _hasNewVendor;
         String _newVendorName;
         String _newVendorStreetAddress;
@@ -173,6 +168,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setComments(String comments)
         {
             _comments = comments;
+        }
+
+        public String getQcState()
+        {
+            return _qcState;
+        }
+
+        public void setQcState(String qcState)
+        {
+            _qcState = qcState;
         }
 
         public Boolean getHasNewVendor()

@@ -20,7 +20,7 @@ import {LineItemsPanel} from "../components/LineItemsPanel";
 import '../RequestEntry/RequestEntry.scss';
 import {ActionURL, getServerContext} from "@labkey/api";
 import produce, {Draft} from "immer";
-import {submitRequest} from "../actions";
+import {getData, submitRequest} from "../actions";
 
 export const App : FC = () => {
 
@@ -37,8 +37,18 @@ export const App : FC = () => {
 
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
-        setRequestOrderModel(requestOrderModel);
-        setLineItems(lineItems);
+        let isNewRequest = ActionURL.getParameter('isNewRequest');
+        if (isNewRequest) {
+            getData('core', 'qcState', 'RowId, Label').then(vals => {
+                let idx = vals.findIndex(qcstate => qcstate['Label'] === 'Review Pending');
+                setRequestOrderModel(RequestOrderModel.create({qcState: vals[idx].RowId}));
+                setLineItems([LineItemModel.create({qcState: vals[idx].RowId})]);
+            });
+        }
+        else {
+            setRequestOrderModel(requestOrderModel);
+            setLineItems(lineItems);
+        }
     }, []);
 
     const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {

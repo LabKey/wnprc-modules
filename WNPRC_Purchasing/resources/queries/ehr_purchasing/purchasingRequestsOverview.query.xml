@@ -19,7 +19,12 @@
                     <column columnName="OtherAcctAndInves"/>
                     <column columnName="requester"/>
                     <column columnName="totalCost"/>
-                    <column columnName="requestStatus"/>
+                    <column columnName="requestStatus">
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>QCState</fkTable>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

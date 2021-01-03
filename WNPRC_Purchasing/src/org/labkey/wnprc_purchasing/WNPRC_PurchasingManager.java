@@ -16,16 +16,20 @@
 
 package org.labkey.wnprc_purchasing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.resource.FileResource;
@@ -33,7 +37,9 @@ import org.labkey.api.resource.Resource;
 import org.labkey.api.security.User;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -120,6 +126,7 @@ public class WNPRC_PurchasingManager
         row.put("shippingAttentionTo", requestForm.getDeliveryAttentionTo());
         row.put("comments", requestForm.getComments());
         row.put("assignedTo", user.getUserId()); //TODO : this will be set to purchasing admin
+        row.put("qcState", requestForm.getQcState());
         //TODO: set qc state
         purchasingRequestsData.add(row);
 

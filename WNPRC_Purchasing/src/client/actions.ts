@@ -23,7 +23,7 @@ export function getData(schemaName: string, queryName: string, colNames: string)
 export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>) : Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
-            url: ActionURL.buildURL('WNPRC_Purchasing', 'submitRequest.api'),
+            url: ActionURL.buildURL('WNPRC_Purchasing', 'submitNewRequest.api'),
             method: 'POST',
             jsonData: {
                 account: requestOrder.account !== 'Other' ? requestOrder.account : undefined,
@@ -33,6 +33,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 shippingDestination: requestOrder.shippingDestination,
                 deliveryAttentionTo: requestOrder.deliveryAttentionTo,
                 comments: requestOrder.comments,
+                qcState: requestOrder.qcState,
                 lineItems: lineItems,
                 hasNewVendor: (requestOrder.vendor === 'Other' && VendorModel.getDisplayVersion(requestOrder.newVendor)) ? true : false,
                 newVendorName: requestOrder.newVendor.vendorName,

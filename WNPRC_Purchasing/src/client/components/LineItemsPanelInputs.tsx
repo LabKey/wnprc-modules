@@ -115,9 +115,9 @@ export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
         if (unitCost  && quantity) {
             setSubtotal(unitCost * quantity);
         }
-    },[]);
+    },[unitCost, quantity, subtotal, setSubtotal]);
 
-    useMemo(() => {
+    useCallback(() => {
         setSubtotal(unitCost * quantity);
     }, [unitCost, quantity]);
 
@@ -127,7 +127,6 @@ export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
             value={formatCurrency(subtotal)}
             disabled={true}
             id="item-subtotal-id"
-            type='number'
         />
     );
 }

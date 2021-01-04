@@ -27,9 +27,11 @@ export const App : FC = () => {
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
     const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create({})]);
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
+    const [isDirty, setIsDirty] = useState<boolean>(false);
 
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
+        // is fired on component mount
         let isNewRequest = ActionURL.getParameter('isNewRequest');
         if (isNewRequest) {
             getData('core', 'qcState', 'RowId, Label').then(vals => {
@@ -42,10 +44,23 @@ export const App : FC = () => {
             setRequestOrderModel(requestOrderModel);
             setLineItems(lineItems);
         }
-    }, []);
+        window.addEventListener('beforeunload', handleWindowBeforeUnload);
+
+        // is fired on component unmount
+        return () => {
+            window.removeEventListener('beforeunload', handleWindowBeforeUnload);
+        }
+    }, [isDirty, setIsDirty]);
+
+    const handleWindowBeforeUnload = useCallback((event) => {
+        if (isDirty) {
+            event.returnValue = 'Changes you made may not be saved.';
+        }
+    }, [isDirty, setIsDirty]);
 
     const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {
         setRequestOrderModel(model);
+        setIsDirty(true);
     }, [requestOrderModel]);
 
     const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
@@ -59,18 +74,15 @@ export const App : FC = () => {
             setLineItemErrorMsg(undefined);
         }
         setLineItems(lineItemArray);
+        setIsDirty(true);
 
     }, [lineItems]);
 
-    const onCancelBtnHandler = useCallback((event: any) => {
-
-        // event.returnValue = 'Changes you made may not be saved.'
+    const onCancelBtnHandler = useCallback(() => {
+        setIsDirty(false);
         const returnUrl = ActionURL.getParameter('returnUrl');
-        setLineItems([LineItemModel.create({})]);
-        setRequestOrderModel(RequestOrderModel.create({}));
-        // window.location.assign(ActionURL.buildURL('project', 'begin'));
         window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
-    }, []);
+    }, [isDirty, setIsDirty]);
 
     const onSaveBtnHandler = useCallback(() => {
 

@@ -10,6 +10,12 @@
                     <column columnName="requestDate">
                         <formatString>Date</formatString>
                     </column>
+                    <column columnName="vendorId">
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>vendor</fkTable>
+                        </fk>
+                    </column>
                     <column columnName="account">
                         <fk>
                             <fkDbSchema>ehr_billingLinked</fkDbSchema>

@@ -1,4 +1,5 @@
 SELECT pr.rowId,
+       pr.vendorId,
        pr.account,
        pr.otherAcctAndInves,
        pr.qcState        AS requestStatus,
@@ -8,6 +9,7 @@ SELECT pr.rowId,
 FROM ehr_purchasing.purchasingRequests pr
 LEFT JOIN ehr_purchasing.lineItems items ON pr.requestId = items.requestId
 GROUP BY pr.rowId,
+         vendorId,
          pr.account,
          pr.otherAcctAndInves,
          pr.qcstate,

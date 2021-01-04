@@ -57,6 +57,9 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
                 draft.errorMsg = msg;
                 setShow(true);
             }
+            else {
+                draft.errors = undefined;
+            }
         });
         onVendorChange(updatedModel);
         setUpdatedNewVendor(updatedModel);

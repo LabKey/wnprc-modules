@@ -123,7 +123,7 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
             draft['newVendor'] = newVendor;
         });
-        if (newVendor.errors && newVendor.errors.length == 0) {
+        if (!newVendor.errors) {
             onModelChange(updatedModel);
         }
     }, [onChange, hasError, model, onModelChange]);

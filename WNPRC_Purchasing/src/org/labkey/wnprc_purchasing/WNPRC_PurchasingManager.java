@@ -112,11 +112,32 @@ public class WNPRC_PurchasingManager
     {
         UserSchema us = QueryService.get().getUserSchema(user, container, "ehr_purchasing");
         String requestId = UUID.randomUUID().toString().toUpperCase();
+        Map<String, Object> row;
+
+        //New vendor data
+        List<Map<String, Object>> newVendorData = new ArrayList<>();
+        if (requestForm.getHasNewVendor())
+        {
+            row = new CaseInsensitiveHashMap<>();
+            row.put("vendorName", requestForm.getNewVendorName());
+            row.put("streetAddress", requestForm.getNewVendorStreetAddress());
+            row.put("city", requestForm.getNewVendorCity());
+            row.put("state", requestForm.getNewVendorState());
+            row.put("country", requestForm.getNewVendorCountry());
+            row.put("zip", requestForm.getNewVendorZip());
+            row.put("phoneNumber", requestForm.getNewVendorPhoneNumber());
+            row.put("faxNumber", requestForm.getNewVendorFaxNumber());
+            row.put("email", requestForm.getNewVendorEmail());
+            row.put("url", requestForm.getNewVendorUrl());
+            row.put("notes", requestForm.getNewVendorNotes());
+            //TODO: set qc state - need to verify workflow with client
+            newVendorData.add(row);
+        }
 
         //Purchasing request data
         List<Map<String, Object>> purchasingRequestsData = new ArrayList<>();
 
-        Map<String, Object> row = new CaseInsensitiveHashMap<>();
+        row = new CaseInsensitiveHashMap<>();
         row.put("requestId", requestId);
         row.put("vendorId", requestForm.getVendor());
         row.put("account", requestForm.getAccount());
@@ -148,35 +169,28 @@ public class WNPRC_PurchasingManager
             lineItemsData.add(row);
         }
 
-        //New vendor data
-        List<Map<String, Object>> newVendorData = new ArrayList<>();
-        if (requestForm.getHasNewVendor())
-        {
-            row = new CaseInsensitiveHashMap<>();
-            row.put("vendorName", requestForm.getNewVendorName());
-            row.put("streetAddress", requestForm.getNewVendorStreetAddress());
-            row.put("city", requestForm.getNewVendorCity());
-            row.put("state", requestForm.getNewVendorState());
-            row.put("country", requestForm.getNewVendorCountry());
-            row.put("zip", requestForm.getNewVendorZip());
-            row.put("phoneNumber", requestForm.getNewVendorPhoneNumber());
-            row.put("faxNumber", requestForm.getNewVendorFaxNumber());
-            row.put("email", requestForm.getNewVendorEmail());
-            row.put("url", requestForm.getNewVendorUrl());
-            row.put("notes", requestForm.getNewVendorNotes());
-            //TODO: set qc state
-            newVendorData.add(row);
-        }
-
         // insert data
         BatchValidationException errors = new BatchValidationException();
 
         try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
         {
+            TableInfo vendorTable = us.getTable("vendor");
             TableInfo purchasingRequestsTable = us.getTable("purchasingRequests");
             TableInfo lineItemsTable = us.getTable("lineItems");
-            TableInfo vendorTable = us.getTable("vendor");
+
             QueryUpdateService qus;
+
+            if (vendorTable != null && newVendorData.size() > 0)
+            {
+                qus = vendorTable.getUpdateService();
+                assert qus != null;
+                List<Map<String, Object>> rowsInserted = qus.insertRows(user, container, newVendorData, errors, null, null);
+
+                //set new vendor's id
+                if (rowsInserted.size() == 1 && purchasingRequestsData.get(0).get("vendorId") == null) {
+                    purchasingRequestsData.get(0).put("vendorId", rowsInserted.get(0).get("rowId"));
+                }
+            }
 
             if (purchasingRequestsTable != null)
             {
@@ -190,13 +204,6 @@ public class WNPRC_PurchasingManager
                 qus = lineItemsTable.getUpdateService();
                 assert qus != null;
                 qus.insertRows(user, container, lineItemsData, errors, null, null);
-            }
-
-            if (vendorTable != null && newVendorData.size() > 0)
-            {
-                qus = vendorTable.getUpdateService();
-                assert qus != null;
-                qus.insertRows(user, container, newVendorData, errors, null, null);
             }
 
             if (errors.hasErrors())

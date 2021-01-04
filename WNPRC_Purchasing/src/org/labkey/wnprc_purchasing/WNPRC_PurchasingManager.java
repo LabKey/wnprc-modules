@@ -148,7 +148,6 @@ public class WNPRC_PurchasingManager
         row.put("comments", requestForm.getComments());
         row.put("assignedTo", user.getUserId()); //TODO : this will be set to purchasing admin
         row.put("qcState", requestForm.getQcState());
-        //TODO: set qc state
         purchasingRequestsData.add(row);
 
         //Line items data

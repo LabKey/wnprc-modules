@@ -32,6 +32,9 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
             if (model.errors && model.errors.length > 0) {
                 draft['errors'] = model.errors.filter((field) => field.fieldName !== colName)
             }
+            if (draft['errors'] && draft['errors'].length == 0) {
+                draft['errors'] = undefined;
+            }
         });
         onInputChange(updatedModel, rowIndex);
     }, [model, onInputChange]);

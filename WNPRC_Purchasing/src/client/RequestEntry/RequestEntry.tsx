@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {FC, useCallback, useEffect, useState} from 'react'
+import React, {FC, useCallback, useEffect, useMemo, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
 import {LineItemModel, RequestOrderModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
@@ -32,6 +32,7 @@ export const App : FC = () => {
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
         // is fired on component mount
+        window.addEventListener('beforeunload', handleWindowBeforeUnload);
         let isNewRequest = ActionURL.getParameter('isNewRequest');
         if (isNewRequest) {
             getData('core', 'qcState', 'RowId, Label').then(vals => {
@@ -40,17 +41,11 @@ export const App : FC = () => {
                 setLineItems([LineItemModel.create({qcState: vals[idx].RowId})]);
             });
         }
-        else {
-            setRequestOrderModel(requestOrderModel);
-            setLineItems(lineItems);
-        }
-        window.addEventListener('beforeunload', handleWindowBeforeUnload);
-
         // is fired on component unmount
         return () => {
             window.removeEventListener('beforeunload', handleWindowBeforeUnload);
         }
-    }, [isDirty, setIsDirty]);
+    }, []);
 
     const handleWindowBeforeUnload = useCallback((event) => {
         if (isDirty) {
@@ -61,7 +56,7 @@ export const App : FC = () => {
     const requestOrderModelChange = useCallback((model:RequestOrderModel)=> {
         setRequestOrderModel(model);
         setIsDirty(true);
-    }, [requestOrderModel]);
+    }, [requestOrderModel, setRequestOrderModel]);
 
     const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
         let numOfErrors = 0;
@@ -76,7 +71,7 @@ export const App : FC = () => {
         setLineItems(lineItemArray);
         setIsDirty(true);
 
-    }, [lineItems]);
+    }, [lineItems, setLineItems]);
 
     const onCancelBtnHandler = useCallback(() => {
         setIsDirty(false);
@@ -154,7 +149,6 @@ export const App : FC = () => {
         //if no errors then save
         if (requestOrderErrors.length == 0 && !hasLineItemError) {
 
-            //TODO : navigate
             submitRequest(requestOrderModel, lineItems).then(r => {
                 if (r.success) {
                     //navigate to purchasing overview grid/main page
@@ -163,7 +157,7 @@ export const App : FC = () => {
             });
         }
 
-    }, [requestOrderModel, lineItems]);
+    }, [requestOrderModel, lineItems, setRequestOrderModel, setLineItems]);
 
     return (
         <>

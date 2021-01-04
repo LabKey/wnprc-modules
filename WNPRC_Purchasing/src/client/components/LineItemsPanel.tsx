@@ -29,8 +29,8 @@ export const LineItemsPanel: FC<Props> = (props) => {
 
     const onDeleteRow = useCallback((indexToDelete) => {
 
-        const updatedLineItems = produce(lineItems, (draft: Draft<LineItemModel>) => {
-            delete draft[indexToDelete];
+        const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
+            draft.splice(indexToDelete, 1);
         });
         onChange(updatedLineItems);
 

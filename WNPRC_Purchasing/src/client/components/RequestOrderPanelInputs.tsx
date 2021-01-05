@@ -281,7 +281,7 @@ export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Other Vendor"
+                label="Other vendor"
                 required={false}
             >
                 <textarea

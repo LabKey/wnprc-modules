@@ -96,6 +96,14 @@ public class Graph {
     	return addedEvent;
     }
 
+    public synchronized static List<Event> createEvents(String accessToken, List<Event> newEvents) {
+    	ensureGraphClient(accessToken);
+
+    	//TODO do things
+
+    	return null;
+	}
+
     public synchronized static List<Event> readRoomEvents(String accessToken, String roomEmailAddress, String start, String end) {
     	ensureGraphClient(accessToken);
 
@@ -188,6 +196,14 @@ public class Graph {
 
     	return updatedEvent;
     }
+
+    public synchronized static List<Event> updateEvents(String accessToken, List<Event> events)  {
+    	ensureGraphClient(accessToken);
+
+    	//TODO things
+
+    	return null;
+	}
 
     public synchronized static void deleteEvent(String accessToken, String eventId) {
     	ensureGraphClient(accessToken);

@@ -121,6 +121,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -1332,6 +1333,7 @@ public class WNPRC_EHRController extends SpringActionController
         private List<String> categories;
         private String assignedTo;
         private String calendarId;
+        private JSONArray rooms;
 
         public String getRequestId()
         {
@@ -1366,9 +1368,13 @@ public class WNPRC_EHRController extends SpringActionController
             return calendarId;
         }
 
-        public void setRequestId(String requestid)
+        public JSONArray getRooms() {
+            return rooms;
+        }
+
+        public void setRequestId(String requestId)
         {
-            this.requestId = requestid;
+            this.requestId = requestId;
         }
 
         public void setStart(Date start)
@@ -1398,6 +1404,10 @@ public class WNPRC_EHRController extends SpringActionController
 
         public void setCalendarId(String calendarId) {
             this.calendarId = calendarId;
+        }
+
+        public void setRooms(JSONArray rooms) {
+            this.rooms = rooms;
         }
     }
 
@@ -1598,7 +1608,7 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
             Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
-            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), roomRows, event.getSubject(), event.getRequestId(), response);
+            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), event.getRooms(), event.getSubject(), event.getRequestId(), response);
 
             if (eventsScheduled)
             {
@@ -1641,11 +1651,14 @@ public class WNPRC_EHRController extends SpringActionController
                     }
 
                     List<Map<String, Object>> updatedRoomRows = new ArrayList<>();
-                    for(Map<String, Object> roomRow: roomRows)
-                    {
+                    for (int i = 0; i < event.getRooms().length(); i++) {
+                        JSONObject roomRow = event.getRooms().getJSONObject(i);
                         JSONObject roomRecord = new JSONObject();
                         roomRecord.put("objectid", roomRow.get("objectid"));
                         roomRecord.put("event_id", roomRow.get("event_id"));
+                        roomRecord.put("room", roomRow.get("room"));
+                        roomRecord.put("date", roomRow.get("date"));
+                        roomRecord.put("enddate", roomRow.get("enddate"));
                         updatedRoomRows.add(roomRecord);
                     }
                     //update all rows at the same time so that the trigger script can update the surgery

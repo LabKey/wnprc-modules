@@ -89,7 +89,7 @@
 
 <script type="text/javascript">
 
-    function createModalSelectDiv(label, id, selectedOption) {
+    function createSelectDiv(label, id, selectedOption) {
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("form-group");
         let labelEl = document.createElement("label");
@@ -130,7 +130,7 @@
         return mainDiv;
     }
 
-    function createModalDiv(label, inputType, id, value) {
+    function createDiv(label, inputType, id, value) {
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("form-group");
         let labelEl = document.createElement("label");
@@ -214,7 +214,7 @@
     }
 
     function getEventSubject(form) {
-        return form.animalid + ' ' + form.procedurename;
+        return form.animalid + ' - ' + form.procedurename;
     }
 
     function createRequestObj(action, calendarIdSuffix) {
@@ -236,7 +236,8 @@
                 subject: getEventSubject(form),
                 categories: 'Surgeries',
                 assignedTo: form.assignedto,
-                calendarId: calendarId
+                calendarId: calendarId,
+                rooms: JSON.stringify(pendingRoomsIndex[form.requestid])
             };
         } else if (action === 'denyRequest') {
             requestObj = {
@@ -249,7 +250,7 @@
     }
 
     function scheduleSurgeryProcedure(apiAction, requestObj) {
-        $('#scheduleRequestForm').block({
+        $('#scheduleRequestDiv').block({
             message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Processing...',
             css: {
                 border: 'none',
@@ -289,12 +290,12 @@
                 }
                 // Clear the form
                 WebUtils.VM.clearForm();
-                $('#scheduleRequestForm').unblock();
+                $('#scheduleRequestDiv').unblock();
             }, this),
             failure: LABKEY.Utils.getCallbackWrapper(function (response)
             {
                 alert("Something went wrong: " + JSON.stringify(response));
-                $('#scheduleRequestForm').unblock();
+                $('#scheduleRequestDiv').unblock();
             }, this)
         });
     }
@@ -314,6 +315,7 @@
 
         let roomNames = [];
         let roomEmails = [];
+        let oldRoomEmails = [];
         let objectIds = [];
         let starts = [];
         let ends = [];
@@ -323,10 +325,12 @@
             roomEvents.push(calendar.getEventById(roomIds[i]));
 
             let roomEmail = document.getElementById("modalRoomField_" + i).value;
+            let oldRoomEmail = oldEventValues["modalRoomField_" + i];
             let roomName = calendarEvents[roomEmail].room;
 
             roomNames.push(roomName);
             roomEmails.push(roomEmail);
+            oldRoomEmails.push(oldRoomEmail);
             objectIds.push(roomEvents[i].extendedProps.objectid);
             starts.push(new Date(document.getElementById("modalStartField_" + i).value));
             ends.push(new Date(document.getElementById("modalEndField_" + i).value));
@@ -352,9 +356,9 @@
                     mainEvent.remove();
                     for (let i = 0; i < roomIds.length; i++) {
                         let roomEventToRemove = calendar.getEventById(roomIds[i]);
-                        for (let j = calendarEvents[roomEmails[i]].events.length - 1; j >= 0; j--) {
-                            if (calendarEvents[roomEmails[i]].events[j].extendedProps.requestid === requestObj.requestId) {
-                                calendarEvents[roomEmails[i]].events.splice(j, 1);
+                        for (let j = calendarEvents[oldRoomEmails[i]].events.length - 1; j >= 0; j--) {
+                            if (calendarEvents[oldRoomEmails[i]].events[j].extendedProps.requestid === requestObj.requestId) {
+                                calendarEvents[oldRoomEmails[i]].events.splice(j, 1);
                                 if (roomEventToRemove) {
                                     roomEventToRemove.remove();
                                 }
@@ -406,6 +410,19 @@
         placeholderEvents[email].push(placeholderEvent);
     }
 
+    function createPlaceholderEvents(rooms) {
+        for (let i = 0; i < rooms.length; i++) {
+            let placeholderEvent = {};
+            placeholderEvent.title = rooms[i].room + " placeholder";
+            placeholderEvent.start = new Date(rooms[i].date);
+            placeholderEvent.end = new Date(rooms[i].enddate);
+            placeholderEvent.backgroundColor = calendarEvents[rooms[i].email].backgroundColor;
+            placeholderEvent.id = "PLACEHOLDER_" + i;
+            addToPlaceholderEvents(rooms[i].email, placeholderEvent);
+            calendar.addEvent(placeholderEvent, rooms[i].email);
+        }
+    }
+
     function clearPlaceholderEvents() {
         placeholderEvents = {};
         let index = 0;
@@ -413,6 +430,26 @@
         while (oldPlaceholders) {
             oldPlaceholders.remove();
             oldPlaceholders = calendar.getEventById("PLACEHOLDER_" + ++index);
+        }
+    }
+
+    function compareRooms(prop1, prop2) {
+        return function (a, b) {
+            if (a[prop1] < b[prop1]) {
+                return -1;
+            }
+            else if (b[prop1] < a[prop1]) {
+                return 1;
+            }
+            else if (prop2) {
+                if (a[prop2] < b[prop2]) {
+                    return -1;
+                }
+                else if (b[prop2] < a[prop2]) {
+                    return 1;
+                }
+            }
+            return 0;
         }
     }
 </script>
@@ -564,13 +601,12 @@
 
 <div class="col-xs-12 col-xl-10">
     <div class="col-xs-12 col-md-8">
-        <div class="panel panel-primary">
+        <div id="pending-requests" class="panel panel-primary">
             <div class="panel-heading"><span>Pending Requests</span></div>
             <div class="panel-body">
                 <p>
-                    Requests are color-coded based on priority.  <span class="bg-danger">Stat</span> requests are
-                    highlighted in <span class="bg-danger">red</span> and <span class="bg-warning">ASAP</span> requests
-                    are highlighted in <span class="bg-warning">yellow</span>.
+                    Once you click on a pending request you are able to edit when (date/time) and where (rooms) the surgery/procedure will be scheduled. Any changes
+                    made will persist until either that request is scheduled, or the page is refreshed.
                 </p>
                 <!-- ko if: pendingRequestTable.rows().length == 0 -->
                 <p><em>There are no pending Surgery requests.</em></p>
@@ -578,7 +614,7 @@
             </div>
 
             <!-- ko if: pendingRequestTable.rows().length > 0 -->
-            <lk-table params="table: pendingRequestTable, rowClickCallback: requestTableClickAction"></lk-table>
+            <lk-table params="table: pendingRequestTable, rowClickCallback: requestTableClickAction, rowsAreSelectable: false"></lk-table>
             <!-- /ko -->
         </div>
     </div>
@@ -586,123 +622,20 @@
     <div class="col-xs-12 col-md-4">
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Schedule Request</span></div>
-            <div class="panel-body" id="scheduleRequestForm" data-bind="with: form">
+            <div class="panel-body" id="scheduleRequestDiv" data-bind="with: form">
                 <!-- ko if: requestid() == '' -->
                 <p style="text-align: center">
                     <em>Please click on a pending request to schedule it.</em>
                 </p>
                 <!-- /ko -->
 
-                <form class="form-horizontal scheduleForm">
-                    <!-- ko if: requestid() != '' -->
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Request ID</label>
-                        <div class="col-xs-8">
-                            <p class="form-control-static">
-                                <a href="{{href}}">
-                                    {{ requestid | lookup:$root.RequestIdLookup }}
-                                </a>
-                                <span> ({{ requestid | lookup:$root.PriorityLookup }})</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Animal ID(s)</label>
-                        <div class="col-xs-8">
-                            <p class="form-control-static">{{animalid}}</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Comments</label>
-                        <div class="col-xs-8">
-                            <p class="form-control-static">{{comments}}</p>
-                        </div>
-                    </div>
-                    <!-- /ko -->
-
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Start Time</label>
-                        <div class="col-xs-8">
-                            <p class="form-control-static">{{date}}</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">End Time</label>
-                        <div class="col-xs-8">
-                            <p class="form-control-static">{{enddate}}</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Location(s)</label>
-                        <div class="col-xs-8">
-                            <p class="form-control-static">{{rooms}}</p>
-                        </div>
-                    </div>
-
-                    <%--<div class="form-group">--%>
-                    <%--<label class="col-xs-4 control-label">Pathologist</label>--%>
-                    <%--<div class="col-xs-8">--%>
-                    <%--&lt;%&ndash;<select data-bind="value: pathologist" class="form-control">&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
-                    <%--</div>--%>
-                    <%--</div>--%>
-
-                    <%--<div class="form-group">--%>
-                    <%--<label class="col-xs-4 control-label">Prosector</label>--%>
-                    <%--<div class="col-xs-8">--%>
-                    <%--&lt;%&ndash;<select data-bind="value: assistant" class="form-control">&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;<option value=""></option>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                    <%--&lt;%&ndash;for(JSONObject pathologist : pathologistList) {&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;String userid = pathologist.getString("userid");&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;String internaluserid = pathologist.getString("internaluserid");&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;<option value="<%=internaluserid%>"><%=h(userid)%></option>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;&lt;%&ndash;%>--%>
-                    <%--&lt;%&ndash;}&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;%>&ndash;%&gt;--%>
-                    <%--&lt;%&ndash;</select>&ndash;%&gt;--%>
-                    <%--</div>--%>
-                    <%--</div>--%>
-
-                    <div class="form-group">
-                        <label class="col-xs-4 control-label">Hold/Deny Reason</label>
-                        <div class="col-xs-8">
-                            <div class='input-group' id='holddenyreason'>
-                                <input type='text' class="form-control" data-bind="value: statuschangereason">
-                            </div>
-                        </div>
-
-
-                        <%--<div class="col-xs-8">--%>
-                        <%--<p class="form-control">{{statuschangereason}}</p>--%>
-                        <%--&lt;%&ndash;<input type="hidden" class="hidden-assignedTo-field" data-bind="value: assignedTo">&ndash;%&gt;--%>
-                        <%--&lt;%&ndash;<input type="text" class="form-control assignedTo-field">&ndash;%&gt;--%>
-                        <%--</div>--%>
-                    </div>
-
-                    <div style="text-align: right;">
-                        <button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>
-                        <button class="btn btn-danger" data-bind="click: $root.denyForm">Deny</button>
-                        <button class="btn btn-warning" data-bind="click: $root.holdForm">Hold</button>
-                        <button class="btn btn-success" data-bind="click: $root.submitForm">Schedule</button>
-                    </div>
-                </form>
-
+                <form id="scheduleRequestForm" class="form-horizontal scheduleForm"></form>
+                <div style="text-align: right;">
+                    <button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>
+                    <button class="btn btn-danger" data-bind="click: $root.denyForm">Deny</button>
+                    <button class="btn btn-warning" data-bind="click: $root.holdForm">Hold</button>
+                    <button class="btn btn-success" data-bind="click: $root.submitForm">Schedule</button>
+                </div>
             </div>
         </div>
     </div>
@@ -728,6 +661,7 @@
 
 <script>
     let selectedEvent = {};
+    let oldEventValues = {};
     let placeholderEvents = {};
     let calendar = {};
     let calendarEvents = {};
@@ -758,6 +692,20 @@
         let displayDateTimeISO = function(dateString) {
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
         };
+
+        // Build a lookup index of requests.
+        let pendingRequests = <%= pendingRequests %>;
+        jQuery.each(pendingRequests, function(i, request) {
+            pendingRequestsIndex[request.requestid] = request;
+        });
+
+        let pendingRooms = <%= jsonRooms %>;
+        jQuery.each(pendingRooms, function(i, request) {
+            if (!pendingRoomsIndex[request.requestid]) {
+                pendingRoomsIndex[request.requestid] = [];
+            }
+            pendingRoomsIndex[request.requestid].push(request);
+        });
 
         $(document).ready(function() {
             document.getElementById('calendar-checklist').innerHTML = '';
@@ -890,6 +838,19 @@
                         }
                     });
 
+                    $('#pending-requests').block({
+                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
+                        css: {
+                            border: 'none',
+                            padding: '15px',
+                            backgroundColor: '#000',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .5,
+                            color: '#fff'
+                        }
+                    });
+
                     calendar = new FullCalendar.Calendar(calendarEl, {
                         themeSystem: 'bootstrap',
                         initialView: 'dayGridMonth',
@@ -929,27 +890,6 @@
                                     }
                                 });
                             }
-
-                            // $("#eventModalTitle").html(info.event.title);
-                            //
-                            // let startYear = info.event.start.getFullYear();
-                            // let startMonth = ("0" + info.event.start.getMonth() + 1).slice(-2);
-                            // let startDay = ("0" + info.event.start.getDate()).slice(-2);
-                            // let startHours = ("0" + info.event.start.getHours()).slice(-2);
-                            // let startMinutes = ("0" + info.event.start.getMinutes()).slice(-2);
-                            // let startValue = startYear + "-" + startMonth + "-" + startDay + "T" + startHours + ":" + startMinutes;
-                            //
-                            // let endYear = info.event.end.getFullYear();
-                            // let endMonth = ("0" + info.event.end.getMonth() + 1).slice(-2);
-                            // let endDay = ("0" + info.event.end.getDate()).slice(-2);
-                            // let endHours = ("0" + info.event.end.getHours()).slice(-2);
-                            // let endMinutes = ("0" + info.event.end.getMinutes()).slice(-2);
-                            // let endValue = endYear + "-" + endMonth + "-" + endDay + "T" + endHours + ":" + endMinutes;
-                            //
-                            // document.getElementById("eventModalTitleField").value = info.event.title;
-                            // document.getElementById("eventModalStartField").value = startValue;
-                            // document.getElementById("eventModalEndField").value = endValue;
-                            // $("#eventModal").modal();
                         }
                     });
 
@@ -972,30 +912,18 @@
                                 }
                                 $('#calendar-selection').unblock();
                                 $('#procedure-calendar').unblock();
+                                $('#pending-requests').unblock();
                             }, this),
                             failure: LABKEY.Utils.getCallbackWrapper(function (response) {
                                 alert("Something went wrong: " + JSON.stringify(response));
                                 $('#calendar-selection').unblock();
                                 $('#procedure-calendar').unblock();
+                                $('#pending-requests').unblock();
                             }, this)
                         });
                     }
                 }
             });
-        });
-
-        // Build a lookup index of requests.
-        let pendingRequests = <%= pendingRequests %>;
-        jQuery.each(pendingRequests, function(i, request) {
-            pendingRequestsIndex[request.requestid] = request;
-        });
-
-        let pendingRooms = <%= jsonRooms %>;
-        jQuery.each(pendingRooms, function(i, request) {
-            if (!pendingRoomsIndex[request.requestid]) {
-                pendingRoomsIndex[request.requestid] = [];
-            }
-            pendingRoomsIndex[request.requestid].push(request);
         });
 
         let $scheduleForm = $('.scheduleForm');
@@ -1077,9 +1005,9 @@
                             displayDateTime(row.enddate)
                         ],
                         otherData: row,
-                        warn: (row.priority == 'ASAP'),
-                        err:  (row.priority == 'Stat'),
-                        success: (row.priority == 'Routine')
+                        warn: false,
+                        err:  false,
+                        success: false
                     });
                 })
             }),
@@ -1088,19 +1016,62 @@
 
                 WebUtils.VM.requestRowInForm = row;
                 WebUtils.VM.updateForm(row.otherData.requestid);
+                let form = ko.mapping.toJS(WebUtils.VM.form);
 
                 let request = pendingRequestsIndex[row.otherData.requestid];
                 let rooms = pendingRoomsIndex[row.otherData.requestid];
 
+                createPlaceholderEvents(rooms);
+
+                let formDiv = document.getElementById("scheduleRequestForm");
+
+                while (formDiv.firstChild) {
+                    formDiv.removeChild(formDiv.lastChild);
+                }
+
+                let titleDiv = createDiv("Title", "text", "scheduleTitleField", getEventSubject(form));
+                formDiv.appendChild(titleDiv);
+                formDiv.appendChild(document.createElement("hr"));
+
                 for (let i = 0; i < rooms.length; i++) {
-                    let placeholderEvent = {};
-                    placeholderEvent.title = rooms[i].room + " placeholder";
-                    placeholderEvent.start = new Date(rooms[i].date);
-                    placeholderEvent.end = new Date(rooms[i].enddate);
-                    placeholderEvent.backgroundColor = rooms[i].default_bg_color;
-                    placeholderEvent.id = "PLACEHOLDER_" + i;
-                    addToPlaceholderEvents(rooms[i].email, placeholderEvent);
-                    calendar.addEvent(placeholderEvent, rooms[i].email);
+                    rooms[i].date = dateToDateInputField(new Date(rooms[i].date));
+                    rooms[i].enddate = dateToDateInputField(new Date(rooms[i].enddate));
+                }
+                rooms.sort(compareRooms("date", "enddate"));
+
+                for (let i = 0; i < rooms.length; i++) {
+                    let startValue = rooms[i].date;
+                    let endValue = rooms[i].enddate;
+                    let calendarId = rooms[i].email;
+
+                    let roomDiv = createSelectDiv("Room", "scheduleRoomField_" + i, calendarId);
+                    let startDiv = createDiv("Start Time", "datetime-local", "scheduleStartField_" + i, startValue);
+                    let endDiv = createDiv("End Time", "datetime-local", "scheduleEndField_" + i, endValue);
+
+                    if (i > 0) {
+                        formDiv.appendChild(document.createElement("hr"));
+                    }
+                    formDiv.appendChild(roomDiv);
+                    formDiv.appendChild(startDiv);
+                    formDiv.appendChild(endDiv);
+
+                    document.getElementById("scheduleRoomField_" + i).addEventListener("change", function() {
+                        rooms[i].email = this.value;
+                        rooms[i].room = this.value.substring(0, this.value.indexOf("@"));
+                        clearPlaceholderEvents();
+                        createPlaceholderEvents(rooms);
+                    });
+                    document.getElementById("scheduleStartField_" + i).addEventListener("change", function() {
+                        rooms[i].date = this.value;
+                        clearPlaceholderEvents();
+                        createPlaceholderEvents(rooms);
+                    });
+                    document.getElementById("scheduleEndField_" + i).addEventListener("change", function() {
+                        rooms[i].enddate = this.value;
+                        clearPlaceholderEvents();
+                        createPlaceholderEvents(rooms);
+                    });
+
                 }
             }
         });
@@ -1129,6 +1100,11 @@
                     }
                 });
                 clearPlaceholderEvents();
+                let formDiv = document.getElementById("scheduleRequestForm");
+
+                while (formDiv.firstChild) {
+                    formDiv.removeChild(formDiv.lastChild);
+                }
             },
             updateForm: function(requestid) {
                 let request = pendingRequestsIndex[requestid];
@@ -1203,7 +1179,7 @@
                                         otherData: eventToRemove.extendedProps,
                                         warn: (eventToRemove.extendedProps.priority === 'ASAP'),
                                         err: (eventToRemove.extendedProps.priority === 'Stat'),
-                                        success: (eventToRemove.extendedProps.priority === 'Routine')
+                                        success: (eventToRemove.extendedProps.priority === 'Routine'),
                                     });
                                     WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
                                     pendingRequestsIndex[eventToRemove.extendedProps.requestid] = eventToRemove.extendedProps;
@@ -1220,6 +1196,7 @@
                 }
             },
             editEvent: function() {
+                oldEventValues = {};
                 $("#eventModalTitle").html(selectedEvent.title);
 
                 let mainEvent = selectedEvent;
@@ -1238,20 +1215,27 @@
                     formDiv.removeChild(formDiv.lastChild);
                 }
 
-                let titleDiv = createModalDiv("Title", "text", "modalTitleField", mainEvent.title);
+                let titleDiv = createDiv("Title", "text", "modalTitleField", mainEvent.title);
                 formDiv.appendChild(titleDiv);
                 formDiv.appendChild(document.createElement("hr"));
 
+                let roomEvents = [];
                 for (let i = 0; i < roomIds.length; i++) {
-                    let roomEvent = calendar.getEventById(roomIds[i]);
+                    roomEvents.push(calendar.getEventById(roomIds[i]));
+                }
+                roomEvents.sort(compareRooms("start", "end"));
 
-                    let startValue = dateToDateInputField(roomEvent.start);
-                    let endValue = dateToDateInputField(roomEvent.end);
-                    let calendarId = roomEvent.extendedProps.calendarId;
+                for (let i = 0; i < roomEvents.length; i++) {
+                    let startValue = dateToDateInputField(roomEvents[i].start);
+                    let endValue = dateToDateInputField(roomEvents[i].end);
+                    let roomEmail = roomEvents[i].extendedProps.calendarId;
 
-                    let roomDiv = createModalSelectDiv("Room", "modalRoomField_" + i, calendarId);
-                    let startDiv = createModalDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
-                    let endDiv = createModalDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
+                    oldEventValues["modalRoomField_" + i] = roomEmail;
+                    let roomDiv = createSelectDiv("Room", "modalRoomField_" + i, roomEmail);
+                    oldEventValues["modalStartField_" + i] = startValue;
+                    let startDiv = createDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
+                    oldEventValues["modalEndField_" + i] = endValue;
+                    let endDiv = createDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
 
                     if (i > 0) {
                         formDiv.appendChild(document.createElement("hr"));

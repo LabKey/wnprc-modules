@@ -120,10 +120,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return CALENDAR_COLORS;
     }
 
-    public Map<String, Boolean> isRoomAvailable(List<String> rooms, Date start, Date end) {
-        ZonedDateTime startTime = ZonedDateTime.ofInstant(start.toInstant(), ZoneId.of("America/Chicago"));
-        ZonedDateTime endTime = ZonedDateTime.ofInstant(end.toInstant(), ZoneId.of("America/Chicago"));
-
+    public Map<String, Boolean> isRoomAvailable(List<String> rooms, ZonedDateTime startTime, ZonedDateTime endTime) {
         Map<String, Boolean> availability = Graph.getAvailability(getAccessToken(), rooms, startTime, endTime);
         return availability;
     }
@@ -144,17 +141,19 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return true;
     }
 
-    public boolean addEvents(String calendarId, List<Map<String, Object>> roomRequests, String subject, String requestId, JSONObject response) throws IOException {
+    public boolean addEvents(String calendarId, JSONArray roomRequests, String subject, String requestId, JSONObject response) throws IOException {
         if (response == null) {
             response = new JSONObject();
         }
         boolean allRoomsAvailable = true;
         List<Event> addedEvents = new ArrayList<>();
 
-        for (Map<String, Object> roomRequest : roomRequests) {
-            Date start = (Timestamp) roomRequest.get("date");
-            Date end = (Timestamp) roomRequest.get("enddate");
-            String roomEmailAddress = (String) roomRequest.get("room_fs_email");
+        for (int i = 0; i < roomRequests.length(); i++) {
+            JSONObject roomRequest = roomRequests.getJSONObject(i);
+
+            ZonedDateTime start = LocalDateTime.parse((String) roomRequest.get("date"), DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("America/Chicago"));
+            ZonedDateTime end = LocalDateTime.parse((String) roomRequest.get("enddate"), DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("America/Chicago"));
+            String roomEmailAddress = (String) roomRequest.get("email");
 
             List<String> rooms = new ArrayList<>();
             rooms.add(roomEmailAddress);
@@ -167,13 +166,12 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         }
 
         if (allRoomsAvailable) {
-            for (Map<String, Object> roomRequest : roomRequests) {
-                Date start = (Timestamp) roomRequest.get("date");
-                Date end = (Timestamp) roomRequest.get("enddate");
-                String roomEmailAddress = (String) roomRequest.get("room_fs_email");
+            for (int i = 0; i < roomRequests.length(); i++) {
+                JSONObject roomRequest = roomRequests.getJSONObject(i);
 
-                ZonedDateTime startTime = ZonedDateTime.ofInstant(start.toInstant(), ZoneId.of("America/Chicago"));
-                ZonedDateTime endTime = ZonedDateTime.ofInstant(end.toInstant(), ZoneId.of("America/Chicago"));
+                String roomEmailAddress = (String) roomRequest.get("email");
+                ZonedDateTime startTime = LocalDateTime.parse((String) roomRequest.get("date"), DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("America/Chicago"));
+                ZonedDateTime endTime = LocalDateTime.parse((String) roomRequest.get("enddate"), DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.of("America/Chicago"));
 
                 List<Attendee> attendees = Graph.buildAttendeeList(roomEmailAddress);
 

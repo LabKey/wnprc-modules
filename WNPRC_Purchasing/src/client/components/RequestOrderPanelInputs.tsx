@@ -119,6 +119,13 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
         onChange('vendor', val);
     }, [onChange, hasError, model, onModelChange]);
 
+    const onVendorCancel = useCallback((newVendor : VendorModel) => {
+        const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
+            draft['vendor'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+        });
+        onModelChange(updatedModel);
+    }, [onChange, hasError, model, onModelChange]);
+
     const onVendorAdd = useCallback((newVendor : VendorModel) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
             draft['newVendor'] = newVendor;
@@ -144,7 +151,13 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
             </PurchasingFormInput>
             {
                 showPopup &&
-                <VendorPopupModal vendorList={dropDownVals} showPopup={showPopup} vendorModel={model.newVendor} onVendorChange={onVendorAdd} onChangeShowPopup={onChangeShowPopup}/>
+                <VendorPopupModal
+                        vendorList={dropDownVals}
+                        showPopup={showPopup}
+                        vendorModel={model.newVendor}
+                        onVendorChange={onVendorAdd}
+                        onVendorCancel={onVendorCancel}
+                        onChangeShowPopup={onChangeShowPopup}/>
             }
             {
                 model.vendor === 'Other' && model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&

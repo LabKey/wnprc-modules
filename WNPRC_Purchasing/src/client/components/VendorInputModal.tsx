@@ -8,12 +8,13 @@ interface VendorInputProps {
     vendorList: any;
     vendorModel: VendorModel;
     onVendorChange: (vendorModel: VendorModel) => void;
+    onVendorCancel: (vendorModel: VendorModel) => void;
     showPopup: boolean,
     onChangeShowPopup: (showPopup: boolean) => void;
 }
 
 export const VendorPopupModal: FC<VendorInputProps> = (props) => {
-    const { vendorList, vendorModel, onVendorChange, showPopup, onChangeShowPopup } = props;
+    const { vendorList, vendorModel, onVendorChange, showPopup, onChangeShowPopup, onVendorCancel } = props;
 
     const [show, setShow] = useState(showPopup);
     const [updatedNewVendor, setUpdatedNewVendor] = useState<VendorModel>(VendorModel.create({}));
@@ -80,6 +81,7 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
         else {
             setUpdatedNewVendor(vendorModel);
         }
+        onVendorCancel(vendorModel);
         onChangeShowPopup(false);
         setShow(false);
 

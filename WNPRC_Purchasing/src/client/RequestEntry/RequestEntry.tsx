@@ -50,7 +50,7 @@ export const App : FC = () => {
         return () => {
             window.removeEventListener('beforeunload', handleWindowBeforeUnload);
         }
-    }, [isDirty]);
+    }, [isDirty, setIsDirty]);
 
     const handleWindowBeforeUnload = useCallback((event) => {
         if (isDirty) {
@@ -153,7 +153,7 @@ export const App : FC = () => {
 
         //if no errors then save
         if (requestOrderErrors.length == 0 && !hasLineItemError) {
-
+            setIsDirty(false);
             submitRequest(requestOrderModel, lineItems).then(r => {
                 if (r.success) {
                     //navigate to purchasing overview grid/main page

@@ -32,7 +32,6 @@ export const App : FC = () => {
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
         // is fired on component mount
-        window.addEventListener('beforeunload', handleWindowBeforeUnload);
         let isNewRequest = ActionURL.getParameter('isNewRequest');
         if (isNewRequest) {
             getData('core', 'qcState', 'RowId, Label').then(vals => {
@@ -41,11 +40,17 @@ export const App : FC = () => {
                 setLineItems([LineItemModel.create({qcState: vals[idx].RowId})]);
             });
         }
+    }, []);
+
+    useEffect(() => {
+        // is fired on component mount
+        window.addEventListener('beforeunload', handleWindowBeforeUnload);
+
         // is fired on component unmount
         return () => {
             window.removeEventListener('beforeunload', handleWindowBeforeUnload);
         }
-    }, []);
+    }, [isDirty]);
 
     const handleWindowBeforeUnload = useCallback((event) => {
         if (isDirty) {

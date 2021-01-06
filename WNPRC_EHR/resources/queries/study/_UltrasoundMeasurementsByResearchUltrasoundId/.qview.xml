@@ -4,6 +4,7 @@
        <column name="measurement_label" />
        <column name="measurement_value" />
        <column name="measurement_unit" />
+       <column name="measurement_averages"/>
    </columns>
    <sorts>
        <sort column="measurement_label"/>

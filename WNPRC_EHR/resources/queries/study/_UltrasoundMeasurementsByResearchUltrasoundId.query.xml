@@ -7,6 +7,9 @@
                     <column columnName="measurement_label"/>
                     <column columnName="measurement_value"/>
                     <column columnName="measurement_unit"/>
+                    <column columnName="measurement_averages">
+                        <columnTitle>Average</columnTitle>
+                    </column>
                 </columns>
             </table>
         </tables>

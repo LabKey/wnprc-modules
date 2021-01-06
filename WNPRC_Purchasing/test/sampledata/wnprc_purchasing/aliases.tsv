@@ -1,5 +1,5 @@
-alias	type	affiliate	tier_rate	grantNumber	investigatorName	projectDescription	contact_name	contact_phone	contact_email	address	city	state	zip	comments	po_number	po_amount	charge_grant_accounts_id	uw_fund	uw_account	uw_udds	uw_class_code	budgetStartDate	budgetEndDate	grant_period_end	order_cutoff	successor_account	predecessor_account	gencredits	mds_number
-acct100	internal	campus	2	acct100	James Bond	monkey 007	Eve Moneypenny	1-700-007-1111	moneypenny@bondworks.com	MI6 Headquarters					direct	100000	3000	135	acct100	A-XY-123	7777	1/1/1996	12/31/2099	12/31/2099	12/31/2099			0
-acct101	external	campus	3	acct101	Jon Snow	NHP White Walkers	Sansa Stark	1-800-123-1234	bran_telepathy@got.com	The Wall					Direct bill WISDM	150000	3000	136	acct101	99-8888	8888	1/1/2010	12/31/2099	12/31/2099	12/31/2099			0
-acct102	internal	campus	1	acct102	Jon Snow	NHP White Walkers	Sansa Stark	1-800-123-1234	bran_telepathy@got.com	The Wall					Direct bill WISDM	150000	3000	136	acct102	99-8888	8888	1/1/2010	12/31/2099	12/31/2099	12/31/2099			0
-acct103	internal	campus	1	acct103	Jon Snow	NHP White Walkers	Sansa Stark	1-800-123-1234	bran_telepathy@got.com	The Wall					Direct bill WISDM	150000	3000	136	acct103	99-8888	8888	1/1/2010	12/31/2099	12/31/2099	12/31/2099			1
+alias	isAcceptingCharges
+acct100	true
+acct101	true
+acct102	true
+acct103	true

@@ -510,7 +510,7 @@
 
             return LABKEY.ActionURL.buildURL('ehr', 'dataEntryFormDetails', null, {
                 formType: 'NecropsyRequest',
-                returnURL: window.location,
+                returnUrl: window.location,
                 requestId: lsid
             });
         });

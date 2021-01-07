@@ -37,7 +37,7 @@ More information about how the entire form works can be found in the documentati
 
 ## Release Notes
 ### 1.1.0
-(2020-09-xx)
+(2020-11-23)
 
 #### Bug Fixes
 * Removed validation for editing `date` 60 days in the past or more

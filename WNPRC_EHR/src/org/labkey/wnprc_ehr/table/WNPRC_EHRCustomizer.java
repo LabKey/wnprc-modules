@@ -25,11 +25,13 @@ import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
@@ -40,9 +42,11 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.ehr.EHRSchema;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
 
 
 /**
@@ -81,9 +85,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeFeedingTable((AbstractTableInfo) table);
             } else if (matches(table, "study", "demographics")) {
                 customizeDemographicsTable((AbstractTableInfo) table);
+            } else if (matches(table, "ehr", "tasks")) {
+                customizeTasksTable((AbstractTableInfo) table);
+            }
         }
     }
-}
 
     private void customizeColumns(AbstractTableInfo ti)
     {
@@ -116,6 +122,99 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         room.setFk(new QueryForeignKey(us, ehrContainer, "rooms", "room", "room", true));
                     }
                 }
+            }
+        }
+    }
+
+    private void customizeTasksTable(AbstractTableInfo ti)
+    {
+//        DetailsURL detailsURL = DetailsURL.fromString("/ehr/dataEntryFormDetails.view?formType=${formtype}&taskid=${taskid}");
+//        ti.setDetailsURL(detailsURL);
+//
+//        if (rowIdCol != null)
+//        {
+//            rowIdCol.setURL(detailsURL);
+//        }
+        UserSchema us = ti.getUserSchema();
+
+        ColumnInfo rowIdCol = ti.getColumn("rowid");
+        if (rowIdCol != null && us != null)
+        {
+            rowIdCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
+            {
+                @Override
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    Integer rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+                    String taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
+                    String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+
+                    if (isExt4Form("form", formType))
+                    {
+                        ActionURL url = new ActionURL("ehr", "dataEntryFormDetails.view", us.getContainer());
+                        if ("Research Ultrasounds".equalsIgnoreCase(formType)) {
+                            formType = "Research Ultrasounds Task";
+                        }
+                        url.addParameter("formtype", formType);
+                        url.addParameter("taskid", taskId);
+                        StringBuilder urlString = new StringBuilder();
+                        urlString.append("<a href=\"" + PageFlowUtil.filter(url) + "\">");
+                        urlString.append(PageFlowUtil.filter(rowId));
+                        urlString.append("</a>");
+
+                        out.write(urlString.toString());
+                    } else {
+                        super.renderGridCellContents(ctx, out);
+                    }
+                }
+
+                @Override
+                public Object getDisplayValue(RenderContext ctx)
+                {
+                    return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+                }
+            });
+
+            ColumnInfo updateTitleCol = ti.getColumn("updateTitle");
+            if (updateTitleCol != null && us != null)
+            {
+                updateTitleCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
+                {
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        String updateTitle = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "updateTitle"));
+                        String taskId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "taskid"));
+                        String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+
+                        if (isExt4Form("form", formType))
+                        {
+                            ActionURL url = new ActionURL("ehr", "dataEntryForm.view", us.getContainer());
+                            if ("Research Ultrasounds".equalsIgnoreCase(formType))
+                            {
+                                formType = "Research Ultrasounds Review";
+                            }
+                            url.addParameter("formType", formType);
+                            url.addParameter("taskid", taskId);
+                            StringBuilder urlString = new StringBuilder();
+                            urlString.append("<a href=\"" + PageFlowUtil.filter(url) + "\">");
+                            urlString.append(PageFlowUtil.filter(updateTitle));
+                            urlString.append("</a>");
+
+                            out.write(urlString.toString());
+                        }
+                        else
+                        {
+                            super.renderGridCellContents(ctx, out);
+                        }
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+                    }
+                });
             }
         }
     }
@@ -289,18 +388,41 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeDemographicsTable(AbstractTableInfo table)
     {
-        if (table.getColumn("Feeding") != null)
-            return;
-
         UserSchema us = getStudyUserSchema(table);
         if (us == null){
             return;
         }
 
-        ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
-        col21.setLabel("Feeding");
-        col21.setDescription("Shows most recent feeding type and chow conversion.");
-        table.addColumn(col21);
+        if (table.getColumn("Feeding") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+            col.setLabel("Feeding");
+            col.setDescription("Shows most recent feeding type and chow conversion.");
+            table.addColumn(col);
+        }
+
+        if (table.getColumn("mostRecentAlopeciaScore") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentAlopeciaScore", "demographicsMostRecentAlopecia");
+            col.setLabel("Alopecia Score");
+            col.setDescription("Calculates the most recent alopecia score for each animal");
+            table.addColumn(col);
+        }
+
+        if (table.getColumn("mostRecentBodyConditionScore") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "mostRecentBodyConditionScore", "demographicsMostRecentBodyConditionScore");
+            col.setLabel("Most Recent BCS");
+            col.setDescription("Returns the participant's most recent body condition score");
+            table.addColumn(col);
+        }
+        if (table.getColumn("necropsyAbstractNotes") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
+            col.setLabel("Necropsy Abstract Notes");
+            col.setDescription("Returns the participant's necropsy abstract remarks and projects");
+            table.addColumn(col);
+        }
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)
@@ -571,4 +693,23 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             return h(getValue(ctx));
         }
     }*/
+
+   private boolean isExt4Form(String schemaName, String queryName)
+   {
+       boolean isExt4Form = false;
+
+       SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, queryName);
+       TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
+       TableSelector ts = new TableSelector(ti, filter, null);
+       String framework;
+       if (ts.getMap() != null && ts.getMap().get("framework") != null)
+       {
+           framework = (String) ts.getMap().get("framework");
+           if ("extjs4".equalsIgnoreCase(framework)) {
+               isExt4Form = true;
+           }
+       }
+
+       return isExt4Form;
+   }
 }

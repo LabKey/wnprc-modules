@@ -1,0 +1,3 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart" title="Research Ultrasounds Detail">
+    <view name="ultrasound_measurements" frame="none"/>
+</webpart>

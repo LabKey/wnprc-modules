@@ -1,0 +1,89 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="ResearchUltrasoundsInfo" tableDbType="NOT_IN_DB">
+                <importUrl></importUrl>
+                <updateUrl>/ehr/dataEntryForm.view?formType=Research%20Ultrasounds%20Review&amp;taskid=${taskid}</updateUrl>
+                <insertUrl>/ehr/dataEntryForm.view?formType=${taskid/formtype}&amp;taskid=${taskid}</insertUrl>
+                <deleteUrl></deleteUrl>
+                <columns>
+                    <column columnName="objectid">
+                        <!--<isHidden>true</isHidden>-->
+                    </column>
+                    <column columnName="Id">
+                        <columnTitle>Id</columnTitle>
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Date</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="pregnancyid">
+                        <columnTitle>Pregnancy (Conc. Date)</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>pregnancyConceptionDate</fkTable>
+                            <fkColumnName>lsid</fkColumnName>
+                            <fkDisplayColumnName>date_conception</fkDisplayColumnName>
+                        </fk>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="gestation_day">
+                        <columnTitle>Estimated Gestation</columnTitle>
+                        <datatype>varchar</datatype>
+                    </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="restraint">
+                        <columnTitle>Restraint</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="fetal_heartbeat">
+                        <columnTitle>+ Fetal HB</columnTitle>
+                        <datatype>boolean</datatype>
+                    </column>
+                    <column columnName="performedby">
+                        <columnTitle>Performed By</columnTitle>
+                    </column>
+                    <column columnName="remark">
+                        <columnTitle>Remark</columnTitle>
+                    </column>
+                    <column columnName="reviewCompleted">
+                        <columnTitle>Review Completed</columnTitle>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Yes"/>
+                                </filters>
+                                <backgroundColor>77DD77</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="No"/>
+                                </filters>
+                                <backgroundColor>E87060</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                          <fkDbSchema>ehr</fkDbSchema>
+                          <fkTable>tasks</fkTable>
+                          <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/dataEntryFormDetails.view?formtype=Research%20Ultrasounds%20Task&amp;taskid=${taskid}</url>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

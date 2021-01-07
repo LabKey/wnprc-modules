@@ -3,6 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
+
 Ext4.namespace('EHR.reports');
 
 //this contains WNPRC-specific reports that should be loaded on the animal history page
@@ -1130,6 +1131,121 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
 
     };
 })();
+
+//override the EHR abstract
+EHR.reports['abstract'] = function(panel, tab){
+    var filterArray = panel.getFilterArray(tab);
+    var title = panel.getTitleSuffix();
+
+    var animalId = panel.activeFilterType.getTitle(tab);
+    var animalList = animalId.split(/[^A-Za-z0-9]+/g);
+    var getErrorHTML = function(message) {
+        return '<p style="color: red"><strong>' + message + '</strong></p>';
+    };
+
+    if (animalList.length <= 2 && !(animalId.match(/multiple rooms selected/i) || animalId.match(/^Room:/i)) && !animalId == "") {
+
+        var config = {
+            xtype: 'ldk-webpartpanel',
+            title: "Details - " + animalId,
+            align: 'stretch',
+            frame: true,
+            html: getErrorHTML("Error loading abstract."),
+            style: 'margin-bottom: 20px'
+        };
+        var elementHTML = '';
+        for (var i = 0; i < animalList.length; i ++){
+            elementHTML += '<div id="abstract-section' + animalList[i] + '"></div>'
+        }
+        Ext4.apply(config, {
+            html: elementHTML,
+            listeners: {
+                afterrender: {
+                    fn: function () {
+                        LABKEY.requiresScript("/wnprc_ehr/gen/abstract.js",true, function() {
+                            for (var i = 0; i < animalList.length; i ++){
+                                Abstract.renderAnimalAbstract(animalList[i])
+                            }
+
+                        });
+                    }
+                }
+            }
+        });
+        tab.add(config);
+    }
+    else {
+        tab.add({
+            xtype: 'ldk-multirecorddetailspanel',
+            bodyStyle: 'padding-bottom: 20px',
+            store: {
+                schemaName: 'study',
+                queryName: 'demographics',
+                viewName: 'Abstract',
+                filterArray: filterArray.removable.concat(filterArray.nonRemovable)
+            },
+            titleField: 'Id',
+            titlePrefix: 'Details',
+            multiToGrid: true,
+            qwpConfig: panel.getQWPConfig({
+                title: 'Abstract'
+            })
+        });
+
+    }
+
+
+    var config = panel.getQWPConfig({
+        title: 'Other Notes' + title,
+        frame: true,
+        schemaName: 'study',
+        queryName: 'notes',
+        sort: '-date',
+        filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable
+    });
+
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
+
+    config = panel.getQWPConfig({
+        title: 'Active Assignments' + title,
+        frame: true,
+        schemaName: 'study',
+        queryName: 'Assignment',
+        viewName: 'Active Assignments',
+        filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable
+    });
+
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
+
+    config = panel.getQWPConfig({
+        title: 'Problem List' + title,
+        frame: true,
+        schemaName: 'study',
+        allowChooseView: true,
+        queryName: 'Problem List',
+        //sort: '-date',
+        filters: filterArray.nonRemovable,
+        removeableFilters: filterArray.removable
+    });
+
+    tab.add({
+        xtype: 'ldk-querycmp',
+        style: 'margin-bottom:20px;',
+        queryConfig: config
+    });
+
+    EHR.reports.weightGraph(panel, tab);
+};
 
 (function() {
     var abstractReport = EHR.reports['abstract'];

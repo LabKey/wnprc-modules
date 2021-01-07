@@ -121,7 +121,9 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
 
     const onVendorCancel = useCallback((newVendor : VendorModel) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
-            draft['vendor'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+            if (!VendorModel.getDisplayVersion(model.newVendor)) {
+                draft['vendor'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+            }
         });
         onModelChange(updatedModel);
     }, [onChange, hasError, model, onModelChange]);

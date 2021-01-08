@@ -22,12 +22,8 @@ export class RequestOrderModel {
         Object.assign(this, values);
     }
 
-    static create(raw: any, defaultSettings = null): RequestOrderModel {
-        if (defaultSettings) {
-            return new RequestOrderModel({ ...defaultSettings });
-        } else {
-            return new RequestOrderModel({ ...raw });
-        }
+    static create(raw?: any): RequestOrderModel {
+        return new RequestOrderModel({ ...raw });
     }
 }
 
@@ -56,15 +52,11 @@ export class VendorModel {
         Object.assign(this, values);
     }
 
-    static create(raw: any, defaultSettings = null): VendorModel {
-        if (defaultSettings) {
-            return new VendorModel({ ...defaultSettings });
-        } else {
-            return new VendorModel({ ...raw });
-        }
+    static create(raw?: any): VendorModel {
+        return new VendorModel({ ...raw });
     }
 
-    static getDisplayVersion(vendorModel: VendorModel) : string {
+    static getDisplayString(vendorModel: VendorModel) : string {
         let newVendorStr = '';
         newVendorStr += vendorModel.vendorName ? ('Vendor name: ' + vendorModel.vendorName + "\n") : '';
         newVendorStr += vendorModel.streetAddress ? ('Street address: ' + vendorModel.streetAddress + "\n") : '';
@@ -100,11 +92,7 @@ export class LineItemModel {
         Object.assign(this, values);
     }
 
-    static create(raw: any, defaultSettings = null): LineItemModel {
-        if (defaultSettings) {
-            return new LineItemModel({ ...defaultSettings });
-        } else {
-            return new LineItemModel({ ...raw });
-        }
+    static create(raw?: any): LineItemModel {
+        return new LineItemModel({ ...raw });
     }
 }

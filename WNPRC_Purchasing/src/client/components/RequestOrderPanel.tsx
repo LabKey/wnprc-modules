@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useState} from 'react';
+import React, {FC, memo, useCallback, useState} from 'react';
 import {Form, Panel} from 'react-bootstrap';
 import {RequestOrderModel, VendorModel} from '../model';
 import {Draft, produce} from 'immer';
@@ -11,12 +11,11 @@ interface Props
 {
     model: RequestOrderModel;
     onInputChange: (model: RequestOrderModel) => void;
-    errorMsg?: string
 }
 
-export const RequestOrderPanel: FC<Props> = (props) => {
+export const RequestOrderPanel: FC<Props> = memo((props) => {
 
-    const {model, onInputChange, errorMsg} = props;
+    const {model, onInputChange} = props;
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
@@ -39,12 +38,10 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                 draft['newVendor'] = VendorModel.create({});
             }
         });
-        if (updatedModel.account === 'Other')
-        {
+        if (updatedModel.account === 'Other') {
             setShowOtherAcct(true);
         }
-        else
-        {
+        else {
             setShowOtherAcct(false);
         }
 
@@ -66,7 +63,7 @@ export const RequestOrderPanel: FC<Props> = (props) => {
             <Form>
                 <AccountInput
                     value={model.account}
-                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'account')}
+                    hasError={model.errors?.find((field) => field.fieldName === 'account')}
                     onChange={onValueChange}
                 />
                 {
@@ -103,11 +100,11 @@ export const RequestOrderPanel: FC<Props> = (props) => {
                     onChange={onValueChange}
                 />
             </Form>
-            {errorMsg &&
+            {model.errorMsg &&
             <div className='alert alert-danger'>
-                {errorMsg}
+                {model.errorMsg}
             </div>
             }
         </Panel>
     );
-}
+})

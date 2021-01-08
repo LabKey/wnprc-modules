@@ -7,9 +7,6 @@ export function getData(schemaName: string, queryName: string, colNames: string)
             schemaName: schemaName,
             queryName: queryName,
             columns: colNames,
-            // filterArray: [
-            //     Filter.create()
-            // ]
             success: function (results) {
                 if (results && results.rows)
                 {
@@ -35,7 +32,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 comments: requestOrder.comments,
                 qcState: requestOrder.qcState,
                 lineItems: lineItems,
-                hasNewVendor: (requestOrder.vendor === 'Other' && VendorModel.getDisplayVersion(requestOrder.newVendor)) ? true : false,
+                hasNewVendor: (!!(requestOrder.vendor === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
                 newVendorName: requestOrder.newVendor.vendorName,
                 newVendorStreetAddress: requestOrder.newVendor.streetAddress,
                 newVendorCity: requestOrder.newVendor.city,

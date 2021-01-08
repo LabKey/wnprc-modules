@@ -16,20 +16,16 @@
 
 package org.labkey.wnprc_purchasing;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
-import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.resource.FileResource;
@@ -37,9 +33,7 @@ import org.labkey.api.resource.Resource;
 import org.labkey.api.security.User;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -152,19 +146,16 @@ public class WNPRC_PurchasingManager
 
         //Line items data
         List<Map<String, Object>> lineItemsData = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
-        WNPRC_PurchasingController.LineItem[] lineItems = mapper.convertValue(requestForm.getLineItems(), WNPRC_PurchasingController.LineItem[].class);
-
-        for (WNPRC_PurchasingController.LineItem lineItem : lineItems)
+        for (JSONObject lineItem : requestForm.getLineItems())
         {
             row = new CaseInsensitiveHashMap<>();
 
             row.put("requestId", requestId);
-            row.put("item", lineItem.getItem());
-            row.put("itemUnitId", lineItem.getItemUnit());
-            row.put("unitCost", lineItem.getUnitCost());
-            row.put("quantity", lineItem.getQuantity());
-            row.put("controlledSubstance", lineItem.isControlledSubstance());
+            row.put("item", lineItem.get("item"));
+            row.put("itemUnitId", lineItem.get("itemUnit"));
+            row.put("unitCost", lineItem.get("unitCost"));
+            row.put("quantity", lineItem.get("quantity"));
+            row.put("controlledSubstance", lineItem.get("controlledSubstance"));
             lineItemsData.add(row);
         }
 

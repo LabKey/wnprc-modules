@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
+import React, {FC, memo, useCallback, useEffect, useMemo, useState} from "react";
 import {getData} from "../actions";
 import {createOptions, formatCurrency} from "./Utils";
 
@@ -8,7 +8,7 @@ interface InputProps {
     hasError?: boolean;
 }
 
-export const DescriptionInput: FC<InputProps> = (props) => {
+export const DescriptionInput: FC<InputProps> = memo((props) => {
 
     const { onChange, value, hasError } = props;
 
@@ -24,9 +24,9 @@ export const DescriptionInput: FC<InputProps> = (props) => {
             id="item-description-id"
         />
     );
-}
+})
 
-export const UnitInput : FC<InputProps> = (props) => {
+export const UnitInput : FC<InputProps> = memo((props) => {
 
     const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
@@ -35,7 +35,7 @@ export const UnitInput : FC<InputProps> = (props) => {
         getData('ehr_purchasing', 'itemUnits', 'itemUnit, rowId').then(vals => {
             setDropDownVals(vals)
         });
-    }, [dropDownVals]);
+    }, []);
 
     const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'itemUnit', false), [dropDownVals]);
 
@@ -53,7 +53,7 @@ export const UnitInput : FC<InputProps> = (props) => {
             {options}
         </select>
     );
-}
+})
 
 interface NumericInputProps {
     value: number;
@@ -61,7 +61,7 @@ interface NumericInputProps {
     hasError?: boolean;
 }
 
-export const UnitCostInput: FC<NumericInputProps> = (props) => {
+export const UnitCostInput: FC<NumericInputProps> = memo((props) => {
 
     const { onChange, value, hasError } = props;
 
@@ -79,9 +79,9 @@ export const UnitCostInput: FC<NumericInputProps> = (props) => {
             type='number'
         />
     );
-}
+})
 
-export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
+export const UnitQuantityInput: FC<NumericInputProps> = memo((props) => {
 
     const { onChange, value, hasError } = props;
 
@@ -99,14 +99,14 @@ export const UnitQuantityInput: FC<NumericInputProps> = (props) => {
             type='number'
         />
     );
-}
+})
 
 interface SubtotalInputProps {
     unitCost: number;
     quantity: number;
 }
 
-export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
+export const SubtotalInput: FC<SubtotalInputProps> = memo((props) => {
 
     const { unitCost, quantity } = props;
     const [subtotal, setSubtotal] = useState<number>(0);
@@ -129,9 +129,9 @@ export const SubtotalInput: FC<SubtotalInputProps> = (props) => {
             id="item-subtotal-id"
         />
     );
-}
+})
 
-export const ControlledSubstance: FC<InputProps> = (props) => {
+export const ControlledSubstance: FC<InputProps> = memo((props) => {
 
     const { onChange, value } = props;
 
@@ -148,4 +148,4 @@ export const ControlledSubstance: FC<InputProps> = (props) => {
             id="control-substance-id"
         />
     );
-}
+})

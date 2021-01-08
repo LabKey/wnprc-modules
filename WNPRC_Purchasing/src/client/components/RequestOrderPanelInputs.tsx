@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useEffect, useMemo, useState} from "react";
+import React, {FC, memo, useCallback, useEffect, useMemo, useState} from "react";
 import {Button} from 'react-bootstrap';
 import {getData} from "../actions";
 import {createOptions} from "./Utils";
@@ -14,7 +14,7 @@ interface InputProps
     hasError?: boolean;
 }
 
-export const AccountInput: FC<InputProps> = (props) => {
+export const AccountInput: FC<InputProps> = memo((props) => {
 
     const {onChange, value, hasError} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
@@ -49,9 +49,9 @@ export const AccountInput: FC<InputProps> = (props) => {
             </PurchasingFormInput>
         </div>
     );
-}
+})
 
-export const AccountOtherInput: FC<InputProps> = (props) => {
+export const AccountOtherInput: FC<InputProps> = memo((props) => {
 
     const {onChange, value, hasError} = props;
 
@@ -76,7 +76,7 @@ export const AccountOtherInput: FC<InputProps> = (props) => {
             </PurchasingFormInput>
         </div>
     );
-}
+})
 
 interface VendorInputProps
 {
@@ -86,7 +86,7 @@ interface VendorInputProps
     onModelChange: (model: RequestOrderModel) => void;
 }
 
-export const VendorInput: FC<VendorInputProps> = (props) => {
+export const VendorInput: FC<VendorInputProps> = memo((props) => {
 
     const {onChange, hasError, model, onModelChange} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
@@ -121,7 +121,9 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
 
     const onVendorCancel = useCallback((newVendor : VendorModel) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
-            draft['vendor'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+            if (!VendorModel.getDisplayString(model.newVendor)) {
+                draft['vendor'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+            }
         });
         onModelChange(updatedModel);
     }, [onChange, hasError, model, onModelChange]);
@@ -160,7 +162,7 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
                         onChangeShowPopup={onChangeShowPopup}/>
             }
             {
-                model.vendor === 'Other' && model.newVendor && VendorModel.getDisplayVersion(model.newVendor).length > 0 &&
+                model.vendor === 'Other' && model.newVendor && VendorModel.getDisplayString(model.newVendor).length > 0 &&
                <>
                 <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
                    <Button className='edit-other-vendor-button btn btn-default' variant="primary" onClick={onClickEditNewVendor}>
@@ -171,9 +173,9 @@ export const VendorInput: FC<VendorInputProps> = (props) => {
 
         </div>
     );
-}
+})
 
-export const BusinessPurposeInput: FC<InputProps> = (props) => {
+export const BusinessPurposeInput: FC<InputProps> = memo((props) => {
 
     const {onChange, value, hasError} = props;
 
@@ -197,9 +199,9 @@ export const BusinessPurposeInput: FC<InputProps> = (props) => {
             </PurchasingFormInput>
         </div>
     );
-}
+})
 
-export const SpecialInstructionInput: FC<InputProps> = (props) => {
+export const SpecialInstructionInput: FC<InputProps> = memo((props) => {
 
     const {onChange, value} = props;
     const onTextChange = useCallback((evt) => {
@@ -222,9 +224,9 @@ export const SpecialInstructionInput: FC<InputProps> = (props) => {
             </PurchasingFormInput>
         </div>
     );
-}
+})
 
-export const ShippingDestinationInput: FC<InputProps> = (props) => {
+export const ShippingDestinationInput: FC<InputProps> = memo((props) => {
 
     const {onChange, value, hasError} = props;
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
@@ -258,9 +260,9 @@ export const ShippingDestinationInput: FC<InputProps> = (props) => {
             </PurchasingFormInput>
         </div>
     );
-}
+})
 
-export const DeliveryAttentionInput: FC<InputProps> = (props) => {
+export const DeliveryAttentionInput: FC<InputProps> = memo((props) => {
     const {onChange, value, hasError} = props;
     const onTextChange = useCallback((evt) => {
         onChange('deliveryAttentionTo', evt.target.value);
@@ -281,13 +283,13 @@ export const DeliveryAttentionInput: FC<InputProps> = (props) => {
             </PurchasingFormInput>
         </div>
     );
-}
+})
 
 interface VendorDisplayProps {
     vendorModel: VendorModel;
     onVendorChange: (vendorModel: VendorModel) => void;
 }
-export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
+export const NewVendorDisplay: FC<VendorDisplayProps> = memo((props) => {
 
     const {vendorModel} = props;
 
@@ -299,11 +301,11 @@ export const NewVendorDisplay: FC<VendorDisplayProps> = (props) => {
             >
                 <textarea
                     className='new-vendor-display form-control'
-                    value={VendorModel.getDisplayVersion(vendorModel)}
+                    value={VendorModel.getDisplayString(vendorModel)}
                     id="new-vendor-display"
                     disabled={true}
                 />
             </PurchasingFormInput>
         </div>
     )
-}
+})

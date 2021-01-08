@@ -24,7 +24,9 @@
                     </column>
                     <column columnName="OtherAcctAndInves"/>
                     <column columnName="requester"/>
-                    <column columnName="totalCost"/>
+                    <column columnName="totalCost">
+                        <formatString>$###,##0.00</formatString>
+                    </column>
                     <column columnName="requestStatus">
                         <fk>
                             <fkDbSchema>core</fkDbSchema>

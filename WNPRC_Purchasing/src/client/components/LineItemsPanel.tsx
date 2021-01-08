@@ -1,5 +1,5 @@
 import {LineItemModel} from "../model";
-import React, {FC, useCallback} from "react";
+import React, {FC, memo, useCallback} from "react";
 import {Panel, Col, Row} from 'react-bootstrap';
 import {Draft, produce} from "immer";
 import {LineItemRow} from "./LineItemRow";
@@ -14,7 +14,7 @@ interface Props
     errorMsg?: string;
 }
 
-export const LineItemsPanel: FC<Props> = (props) => {
+export const LineItemsPanel: FC<Props> = memo((props) => {
 
     const {lineItems, onChange, errorMsg} = props;
 
@@ -61,7 +61,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
                     <Col xs={1}>Unit *</Col>
                     <Col xs={1}>Unit Cost *</Col>
                     <Col xs={1}>Quantity *</Col>
-                    <Col xs={1}>Subtotal</Col>
+                    <Col xs={1}>Subtotal ($)</Col>
                     <Col xs={2}>Controlled substance</Col>
                 </Row>
             </div>
@@ -81,7 +81,7 @@ export const LineItemsPanel: FC<Props> = (props) => {
                     <Col xs={4}></Col>
                     <Col xs={1}></Col>
                     <Col xs={1}></Col>
-                    <Col className='calc-total' xs={1}>Total:</Col>
+                    <Col className='calc-total' xs={1}>Total ($):</Col>
                     <Col className='calc-total-val' xs={1}>
                         {
                             formatCurrency(lineItems.reduce( function(accumulatedVal,lineItem){
@@ -104,4 +104,4 @@ export const LineItemsPanel: FC<Props> = (props) => {
             }
         </Panel>
     );
-}
+})

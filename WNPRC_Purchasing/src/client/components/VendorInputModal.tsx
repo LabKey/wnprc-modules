@@ -1,5 +1,5 @@
 import {VendorModel} from "../model";
-import React, {FC, useCallback, useEffect, useState} from "react";
+import React, {FC, memo, useCallback, useEffect, useState} from "react";
 import {Button, Modal, Form} from 'react-bootstrap';
 import {VendorFormInput} from "./PurchasingFormInput";
 import produce, {Draft} from "immer";
@@ -13,7 +13,7 @@ interface VendorInputProps {
     onChangeShowPopup: (showPopup: boolean) => void;
 }
 
-export const VendorPopupModal: FC<VendorInputProps> = (props) => {
+export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
     const { vendorList, vendorModel, onVendorChange, showPopup, onChangeShowPopup, onVendorCancel } = props;
 
     const [show, setShow] = useState(showPopup);
@@ -49,11 +49,11 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
         const updatedModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
             if (errors.length > 0) {
                 draft.errors = errors;
-                let msg = 'Please fix error(s) before saving:  ';
+                let msg = 'Please fix error' + (errors.length > 1 ? 's' : '') + ' before saving:  ';
                 if (isDuplicateVendor){
                     msg += "duplicate vendor, ";
                 }
-                msg += "missing required field(s).";
+                msg += 'missing required field' + (errors.length > 1 ? 's' : '');
 
                 draft.errorMsg = msg;
                 setShow(true);
@@ -75,7 +75,7 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
     const handleClose = useCallback(() => {
 
         // scenario when user hits Cancel without Saving and there is no new vendor data, then cleanup and create and empty new vendor
-        if (VendorModel.getDisplayVersion(vendorModel).length == 0) {
+        if (VendorModel.getDisplayString(vendorModel).length == 0) {
             onVendorChange(VendorModel.create({}));
         }
         else {
@@ -89,8 +89,8 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
 
     const onInputChange = useCallback((colName, value) => {
         const updatedVendorModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
-            if (updatedNewVendor.errors && updatedNewVendor.errors.length > 0) {
-                let updatedErrors = updatedNewVendor.errors.filter((field) => field.fieldName !== colName);
+            if (updatedNewVendor.errors?.length > 0) {
+                const updatedErrors = updatedNewVendor.errors.filter((field) => field.fieldName !== colName);
                 draft['errors'] = updatedErrors;
             }
             if (draft['errors'] && draft['errors'].length === 0) {
@@ -213,7 +213,7 @@ export const VendorPopupModal: FC<VendorInputProps> = (props) => {
             </Modal>
         </>
     );
-}
+})
 
 interface VendorProps
 {
@@ -225,7 +225,7 @@ interface VendorProps
     hasError?: boolean;
 }
 
-const NewVendorInput: FC<VendorProps> = (props) => {
+const NewVendorInput: FC<VendorProps> = memo((props) => {
 
     const {required, column, columnTitle, value, onChange, hasError} = props;
 
@@ -234,7 +234,7 @@ const NewVendorInput: FC<VendorProps> = (props) => {
     }, [required, column, columnTitle, value, onChange]);
 
     return (
-        <div style={{width:'100%'}}>
+        <div className='vendor-modal'>
             <VendorFormInput
                 label={columnTitle}
                 required={required}
@@ -250,9 +250,9 @@ const NewVendorInput: FC<VendorProps> = (props) => {
             </VendorFormInput>
         </div>
     );
-}
+})
 
-const NewVendorTextArea: FC<VendorProps> = (props) => {
+const NewVendorTextArea: FC<VendorProps> = memo((props) => {
 
     const {required, column, columnTitle, value, onChange, hasError} = props;
 
@@ -276,4 +276,4 @@ const NewVendorTextArea: FC<VendorProps> = (props) => {
             </VendorFormInput>
         </div>
     );
-}
+})

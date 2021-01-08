@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {FC, memo} from 'react';
 import {Col, Row} from 'react-bootstrap';
 
 interface PurchasingFormInputProps
@@ -7,48 +7,41 @@ interface PurchasingFormInputProps
     required?: boolean;
     colSize?: number;
 }
+export const PurchasingFormInput: FC<PurchasingFormInputProps> = memo((props) => {
 
-export class PurchasingFormInput extends React.PureComponent<PurchasingFormInputProps, any>
-{
-    render()
-    {
-        const {label, required, children} = this.props;
+    const {label, required, children} = props;
 
-        return (
-            <Row>
-                <Col xs={12} md={7} className='request-order-form-row'>
-                    <Col xs={4} lg={3}>
-                        <label>{label}</label>
-                        {required ? ' *' : ''}
-                    </Col>
-                    <Col xs={9} lg={8}>
-                        {children}
-                    </Col>
+    return (
+        <Row>
+            <Col xs={12} md={7} className='request-order-form-row'>
+                <Col xs={4} lg={3}>
+                    <label>{label}</label>
+                    {required ? ' *' : ''}
                 </Col>
-            </Row>
-        );
-    }
-}
-
-export class VendorFormInput extends React.PureComponent<PurchasingFormInputProps, any>
-{
-    render()
-    {
-        const {label, required, children} = this.props;
-
-        return (
-            <Row>
-                <Col xs={12} className='request-order-form-row'>
-                    <Col xs={4}>
-                        <label>{label}</label>
-                        {required ? ' *' : ''}
-                    </Col>
-                    <Col xs={8}>
-                        {children}
-                    </Col>
+                <Col xs={9} lg={8}>
+                    {children}
                 </Col>
-            </Row>
-        );
-    }
-}
+            </Col>
+        </Row>
+    );
+})
+
+export const VendorFormInput: FC<PurchasingFormInputProps> = memo((props) => {
+
+    const {label, required, children} = props;
+
+    return (
+        <Row>
+            <Col xs={12} className='request-order-form-row'>
+                <Col xs={4}>
+                    <label>{label}</label>
+                    {required ? ' *' : ''}
+                </Col>
+                <Col xs={8}>
+                    {children}
+                </Col>
+            </Col>
+        </Row>
+    );
+})
 

@@ -28,6 +28,7 @@
 
 .delete-item-icon {
   margin-left: 100%;
+  color: gray;
 }
 
 .line-item-row-input {
@@ -79,6 +80,10 @@
 .calc-total-val {
   margin-left:-4.50%;
   font-weight: bold;
+}
+
+.vendor-modal {
+  width: 100%;
 }
 
 .vendor-new-input {

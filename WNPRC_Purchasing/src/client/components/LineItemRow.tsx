@@ -1,5 +1,5 @@
 import {LineItemModel} from "../model";
-import React, {FC, useCallback} from "react";
+import React, {FC, memo, useCallback} from "react";
 import {Col, Row} from 'react-bootstrap';
 import {Draft, produce} from "immer";
 import {faTimesCircle} from '@fortawesome/free-solid-svg-icons';
@@ -22,14 +22,14 @@ interface LineItemProps
     rowIndex: number;
 }
 
-export const LineItemRow: FC<LineItemProps> = (props) => {
+export const LineItemRow: FC<LineItemProps> = memo((props) => {
 
     const {model, onInputChange, onDelete, rowIndex} = props;
 
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<LineItemModel>) => {
             draft[colName] = value;
-            if (model.errors && model.errors.length > 0) {
+            if (model.errors?.length > 0) {
                 draft['errors'] = model.errors.filter((field) => field.fieldName !== colName)
             }
             if (draft['errors'] && draft['errors'].length == 0) {
@@ -49,7 +49,7 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                 <Col xs={4}>
                     <DescriptionInput
                     value={model.item}
-                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'item')}
+                    hasError={model.errors?.find((field) => field.fieldName === 'item')}
                     onChange={onValueChange}
                     />
                 </Col>
@@ -81,10 +81,10 @@ export const LineItemRow: FC<LineItemProps> = (props) => {
                       id={'delete-line-item-row-' + rowIndex} title={'Delete item'} className="delete-item-icon"
                       onClick={onDeleteRow}
                     >
-                        <FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle} color={'gray'}/>
+                        <FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle}/>
                     </span>
                 </Col>
             </Row>
         </>
     )
-}
+})

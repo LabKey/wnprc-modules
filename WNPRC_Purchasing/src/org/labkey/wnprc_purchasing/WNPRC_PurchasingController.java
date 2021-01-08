@@ -17,6 +17,7 @@
 package org.labkey.wnprc_purchasing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -29,6 +30,8 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
@@ -68,7 +71,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
     public static class RequestForm
     {
-        Object[] _lineItems;
+        List<JSONObject> _lineItems;
         Integer _account;
         String _accountOther;
         Integer _vendor;
@@ -90,12 +93,12 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _newVendorUrl;
         String _newVendorNotes;
 
-        public Object[] getLineItems()
+        public List<JSONObject> getLineItems()
         {
             return _lineItems;
         }
 
-        public void setLineItems(Object[] lineItems)
+        public void setLineItems(List<JSONObject> lineItems)
         {
             _lineItems = lineItems;
         }

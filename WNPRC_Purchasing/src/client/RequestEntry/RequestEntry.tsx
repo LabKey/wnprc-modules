@@ -81,7 +81,7 @@ export const App : FC = memo(() => {
         event.preventDefault();
         const returnUrl = ActionURL.getParameter('returnUrl');
         window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
-    }, [isDirty, setIsDirty]);
+    }, [isDirty]);
 
     const onSaveBtnHandler = useCallback((event) => {
 

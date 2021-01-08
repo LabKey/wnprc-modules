@@ -200,7 +200,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Verifying the validation for mandatory fields");
         requestPage.submitForReview();
-        checker().verifyEquals("Invalid error message", "Unable to submit request, missing required field(s).", requestPage.getAlertMessage());
+        checker().verifyEquals("Invalid error message", "Unable to submit request, missing required fields.", requestPage.getAlertMessage());
 
         log("Creating a request order");
         requestPage.setAccountsToCharge("acct100")

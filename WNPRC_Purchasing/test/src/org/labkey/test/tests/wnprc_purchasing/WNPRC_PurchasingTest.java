@@ -30,11 +30,14 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
+import org.labkey.test.componenes.CreateVendorDialog;
 import org.labkey.test.components.DomainDesignerPage;
 import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.SiteNavBar;
+import org.labkey.test.pages.CreateRequestPage;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
+import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
@@ -59,28 +62,18 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private static final String BILLING_FOLDER = "WNPRC Billing";
 
     private static final String REQUESTER_USER = "purchaserequester@test.com";
-    private int _adminUserId;
-
     private static final String ADMIN_USER = "purchaseadmin@test.com";
-    private int _requesterUserId;
-
+    private static int requestCnt = 0;
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_purchasing/aliases.tsv");
     private final File SHIPPING_INFO_TSV = TestFileUtils.getSampleData("wnprc_purchasing/shippingInfo.tsv");
     private final File VENDOR_TSV = TestFileUtils.getSampleData("wnprc_purchasing/vendor.tsv");
-
     private final String ACCT_100 = "acct100";
     private final String ACCT_101 = "acct101";
     private final String OTHER_ACCT_FIELD_NAME = "otherAcctAndInves";
-
     public AbstractUserHelper _userHelper = new APIUserHelper(this);
+    private int _adminUserId;
+    private int _requesterUserId;
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
-
-    @Override
-    protected void doCleanup(boolean afterTest) throws TestTimeoutException
-    {
-        _containerHelper.deleteProject(getProjectName(), afterTest);
-        _containerHelper.deleteProject(BILLING_FOLDER, afterTest);
-    }
 
     @BeforeClass
     public static void setupProject() throws IOException, CommandException
@@ -88,6 +81,13 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         WNPRC_PurchasingTest init = (WNPRC_PurchasingTest) getCurrentTest();
 
         init.doSetup();
+    }
+
+    @Override
+    protected void doCleanup(boolean afterTest) throws TestTimeoutException
+    {
+        _containerHelper.deleteProject(getProjectName(), afterTest);
+        _containerHelper.deleteProject(BILLING_FOLDER, afterTest);
     }
 
     private void doSetup() throws IOException, CommandException
@@ -192,12 +192,80 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     }
 
     @Test
-    public void testPurchasingLandingPage()
+    public void testCreateRequest()
     {
         goToProjectHome();
         clickButton("Create Request");
-        assertElementPresent(Locator.tagContainingText("div", "Request Order"));
-        assertElementPresent(Locator.tagContainingText("div", "Specify Items"));
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+
+        log("Verifying the validation for mandatory fields");
+        requestPage.submitForReview();
+        checker().verifyEquals("Invalid error message", "Unable to submit request, missing required field(s).", requestPage.getAlertMessage());
+
+        log("Creating a request order");
+        requestPage.setAccountsToCharge("acct100")
+                .setVendor("Real Santa Claus")
+                .setBusinessPurpose("Holiday Party")
+                .setSpecialInstructions("Ho Ho Ho")
+                .setShippingDestination("456 Thompson lane (Math bldg)")
+                .setDeliveryAttentionTo("Mrs Claus")
+                .setItemDesc("Pen")
+                .setUnitInput("CS")
+                .setUnitCost("10")
+                .setQuantity("25")
+                .submitForReview();
+
+        log("Verifying the request created");
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        checker().verifyEquals("Invalid number of requests ", ++requestCnt, table.getDataRowCount());
+        checker().verifyEquals("Invalid request status ", "Review Pending",
+                table.getDataAsText(0, "requestStatus"));
+    }
+
+    @Test
+    public void testOtherVendorRequest()
+    {
+        goToProjectHome();
+        clickButton("Create Request");
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setVendor("Other");
+
+        log("Creating the New vendor");
+        CreateVendorDialog vendorDialog = new CreateVendorDialog(getDriver());
+        vendorDialog.setVendorName("Test1")
+                .setStreetAddress("123 Will street")
+                .setCity("New York City")
+                .setState("New York")
+                .setCountry("USA")
+                .setZipCode("98989")
+                .save();
+
+        log("Edit the vendor information");
+        clickButton("Edit other vendor", 0);
+        vendorDialog = new CreateVendorDialog(getDriver());
+        vendorDialog.setNotes("Edited vendor")
+                .save();
+
+        requestPage = new CreateRequestPage(getDriver());
+        requestPage.setAccountsToCharge("acct101")
+                .setBusinessPurpose("New vendor")
+                .setSpecialInstructions("Welcome Party")
+                .setShippingDestination("89 meow ave (Chemistry Bldg)")
+                .setDeliveryAttentionTo("Newcomer")
+                .setItemDesc("Pencil")
+                .setUnitInput("PK")
+                .setUnitCost("1000")
+                .setQuantity("25000")
+                .submitForReview();
+
+        log("Verifying the request created");
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        checker().verifyEquals("Invalid number of requests ", ++requestCnt, table.getDataRowCount());
+        checker().verifyEquals("Invalid request status ", "Review Pending",
+                table.getDataAsText(0, "requestStatus"));
+        checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendorId"));
     }
 
     @Override

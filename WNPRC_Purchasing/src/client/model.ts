@@ -9,7 +9,7 @@ export class RequestOrderModel {
     readonly account: string;
     readonly accountOther: string;
     readonly vendor: string; //rowId of ehr_purchasing.vendor
-    readonly newVendor?: VendorModel = VendorModel.create({});
+    readonly newVendor?: VendorModel = VendorModel.create();
     readonly purpose: string;
     readonly shippingDestination: number; //rowId of ehr_purchasing.shippingInfo
     readonly deliveryAttentionTo: string;

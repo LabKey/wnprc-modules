@@ -17,7 +17,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
     const { vendorList, vendorModel, onVendorChange, showPopup, onChangeShowPopup, onVendorCancel } = props;
 
     const [show, setShow] = useState(showPopup);
-    const [updatedNewVendor, setUpdatedNewVendor] = useState<VendorModel>(VendorModel.create({}));
+    const [updatedNewVendor, setUpdatedNewVendor] = useState<VendorModel>(VendorModel.create());
 
     useEffect(() => {
         setUpdatedNewVendor(vendorModel);
@@ -76,7 +76,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
 
         // scenario when user hits Cancel without Saving and there is no new vendor data, then cleanup and create and empty new vendor
         if (VendorModel.getDisplayString(vendorModel).length == 0) {
-            onVendorChange(VendorModel.create({}));
+            onVendorChange(VendorModel.create());
         }
         else {
             setUpdatedNewVendor(vendorModel);
@@ -93,7 +93,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                 const updatedErrors = updatedNewVendor.errors.filter((field) => field.fieldName !== colName);
                 draft['errors'] = updatedErrors;
             }
-            if (draft['errors'] && draft['errors'].length === 0) {
+            if (draft['errors']?.length === 0) {
                 draft['errorMsg'] = undefined;
             }
             draft[colName] = value;
@@ -116,7 +116,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                             columnTitle={'Vendor Name'}
                             value={updatedNewVendor.vendorName}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'vendorName')}
+                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'vendorName')}
                         />
                         <NewVendorTextArea
                             required={true}
@@ -124,7 +124,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                             columnTitle={'Street Address'}
                             value={updatedNewVendor.streetAddress}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'streetAddress')}
+                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'streetAddress')}
                         />
                         <NewVendorInput
                             required={true}
@@ -132,7 +132,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                             columnTitle={'City'}
                             value={updatedNewVendor.city}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'city')}
+                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'city')}
                         />
                         <NewVendorInput
                             required={true}
@@ -140,7 +140,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                             columnTitle={'State'}
                             value={updatedNewVendor.state}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'state')}
+                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'state')}
                         />
                         <NewVendorInput
                             required={true}
@@ -148,7 +148,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                             columnTitle={'Country'}
                             value={updatedNewVendor.country}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'country')}
+                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'country')}
                         />
                         <NewVendorInput
                             required={true}
@@ -156,7 +156,7 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                             columnTitle={'Zip Code'}
                             value={updatedNewVendor.zip}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors && updatedNewVendor.errors.find((field) => field.fieldName === 'zip')}
+                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'zip')}
                         />
                         <NewVendorInput
                             required={false}

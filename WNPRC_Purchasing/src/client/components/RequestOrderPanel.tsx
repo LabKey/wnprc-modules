@@ -26,16 +26,16 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
     const onValueChange = useCallback((colName, value) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
             draft[colName] = value;
-            if (model.errors && model.errors.length > 0) {
+            if (model.errors?.length > 0) {
                 let updatedErrors = model.errors.filter((field) => field.fieldName !== colName);
                 draft['errors'] = updatedErrors;
             }
-            if (draft['errors'] && draft['errors'].length === 0) {
+            if (draft['errors']?.length === 0) {
                 draft['errorMsg'] = undefined;
             }
             // if 'Other' was selected before, during which user added a New vendor from the popup, and then user decided to select a different vendor - then do cleanup on newVendor obj
             if (colName === 'vendorName' && value !== 'Other') {
-                draft['newVendor'] = VendorModel.create({});
+                draft['newVendor'] = VendorModel.create();
             }
         });
         if (updatedModel.account === 'Other') {
@@ -70,19 +70,19 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                     (showOtherAcct || model.account === "Other") &&
                     <AccountOtherInput
                             value={model.accountOther}
-                            hasError={model.errors && model.errors.find((field) => field.fieldName === 'accountOther')}
+                            hasError={model.errors?.find((field) => field.fieldName === 'accountOther')}
                             onChange={onValueChange}
                     />
                 }
                 <VendorInput
-                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'vendor')}
+                    hasError={model.errors?.find((field) => field.fieldName === 'vendor')}
                     onChange={onValueChange}
                     model={model}
                     onModelChange={onModelChange}
                 />
                 <BusinessPurposeInput
                     value={model.purpose}
-                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'purpose')}
+                    hasError={model.errors?.find((field) => field.fieldName === 'purpose')}
                     onChange={onValueChange}
                 />
                 <SpecialInstructionInput
@@ -91,12 +91,12 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                 />
                 <ShippingDestinationInput
                     value={model.shippingDestination}
-                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'shippingDestination')}
+                    hasError={model.errors?.find((field) => field.fieldName === 'shippingDestination')}
                     onChange={onValueChange}
                 />
                 <DeliveryAttentionInput
                     value={model.deliveryAttentionTo}
-                    hasError={model.errors && model.errors.find((field) => field.fieldName === 'deliveryAttentionTo')}
+                    hasError={model.errors?.find((field) => field.fieldName === 'deliveryAttentionTo')}
                     onChange={onValueChange}
                 />
             </Form>

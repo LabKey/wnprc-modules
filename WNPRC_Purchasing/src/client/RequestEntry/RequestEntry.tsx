@@ -24,8 +24,8 @@ import {getData, submitRequest} from "../actions";
 
 export const App : FC = memo(() => {
 
-    const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create({}));
-    const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create({})]);
+    const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create());
+    const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create()]);
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -172,8 +172,23 @@ export const App : FC = memo(() => {
         <><div className={isSaving ? 'fa-spinner' : ''}>
             <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
             <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems} errorMsg={lineItemErrorMsg}/>
-            <button className='btn btn-default' id='cancel' name='cancel' onClick={onCancelBtnHandler}>Cancel</button>
-            <button className='btn btn-primary pull-right' id='submitForReview' name='submitForReview' onClick={onSaveBtnHandler}>Submit for Review</button>
+            <button disabled={isSaving} className='btn btn-default' id='cancel' name='cancel' onClick={onCancelBtnHandler}>Cancel</button>
+            {
+                !isSaving &&
+                <button
+                        className='btn btn-primary pull-right'
+                        id='submitForReview'
+                        name='submitForReview'
+                        onClick={onSaveBtnHandler}>Submit for Review
+                </button>
+            }
+            {
+                isSaving &&
+                <button disabled className='btn btn-primary pull-right'>
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+                    Saving...
+                </button>
+            }
         </div>
         </>
     )

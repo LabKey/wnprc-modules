@@ -32,7 +32,7 @@ export const LineItemRow: FC<LineItemProps> = memo((props) => {
             if (model.errors?.length > 0) {
                 draft['errors'] = model.errors.filter((field) => field.fieldName !== colName)
             }
-            if (draft['errors'] && draft['errors'].length == 0) {
+            if (draft['errors']?.length == 0) {
                 draft['errors'] = undefined;
             }
         });
@@ -56,21 +56,21 @@ export const LineItemRow: FC<LineItemProps> = memo((props) => {
                 <Col xs={1}>
                     <UnitInput
                         value={model.itemUnit}
-                        hasError={model.errors && model.errors.find((field) => field.fieldName === 'itemUnit')}
+                        hasError={model.errors?.find((field) => field.fieldName === 'itemUnit')}
                         onChange={onValueChange}
                     />
                 </Col>
                 <Col xs={1}>
                     <UnitCostInput
                         value={model.unitCost}
-                        hasError={model.errors && model.errors.find((field) => field.fieldName === 'unitCost')}
+                        hasError={model.errors?.find((field) => field.fieldName === 'unitCost')}
                         onChange={onValueChange}
                     />
                 </Col>
                 <Col xs={1}>
                     <UnitQuantityInput
                         value={model.quantity}
-                        hasError={model.errors && model.errors.find((field) => field.fieldName === 'quantity')}
+                        hasError={model.errors?.find((field) => field.fieldName === 'quantity')}
                         onChange={onValueChange}
                     />
                 </Col>

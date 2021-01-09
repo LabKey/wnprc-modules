@@ -38,7 +38,7 @@ export const LineItemsPanel: FC<Props> = memo((props) => {
 
     const onClickAddRow = () => {
         const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
-            draft.push(LineItemModel.create({}))
+            draft.push(LineItemModel.create())
         });
         onChange(updatedLineItems);
     }

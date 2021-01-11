@@ -23,6 +23,8 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:GoogleDrive", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:WNPRC_Compliance", depProjectConfig: 'published', depExtension: 'module')
 
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: "apiJarFile")
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: "published", depExtension: "module")
 }
 configurations.all {
     Configuration config ->

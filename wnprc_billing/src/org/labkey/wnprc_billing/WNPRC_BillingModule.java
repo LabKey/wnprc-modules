@@ -63,7 +63,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return 21.000;
     }
 
     @Override

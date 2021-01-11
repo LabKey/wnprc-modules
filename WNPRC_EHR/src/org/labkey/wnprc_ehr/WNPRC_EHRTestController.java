@@ -35,10 +35,10 @@ public class WNPRC_EHRTestController extends SpringActionController
      * definition.
      */
     @RequiresSiteAdmin
-    public static class ImportDatasetMetadataAction extends MutatingApiAction<Void>
+    public static class ImportDatasetMetadataAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void aVoid, BindException errors) throws Exception
+        public Object execute(Object form, BindException errors) throws Exception
         {
             Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
             assert module != null;
@@ -98,10 +98,10 @@ public class WNPRC_EHRTestController extends SpringActionController
      * demographic datasets.
      */
     @RequiresSiteAdmin
-    public class CreatePregnanciesAction extends MutatingApiAction<Void>
+    public class CreatePregnanciesAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void aVoid, BindException errors)
+        public Object execute(Object form, BindException errors)
         {
             try
             {

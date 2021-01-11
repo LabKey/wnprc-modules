@@ -63,10 +63,11 @@ public class WebUtilsController extends SpringActionController
 
     @RequiresNoPermission
     @ActionNames("loginStatus")
-    public class getLoginStatus extends ReadOnlyApiAction<Void>
+    public class getLoginStatus extends ReadOnlyApiAction<Object>
     {
         @Override
-        public Object execute(Void v, BindException errors) throws Exception {
+        public Object execute(Object v, BindException errors) throws Exception
+        {
             Map<String, Object> json = new HashMap<>();
 
             // Check to see if we're logged in as a guest.
@@ -77,14 +78,16 @@ public class WebUtilsController extends SpringActionController
         }
     }
 
-    public abstract class WebUtilsJspPageAction extends SimpleJspPageAction {
+    public abstract class WebUtilsJspPageAction extends SimpleJspPageAction
+    {
         @Override
         public Module getModule() {
             return ModuleLoader.getInstance().getModule(WebUtilsModule.class);
         }
     }
 
-    public class TestPageAction extends WebUtilsJspPageAction {
+    public class TestPageAction extends WebUtilsJspPageAction
+    {
         @Override
         public String getPathToJsp() {
             return "view/TestPage.jsp";

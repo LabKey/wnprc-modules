@@ -14,7 +14,7 @@
                     </column>
                     <column columnName="account">
                         <fk>
-                            <fkDbSchema>ehr_billing</fkDbSchema>
+                            <fkDbSchema>ehr_billingLinked</fkDbSchema>
                             <fkTable>aliases</fkTable>
                             <fkColumnName>alias</fkColumnName>
                         </fk>

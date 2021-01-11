@@ -1,0 +1,109 @@
+
+.fa-faTimesCircle:hover {
+  color: red;
+}
+
+.fa-faPlusCircle:hover {
+  font-size:16.5px;
+}
+
+.line-item-row {
+  margin: 1%;
+  border: 1px solid #d3d3d3;
+  padding: 0.65%;
+}
+
+.line-item-row-header {
+  margin: 1%;
+}
+
+.add-item {
+  height: 30px;
+}
+
+.add-item-icon {
+  margin-left: 1%;
+  margin-bottom: 1%;
+}
+
+.delete-item-icon {
+  margin-left: 100%;
+  color: gray;
+}
+
+.line-item-row-input {
+  width: 100%;
+}
+
+.description-input {
+  margin-left: -3%;
+}
+
+.unit-input, .unit-price-input, .quantity-input {
+  margin-left: -6%;
+}
+
+.subtotal-input {
+  margin-left: -4%;
+}
+
+.controlled-sub-input {
+  margin-left: -25% !important;
+}
+
+.request-order-form-row {
+  margin-top: 1%;
+  margin-left: 1%;
+  margin-bottom: 0.50%;
+}
+
+.account-input, .vendor-input, .shipping-dest-input {
+  resize: none;
+  width: 60%;
+}
+
+.other-account-input {
+  height: 60px;
+}
+
+.business-purpose-input, .special-instr-input, .delivery-attn-input, .new-vendor-display{
+  resize: none;
+  width: 60%;
+  height: 90px !important;
+}
+
+.calc-total {
+  margin-left:54%;
+  font-weight: bold;
+}
+
+.calc-total-val {
+  margin-left:-4.50%;
+  font-weight: bold;
+}
+
+.vendor-modal {
+  width: 100%;
+}
+
+.vendor-new-input {
+  width: 80%;
+}
+
+.vendor-new-text-area-input {
+  resize: none;
+  width: 80%;
+  height: 60px !important;
+}
+
+$red-border:            rgba(160, 80, 76, 1);
+$red-shadow:            rgba(160, 80, 76, 0.5);
+
+.field-validation-error {
+  border-color: $red-border;
+  box-shadow: inset 0 0 5px 0 $red-shadow, 0 0 5px 0 $red-shadow;
+}
+
+.edit-other-vendor-button {
+  margin-left: 16.25%;
+}

@@ -1,3 +1,3 @@
-attentionTo	city	state	country	zip	phoneNumber	email
-Ms. Kitty Cat	Madison	WI	USA	53700	1112223333	Buyerita@buying.com
-Tom Thompson	Madison	WI	USA	53701	2223334444	buyer@buy.com
+streetAddress	shippingAlias	city	state	country	zip	phoneNumber	email
+89 meow ave	Chemistry Bldg	Madison	WI	USA	53700	1112223333	Buyerita@buying.com
+456 Thompson lane	Math bldg	Madison	WI	USA	53701	2223334444	buyer@buy.com

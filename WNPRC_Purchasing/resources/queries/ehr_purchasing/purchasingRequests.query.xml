@@ -1,16 +1,11 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB" useColumnOrder="true">
-                <tableTitle>Purchase Requests</tableTitle>
+            <table tableName="purchasingRequests" tableDbType="TABLE" useColumnOrder="true">
+                <tableTitle>Purchasing Requests</tableTitle>
                 <columns>
-                    <column columnName="rowId">
-                        <columnTitle>Request No.</columnTitle>
-                    </column>
-                    <column columnName="requestDate">
-                        <formatString>Date</formatString>
-                    </column>
                     <column columnName="vendorId">
+                        <columnTitle>Vendor</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>vendor</fkTable>
@@ -22,15 +17,13 @@
                             <fkTable>aliases</fkTable>
                         </fk>
                     </column>
-                    <column columnName="OtherAcctAndInves"/>
-                    <column columnName="requester"/>
-                    <column columnName="totalCost">
-                        <formatString>$###,##0.00</formatString>
+                    <column columnName="otherAcctAndInves">
+                        <columnTitle>Other Acct and Investigator</columnTitle>
                     </column>
-                    <column columnName="requestStatus">
+                    <column columnName="shippingInfoId">
                         <fk>
-                            <fkDbSchema>core</fkDbSchema>
-                            <fkTable>QCState</fkTable>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>shippingInfo</fkTable>
                         </fk>
                     </column>
                 </columns>

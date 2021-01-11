@@ -25,19 +25,27 @@ import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
+import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
+import org.labkey.test.componenes.CreateVendorDialog;
+import org.labkey.test.components.DomainDesignerPage;
+import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.SiteNavBar;
+import org.labkey.test.pages.CreateRequestPage;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
+import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
+import org.labkey.test.util.SchemaHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,26 +59,21 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 {
     private static final String FOLDER_TYPE = "WNPRC Purchasing";
 
+    private static final String BILLING_FOLDER = "WNPRC Billing";
+
     private static final String REQUESTER_USER = "purchaserequester@test.com";
-    private int _adminUserId;
-
     private static final String ADMIN_USER = "purchaseadmin@test.com";
-    private int _requesterUserId;
-
+    private static int requestCnt = 0;
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_purchasing/aliases.tsv");
     private final File SHIPPING_INFO_TSV = TestFileUtils.getSampleData("wnprc_purchasing/shippingInfo.tsv");
     private final File VENDOR_TSV = TestFileUtils.getSampleData("wnprc_purchasing/vendor.tsv");
-
     private final String ACCT_100 = "acct100";
     private final String ACCT_101 = "acct101";
-
+    private final String OTHER_ACCT_FIELD_NAME = "otherAcctAndInves";
     public AbstractUserHelper _userHelper = new APIUserHelper(this);
-
-    @Override
-    protected void doCleanup(boolean afterTest) throws TestTimeoutException
-    {
-        _containerHelper.deleteProject(getProjectName(), afterTest);
-    }
+    private int _adminUserId;
+    private int _requesterUserId;
+    private SchemaHelper _schemaHelper = new SchemaHelper(this);
 
     @BeforeClass
     public static void setupProject() throws IOException, CommandException
@@ -80,10 +83,32 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         init.doSetup();
     }
 
+    @Override
+    protected void doCleanup(boolean afterTest) throws TestTimeoutException
+    {
+        _containerHelper.deleteProject(getProjectName(), afterTest);
+        _containerHelper.deleteProject(BILLING_FOLDER, afterTest);
+    }
+
     private void doSetup() throws IOException, CommandException
     {
+        log("Creating 'WNPRC Billing' folder");
+        _containerHelper.createProject(BILLING_FOLDER, FOLDER_TYPE);
+        _containerHelper.enableModules(Arrays.asList("EHR_Billing"));
+
+        log("Populate ehr_billing.aliases");
+        goToProjectHome(BILLING_FOLDER);
+        uploadData(ALIASES_TSV, "ehr_billing", "aliases", BILLING_FOLDER);
+
+        goToHome();
+
         log("Creating a 'WNPRC Purchasing' folder");
         _containerHelper.createProject(getProjectName(), FOLDER_TYPE);
+
+        goToProjectHome();
+
+        log("Add extensible columns");
+        addExtensibleColumns();
 
         log("Creating a purchasing admin user");
         _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
@@ -104,6 +129,20 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Creating user-account associations");
         createUserAccountAssociations();
 
+        log("Create ehrBillingLinked schema");
+        _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, null, "ehr_billing", "aliases", null);
+    }
+
+    private void addExtensibleColumns()
+    {
+        goToSchemaBrowser();
+        selectQuery("ehr_purchasing", "purchasingRequests");
+        clickAndWait(Locator.linkWithText("create definition"));
+        DomainDesignerPage domainDesignerPage = new DomainDesignerPage(getDriver());
+        DomainFormPanel panel = domainDesignerPage.fieldsPanel();
+        panel.manuallyDefineFields(OTHER_ACCT_FIELD_NAME);
+        domainDesignerPage.clickSave();
+        goToProjectHome();
     }
 
     private void createUserAccountAssociations() throws IOException, CommandException
@@ -120,34 +159,29 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         userAcctRow.put("account", ACCT_101);
         userAcctAssocRows.add(userAcctRow);
 
-        int rowsInserted = insertData(getRemoteApiConnection(true), "ehr_purchasing", "userAccountAssociations", userAcctAssocRows).size();
+        int rowsInserted = insertData(getRemoteApiConnection(true), "ehr_purchasing", "userAccountAssociations", userAcctAssocRows, getProjectName()).size();
         assertEquals("Incorrect number of rows created", 2, rowsInserted);
     }
 
     private void uploadPurchasingData() throws IOException, CommandException
     {
-        Connection connection = getRemoteApiConnection(true);
-        Map<String, Object> responseMap = new HashMap<>();
-
-        List<Map<String, Object>> tsv = loadTsv(SHIPPING_INFO_TSV);
-        insertData(connection, "ehr_purchasing", "shippingInfo", tsv)
-                .forEach(row -> responseMap.put(row.get("attentionTo").toString(), row.get("rowid")));
-
-        tsv = loadTsv(VENDOR_TSV);
-        insertData(connection, "ehr_purchasing", "vendor", tsv)
-                .forEach(row -> responseMap.put(row.get("vendorName").toString(), row.get("rowid")));
-
-        tsv = loadTsv(ALIASES_TSV);
-        insertData(connection, "ehr_billing", "aliases", tsv)
-                .forEach(row -> responseMap.put(row.get("alias").toString(), row.get("rowid")));
+        uploadData(SHIPPING_INFO_TSV, "ehr_purchasing", "shippingInfo", getProjectName());
+        uploadData(VENDOR_TSV, "ehr_purchasing", "vendor", getProjectName());
     }
 
-    private List<Map<String, Object>> insertData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> rows) throws IOException, CommandException
+    private void uploadData(File tsvFile, String schemaName, String tableName, String projectName) throws IOException, CommandException
+    {
+        Connection connection = getRemoteApiConnection(true);
+        List<Map<String, Object>> tsv = loadTsv(tsvFile);
+        insertData(connection, schemaName, tableName, tsv, projectName);
+    }
+
+    private List<Map<String, Object>> insertData(Connection connection, String schemaName, String queryName, List<Map<String, Object>> rows, String projectName) throws IOException, CommandException
     {
         log("Loading data in: " + schemaName + "." + queryName);
         InsertRowsCommand command = new InsertRowsCommand(schemaName, queryName);
         command.setRows(rows);
-        SaveRowsResponse response = command.execute(connection, getProjectName());
+        SaveRowsResponse response = command.execute(connection, projectName);
         return response.getRows();
     }
 
@@ -158,11 +192,80 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     }
 
     @Test
-    public void testPurchasingLandingPage()
+    public void testCreateRequest()
     {
         goToProjectHome();
         clickButton("Create Request");
-        assertTextPresent("Work in progress"); //TODO: Remove once Purchase Request data entry is implemented, & replace with appropriate text
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+
+        log("Verifying the validation for mandatory fields");
+        requestPage.submitForReview();
+        checker().verifyEquals("Invalid error message", "Unable to submit request, missing required fields.", requestPage.getAlertMessage());
+
+        log("Creating a request order");
+        requestPage.setAccountsToCharge("acct100")
+                .setVendor("Real Santa Claus")
+                .setBusinessPurpose("Holiday Party")
+                .setSpecialInstructions("Ho Ho Ho")
+                .setShippingDestination("456 Thompson lane (Math bldg)")
+                .setDeliveryAttentionTo("Mrs Claus")
+                .setItemDesc("Pen")
+                .setUnitInput("CS")
+                .setUnitCost("10")
+                .setQuantity("25")
+                .submitForReview();
+
+        log("Verifying the request created");
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        checker().verifyEquals("Invalid number of requests ", ++requestCnt, table.getDataRowCount());
+        checker().verifyEquals("Invalid request status ", "Review Pending",
+                table.getDataAsText(0, "requestStatus"));
+    }
+
+    @Test
+    public void testOtherVendorRequest()
+    {
+        goToProjectHome();
+        clickButton("Create Request");
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setVendor("Other");
+
+        log("Creating the New vendor");
+        CreateVendorDialog vendorDialog = new CreateVendorDialog(getDriver());
+        vendorDialog.setVendorName("Test1")
+                .setStreetAddress("123 Will street")
+                .setCity("New York City")
+                .setState("New York")
+                .setCountry("USA")
+                .setZipCode("98989")
+                .save();
+
+        log("Edit the vendor information");
+        clickButton("Edit other vendor", 0);
+        vendorDialog = new CreateVendorDialog(getDriver());
+        vendorDialog.setNotes("Edited vendor")
+                .save();
+
+        requestPage = new CreateRequestPage(getDriver());
+        requestPage.setAccountsToCharge("acct101")
+                .setBusinessPurpose("New vendor")
+                .setSpecialInstructions("Welcome Party")
+                .setShippingDestination("89 meow ave (Chemistry Bldg)")
+                .setDeliveryAttentionTo("Newcomer")
+                .setItemDesc("Pencil")
+                .setUnitInput("PK")
+                .setUnitCost("1000")
+                .setQuantity("25000")
+                .submitForReview();
+
+        log("Verifying the request created");
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        checker().verifyEquals("Invalid number of requests ", ++requestCnt, table.getDataRowCount());
+        checker().verifyEquals("Invalid request status ", "Review Pending",
+                table.getDataAsText(0, "requestStatus"));
+        checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendorId"));
     }
 
     @Override

@@ -60,7 +60,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   const [errorLevel, setErrorLevel] = useState("no-action");
   const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
 
-  const { submit, submitted, setrestraints, restraints } = useContext(
+  const { submit, submitted, setrestraints, restraints, setEndTimeExternal, setStartTimeExternal, setFormFrameworkTypesExternal, wasSaved, isRecording, setIsRecordingExternal, setAnyErrorsEverExternal } = useContext(
     AppContext
   );
 
@@ -98,11 +98,13 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   const validateItems = (name, value) => {
     if (value == "" && name == "animalid") {
       setAnyErrors(true);
+      setAnyErrorsEverExternal();
       setErrorLevel("no-action");
       return;
     }
     if (value == "" && name == "weight" && animalError == "") {
       setAnyErrors(true);
+      setAnyErrorsEverExternal();
       setErrorLevel("saveable");
       return;
     }
@@ -113,23 +115,36 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     }
   };
 
+
+  const startSessionTimer = (name, value) => {
+    console.log('isRecording ', isRecording);
+    if (isRecording)
+      return;
+    setIsRecordingExternal(true);
+    setStartTimeExternal(new Date());
+  }
+
   const handleChange = e => {
     liftUpVal(e.target.name, e.target.value, index);
+    startSessionTimer(e.target.name, e.target.value);
     validateItems(e.target.name, e.target.value);
 
   };
 
   const handleRestraintChange = val => {
     liftUpVal("restraint", val, index);
+    startSessionTimer("restraint", val);
   };
 
   const handleDateChange = date => {
     liftUpVal("date", date, index);
+    startSessionTimer("date", date);
   };
 
   const handleRawDateChange = e => {
     if (e.currentTarget.value instanceof Date && !isNaN(e.currentTarget.value)){
       liftUpVal("date", new Date(e.currentTarget.value), index);
+      startSessionTimer(e.target.name, e.target.value);
     }
   };
 

@@ -74,21 +74,16 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
  * Main parent component that holds most of the state.
  */
 const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
-  const { submit, submitted, setrestraints, restraints } = useContext(AppContext);
+  const { submit, submitted, setrestraints, restraints, setStartTimeExternal, setEndTimeExternal, setFormDataExternal, formdata, setTaskIdExternal, taskId, setFormFrameworkTypesExternal, wasSaved, setWasSavedExternal, setBulkEditUsedExternal, setBatchAddUsedExternal } = useContext(AppContext);
   const [animalId, setAnimalId] = useState<string>("");
   const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [locloading, setLocLoading] = useState<boolean>(false);
   const [infoState, setInfoState] = useState<infoStates>("waiting");
-  const [formdata, setFormData] = useState<Array<RowObj>>([]);
   const [location, setLocation] = useState<Array<string>>([]);
   const [ids, setIds] = useState<Array<string>>([]);
   const [submitBoxText, setSubmitBoxText] = useState<string>("Submit values?");
   const [current, setCurrent] = useState<number>(0);
-  const [taskId, setTaskId] = useState<string>(
-    Utils.generateUUID().toUpperCase()
-  );
-  const [wasSaved, setWasSaved] = useState<boolean>(false);
   const [wasError, setWasError] = useState<boolean>(false);
   const [errorText, setErrorText] = useState<string>("");
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -112,6 +107,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
 
   const triggerLocation = (loc: Array<any>) => {
     setLocation(loc);
+    setBatchAddUsedExternal();
   };
 
   //here we lifted up state from the BulkEditFields - > BatchEditModal -> this component
@@ -125,12 +121,14 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       item["remark"] = vals["remark"]["value"] != "" ? Object.assign({}, vals["remark"]) : Object.assign({}, item["remark"]);
     });
 
-    setFormData(copyformdata);
+    setFormDataExternal(copyformdata);
     onValidate();
+    setBulkEditUsedExternal();
   };
   const triggerIds = (ids: any) => {
-    setFormData([]);
+    setFormDataExternal([]);
     setIds(ids);
+    setBatchAddUsedExternal();
   };
 
   useEffect(() => {
@@ -168,7 +166,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           });
         }
       });
-      setFormData(animaldata);
+      setFormDataExternal(animaldata);
       setLocLoading(false);
       setErrorLevel("saveable");
     });
@@ -191,7 +189,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
 
     //if there's no task id, then we don't have to update the task table... just update the records
     //or more generally if we are in edit mode, we don't have ot update the task id...
-    setTaskId(ActionURL.getParameter("taskid"));
+    setTaskIdExternal(ActionURL.getParameter("taskid"));
 
     //TODO clean this up
     let filter = [];
@@ -258,7 +256,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           restraint: {value: "", error: "", objectid: ""},
           validated: {value: false, error: ""}
         });
-        setTaskId(row.taskid);
+        setTaskIdExternal(row.taskid);
         restraintobjectids.push(row.restraint_objectid);
       });
     }).then(()=> {
@@ -295,7 +293,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           }
         }
       }).then(() => {
-        setFormData(newformdatarestraints);
+        setFormDataExternal(newformdatarestraints);
         setErrorLevel("submittable");
       }).catch((data) => {
         setWasError(true);
@@ -314,19 +312,27 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     labkeyActionSelectWithPromise(config).then((data) => {
       setrestraints(data.rows);
     })
+    let config_fff:ConfigProps = {
+      schemaName: "ehr",
+      queryName: "form_framework_types",
+      filterArray: [Filter.create("schemaName", "study", Filter.Types.EQUAL), Filter.create("queryName", "weight", Filter.Types.EQUAL) ]
+    };
+    labkeyActionSelectWithPromise(config_fff).then((data) => {
+      setFormFrameworkTypesExternal(data.rows);
+    })
   },[]);
 
   //mutate the array
   const liftUpVal = (name, value, index) => {
     let newValues = [...formdata];
     newValues[index][name]["value"] = value;
-    setFormData(newValues);
+    setFormDataExternal(newValues);
     console.log(errorLevel);
   };
   const liftUpValidationState = (name, value, index) => {
     let newValues = [...formdata];
     newValues[index][name]["value"] = value;
-    setFormData(newValues);
+    setFormDataExternal(newValues);
     console.log(errorLevel);
   };
 
@@ -378,7 +384,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         item["command"]["value"] = "update";
       }
     });
-    setFormData(copyformdata);
+    setFormDataExternal(copyformdata);
   };
 
   const setupValues = (formdata: any[], QCStateLabel: string, valuekey: string, taskId: string) => {
@@ -459,11 +465,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     let jsonData = setupJsonData(itemsToInsert, QCState, taskId, reviewer, currentDate, command);
 
     saveRowsDirect(jsonData).then(()=> {
-      setWasSaved(true);
+      setWasSavedExternal(true);
       setSaving(false);
       //need to set each record to update
       changeActionToUpdate();
       window.scrollTo(0,0);
+      setEndTimeExternal(new Date());
     }).catch(()=>{
       setWasError(true);
       setErrorText("Error during operation.");
@@ -494,6 +501,9 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     let jsonData = setupJsonData(itemsToInsert, "Completed", taskId, reviewer, currentDate, command);
 
     saveRowsDirect(jsonData).then(()=> {
+      //for now just on submit, need to revisit other submit buttons
+      setEndTimeExternal(new Date());
+
       wait(3).then(() => {
         window.location.href = ActionURL.buildURL(
           "wnprc_ehr",
@@ -529,7 +539,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       restraint: {value: "None", error: "", objectid: restraintObjectId },
       validated: {value: false, error: ""}
     });
-    setFormData(initialdata);
+    setFormDataExternal(initialdata);
     getQCStateMap().then(map => {
       setQCMap(map);
     });
@@ -561,7 +571,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         validated: {value: false, error: ""}
       });
     });
-    setFormData(t);
+    setFormDataExternal(t);
   };
 
   const toggleCollapse = (item, i) => {
@@ -575,7 +585,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     let copyformdata = [...formdata];
     //TODO fix this...
     copyformdata[i] = (copyitem as unknown) as RowObj;
-    setFormData(copyformdata);
+    setFormDataExternal(copyformdata);
     return true;
   };
 
@@ -614,6 +624,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       .then(data => {
         //TODO wait til this is done rather than sleep
         submit();
+        setEndTimeExternal(new Date());
         wait(4).then(() => {
           window.location.href = ActionURL.buildURL(
             "ehr",
@@ -680,7 +691,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           onClick={() => {
             let newform = addRecord();
             let index = formdata.length;
-            setFormData(newform);
+            setFormDataExternal(newform);
             setCurrent(index);
           }}
         >
@@ -709,7 +720,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
           id="delete-record"
           disabled={singleEditMode}
           onClick={() => {
-            setFormData([]);
+            setFormDataExternal([]);
             setAnimalInfo(null);
             setInfoState("waiting");
           }}
@@ -826,7 +837,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                           let copyformdata = [...formdata];
                           copyformdata[i]["visibility"]["value"] =
                             "hide-record";
-                          setFormData(copyformdata);
+                          setFormDataExternal(copyformdata);
                           sleep(750).then(() => {
                             let copyformdata = [...formdata];
                             //only need to do this part if we are in wasSaved or editMode, otherwise we can splice.
@@ -836,7 +847,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                               copyformdata.splice(i, 1);
                             }
                             //the validity of this record is no longer valid, so set the error level to whatever it was
-                            setFormData(copyformdata);
+                            setFormDataExternal(copyformdata);
                             onValidate();
                           });
                         }}

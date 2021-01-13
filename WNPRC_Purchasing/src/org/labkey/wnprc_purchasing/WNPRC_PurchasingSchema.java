@@ -18,12 +18,16 @@ package org.labkey.wnprc_purchasing;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 
 public class WNPRC_PurchasingSchema
 {
     private static final WNPRC_PurchasingSchema _instance = new WNPRC_PurchasingSchema();
     public static final String NAME = "wnprc_purchasing";
+
+    //wnprc_purchasing tables
+    public static final String CREDIT_CARD_OPTIONS_TABLE = "creditCardOptions";
 
     public static WNPRC_PurchasingSchema getInstance()
     {
@@ -45,5 +49,10 @@ public class WNPRC_PurchasingSchema
     public SqlDialect getSqlDialect()
     {
         return getSchema().getSqlDialect();
+    }
+
+    public TableInfo getCreditCardOptionsTable()
+    {
+        return getSchema().getTable(CREDIT_CARD_OPTIONS_TABLE);
     }
 }

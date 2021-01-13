@@ -19,6 +19,10 @@ package org.labkey.wnprc_purchasing;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager.ContainerListener;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.security.User;
 import java.util.Collections;
 import java.util.Collection;
@@ -35,6 +39,16 @@ public class WNPRC_PurchasingContainerListener implements ContainerListener
     @Override
     public void containerDeleted(Container c, User user)
     {
+        // This will clean up the wnprc_purchasing schema.
+        DbScope scope = WNPRC_PurchasingSchema.getInstance().getSchema().getScope();
+        SimpleFilter containerFilter = SimpleFilter.createContainerFilter(c);
+        try (DbScope.Transaction transaction = scope.ensureTransaction())
+        {
+            TableInfo creditCardOptionsTable = WNPRC_PurchasingSchema.getInstance().getCreditCardOptionsTable();
+            Table.delete(creditCardOptionsTable, containerFilter);
+
+            transaction.commit();
+        }
     }
 
     @Override

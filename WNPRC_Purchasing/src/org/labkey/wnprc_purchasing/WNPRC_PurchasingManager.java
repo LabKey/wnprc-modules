@@ -22,11 +22,15 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.DomainUtil;
+import org.labkey.api.gwt.client.model.GWTDomain;
+import org.labkey.api.gwt.client.model.GWTPropertyDescriptor;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
@@ -43,6 +47,9 @@ public class WNPRC_PurchasingManager
     private static final WNPRC_PurchasingManager _instance = new WNPRC_PurchasingManager();
     private static final String INITIAL_DATA_FOLDER = "data/";
 
+    private static final String DOMAIN_NAME = "EHR_Purchasing";
+    private static final String PURCHASING_REQUEST_TABLE_NAME = "purchasingRequests";
+
     private WNPRC_PurchasingManager()
     {
         // prevent external construction with a private default constructor
@@ -53,7 +60,7 @@ public class WNPRC_PurchasingManager
         return _instance;
     }
 
-    public void addLineItems(Container c, User user)
+    public void addLineItemStatus(Container c, User user)
     {
         addData(c, user, "ehr_purchasing", "lineItemStatus", "lineItemStatus.tsv");
     }
@@ -204,6 +211,55 @@ public class WNPRC_PurchasingManager
         catch (Exception e)
         {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void addExtensibleColumns(Container container, User user)
+    {
+        addPurchasingRequestsCols(container, user);
+    }
+
+    private void addPurchasingRequestsCols(Container container, User user)
+    {
+        GWTDomain<GWTPropertyDescriptor> domain = new GWTDomain<>();
+        domain.setName(PURCHASING_REQUEST_TABLE_NAME);
+        List<GWTPropertyDescriptor> extensibleCols = new ArrayList<>();
+
+        GWTPropertyDescriptor otherAcctAndInves = new GWTPropertyDescriptor();
+        otherAcctAndInves.setName("otherAcctAndInves");
+        otherAcctAndInves.setRangeURI("string");
+        otherAcctAndInves.setLabel("Other Acct and Investigator");
+        otherAcctAndInves.setDescription("User will be required to fill out this column when 'Account to charge' is 'Other' on the Request Entry form");
+        extensibleCols.add(otherAcctAndInves);
+
+        GWTPropertyDescriptor ccOptionId = new GWTPropertyDescriptor();
+        ccOptionId.setName("creditCardOptionId");
+        ccOptionId.setRangeURI("int");
+        extensibleCols.add(ccOptionId);
+
+        GWTPropertyDescriptor program = new GWTPropertyDescriptor();
+        program.setName("program");
+        program.setRangeURI("string");
+        program.setDefaultValue("4");
+        extensibleCols.add(program);
+
+        GWTPropertyDescriptor invoiceNum = new GWTPropertyDescriptor();
+        invoiceNum.setName("invoiceNum");
+        invoiceNum.setRangeURI("string");
+        extensibleCols.add(invoiceNum);
+
+        GWTPropertyDescriptor confirmNum = new GWTPropertyDescriptor();
+        confirmNum.setName("confirmationNum");
+        confirmNum.setRangeURI("string");
+        extensibleCols.add(confirmNum);
+
+        domain.setFields(extensibleCols);
+
+        try {
+            DomainUtil.createDomain(DOMAIN_NAME, domain, null, container, user, null, null);
+        }
+        catch (ValidationException ve) {
+            throw new RuntimeException(ve.getMessage(), ve);
         }
     }
 }

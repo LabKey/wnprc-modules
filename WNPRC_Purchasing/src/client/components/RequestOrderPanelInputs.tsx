@@ -1,5 +1,6 @@
 import React, {FC, memo, useCallback, useEffect, useMemo, useState} from "react";
 import {Button} from 'react-bootstrap';
+import { Filter } from '@labkey/api';
 import {getData} from "../actions";
 import {createOptions} from "./Utils";
 import {PurchasingFormInput} from "./PurchasingFormInput";
@@ -20,8 +21,8 @@ export const AccountInput: FC<InputProps> = memo((props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getData('ehr_billingLinked', 'aliases', 'alias, rowid').then(vals => {
-            setDropDownVals(vals)
+        getData('ehr_billingLinked', 'aliases', 'alias, rowid', 'alias').then(vals => {
+            setDropDownVals(vals);
         });
     }, []);
 
@@ -93,8 +94,9 @@ export const VendorInput: FC<VendorInputProps> = memo((props) => {
     const [showPopup, setShowPopup] = useState<boolean>(false);
 
     useEffect(() => {
-        getData('ehr_purchasing', 'vendor', 'vendorName, rowId').then(vals => {
-            setDropDownVals(vals)
+        const filterArray = [Filter.create('isValidVendor', true)];
+        getData('ehr_purchasing', 'vendor', 'vendorName, rowId, isValid', 'vendorName', filterArray).then(vals => {
+            setDropDownVals(vals);
         });
     }, []);
 
@@ -232,8 +234,8 @@ export const ShippingDestinationInput: FC<InputProps> = memo((props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getData('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias, rowId').then(vals => {
-            setDropDownVals(vals)
+        getData('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias, rowId', 'streetAddress').then(vals => {
+            setDropDownVals(vals);
         });
     }, []);
 

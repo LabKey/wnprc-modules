@@ -1,15 +1,16 @@
-import {Query, Ajax, Utils, ActionURL} from "@labkey/api";
+import {Query, Ajax, Utils, ActionURL, Filter} from "@labkey/api";
 import {LineItemModel, RequestOrderModel, VendorModel} from "./model";
 
-export function getData(schemaName: string, queryName: string, colNames: string) : Promise<any> {
+export function getData(schemaName: string, queryName: string, colNames: string, sort?: string, filter?: Array<Filter.IFilter>) : Promise<any> {
     return new Promise((resolve, reject) => {
         Query.selectRows({
             schemaName: schemaName,
             queryName: queryName,
             columns: colNames,
+            sort: sort,
+            filterArray: filter,
             success: function (results) {
-                if (results && results.rows)
-                {
+                if (results && results.rows) {
                     resolve(results.rows);
                 }
             }

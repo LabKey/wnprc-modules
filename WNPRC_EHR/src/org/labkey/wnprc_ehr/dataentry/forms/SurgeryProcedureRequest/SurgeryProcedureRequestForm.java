@@ -28,7 +28,7 @@ public class SurgeryProcedureRequestForm extends SimpleRequestForm
                 new AnimalDetailsPanel(),
                 new SurgeryProcedureRequestSection(),
                 new SurgeryProcedureRoomsSection(),
-                new SurgeryProcedureDrugSection(),
+                //new SurgeryProcedureDrugSection(),
                 new SurgeryProcedureFoodDepriveSection()
                 //new SimpleFormPanelSection("wnprc", "surgeries", "Surgery Request"),
         ));

@@ -499,7 +499,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     private void loadLatestDatasetMetadata(EHRService es)
     {
         LOG.debug("importing study metadata from reference study to all study containers");
-        File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
+        File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(), "study.xml");
         getWNPRCStudyContainers().forEach(c -> DatasetImportHelper.safeImportDatasetMetadata(es.getEHRUser(c), c, file));
     }
 }

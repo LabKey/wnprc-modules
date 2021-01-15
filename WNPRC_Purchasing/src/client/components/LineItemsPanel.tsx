@@ -12,11 +12,12 @@ interface Props
     lineItems: Array<LineItemModel>;
     onChange: (lineItems: Array<LineItemModel>) => void;
     errorMsg?: string;
+    hasRequestId?: boolean;
 }
 
 export const LineItemsPanel: FC<Props> = memo((props) => {
 
-    const {lineItems, onChange, errorMsg} = props;
+    const {lineItems, onChange, errorMsg, hasRequestId} = props;
 
     const lineItemRowChange = useCallback((lineItem, updatedRowIndex) => {
 
@@ -52,7 +53,9 @@ export const LineItemsPanel: FC<Props> = memo((props) => {
         >
             <div className='bg-primary'>
                 <Panel.Heading>
-                    <div className='panel-title'>Specify Items</div>
+                    <div className='panel-title'>
+                        {(!hasRequestId && 'Specify Items') || (hasRequestId && 'Requested Items')}
+                    </div>
                 </Panel.Heading>
             </div>
             <div>

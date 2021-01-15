@@ -55,7 +55,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class SubmitNewRequestAction extends MutatingApiAction<RequestForm>
+    public class SubmitRequestAction extends MutatingApiAction<RequestForm>
     {
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
@@ -72,6 +72,8 @@ public class WNPRC_PurchasingController extends SpringActionController
     public static class RequestForm
     {
         List<JSONObject> _lineItems;
+        Integer _rowId;
+        String _requestId;
         Integer _account;
         String _accountOther;
         Integer _vendor;
@@ -101,6 +103,26 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setLineItems(List<JSONObject> lineItems)
         {
             _lineItems = lineItems;
+        }
+
+        public Integer getRowId()
+        {
+            return _rowId;
+        }
+
+        public void setRowId(Integer rowId)
+        {
+            _rowId = rowId;
+        }
+
+        public String getRequestId()
+        {
+            return _requestId;
+        }
+
+        public void setRequestId(String requestId)
+        {
+            _requestId = requestId;
         }
 
         public Integer getAccount()

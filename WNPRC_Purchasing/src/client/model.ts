@@ -6,6 +6,7 @@ export class RequestOrderModel {
      */
     [immerable] = true;
 
+    readonly rowId?: number;
     readonly account: string;
     readonly accountOther: string;
     readonly vendor: string; //rowId of ehr_purchasing.vendor
@@ -33,6 +34,7 @@ export class VendorModel {
      */
     [immerable] = true;
 
+    readonly rowId?: number;
     readonly vendorName: string;
     readonly streetAddress: string;
     readonly city: string;
@@ -79,6 +81,7 @@ export class LineItemModel {
      */
     [immerable] = true;
 
+    readonly rowId?: number;
     readonly item: string;
     readonly controlledSubstance: boolean = false;
     readonly itemUnit: number; //rowId of ehr_purchasing.itemUnits

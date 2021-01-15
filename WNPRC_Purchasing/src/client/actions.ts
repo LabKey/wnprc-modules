@@ -18,12 +18,14 @@ export function getData(schemaName: string, queryName: string, colNames: string,
     })
 }
 
-export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>) : Promise<any> {
+export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>, requestId?: string) : Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
-            url: ActionURL.buildURL('WNPRC_Purchasing', 'submitNewRequest.api'),
+            url: ActionURL.buildURL('WNPRC_Purchasing', 'submitRequest.api'),
             method: 'POST',
             jsonData: {
+                rowId: requestOrder.rowId,
+                requestId: requestId,
                 account: requestOrder.account !== 'Other' ? requestOrder.account : undefined,
                 accountOther: requestOrder.accountOther,
                 vendor: requestOrder.vendor !== 'Other' ? requestOrder.vendor : undefined,

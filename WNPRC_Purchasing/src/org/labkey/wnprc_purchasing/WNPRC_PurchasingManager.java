@@ -16,6 +16,7 @@
 
 package org.labkey.wnprc_purchasing;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
@@ -112,7 +113,8 @@ public class WNPRC_PurchasingManager
     public void submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
     {
         UserSchema us = QueryService.get().getUserSchema(user, container, "ehr_purchasing");
-        String requestId = UUID.randomUUID().toString().toUpperCase();
+        boolean isNewRequest = !StringUtils.isNotBlank(requestForm.getRequestId());
+        String requestId = StringUtils.isNotBlank(requestForm.getRequestId()) ? requestForm.getRequestId() : UUID.randomUUID().toString().toUpperCase();
         Map<String, Object> row;
 
         //New vendor data
@@ -139,6 +141,9 @@ public class WNPRC_PurchasingManager
         List<Map<String, Object>> purchasingRequestsData = new ArrayList<>();
 
         row = new CaseInsensitiveHashMap<>();
+        if (null != requestForm.getRowId()) {
+            row.put("rowId", requestForm.getRowId());
+        }
         row.put("requestId", requestId);
         row.put("vendorId", requestForm.getVendor());
         row.put("account", requestForm.getAccount());
@@ -152,18 +157,27 @@ public class WNPRC_PurchasingManager
         purchasingRequestsData.add(row);
 
         //Line items data
-        List<Map<String, Object>> lineItemsData = new ArrayList<>();
+        List<Map<String, Object>> newLineItemsData = new ArrayList<>();
+        List<Map<String, Object>> updatedLineItemsData = new ArrayList<>();
         for (JSONObject lineItem : requestForm.getLineItems())
         {
             row = new CaseInsensitiveHashMap<>();
-
             row.put("requestId", requestId);
             row.put("item", lineItem.get("item"));
             row.put("itemUnitId", lineItem.get("itemUnit"));
             row.put("unitCost", lineItem.get("unitCost"));
             row.put("quantity", lineItem.get("quantity"));
             row.put("controlledSubstance", lineItem.get("controlledSubstance"));
-            lineItemsData.add(row);
+
+            if(null != lineItem.get("rowId"))
+            {
+                row.put("rowId", lineItem.get("rowId"));
+                updatedLineItemsData.add(row);
+            }
+            else
+            {
+                newLineItemsData.add(row);
+            }
         }
 
         // insert data
@@ -193,14 +207,28 @@ public class WNPRC_PurchasingManager
             {
                 qus = purchasingRequestsTable.getUpdateService();
                 assert qus != null;
-                qus.insertRows(user, container, purchasingRequestsData, errors, null, null);
+                if (isNewRequest)
+                {
+                    qus.insertRows(user, container, purchasingRequestsData, errors, null, null);
+                }
+                else
+                {
+                    qus.updateRows(user, container, purchasingRequestsData, null, null, null);
+                }
             }
 
             if (lineItemsTable != null)
             {
                 qus = lineItemsTable.getUpdateService();
                 assert qus != null;
-                qus.insertRows(user, container, lineItemsData, errors, null, null);
+                if (newLineItemsData.size() > 0)
+                {
+                    qus.insertRows(user, container, newLineItemsData, errors, null, null);
+                }
+                if (updatedLineItemsData.size() > 0)
+                {
+                    qus.updateRows(user, container, updatedLineItemsData, null, null, null);
+                }
             }
 
             if (errors.hasErrors())

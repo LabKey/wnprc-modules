@@ -1,4 +1,6 @@
-SELECT pr.rowId,
+SELECT
+       pr.requestId,
+       pr.rowId,
        pr.vendorId,
        pr.account,
        pr.otherAcctAndInves,

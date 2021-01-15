@@ -15,10 +15,10 @@
  */
 import React, {FC, memo, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
-import {LineItemModel, RequestOrderModel} from "../model";
+import {LineItemModel, RequestOrderModel, VendorModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
 import '../RequestEntry/RequestEntry.scss';
-import {ActionURL, getServerContext} from "@labkey/api";
+import {ActionURL, Filter, getServerContext} from "@labkey/api";
 import produce, {Draft} from "immer";
 import {getData, submitRequest} from "../actions";
 
@@ -34,11 +34,44 @@ export const App : FC = memo(() => {
     useEffect(() => {
         // is fired on component mount
         const isNewRequest = ActionURL.getParameter('isNewRequest');
+        const requestId = ActionURL.getParameter('requestId');
+
         if (isNewRequest) {
             getData('core', 'qcState', 'RowId, Label').then(vals => {
                 const idx = vals.findIndex(qcstate => qcstate['Label'] === 'Review Pending');
                 setRequestOrderModel(RequestOrderModel.create({qcState: vals[idx].RowId}));
                 setLineItems([LineItemModel.create({qcState: vals[idx].RowId})]);
+            });
+        }
+        else if (requestId)
+        {
+            //get ehr_purchasing.purchasingRequests data
+            const filter = [Filter.create('requestId', requestId)];
+            getData('ehr_purchasing', 'purchasingRequests', 'requestId, vendorId, account, otherAcctAndInves, shippingInfoId, shippingAttentionTo, justification, comments', undefined, filter).then(vals => {
+                setRequestOrderModel(RequestOrderModel.create({
+                    account: vals[0].account,
+                    accountOther: vals[0].otherAcctAndInves,
+                    vendor: vals[0].vendorId,
+                    // newVendor?: VendorModel = VendorModel.create();
+                    purpose: vals[0].justification,
+                    shippingDestination: vals[0].shippingInfoId, //rowId of ehr_purchasing.shippingInfo
+                    deliveryAttentionTo: vals[0].shippingAttentionTo,
+                    comments: vals[0].comments
+                }));
+            });
+            //get ehr_purchasing.lineItems data
+            getData('ehr_purchasing', 'lineItems', 'item, itemUnitId, controlledSubstance, quantity, unitCost, itemStatusId', undefined, filter).then(vals => {
+                let lineItems = vals.map(val => {
+                   return LineItemModel.create({
+                        item: val.item,
+                        controlledSubstance: val.controlledSubstance,
+                        itemUnit: val.itemUnitId,
+                        quantity: val.quantity,
+                        unitCost: val.unitCost,
+                        status: val.itemStatusId
+                    });
+                });
+                setLineItems(lineItems);
             });
         }
     }, []);

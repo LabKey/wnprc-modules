@@ -143,7 +143,7 @@ public class WNPRC_PurchasingManager
         row.put("vendorId", requestForm.getVendor());
         row.put("account", requestForm.getAccount());
         row.put("otherAcctAndInves", requestForm.getAccountOther());
-        row.put("shippingInfo", requestForm.getShippingDestination());
+        row.put("shippingInfoId", requestForm.getShippingDestination());
         row.put("justification", requestForm.getPurpose());
         row.put("shippingAttentionTo", requestForm.getDeliveryAttentionTo());
         row.put("comments", requestForm.getComments());

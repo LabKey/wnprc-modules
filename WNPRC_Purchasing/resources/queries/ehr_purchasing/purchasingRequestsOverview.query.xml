@@ -4,8 +4,12 @@
             <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB" useColumnOrder="true">
                 <tableTitle>Purchase Requests</tableTitle>
                 <columns>
+                    <column columnName="requestId">
+                        <isHidden>true</isHidden>
+                    </column>
                     <column columnName="rowId">
                         <columnTitle>Request No.</columnTitle>
+                        <url>/WNPRC_Purchasing-purchasingRequest.view?requestId=${requestId}</url>
                     </column>
                     <column columnName="requestDate">
                         <formatString>Date</formatString>

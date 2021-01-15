@@ -27,6 +27,31 @@ export class RequestOrderModel {
         return new RequestOrderModel({ ...raw });
     }
 }
+export class PurchaseAdminModel {
+    /**
+     * @hidden
+     */
+    [immerable] = true;
+
+    readonly rowId?: number;
+    readonly assignedTo: string;
+    readonly creditCardOption: string;
+    readonly qcState: number;
+    readonly program: string = '4';
+    readonly confirmationNum?: string;
+    readonly invoiceNum?: string;
+    readonly errorMsg?: string;
+    readonly errors?: any;
+
+
+    constructor(values?: Partial<PurchaseAdminModel>) {
+        Object.assign(this, values);
+    }
+
+    static create(raw?: any): PurchaseAdminModel {
+        return new PurchaseAdminModel({ ...raw });
+    }
+}
 
 export class VendorModel {
     /**

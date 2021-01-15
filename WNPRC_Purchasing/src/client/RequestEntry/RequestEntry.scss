@@ -57,7 +57,7 @@
   margin-bottom: 0.50%;
 }
 
-.account-input, .vendor-input, .shipping-dest-input {
+.account-input, .vendor-input, .shipping-dest-input, .assigned-to-input, .credit-card-option-input, .status-input {
   resize: none;
   width: 60%;
 }
@@ -66,10 +66,17 @@
   height: 60px;
 }
 
-.business-purpose-input, .special-instr-input, .delivery-attn-input, .new-vendor-display{
+.business-purpose-input, .special-instr-input, .delivery-attn-input, .new-vendor-display {
   resize: none;
   width: 60%;
   height: 90px !important;
+}
+
+.program-input, .confirmation-input, .invoice-input {
+  resize: none;
+  width: 60%;
+  height: 27px !important;
+  padding-top: 0.4%;
 }
 
 .calc-total {

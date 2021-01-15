@@ -4,7 +4,7 @@ interface InputRow {
     [key: string]: string
 }
 
-export const createOptions = (rows: Array<InputRow>, keyCol: string, displayCol: string, addOtherOption: boolean, formatColName ?: string) => {
+export const createOptions = (rows: Array<InputRow>, keyCol: string, displayCol: string, addOtherOption?: boolean, formatColName ?: string) => {
     if (!rows)
         return undefined;
 

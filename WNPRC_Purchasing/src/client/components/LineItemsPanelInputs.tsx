@@ -71,10 +71,10 @@ export const UnitCostInput: FC<NumericInputProps> = memo((props) => {
 
     return (
         <input
-            className= {'line-item-row-input unit-Cost-input form-control ' + (hasError ? 'field-validation-error' : '')}
+            className= {'line-item-row-input unit-cost-input form-control ' + (hasError ? 'field-validation-error' : '')}
             value={value}
             onChange={onValueChange}
-            id="unit-Cost-id"
+            id="unit-cost-id"
             pattern="[0-9]*"
             type='number'
         />
@@ -127,6 +127,7 @@ export const SubtotalInput: FC<SubtotalInputProps> = memo((props) => {
             value={formatCurrency(subtotal)}
             disabled={true}
             id="item-subtotal-id"
+            type='number'
         />
     );
 })

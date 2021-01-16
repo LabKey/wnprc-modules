@@ -39,7 +39,7 @@
   margin-left: -3%;
 }
 
-.unit-input, .unit-price-input, .quantity-input {
+.unit-input, .unit-cost-input, .quantity-input {
   margin-left: -6%;
 }
 
@@ -80,7 +80,7 @@
 }
 
 .calc-total {
-  margin-left:54%;
+  margin-left:57%;
   font-weight: bold;
 }
 
@@ -113,4 +113,20 @@ $red-shadow:            rgba(160, 80, 76, 0.5);
 
 .edit-other-vendor-button {
   margin-left: 16.25%;
+}
+
+input[type=number] {
+  text-align:right;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }

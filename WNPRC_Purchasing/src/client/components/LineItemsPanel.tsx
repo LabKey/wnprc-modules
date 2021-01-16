@@ -62,7 +62,7 @@ export const LineItemsPanel: FC<Props> = memo((props) => {
                 <Row className="line-item-row-header">
                     <Col xs={4}>Part no./Item description *</Col>
                     <Col xs={1}>Unit *</Col>
-                    <Col xs={1}>Unit Cost *</Col>
+                    <Col xs={1}>Unit Cost ($) *</Col>
                     <Col xs={1}>Quantity *</Col>
                     <Col xs={1}>Subtotal ($)</Col>
                     <Col xs={2}>Controlled substance</Col>

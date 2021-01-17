@@ -1,5 +1,5 @@
 import {Query, Ajax, Utils, ActionURL, Filter} from "@labkey/api";
-import {LineItemModel, RequestOrderModel, VendorModel} from "./model";
+import {LineItemModel, PurchaseAdminModel, RequestOrderModel, VendorModel} from "./model";
 
 export function getData(schemaName: string, queryName: string, colNames: string, sort?: string, filter?: Array<Filter.IFilter>) : Promise<any> {
     return new Promise((resolve, reject) => {
@@ -18,14 +18,13 @@ export function getData(schemaName: string, queryName: string, colNames: string,
     })
 }
 
-export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>, requestId?: string) : Promise<any> {
+export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>, purchasingAdminModel?: PurchaseAdminModel) : Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
             url: ActionURL.buildURL('WNPRC_Purchasing', 'submitRequest.api'),
             method: 'POST',
             jsonData: {
                 rowId: requestOrder.rowId,
-                requestId: requestId,
                 account: requestOrder.account !== 'Other' ? requestOrder.account : undefined,
                 accountOther: requestOrder.accountOther,
                 vendor: requestOrder.vendor !== 'Other' ? requestOrder.vendor : undefined,
@@ -34,6 +33,12 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 deliveryAttentionTo: requestOrder.deliveryAttentionTo,
                 comments: requestOrder.comments,
                 qcState: requestOrder.qcState,
+                // assignedTo: purchasingAdminModel.assignedTo,
+                // creditCardOption: purchasingAdminModel.creditCardOption,
+                // status: purchasingAdminModel.qcState,
+                // program: purchasingAdminModel.program,
+                // confirmNum: purchasingAdminModel.confirmationNum,
+                // invoiceNum: purchasingAdminModel.invoiceNum,
                 lineItems: lineItems,
                 hasNewVendor: (!!(requestOrder.vendor === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
                 newVendorName: requestOrder.newVendor.vendorName,

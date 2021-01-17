@@ -1,5 +1,4 @@
 SELECT
-       pr.requestId,
        pr.rowId,
        pr.vendorId,
        pr.account,
@@ -11,9 +10,9 @@ SELECT
 FROM ehr_purchasing.purchasingRequests pr
 LEFT JOIN
     (
-        SELECT requestId,
+        SELECT requestRowId,
                round(sum(quantity * unitCost), 2) AS totalCost
         FROM ehr_purchasing.lineItems
-        GROUP BY requestId
+        GROUP BY requestRowId
     ) items
-ON pr.requestId = items.requestId
+ON pr.rowId = items.requestRowId

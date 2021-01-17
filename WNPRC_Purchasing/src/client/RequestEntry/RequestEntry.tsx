@@ -37,13 +37,14 @@ export const App : FC = memo(() => {
     useEffect(() => {
 
         // is fired on component mount
-        const reqId = ActionURL.getParameter('requestId');
-        setRequestId(reqId);
-        if (reqId)
+        const reqRowId = ActionURL.getParameter('requestRowId');
+        setRequestId(reqRowId);
+        if (reqRowId)
         {
             //get ehr_purchasing.purchasingRequests data
-            const filter = [Filter.create('requestId', reqId)];
-            getData('ehr_purchasing', 'purchasingRequests', 'rowId, requestId, vendorId, account, otherAcctAndInves, shippingInfoId, shippingAttentionTo, justification, comments', undefined, filter).then(vals => {
+            const filter = [Filter.create('rowId', reqRowId)];
+            getData('ehr_purchasing', 'purchasingRequests', 'rowId, vendorId, account, otherAcctAndInves, shippingInfoId, ' +
+                'shippingAttentionTo, justification, comments', undefined, filter).then(vals => {
                 setRequestOrderModel(RequestOrderModel.create({
                     rowId: vals[0].rowId,
                     account: vals[0].account,
@@ -57,10 +58,12 @@ export const App : FC = memo(() => {
                 }));
             });
             //get ehr_purchasing.lineItems data
-            getData('ehr_purchasing', 'lineItems', 'rowId, item, itemUnitId, controlledSubstance, quantity, unitCost, itemStatusId', undefined, filter).then(vals => {
+            const requestRowIdFilter = [Filter.create('requestRowId', reqRowId)];
+            getData('ehr_purchasing', 'lineItems', 'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, unitCost, itemStatusId', undefined, requestRowIdFilter).then(vals => {
                 let lineItems = vals.map(val => {
                    return LineItemModel.create({
                         rowId: val.rowId,
+                        requestRowId: reqRowId,
                         item: val.item,
                         controlledSubstance: val.controlledSubstance,
                         itemUnit: val.itemUnitId,
@@ -201,7 +204,7 @@ export const App : FC = memo(() => {
             setIsSaving(true);
             event.preventDefault();
 
-            submitRequest(requestOrderModel, lineItems, requestId).then(r => {
+            submitRequest(requestOrderModel, lineItems).then(r => {
                 if (r.success) {
                     //navigate to purchasing overview grid/main page
                     window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)

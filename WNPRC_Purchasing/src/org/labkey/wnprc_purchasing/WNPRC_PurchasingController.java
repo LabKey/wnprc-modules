@@ -73,7 +73,6 @@ public class WNPRC_PurchasingController extends SpringActionController
     {
         List<JSONObject> _lineItems;
         Integer _rowId;
-        String _requestId;
         Integer _account;
         String _accountOther;
         Integer _vendor;
@@ -113,16 +112,6 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setRowId(Integer rowId)
         {
             _rowId = rowId;
-        }
-
-        public String getRequestId()
-        {
-            return _requestId;
-        }
-
-        public void setRequestId(String requestId)
-        {
-            _requestId = requestId;
         }
 
         public Integer getAccount()

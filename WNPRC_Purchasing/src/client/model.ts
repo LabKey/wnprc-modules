@@ -107,6 +107,7 @@ export class LineItemModel {
     [immerable] = true;
 
     readonly rowId?: number;
+    readonly requestRowId?: number;
     readonly item: string;
     readonly controlledSubstance: boolean = false;
     readonly itemUnit: number; //rowId of ehr_purchasing.itemUnits

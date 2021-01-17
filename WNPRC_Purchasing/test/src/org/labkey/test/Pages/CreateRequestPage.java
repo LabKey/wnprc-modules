@@ -111,7 +111,7 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         final Input itemDesc = new Input(Locator.id("item-description-id").findWhenNeeded(this).withTimeout(200), getDriver());
         final Select unit = SelectWrapper.Select(Locator.byClass("unit-input"))
                 .findWhenNeeded(this);
-        final Input unitCost = new Input(Locator.id("unit-Cost-id").findWhenNeeded(this).withTimeout(200), getDriver());
+        final Input unitCost = new Input(Locator.id("unit-cost-id").findWhenNeeded(this).withTimeout(200), getDriver());
         final Input quantity = new Input(Locator.id("unit-quantity-id").findWhenNeeded(this).withTimeout(200), getDriver());
 
 

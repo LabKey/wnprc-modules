@@ -107,9 +107,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         goToProjectHome();
 
-        log("Add extensible columns");
-        addExtensibleColumns();
-
         log("Creating a purchasing admin user");
         _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
 
@@ -131,18 +128,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Create ehrBillingLinked schema");
         _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, null, "ehr_billing", "aliases", null);
-    }
-
-    private void addExtensibleColumns()
-    {
-        goToSchemaBrowser();
-        selectQuery("ehr_purchasing", "purchasingRequests");
-        clickAndWait(Locator.linkWithText("create definition"));
-        DomainDesignerPage domainDesignerPage = new DomainDesignerPage(getDriver());
-        DomainFormPanel panel = domainDesignerPage.fieldsPanel();
-        panel.manuallyDefineFields(OTHER_ACCT_FIELD_NAME);
-        domainDesignerPage.clickSave();
-        goToProjectHome();
     }
 
     private void createUserAccountAssociations() throws IOException, CommandException

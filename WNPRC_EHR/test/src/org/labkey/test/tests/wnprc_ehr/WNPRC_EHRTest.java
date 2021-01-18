@@ -346,9 +346,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     @Override
     public void importStudy()
     {
-        goToManageStudy();
+        importStudyFromPath(1);
+    }
 
-        importStudyFromZip(STUDY_ZIP);
+    @Override
+    public String getModulePath()
+    {
+        return "/server/modules/wnprc-modules/" + getModuleDirectory();
     }
 
     @Override

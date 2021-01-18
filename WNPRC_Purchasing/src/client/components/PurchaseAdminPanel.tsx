@@ -1,9 +1,10 @@
 import React, {FC, memo, useCallback} from 'react';
-import {Form, Panel, Row, Col, Container} from 'react-bootstrap';
+import {Form, Panel} from 'react-bootstrap';
 import {PurchaseAdminModel} from '../model';
 import {
     AssignedToInput, CreditCardOptionInput, ConfirmationInput, InvoiceInput, ProgramInput, StatusInput
 } from "./PurchaseAdminPanelInputs";
+import produce, {Draft} from "immer";
 
 interface Props
 {
@@ -16,7 +17,10 @@ export const PurchaseAdminPanel: FC<Props> = memo((props) => {
     const {model, onInputChange} = props;
     const onValueChange = useCallback((colName, value) => {
 
-        // onInputChange(updatedModel);
+        const updatedModel = produce(model, (draft: Draft<PurchaseAdminModel>) => {
+            draft[colName] = value;
+        });
+        onInputChange(updatedModel);
     }, [model, onInputChange]);
 
     return (

@@ -113,7 +113,7 @@ public class WNPRC_PurchasingManager
     public void submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
     {
         UserSchema us = QueryService.get().getUserSchema(user, container, "ehr_purchasing");
-        boolean isNewRequest = StringUtils.isNotBlank(String.valueOf(requestForm.getRowId()));
+        boolean isNewRequest = StringUtils.isBlank(String.valueOf(requestForm.getRowId()));
         List<Map<String, Object>> insertedPurchasingReq = new ArrayList<>();
 
         Map<String, Object> row;
@@ -152,8 +152,12 @@ public class WNPRC_PurchasingManager
         row.put("justification", requestForm.getPurpose());
         row.put("shippingAttentionTo", requestForm.getDeliveryAttentionTo());
         row.put("comments", requestForm.getComments());
-        row.put("assignedTo", user.getUserId()); //TODO : this will be set to purchasing admin
+        row.put("assignedTo", requestForm.getAssignedTo());
         row.put("qcState", requestForm.getQcState());
+        row.put("creditCardOptionId", requestForm.getCreditCardOption());
+        row.put("program", requestForm.getProgram());
+        row.put("confirmationNum", requestForm.getConfirmNum());
+        row.put("invoiceNum", requestForm.getInvoiceNum());
         purchasingRequestsData.add(row);
 
         // insert data

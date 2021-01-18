@@ -43,20 +43,29 @@ export const App : FC = memo(() => {
         {
             //get ehr_purchasing.purchasingRequests data
             const filter = [Filter.create('rowId', reqRowId)];
-            getData('ehr_purchasing', 'purchasingRequests', 'rowId, vendorId, account, otherAcctAndInves, shippingInfoId, ' +
-                'shippingAttentionTo, justification, comments', undefined, filter).then(vals => {
+            getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter).then(vals => {
                 setRequestOrderModel(RequestOrderModel.create({
                     rowId: vals[0].rowId,
                     account: vals[0].account,
                     accountOther: vals[0].otherAcctAndInves,
                     vendor: vals[0].vendorId,
-                    // newVendor?: VendorModel = VendorModel.create();
                     purpose: vals[0].justification,
-                    shippingDestination: vals[0].shippingInfoId, //rowId of ehr_purchasing.shippingInfo
+                    shippingDestination: vals[0].shippingInfoId,
                     deliveryAttentionTo: vals[0].shippingAttentionTo,
                     comments: vals[0].comments
                 }));
+                //show purchasing admin panel if there is rowId
+                //TODO: add condition on purchasing admin user
+                setPurchaseAdminModel(PurchaseAdminModel.create({
+                    assignedTo: vals[0].assignedTo,
+                    creditCardOption: vals[0].creditCardOptionId,
+                    qcState: vals[0].qcState,
+                    program: vals[0].program,
+                    confirmationNum: vals[0].confirmationNum,
+                    invoiceNum: vals[0].invoiceNum
+                }));
             });
+
             //get ehr_purchasing.lineItems data
             const requestRowIdFilter = [Filter.create('requestRowId', reqRowId)];
             getData('ehr_purchasing', 'lineItems', 'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, unitCost, itemStatusId', undefined, requestRowIdFilter).then(vals => {
@@ -204,7 +213,7 @@ export const App : FC = memo(() => {
             setIsSaving(true);
             event.preventDefault();
 
-            submitRequest(requestOrderModel, lineItems).then(r => {
+            submitRequest(requestOrderModel, lineItems, !!requestId ? purchaseAdminModel : undefined).then(r => {
                 if (r.success) {
                     //navigate to purchasing overview grid/main page
                     window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
@@ -212,7 +221,7 @@ export const App : FC = memo(() => {
             });
         }
 
-    }, [requestOrderModel, lineItems, isSaving]);
+    }, [requestOrderModel, lineItems, purchaseAdminModel, isSaving]);
 
     return (
         <>

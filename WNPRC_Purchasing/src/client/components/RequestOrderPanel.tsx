@@ -100,10 +100,11 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                     onChange={onValueChange}
                 />
             </Form>
-            {model.errorMsg &&
-            <div className='alert alert-danger'>
-                {model.errorMsg}
-            </div>
+            {
+                model.errorMsg &&
+                <div className='alert alert-danger'>
+                    {model.errorMsg}
+                </div>
             }
         </Panel>
     );

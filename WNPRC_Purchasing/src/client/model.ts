@@ -34,8 +34,8 @@ export class PurchaseAdminModel {
     [immerable] = true;
 
     readonly rowId?: number;
-    readonly assignedTo: string;
-    readonly creditCardOption: string;
+    readonly assignedTo: number;
+    readonly creditCardOption: number;
     readonly qcState: number;
     readonly program: string = '4';
     readonly confirmationNum?: string;

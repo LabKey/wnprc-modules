@@ -81,6 +81,11 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _deliveryAttentionTo;
         String _comments;
         String _qcState;
+        Integer _assignedTo;
+        Integer _creditCardOption;
+        String _program;
+        String _confirmNum;
+        String _invoiceNum;
         Boolean _hasNewVendor;
         String _newVendorName;
         String _newVendorStreetAddress;
@@ -192,6 +197,56 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setQcState(String qcState)
         {
             _qcState = qcState;
+        }
+
+        public Integer getAssignedTo()
+        {
+            return _assignedTo;
+        }
+
+        public void setAssignedTo(Integer assignedTo)
+        {
+            _assignedTo = assignedTo;
+        }
+
+        public Integer getCreditCardOption()
+        {
+            return _creditCardOption;
+        }
+
+        public void setCreditCardOption(Integer creditCardOption)
+        {
+            _creditCardOption = creditCardOption;
+        }
+
+        public String getProgram()
+        {
+            return _program;
+        }
+
+        public void setProgram(String program)
+        {
+            _program = program;
+        }
+
+        public String getConfirmNum()
+        {
+            return _confirmNum;
+        }
+
+        public void setConfirmNum(String confirmNum)
+        {
+            _confirmNum = confirmNum;
+        }
+
+        public String getInvoiceNum()
+        {
+            return _invoiceNum;
+        }
+
+        public void setInvoiceNum(String invoiceNum)
+        {
+            _invoiceNum = invoiceNum;
         }
 
         public Boolean getHasNewVendor()

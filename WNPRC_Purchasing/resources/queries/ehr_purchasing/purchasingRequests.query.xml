@@ -26,6 +26,13 @@
                             <fkTable>shippingInfo</fkTable>
                         </fk>
                     </column>
+                    <column columnName="creditCardOptionId">
+                        <fk>
+                            <fkDbSchema>wnprc_purchasing</fkDbSchema>
+                            <fkTable>creditCardOptions</fkTable>
+                            <fkColumnName>rowId</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

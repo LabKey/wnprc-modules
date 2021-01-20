@@ -4,27 +4,21 @@ import { useContext, useEffect, useState } from "react";
 import { labkeyActionSelectWithPromise } from "../query/actions";
 import { AppContext } from "../containers/App/ContextProvider";
 import DropdownOptions from "./DropdownOptions";
-import { ConfigProps } from "../typings/main";
-
-interface PropTypes {
-  action: any;
-  setreviewer: any;
-  flipState: any;
-}
+import { ConfigProps, SubmitForReviewModalProps} from "../typings/main";
 
 /**
  * Similar to SubmitModal but requires options and sets a reviewer by lifting state up.
  */
-const SubmitForReviewModal: React.FunctionComponent<PropTypes> = props => {
+const SubmitForReviewModal: React.FunctionComponent<SubmitForReviewModalProps> = props => {
   const { action, setreviewer, flipState } = props;
 
   //TODO move this state up?
-  const [reviewers, setReviewers] = useState(null);
-  const [reviewer, setReviewer] = useState(null);
-  const [enabled, setEnabled] = useState(false);
+  const [reviewers, setReviewers] = useState<Array<any>>(null);
+  const [reviewer, setReviewer] = useState<number>(null);
+  const [enabled, setEnabled] = useState<boolean>(false);
   const { submitted } = useContext(AppContext);
 
-  const handleChange = e => {
+  const handleChange = (e: number) => {
     if (!e) {
       return;
     }

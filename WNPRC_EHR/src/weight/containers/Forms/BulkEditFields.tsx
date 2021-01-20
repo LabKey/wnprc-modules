@@ -7,21 +7,17 @@ import "../../../theme/css/tooltip.css";
 import DateInput from "../../../components/DateInput";
 import { useRef } from "react";
 import DropdownOptions from "../../components/DropdownOptions";
-
-interface RewriteProps {
-  fieldValues: any;
-  restraints: any;
-}
+import {BulkEditFieldProps} from "../../typings/main"
 
 /**
  * A set of fields whose values are meant to be passed up to a parent modal.
  */
-const BulkEditFields: React.FunctionComponent<RewriteProps> = props => {
+const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
   const { fieldValues, restraints } = props;
-  const [date, setDate] = useState<any>(new Date());
-  const [weight, setWeight] = useState<any>("");
-  const [remark, setRemark] = useState<any>("");
-  const [restraint, setRestraint] = useState<any>("");
+  const [date, setDate] = useState<object>(new Date());
+  const [weight, setWeight] = useState<number>(null);
+  const [remark, setRemark] = useState<string>("");
+  const [restraint, setRestraint] = useState<string>("");
 
   //lift state up to parent
   //can either use full objects or objects w errors
@@ -34,16 +30,16 @@ const BulkEditFields: React.FunctionComponent<RewriteProps> = props => {
     });
   }, [weight, date, remark, restraint]);
 
-  const openDatepicker = () => {
+  const openDatepicker = (): void => {
     //@ts-ignore
     calendarEl.setOpen(true);
   };
 
-  const handleDateChange = date => {
+  const handleDateChange = (date: object): void => {
     setDate(date);
   };
 
-  const handleRestraintChange = restraint => {
+  const handleRestraintChange = (restraint: string): void => {
     setRestraint(restraint);
   };
 
@@ -76,9 +72,9 @@ const BulkEditFields: React.FunctionComponent<RewriteProps> = props => {
               id="weight-bulk"
               type="number"
               value={weight}
-              min="0"
+              min={0}
               onChange={e => {
-                setWeight(e.target.value);
+                setWeight(parseFloat(e.target.value));
               }}
               required
             />

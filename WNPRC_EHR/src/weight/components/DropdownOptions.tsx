@@ -1,23 +1,13 @@
 import { useEffect, useState } from "react";
 import * as React from "react";
-
-interface PropTypes {
-  options: any;
-  value: any;
-  name: any;
-  id: string;
-  classname: string;
-  valuekey: string;
-  displaykey: string;
-  initialvalue: string;
-}
+import { DropdownOptionsProps } from "../typings/main";
 
 
 /**
  * Renders dropdown select options. Expects a set of options w/ value & label properties,
  * as well as a @value function to handle the option that is selected and id and name.
  */
-const DropdownOptions: React.FunctionComponent<PropTypes> = props => {
+const DropdownOptions: React.FunctionComponent<DropdownOptionsProps> = props => {
   const { options, value, name, id, classname, valuekey, displaykey, initialvalue} = props;
   const [option, setOption] = useState(initialvalue);
 

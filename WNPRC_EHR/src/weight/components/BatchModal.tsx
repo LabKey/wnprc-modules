@@ -3,13 +3,8 @@ import * as React from "react";
 import { labkeyActionSelectWithPromise } from "../query/actions";
 import Select from "react-select";
 import SubmitModal from "./SubmitModal";
-import { ConfigProps } from "../typings/main";
+import { ConfigProps, BatchModalProps } from "../typings/main";
 
-interface PropTypes {
-  setLocation: any;
-  setIds: any;
-  flipState: any;
-}
 
 // Custom styling for react-select dropdown
 const customStyles = {
@@ -38,9 +33,9 @@ const customStyles = {
 /**
  * Uses Submit Modal to add batch records by a string of ids or room locaiton.
  */
-const BatchModal: React.FunctionComponent<PropTypes> = props => {
-  const [location, setLocation] = useState("");
-  const [locations, setLocations] = useState([]);
+const BatchModal: React.FunctionComponent<BatchModalProps> = props => {
+  const [location, setLocation] = useState<Array<any>>([]);
+  const [locations, setLocations] = useState<Array<any>>([]);
   const [ids, setIds] = useState([]);
 
   const handleSubmit = () => {

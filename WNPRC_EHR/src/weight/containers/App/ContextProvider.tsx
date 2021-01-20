@@ -1,41 +1,17 @@
 import * as React from 'react';
 import {createContext, useState,  useEffect} from 'react';
 import {saveRowsDirect} from "../../../query/helpers";
-import {RowObj} from "../../../feeding/typings/main";
+import {RowObj} from "../../typings/main";
 import {Utils} from "@labkey/api";
+import { ContextProviderProps } from "../../typings/main";
 
-interface ContextProps {
-  submitted: boolean;
-  submit: any;
-  setrestraints: any;
-  restraints: any;
-  setStartTimeExternal: any;
-  setEndTimeExternal: any;
-  formdata: any;
-  setFormDataExternal: any;
-  setTaskIdExternal: any;
-  taskId: any;
-  formFrameworkTypes: any;
-  setFormFrameworkTypesExternal: any;
-  wasSaved: any;
-  setWasSavedExternal: any;
-  isRecording: any;
-  setIsRecordingExternal: any;
-  bulkEditUsed: boolean;
-  setBulkEditUsedExternal: () => void;
-  batchAddUsed: boolean;
-  setBatchAddUsedExternal: () => void;
-  anyErrorsEver: boolean;
-  setAnyErrorsEverExternal: () => void;
-}
-
-const AppContext = createContext({} as ContextProps);
+const AppContext = createContext({} as ContextProviderProps);
 
 function ContextProvider({ children }) {
   const [submitted, setSubmitted] = useState(false);
-  const [restraints, setRestraints] = useState(null);
-  const [startTime, setStartTime] = useState<any>();
-  const [endTime, setEndTime] = useState<any>();
+  const [restraints, setRestraints] = useState<Array<any>>(null);
+  const [startTime, setStartTime] = useState<object>();
+  const [endTime, setEndTime] = useState<object>();
   const [formdata, setFormData] = useState<Array<RowObj>>([]);
   const [taskId, setTaskId] = useState<string>(
     Utils.generateUUID().toUpperCase()
@@ -97,7 +73,7 @@ function ContextProvider({ children }) {
     setAnyErrorsEver(true);
   }
 
-  const logSessionTime = () => {
+  const logSessionTime = (): void => {
     let commands =[];
     let vals = {
       start_time: startTime ,
@@ -127,7 +103,7 @@ function ContextProvider({ children }) {
     logSessionTime();
   },[endTime])
 
-  function submit() {
+  function submit(): void {
     setSubmitted(true);
   }
 

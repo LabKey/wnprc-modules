@@ -1,18 +1,11 @@
 import * as React from "react";
 import { Alert } from "react-bootstrap";
-
-interface AlertPropTypes {
-  body: any;
-  show: boolean;
-  variant: any;
-  onClose: any;
-  dismissable: boolean;
-}
+import { CustomAlertProps } from "../typings/main";
 
 /**
  * Shows a bootstrap alert given a few props.
  */
-const CustomAlert: React.FunctionComponent<AlertPropTypes> = props => {
+const CustomAlert: React.FunctionComponent<CustomAlertProps> = props => {
   const { body, show, variant, onClose, dismissable } = props;
 
   return (

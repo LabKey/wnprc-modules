@@ -2,35 +2,23 @@ import { useState } from "react";
 import * as React from "react";
 import BulkEditFields from "../containers/Forms/BulkEditFields";
 import SubmitModal from "./SubmitModal";
-
-interface PropTypes {
-  liftUpBulkValues: (values: object) => void;
-  flipState: () => void;
-  restraints: any;
-}
-
-interface BulkEditValues {
-  weight: object;
-  date: object;
-  remark: object;
-  restraint: object;
-}
+import {BulkEditFormValues, BulkEditModalProps} from "../typings/main";
 
 /**
  * Uses a Submit Modal to display a set of fields used for bulk editing.
  * Requires an action to lift up all of the field values and flip the state
  *  flipstate just decides whether or not to show this modal.
  */
-const BulkEditModal: React.FunctionComponent<PropTypes> = props => {
+const BulkEditModal: React.FunctionComponent<BulkEditModalProps> = props => {
   const { liftUpBulkValues, flipState, restraints} = props;
-  const [vals, setVals] = useState<BulkEditValues>();
+  const [vals, setVals] = useState<BulkEditFormValues>();
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     liftUpBulkValues(vals);
     flipState();
   };
 
-  const liftUpBulkVals = (values: BulkEditValues) => {
+  const liftUpBulkVals = (values: BulkEditFormValues): void => {
     setVals(values);
   };
 

@@ -1,24 +1,8 @@
 import * as React from "react";
 import { Table } from "react-bootstrap";
 import Spinner from "../../components/Spinner";
+import {PaneProps} from "../typings/main";
 
-interface InfoProps {
-  Id: string;
-  calculated_status: string;
-  gender: string;
-  dam: string;
-  birth: string;
-  _labkeyurl_Id: string;
-  _labkeyurl_calculated_status: string;
-  _labkeyurl_genderd: string;
-  _labkeyurl_dam: string;
-  _labkeyurl_birth: string;
-}
-
-interface PaneProps {
-  animalInfo: InfoProps;
-  infoState?: string;
-}
 
 /**
  * Displays animal info given a successful state.

@@ -171,14 +171,20 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             EHR.Server.Utils.addError(scriptErrors, 'remarks', 'Add remark for connecting lixit', 'WARN');
         }
         console.log ('value outside if statement '+ row.treatmentId);
+        console.log (row.QCStateLabel);
 
-        if (row.treatmentId != null && row.id && row.performedby && row.volume){
+        if (row.treatmentId != null && row.id && row.performedby && row.volume && (row.QCStateLabel == 'In Progress' || row.QCStateLabel == 'Completed')){
             //TODO: called function to change QC for water amount
             console.log('value of dataSource ' + row.dataSource);
             console.log('value of treatmentId ' + row.treatmentId);
             console.log('extra context '+ waters);
-            
-            WNPRC.Utils.getJavaHelper().changeWaterAmountQC(row.treatmentId, waters);
+            console.log('date on water Given '+ row.date);
+            let errorMessage = WNPRC.Utils.getJavaHelper().changeWaterAmountQC(row.treatmentId, waters);
+            console.log('error Message ' + errorMessage);
+            if (!errorMessage){
+                console.log('before adding description '+ row);
+                addWaterGivenDescription(row, waters);
+            }
             //row.remarks=
 
         }
@@ -188,12 +194,41 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 
 
 }
+function addWaterGivenDescription(row, waters){
+    let clientDescription = '';
+    console.log ('description  '+clientDescription+ ' waters length '+ waters.length);
+    let waterRecords = [];
+    waterRecords = waters[0].waterObjects;
+    console.log('waterRecords '+waterRecords.length + ' inside waters '+ waters[0].waterObjects);
+    for (var i=0;i<waterRecords.length; i++ ){
+        console.log ('value of map '+ waterRecords[i]);
+        let waterRecord = waterRecords[i];
+        console.log (waterRecord.assignedTo + ',' + waterRecord.volume);
+        clientDescription += 'Volume of ' + + waterRecord.volume + ' assigned to ' +waterRecord.assignedTo + '\n'  ;
+
+
+    }
+    /*LABKEY.ExtAdapter.each(waters, function (waterRecord){
+        console.log (waterRecord.get('assignedto') + ',' + waterRecord.get('volume'));
+        clientDescription += 'Volume of' + + waterRecord.get('volume') + 'assigned to' +waterRecord.get('assignedto') + ',' ;
+
+
+    },this)*/
+
+    console.log ('description after   '+clientDescription);
+
+    row.description = clientDescription;
+
+    
+}
 
 function setDescription(row, helper){
     var description = new Array();
 
+    if (row.description)
+        description.push(EHR.Server.Utils.nullToString(row.description));
     if (row.volume)
-        description.push('Volume: ' +EHR.Server.Utils.nullToString(row.volume));
+        description.push('Total Volume: ' +EHR.Server.Utils.nullToString(row.volume));
     if (row.provideFruit)
         description.push('Provide Fruit: ' +EHR.Server.Utils.nullToString(row.provideFruit));
     if (row.remarks)

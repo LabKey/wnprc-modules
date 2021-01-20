@@ -43,11 +43,13 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 itemId: 'CurDate'
             },{
                 xtype: 'ehr-areafield',
+                forceSelection: true,
                 multiSelect: true,
                 typeAhead: true,
                 itemId: 'areaField'
             },{
                  xtype: 'ehr-roomfield',
+                 forceSelection: true,
                  multiSelect: true,
                  itemId: 'roomField'
             },{
@@ -98,7 +100,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
     getFilterArray: function(){
         var area = EHR.DataEntryUtils.ensureArray(this.down('#areaField').getValue()) || [];
-        var room = EHR.DataEntryUtils.ensureArray(this.down('#roomField').getValue()) || [];
+        var rooms = EHR.DataEntryUtils.ensureArray(this.down('#roomField').getValue()) || [];
 
         var curDate = this.down('#CurDate').getValue();
         var assignedTo =  EHR.DataEntryUtils.ensureArray(this.down('#assigned').getValue()) || [];
@@ -113,11 +115,15 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
         filtersArray.push(LABKEY.Filter.create('actionRequired',true, LABKEY.Filter.Types.EQUAL));
         filtersArray.push(LABKEY.Filter.create('qcstate','10', LABKEY.Filter.Types.EQUAL));
 
+        if (area.length==0 && rooms.length==0){
+            alert('Must provide at least one room or an area');
+            return;
+        }
         if (area.length)
             filtersArray.push(LABKEY.Filter.create('area', area.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
 
-        if (room.length)
-            filtersArray.push(LABKEY.Filter.create('room', room.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
+        if (rooms.length)
+            filtersArray.push(LABKEY.Filter.create('room', rooms.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
 
 
         return filtersArray;
@@ -138,7 +144,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             queryName: 'waterScheduleCoalesced',
             parameters: {NumDays: 1, StartDate: new Date()},
             sort: 'date,Id/curlocation/room,Id/curlocation/cage,Id',
-            columns: 'animalid,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dataSource,dateOrdered',
+            columns: 'lsid,animalid,date,project,assignedTo,frequency,volume,provideFruit,waterSource,objectid,dataSource,dateOrdered',
             filterArray: filtersArray,
             scope: this,
             success: this.loadWater,
@@ -209,6 +215,10 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
         var records = [];
         let waterRecord = new Map();
         let waterObjects = {};
+        let matchingDate = '';
+        let dataSource = '';
+        let containsWaterOrder = new Boolean(false);
+        let containsWaterAmount = new Boolean(false);
         //var performedby = this.down('#performedBy').getValue();
 
 
@@ -220,14 +230,24 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             modelDate.setHours(dateCurrentTime.getHours());
             modelDate.setMinutes(dateCurrentTime.getMinutes());
 
-            let waterObject = {treatmentId: row.getValue('objectid'), volume: row.getValue('volume')};
+            let waterObject = {treatmentId: row.getValue('objectid'), volume: row.getValue('volume'), assignedTo: row.getValue('assignedTo'),
+                                dataSource: row.getValue('dataSource'), lsid:row.getValue('lsid')};
 
             let previousVolume = 0;
             let previousTreatmentId = '';
+            let previousDataSource = '';
 
-            if (waterRecord.has(animalId) && waterRecord.get(animalId).raw.model == 'waterRecord'){
+
+
+            if (!containsWaterOrder){
+                matchingDate = new Date(modelDate);
+
+            }
+
+            if (waterRecord.has(animalId) && waterRecord.get(animalId).raw.model == 'waterRecord'){  
                 previousVolume = waterRecord.get(animalId).get('volume');
                 previousTreatmentId = ';' + waterRecord.get(animalId).get('treatmentId');
+                previousDataSource = ';' + waterRecord.get(animalId).get('dataSource');
                 //waterObjects.push({treatmentId:waterRecord.get(animalId).get('treatmentId'), volume: waterRecord.get(animalId).get('volume')});
                 //waterObjects[animalId].push(waterObject);
             }
@@ -235,6 +255,17 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             if (!waterObjects[animalId]){
                 waterObjects[animalId] = [];
             }
+
+            if (row.getValue('dataSource') == 'waterOrders' ){
+
+                /*if ( dataSource != 'atLeastAWaterAmount'){
+                    dataSource = row.getValue('dataSource');
+                }*/
+                //for water Orders I need to keep the date ordered from the waterschedule to change qc state
+                matchingDate = row.getValue('dateOrdered');
+                containsWaterOrder = true;
+            }
+
             waterObjects[animalId].push(waterObject);
 
             var tempModel = this.targetStore.createModel({
@@ -245,8 +276,8 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 assignedto:         row.getValue('assignedTo'),
                 waterSource:        row.getValue('waterSource'),
                 treatmentId:        row.getValue('objectid') + previousTreatmentId,
-                dataSource:         row.getValue('dataSource'),
-                dateOrdered:        row.getValue('dateOrdered'),
+                dataSource:         row.getValue('dataSource') + previousDataSource,
+                dateOrdered:        matchingDate,
                 model:              'waterRecord',
                 waterObjects:       waterObjects[animalId]
 

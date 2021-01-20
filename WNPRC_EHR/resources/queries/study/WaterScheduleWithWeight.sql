@@ -16,8 +16,9 @@ SELECT
     assignedToTitle AS assignedToTitleCoalesced,
     frequency AS frequencyCoalesced,
     frequencyMeaning AS frequencyMeaningCoalesced,
+    qcstate AS qcstate,
 
-    (SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE WCO.objectid = wg.treatmentid AND WCO.dateOrdered = wg.dateordered ) AS waterStatus,
+    --(SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE WCO.objectid = wg.treatmentid AND WCO.dateOrdered = wg.dateordered ) AS waterStatus,
    -- (SELECT timestampdiff(SQL_TSI_HOUR,WCO.date,wg.dateordered ) as diff FROM study.waterGiven wg WHERE WCO.objectid = wg.treatmentid  ) AS difference,
 
     (SELECT wg.weight AS weightAtDate

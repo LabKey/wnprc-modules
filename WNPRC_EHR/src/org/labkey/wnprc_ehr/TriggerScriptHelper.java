@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -849,15 +850,13 @@ public class TriggerScriptHelper {
     public String checkUploadTime (String animalId, Date clientDate, String recordSource, String assignedTo, String dataSet){
         String errorMessage = null;
 
-        Calendar currentTime = Calendar.getInstance();
-        Calendar limitTime = Calendar.getInstance();
-        limitTime.set(Calendar.HOUR_OF_DAY, 13);
-        limitTime.set(Calendar.MINUTE, 30);
+        ZonedDateTime treshholdTime = ZonedDateTime.now().withHour(13).withMinute(30);
+        java.util.Date date = new Date();
 
         Calendar waterClientDate = Calendar.getInstance();
         waterClientDate.setTime(clientDate);
 
-        if (currentTime.after(limitTime)){
+        if (date.toInstant().isAfter(treshholdTime.toInstant()) || waterClientDate.toInstant().isAfter(treshholdTime.toInstant())){
             if (assignedTo.equals("animalcare") && recordSource.equals("LabWaterForm")){
                 errorMessage = "Additional water for today assignedTo animalCare cannot be entered after 1:30 PM";
             }
@@ -869,41 +868,57 @@ public class TriggerScriptHelper {
     public String changeWaterAmountQC(String treatmentId, List<Map<String, Object>> recordsInTransaction){
         StringBuilder errorMessage = new StringBuilder();
         String success = null;
+        List<Map<String,Object>> watersRecordsToUpdate = new ArrayList<>();
 
         if (recordsInTransaction != null)
         {
             for (Map<String,Object> origMap : recordsInTransaction)
             {
                 Map<String, Object> map = new CaseInsensitiveHashMap<>(origMap);
-                String dataSource = ConvertHelper.convert(map.get("datasource"), String.class);
-                if (dataSource.equals("waterAmount")){
-                    String allTreatmentId = ConvertHelper.convert(map.get("treatmentId"), String.class);
-                    String [] treatmentArray = allTreatmentId.split(";");
-                    String clientVolume = ((Map)((List)recordsInTransaction.get(0).get("waterObjects")).get(0)).get("volume").toString();
-                    List<Map<String, Object>> waterFromExtraContext = ((List)recordsInTransaction.get(0).get("waterObjects"));
+
+                //if (dataSource.equals("atLeastAWaterAmount")){
+
+                String allTreatmentId = ConvertHelper.convert(map.get("treatmentId"), String.class);
+
+                if (allTreatmentId.equals(treatmentId))
+                {
+                    String[] treatmentArray = allTreatmentId.split(";");
+                    // String clientVolume = ((Map)((List)recordsInTransaction.get(0).get("waterObjects")).get(0)).get("volume").toString();
+                    List<Map<String, Object>> waterFromExtraContext = ((List) recordsInTransaction.get(0).get("waterObjects"));
 
 
+                    String clientVolume = null;
+                    for (String objectId : treatmentArray)
+                    {
+                        for (Map extraContextRows : waterFromExtraContext)
+                        {
 
-                    for (String objectId : treatmentArray){
-                        for (Map extraContextRows : waterFromExtraContext){
-                            if (objectId.equals(extraContextRows.get("treatmentId"))){
-                                clientVolume = extraContextRows.get("volume").toString();
+                            if (objectId.equals(extraContextRows.get("treatmentId")) && "waterAmount".equals(extraContextRows.get("dataSource")))
+                            {
+                                Map<String, Object> updateWaterAmount = new CaseInsensitiveHashMap<>();
+                                updateWaterAmount.put("lsid", extraContextRows.get("lsid"));
+                                updateWaterAmount.put("volume", extraContextRows.get("volume"));
+                                //updateWaterAmount.put("");
+                                watersRecordsToUpdate.add(updateWaterAmount);
+                                // clientVolume = extraContextRows.get("volume").toString();
                             }
                         }
-                        success = changeRowQCStatus("waterAmount", "objectId", objectId, "volume",clientVolume);
-                        if (!success.isBlank()){
-                            errorMessage.append(success);
-                        }
+
                     }
+                }
 
 
                     
-                    JSONArray waterAmounts = ConvertHelper.convert(map.get("waterObjects"), JSONArray.class);
-                    waterAmounts.length();
+                   // JSONArray waterAmounts = ConvertHelper.convert(map.get("waterObjects"), JSONArray.class);
+                    //waterAmounts.length();
 
 
                 }
 
+
+            success = changeRowQCStatus("waterAmount", "lsid",  "volume",watersRecordsToUpdate);
+            if (!success.isBlank()){
+                errorMessage.append(success);
             }
 
         }
@@ -915,69 +930,83 @@ public class TriggerScriptHelper {
         return  errorMessage.toString();
     }
 
-    public String changeRowQCStatus(String tableName, String keyColumn , String keyValue, String columnCheck, Object verifyValue){
-        String returnMessage = null;
+    public String changeRowQCStatus(String tableName, String keyColumn, String columnCheck, List<Map<String, Object>> rowsToUpdate){
+        String returnMessage = new String();
 
-        if (keyValue != null){
-            TableInfo genericTable = getTableInfo("study",tableName);
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromString(keyColumn),keyValue);
-            filter.addCondition(FieldKey.fromString("qcstate"),EHRService.get().getQCStates(container).get(EHRService.QCSTATES.Scheduled.getLabel()).getRowId());
+        TableInfo genericTable = getTableInfo("study",tableName);
 
-            TableSelector filteredTable = new TableSelector(genericTable, PageFlowUtil.set(keyColumn, "qcstate", columnCheck), filter, null);
-            Map<String, Object>[] waterAmountObjects = filteredTable.getMapArray();
-            List<Map<String,Object>> toUpdate = new ArrayList<>();
-            List<Map<String,Object>> oldKeys = new ArrayList<>();
+        List<Map<String,Object>> toUpdate = new ArrayList<>();
+        List<Map<String,Object>> oldKeys = new ArrayList<>();
 
-            if (waterAmountObjects.length > 0)
+        if (rowsToUpdate != null)
+        {
+            for (Map<String,Object> origMap : rowsToUpdate)
             {
-                for (Map<String, Object> waterAmountMap : waterAmountObjects)
-                {
-                    String internalObjectId = ConvertHelper.convert(waterAmountMap.get(keyColumn), String.class);
-                    String columnClass = waterAmountMap.get(columnCheck).getClass().getSimpleName();
+                Map<String, Object> map = new CaseInsensitiveHashMap<>(origMap);
+                String keyValue = ConvertHelper.convert(map.get(keyColumn), String.class);
+                Object verifyValue = map.get(columnCheck);
 
-                        //Double serverValue = ConvertHelper.convert(waterAmountMap.get(columnCheck),Double.class);
-                        //Double clientValue = Double.parseDouble(verifyValue);
+                if (keyValue != null){
 
-                    if (!verifyValue.equals(waterAmountMap.get(columnCheck))){
-                        returnMessage = "Server and Client value do not match";
-                        return returnMessage;
+                    SimpleFilter filter = new SimpleFilter(FieldKey.fromString(keyColumn),keyValue);
+                    filter.addCondition(FieldKey.fromString("qcstate"),EHRService.get().getQCStates(container).get(EHRService.QCSTATES.Scheduled.getLabel()).getRowId());
+
+                    TableSelector filteredTable = new TableSelector(genericTable, PageFlowUtil.set(keyColumn, "qcstate", columnCheck), filter, null);
+                    Map<String, Object>[] waterAmountObjects = filteredTable.getMapArray();
+
+
+                    if (waterAmountObjects.length > 0)
+                    {
+                        for (Map<String, Object> waterAmountMap : waterAmountObjects)
+                        {
+                            String internalObjectId = ConvertHelper.convert(waterAmountMap.get(keyColumn), String.class);
+                            String columnClass = waterAmountMap.get(columnCheck).getClass().getSimpleName();
+
+                            //Double serverValue = ConvertHelper.convert(waterAmountMap.get(columnCheck),Double.class);
+                            //Double clientValue = Double.parseDouble(verifyValue);
+
+                            //TODO: finding a way to compare to values independent of the type of objects they are
+                            //this only address if the object is a double
+                            if (!verifyValue.equals(waterAmountMap.get(columnCheck))){
+                            //if (!waterAmountMap.get(columnCheck).equals(Double.parseDouble(verifyValue.toString()))){
+                                returnMessage = "Server and Client values do not match";
+                                return returnMessage;
+                            }
+
+                            Map<String, Object> updateWaterAmount = new CaseInsensitiveHashMap<>();
+                            updateWaterAmount.put(keyColumn, internalObjectId);
+                            updateWaterAmount.put("QCState", EHRService.get().getQCStates(container).get(EHRService.QCSTATES.Completed.getLabel()).getRowId());
+                            updateWaterAmount.put("QCStateLabel", EHRService.QCSTATES.Completed.getLabel());
+                            updateWaterAmount.put("skipWaterRegulationCheck", true);
+                            toUpdate.add(updateWaterAmount);
+
+                            Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
+                            keyMap.put(keyColumn, internalObjectId);
+                            oldKeys.add(keyMap);
+
+
+                        }
                     }
-
-                    Map<String, Object> updateWaterAmount = new CaseInsensitiveHashMap<>();
-                    updateWaterAmount.put(keyColumn, internalObjectId);
-                    updateWaterAmount.put("QCState", EHRService.get().getQCStates(container).get(EHRService.QCSTATES.Completed.getLabel()).getRowId());
-                    toUpdate.add(updateWaterAmount);
-
-                    Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
-                    keyMap.put(keyColumn, internalObjectId);
-                    oldKeys.add(keyMap);
-
-
                 }
             }
-            try
-            {
-
-                if (!toUpdate.isEmpty())
-                {
-                    Container container = getContainer();
-                    User user = getUser();
-
-                    List<Map<String, Object>> updatedRows = genericTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, null);
-                    if (updatedRows.isEmpty()){
-                        returnMessage = "Error changing QCState for waterAmount table";
-
-                    }
-                }
-            }catch (Exception e){
-                returnMessage= "Error changing QCState for waterAmount table";
-            }
-
-
-
-
-
         }
+        try
+        {
+            if (!toUpdate.isEmpty())
+            {
+                Container container = getContainer();
+                User user = getUser();
+
+                List<Map<String, Object>> updatedRows = genericTable.getUpdateService().updateRows(user, container, toUpdate, oldKeys, null, null);
+                if (updatedRows.isEmpty()){
+                    returnMessage = "Error changing QCState for waterAmount table";
+
+                }
+            }
+        }catch (Exception e){
+            returnMessage= "Error exception changing QCState for waterAmount table";
+        }
+
         return returnMessage;
 
     }
@@ -1543,7 +1572,7 @@ public class TriggerScriptHelper {
 
         return arrayOfErrors;
     }
-    public JSONArray checkWaterSchedule(String  animalId, Date clientDate, String objectId){
+    public JSONArray checkWaterSchedule(String  animalId, Date clientDate, String objectId, Double clientVolume){
         JSONArray arrayOfErrors = new JSONArray();
 
 
@@ -1562,7 +1591,7 @@ public class TriggerScriptHelper {
         //Setting interval to start the water schedule, the system generates the calendar thirty days before
         Calendar startInterval = Calendar.getInstance();
         startInterval.setTime(clientDate);
-        startInterval.add(Calendar.DATE, -30);
+        startInterval.add(Calendar.DATE, -5);
         startInterval = DateUtils.truncate(startInterval, Calendar.DATE);
 
         final String intervalLength = "10";
@@ -1581,6 +1610,7 @@ public class TriggerScriptHelper {
         TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
         filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_EQUAL);
+        filter.addCondition(FieldKey.fromString("QCState/label"),"Scheduled", CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
 
         //Adding all the water records from database to a list of waterRecord objects that can be compared
@@ -1589,12 +1619,14 @@ public class TriggerScriptHelper {
         waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
         for (WaterDataBaseRecord waterRecord : waterRecords){
-            if (waterRecord.getVolume() != null){
+            if (waterRecord.getVolume() != null && !objectId.equals(waterRecord.getObjectId())){
+                Double totalScheduleWater =   waterRecord.getVolume()+clientVolume;
 
                 JSONObject returnErrors = new JSONObject();
                 returnErrors.put("field", "volume");
                 returnErrors.put("severity", "INFO");
-                returnErrors.put("message", "Animal already has a scheduled water order for "+ waterRecord.getVolume());
+                returnErrors.put("message", "Animal already has a scheduled water order for "+ waterRecord.getVolume() +
+                        " mL, assigned to "+waterRecord.getAssignedTo()+ ". Making a total water volume of "+ totalScheduleWater);
                 errorMap.put(waterRecord.getObjectId(), returnErrors);
             }
             

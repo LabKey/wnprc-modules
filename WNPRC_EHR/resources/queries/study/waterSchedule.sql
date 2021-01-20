@@ -10,7 +10,10 @@ d.calculated_status,
 s.*,
 s.objectid as treatmentid,
 --(SELECT max(d.qcstate) as label FROM study.drug d WHERE s.objectid = d.treatmentid AND s.date = d.timeordered) as treatmentStatus,
-COALESCE((SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE s.objectid = wg.treatmentid AND s.date = wg.dateordered),10) as waterStatus,
+COALESCE((SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE wg.treatmentid LIKE '%' || s.objectid || '%'  AND s.date = wg.dateordered AND wg.volume IS NOT NULL ),10) as waterStatus,
+--COALESCE((SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE s.objectid IN (wg.treatmentid)  AND s.date = wg.dateordered AND wg.volume IS NOT NULL ),10) as waterStatus,
+COALESCE((SELECT max(wg.treatmentid) as treatmentIds FROM study.waterGiven wg WHERE s.date = wg.dateordered AND wg.volume IS NOT NULL ),'objectId') as watertreatment
+
 
 FROM study.demographics d
 

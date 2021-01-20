@@ -99,7 +99,11 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                                // r.phantom  = true;
                                  recMap.create.push(r);
                                  break;
+                            }else {
+                                recMap.update.push(r);
+                                break;
                             }
+
 
                         default:
                             recMap.create.push(r);

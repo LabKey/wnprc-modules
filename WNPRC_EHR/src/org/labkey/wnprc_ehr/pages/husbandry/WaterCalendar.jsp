@@ -29,18 +29,22 @@
     {
         dependencies.add("clientapi/ext4");
         dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.js");
+        dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.css");
         dependencies.add("/webutils/lib/webutils_core/api.js");
+        dependencies.add("//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js");
+        dependencies.add("https://unpkg.com/popper.js/dist/umd/popper.min.js");
+        dependencies.add("https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js");
         //dependencies.add("/mypath/mydependency.js");
     }
 %>
 
 
 
-<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
+<%--<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js'></script>
-<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js'></script>
-<script src= 'https://unpkg.com/popper.js/dist/umd/popper.min.js'></script>
-<script src= 'https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js'></script>--%>
+<%--<script src= '"https://unpkg.com/popper.js/dist/umd/popper.min.js"'></script>
+<script src= 'https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js'></script>--%>
 <%--<script src= '/labkey/webutils/lib/ko/core/knockout-3.4.0.js' type="text/javascript"></script>--%>
 <%--<script src= '/labkey/webutils/lib/webutils_core/api.js' type="text/javascript"></script>--%>
 <%--<script src= '/WebUtils/src/org/labkey/webutils/view/JspPage.jsp' type="text/jsp"></script>--%>
@@ -422,10 +426,10 @@
 
 
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", {
-                                    "date~gte": startMoment.format('Y-MM-DD'),
-                                    "date~lte": endMoment.format('Y-MM-DD'),
-                                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                                    "waterStatus~eq": ""
+                                    "date~gte":         startMoment.format('Y-MM-DD'),
+                                    "date~lte":         endMoment.format('Y-MM-DD'),
+                                    "parameters":       {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                                    "qcstate/label~eq": "Scheduled"
                                 }).then(function (data) {
                                     var events = data.rows;
 
@@ -461,14 +465,15 @@
                                     }))
                                 })
                             }
-                            //Render calendat for one animal of a group of animals
+                            //Render calendar for one animal of a group of animals
                             //Display panel in the animal history
                             else{
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", {
-                                    "date~gte": startMoment.format('Y-MM-DD'),
-                                    "date~lte": endMoment.format('Y-MM-DD'),
-                                    "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                                    "animalid~in": $animalId
+                                    "date~gte":         startMoment.format('Y-MM-DD'),
+                                    "date~lte":         endMoment.format('Y-MM-DD'),
+                                    "parameters":       {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                                    "animalid~in":      $animalId,
+                                    "qcstate/label~eq": "Scheduled"
                                 }).then(function (data) {
                                     var events = data.rows;
 

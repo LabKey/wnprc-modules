@@ -28,8 +28,13 @@ export function saveWeightActionSaveRowsDirect(jsonData: jsonDataType) {
   });
 }
 
-export function buildQCMap(data) {
-  let qcmap = {
+export interface qcMapType {
+  label: {};
+  rowid: {};
+}
+
+export function buildQCMap(data: any): qcMapType {
+  let qcmap: qcMapType = {
     label: {},
     rowid: {}
   };
@@ -45,7 +50,7 @@ export function buildQCMap(data) {
   return qcmap;
 }
 
-export function getQCStateByRowId(qcmap, rowid) {
+export function getQCStateByRowId(qcmap: qcMapType, rowid: number): string {
   if (!qcmap) {
     return null;
   }
@@ -59,7 +64,7 @@ export function getQCStateByRowId(qcmap, rowid) {
   return qcmap.rowid[rowid].Label;
 }
 
-export function getQCStateByLabel(qcmap, label) {
+export function getQCStateByLabel(qcmap: qcMapType, label: string): number {
   if (!qcmap) {
     return null;
   }
@@ -73,7 +78,7 @@ export function getQCStateByLabel(qcmap, label) {
   return qcmap.label[label].RowId;
 }
 
-export function getQCStateMap() {
+export function getQCStateMap(): Promise<any> {
   return new Promise((resolve, reject) => {
     Query.selectRows({
       containerPath: ActionURL.getContainer(),

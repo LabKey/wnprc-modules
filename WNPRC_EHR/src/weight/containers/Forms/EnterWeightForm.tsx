@@ -9,28 +9,13 @@ import {
 } from "../../query/helpers";
 import { useEffect, useState } from "react";
 import { labkeyActionSelectWithPromise } from "../../query/actions";
-import { InfoProps, ConfigProps } from "../../typings/main";
-import { infoStates } from "./EnterWeightFormContainer";
-import { useRef } from "react";
+import { useRef, useContext } from "react";
 import DateInput from "../../../components/DateInput";
-import { useContext } from "react";
 import { AppContext } from "../App/ContextProvider";
 import DropdownOptions from "../../components/DropdownOptions";
 import {Filter, ActionURL} from "@labkey/api"
-
-interface WeightFormProps {
-  animalid?: string;
-  weight?: number;
-  date?: any;
-  restraint?: string;
-  remark?: string;
-  index?: any;
-  infoState?: any;
-  liftUpVal?: (name: string, value: any, index: number) => void;
-  liftUpAnimalInfo: (animalInfo: any) => void;
-  liftUpErrorLevel: (errorLevel: string) => void;
-  liftUpValidation: (name: string, value: any, index: number) => void;
-}
+import {AnimalInfoStates, AnimalInfoProps, ConfigProps, FormErrorLevels} from "../../../typings/main";
+import {WeightFormProps} from "../../typings/main";
 
 /**
  * Main modal which holds the values for the fields in the weight dataset,
@@ -51,14 +36,14 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     liftUpErrorLevel,
     liftUpValidation
   } = props;
-  const [prevweight, setPrevWeight] = useState<any>("");
-  const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
-  const [weightWarning, setWeightWarning] = useState("");
-  const [animalError, setAnimalError] = useState("");
-  const [weightError, setWeightError] = useState("");
-  const [anyErrors, setAnyErrors] = useState(true);
-  const [errorLevel, setErrorLevel] = useState("no-action");
-  const [animalInfoState, setAnimalInfoState] = useState<infoStates>("waiting");
+  const [prevweight, setPrevWeight] = useState<number>(null);
+  const [animalInfo, setAnimalInfo] = useState<AnimalInfoProps>(null);
+  const [weightWarning, setWeightWarning] = useState<string>("");
+  const [animalError, setAnimalError] = useState<string>("");
+  const [weightError, setWeightError] = useState<string>("");
+  const [anyErrors, setAnyErrors] = useState<boolean>(true);
+  const [errorLevel, setErrorLevel] = useState<FormErrorLevels>("no-action");
+  const [animalInfoState, setAnimalInfoState] = useState<AnimalInfoStates>("waiting");
 
   const { submit, submitted, setrestraints, restraints, setEndTimeExternal, setStartTimeExternal, setFormFrameworkTypesExternal, wasSaved, isRecording, setIsRecordingExternal, setAnyErrorsEverExternal } = useContext(
     AppContext
@@ -95,7 +80,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
 
 
   //validate items to set error levels which determine which buttons are disabled
-  const validateItems = (name, value) => {
+  const validateItems = (name: string, value: string | number | object) => {
     if (value == "" && name == "animalid") {
       setAnyErrors(true);
       setAnyErrorsEverExternal();
@@ -116,7 +101,8 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   };
 
 
-  const startSessionTimer = (name, value) => {
+
+  const startSessionTimer = () => {
     console.log('isRecording ', isRecording);
     if (isRecording)
       return;
@@ -124,33 +110,34 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     setStartTimeExternal(new Date());
   }
 
-  const handleChange = e => {
-    liftUpVal(e.target.name, e.target.value, index);
-    startSessionTimer(e.target.name, e.target.value);
+  const handleChange = (e: any) => {
+    let target = e.target as HTMLInputElement;
+    liftUpVal(target.name, target.value, index);
+    startSessionTimer();
     validateItems(e.target.name, e.target.value);
-
   };
 
-  const handleRestraintChange = val => {
+  const handleRestraintChange = (val: number) => {
     liftUpVal("restraint", val, index);
-    startSessionTimer("restraint", val);
+    startSessionTimer();
   };
 
-  const handleDateChange = date => {
+  const handleDateChange = (date: object) => {
     liftUpVal("date", date, index);
-    startSessionTimer("date", date);
+    startSessionTimer();
   };
 
-  const handleRawDateChange = e => {
+  const handleRawDateChange = (e: any) => {
     if (e.currentTarget.value instanceof Date && !isNaN(e.currentTarget.value)){
       liftUpVal("date", new Date(e.currentTarget.value), index);
-      startSessionTimer(e.target.name, e.target.value);
+      startSessionTimer();
     }
   };
 
-  const getAnimalInfo = e => {
-    if (e.target.name == "animalid" && e.nativeEvent.type != "focus") {
-      if (e.target.value == "") {
+  const getAnimalInfo = (e: React.FormEvent<EventTarget>): void => {
+    let target = e.target as HTMLInputElement;
+    if (target.name == "animalid" && e.nativeEvent.type != "focus") {
+      if (target.value == "") {
         setAnimalError("Required");
         setAnyErrors(true);
         return;
@@ -159,12 +146,12 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
         return;
       }
     }
-    if (e.target.value == "" && e.nativeEvent.type == "blur" && e.target.name=="animalid") {
+    if (target.value == "" && e.nativeEvent.type == "blur" && target.name=="animalid") {
       setAnimalError("Required");
       return;
     }
 
-    if (e.target.value == "" && e.target.name=="animalid") {
+    if (target.value == "" && target.name=="animalid") {
       return;
     }
 
@@ -204,7 +191,8 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     });
   };
 
-  const checkWeights = e => {
+  const checkWeights = (e: React.FormEvent<HTMLInputElement>) => {
+    let target = e.target as HTMLInputElement;
     if (enteredWeightIsGreaterThanPrevWeight(weight, prevweight, 10)) {
       setWeightWarning("Weight is greater than 10% of previous weight.");
     } else if (enteredWeightIsLessThanPrevWeight(weight, prevweight, 10)) {
@@ -213,7 +201,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
       setWeightWarning("");
     }
 
-    if (e.target.value.length == 0) {
+    if (target.value.length == 0) {
       setWeightError("Required");
     } else {
       setWeightError("");

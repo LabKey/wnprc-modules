@@ -2,11 +2,12 @@ import {
   labkeyActionSelectWithPromise,
 } from "./actions";
 import {Filter, Utils} from "@labkey/api";
+import {ConfigProps, GroupCommandType, RowObj} from "../typings/main";
 
 //TODO implement this...
 export const getSchemaMetaData = (schemaName: string, queryName: string) => {};
 
-export const setupWeightValues = (values: any[], QCStateLabel: string, taskId: string) => {
+export const setupWeightValues = (values: Array<any>, QCStateLabel: string, taskId: string) => {
   let valuesToInsert = [];
   for (let value of values){
     valuesToInsert.push({
@@ -24,7 +25,7 @@ export const setupWeightValues = (values: any[], QCStateLabel: string, taskId: s
   return valuesToInsert;
 };
 
-export const setupTaskValues = (taskId: string, dueDate: object, assignedTo: number, QCStateLabel: string) => {
+export const setupTaskValues = (taskId: string, dueDate: string, assignedTo: number, QCStateLabel: string) => {
   return [{
       taskId: taskId,
       duedate: dueDate,
@@ -51,13 +52,13 @@ export const setupRestraintValues = (values: any[], taskId: string) => {
   return restraintValsToInsert;
 };
 
-export const groupCommands = (values) => {
-  return values.reduce((acc, item) => {
-    if (!acc[item.command.value]) {
-      acc[item.command.value] = [];
+export const groupCommands = (values: Array<RowObj>): any => {
+  return values.reduce((acc: object, item: RowObj) => {
+    if (!acc[item.command.value.toString()]) {
+      acc[item.command.value.toString()] = [];
     }
 
-    acc[item.command.value].push(item);
+    acc[item.command.value.toString()].push(item);
     return acc;
   }, {});
 };
@@ -89,9 +90,9 @@ export const getlocations = (location:Array<any>): Array<Promise<any>> => {
     //alert('please set a location')
     return;
   }
-  let promises = [];
+  let promises: Array<Promise<any>> = [];
   location.forEach(loc => {
-    let config = {
+    let config: ConfigProps = {
       schemaName: "study",
       queryName: "demographicsCurLocation",
       columns: ["Id,location"],

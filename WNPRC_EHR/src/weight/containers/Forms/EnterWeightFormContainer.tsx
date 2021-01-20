@@ -5,7 +5,7 @@ import {
   useRef,
   useState
 } from "react";
-import { InfoProps, ConfigProps } from "../../typings/main";
+import {InfoProps, ConfigProps, RowObj, UserEditableWeightFormValues, ModifyRowsCommands} from "../../typings/main";
 import {
   getQCStateByLabel,
   getQCStateByRowId,
@@ -32,41 +32,8 @@ import { AppContext } from "../App/ContextProvider";
 import CustomAlert from "../../components/CustomAlert";
 import * as dayjs from "dayjs";
 import {ActionURL, Utils, Security, Filter} from "@labkey/api";
-
-interface RowMemberObj {
-  value: any;
-  error: string;
-}
-
-interface RowObj {
-  animalid: RowMemberObj;
-  date: RowMemberObj;
-  weight?: RowMemberObj;
-  remark: RowMemberObj;
-  QCState: RowMemberObj;
-  objectid: RowMemberObj;
-  restraint_objectid: RowMemberObj;
-  lsid: RowMemberObj;
-  command: RowMemberObj;
-  collapsed: RowMemberObj;
-  visibility: RowMemberObj;
-  restraint: RestraintObj;
-  validated: RowMemberObj;
-}
-
-//TODO add everything thats in the setupRestraintValues (date, taskid)
-interface RestraintObj {
-  value: string;
-  objectid: string;
-  error: string;
-}
-
-export type errorLevels = "no-action" | "saveable" | "submittable";
-export type infoStates =
-  | "waiting"
-  | "loading"
-  | "loading-unsuccess"
-  | "loading-success";
+import {AnimalInfoStates, FormErrorLevels} from "../../../typings/main";
+import { Command, CommandType } from "@labkey/api/dist/labkey/query/Rows";
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -79,7 +46,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   const [animalInfo, setAnimalInfo] = useState<InfoProps>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [locloading, setLocLoading] = useState<boolean>(false);
-  const [infoState, setInfoState] = useState<infoStates>("waiting");
+  const [infoState, setInfoState] = useState<AnimalInfoStates>("waiting");
   const [location, setLocation] = useState<Array<string>>([]);
   const [ids, setIds] = useState<Array<string>>([]);
   const [submitBoxText, setSubmitBoxText] = useState<string>("Submit values?");
@@ -92,7 +59,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   const [showAlert, setShowAlert] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<string>();
-  const [errorLevel, setErrorLevel] = useState<errorLevels>("no-action");
+  const [errorLevel, setErrorLevel] = useState<FormErrorLevels>("no-action");
   const [singleEditMode, setSingleEditMode] = useState(false);
 
   const formEl = useRef(null);
@@ -111,8 +78,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   //here we lifted up state from the BulkEditFields - > BatchEditModal -> this component
-  const updateValues = vals => {
-    const copyformdata: RowObj[] = [...formdata];
+  const updateValues = (vals: UserEditableWeightFormValues): void => {
+    const copyformdata: Array<RowObj> = [...formdata];
 
     copyformdata.forEach(item => {
       item["weight"] = vals["weight"]["value"] != "" ? Object.assign({}, vals["weight"]) : Object.assign({}, item["weight"]);
@@ -135,13 +102,13 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     if (location.length == 0) {
       return;
     }
-    let animaldata: RowObj[] = [];
+    let animaldata: Array<RowObj> = [];
     setLocLoading(true);
     Promise.all(getlocations(location)).then(d => {
       d.forEach((promise, i) => {
         if (promise["rows"]) {
           promise["rows"].forEach((row, i) => {
-            let restraintObjectId = Utils.generateUUID().toUpperCase();
+            let restraintObjectId: string = Utils.generateUUID().toUpperCase();
             animaldata.push({
               animalid: { value: row.Id, error: "" },
               date: { value: new Date(), error: "" },
@@ -192,7 +159,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setTaskIdExternal(ActionURL.getParameter("taskid"));
 
     //TODO clean this up
-    let filter = [];
+    let filter: Array<any> = [];
     if (ActionURL.getParameter("taskid")) {
       filter.push(
         Filter.create(
@@ -228,9 +195,9 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       columns: "Id,date,weight,remark,objectid,lsid,QCState,taskid,restraint_objectid"
     };
 
-    let newformdata: RowObj[] = [];
-    let newformdatarestraints: RowObj[] = [];
-    let restraintobjectids = [];
+    let newformdata: Array<RowObj> = [];
+    let newformdatarestraints: Array<RowObj> = [];
+    let restraintobjectids: Array<string> = [];
     labkeyActionSelectWithPromise(config).then(data => {
 
       if (data["rows"].length == 0){
@@ -262,8 +229,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     }).then(()=> {
 
       //if theres no lsid/taskid, then we have to get the restraint record using weight objectid
-      let filter = [];
-      let restraintobjectidssplit = restraintobjectids.join(";")
+      let filter: Array<any> = [];
+      let restraintobjectidssplit: string = restraintobjectids.join(";")
       if (ActionURL.getParameter("taskid") == null){
         filter.push(
           Filter.create(
@@ -323,24 +290,24 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   },[]);
 
   //mutate the array
-  const liftUpVal = (name, value, index) => {
+  const liftUpVal = (name: string, value: string | number | object | boolean, index: number) => {
     let newValues = [...formdata];
     newValues[index][name]["value"] = value;
     setFormDataExternal(newValues);
     console.log(errorLevel);
   };
-  const liftUpValidationState = (name, value, index) => {
+  const liftUpValidationState = (name: string, value: string | number | object | boolean, index: number) => {
     let newValues = [...formdata];
     newValues[index][name]["value"] = value;
     setFormDataExternal(newValues);
     console.log(errorLevel);
   };
 
-  const liftUpInfoState = (state: infoStates) => {
+  const liftUpInfoState = (state: AnimalInfoStates) => {
     setInfoState(state);
   };
 
-  const onSubmit = e => {
+  const onSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     if (formEl.current.checkValidity()) {
       handleShowRewrite(e);
@@ -349,7 +316,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     }
   };
 
-  const onSubmitForReview = e => {
+  const onSubmitForReview = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     if (formEl.current.checkValidity()) {
       handleShowRewrite(e);
@@ -358,8 +325,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     }
   };
 
-  const onValidate = () => {
-    let copyformdata = [...formdata];
+  const onValidate = (): void => {
+    let copyformdata: Array<RowObj> = [...formdata];
     copyformdata.forEach(item => {
       //don't validate against deleted / hidden items
       if (item["visibility"]["value"] != "hide-record"){
@@ -377,8 +344,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
 
   };
 
-  const changeActionToUpdate = () => {
-    let copyformdata = [...formdata];
+  const changeActionToUpdate = (): void => {
+    let copyformdata: Array<RowObj> = [...formdata];
     copyformdata.forEach(item => {
       if (item["command"]["value"] != "delete") {
         item["command"]["value"] = "update";
@@ -400,10 +367,10 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     return newarray;
   };
 
-  const setupJsonData = (values, QCState, taskId, reviewer, date, command) => {
+  const setupJsonData = (values: Array<any>, QCState: string, taskId: string, reviewer: number, date: string, command: CommandType) => {
     //for each grouped item (insert, update, delete), set up commands for each diff set.
-    let commands =[];
-    Object.keys(values).forEach(function(key,index) {
+    let commands: Array<ModifyRowsCommands> = [];
+    Object.keys(values).forEach(function(key: CommandType,index: number) {
       let valuesToInsert = setupWeightValues(values[key], QCState, taskId);
       commands.push({
         schemaName: "study",
@@ -422,7 +389,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     });
 
 
-    Object.keys(values).forEach(function(key,index) {
+    Object.keys(values).forEach(function(key: CommandType, index: number) {
       let valuesToInsert = setupRestraintValues(values[key], taskId);
       commands.push({
         schemaName: "study",
@@ -442,15 +409,15 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     };
   };
 
-  const onSave = e => {
+  const onSave = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     //to animate the popup
     setSaving(true);
-    let command = wasSaved || editMode ? "update" : "insert";
+    let command: CommandType = wasSaved || editMode ? "update" : "insert";
     //if we are in edit mode, just grab current QCState of a record...
     //TODO think about this qcstate implementation a bit more since the qc state gets saved "globally"
     // (see saveWeights function)...
-    let QCState = "";
+    let QCState: string = "";
     if (editMode) {
       QCState = getQCStateByRowId(QCMap, formdata[0]["QCState"]);
     } else {
@@ -458,7 +425,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     }
 
     let itemsToInsert = groupCommands(formdata);
-    let currentDate = dayjs(new Date()).format();
+    let currentDate: string = dayjs(new Date()).format();
     //let jsonData = setupJsonData(itemsToInsert)
     //I think i need to rip out the task and attach it to commands
 
@@ -479,9 +446,9 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
 
   };
 
-  const wait = time => {
+  const wait = (time: number): Promise<any> => {
     return new Promise(resolve => {
-      let countdown = time;
+      let countdown: number = time;
       setInterval(() => {
         setSubmitBoxText("Success! Redirecting in..." + countdown);
         countdown--;
@@ -493,11 +460,11 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const triggerSubmit = () => {
-    let command = wasSaved || editMode ? "update" : "insert";
+    let command: CommandType = wasSaved || editMode ? "update" : "insert";
     setSubmitBoxText("Submitting...");
 
     let itemsToInsert = groupCommands(formdata);
-    let currentDate = dayjs(new Date()).format();
+    let currentDate: string = dayjs(new Date()).format();
     let jsonData = setupJsonData(itemsToInsert, "Completed", taskId, reviewer, currentDate, command);
 
     saveRowsDirect(jsonData).then(()=> {
@@ -519,8 +486,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   useEffect(() => {
-    let initialdata: RowObj[] = [];
-    let restraintObjectId = Utils.generateUUID().toUpperCase();
+    let initialdata: Array<RowObj> = [];
+    let restraintObjectId: string = Utils.generateUUID().toUpperCase();
     initialdata.push({
       animalid: { value: "", error: "" },
       date: { value: new Date(), error: "" },
@@ -546,7 +513,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   }, []);
 
   const setFormIds = () => {
-    let t: RowObj[] = [];
+    let t: Array<RowObj> = [];
     ids.forEach((id, i) => {
       let restraintObjectId = Utils.generateUUID().toUpperCase();
       t.push({
@@ -574,15 +541,15 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormDataExternal(t);
   };
 
-  const toggleCollapse = (item, i) => {
-    let copyitem = [...item];
+  const toggleCollapse = (item: RowObj, i) => {
+    let copyitem: RowObj = Object.assign({},item);
     copyitem["collapsed"]["value"] = false;
     if (copyitem["collapsed"]["value"] == false) {
       copyitem["collapsed"]["value"] = true;
     } else {
       copyitem["collapsed"]["value"] = false;
     }
-    let copyformdata = [...formdata];
+    let copyformdata: Array<RowObj> = [...formdata];
     //TODO fix this...
     copyformdata[i] = (copyitem as unknown) as RowObj;
     setFormDataExternal(copyformdata);
@@ -590,8 +557,8 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const addRecord = () => {
-    let copyformdata = [...formdata];
-    let restraintObjectId = Utils.generateUUID().toUpperCase();
+    let copyformdata: Array<RowObj> = [...formdata];
+    let restraintObjectId: string = Utils.generateUUID().toUpperCase();
     copyformdata.push({
       animalid: { value: "", error: "" },
       date: { value: new Date(), error: "" },
@@ -614,10 +581,10 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   };
 
   const triggerSubmitForReview = () => {
-    let command = wasSaved || editMode ? "update" : "insert";
+    let command: CommandType = wasSaved || editMode ? "update" : "insert";
 
     let itemsToInsert = groupCommands(formdata);
-    let currentDate = dayjs(new Date()).format();
+    let currentDate: string = dayjs(new Date()).format();
     let jsonData = setupJsonData(itemsToInsert, "In Progress", taskId, reviewer, currentDate, command);
 
     saveRowsDirect(jsonData)
@@ -638,17 +605,18 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       });
   };
 
-  const triggerReviewer = id => {
+  const triggerReviewer = (id: number): void => {
     setReviewer(id);
   };
 
-  const onAlertClose = () => {
+  const onAlertClose = (): void => {
     setShowAlert(false);
   };
 
   //when this is called, just get the id and set which modal to show
-  const handleShowRewrite = e => {
-    setShowModal(e.target.id);
+  const handleShowRewrite = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    let target = e.target as HTMLInputElement
+    setShowModal(target.id);
   };
 
   const flipModalState = () => {
@@ -834,12 +802,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
                         title="Remove Record"
                         aria-label="Close"
                         onClick={e => {
-                          let copyformdata = [...formdata];
+                          let copyformdata: Array<RowObj> = [...formdata];
                           copyformdata[i]["visibility"]["value"] =
                             "hide-record";
                           setFormDataExternal(copyformdata);
                           sleep(750).then(() => {
-                            let copyformdata = [...formdata];
+                            let copyformdata: Array<RowObj> = [...formdata];
                             //only need to do this part if we are in wasSaved or editMode, otherwise we can splice.
                             if (wasSaved || editMode) {
                               copyformdata[i]["command"]["value"] = "delete";

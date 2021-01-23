@@ -1,4 +1,5 @@
 import { immerable } from 'immer';
+import {Map} from "immutable";
 
 export class RequestOrderModel {
     /**
@@ -123,5 +124,22 @@ export class LineItemModel {
 
     static create(raw?: any): LineItemModel {
         return new LineItemModel({ ...raw });
+    }
+}
+
+export class DocumentAttachmentModel {
+    /**
+     * @hidden
+     */
+    [immerable] = true;
+
+    readonly files: Map<string, File>
+
+    constructor(values?: Partial<DocumentAttachmentModel>) {
+        Object.assign(this, values);
+    }
+
+    static create(raw?: any): DocumentAttachmentModel {
+        return new DocumentAttachmentModel({ ...raw });
     }
 }

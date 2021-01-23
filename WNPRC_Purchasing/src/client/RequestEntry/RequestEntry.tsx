@@ -15,19 +15,21 @@
  */
 import React, {FC, memo, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
-import {LineItemModel, RequestOrderModel, PurchaseAdminModel} from "../model";
+import {LineItemModel, RequestOrderModel, PurchaseAdminModel, DocumentAttachmentModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
 import '../RequestEntry/RequestEntry.scss';
 import {ActionURL, Filter, getServerContext} from "@labkey/api";
 import produce, {Draft} from "immer";
 import {getData, submitRequest} from "../actions";
 import {PurchaseAdminPanel} from "../components/PurchaseAdminPanel";
+import {DocumentAttachmentPanel} from "../components/DocumentAttachmentPanel";
 
 export const App : FC = memo(() => {
 
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create());
     const [purchaseAdminModel, setPurchaseAdminModel] = useState<PurchaseAdminModel>(PurchaseAdminModel.create());
     const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create()]);
+    const [documentAttachmentModel, setDocumentAttachmentModel] = useState<DocumentAttachmentModel>(DocumentAttachmentModel.create());
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -118,6 +120,11 @@ export const App : FC = memo(() => {
         setPurchaseAdminModel(model);
         setIsDirty(true);
     }, [purchaseAdminModel]);
+
+    const documentAttachmentChange = useCallback((model:DocumentAttachmentModel)=> {
+        setDocumentAttachmentModel(model);
+        setIsDirty(true);
+    }, [documentAttachmentModel]);
 
     const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
 
@@ -213,8 +220,9 @@ export const App : FC = memo(() => {
             setIsSaving(true);
             event.preventDefault();
 
-            submitRequest(requestOrderModel, lineItems, !!requestId ? purchaseAdminModel : undefined).then(r => {
-                if (r.success) {
+            submitRequest(requestOrderModel, lineItems, !!requestId ? purchaseAdminModel : undefined,
+                        documentAttachmentModel.files?.size > 0 ? documentAttachmentModel :undefined ).then(r => {
+                if (r.success || r.uploadedFiles?.length > 0) {
                     //navigate to purchasing overview grid/main page
                     window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
                 }
@@ -230,6 +238,7 @@ export const App : FC = memo(() => {
                 !!requestId &&
                 <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
             }
+            <DocumentAttachmentPanel onInputChange={documentAttachmentChange} model={documentAttachmentModel}/>
             <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems} errorMsg={lineItemErrorMsg} hasRequestId={!!requestId}/>
             <button disabled={isSaving} className='btn btn-default' id='cancel' name='cancel' onClick={onCancelBtnHandler}>Cancel</button>
             {

@@ -64,6 +64,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
+            response.put("requestId", requestForm.getRowId());
 
             return response;
         }

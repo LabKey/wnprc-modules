@@ -1,5 +1,7 @@
-import {Query, Ajax, Utils, ActionURL, Filter} from "@labkey/api";
-import {LineItemModel, PurchaseAdminModel, RequestOrderModel, VendorModel} from "./model";
+import {Query, Ajax, Utils, ActionURL, Filter, getServerContext} from "@labkey/api";
+import {DocumentAttachmentModel, LineItemModel, PurchaseAdminModel, RequestOrderModel, VendorModel} from "./model";
+import {uploadWebDavFile} from '@labkey/components';
+import {PURCHASING_REQUEST_ATTACHMENTS} from "./constants";
 
 export function getData(schemaName: string, queryName: string, colNames: string, sort?: string, filter?: Array<Filter.IFilter>) : Promise<any> {
     return new Promise((resolve, reject) => {
@@ -18,7 +20,10 @@ export function getData(schemaName: string, queryName: string, colNames: string,
     })
 }
 
-export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>, purchasingAdminModel?: PurchaseAdminModel) : Promise<any> {
+export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>,
+                                     purchasingAdminModel?: PurchaseAdminModel,
+                                     documentAttachmentModel?: DocumentAttachmentModel
+                                     ) : Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
             url: ActionURL.buildURL('WNPRC_Purchasing', 'submitRequest.api'),
@@ -53,12 +58,48 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 newVendorNotes: requestOrder.newVendor.notes
             },
             success: Utils.getCallbackWrapper(response => {
-                resolve(response);
+                if (documentAttachmentModel?.files?.size > 0) {
+                    uploadFiles(documentAttachmentModel, getServerContext().container.name, response.requestId).then((files: Array<File>) => {
+                        resolve({uploadedFiles: files});
+                    });
+                }
+                else {
+                    resolve(response);
+                }
             }),
             failure: Utils.getCallbackWrapper(error => {
                 console.error(`Failed to submit request.`, error);
                 reject(error);
-            }, undefined, true),
+            }, undefined, true)
         });
+    });
+}
+
+function uploadFiles(model: DocumentAttachmentModel, container: string, requestId: number): any {
+    return new Promise((resolve, reject) => {
+
+        // Nothing to do here
+        if (model.files?.size === 0) {
+            resolve(model.files);
+        }
+
+        const dir = PURCHASING_REQUEST_ATTACHMENTS + (requestId ? ('/' + requestId) : '');
+        const uploadedFiles = Array<string>();
+
+        model.files.map((fileToUpload) => {
+
+            if (fileToUpload) {
+                uploadWebDavFile(fileToUpload, ActionURL.getContainer(), dir, true)
+                    .then((name: string) => {
+                        uploadedFiles.push(name);
+                        if (uploadedFiles.length ===  model.files.size) {
+                            resolve(uploadedFiles);
+                        }
+                    })
+                    .catch(reason => {
+                        reject(reason);
+                    });
+            }
+        }, this);
     });
 }

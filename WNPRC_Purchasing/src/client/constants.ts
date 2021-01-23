@@ -1,0 +1,1 @@
+export const PURCHASING_REQUEST_ATTACHMENTS = 'PurchasingRequestAttachments';

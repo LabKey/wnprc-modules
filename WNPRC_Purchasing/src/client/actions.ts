@@ -1,7 +1,7 @@
 import {Query, Ajax, Utils, ActionURL, Filter, getServerContext} from "@labkey/api";
 import {DocumentAttachmentModel, LineItemModel, PurchaseAdminModel, RequestOrderModel, VendorModel} from "./model";
-import {uploadWebDavFile} from '@labkey/components';
-import {PURCHASING_REQUEST_ATTACHMENTS} from "./constants";
+import {getWebDavFiles, uploadWebDavFile, WebDavFile} from '@labkey/components';
+import {PURCHASING_REQUEST_ATTACHMENTS_DIR, FILE_ATTACHMENT_SEPARATOR} from "./constants";
 
 export function getData(schemaName: string, queryName: string, colNames: string, sort?: string, filter?: Array<Filter.IFilter>) : Promise<any> {
     return new Promise((resolve, reject) => {
@@ -43,6 +43,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 program: purchasingAdminModel?.program,
                 confirmNum: purchasingAdminModel?.confirmationNum,
                 invoiceNum: purchasingAdminModel?.invoiceNum,
+                attachments: documentAttachmentModel?.filesToUpload?.map((file:File) => file.name).join(FILE_ATTACHMENT_SEPARATOR),
                 lineItems: lineItems,
                 hasNewVendor: (!!(requestOrder.vendor === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
                 newVendorName: requestOrder.newVendor.vendorName,
@@ -58,7 +59,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 newVendorNotes: requestOrder.newVendor.notes
             },
             success: Utils.getCallbackWrapper(response => {
-                if (documentAttachmentModel?.files?.size > 0) {
+                if (documentAttachmentModel?.filesToUpload?.size > 0) {
                     uploadFiles(documentAttachmentModel, getServerContext().container.name, response.requestId).then((files: Array<File>) => {
                         resolve({uploadedFiles: files});
                     });
@@ -79,20 +80,20 @@ function uploadFiles(model: DocumentAttachmentModel, container: string, requestI
     return new Promise((resolve, reject) => {
 
         // Nothing to do here
-        if (model.files?.size === 0) {
-            resolve(model.files);
+        if (model.filesToUpload?.size === 0) {
+            resolve(model.filesToUpload);
         }
 
-        const dir = PURCHASING_REQUEST_ATTACHMENTS + (requestId ? ('/' + requestId) : '');
+        const dir = PURCHASING_REQUEST_ATTACHMENTS_DIR + (requestId ? ('/' + requestId) : '');
         const uploadedFiles = Array<string>();
 
-        model.files.map((fileToUpload) => {
+        model.filesToUpload.map((fileToUpload) => {
 
             if (fileToUpload) {
                 uploadWebDavFile(fileToUpload, ActionURL.getContainer(), dir, true)
                     .then((name: string) => {
                         uploadedFiles.push(name);
-                        if (uploadedFiles.length ===  model.files.size) {
+                        if (uploadedFiles.length ===  model.filesToUpload.size) {
                             resolve(uploadedFiles);
                         }
                     })
@@ -101,5 +102,21 @@ function uploadFiles(model: DocumentAttachmentModel, container: string, requestI
                     });
             }
         }, this);
+    });
+}
+
+export async function getSavedFiles(container: string, directory?: string, includeSubdirectories?: boolean): Promise<any> {
+    return new Promise((resolve, reject) => {
+        getWebDavFiles(container, directory, includeSubdirectories)
+            .then((response) => {
+                const displayFiles = response.get('files').valueSeq().map((file: WebDavFile) => {
+                    return file.name;
+                });
+                resolve(displayFiles.toArray());
+            })
+            .catch(response => {
+                const msg = 'Unable to load files in ' + (directory ? directory : 'root') + ': ' + response;
+                reject(msg);
+            });
     });
 }

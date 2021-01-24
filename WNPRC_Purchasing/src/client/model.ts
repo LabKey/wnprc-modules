@@ -133,7 +133,8 @@ export class DocumentAttachmentModel {
      */
     [immerable] = true;
 
-    readonly files: Map<string, File>
+    readonly savedFiles?: Array<string>;
+    readonly filesToUpload?: Map<string, File>;
 
     constructor(values?: Partial<DocumentAttachmentModel>) {
         Object.assign(this, values);

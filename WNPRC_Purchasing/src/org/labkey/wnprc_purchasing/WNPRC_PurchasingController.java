@@ -87,6 +87,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _program;
         String _confirmNum;
         String _invoiceNum;
+        String _attachments;
         Boolean _hasNewVendor;
         String _newVendorName;
         String _newVendorStreetAddress;
@@ -248,6 +249,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setInvoiceNum(String invoiceNum)
         {
             _invoiceNum = invoiceNum;
+        }
+
+        public String getAttachments()
+        {
+            return _attachments;
+        }
+
+        public void setAttachments(String attachments)
+        {
+            _attachments = attachments;
         }
 
         public Boolean getHasNewVendor()

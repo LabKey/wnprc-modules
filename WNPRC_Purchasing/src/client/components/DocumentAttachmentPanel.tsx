@@ -4,6 +4,8 @@ import { FileAttachmentForm } from '@labkey/components';
 import {DocumentAttachmentModel} from "../model";
 import { Map } from 'immutable';
 import {Draft, produce} from "immer";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 
 interface Props
 {
@@ -17,9 +19,13 @@ export const DocumentAttachmentPanel: FC<Props> = memo((props) => {
 
     const onFileChange = useCallback((files: Map<string, File>) => {
         const updatedModel = produce(model, (draft: Draft<DocumentAttachmentModel>) => {
-            draft['files'] = files;
+            draft['filesToUpload'] = files;
         });
         onInputChange(updatedModel);
+
+    }, [model, onInputChange]);
+
+    const onRemoveAttachment = useCallback((event: any) => {
 
     }, [model, onInputChange]);
 
@@ -41,14 +47,36 @@ export const DocumentAttachmentPanel: FC<Props> = memo((props) => {
                     </Panel.Heading>
                 </div>
                 <Panel.Body>
-                        <FileAttachmentForm
-                            allowDirectories={false}
-                            allowMultiple={true}
-                            showLabel={false}
-                            acceptedFormats={".pdf, .PDF, .jpg, .JPG"}
-                            onFileChange={onFileChange}
-                            onFileRemoval={onFileRemove}
-                        />
+                    <FileAttachmentForm
+                        allowDirectories={false}
+                        allowMultiple={true}
+                        showLabel={false}
+                        acceptedFormats={".pdf, .PDF, .jpg, .JPG"}
+                        onFileChange={onFileChange}
+                        onFileRemoval={onFileRemove}
+                    />
+                    {
+                        model.savedFiles?.length > 0 &&
+                        <>
+                        <br/>
+                        <div className='saved-attachment-label'>
+                            <strong>Saved Attachments:</strong>
+                        </div>
+                        {
+                            model.savedFiles.map((savedFile, idx) => {
+                                return <div>
+                                            <span
+                                                 id={'remove-saved-attachment-' + idx} title={'Remove saved attachment'} className="remove-saved-file-icon"
+                                                 onClick={onRemoveAttachment}
+                                            >
+                                            <FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle}/>
+                                            </span>
+                                            {savedFile}
+                                        </div>
+                            })
+                        }
+                        </>
+                    }
                 </Panel.Body>
             </Panel>
         </>

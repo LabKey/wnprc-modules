@@ -159,6 +159,7 @@ public class WNPRC_PurchasingManager
         row.put("program", requestForm.getProgram());
         row.put("confirmationNum", requestForm.getConfirmNum());
         row.put("invoiceNum", requestForm.getInvoiceNum());
+        row.put("attachments", requestForm.getAttachments());
         purchasingRequestsData.add(row);
 
         // insert data
@@ -287,6 +288,12 @@ public class WNPRC_PurchasingManager
         confirmNum.setName("confirmationNum");
         confirmNum.setRangeURI("string");
         extensibleCols.add(confirmNum);
+
+        GWTPropertyDescriptor attachments = new GWTPropertyDescriptor();
+        attachments.setName("attachments");
+        attachments.setRangeURI("string");
+        attachments.setDescription("'||' separated attachment files");
+        extensibleCols.add(attachments);
 
         domain.setFields(extensibleCols);
 

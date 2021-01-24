@@ -33,6 +33,7 @@
                             <fkColumnName>rowId</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="attachments"/>
                 </columns>
             </table>
         </tables>

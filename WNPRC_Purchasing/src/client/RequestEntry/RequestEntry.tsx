@@ -20,9 +20,11 @@ import {LineItemsPanel} from "../components/LineItemsPanel";
 import '../RequestEntry/RequestEntry.scss';
 import {ActionURL, Filter, getServerContext} from "@labkey/api";
 import produce, {Draft} from "immer";
-import {getData, submitRequest} from "../actions";
+import {getData, getSavedFiles, submitRequest} from "../actions";
 import {PurchaseAdminPanel} from "../components/PurchaseAdminPanel";
 import {DocumentAttachmentPanel} from "../components/DocumentAttachmentPanel";
+import {getWebDavFiles, WebDavFile} from "@labkey/components";
+import {PURCHASING_REQUEST_ATTACHMENTS_DIR} from "../constants";
 
 export const App : FC = memo(() => {
 
@@ -84,6 +86,14 @@ export const App : FC = memo(() => {
                     });
                 });
                 setLineItems(lineItems);
+            });
+
+            //get saved files
+            const dir = PURCHASING_REQUEST_ATTACHMENTS_DIR + "/" + reqRowId;
+            getSavedFiles (ActionURL.getContainer(), dir, false).then((files:Array<string>) => {
+                setDocumentAttachmentModel(DocumentAttachmentModel.create({
+                    savedFiles: files
+                }));
             });
         }
         else {
@@ -221,7 +231,7 @@ export const App : FC = memo(() => {
             event.preventDefault();
 
             submitRequest(requestOrderModel, lineItems, !!requestId ? purchaseAdminModel : undefined,
-                        documentAttachmentModel.files?.size > 0 ? documentAttachmentModel :undefined ).then(r => {
+                        documentAttachmentModel.filesToUpload?.size > 0 ? documentAttachmentModel :undefined ).then(r => {
                 if (r.success || r.uploadedFiles?.length > 0) {
                     //navigate to purchasing overview grid/main page
                     window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
@@ -229,7 +239,7 @@ export const App : FC = memo(() => {
             });
         }
 
-    }, [requestOrderModel, lineItems, purchaseAdminModel, isSaving]);
+    }, [requestOrderModel, lineItems, purchaseAdminModel, documentAttachmentModel, isSaving]);
 
     return (
         <>

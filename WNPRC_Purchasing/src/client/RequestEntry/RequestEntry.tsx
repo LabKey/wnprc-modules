@@ -270,7 +270,7 @@ export const App : FC = memo(() => {
                     {
                         requestOrderModel.otherAcctAndInvesWarning &&
                         <span className='other-account-warning'>
-                            <strong>{requestOrderModel.otherAcctAndInvesWarning}</strong>
+                            {requestOrderModel.otherAcctAndInvesWarning}
                         </span>
                     }
                     <button

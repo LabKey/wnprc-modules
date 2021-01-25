@@ -127,7 +127,6 @@ export const SubtotalInput: FC<SubtotalInputProps> = memo((props) => {
             value={formatCurrency(subtotal)}
             disabled={true}
             id="item-subtotal-id"
-            type='number'
         />
     );
 })

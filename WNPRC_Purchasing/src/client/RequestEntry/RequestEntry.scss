@@ -55,6 +55,7 @@
 
 .subtotal-input {
   margin-left: -4%;
+  text-align:right;
 }
 
 .controlled-sub-input {
@@ -90,12 +91,12 @@
 }
 
 .calc-total {
-  margin-left:57.75%;
+  margin-left:57.40%;
   font-weight: bold;
 }
 
 .calc-total-val {
-  margin-left:-4.50%;
+  margin-left:-4.65%;
   font-weight: bold;
 }
 
@@ -124,6 +125,7 @@ $red-shadow:            rgba(160, 80, 76, 0.5);
 .other-account-warning {
   color: $brand-warning;
   margin-left: 75%;
+  font-weight: bold;
 }
 
 .other-account-warning-box {

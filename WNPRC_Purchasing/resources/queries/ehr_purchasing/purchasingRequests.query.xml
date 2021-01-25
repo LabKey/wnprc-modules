@@ -3,6 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="purchasingRequests" tableDbType="TABLE" useColumnOrder="true">
                 <tableTitle>Purchasing Requests</tableTitle>
+                <titleColumn>rowId</titleColumn>
                 <columns>
                     <column columnName="vendorId">
                         <columnTitle>Vendor</columnTitle>

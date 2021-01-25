@@ -10,7 +10,7 @@ import {formatCurrency} from "./Utils";
 interface Props
 {
     lineItems: Array<LineItemModel>;
-    onChange: (lineItems: Array<LineItemModel>) => void;
+    onChange: (lineItems: Array<LineItemModel>, rowIdToDelete?:number) => void;
     errorMsg?: string;
     hasRequestId?: boolean;
 }
@@ -33,7 +33,8 @@ export const LineItemsPanel: FC<Props> = memo((props) => {
         const updatedLineItems = produce(lineItems, (draft: Draft<Array<LineItemModel>>) => {
             draft.splice(indexToDelete, 1);
         });
-        onChange(updatedLineItems);
+
+        onChange(updatedLineItems, lineItems[indexToDelete].rowId);
 
     }, [lineItems, onChange]);
 

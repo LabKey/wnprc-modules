@@ -203,6 +203,7 @@ public class WNPRC_PurchasingManager
             //Line items data
             List<Map<String, Object>> newLineItemsData = new ArrayList<>();
             List<Map<String, Object>> updatedLineItemsData = new ArrayList<>();
+            List<Map<String, Object>> deleteLineItemsData = new ArrayList<>();
             for (JSONObject lineItem : requestForm.getLineItems())
             {
                 row = new CaseInsensitiveHashMap<>();
@@ -224,6 +225,15 @@ public class WNPRC_PurchasingManager
                 }
             }
 
+            if (null != requestForm.getLineItemsToDelete()) {
+                for (Integer lineItemRowId : requestForm.getLineItemsToDelete())
+                {
+                    row = new CaseInsensitiveHashMap<>();
+                    row.put("rowId", lineItemRowId);
+                    deleteLineItemsData.add(row);
+                }
+            }
+
             if (lineItemsTable != null)
             {
                 qus = lineItemsTable.getUpdateService();
@@ -236,6 +246,10 @@ public class WNPRC_PurchasingManager
                 if (updatedLineItemsData.size() > 0)
                 {
                     qus.updateRows(user, container, updatedLineItemsData, null, null, null);
+                }
+                if (deleteLineItemsData.size() > 0)
+                {
+                    qus.deleteRows(user, container, deleteLineItemsData, null, null);
                 }
             }
 

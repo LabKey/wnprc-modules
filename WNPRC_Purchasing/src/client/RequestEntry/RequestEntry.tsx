@@ -31,6 +31,7 @@ export const App : FC = memo(() => {
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create());
     const [purchaseAdminModel, setPurchaseAdminModel] = useState<PurchaseAdminModel>(PurchaseAdminModel.create());
     const [lineItems, setLineItems] = useState<Array<LineItemModel>>([LineItemModel.create()]);
+    const [lineItemRowsToDelete, setLineItemRowsToDelete] = useState<Array<number>>([]);
     const [documentAttachmentModel, setDocumentAttachmentModel] = useState<DocumentAttachmentModel>(DocumentAttachmentModel.create());
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
     const [isDirty, setIsDirty] = useState<boolean>(false);
@@ -138,7 +139,7 @@ export const App : FC = memo(() => {
         setIsDirty(true);
     }, [documentAttachmentModel]);
 
-    const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>)=> {
+    const lineItemsChange = useCallback((lineItemArray : Array<LineItemModel>, rowIdToDelete?: number)=> {
 
         const numOfErrors = lineItemArray.reduce(((count, item) => (item.errors?.length > 0) ? (count + 1) : count), 0);
 
@@ -148,7 +149,13 @@ export const App : FC = memo(() => {
         setLineItems(lineItemArray);
         setIsDirty(true);
 
-    }, [lineItems]);
+        if (rowIdToDelete) {
+            const updatedRowsToDelete = produce(lineItemRowsToDelete, (draft: Draft<Array<number>>) => {
+                draft.push(rowIdToDelete);
+            });
+            setLineItemRowsToDelete(updatedRowsToDelete);
+        }
+    }, [lineItems, lineItemRowsToDelete]);
 
     const onCancelBtnHandler = useCallback((event) => {
         setIsDirty(false);
@@ -232,16 +239,20 @@ export const App : FC = memo(() => {
             setIsSaving(true);
             event.preventDefault();
 
-            submitRequest(requestOrderModel, lineItems, !!requestId ? purchaseAdminModel : undefined,
-                (documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0) ? documentAttachmentModel : undefined ).then(r => {
-                if (r.success || r.fileNames?.length > 0) {
-                    //navigate to purchasing overview grid/main page
-                    window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
-                }
+            submitRequest(requestOrderModel,
+                            lineItems,
+                            !!requestId ? purchaseAdminModel : undefined,
+                            (documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0) ? documentAttachmentModel : undefined,
+                            lineItemRowsToDelete)
+                .then(r => {
+                    if (r.success || r.fileNames?.length > 0) {
+                        //navigate to purchasing overview grid/main page
+                        window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
+                    }
             });
         }
 
-    }, [requestOrderModel, lineItems, purchaseAdminModel, documentAttachmentModel, isSaving]);
+    }, [requestOrderModel, lineItems, lineItemRowsToDelete, purchaseAdminModel, documentAttachmentModel, isSaving]);
 
     return (
         <>
@@ -257,9 +268,9 @@ export const App : FC = memo(() => {
                 !isSaving &&
                 <button
                         className='btn btn-primary pull-right'
-                        id='submitForReview'
-                        name='submitForReview'
-                        onClick={onSaveBtnHandler}>Submit for Review
+                        id={requestId ? 'save' : 'submitForReview'}
+                        name={requestId ? 'save' : 'submitForReview'}
+                        onClick={onSaveBtnHandler}>{requestId ? 'Save' : 'Submit for Review'}
                 </button>
             }
             {

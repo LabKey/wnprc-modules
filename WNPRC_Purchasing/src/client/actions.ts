@@ -22,7 +22,8 @@ export function getData(schemaName: string, queryName: string, colNames: string,
 
 export async function submitRequest (requestOrder: RequestOrderModel, lineItems: Array<LineItemModel>,
                                      purchasingAdminModel?: PurchaseAdminModel,
-                                     documentAttachmentModel?: DocumentAttachmentModel
+                                     documentAttachmentModel?: DocumentAttachmentModel,
+                                     lineItemsToDelete?: Array<number>
                                      ) : Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
@@ -44,6 +45,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 confirmNum: purchasingAdminModel?.confirmationNum,
                 invoiceNum: purchasingAdminModel?.invoiceNum,
                 lineItems: lineItems,
+                lineItemsToDelete: lineItemsToDelete,
                 hasNewVendor: (!!(requestOrder.vendor === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
                 newVendorName: requestOrder.newVendor.vendorName,
                 newVendorStreetAddress: requestOrder.newVendor.streetAddress,

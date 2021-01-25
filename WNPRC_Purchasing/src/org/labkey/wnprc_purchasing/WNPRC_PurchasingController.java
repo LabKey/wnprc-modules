@@ -73,6 +73,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     public static class RequestForm
     {
         List<JSONObject> _lineItems;
+        List<Integer> _lineItemsToDelete;
         Integer _rowId;
         Integer _account;
         String _accountOther;
@@ -109,6 +110,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setLineItems(List<JSONObject> lineItems)
         {
             _lineItems = lineItems;
+        }
+
+        public List<Integer> getLineItemsToDelete()
+        {
+            return _lineItemsToDelete;
+        }
+
+        public void setLineItemsToDelete(List<Integer> lineItemsToDelete)
+        {
+            _lineItemsToDelete = lineItemsToDelete;
         }
 
         public Integer getRowId()

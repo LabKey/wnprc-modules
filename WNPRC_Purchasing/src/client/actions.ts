@@ -11,10 +11,13 @@ export function getData(schemaName: string, queryName: string, colNames: string,
             columns: colNames,
             sort: sort,
             filterArray: filter,
-            success: function (results) {
+            success: function(results) {
                 if (results && results.rows) {
                     resolve(results.rows);
                 }
+            },
+            failure: function(error) {
+                reject(error);
             }
         });
     })

@@ -71,6 +71,7 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                     <AccountOtherInput
                             value={model.accountOther}
                             hasError={model.errors?.find((field) => field.fieldName === 'accountOther')}
+                            hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
                             onChange={onValueChange}
                     />
                 }

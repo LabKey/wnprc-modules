@@ -13,6 +13,7 @@ interface InputProps
     value: any;
     onChange: (colName, value) => void;
     hasError?: boolean;
+    hasOtherAcctWarning?:boolean;
 }
 
 export const AccountInput: FC<InputProps> = memo((props) => {
@@ -54,7 +55,7 @@ export const AccountInput: FC<InputProps> = memo((props) => {
 
 export const AccountOtherInput: FC<InputProps> = memo((props) => {
 
-    const {onChange, value, hasError} = props;
+    const {onChange, value, hasError, hasOtherAcctWarning} = props;
 
     const onTextChange = useCallback((evt) => {
         onChange('accountOther', evt.target.value);
@@ -67,7 +68,7 @@ export const AccountOtherInput: FC<InputProps> = memo((props) => {
                 required={true}
             >
                 <textarea
-                    className={'account-input other-account-input form-control ' + (hasError ? 'field-validation-error' : '')}
+                    className={'account-input other-account-input form-control ' + (hasError ? 'field-validation-error' : (hasOtherAcctWarning ? 'other-account-warning-box' : ''))}
                     value={value}
                     onChange={onTextChange}
                     id="account-and-pi-id"

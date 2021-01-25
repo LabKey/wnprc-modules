@@ -16,7 +16,6 @@
 
 package org.labkey.wnprc_purchasing;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
@@ -41,7 +40,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class WNPRC_PurchasingManager
 {

@@ -23,7 +23,6 @@ import produce, {Draft} from "immer";
 import {getData, getSavedFiles, submitRequest} from "../actions";
 import {PurchaseAdminPanel} from "../components/PurchaseAdminPanel";
 import {DocumentAttachmentPanel} from "../components/DocumentAttachmentPanel";
-import {getWebDavFiles, WebDavFile} from "@labkey/components";
 import {PURCHASING_REQUEST_ATTACHMENTS_DIR} from "../constants";
 
 export const App : FC = memo(() => {
@@ -51,13 +50,14 @@ export const App : FC = memo(() => {
             getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter).then(vals => {
                 setRequestOrderModel(RequestOrderModel.create({
                     rowId: vals[0].rowId,
-                    account: vals[0].account,
+                    account: vals[0].account === undefined ? vals[0].account : "Other",
                     accountOther: vals[0].otherAcctAndInves,
                     vendor: vals[0].vendorId,
                     purpose: vals[0].justification,
                     shippingDestination: vals[0].shippingInfoId,
                     deliveryAttentionTo: vals[0].shippingAttentionTo,
-                    comments: vals[0].comments
+                    comments: vals[0].comments,
+                    otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add '" + vals[0].otherAcctAndInves + "' into the system" : undefined
                 }));
                 //show purchasing admin panel if there is rowId
                 //TODO: add condition on purchasing admin user
@@ -266,12 +266,20 @@ export const App : FC = memo(() => {
             <button disabled={isSaving} className='btn btn-default' id='cancel' name='cancel' onClick={onCancelBtnHandler}>Cancel</button>
             {
                 !isSaving &&
-                <button
-                        className='btn btn-primary pull-right'
-                        id={requestId ? 'save' : 'submitForReview'}
-                        name={requestId ? 'save' : 'submitForReview'}
-                        onClick={onSaveBtnHandler}>{requestId ? 'Save' : 'Submit for Review'}
-                </button>
+                <>
+                    {
+                        requestOrderModel.otherAcctAndInvesWarning &&
+                        <span className='other-account-warning'>
+                            <strong>{requestOrderModel.otherAcctAndInvesWarning}</strong>
+                        </span>
+                    }
+                    <button
+                            className='btn btn-primary pull-right'
+                            id={requestId ? 'save' : 'submitForReview'}
+                            name={requestId ? 'save' : 'submitForReview'}
+                            onClick={onSaveBtnHandler}>{requestId ? 'Save' : 'Submit for Review'}
+                    </button>
+                </>
             }
             {
                 isSaving &&

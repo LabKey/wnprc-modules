@@ -91,9 +91,11 @@ export const App : FC = memo(() => {
             //get saved files
             const dir = PURCHASING_REQUEST_ATTACHMENTS_DIR + "/" + reqRowId;
             getSavedFiles (ActionURL.getContainer(), dir, false).then((files:Array<string>) => {
-                setDocumentAttachmentModel(DocumentAttachmentModel.create({
-                    savedFiles: files
-                }));
+                if (files?.length > 0) {
+                    setDocumentAttachmentModel(DocumentAttachmentModel.create({
+                        savedFiles: files
+                    }));
+                }
             });
         }
         else {
@@ -231,8 +233,8 @@ export const App : FC = memo(() => {
             event.preventDefault();
 
             submitRequest(requestOrderModel, lineItems, !!requestId ? purchaseAdminModel : undefined,
-                        documentAttachmentModel.filesToUpload?.size > 0 ? documentAttachmentModel :undefined ).then(r => {
-                if (r.success || r.uploadedFiles?.length > 0) {
+                (documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0) ? documentAttachmentModel : undefined ).then(r => {
+                if (r.success || r.fileNames?.length > 0) {
                     //navigate to purchasing overview grid/main page
                     window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
                 }

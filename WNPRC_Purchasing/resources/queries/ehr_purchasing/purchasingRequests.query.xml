@@ -33,7 +33,14 @@
                             <fkColumnName>rowId</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="attachments"/>
+                    <column columnName="attachments">
+                        <columnTitle>Attachments</columnTitle>
+                        <textAlign>left</textAlign>
+<!--                        <displayColumnFactory>-->
+<!--                        TODO: not working as expected-->
+<!--                            <className>org.labkey.wnprc_purchasing.table.AttachmentDisplayColumnFactory</className>-->
+<!--                        </displayColumnFactory>-->
+                    </column>
                 </columns>
             </table>
         </tables>

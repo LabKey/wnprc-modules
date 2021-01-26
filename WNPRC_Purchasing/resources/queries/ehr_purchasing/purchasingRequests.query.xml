@@ -5,6 +5,15 @@
                 <tableTitle>Purchasing Requests</tableTitle>
                 <titleColumn>rowId</titleColumn>
                 <columns>
+                    <column columnName="rowId"/>
+                    <column columnName="qcState">
+                        <columnTitle>Status</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>QCState</fkTable>
+                            <fkColumnName>RowId</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="vendorId">
                         <columnTitle>Vendor</columnTitle>
                         <fk>
@@ -41,6 +50,7 @@
 <!--                            <className>org.labkey.wnprc_purchasing.table.AttachmentDisplayColumnFactory</className>-->
 <!--                        </displayColumnFactory>-->
                     </column>
+
                 </columns>
             </table>
         </tables>

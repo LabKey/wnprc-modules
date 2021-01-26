@@ -15,7 +15,7 @@
  */
 import React, {FC, memo, useCallback, useEffect, useState} from 'react'
 import {RequestOrderPanel} from "../components/RequestOrderPanel";
-import {LineItemModel, RequestOrderModel, PurchaseAdminModel, DocumentAttachmentModel} from "../model";
+import {LineItemModel, RequestOrderModel, PurchaseAdminModel, DocumentAttachmentModel, SavedFileModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
 import '../RequestEntry/RequestEntry.scss';
 import {ActionURL, Filter, getServerContext} from "@labkey/api";
@@ -50,14 +50,14 @@ export const App : FC = memo(() => {
             getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter).then(vals => {
                 setRequestOrderModel(RequestOrderModel.create({
                     rowId: vals[0].rowId,
-                    account: vals[0].account === undefined ? vals[0].account : "Other",
-                    accountOther: vals[0].otherAcctAndInves,
+                    account: !!vals[0].otherAcctAndInves ? "Other" : vals[0].account,
+                    accountOther: !!vals[0].otherAcctAndInves ? vals[0].otherAcctAndInves : undefined,
                     vendor: vals[0].vendorId,
                     purpose: vals[0].justification,
                     shippingDestination: vals[0].shippingInfoId,
                     deliveryAttentionTo: vals[0].shippingAttentionTo,
                     comments: vals[0].comments,
-                    otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add '" + vals[0].otherAcctAndInves + "' into the system" : undefined
+                    otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add 'Account & Principal Investigator' value '" + vals[0].otherAcctAndInves + "' into the system" : undefined
                 }));
                 //show purchasing admin panel if there is rowId
                 //TODO: add condition on purchasing admin user
@@ -91,11 +91,12 @@ export const App : FC = memo(() => {
 
             //get saved files
             const dir = PURCHASING_REQUEST_ATTACHMENTS_DIR + "/" + reqRowId;
-            getSavedFiles (ActionURL.getContainer(), dir, false).then((files:Array<string>) => {
+            getSavedFiles(ActionURL.getContainer(), dir, false).then((files:Array<SavedFileModel>) => {
                 if (files?.length > 0) {
-                    setDocumentAttachmentModel(DocumentAttachmentModel.create({
-                        savedFiles: files
-                    }));
+                    const updatedModel = produce(documentAttachmentModel, (draft: Draft<DocumentAttachmentModel>) => {
+                        draft['savedFiles'] = files;
+                    });
+                    setDocumentAttachmentModel(updatedModel);
                 }
             });
         }
@@ -267,12 +268,6 @@ export const App : FC = memo(() => {
             {
                 !isSaving &&
                 <>
-                    {
-                        requestOrderModel.otherAcctAndInvesWarning &&
-                        <span className='other-account-warning'>
-                            {requestOrderModel.otherAcctAndInvesWarning}
-                        </span>
-                    }
                     <button
                             className='btn btn-primary pull-right'
                             id={requestId ? 'save' : 'submitForReview'}
@@ -287,6 +282,13 @@ export const App : FC = memo(() => {
                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
                     Saving...
                 </button>
+            }
+            {
+                requestOrderModel.otherAcctAndInvesWarning &&
+                <div className='other-account-warning alert alert-danger'>
+                    {requestOrderModel.otherAcctAndInvesWarning}
+                </div>
+
             }
         </>
     )

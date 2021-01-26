@@ -6,11 +6,11 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.query.QueryAction;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.HtmlStringBuilder;
-import org.labkey.api.util.Link;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HtmlView;
 
 public class AttachmentDisplayColumnFactory implements DisplayColumnFactory
 {
@@ -32,8 +32,7 @@ public class AttachmentDisplayColumnFactory implements DisplayColumnFactory
         public HtmlString getFormattedHtml(RenderContext ctx)
         {
             String fileAttachment = (String) ctx.get(getColumnInfo().getFieldKey());
-//            HtmlStringBuilder hsb = HtmlStringBuilder.of();
-            StringBuilder hsb = new StringBuilder();
+            StringBuilder html = new StringBuilder();
             if (StringUtils.isNotBlank(fileAttachment))
             {
                 //file attachments are saved as a string with "||" delimiters between file names ex. fileA||fileB
@@ -42,17 +41,24 @@ public class AttachmentDisplayColumnFactory implements DisplayColumnFactory
                 for (String attachment : attachments)
                 {
                     if (index++ > 0) {
-                     hsb.append(", ");
+                        html.append(", ");
                     }
-                    hsb.append("<a href=\"query-executeQuery.view?schemaName=exp&query.queryName=Files&query.Name~eq=" + attachment + "\">" + attachment +"</a>");
+                    ActionURL url = QueryService.get().urlFor(ctx.getViewContext().getUser(), ctx.getViewContext().getContainer(), QueryAction.executeQuery, "exp", "Files");
+                    url.addParameter("Name", attachment);
+                    html.append("<a href=\"");
+//                    html.append(PageFlowUtil.filter(url));
+                    html.append("labkey/_webdav/WNPRC%20Purchasing/%40files/PurchasingRequestAttachments/38/IMG-2982.jpg");
+                    html.append("\">");
+                    html.append(attachment);
+                    html.append("</a>");
                 }
             }
             else
             {
-                hsb.append(HtmlString.NBSP);
+                html.append(HtmlString.NBSP);
             }
 
-            return HtmlString.of(hsb);
+            return HtmlString.of(html);
         }
 
     }

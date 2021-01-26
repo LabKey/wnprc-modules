@@ -1,5 +1,12 @@
 import {Query, Ajax, Utils, ActionURL, Filter, getServerContext} from "@labkey/api";
-import {DocumentAttachmentModel, LineItemModel, PurchaseAdminModel, RequestOrderModel, VendorModel} from "./model";
+import {
+    DocumentAttachmentModel,
+    LineItemModel,
+    PurchaseAdminModel,
+    RequestOrderModel,
+    SavedFileModel,
+    VendorModel
+} from "./model";
 import {getWebDavFiles, uploadWebDavFile, WebDavFile} from '@labkey/components';
 import {PURCHASING_REQUEST_ATTACHMENTS_DIR, FILE_ATTACHMENT_SEPARATOR, EHR_PURCHASING_SCHEMA_NAME} from "./constants";
 
@@ -68,7 +75,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
 
                         //once the files are uploaded successfully, then update the purchasingRequest.attachments column with concatenated filenames
                         //make sure that the previously saved files are also included
-                        const fileNames = documentAttachmentModel.savedFiles?.length > 0 ? files.concat(documentAttachmentModel.savedFiles) : files;
+                        const fileNames = documentAttachmentModel?.savedFiles?.length > 0 ? files.concat(documentAttachmentModel.savedFiles.map((file:SavedFileModel) => file.fileName)) : files;
                         updateAttachmentColumn(response.requestId, fileNames.join(FILE_ATTACHMENT_SEPARATOR)).then((fileNames:string) => {resolve({fileNames: fileNames});})
                     });
                 }
@@ -138,12 +145,12 @@ export async function updateAttachmentColumn(rowId: number, fileNames: string): 
     });
 }
 
-export async function getSavedFiles(container: string, directory?: string, includeSubdirectories?: boolean): Promise<any> {
+export async function getSavedFiles(container: string, directory?: string, includeSubdirectories?: boolean): Promise<Array<SavedFileModel>> {
     return new Promise((resolve, reject) => {
         getWebDavFiles(container, directory, includeSubdirectories)
             .then((response) => {
                 const displayFiles = response.get('files').valueSeq().map((file: WebDavFile) => {
-                    return file.name;
+                    return {fileName: file.name, href: file.href};
                 });
                 resolve(displayFiles.toArray());
             })

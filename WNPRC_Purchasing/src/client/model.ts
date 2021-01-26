@@ -127,13 +127,31 @@ export class LineItemModel {
     }
 }
 
+export class SavedFileModel {
+    /**
+     * @hidden
+     */
+    [immerable] = true;
+
+    readonly href: string;
+    readonly fileName: string;
+
+    constructor(values?: Partial<SavedFileModel>) {
+        Object.assign(this, values);
+    }
+
+    static create(raw?: any): SavedFileModel {
+        return new SavedFileModel({ ...raw });
+    }
+}
+
 export class DocumentAttachmentModel {
     /**
      * @hidden
      */
     [immerable] = true;
 
-    readonly savedFiles?: Array<string>;
+    readonly savedFiles?: Array<SavedFileModel>;
     readonly filesToUpload?: Map<string, File>;
 
     constructor(values?: Partial<DocumentAttachmentModel>) {

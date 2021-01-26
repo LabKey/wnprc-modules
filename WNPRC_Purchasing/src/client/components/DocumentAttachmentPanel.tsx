@@ -26,27 +26,38 @@ export const DocumentAttachmentPanel: FC<Props> = memo((props) => {
 
     }, [model, onInputChange]);
 
-    const onRemoveAttachment = useCallback((event: any) => {
-
-        let { id } = event.target;
-
-        if (!id) {
-            id = event.target.parentElement.id;
-        }
-        if (!id) {
-            id = event.target.parentElement.parentElement.id;
-        }
-
-        const fileIdx = parseInt(id.split(REMOVE_ATTACHMENT_ID_PREFIX)[1]);
-        const updatedModel = produce(model, (draft: Draft<DocumentAttachmentModel>) => {
-            draft['savedFiles'] = model.savedFiles.filter((fileName, idx) => fileIdx !== idx);
-        });
-        onInputChange(updatedModel);
-
-    }, [model, onInputChange]);
+    // const onRemoveAttachment = useCallback((event: any) => {
+    //
+    //     let { id } = event.target;
+    //
+    //     if (!id) {
+    //         id = event.target.parentElement.id;
+    //     }
+    //     if (!id) {
+    //         id = event.target.parentElement.parentElement.id;
+    //     }
+    //
+    //     const fileIdx = parseInt(id.split(REMOVE_ATTACHMENT_ID_PREFIX)[1]);
+    //     const updatedModel = produce(model, (draft: Draft<DocumentAttachmentModel>) => {
+    //         draft['savedFiles'] = model.savedFiles.filter((fileName, idx) => fileIdx !== idx);
+    //     });
+    //     onInputChange(updatedModel);
+    //
+    // }, [model, onInputChange]);
 
     const onFileRemove = useCallback((attachmentName: string) => {
 
+    }, [model, onInputChange]);
+
+    const showImg = useCallback((evt: any) => {
+        const attachment = model.savedFiles.filter(file => file.fileName === evt.target.innerText)
+        if (attachment) {
+            const width = 400;
+            const height = 400;
+            const y = window.top.outerHeight / 2 + window.top.screenY - ( height / 2);
+            const x = window.top.outerWidth / 2 + window.top.screenX - ( width / 2);
+            window.open(attachment[0].href,'popwin','width=${width}, height=${height}, top=${y}, left=${x}');
+        }
     }, [model, onInputChange]);
 
     return (
@@ -81,13 +92,13 @@ export const DocumentAttachmentPanel: FC<Props> = memo((props) => {
                         {
                             model.savedFiles.map((savedFile, idx) => {
                                 return <div>
-                                            <span
-                                                 id={REMOVE_ATTACHMENT_ID_PREFIX + idx} title={'Remove saved attachment'} className="remove-saved-file-icon"
-                                                 onClick={onRemoveAttachment}
-                                            >
-                                            <FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle}/>
-                                            </span>
-                                            {savedFile}
+                                            {/*<span*/}
+                                            {/*     id={REMOVE_ATTACHMENT_ID_PREFIX + idx} title={'Remove saved attachment'} className="remove-saved-file-icon"*/}
+                                            {/*     // onClick={onRemoveAttachment}*/}
+                                            {/*>*/}
+                                            {/*<FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle}/>*/}
+                                            {/*</span>*/}
+                                            <a href="#" onClick={showImg}>{savedFile.fileName}</a>
                                         </div>
                             })
                         }

@@ -69,6 +69,10 @@
   margin-bottom: 2rem;
 }
 
+.card-body > div > .row > .col-xs-2 {
+  margin-right: 5px;
+}
+
 .card {
   border-color: #e0e0e0 !important;
   border: 1px solid transparent !important;

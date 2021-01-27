@@ -70,22 +70,28 @@
 
 .account-input, .vendor-input, .shipping-dest-input, .assigned-to-input, .credit-card-option-input, .status-input {
   resize: none;
-  width: 60%;
+  width: 140%;
 }
 
 .other-account-input {
   height: 60px;
 }
 
-.business-purpose-input, .special-instr-input, .delivery-attn-input, .new-vendor-display {
+.business-purpose-input, .special-instr-input, .new-vendor-display {
   resize: none;
-  width: 60%;
+  width: 140%;
   height: 90px !important;
+}
+
+.delivery-attn-input {
+  resize: none;
+  width: 140%;
+  height: 40px !important;
 }
 
 .program-input, .confirmation-input, .invoice-input {
   resize: none;
-  width: 60%;
+  width: 140%;
   height: 27px !important;
   padding-top: 0.4%;
 }
@@ -134,7 +140,12 @@ $red-shadow:            rgba(160, 80, 76, 0.5);
 }
 
 .edit-other-vendor-button {
-  margin-left: 16.25%;
+  margin-left: 27.75%;
+}
+
+.form-margin {
+  margin-top: 0.5%;
+  margin-bottom: 0.75%;
 }
 
 input[type=number] {

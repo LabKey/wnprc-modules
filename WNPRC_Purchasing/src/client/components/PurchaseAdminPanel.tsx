@@ -1,5 +1,5 @@
 import React, {FC, memo, useCallback} from 'react';
-import {Form, Panel} from 'react-bootstrap';
+import {Form, Panel, Row, Col} from 'react-bootstrap';
 import {PurchaseAdminModel} from '../model';
 import {
     AssignedToInput, CreditCardOptionInput, ConfirmationInput, InvoiceInput, ProgramInput, StatusInput
@@ -35,37 +35,55 @@ export const PurchaseAdminPanel: FC<Props> = memo((props) => {
                     <div className='panel-title'>Purchase Admin Input</div>
                 </Panel.Heading>
             </div>
-            <Form>
-                <AssignedToInput
-                    value={model.assignedTo}
-                    hasError={false}
-                    onChange={onValueChange}
-                />
-                <CreditCardOptionInput
-                    value={model.creditCardOption}
-                    hasError={false}
-                    onChange={onValueChange}
-                />
-                <StatusInput
-                    value={model.qcState}
-                    hasError={false}
-                    onChange={onValueChange}
-                />
-                <ProgramInput
-                    value={model.program}
-                    hasError={false}
-                    onChange={onValueChange}
-                />
-                <ConfirmationInput
-                    value={model.confirmationNum}
-                    hasError={false}
-                    onChange={onValueChange}
-                />
-                <InvoiceInput
-                    value={model.invoiceNum}
-                    hasError={false}
-                    onChange={onValueChange}
-                />
+            <Form className='form-margin'>
+                <Row>
+                    <Col xs={11} lg={6}>
+                        <AssignedToInput
+                            value={model.assignedTo}
+                            hasError={false}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                    <Col xs={11} lg={6}>
+                        <ProgramInput
+                            value={model.program}
+                            hasError={false}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={11} lg={6}>
+                        <CreditCardOptionInput
+                            value={model.creditCardOption}
+                            hasError={false}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                    <Col xs={11} lg={6}>
+                        <ConfirmationInput
+                            value={model.confirmationNum}
+                            hasError={false}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={11} lg={6}>
+                        <StatusInput
+                            value={model.qcState}
+                            hasError={false}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                    <Col xs={11} lg={6}>
+                        <InvoiceInput
+                            value={model.invoiceNum}
+                            hasError={false}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                </Row>
             </Form>
             {model.errorMsg &&
             <div className='alert alert-danger'>

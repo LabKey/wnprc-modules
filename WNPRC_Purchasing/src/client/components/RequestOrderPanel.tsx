@@ -1,5 +1,5 @@
 import React, {FC, memo, useCallback, useState} from 'react';
-import {Form, Panel} from 'react-bootstrap';
+import {Form, Panel, Row, Col} from 'react-bootstrap';
 import {RequestOrderModel, VendorModel} from '../model';
 import {Draft, produce} from 'immer';
 import {
@@ -60,46 +60,103 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                 <div className='panel-title'>Request Order</div>
             </Panel.Heading>
             </div>
-            <Form>
-                <AccountInput
-                    value={model.account}
-                    hasError={model.errors?.find((field) => field.fieldName === 'account')}
-                    onChange={onValueChange}
-                />
-                {
-                    (showOtherAcct || model.account === "Other") &&
-                    <AccountOtherInput
-                            value={model.accountOther}
-                            hasError={model.errors?.find((field) => field.fieldName === 'accountOther')}
-                            hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
+            <Form className='form-margin'>
+                <Row>
+                        <Col xs={11} lg={6}>
+                            <AccountInput
+                                value={model.account}
+                                hasError={model.errors?.find((field) => field.fieldName === 'account')}
+                                onChange={onValueChange}
+                            />
+                            {
+                                (showOtherAcct || model.account === "Other") &&
+                                <AccountOtherInput
+                                        value={model.accountOther}
+                                        hasError={model.errors?.find((field) => field.fieldName === 'accountOther')}
+                                        hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
+                                        onChange={onValueChange}
+                                />
+                            }
+                        </Col>
+                        <Col xs={11} lg={6}>
+                            <ShippingDestinationInput
+                                value={model.shippingDestination}
+                                hasError={model.errors?.find((field) => field.fieldName === 'shippingDestination')}
+                                onChange={onValueChange}
+                            />
+                        </Col>
+                </Row>
+                <Row>
+                    <Col xs={11} lg={6}>
+                        <VendorInput
+                            hasError={model.errors?.find((field) => field.fieldName === 'vendor')}
                             onChange={onValueChange}
-                    />
-                }
-                <VendorInput
-                    hasError={model.errors?.find((field) => field.fieldName === 'vendor')}
-                    onChange={onValueChange}
-                    model={model}
-                    onModelChange={onModelChange}
-                />
-                <BusinessPurposeInput
-                    value={model.purpose}
-                    hasError={model.errors?.find((field) => field.fieldName === 'purpose')}
-                    onChange={onValueChange}
-                />
-                <SpecialInstructionInput
-                    value={model.comments}
-                    onChange={onValueChange}
-                />
-                <ShippingDestinationInput
-                    value={model.shippingDestination}
-                    hasError={model.errors?.find((field) => field.fieldName === 'shippingDestination')}
-                    onChange={onValueChange}
-                />
-                <DeliveryAttentionInput
-                    value={model.deliveryAttentionTo}
-                    hasError={model.errors?.find((field) => field.fieldName === 'deliveryAttentionTo')}
-                    onChange={onValueChange}
-                />
+                            model={model}
+                            onModelChange={onModelChange}
+                        />
+                    </Col>
+                    <Col xs={11} lg={6}>
+                        <DeliveryAttentionInput
+                            value={model.deliveryAttentionTo}
+                            hasError={model.errors?.find((field) => field.fieldName === 'deliveryAttentionTo')}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={11} lg={6}>
+                        <BusinessPurposeInput
+                            value={model.purpose}
+                            hasError={model.errors?.find((field) => field.fieldName === 'purpose')}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                    <Col xs={11} lg={6}>
+                        <SpecialInstructionInput
+                            value={model.comments}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                </Row>
+                {/*<AccountInput*/}
+                {/*    value={model.account}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'account')}*/}
+                {/*    onChange={onValueChange}*/}
+                {/*/>*/}
+                {/*{*/}
+                {/*    (showOtherAcct || model.account === "Other") &&*/}
+                {/*    <AccountOtherInput*/}
+                {/*            value={model.accountOther}*/}
+                {/*            hasError={model.errors?.find((field) => field.fieldName === 'accountOther')}*/}
+                {/*            hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}*/}
+                {/*            onChange={onValueChange}*/}
+                {/*    />*/}
+                {/*}*/}
+                {/*<VendorInput*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'vendor')}*/}
+                {/*    onChange={onValueChange}*/}
+                {/*    model={model}*/}
+                {/*    onModelChange={onModelChange}*/}
+                {/*/>*/}
+                {/*<BusinessPurposeInput*/}
+                {/*    value={model.purpose}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'purpose')}*/}
+                {/*    onChange={onValueChange}*/}
+                {/*/>*/}
+                {/*<SpecialInstructionInput*/}
+                {/*    value={model.comments}*/}
+                {/*    onChange={onValueChange}*/}
+                {/*/>*/}
+                {/*<ShippingDestinationInput*/}
+                {/*    value={model.shippingDestination}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'shippingDestination')}*/}
+                {/*    onChange={onValueChange}*/}
+                {/*/>*/}
+                {/*<DeliveryAttentionInput*/}
+                {/*    value={model.deliveryAttentionTo}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'deliveryAttentionTo')}*/}
+                {/*    onChange={onValueChange}*/}
+                {/*/>*/}
             </Form>
             {
                 model.errorMsg &&

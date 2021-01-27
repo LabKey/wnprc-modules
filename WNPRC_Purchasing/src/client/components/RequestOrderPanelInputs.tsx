@@ -36,8 +36,7 @@ export const AccountInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Account to charge"
-                required={true}
+                label="Account to charge *"
             >
                 <select
                     className={'account-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -64,8 +63,8 @@ export const AccountOtherInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Account & Principal Investigator"
-                required={true}
+                label="Account & Principal Investigator *"
+                required={false}
             >
                 <textarea
                     className={'account-input other-account-input form-control ' + (hasError ? 'field-validation-error' : (hasOtherAcctWarning ? 'other-account-warning-box' : ''))}
@@ -143,8 +142,7 @@ export const VendorInput: FC<VendorInputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Vendor"
-                required={true}
+                label="Vendor *"
             >
                 <select className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
                         value={model.vendor}
@@ -189,8 +187,7 @@ export const BusinessPurposeInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Business purpose"
-                required={true}
+                label="Business purpose *"
             >
                 <textarea
                     className={'business-purpose-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -249,8 +246,7 @@ export const ShippingDestinationInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Shipping destination"
-                required={true}
+                label="Shipping destination *"
             >
                 <select
                     className={'shipping-dest-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -273,7 +269,7 @@ export const DeliveryAttentionInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Delivery attention to"
+                label="Delivery attention to *"
                 required={true}
             >
                 <textarea

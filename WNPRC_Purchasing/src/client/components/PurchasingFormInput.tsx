@@ -13,10 +13,9 @@ export const PurchasingFormInput: FC<PurchasingFormInputProps> = memo((props) =>
 
     return (
         <Row>
-            <Col xs={12} md={7} className='request-order-form-row'>
-                <Col xs={4} lg={3}>
+            <Col xs={11} md={9} className='request-order-form-row'>
+                <Col sm={3} md={4}>
                     <label>{label}</label>
-                    {required ? ' *' : ''}
                 </Col>
                 <Col xs={9} lg={8}>
                     {children}

@@ -3,6 +3,7 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="purchasingRequests" tableDbType="TABLE" useColumnOrder="true">
                 <tableTitle>Purchasing Requests</tableTitle>
+                <javaCustomizer class="org.labkey.wnprc_purchasing.table.WNPRC_PurchasingCustomizer"/>
                 <titleColumn>rowId</titleColumn>
                 <columns>
                     <column columnName="rowId"/>
@@ -45,7 +46,7 @@
                     </column>
                     <column columnName="attachments">
                         <columnTitle>Attachments</columnTitle>
-                        <textAlign>left</textAlign>
+<!--                        <textAlign>left</textAlign>-->
 <!--                        <displayColumnFactory>-->
 <!--                            <className>org.labkey.wnprc_purchasing.table.AttachmentDisplayColumnFactory</className>-->
 <!--                        </displayColumnFactory>-->

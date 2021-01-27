@@ -1,19 +1,29 @@
 package org.labkey.wnprc_purchasing.table;
 
-import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.query.QueryAction;
-import org.labkey.api.query.QueryService;
+import org.labkey.api.files.FileContentService;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.util.HtmlStringBuilder;
+import org.labkey.api.util.Path;
+import org.labkey.api.webdav.AbstractWebdavResource;
+import org.labkey.api.webdav.WebdavResolver;
+import org.labkey.api.webdav.WebdavResolverImpl;
+import org.labkey.api.webdav.WebdavResource;
+
+import java.util.Collection;
+
+import static org.labkey.api.util.DOM.A;
+import static org.labkey.api.util.DOM.Attribute.href;
+import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.DOM.createHtml;
 
 public class AttachmentDisplayColumnFactory implements DisplayColumnFactory
 {
+    private final String PURCHASING_ATTACHMENT_FOLDER = "PurchasingRequestAttachments";
 
     @Override
     public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -31,26 +41,24 @@ public class AttachmentDisplayColumnFactory implements DisplayColumnFactory
         @Override
         public HtmlString getFormattedHtml(RenderContext ctx)
         {
-            String fileAttachment = (String) ctx.get(getColumnInfo().getFieldKey());
-            StringBuilder html = new StringBuilder();
-            if (StringUtils.isNotBlank(fileAttachment))
+            String subFolder = String.valueOf(getValue(ctx));
+            WebdavResolver resolver = WebdavResolverImpl.get();
+            Path root = resolver.getRootPath();
+            String pathStr = AbstractWebdavResource.c(root.getName() + ctx.getContainerPath(), FileContentService.FILES_LINK, PURCHASING_ATTACHMENT_FOLDER, subFolder);
+            WebdavResource attachmentRoot = resolver.lookup(Path.parse(pathStr));
+            HtmlStringBuilder html = HtmlStringBuilder.of();
+
+            if (null != attachmentRoot)
             {
-                //file attachments are saved as a string with "||" delimiters between file names ex. fileA||fileB
-                String[] attachments = fileAttachment.split("\\|\\|");
+                Collection<? extends WebdavResource> list = attachmentRoot.list();
                 int index = 0;
-                for (String attachment : attachments)
+
+                for(WebdavResource r : list)
                 {
                     if (index++ > 0) {
                         html.append(", ");
                     }
-                    ActionURL url = QueryService.get().urlFor(ctx.getViewContext().getUser(), ctx.getViewContext().getContainer(), QueryAction.executeQuery, "exp", "Files");
-                    url.addParameter("Name", attachment);
-                    html.append("<a href=\"");
-//                    html.append(PageFlowUtil.filter(url));
-                    html.append("labkey/_webdav/WNPRC%20Purchasing/%40files/PurchasingRequestAttachments/38/IMG-2982.jpg");
-                    html.append("\">");
-                    html.append(attachment);
-                    html.append("</a>");
+                    html.append(createHtml(A(at(href, r.getHref(ctx.getViewContext())), r.getName())));
                 }
             }
             else
@@ -58,8 +66,7 @@ public class AttachmentDisplayColumnFactory implements DisplayColumnFactory
                 html.append(HtmlString.NBSP);
             }
 
-            return HtmlString.of(html);
+            return html.getHtmlString();
         }
-
     }
 }

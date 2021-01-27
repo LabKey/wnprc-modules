@@ -301,12 +301,6 @@ public class WNPRC_PurchasingManager
         confirmNum.setRangeURI("string");
         extensibleCols.add(confirmNum);
 
-        GWTPropertyDescriptor attachments = new GWTPropertyDescriptor();
-        attachments.setName("attachments");
-        attachments.setRangeURI("string");
-        attachments.setDescription("'||' separated attachment files");
-        extensibleCols.add(attachments);
-
         domain.setFields(extensibleCols);
 
         try {

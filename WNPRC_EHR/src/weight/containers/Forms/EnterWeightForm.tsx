@@ -45,7 +45,7 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   const [errorLevel, setErrorLevel] = useState<FormErrorLevels>("no-action");
   const [animalInfoState, setAnimalInfoState] = useState<AnimalInfoStates>("waiting");
 
-  const { submit, submitted, setrestraints, restraints, setEndTimeExternal, setStartTimeExternal, setFormFrameworkTypesExternal, wasSaved, isRecording, setIsRecordingExternal, setAnyErrorsEverExternal } = useContext(
+  const { submit, submitted, setRestraintsInAppContext, restraints, setEndTimeInAppContext, setStartTimeInAppContext, setFormFrameworkTypesInAppContext, wasSaved, isRecording, setIsRecordingInAppContext, setAnyErrorsEverInAppContext } = useContext(
     AppContext
   );
 
@@ -83,13 +83,13 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
   const validateItems = (name: string, value: string | number | object) => {
     if (value == "" && name == "animalid") {
       setAnyErrors(true);
-      setAnyErrorsEverExternal();
+      setAnyErrorsEverInAppContext();
       setErrorLevel("no-action");
       return;
     }
     if (value == "" && name == "weight" && animalError == "") {
       setAnyErrors(true);
-      setAnyErrorsEverExternal();
+      setAnyErrorsEverInAppContext();
       setErrorLevel("saveable");
       return;
     }
@@ -106,8 +106,8 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
     console.log('isRecording ', isRecording);
     if (isRecording)
       return;
-    setIsRecordingExternal(true);
-    setStartTimeExternal(new Date());
+    setIsRecordingInAppContext(true);
+    setStartTimeInAppContext(new Date());
   }
 
   const handleChange = (e: any) => {

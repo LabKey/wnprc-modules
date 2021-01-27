@@ -23,21 +23,22 @@ function ContextProvider({ children }) {
   const [batchAddUsed, setBatchAddUsed] = useState<boolean>(false);
   const [anyErrorsEver, setAnyErrorsEver] = useState<boolean>(false);
 
-  function setFormDataExternal(formdata){
+  const setFormDataInAppContext = (formdata) => {
     setFormData(formdata);
   }
 
-  function setrestraints(restraints) {
+  const setRestraintsInAppContext = (restraints) => {
     setRestraints(restraints);
   }
 
-  function setStartTimeExternal (startTime) {
+  const setStartTimeInAppContext = (startTime) => {
     //we only want to set this once
     if (startTime != ''){
       setStartTime(startTime);
     }
   }
-  function setEndTimeExternal (endTime){
+
+  const setEndTimeInAppContext = (endTime) => {
     if (!isRecording){
       return;
     }
@@ -45,31 +46,31 @@ function ContextProvider({ children }) {
     setIsRecording(false);
   }
 
-  function setTaskIdExternal(taskId){
+  const setTaskIdInAppContext = (taskId) => {
     setTaskId(taskId);
   }
 
-  function setFormFrameworkTypesExternal(formFrameworkTypes){
+  const setFormFrameworkTypesInAppContext = (formFrameworkTypes) => {
     setFormFrameworkTypes(formFrameworkTypes);
   }
 
-  function setWasSavedExternal(wasSaved){
+  const setWasSavedInAppContext = (wasSaved) => {
     setWasSaved(wasSaved);
   }
 
-  function setIsRecordingExternal(isRecording){
+  const setIsRecordingInAppContext = (isRecording) => {
     setIsRecording(isRecording);
   }
 
-  function setBulkEditUsedExternal(){
+  const setBulkEditUsedInAppContext = () => {
     setBulkEditUsed(true);
   }
 
-  function setBatchAddUsedExternal(){
+  const setBatchAddUsedInAppContext = () => {
     setBatchAddUsed(true);
   }
 
-  function setAnyErrorsEverExternal(){
+  const setAnyErrorsEverInAppContext = () => {
     setAnyErrorsEver(true);
   }
 
@@ -110,25 +111,25 @@ function ContextProvider({ children }) {
   const defaultContext = {
     submitted,
     submit,
-    setrestraints,
+    setRestraintsInAppContext,
     restraints,
-    setStartTimeExternal,
-    setEndTimeExternal,
-    setFormDataExternal,
+    setStartTimeInAppContext,
+    setEndTimeInAppContext,
+    setFormDataInAppContext,
     formdata,
-    setTaskIdExternal,
+    setTaskIdInAppContext,
     taskId,
-    setFormFrameworkTypesExternal,
+    setFormFrameworkTypesInAppContext,
     formFrameworkTypes,
-    setWasSavedExternal,
+    setWasSavedInAppContext,
     wasSaved,
-    setIsRecordingExternal,
+    setIsRecordingInAppContext,
     isRecording,
-    setBulkEditUsedExternal,
+    setBulkEditUsedInAppContext,
     bulkEditUsed,
-    setBatchAddUsedExternal,
+    setBatchAddUsedInAppContext,
     batchAddUsed,
-    setAnyErrorsEverExternal,
+    setAnyErrorsEverInAppContext,
     anyErrorsEver
   };
 

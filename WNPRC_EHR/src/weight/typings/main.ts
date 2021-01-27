@@ -50,26 +50,26 @@ export interface ConfigProps {
 export interface ContextProviderProps {
     submitted: boolean;
     submit: () => void;
-    setrestraints: (restraints: Array<any>) => void;
+    setRestraintsInAppContext: (restraints: Array<any>) => void;
     restraints: Array<any>;
-    setStartTimeExternal: (startTime: object) => void;
-    setEndTimeExternal: (endTime: object) => void;
+    setStartTimeInAppContext: (startTime: object) => void;
+    setEndTimeInAppContext: (endTime: object) => void;
     formdata: Array<any>;
-    setFormDataExternal: (formData: Array<any>) => void;
-    setTaskIdExternal: (taskID: string) => void;
+    setFormDataInAppContext: (formData: Array<any>) => void;
+    setTaskIdInAppContext: (taskID: string) => void;
     taskId: string;
     formFrameworkTypes: string;
-    setFormFrameworkTypesExternal: (fff: object) => void;
+    setFormFrameworkTypesInAppContext: (fff: object) => void;
     wasSaved: boolean;
-    setWasSavedExternal: (wasSaved: boolean) => void;
+    setWasSavedInAppContext: (wasSaved: boolean) => void;
     isRecording: boolean;
-    setIsRecordingExternal: (isRecording: boolean) => void;
+    setIsRecordingInAppContext: (isRecording: boolean) => void;
     bulkEditUsed: boolean;
-    setBulkEditUsedExternal: () => void;
+    setBulkEditUsedInAppContext: () => void;
     batchAddUsed: boolean;
-    setBatchAddUsedExternal: () => void;
+    setBatchAddUsedInAppContext: () => void;
     anyErrorsEver: boolean;
-    setAnyErrorsEverExternal: () => void;
+    setAnyErrorsEverInAppContext: () => void;
 }
 
 export interface CustomAlertProps {

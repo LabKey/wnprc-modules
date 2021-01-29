@@ -170,14 +170,19 @@
 
         // Use a try block to ensure that we always show the hidden div.
         try {
+            debugger;
             if ($numberOfRenders == 0){
                 ko.applyBindings(WebUtils.VM);
             }else{
-                for(var i =0; i<unBindComponents.length; i++){
-                    var nodeComponent = document.getElementById(unBindComponents[i]);
-                    ko.cleanNode(nodeComponent);
-                    ko.applyBindings(WebUtils.VM, nodeComponent);
+                if(typeof ko !== 'undefined'){
+                    for(var i =0; i<unBindComponents.length; i++){
+                        var nodeComponent = document.getElementById(unBindComponents[i]);
+                        ko.cleanNode(nodeComponent);
+                        ko.applyBindings(WebUtils.VM, nodeComponent);
+                    }
+
                 }
+
             }
         }
         catch (e) {

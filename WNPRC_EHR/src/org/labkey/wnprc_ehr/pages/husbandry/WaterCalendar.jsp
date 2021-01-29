@@ -39,11 +39,12 @@
 %>
 
 
-
-<%--<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js'></script>
-<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js'></script>--%>
-<%--<script src= '"https://unpkg.com/popper.js/dist/umd/popper.min.js"'></script>
+<%--Uncommenting this section brings the undefined to the calendar view
+DO NOT UNCOMMENT --%>
+<%--<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.0/fullcalendar.min.css' />
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.0/fullcalendar.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js'></script>
+<script src= 'https://unpkg.com/popper.js/dist/umd/popper.min.js'></script>
 <script src= 'https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js'></script>--%>
 <%--<script src= '/labkey/webutils/lib/ko/core/knockout-3.4.0.js' type="text/javascript"></script>--%>
 <%--<script src= '/labkey/webutils/lib/webutils_core/api.js' type="text/javascript"></script>--%>
@@ -717,7 +718,7 @@
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
-                debugger;
+
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "CloseWaterOrder", null, {
                         lsid:               waterOrder.lsid,
@@ -738,7 +739,6 @@
                             $('#waterInfoPanel').unblock();
 
                         }else if (response.errors){
-                            debugger;
                             document.getElementById("returnTitle").style.display = "block";
                             document.getElementById("modelServerResponse").style.display = "block";
 
@@ -796,7 +796,6 @@
 
                 WebUtils.VM.requestRowInForm = row;
                 var waterOrder = ko.mapping.toJS(row);
-                debugger;
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
@@ -833,7 +832,7 @@
 
                         }
                         if (!response.success){
-                            debugger;
+
                             response.errors;
                             $('#myModal');
 
@@ -922,7 +921,7 @@
                 var form = ko.mapping.toJS(WebUtils.VM.taskDetails);
                 var taskid = LABKEY.Utils.generateUUID();
                 //var date = form.date.format("Y-m-d H:i:s");
-                debugger;
+
                 var insertDate = new Date(form.date);
                 if (form.frequencyCoalesced == "1"){
                     insertDate.setHours(8);

@@ -1522,8 +1522,8 @@ public class TriggerScriptHelper {
             }
 
             //TODO: only change water schedule animals if they are not in Lixit
-            String animalCondition = checkIfAnimalInCondition(animalId,clientStartDate).get(animalId);
-            if (animalCondition.equals("lixit")){
+           Map animalCondition = checkIfAnimalInCondition(animalId,clientStartDate);
+            if ("lixit".equals(animalCondition.get(animalId).toString())){
                 List<Map<String, Object>> rowToAdd = null;
 
                 JSONObject scheduledAnimalRecord = new JSONObject();
@@ -1531,6 +1531,7 @@ public class TriggerScriptHelper {
                 scheduledAnimalRecord.put("id", animalId);
                 scheduledAnimalRecord.put("condition", waterSource);
                 scheduledAnimalRecord.put("project", project);
+                scheduledAnimalRecord.put("mlsperKg",animalCondition.get("mlsPerKg"));
 
                 rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
 
@@ -1999,9 +2000,9 @@ public class TriggerScriptHelper {
         return returnMeaning;
     }
 
-    public Map<String,String> checkIfAnimalInCondition(String animalId, Date clientDate)
+    public Map<String,Object> checkIfAnimalInCondition(String animalId, Date clientDate)
     {
-        Map<String,String> returnCondition = new HashMap<>();
+        Map<String,Object> returnCondition = new HashMap<>();
 
         Calendar filterDate = Calendar.getInstance();
         filterDate.setTime(clientDate);
@@ -2014,7 +2015,7 @@ public class TriggerScriptHelper {
         sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.DESC, false);
 
 
-        TableSelector rawAnimals = new TableSelector(waterGiven, PageFlowUtil.set("id", "date", "condition"),filter, sort);
+        TableSelector rawAnimals = new TableSelector(waterGiven, PageFlowUtil.set("id", "date", "condition", "mlsperKg"),filter, sort);
         rawAnimals.setMaxRows(1);
         Map<String, Object>[] animalsFromServer = rawAnimals.getMapArray();
 
@@ -2025,6 +2026,7 @@ public class TriggerScriptHelper {
             {
                 String condition = ConvertHelper.convert(animalRestricted.get("condition"), String.class);
                 returnCondition.put(animalId, ConvertHelper.convert(animalRestricted.get("condition"), String.class));
+                returnCondition.put("mlsPerKg", ConvertHelper.convert(animalRestricted.get("mlsperKg"), Double.class));
 
             }
         }

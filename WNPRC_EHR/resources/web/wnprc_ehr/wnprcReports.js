@@ -1232,7 +1232,7 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
                             afterrender: {
                                 fn: function() {
                                     var applyBindings = function() {
-                                        var $animalNodes = jQuery('#' + panelId).find('animal-housing');
+                                        var $animalNodes = $('#' + panelId).find('animal-housing');
 
                                         $animalNodes.each(function() {
                                             if (typeof ko !== 'undefined') {

@@ -89,14 +89,12 @@ export const PurchaseAdminPanel: FC<Props> = memo((props) => {
                     <Col xs={11} lg={6}>
                         <OrderDateInput
                             value={model.orderDate}
-                            hasError={model.errors}
                             onChange={onValueChange}
                         />
                     </Col>
                     <Col xs={11} lg={6}>
                         <CardPostDateInput
                             value={model.cardPostDate}
-                            hasError={false}
                             onChange={onValueChange}
                         />
                     </Col>

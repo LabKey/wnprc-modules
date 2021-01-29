@@ -175,11 +175,48 @@ export interface RestraintObj {
     error: string;
 }
 
-export type GroupCommandType = {
-    [key in CommandType]: object;
+export type DataRowsPerCommandType = {
+    CommandType: Array<RowObj>;
 }
 
 export interface BulkEditFieldProps {
     fieldValues: (values: object) => void;
     restraints: Array<any>;
+}
+
+export type InsertValuesWithCommand = {
+    CommandType: any;
+}
+
+export type WeightValuesType = {
+    Id: string;
+    QCStateLabel: string;
+    date: string;
+    weight: number;
+    remark: string;
+    taskid: string;
+    objectid: string;
+    restraint_objectid: string;
+}
+
+export type TaskValuesType = {
+    taskId: string;
+    duedate: string;
+    assignedTo: number;
+    category: string;
+    title: string;
+    formType: string;
+    QCStateLabel: string;
+}
+
+export type RestraintValuesType = {
+    Id: string;
+    restraintType: string;
+    taskid: string
+    objectid: string;
+    date: string;
+}
+
+export type Commands = {
+    commands: Array<ModifyRowsCommands>
 }

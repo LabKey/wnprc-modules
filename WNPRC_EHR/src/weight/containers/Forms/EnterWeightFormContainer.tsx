@@ -5,7 +5,12 @@ import {
   useRef,
   useState
 } from "react";
-import {InfoProps, ConfigProps, RowObj, UserEditableWeightFormValues, ModifyRowsCommands} from "../../typings/main";
+import {
+  InfoProps,
+  ConfigProps,
+  RowObj,
+  UserEditableWeightFormValues,
+} from "../../typings/main";
 import {
   getQCStateByLabel,
   getQCStateByRowId,
@@ -18,9 +23,8 @@ import AnimalInfoPane from "../../components/AnimalInfoPane";
 import EnterWeightForm from "./EnterWeightForm";
 import {
   getlocations,
-  setupWeightValues,
-  setupTaskValues,
-  setupRestraintValues, groupCommands, checkUniqueIds
+  groupCommands,
+  setupJsonData
 } from "../../query/helpers";
 //import {setupJsonData} from "../../../query/helpers";
 import BatchModal from "../../components/BatchModal";
@@ -354,61 +358,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setFormDataInAppContext(copyformdata);
   };
 
-  const setupValues = (formdata: any[], QCStateLabel: string, valuekey: string, taskId: string) => {
-    let newarray = [];
-    for (let item of formdata){
-      let newobj = {};
-      for (let key of Object.keys(item)){
-        let pair = {[key]: item[key][valuekey]};
-        newobj = {...newobj, ...pair}
-      }
-      newarray.push(newobj);
-    }
-    return newarray;
-  };
-
-  const setupJsonData = (values: Array<any>, QCState: string, taskId: string, reviewer: number, date: string, command: CommandType) => {
-    //for each grouped item (insert, update, delete), set up commands for each diff set.
-    let commands: Array<ModifyRowsCommands> = [];
-    Object.keys(values).forEach(function(key: CommandType,index: number) {
-      let valuesToInsert = setupWeightValues(values[key], QCState, taskId);
-      commands.push({
-        schemaName: "study",
-        queryName: "weight",
-        command: key,
-        rows: valuesToInsert
-      })
-    });
-
-    let taskValue = setupTaskValues(taskId, date, reviewer, QCState);
-    commands.push({
-      schemaName: "ehr",
-      queryName: "tasks",
-      command: command,
-      rows: taskValue
-    });
-
-
-    Object.keys(values).forEach(function(key: CommandType, index: number) {
-      let valuesToInsert = setupRestraintValues(values[key], taskId);
-      commands.push({
-        schemaName: "study",
-        queryName: "restraints",
-        command: key,
-        rows: valuesToInsert
-      })
-    });
-    //TODO add trackids somewhere
-    /*if (!checkUniqueIds(trackIds)) {
-      //find which index is affected and return it to the correct area?
-      alert("Cannot insert duplicate animals per weight form.");
-      return;
-    }*/
-    return {
-      commands: commands
-    };
-  };
-
   const onSave = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     //to animate the popup
@@ -426,9 +375,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
 
     let itemsToInsert = groupCommands(formdata);
     let currentDate: string = dayjs(new Date()).format();
-    //let jsonData = setupJsonData(itemsToInsert)
-    //I think i need to rip out the task and attach it to commands
-
     let jsonData = setupJsonData(itemsToInsert, QCState, taskId, reviewer, currentDate, command);
 
     saveRowsDirect(jsonData).then(()=> {
@@ -504,7 +450,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       collapsed: { value: false, error: "" },
       visibility: { value: "visible", error: "" },
       restraint: {value: "None", error: "", objectid: restraintObjectId },
-      validated: {value: false, error: ""}
+      validated: {value: false, error: ""},
     });
     setFormDataInAppContext(initialdata);
     getQCStateMap().then(map => {

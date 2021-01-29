@@ -53,6 +53,7 @@ services:
       - "postgres"
     volumes:
       - "${LABKEY_FILES_DIR}:/backups/new_files_dir"
+      - "${LABKEY_NEW_FILES}:/space/ehr_files"
       - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"
       - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"

@@ -1418,9 +1418,13 @@ public class WNPRC_EHRController extends SpringActionController
         private List<String> roomNames;
         private List<String> roomEmails;
         private List<String> objectIds;
+        private Date start;
+        private Date end;
         private List<Date> starts;
         private List<Date> ends;
+        private boolean allDay;
         private String subject;
+        private String eventId;
 
         public String getCalendarId()
         {
@@ -1447,6 +1451,16 @@ public class WNPRC_EHRController extends SpringActionController
             return objectIds;
         }
 
+        public Date getStart()
+        {
+            return start;
+        }
+
+        public Date getEnd()
+        {
+            return end;
+        }
+
         public List<Date> getStarts()
         {
             return starts;
@@ -1457,9 +1471,19 @@ public class WNPRC_EHRController extends SpringActionController
             return ends;
         }
 
+        public boolean getAllDay()
+        {
+            return allDay;
+        }
+
         public String getSubject()
         {
             return subject;
+        }
+
+        public String getEventId()
+        {
+            return eventId;
         }
 
         public void setCalendarId(String calendarId)
@@ -1487,6 +1511,16 @@ public class WNPRC_EHRController extends SpringActionController
             this.objectIds = objectIds;
         }
 
+        public void setStart(Date start)
+        {
+            this.start = start;
+        }
+
+        public void setEnd(Date end)
+        {
+            this.end = end;
+        }
+
         public void setStarts(List<Date> starts)
         {
             this.starts = starts;
@@ -1497,15 +1531,53 @@ public class WNPRC_EHRController extends SpringActionController
             this.ends = ends;
         }
 
+        public void setAllDay(boolean allDay)
+        {
+            this.allDay = allDay;
+        }
+
         public void setSubject(String title)
         {
             this.subject = title;
+        }
+
+        public void setEventId(String eventId)
+        {
+            this.eventId = eventId;
+        }
+    }
+
+    @ActionNames("UpdateUnmanagedEvent")
+    @RequiresLogin
+    public class UpdateUnmanagedEventAction extends ApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try {
+
+                Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+
+                ZonedDateTime start = ZonedDateTime.ofInstant(event.getStart().toInstant(), ZoneId.of("America/Chicago"));
+                ZonedDateTime end = ZonedDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.of("America/Chicago"));
+                Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, null, event.getAllDay());
+                updatedEvent.id = event.getEventId();
+
+                calendar.updateUnmanagedEvent(event.getCalendarId(), updatedEvent, response);
+                response.put("success", true);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+            return response;
         }
     }
 
     @ActionNames("UpdateSurgeryProcedure")
     @RequiresLogin()
-    public class UpdateSurgeryProcedureActions extends ApiAction<SurgeryProcedureUpdateEvent>
+    public class UpdateSurgeryProcedureAction extends ApiAction<SurgeryProcedureUpdateEvent>
     {
         @Override
         public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception
@@ -1546,7 +1618,7 @@ public class WNPRC_EHRController extends SpringActionController
                         ZonedDateTime start = newStart.atZone(ZoneId.of("America/Chicago"));
                         ZonedDateTime end = newEnd.atZone(ZoneId.of("America/Chicago"));
 
-                        Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, Graph.buildAttendeeList(event.getRoomEmails().get(i)));
+                        Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, Graph.buildAttendeeList(event.getRoomEmails().get(i)), false);
                         updatedEvent.id = (String) roomRow.get("event_id");
                         updatedEvents.add(updatedEvent);
 
@@ -1560,7 +1632,7 @@ public class WNPRC_EHRController extends SpringActionController
                 updateRecords(updatedRooms, "wnprc", "procedure_scheduled_rooms");
                 if (updatedEvents.size() > 0) {
 
-                    boolean eventsUpdated = calendar.updateEvents(event.getCalendarId(), updatedEvents, response, true);
+                    boolean eventsUpdated = calendar.updateProcedureEvents(event.getCalendarId(), updatedEvents, response, true);
 
                     transaction.commit();
                     response.put("success", true);
@@ -1575,12 +1647,12 @@ public class WNPRC_EHRController extends SpringActionController
                             ZonedDateTime start = ((Timestamp) roomRow.get("date")).toInstant().atZone(ZoneId.of("America/Chicago"));
                             ZonedDateTime end = ((Timestamp) roomRow.get("enddate")).toInstant().atZone(ZoneId.of("America/Chicago"));
 
-                            Event resetEvent = Graph.buildEvent(start, end, null, null, Graph.buildAttendeeList((String) roomRow.get("room_fs_email")));
+                            Event resetEvent = Graph.buildEvent(start, end, null, null, Graph.buildAttendeeList((String) roomRow.get("room_fs_email")), false);
                             resetEvent.id = (String) roomRow.get("event_id");
 
                             resetEvents.add(resetEvent);
                         }
-                        calendar.updateEvents(event.getCalendarId(), resetEvents, null, false);
+                        calendar.updateProcedureEvents(event.getCalendarId(), resetEvents, null, false);
                     } catch (Exception ex) {
                         response.put("error", "There was an error. It's possible that only some of the events were updated in outlook. " +
                                 "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");

@@ -48,27 +48,6 @@ CREATE TABLE wnprc.procedure_names
     CONSTRAINT pk_procedure_name PRIMARY KEY (name)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_calendars;
-CREATE TABLE wnprc.procedure_calendars
-(
-    calendar_id       VARCHAR(100),
-    calendar_type     VARCHAR(100),
-    display_name      VARCHAR(500),
-    api_action        VARCHAR(200),
-    folder_id         VARCHAR(200),
-    show_by_default   BOOLEAN DEFAULT TRUE,
-    default_bg_color  VARCHAR(20),
-
-    -- Default fields for LabKey.
-    container         entityid NOT NULL,
-    createdby         userid,
-    created           TIMESTAMP,
-    modifiedby        userid,
-    modified          TIMESTAMP,
-
-    CONSTRAINT pk_procedure_calendar_id PRIMARY KEY (calendar_id)
-);
-
 DROP TABLE IF EXISTS wnprc.procedure_scheduled_rooms;
 CREATE TABLE wnprc.procedure_scheduled_rooms
 (
@@ -112,6 +91,29 @@ CREATE TABLE wnprc.azure_accounts
     modified        TIMESTAMP,
 
     CONSTRAINT pk_azure_accounts_name PRIMARY KEY (name)
+);
+
+DROP TABLE IF EXISTS wnprc.procedure_calendars;
+CREATE TABLE wnprc.procedure_calendars
+(
+    calendar_id       VARCHAR(100),
+    calendar_type     VARCHAR(100),
+    display_name      VARCHAR(500),
+    account_name      VARCHAR(100),
+    api_action        VARCHAR(200),
+    folder_id         VARCHAR(200),
+    show_by_default   BOOLEAN DEFAULT TRUE,
+    default_bg_color  VARCHAR(20),
+
+    -- Default fields for LabKey.
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+
+    CONSTRAINT pk_procedure_calendar_id PRIMARY KEY (calendar_id),
+    CONSTRAINT fk_azure_accounts_name FOREIGN KEY (account_name) REFERENCES wnprc.azure_accounts (name)
 );
 
 -- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';

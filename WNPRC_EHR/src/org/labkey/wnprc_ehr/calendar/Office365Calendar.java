@@ -24,7 +24,6 @@ import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -32,7 +31,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,10 +44,12 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private User user;
     private Container container;
 
+    private Map<String, String> ACCOUNT_NAMES = null;
+    private Map<String, String> UNMANAGED_CALENDARS = null;
     private Map<String, String> BASE_CALENDARS = null;
     private Map<String, String> CALENDARS_BY_ID = null;
     private Map<String, String> CALENDAR_COLORS = null;
-    private static final String AZURE_NAME = "ProcedureCalendar";
+    private static final String PROCEDURE_ACCOUNT_NAME = "ProcedureCalendar";
     public static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     public static final String DEFAULT_BG_COLOR = "#3788D8";
 
@@ -71,8 +71,38 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     //Gets the access token from the property manager. The access token is kept up to date via a scheduled job
-    private String getAccessToken() {
-        return PropertyManager.getEncryptedStore().getWritableProperties(AZURE_NAME + ".Credentials", false).get("AccessToken");
+    private String getAccessToken(String accountName) {
+        return PropertyManager.getEncryptedStore().getWritableProperties(accountName + ".Credentials", false).get("AccessToken");
+    }
+
+    //Gets the base calendars (surgeries_scheduled, surgeries_on_hold, procedures_scheduled, procedures_on_hold)
+    private synchronized Map<String, String> getAccountNames() {
+        if (ACCOUNT_NAMES == null) {
+            ACCOUNT_NAMES = new HashMap<>();
+            TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("procedure_calendars_and_rooms");
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "account_name"), null, null);
+            Map<String, Object>[] calendars = ts.getMapArray();
+            for (Map<String, Object> calendar : calendars) {
+                ACCOUNT_NAMES.put((String) calendar.get("calendar_id"), (String) calendar.get("account_name"));
+            }
+        }
+        return ACCOUNT_NAMES;
+    }
+
+    //Gets the base calendars (surgeries_scheduled, surgeries_on_hold, procedures_scheduled, procedures_on_hold)
+    private synchronized Map<String, String> getUnmanagedCalendars() {
+        if (UNMANAGED_CALENDARS == null) {
+            UNMANAGED_CALENDARS = new HashMap<>();
+            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365Unmanaged");
+            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("procedure_calendars");
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "folder_id"), filter, null);
+            Map<String, Object>[] calendars = ts.getMapArray();
+            for (Map<String, Object> calendar : calendars) {
+                UNMANAGED_CALENDARS.put((String) calendar.get("calendar_id"), (String) calendar.get("folder_id"));
+            }
+        }
+        return UNMANAGED_CALENDARS;
     }
 
     //Gets the base calendars (surgeries_scheduled, surgeries_on_hold, procedures_scheduled, procedures_on_hold)
@@ -94,7 +124,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private synchronized Map<String, String> getCalendarsById() {
         if (CALENDARS_BY_ID == null) {
             CALENDARS_BY_ID = new HashMap<>();
-            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365");
+            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.IN, List.of("Office365", "Office365Unmanaged"));
             DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
             TableInfo ti = schema.getTable("procedure_calendars");
             TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "folder_id"), filter, null);
@@ -109,7 +139,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private synchronized Map<String, String> getCalendarColors() {
         if (CALENDAR_COLORS == null) {
             CALENDAR_COLORS = new HashMap<>();
-            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.IN, List.of("Office365", "Office365Resource"));
+            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.IN, List.of("Office365", "Office365Resource", "Office365Unmanaged"));
             TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("procedure_calendars_and_rooms");
             TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "default_bg_color"), filter, null);
             Map<String, Object>[] calendars = ts.getMapArray();
@@ -121,14 +151,14 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     public Map<String, Boolean> isRoomAvailable(List<String> rooms, ZonedDateTime startTime, ZonedDateTime endTime) {
-        Map<String, Boolean> availability = Graph.getAvailability(getAccessToken(), rooms, startTime, endTime);
+        Map<String, Boolean> availability = Graph.getAvailability(getAccessToken(PROCEDURE_ACCOUNT_NAME), rooms, startTime, endTime);
         return availability;
     }
 
-    public boolean updateEvents(String baseCalendarName, List<Event> events, JSONObject response, boolean returnEvents) throws IOException {
+    public boolean updateProcedureEvents(String baseCalendarName, List<Event> events, JSONObject response, boolean returnEvents) throws IOException {
         List<Event> updatedEvents = new ArrayList<>();
         for (Event event : events) {
-            Event updatedEvent = Graph.updateEvent(getAccessToken(), event.id, event);
+            Event updatedEvent = Graph.updateEvent(getAccessToken(getAccountNames().get(baseCalendarName)), event.id, event);
             updatedEvent.calendar = new com.microsoft.graph.models.extensions.Calendar();
             updatedEvent.calendar.id = getBaseCalendars().get(baseCalendarName);
             updatedEvents.add(updatedEvent);
@@ -138,6 +168,20 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             JSONObject updatedEventsJson = getJsonEventList(updatedEvents);
             response.put("events", updatedEventsJson);
         }
+        return true;
+    }
+
+    public boolean updateUnmanagedEvent(String calendarName, Event event, JSONObject response) {
+        Event updatedEvent = Graph.updateEvent(getAccessToken(getAccountNames().get(calendarName)), event.id, event);
+        updatedEvent.calendar = new com.microsoft.graph.models.extensions.Calendar();
+        updatedEvent.calendar.id = getUnmanagedCalendars().get(calendarName);
+
+        List<Event> updatedEvents = new ArrayList<>();
+        updatedEvents.add(updatedEvent);
+
+        JSONObject updatedEventsJson = getUnmanagedJsonEventList(updatedEvents);
+        response.put("events", updatedEventsJson);
+
         return true;
     }
 
@@ -179,8 +223,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 props.setProperty("requestid", requestId);
                 props.setProperty("objectid", (String) roomRequest.get("objectid"));
 
-                Event newEvent = Graph.buildEvent(startTime, endTime, subject, props, attendees);
-                Event createdEvent = Graph.createEvent(getAccessToken(), getBaseCalendars().get(calendarId), newEvent);
+                Event newEvent = Graph.buildEvent(startTime, endTime, subject, props, attendees, false);
+                Event createdEvent = Graph.createEvent(getAccessToken(getAccountNames().get(calendarId)), getBaseCalendars().get(calendarId), newEvent);
                 roomRequest.put("event_id", createdEvent.id);
                 createdEvent.calendar = new com.microsoft.graph.models.extensions.Calendar();
                 createdEvent.calendar.id = getBaseCalendars().get(calendarId);
@@ -193,7 +237,11 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     public void cancelEvent(String eventId) {
-        Graph.deleteEvent(getAccessToken(), eventId);
+        cancelEvent(eventId, PROCEDURE_ACCOUNT_NAME);
+    }
+
+    public void cancelEvent(String eventId, String calendarName) {
+        Graph.deleteEvent(getAccessToken(getAccountNames().get(calendarName)), eventId);
     }
 
     private JSONObject getJsonEventList(List<Event> events) throws IOException {
@@ -289,7 +337,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 //If the surgeries account is listed as an attendee for some reason, then skip it
                 //The base calendar event will be processed on the last time through the loop regardless,
                 //and we want it organized by which surgeries calendar it's on
-                if (currentCalName.equalsIgnoreCase(settings.getAccount(AZURE_NAME))) {
+                if (currentCalName.equalsIgnoreCase(settings.getAccount(PROCEDURE_ACCOUNT_NAME))) {
                     continue;
                 }
 
@@ -320,6 +368,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     }
                     jsonEvent.put("start", start);
                     jsonEvent.put("end", end);
+                    jsonEvent.put("allDay", event.isAllDay);
                     jsonEvent.put("calendarId", currentCalName);
                     String bgColor = getCalendarColors().get(currentCalName);
                     jsonEvent.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
@@ -382,9 +431,47 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return allJsonData;
     }
 
+    private JSONObject getUnmanagedJsonEventList(List<Event> events) {
+        //JSONObject allJsonData = new JSONObject();
+        JSONObject allJsonEvents = new JSONObject();
+        for (Event event : events) {
+            String currentCalName = getCalendarsById().get(event.calendar.id);
+            allJsonEvents.computeIfAbsent(currentCalName, key -> new JSONArray());
+            JSONObject jsonEvent = new JSONObject();
+            JSONObject extendedProps = new JSONObject();
+
+            jsonEvent.put("title", event.subject);
+            String id = UUID.randomUUID().toString();
+            String start = dtf.format(LocalDateTime.parse(event.start.dateTime));
+            String end = dtf.format(LocalDateTime.parse(event.end.dateTime));
+            jsonEvent.put("start", start);
+            jsonEvent.put("end", end);
+            jsonEvent.put("allDay", event.isAllDay);
+            jsonEvent.put("calendarId", currentCalName);
+            String bgColor = getCalendarColors().get(currentCalName);
+            jsonEvent.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
+            jsonEvent.put("textColor", getTextColor(jsonEvent.getString("backgroundColor")));
+            jsonEvent.put("id", id);
+
+            extendedProps.put("isUnmanaged", true);
+            extendedProps.put("eventId", event.id);
+            jsonEvent.put("extendedProps", extendedProps);
+
+            ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);
+        }
+
+        return allJsonEvents;
+    }
+
     private JSONObject getCalendarEvents(String start, String end) throws IOException {
-        JSONObject jsonEvents = getJsonEventList(getCalendarAppointments(start, end));
-        return jsonEvents;
+        JSONObject baseCalendarEvents = getJsonEventList(getCalendarAppointments(start, end, getBaseCalendars()));
+        JSONObject unmanagedEvents = getUnmanagedJsonEventList(getCalendarAppointments(start, end, getUnmanagedCalendars()));
+
+        for (Map.Entry entry : unmanagedEvents.entrySet()) {
+            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", entry.getValue());
+        }
+
+        return baseCalendarEvents;
     }
 
 //    private JSONObject getRoomEvents(String start, String end, String roomId) {
@@ -392,10 +479,10 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 //        return jsonEvents;
 //    }
 
-    private List<Event> getCalendarAppointments(String start, String end) {
+    private List<Event> getCalendarAppointments(String start, String end, Map<String, String> calendars) {
         List<Event> events = new ArrayList<>();
-        for (Map.Entry<String, String> entry : getBaseCalendars().entrySet()) {
-            events.addAll(Graph.readEvents(getAccessToken(), entry.getValue(), start, end));
+        for (Map.Entry<String, String> entry : calendars.entrySet()) {
+            events.addAll(Graph.readEvents(getAccessToken(getAccountNames().get(entry.getKey())), entry.getValue(), start, end));
         }
         return events;
     }

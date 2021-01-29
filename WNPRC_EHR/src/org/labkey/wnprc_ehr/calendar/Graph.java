@@ -40,6 +40,7 @@ public class Graph {
 
     private static IGraphServiceClient graphClient = null;
     private static SimpleAuthProvider authProvider = null;
+    private static DateTimeFormatter isoLocalDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
     private static DateTimeFormatter isoLocalDateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     private static DefaultLogger logger = new DefaultLogger();
 
@@ -197,7 +198,7 @@ public class Graph {
     	return updatedEvent;
     }
 
-    public synchronized static List<Event> updateEvents(String accessToken, List<Event> events)  {
+    public synchronized static List<Event> updateEvents(String accessToken, List<Event> events, List<Map<String, Object>> oldEvents)  {
     	ensureGraphClient(accessToken);
 
     	//TODO things
@@ -262,7 +263,7 @@ public class Graph {
 
     // Helper methods below
 
-    public static Event buildEvent(ZonedDateTime start, ZonedDateTime end, String subject, Properties bodyProps, List<Attendee> attendees) throws IOException {
+    public static Event buildEvent(ZonedDateTime start, ZonedDateTime end, String subject, Properties bodyProps, List<Attendee> attendees, boolean isAllDay) throws IOException {
     	Event event = new Event();
     	if (subject != null) {
 			event.subject = subject;
@@ -281,13 +282,20 @@ public class Graph {
 		}
 
     	DateTimeTimeZone eventStart = new DateTimeTimeZone();
-    	eventStart.dateTime = start.format(isoLocalDateTimeFormatter);
-    	eventStart.timeZone = start.getZone().toString();
-    	DateTimeTimeZone eventEnd = new DateTimeTimeZone();
-    	eventEnd.dateTime = end.format(isoLocalDateTimeFormatter);
-    	eventEnd.timeZone = end.getZone().toString();
-    	event.start = eventStart;
-    	event.end = eventEnd;
+		DateTimeTimeZone eventEnd = new DateTimeTimeZone();
+		if (isAllDay) {
+			eventStart.dateTime = start.format(isoLocalDateFormatter);
+			eventEnd.dateTime = start.plusDays(1).format(isoLocalDateFormatter);
+		} else {
+			eventStart.dateTime = start.format(isoLocalDateTimeFormatter);
+			eventEnd.dateTime = end.format(isoLocalDateTimeFormatter);
+		}
+		eventStart.timeZone = start.getZone().toString();
+		eventEnd.timeZone = end.getZone().toString();
+
+		event.start = eventStart;
+		event.end = eventEnd;
+		event.isAllDay = isAllDay;
     	event.attendees = attendees;
 
     	return event;

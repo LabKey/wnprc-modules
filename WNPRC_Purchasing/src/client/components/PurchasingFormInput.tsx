@@ -9,7 +9,7 @@ interface PurchasingFormInputProps
 }
 export const PurchasingFormInput: FC<PurchasingFormInputProps> = memo((props) => {
 
-    const {label, required, children} = props;
+    const {label, children} = props;
 
     return (
         <Row>

@@ -31,6 +31,7 @@ import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Date;
 import java.util.List;
 
 public class WNPRC_PurchasingController extends SpringActionController
@@ -88,7 +89,8 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _program;
         String _confirmNum;
         String _invoiceNum;
-        String _attachments;
+        Date _orderDate;
+        Date _cardPostDate;
         Boolean _hasNewVendor;
         String _newVendorName;
         String _newVendorStreetAddress;
@@ -262,14 +264,24 @@ public class WNPRC_PurchasingController extends SpringActionController
             _invoiceNum = invoiceNum;
         }
 
-        public String getAttachments()
+        public Date getOrderDate()
         {
-            return _attachments;
+            return _orderDate;
         }
 
-        public void setAttachments(String attachments)
+        public void setOrderDate(Date orderDate)
         {
-            _attachments = attachments;
+            _orderDate = orderDate;
+        }
+
+        public Date getCardPostDate()
+        {
+            return _cardPostDate;
+        }
+
+        public void setCardPostDate(Date cardPostDate)
+        {
+            _cardPostDate = cardPostDate;
         }
 
         public Boolean getHasNewVendor()

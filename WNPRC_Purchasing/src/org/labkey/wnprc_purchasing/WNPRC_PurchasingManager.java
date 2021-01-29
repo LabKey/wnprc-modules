@@ -132,7 +132,6 @@ public class WNPRC_PurchasingManager
             row.put("email", requestForm.getNewVendorEmail());
             row.put("url", requestForm.getNewVendorUrl());
             row.put("notes", requestForm.getNewVendorNotes());
-            //TODO: set qc state - need to verify workflow with client
             newVendorData.add(row);
         }
 
@@ -157,7 +156,8 @@ public class WNPRC_PurchasingManager
         row.put("program", requestForm.getProgram());
         row.put("confirmationNum", requestForm.getConfirmNum());
         row.put("invoiceNum", requestForm.getInvoiceNum());
-        row.put("attachments", requestForm.getAttachments());
+        row.put("orderDate", requestForm.getOrderDate());
+        row.put("cardPostDate", requestForm.getCardPostDate());
         purchasingRequestsData.add(row);
 
         // insert data
@@ -300,6 +300,16 @@ public class WNPRC_PurchasingManager
         confirmNum.setName("confirmationNum");
         confirmNum.setRangeURI("string");
         extensibleCols.add(confirmNum);
+
+        GWTPropertyDescriptor orderDate = new GWTPropertyDescriptor();
+        orderDate.setName("orderDate");
+        orderDate.setRangeURI("dateTime");
+        extensibleCols.add(orderDate);
+
+        GWTPropertyDescriptor cardPostDate = new GWTPropertyDescriptor();
+        cardPostDate.setName("cardPostDate");
+        cardPostDate.setRangeURI("dateTime");
+        extensibleCols.add(cardPostDate);
 
         domain.setFields(extensibleCols);
 

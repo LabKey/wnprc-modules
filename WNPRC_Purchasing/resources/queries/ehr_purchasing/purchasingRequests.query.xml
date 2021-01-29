@@ -46,12 +46,9 @@
                     </column>
                     <column columnName="attachments">
                         <columnTitle>Attachments</columnTitle>
-<!--                        <textAlign>left</textAlign>-->
-<!--                        <displayColumnFactory>-->
-<!--                            <className>org.labkey.wnprc_purchasing.table.AttachmentDisplayColumnFactory</className>-->
-<!--                        </displayColumnFactory>-->
                     </column>
-
+                    <column columnName="orderDate"/>
+                    <column columnName="cardPostDate"/>
                 </columns>
             </table>
         </tables>

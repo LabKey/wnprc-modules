@@ -54,6 +54,8 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 program: purchasingAdminModel?.program,
                 confirmNum: purchasingAdminModel?.confirmationNum,
                 invoiceNum: purchasingAdminModel?.invoiceNum,
+                orderDate: purchasingAdminModel?.orderDate,
+                cardPostDate: purchasingAdminModel?.cardPostDate,
                 lineItems: lineItems,
                 lineItemsToDelete: lineItemsToDelete,
                 hasNewVendor: (!!(requestOrder.vendor === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
@@ -72,20 +74,9 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
             success: Utils.getCallbackWrapper(response => {
                 if (documentAttachmentModel?.filesToUpload?.size > 0) {
                     uploadFiles(documentAttachmentModel, getServerContext().container.name, response.requestId).then((files: Array<string>) => {
-
-                        //once the files are uploaded successfully, then update the purchasingRequest.attachments column with concatenated filenames
-                        //make sure that the previously saved files are also included
                         const fileNames = documentAttachmentModel?.savedFiles?.length > 0 ? files.concat(documentAttachmentModel.savedFiles.map((file:SavedFileModel) => file.fileName)) : files;
-                        updateAttachmentColumn(response.requestId, fileNames.join(FILE_ATTACHMENT_SEPARATOR)).then((fileNames:string) => {resolve({fileNames: fileNames});})
+                        resolve({fileNames: fileNames});
                     });
-                }
-                //handle previously saved files - esp. if the user has removed the saved file
-                else if (documentAttachmentModel?.savedFiles?.length > 0) {
-
-                    //TODO: removal of the file from the UI does not delete the file from the file server, it only updates the purchasingRequests.attachments col -
-                    // need to verify with the client if that is the intended behavior in case the files need to be kept on the server for auditing reasons
-                    const fileNames = documentAttachmentModel.savedFiles.join(FILE_ATTACHMENT_SEPARATOR);
-                    updateAttachmentColumn(response.requestId, fileNames).then((fileNames:string) => {resolve({fileNames: fileNames});})
                 }
                 else {
                     resolve(response);
@@ -125,23 +116,6 @@ function uploadFiles(model: DocumentAttachmentModel, container: string, requestI
                     });
             }
         }, this);
-    });
-}
-
-export async function updateAttachmentColumn(rowId: number, fileNames: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-        Query.updateRows({
-            containerPath: ActionURL.getContainer(),
-            schemaName: EHR_PURCHASING_SCHEMA_NAME,
-            queryName: "purchasingRequests",
-            rows: [{rowId: rowId, attachments: fileNames}],
-            success: response => {
-                resolve(response.rows);
-            },
-            failure: error => {
-                reject(error);
-            },
-        });
     });
 }
 

@@ -190,3 +190,51 @@ export const InvoiceInput: FC<InputProps> = memo((props) => {
         </div>
     );
 })
+
+export const OrderDateInput: FC<InputProps> = memo((props) => {
+
+    const {onChange, value} = props;
+    const onValueChange = useCallback((evt) => {
+        onChange('orderDate', evt.target.value);
+    }, [onChange]);
+
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Order date"
+                required={false}
+            >
+                <input
+                    type="date"
+                    value={value}
+                    onChange={onValueChange}
+                    id="order-date-id"
+                />
+            </PurchasingFormInput>
+        </div>
+    );
+})
+
+export const CardPostDateInput: FC<InputProps> = memo((props) => {
+
+    const {onChange, value} = props;
+    const onValueChange = useCallback((evt) => {
+        onChange('cardPostDate', evt.target.value);
+    }, [onChange]);
+
+    return (
+        <div>
+            <PurchasingFormInput
+                label="Card post date"
+                required={false}
+            >
+                <input
+                    type="date"
+                    value={value}
+                    onChange={onValueChange}
+                    id="card-post-date-id"
+                />
+            </PurchasingFormInput>
+        </div>
+    );
+})

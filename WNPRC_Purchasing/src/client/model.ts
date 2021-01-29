@@ -42,6 +42,8 @@ export class PurchaseAdminModel {
     readonly program: string = '4';
     readonly confirmationNum?: string;
     readonly invoiceNum?: string;
+    readonly orderDate?: Date;
+    readonly cardPostDate?: Date;
     readonly errorMsg?: string;
     readonly errors?: any;
 

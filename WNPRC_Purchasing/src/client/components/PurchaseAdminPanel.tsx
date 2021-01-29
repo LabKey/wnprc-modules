@@ -2,7 +2,14 @@ import React, {FC, memo, useCallback} from 'react';
 import {Form, Panel, Row, Col} from 'react-bootstrap';
 import {PurchaseAdminModel} from '../model';
 import {
-    AssignedToInput, CreditCardOptionInput, ConfirmationInput, InvoiceInput, ProgramInput, StatusInput
+    AssignedToInput,
+    CreditCardOptionInput,
+    ConfirmationInput,
+    InvoiceInput,
+    ProgramInput,
+    StatusInput,
+    OrderDateInput,
+    CardPostDateInput
 } from "./PurchaseAdminPanelInputs";
 import produce, {Draft} from "immer";
 
@@ -40,14 +47,12 @@ export const PurchaseAdminPanel: FC<Props> = memo((props) => {
                     <Col xs={11} lg={6}>
                         <AssignedToInput
                             value={model.assignedTo}
-                            hasError={false}
                             onChange={onValueChange}
                         />
                     </Col>
                     <Col xs={11} lg={6}>
                         <ProgramInput
                             value={model.program}
-                            hasError={false}
                             onChange={onValueChange}
                         />
                     </Col>
@@ -56,14 +61,12 @@ export const PurchaseAdminPanel: FC<Props> = memo((props) => {
                     <Col xs={11} lg={6}>
                         <CreditCardOptionInput
                             value={model.creditCardOption}
-                            hasError={false}
                             onChange={onValueChange}
                         />
                     </Col>
                     <Col xs={11} lg={6}>
                         <ConfirmationInput
                             value={model.confirmationNum}
-                            hasError={false}
                             onChange={onValueChange}
                         />
                     </Col>
@@ -72,13 +75,27 @@ export const PurchaseAdminPanel: FC<Props> = memo((props) => {
                     <Col xs={11} lg={6}>
                         <StatusInput
                             value={model.qcState}
-                            hasError={false}
                             onChange={onValueChange}
                         />
                     </Col>
                     <Col xs={11} lg={6}>
                         <InvoiceInput
                             value={model.invoiceNum}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={11} lg={6}>
+                        <OrderDateInput
+                            value={model.orderDate}
+                            hasError={model.errors}
+                            onChange={onValueChange}
+                        />
+                    </Col>
+                    <Col xs={11} lg={6}>
+                        <CardPostDateInput
+                            value={model.cardPostDate}
                             hasError={false}
                             onChange={onValueChange}
                         />

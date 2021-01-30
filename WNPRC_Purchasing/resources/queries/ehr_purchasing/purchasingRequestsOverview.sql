@@ -5,7 +5,7 @@ SELECT
        pr.otherAcctAndInves,
        pr.qcState   AS requestStatus,
        pr.created   AS requestDate,
-       pr.createdBy AS requestor,
+       pr.createdBy AS requester,
        items.totalCost
 FROM ehr_purchasing.purchasingRequests pr
 LEFT JOIN
@@ -16,3 +16,4 @@ LEFT JOIN
         GROUP BY requestRowId
     ) items
 ON pr.rowId = items.requestRowId
+WHERE ISMEMBEROF(pr.createdBy)

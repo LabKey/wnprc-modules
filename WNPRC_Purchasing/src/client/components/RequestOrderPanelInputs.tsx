@@ -22,12 +22,12 @@ export const AccountInput: FC<InputProps> = memo((props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        getData('ehr_billingLinked', 'aliases', 'alias, rowid', 'alias').then(vals => {
+        getData('ehr_purchasing', 'userAccountsAssocFiltered', 'account, rowid', 'account').then(vals => {
             setDropDownVals(vals);
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'rowid', 'alias', true), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'rowid', 'account', true), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
         onChange('account', evt.target.value);

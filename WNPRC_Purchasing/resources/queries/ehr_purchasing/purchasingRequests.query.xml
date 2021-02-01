@@ -17,6 +17,7 @@
                     </column>
                     <column columnName="vendorId">
                         <columnTitle>Vendor</columnTitle>
+                        <required>true</required>
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>vendor</fkTable>
@@ -32,6 +33,7 @@
                         <columnTitle>Other Acct and Investigator</columnTitle>
                     </column>
                     <column columnName="shippingInfoId">
+                        <required>true</required>
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>shippingInfo</fkTable>

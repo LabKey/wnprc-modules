@@ -71,8 +71,8 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                             {
                                 (showOtherAcct || model.account === "Other") &&
                                 <AccountOtherInput
-                                        value={model.accountOther}
-                                        hasError={model.errors?.find((field) => field.fieldName === 'accountOther')}
+                                        value={model.otherAcctAndInves}
+                                        hasError={model.errors?.find((field) => field.fieldName === 'otherAcctAndInves')}
                                         hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
                                         onChange={onValueChange}
                                 />
@@ -80,8 +80,8 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                         </Col>
                         <Col xs={11} lg={6}>
                             <ShippingDestinationInput
-                                value={model.shippingDestination}
-                                hasError={model.errors?.find((field) => field.fieldName === 'shippingDestination')}
+                                value={model.shippingInfoId}
+                                hasError={model.errors?.find((field) => field.fieldName === 'shippingInfoId')}
                                 onChange={onValueChange}
                             />
                         </Col>
@@ -89,7 +89,7 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                 <Row>
                     <Col xs={11} lg={6}>
                         <VendorInput
-                            hasError={model.errors?.find((field) => field.fieldName === 'vendor')}
+                            hasError={model.errors?.find((field) => field.fieldName === 'vendorId')}
                             onChange={onValueChange}
                             model={model}
                             onModelChange={onModelChange}
@@ -97,8 +97,8 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                     </Col>
                     <Col xs={11} lg={6}>
                         <DeliveryAttentionInput
-                            value={model.deliveryAttentionTo}
-                            hasError={model.errors?.find((field) => field.fieldName === 'deliveryAttentionTo')}
+                            value={model.shippingAttentionTo}
+                            hasError={model.errors?.find((field) => field.fieldName === 'shippingAttentionTo')}
                             onChange={onValueChange}
                         />
                     </Col>
@@ -106,8 +106,8 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                 <Row>
                     <Col xs={11} lg={6}>
                         <BusinessPurposeInput
-                            value={model.purpose}
-                            hasError={model.errors?.find((field) => field.fieldName === 'purpose')}
+                            value={model.justification}
+                            hasError={model.errors?.find((field) => field.fieldName === 'justification')}
                             onChange={onValueChange}
                         />
                     </Col>
@@ -126,21 +126,21 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                 {/*{*/}
                 {/*    (showOtherAcct || model.account === "Other") &&*/}
                 {/*    <AccountOtherInput*/}
-                {/*            value={model.accountOther}*/}
-                {/*            hasError={model.errors?.find((field) => field.fieldName === 'accountOther')}*/}
+                {/*            value={model.otherAcctAndInves}*/}
+                {/*            hasError={model.errors?.find((field) => field.fieldName === 'otherAcctAndInves')}*/}
                 {/*            hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}*/}
                 {/*            onChange={onValueChange}*/}
                 {/*    />*/}
                 {/*}*/}
                 {/*<VendorInput*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'vendor')}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'vendorId')}*/}
                 {/*    onChange={onValueChange}*/}
                 {/*    model={model}*/}
                 {/*    onModelChange={onModelChange}*/}
                 {/*/>*/}
                 {/*<BusinessPurposeInput*/}
-                {/*    value={model.purpose}*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'purpose')}*/}
+                {/*    value={model.justification}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'justification')}*/}
                 {/*    onChange={onValueChange}*/}
                 {/*/>*/}
                 {/*<SpecialInstructionInput*/}
@@ -148,13 +148,13 @@ export const RequestOrderPanel: FC<Props> = memo((props) => {
                 {/*    onChange={onValueChange}*/}
                 {/*/>*/}
                 {/*<ShippingDestinationInput*/}
-                {/*    value={model.shippingDestination}*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'shippingDestination')}*/}
+                {/*    value={model.shippingInfoId}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'shippingInfoId')}*/}
                 {/*    onChange={onValueChange}*/}
                 {/*/>*/}
                 {/*<DeliveryAttentionInput*/}
-                {/*    value={model.deliveryAttentionTo}*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'deliveryAttentionTo')}*/}
+                {/*    value={model.shippingAttentionTo}*/}
+                {/*    hasError={model.errors?.find((field) => field.fieldName === 'shippingAttentionTo')}*/}
                 {/*    onChange={onValueChange}*/}
                 {/*/>*/}
             </Form>

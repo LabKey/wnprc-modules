@@ -51,13 +51,13 @@ export const App : FC = memo(() => {
                 setRequestOrderModel(RequestOrderModel.create({
                     rowId: vals[0].rowId,
                     account: !!vals[0].otherAcctAndInves ? "Other" : vals[0].account,
-                    accountOther: !!vals[0].otherAcctAndInves ? vals[0].otherAcctAndInves : undefined,
-                    vendor: vals[0].vendorId,
-                    purpose: vals[0].justification,
-                    shippingDestination: vals[0].shippingInfoId,
-                    deliveryAttentionTo: vals[0].shippingAttentionTo,
+                    otherAcctAndInves: !!vals[0].otherAcctAndInves ? vals[0].otherAcctAndInves : undefined,
+                    vendorId: vals[0].vendorId,
+                    justification: vals[0].justification,
+                    shippingInfoId: vals[0].shippingInfoId,
+                    shippingAttentionTo: vals[0].shippingAttentionTo,
                     comments: vals[0].comments,
-                    otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add 'Account & Principal Investigator' value '" + vals[0].otherAcctAndInves + "' into the system" : undefined
+                    otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add 'Account & Principal Investigator' value '" + vals[0].otherAcctAndInves + "' into the system." : undefined
                 }));
                 //show purchasing admin panel if there is rowId
                 //TODO: add condition on purchasing admin user
@@ -170,33 +170,33 @@ export const App : FC = memo(() => {
         //if required values are not provided, then set errorMessage for the panel and errors on each field to highlight boxes in red
         let msg = "Unable to submit request, missing required field";
 
-        //catch errors for Request Order panel
+        // catch errors for Request Order panel
         const requestOrderErrors = [];
-        if (!requestOrderModel.account) {
-            requestOrderErrors.push({fieldName: 'account'});
-        }
-        if (requestOrderModel.account === 'Other' && !requestOrderModel.accountOther) {
-            requestOrderErrors.push({fieldName: 'accountOther'});
-        }
-        if (!requestOrderModel.vendor) {
-            requestOrderErrors.push({fieldName: 'vendor'});
-        }
-        if (!requestOrderModel.purpose) {
-            requestOrderErrors.push({fieldName: 'purpose'});
-        }
-        if (!requestOrderModel.shippingDestination) {
-            requestOrderErrors.push({fieldName: 'shippingDestination'});
-        }
-        if (!requestOrderModel.deliveryAttentionTo) {
-            requestOrderErrors.push({fieldName: 'deliveryAttentionTo'});
-        }
-        if (requestOrderErrors.length > 0) {
-            const updatedRequestOrderObj = produce(requestOrderModel, (draft: Draft<RequestOrderModel>) => {
-                draft['errorMsg'] = requestOrderErrors?.length > 1 ? (msg + 's.') : (msg + '.');
-                draft['errors'] = requestOrderErrors;
-            });
-            setRequestOrderModel(updatedRequestOrderObj);
-        }
+        // if (!requestOrderModel.account) {
+        //     requestOrderErrors.push({fieldName: 'account'});
+        // }
+        // if (requestOrderModel.account === 'Other' && !requestOrderModel.otherAcctAndInves) {
+        //     requestOrderErrors.push({fieldName: 'otherAcctAndInves'});
+        // }
+        // if (!requestOrderModel.vendorId) {
+        //     requestOrderErrors.push({fieldName: 'vendorId'});
+        // }
+        // if (!requestOrderModel.justification) {
+        //     requestOrderErrors.push({fieldName: 'justification'});
+        // }
+        // if (!requestOrderModel.shippingInfoId) {
+        //     requestOrderErrors.push({fieldName: 'shippingInfoId'});
+        // }
+        // if (!requestOrderModel.shippingAttentionTo) {
+        //     requestOrderErrors.push({fieldName: 'shippingAttentionTo'});
+        // }
+        // if (requestOrderErrors.length > 0) {
+        //     const updatedRequestOrderObj = produce(requestOrderModel, (draft: Draft<RequestOrderModel>) => {
+        //         draft['errorMsg'] = requestOrderErrors?.length > 1 ? (msg + 's.') : (msg + '.');
+        //         draft['errors'] = requestOrderErrors;
+        //     });
+        //     setRequestOrderModel(updatedRequestOrderObj);
+        // }
 
         // catch errors for Line Items panel
         let hasLineItemError = false;
@@ -249,8 +249,41 @@ export const App : FC = memo(() => {
                     if (r.success || r.fileNames?.length > 0) {
                         //navigate to purchasing overview grid/main page
                         window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
+                    }})
+                .catch(reject => {
+                    if (reject?.errors?.length > 0) {
+                        setIsSaving(false);
+                        let msg = "Unable to submit request, missing required field";
+                        const requestOrderErrors = [];
+                        reject.errors.map((error) => {
+                            if (error.field === "account") {
+                                requestOrderErrors.push({fieldName: 'account', errorMessage: error.msg || error.message});
+                            }
+                            if (error.field === "otherAcctAndInves") {
+                                requestOrderErrors.push({fieldName: 'otherAcctAndInves', errorMessage: error.msg || error.message});
+                            }
+                            if (error.field === "vendorId") {
+                                requestOrderErrors.push({fieldName: 'vendorId', errorMessage: error.msg || error.message});
+                            }
+                            if (error.field === "justification") {
+                                requestOrderErrors.push({fieldName: 'justification', errorMessage: error.msg || error.message});
+                            }
+                            if (error.field === "shippingInfoId") {
+                                requestOrderErrors.push({fieldName: 'shippingInfoId', errorMessage: error.msg || error.message});
+                            }
+                            if (error.field === "shippingAttentionTo") {
+                                requestOrderErrors.push({fieldName: 'shippingAttentionTo', errorMessage: error.msg || error.message});
+                            }
+                        });
+                        if (requestOrderErrors.length > 0) {
+                            const updatedRequestOrderObj = produce(requestOrderModel, (draft: Draft<RequestOrderModel>) => {
+                                draft['errorMsg'] = requestOrderErrors?.length > 1 ? (msg + 's.') : (msg + '.');
+                                draft['errors'] = requestOrderErrors;
+                            });
+                            setRequestOrderModel(updatedRequestOrderObj);
+                        }
                     }
-            });
+                });
         }
 
     }, [requestOrderModel, lineItems, lineItemRowsToDelete, purchaseAdminModel, documentAttachmentModel, isSaving]);
@@ -272,7 +305,7 @@ export const App : FC = memo(() => {
                             className='btn btn-primary pull-right'
                             id={requestId ? 'save' : 'submitForReview'}
                             name={requestId ? 'save' : 'submitForReview'}
-                            onClick={onSaveBtnHandler}>{requestId ? 'Save' : 'Submit for Review'}
+                            onClick={onSaveBtnHandler}>{requestId ? 'Submit' : 'Submit for Review'}
                     </button>
                 </>
             }
@@ -285,10 +318,15 @@ export const App : FC = memo(() => {
             }
             {
                 requestOrderModel.otherAcctAndInvesWarning &&
-                <div className='other-account-warning alert alert-danger'>
+                <div className='other-account-warning alert alert-warning'>
                     {requestOrderModel.otherAcctAndInvesWarning}
                 </div>
-
+            }
+            {
+                (!!requestOrderModel.errorMsg || !!lineItemErrorMsg) &&
+                        requestOrderModel?.errors?.map((error) => {
+                            return <div className='alert alert-danger'> {error.errorMessage} </div>
+                        })
             }
         </>
     )

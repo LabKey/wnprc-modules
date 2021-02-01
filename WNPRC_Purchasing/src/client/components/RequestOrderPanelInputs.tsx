@@ -57,7 +57,7 @@ export const AccountOtherInput: FC<InputProps> = memo((props) => {
     const {onChange, value, hasError, hasOtherAcctWarning} = props;
 
     const onTextChange = useCallback((evt) => {
-        onChange('accountOther', evt.target.value);
+        onChange('otherAcctAndInves', evt.target.value);
     }, [onChange]);
 
     return (
@@ -118,13 +118,13 @@ export const VendorInput: FC<VendorInputProps> = memo((props) => {
         else {
             setShowPopup(false);
         }
-        onChange('vendor', val);
+        onChange('vendorId', val);
     }, [onChange, hasError, model, onModelChange]);
 
     const onVendorCancel = useCallback((newVendor : VendorModel) => {
         const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
             if (!VendorModel.getDisplayString(model.newVendor)) {
-                draft['vendor'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+                draft['vendorId'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
             }
         });
         onModelChange(updatedModel);
@@ -145,7 +145,7 @@ export const VendorInput: FC<VendorInputProps> = memo((props) => {
                 label="Vendor *"
             >
                 <select className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                        value={model.vendor}
+                        value={model.vendorId}
                         onChange={onValueChange}
                 >
                     <option hidden value="">Select</option>
@@ -163,7 +163,7 @@ export const VendorInput: FC<VendorInputProps> = memo((props) => {
                         onChangeShowPopup={onChangeShowPopup}/>
             }
             {
-                model.vendor === 'Other' && model.newVendor && VendorModel.getDisplayString(model.newVendor).length > 0 &&
+                model.vendorId === 'Other' && model.newVendor && VendorModel.getDisplayString(model.newVendor).length > 0 &&
                <>
                 <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
                    <Button className='edit-other-vendor-button btn btn-default' variant="primary" onClick={onClickEditNewVendor}>
@@ -181,7 +181,7 @@ export const BusinessPurposeInput: FC<InputProps> = memo((props) => {
     const {onChange, value, hasError} = props;
 
     const onTextChange = useCallback((evt) => {
-        onChange('purpose', evt.target.value);
+        onChange('justification', evt.target.value);
     }, [onChange]);
 
     return (
@@ -240,7 +240,7 @@ export const ShippingDestinationInput: FC<InputProps> = memo((props) => {
     const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'streetAddress', false, 'shippingAlias'), [dropDownVals]);
 
     const onValueChange = useCallback((evt) => {
-        onChange('shippingDestination', evt.target.value);
+        onChange('shippingInfoId', evt.target.value);
     }, [onChange]);
 
     return (
@@ -264,7 +264,7 @@ export const ShippingDestinationInput: FC<InputProps> = memo((props) => {
 export const DeliveryAttentionInput: FC<InputProps> = memo((props) => {
     const {onChange, value, hasError} = props;
     const onTextChange = useCallback((evt) => {
-        onChange('deliveryAttentionTo', evt.target.value);
+        onChange('shippingAttentionTo', evt.target.value);
     }, [onChange]);
     return (
         <div>

@@ -129,8 +129,9 @@ $red-shadow:            rgba(160, 80, 76, 0.5);
 }
 
 .other-account-warning {
-  color: $brand-warning;
-  font-weight: bold;
+  margin-top: 1%;
+  background-color: #ffdaa39e;
+  border-color: $yellow-border
 }
 
 .other-account-warning-box {

@@ -14,9 +14,12 @@
                             <fkTable>purchasingRequests</fkTable>
                         </fk>
                     </column>
-                    <column columnName="item"/>
+                    <column columnName="item">
+                        <required>true</required>
+                    </column>
                     <column columnName="itemUnitId">
                         <columnTitle>Item Unit</columnTitle>
+                        <required>true</required>
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>itemUnits</fkTable>
@@ -24,9 +27,11 @@
                     </column>
                     <column columnName="controlledSubstance"/>
                     <column columnName="quantity">
+                        <required>true</required>
                         <formatString>###,##0.00</formatString>
                     </column>
                     <column columnName="unitCost">
+                        <required>true</required>
                         <formatString>$###,##0.00</formatString>
                     </column>
                     <column columnName="itemStatusId">

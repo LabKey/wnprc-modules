@@ -24,6 +24,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -61,7 +62,12 @@ public class WNPRC_PurchasingController extends SpringActionController
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
-           WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
+            ValidationException validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
+
+            if (validationExceptions.hasErrors())
+            {
+                throw new ValidationException(validationExceptions);
+            }
 
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
@@ -81,7 +87,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         Integer _vendor;
         String _purpose;
         Integer _shippingDestination;
-        String _deliveryAttentionTo;
+        String _shippingAttentionTo;
         String _comments;
         String _qcState;
         Integer _assignedTo;
@@ -184,14 +190,14 @@ public class WNPRC_PurchasingController extends SpringActionController
             _shippingDestination = shippingDestination;
         }
 
-        public String getDeliveryAttentionTo()
+        public String getShippingAttentionTo()
         {
-            return _deliveryAttentionTo;
+            return _shippingAttentionTo;
         }
 
-        public void setDeliveryAttentionTo(String deliveryAttentionTo)
+        public void setShippingAttentionTo(String shippingAttentionTo)
         {
-            _deliveryAttentionTo = deliveryAttentionTo;
+            _shippingAttentionTo = shippingAttentionTo;
         }
 
         public String getComments()

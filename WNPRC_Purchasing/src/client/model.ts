@@ -9,12 +9,12 @@ export class RequestOrderModel {
 
     readonly rowId?: number;
     readonly account: string;
-    readonly accountOther: string;
-    readonly vendor: string; //rowId of ehr_purchasing.vendor
+    readonly otherAcctAndInves: string;
+    readonly vendorId: string; //rowId of ehr_purchasing.vendor
     readonly newVendor?: VendorModel = VendorModel.create();
-    readonly purpose: string;
-    readonly shippingDestination: number; //rowId of ehr_purchasing.shippingInfo
-    readonly deliveryAttentionTo: string;
+    readonly justification: string;
+    readonly shippingInfoId: number; //rowId of ehr_purchasing.shippingInfo
+    readonly shippingAttentionTo: string;
     readonly comments?: string;
     readonly errorMsg?: string;
     readonly errors?: any;

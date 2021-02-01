@@ -8,7 +8,7 @@ import {
     VendorModel
 } from "./model";
 import {getWebDavFiles, uploadWebDavFile, WebDavFile} from '@labkey/components';
-import {PURCHASING_REQUEST_ATTACHMENTS_DIR, FILE_ATTACHMENT_SEPARATOR, EHR_PURCHASING_SCHEMA_NAME} from "./constants";
+import {PURCHASING_REQUEST_ATTACHMENTS_DIR} from "./constants";
 
 export function getData(schemaName: string, queryName: string, colNames: string, sort?: string, filter?: Array<Filter.IFilter>) : Promise<any> {
     return new Promise((resolve, reject) => {
@@ -41,12 +41,12 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
             method: 'POST',
             jsonData: {
                 rowId: requestOrder.rowId,
-                account: requestOrder.account !== 'Other' ? requestOrder.account : undefined,
-                accountOther: requestOrder.accountOther,
-                vendor: requestOrder.vendor !== 'Other' ? requestOrder.vendor : undefined,
-                purpose: requestOrder.purpose,
-                shippingDestination: requestOrder.shippingDestination,
-                deliveryAttentionTo: requestOrder.deliveryAttentionTo,
+                account: requestOrder.account !== 'Other' ? requestOrder.account : -1,
+                accountOther: requestOrder.otherAcctAndInves,
+                vendor: requestOrder.vendorId !== 'Other' ? requestOrder.vendorId : undefined,
+                purpose: requestOrder.justification,
+                shippingDestination: requestOrder.shippingInfoId,
+                shippingAttentionTo: requestOrder.shippingAttentionTo,
                 comments: requestOrder.comments,
                 qcState: purchasingAdminModel?.qcState || requestOrder.qcState,
                 assignedTo: purchasingAdminModel?.assignedTo,
@@ -58,7 +58,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 cardPostDate: purchasingAdminModel?.cardPostDate,
                 lineItems: lineItems,
                 lineItemsToDelete: lineItemsToDelete,
-                hasNewVendor: (!!(requestOrder.vendor === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
+                hasNewVendor: (!!(requestOrder.vendorId === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
                 newVendorName: requestOrder.newVendor.vendorName,
                 newVendorStreetAddress: requestOrder.newVendor.streetAddress,
                 newVendorCity: requestOrder.newVendor.city,

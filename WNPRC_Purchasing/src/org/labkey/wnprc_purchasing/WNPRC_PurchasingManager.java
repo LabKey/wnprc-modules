@@ -16,6 +16,7 @@
 
 package org.labkey.wnprc_purchasing;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
@@ -27,8 +28,10 @@ import org.labkey.api.gwt.client.model.GWTDomain;
 import org.labkey.api.gwt.client.model.GWTPropertyDescriptor;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.PropertyValidationError;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.SimpleValidationError;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.TabLoader;
@@ -38,6 +41,7 @@ import org.labkey.api.security.User;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -108,11 +112,12 @@ public class WNPRC_PurchasingManager
         }
     }
 
-    public void submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
+    public ValidationException submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
     {
         UserSchema us = QueryService.get().getUserSchema(user, container, "ehr_purchasing");
         boolean isNewRequest = null == requestForm.getRowId();
         List<Map<String, Object>> insertedPurchasingReq = new ArrayList<>();
+        ValidationException validationErrors = new ValidationException();
 
         Map<String, Object> row;
 
@@ -139,15 +144,48 @@ public class WNPRC_PurchasingManager
         List<Map<String, Object>> purchasingRequestsData = new ArrayList<>();
 
         row = new CaseInsensitiveHashMap<>();
-        if (null != requestForm.getRowId()) {
+        if (null != requestForm.getRowId())
             row.put("rowId", requestForm.getRowId());
+
+        //handle validation
+
+        if (null != requestForm.getAccount())
+        {
+            if (requestForm.getAccount() == -1 && StringUtils.isBlank(requestForm.getAccountOther()))
+                validationErrors.addError(new PropertyValidationError("Required value for 'Account & Principal Investigator' not provided", "otherAcctAndInves"));
+            else if (requestForm.getAccount() == -1 && StringUtils.isNotBlank(requestForm.getAccountOther()))
+                row.put("otherAcctAndInves", requestForm.getAccountOther());
+            else if (requestForm.getAccount() > 0)
+                row.put("account", requestForm.getAccount());
         }
-        row.put("vendorId", requestForm.getVendor());
-        row.put("account", requestForm.getAccount());
-        row.put("otherAcctAndInves", requestForm.getAccountOther());
-        row.put("shippingInfoId", requestForm.getShippingDestination());
-        row.put("justification", requestForm.getPurpose());
-        row.put("shippingAttentionTo", requestForm.getDeliveryAttentionTo());
+        else
+            validationErrors.addError(new PropertyValidationError("Required value for 'Account to charge' not provided", "account"));
+
+        if (null == requestForm.getVendor())
+            validationErrors.addError(new PropertyValidationError("Required value for 'Vendor' not provided", "vendorId"));
+        else
+            row.put("vendorId", requestForm.getVendor());
+
+        if (null == requestForm.getPurpose())
+            validationErrors.addError(new PropertyValidationError("Required value for 'Business purpose' not provided", "justification"));
+        else
+            row.put("justification", requestForm.getPurpose());
+
+        if (null == requestForm.getShippingDestination())
+            validationErrors.addError(new PropertyValidationError("Required value for 'Shipping destination' not provided", "shippingInfoId"));
+        else
+            row.put("shippingInfoId", requestForm.getShippingDestination());
+
+        if (null == requestForm.getShippingAttentionTo())
+            validationErrors.addError(new PropertyValidationError("Required value for 'Delivery attention to' not provided", "shippingAttentionTo"));
+        else
+            row.put("shippingAttentionTo", requestForm.getShippingAttentionTo());
+
+        //return errors, if any
+        if (validationErrors.hasErrors())
+            return validationErrors;
+
+        //otherwise, continue adding non-required values
         row.put("comments", requestForm.getComments());
         //TODO: update assignedTo
         row.put("assignedTo", null != requestForm.getAssignedTo() ? requestForm.getAssignedTo() : user.getUserId());
@@ -178,9 +216,8 @@ public class WNPRC_PurchasingManager
                 List<Map<String, Object>> rowsInserted = qus.insertRows(user, container, newVendorData, errors, null, null);
 
                 //set new vendor's id
-                if (rowsInserted.size() == 1 && purchasingRequestsData.get(0).get("vendorId") == null) {
+                if (rowsInserted.size() == 1 && purchasingRequestsData.get(0).get("vendorId") == null)
                     purchasingRequestsData.get(0).put("vendorId", rowsInserted.get(0).get("rowId"));
-                }
             }
 
             if (purchasingRequestsTable != null)
@@ -188,14 +225,17 @@ public class WNPRC_PurchasingManager
                 qus = purchasingRequestsTable.getUpdateService();
                 assert qus != null;
                 if (isNewRequest)
-                {
                     insertedPurchasingReq = qus.insertRows(user, container, purchasingRequestsData, errors, null, null);
-                }
+                else
+                    insertedPurchasingReq = qus.updateRows(user, container, purchasingRequestsData, null, null, null);
+
+                if (null != insertedPurchasingReq)
+                    requestForm.setRowId((Integer) insertedPurchasingReq.get(0).get("rowId"));
                 else
                 {
-                    insertedPurchasingReq = qus.updateRows(user, container, purchasingRequestsData, null, null, null);
+                    validationErrors.addError(new SimpleValidationError("Unable to submit purchasing request"));
+                    return validationErrors;
                 }
-                requestForm.setRowId((Integer) insertedPurchasingReq.get(0).get("rowId"));
             }
 
             //Line items data
@@ -218,9 +258,7 @@ public class WNPRC_PurchasingManager
                     updatedLineItemsData.add(row);
                 }
                 else
-                {
                     newLineItemsData.add(row);
-                }
             }
 
             if (null != requestForm.getLineItemsToDelete()) {
@@ -238,21 +276,15 @@ public class WNPRC_PurchasingManager
                 assert qus != null;
 
                 if (newLineItemsData.size() > 0)
-                {
                     qus.insertRows(user, container, newLineItemsData, errors, null, null);
-                }
                 if (updatedLineItemsData.size() > 0)
-                {
                     qus.updateRows(user, container, updatedLineItemsData, null, null, null);
-                }
                 if (deleteLineItemsData.size() > 0)
-                {
                     qus.deleteRows(user, container, deleteLineItemsData, null, null);
-                }
             }
 
-            if (errors.hasErrors())
-                throw errors;
+            if (validationErrors.hasErrors())
+                return validationErrors;
 
             transaction.commit();
         }
@@ -260,6 +292,7 @@ public class WNPRC_PurchasingManager
         {
             throw new RuntimeException(e);
         }
+        return validationErrors;
     }
 
     public void addExtensibleColumns(Container container, User user)

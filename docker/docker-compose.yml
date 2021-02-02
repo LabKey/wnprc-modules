@@ -8,6 +8,7 @@ services:
 
   postgres:
     image: postgres:11
+    restart: always
     volumes:
       - "${PG_CONF_FILE}:/conf/postgresql.conf"
       - "${PG_DATA_DIR}:/var/lib/postgresql/data"

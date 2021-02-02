@@ -263,12 +263,12 @@ public class WNPRC_PurchasingManager
                     row.put("itemUnitId", lineItem.get("itemUnit"));
 
                 if (null == lineItem.get("unitCost"))
-                    lineItemErrors.addError(new PropertyValidationError("Required value for 'Unit Cost' not provided", "unitCost"));
+                    lineItemErrors.addError(new PropertyValidationError("Required numeric value for 'Unit Cost' not provided", "unitCost"));
                 else
                     row.put("unitCost", lineItem.get("unitCost"));
 
                 if (null == lineItem.get("quantity"))
-                    lineItemErrors.addError(new PropertyValidationError("Required value for 'Quantity' not provided", "quantity"));
+                    lineItemErrors.addError(new PropertyValidationError("Required numeric value for 'Quantity' not provided", "quantity"));
                 else
                     row.put("quantity", lineItem.get("quantity"));
 

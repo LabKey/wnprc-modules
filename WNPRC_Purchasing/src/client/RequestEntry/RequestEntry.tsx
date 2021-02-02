@@ -33,6 +33,7 @@ export const App : FC = memo(() => {
     const [lineItemRowsToDelete, setLineItemRowsToDelete] = useState<Array<number>>([]);
     const [documentAttachmentModel, setDocumentAttachmentModel] = useState<DocumentAttachmentModel>(DocumentAttachmentModel.create());
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
+    const [globalErrorMsg, setGlobalErrorMsg] = useState<string>();
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
@@ -188,8 +189,7 @@ export const App : FC = memo(() => {
                 setIsSaving(false);
 
                 //handle errors from the server
-                if (reject?.errors?.length > 0)
-                {
+                if (reject?.errors?.length > 0) {
                     let msg = "Unable to submit request, missing required field";
                     let hasLineItemError = false;
                     let lineItemsErrorCount = 0;
@@ -201,7 +201,7 @@ export const App : FC = memo(() => {
                             const lineItemErrors = [];
                             error.errors.map((error) => {
 
-                                // errors for Request Order panel
+                                // Errors for Request Order panel
                                 if (error.field === "account") {
                                     requestOrderErrors.push({fieldName: 'account', errorMessage: error.msg || error.message});
                                 }
@@ -233,7 +233,7 @@ export const App : FC = memo(() => {
                                     });
                                 }
 
-                                // catch errors for Line Items panel.
+                                // Errors for Line Items panel
                                 // Note: server throws error on the first sign on error, so will only see errors on the one
                                 // line item that error actually occurred on, and will not show all the other line items that might have errors
                                 if (error.field === "item") {
@@ -249,7 +249,7 @@ export const App : FC = memo(() => {
                                     lineItemErrors.push({fieldName: 'quantity', errorMessage: error.msg || error.message});
                                 }
                                 else if (error.field === "rowIndex") {
-                                    const txt = error.msg || error.message;//this is just the row index set on server side to identify error on specific index
+                                    const txt = error.msg || error.message;//this is just the row index set on server side to identify error on specific line item index
                                     errorOnIndex = parseInt(txt, 10);
                                 }
                             });
@@ -278,8 +278,10 @@ export const App : FC = memo(() => {
                         setLineItemErrorMsg(lineItemsErrorCount > 1 ? (msg + 's.') : (msg + '.'));
                     }
                 }
+                else if (reject?.exception) {
+                    setGlobalErrorMsg(reject.exception);
+                }
             });
-    // }
     }, [requestOrderModel, lineItems, lineItemRowsToDelete, purchaseAdminModel, documentAttachmentModel, isSaving]);
 
     return (
@@ -329,6 +331,9 @@ export const App : FC = memo(() => {
                             return <div className='alert alert-danger'> {error.errorMessage} </div>
                         })
                     })
+            }
+            {
+                (!!globalErrorMsg) && <div className='alert alert-danger'> {globalErrorMsg} </div>
             }
         </>
     )

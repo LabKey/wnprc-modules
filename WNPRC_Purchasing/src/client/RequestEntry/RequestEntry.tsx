@@ -18,12 +18,13 @@ import {RequestOrderPanel} from "../components/RequestOrderPanel";
 import {LineItemModel, RequestOrderModel, PurchaseAdminModel, DocumentAttachmentModel, SavedFileModel} from "../model";
 import {LineItemsPanel} from "../components/LineItemsPanel";
 import '../RequestEntry/RequestEntry.scss';
-import {ActionURL, Filter, getServerContext} from "@labkey/api";
+import {ActionURL, Filter, getServerContext, PermissionTypes, Security} from "@labkey/api";
 import produce, {Draft} from "immer";
 import {getData, getSavedFiles, submitRequest} from "../actions";
 import {PurchaseAdminPanel} from "../components/PurchaseAdminPanel";
 import {DocumentAttachmentPanel} from "../components/DocumentAttachmentPanel";
 import {PURCHASING_REQUEST_ATTACHMENTS_DIR} from "../constants";
+import {Alert} from "@labkey/components";
 
 export const App : FC = memo(() => {
 
@@ -37,6 +38,8 @@ export const App : FC = memo(() => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
+    const [hasPurchasingAdminPermission, setHasPurchasingAdminPermission] = useState<boolean>(false);
+    const [permissionError, setPermissionError] = useState<string>();
 
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
@@ -44,7 +47,21 @@ export const App : FC = memo(() => {
         // is fired on component mount
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
-        if (reqRowId)
+        Security.getUserPermissions({
+            containerPath: getServerContext().container.path,
+            success: (data) => {
+                const hasPerm = (data.container.effectivePermissions.indexOf(PermissionTypes.Read) > -1 &&
+                                    data.container.effectivePermissions.indexOf(PermissionTypes.Insert) > -1 &&
+                                    data.container.effectivePermissions.indexOf(PermissionTypes.Update) > -1 &&
+                                    data.container.effectivePermissions.indexOf(PermissionTypes.Delete) > -1);
+                setHasPurchasingAdminPermission(hasPerm);
+            },
+            failure: (error) => {
+                setPermissionError(error.exception);
+                setHasPurchasingAdminPermission(false);
+            }
+        });
+        if (reqRowId && hasPurchasingAdminPermission)
         {
             //get ehr_purchasing.purchasingRequests data
             const filter = [Filter.create('rowId', reqRowId)];
@@ -60,8 +77,6 @@ export const App : FC = memo(() => {
                     comments: vals[0].comments,
                     otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add 'Account & Principal Investigator' value '" + vals[0].otherAcctAndInves + "' into the system." : undefined
                 }));
-                //show purchasing admin panel if there is rowId
-                //TODO: add condition on purchasing admin user
                 setPurchaseAdminModel(PurchaseAdminModel.create({
                     assignedTo: vals[0].assignedTo,
                     creditCardOption: vals[0].creditCardOptionId,
@@ -286,54 +301,65 @@ export const App : FC = memo(() => {
 
     return (
         <>
-            <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
             {
-                !!requestId &&
-                <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
+                //has to be a purchasing admin to update the existing request
+                ((!!requestId && !hasPurchasingAdminPermission) || !!permissionError) &&
+                <Alert>You do not have sufficient permissions to update this request.</Alert>
             }
-            <DocumentAttachmentPanel onInputChange={documentAttachmentChange} model={documentAttachmentModel}/>
-            <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems} errorMsg={lineItemErrorMsg} hasRequestId={!!requestId}/>
-            <button disabled={isSaving} className='btn btn-default' id='cancel' name='cancel' onClick={onCancelBtnHandler}>Cancel</button>
             {
-                !isSaving &&
+                //display ui for purchasing admins to update existing request or requesters to enter new request
+                ((!!requestId && hasPurchasingAdminPermission) || (requestId === undefined)) &&
                 <>
-                    <button
-                            className='btn btn-primary pull-right'
-                            id={requestId ? 'save' : 'submitForReview'}
-                            name={requestId ? 'save' : 'submitForReview'}
-                            onClick={onSaveBtnHandler}>{requestId ? 'Submit' : 'Submit for Review'}
-                    </button>
-                </>
-            }
-            {
-                isSaving &&
-                <button disabled className='btn btn-primary pull-right'>
-                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
-                    Saving...
-                </button>
-            }
-            {
-                requestOrderModel.otherAcctAndInvesWarning &&
-                <div className='other-account-warning alert alert-warning'>
-                    {requestOrderModel.otherAcctAndInvesWarning}
-                </div>
-            }
-            {
-                (!!requestOrderModel.errorMsg) &&
-                    requestOrderModel?.errors?.map((error) => {
-                        return <div className='alert alert-danger'> {error.errorMessage} </div>
-                    })
-            }
-            {
-                (!!lineItemErrorMsg) &&
-                    lineItems?.map((lineItem) => {
-                        return lineItem?.errors?.map((error) => {
+                    <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
+                    {
+                        !!requestId &&
+                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
+                    }
+                    <DocumentAttachmentPanel onInputChange={documentAttachmentChange} model={documentAttachmentModel}/>
+                    <LineItemsPanel onChange={lineItemsChange} lineItems={lineItems} errorMsg={lineItemErrorMsg} hasRequestId={!!requestId}/>
+                    <button disabled={isSaving} className='btn btn-default' id='cancel' name='cancel' onClick={onCancelBtnHandler}>Cancel</button>
+                    {
+                        !isSaving &&
+                        <>
+                            <button
+                                    className='btn btn-primary pull-right'
+                                    id={requestId ? 'save' : 'submitForReview'}
+                                    name={requestId ? 'save' : 'submitForReview'}
+                                    onClick={onSaveBtnHandler}>{requestId ? 'Submit' : 'Submit for Review'}
+                            </button>
+                        </>
+                    }
+                    {
+                        isSaving &&
+                        <button disabled className='btn btn-primary pull-right'>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+                            Saving...
+                        </button>
+                    }
+                    {
+                        requestOrderModel.otherAcctAndInvesWarning &&
+                        <div className='other-account-warning alert alert-warning'>
+                            {requestOrderModel.otherAcctAndInvesWarning}
+                        </div>
+                    }
+                    {
+                        (!!requestOrderModel.errorMsg) &&
+                        requestOrderModel?.errors?.map((error) => {
                             return <div className='alert alert-danger'> {error.errorMessage} </div>
                         })
-                    })
-            }
-            {
-                (!!globalErrorMsg) && <div className='alert alert-danger'> {globalErrorMsg} </div>
+                    }
+                    {
+                        (!!lineItemErrorMsg) &&
+                        lineItems?.map((lineItem) => {
+                            return lineItem?.errors?.map((error) => {
+                                return <div className='alert alert-danger'> {error.errorMessage} </div>
+                            })
+                        })
+                    }
+                    {
+                        (!!globalErrorMsg) && <div className='alert alert-danger'> {globalErrorMsg} </div>
+                    }
+                </>
             }
         </>
     )

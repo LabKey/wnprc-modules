@@ -7,7 +7,7 @@ module.exports = {
     apps: [{
         name: 'RequestEntry',
         title: 'WNPRC Purchasing',
-        permission: 'read', // TODO: maybe change
+        permission: 'insert',
         path: './src/client/RequestEntry'
     }]
 };

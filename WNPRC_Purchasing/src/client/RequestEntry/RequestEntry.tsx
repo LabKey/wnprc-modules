@@ -167,125 +167,119 @@ export const App : FC = memo(() => {
 
     const onSaveBtnHandler = useCallback((event) => {
 
-        //if required values are not provided, then set errorMessage for the panel and errors on each field to highlight boxes in red
-        let msg = "Unable to submit request, missing required field";
+        setIsDirty(false);
+        setIsSaving(true);
+        event.preventDefault();
 
-        // catch errors for Request Order panel
-        const requestOrderErrors = [];
-        // if (!requestOrderModel.account) {
-        //     requestOrderErrors.push({fieldName: 'account'});
-        // }
-        // if (requestOrderModel.account === 'Other' && !requestOrderModel.otherAcctAndInves) {
-        //     requestOrderErrors.push({fieldName: 'otherAcctAndInves'});
-        // }
-        // if (!requestOrderModel.vendorId) {
-        //     requestOrderErrors.push({fieldName: 'vendorId'});
-        // }
-        // if (!requestOrderModel.justification) {
-        //     requestOrderErrors.push({fieldName: 'justification'});
-        // }
-        // if (!requestOrderModel.shippingInfoId) {
-        //     requestOrderErrors.push({fieldName: 'shippingInfoId'});
-        // }
-        // if (!requestOrderModel.shippingAttentionTo) {
-        //     requestOrderErrors.push({fieldName: 'shippingAttentionTo'});
-        // }
-        // if (requestOrderErrors.length > 0) {
-        //     const updatedRequestOrderObj = produce(requestOrderModel, (draft: Draft<RequestOrderModel>) => {
-        //         draft['errorMsg'] = requestOrderErrors?.length > 1 ? (msg + 's.') : (msg + '.');
-        //         draft['errors'] = requestOrderErrors;
-        //     });
-        //     setRequestOrderModel(updatedRequestOrderObj);
-        // }
+        submitRequest(requestOrderModel,
+            lineItems,
+            !!requestId ? purchaseAdminModel : undefined,
+            (documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0) ? documentAttachmentModel : undefined,
+            lineItemRowsToDelete)
+            .then(r => {
+                if (r.success || r.fileNames?.length > 0)
+                {
+                    //navigate to purchasing overview grid/main page
+                    window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
+                }
+            })
+            .catch(reject => {
 
-        // catch errors for Line Items panel
-        let hasLineItemError = false;
-        let lineItemsErrorCount = 0;
-        for (let i = 0; i < lineItems.length; i++) {
-            const lineItemErrors = [];
+                setIsSaving(false);
 
-            if (!lineItems[i].item) {
-                lineItemErrors.push({fieldName: 'item'});
-            }
-            if (!lineItems[i].itemUnit) {
-                lineItemErrors.push({fieldName: 'itemUnit'});
-            }
-            if (!lineItems[i].unitCost) {
-                lineItemErrors.push({fieldName: 'unitCost'});
-            }
-            if (!lineItems[i].quantity) {
-                lineItemErrors.push({fieldName: 'quantity'});
-            }
+                //handle errors from the server
+                if (reject?.errors?.length > 0)
+                {
+                    let msg = "Unable to submit request, missing required field";
+                    let hasLineItemError = false;
+                    let lineItemsErrorCount = 0;
+                    let errorOnIndex = -1;
 
-            if (lineItemErrors.length > 0) {
-                lineItemsErrorCount += lineItemErrors.length;
-                const updatedLineItem = produce(lineItems[i], (draft: Draft<LineItemModel>) => {
-                    draft['errors'] = lineItemErrors;
-                });
-                const updatedLineItems = produce(lineItems, (draft: Draft<LineItemModel>) => {
-                    draft[i] = updatedLineItem;
-                });
-                setLineItems(updatedLineItems);
-                hasLineItemError = true;
-            }
-        }
+                    const requestOrderErrors = [];
+                    reject.errors.map((error) => {
+                        if (error.errors?.length > 0) {
+                            const lineItemErrors = [];
+                            error.errors.map((error) => {
 
-        if (hasLineItemError) {
-            setLineItemErrorMsg(lineItemsErrorCount > 1 ? (msg + 's.') : (msg + '.'));
-        }
+                                // errors for Request Order panel
+                                if (error.field === "account") {
+                                    requestOrderErrors.push({fieldName: 'account', errorMessage: error.msg || error.message});
+                                }
+                                else if (error.field === "otherAcctAndInves") {
+                                    requestOrderErrors.push({
+                                        fieldName: 'otherAcctAndInves',
+                                        errorMessage: error.msg || error.message
+                                    });
+                                }
+                                else if (error.field === "vendorId") {
+                                    requestOrderErrors.push({fieldName: 'vendorId', errorMessage: error.msg || error.message});
+                                }
+                                else if (error.field === "justification") {
+                                    requestOrderErrors.push({
+                                        fieldName: 'justification',
+                                        errorMessage: error.msg || error.message
+                                    });
+                                }
+                                else if (error.field === "shippingInfoId") {
+                                    requestOrderErrors.push({
+                                        fieldName: 'shippingInfoId',
+                                        errorMessage: error.msg || error.message
+                                    });
+                                }
+                                else if (error.field === "shippingAttentionTo") {
+                                    requestOrderErrors.push({
+                                        fieldName: 'shippingAttentionTo',
+                                        errorMessage: error.msg || error.message
+                                    });
+                                }
 
-        //if no errors then save
-        if (requestOrderErrors.length == 0 && !hasLineItemError) {
-            setIsDirty(false);
-            setIsSaving(true);
-            event.preventDefault();
-
-            submitRequest(requestOrderModel,
-                            lineItems,
-                            !!requestId ? purchaseAdminModel : undefined,
-                            (documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0) ? documentAttachmentModel : undefined,
-                            lineItemRowsToDelete)
-                .then(r => {
-                    if (r.success || r.fileNames?.length > 0) {
-                        //navigate to purchasing overview grid/main page
-                        window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
-                    }})
-                .catch(reject => {
-                    if (reject?.errors?.length > 0) {
-                        setIsSaving(false);
-                        let msg = "Unable to submit request, missing required field";
-                        const requestOrderErrors = [];
-                        reject.errors.map((error) => {
-                            if (error.field === "account") {
-                                requestOrderErrors.push({fieldName: 'account', errorMessage: error.msg || error.message});
-                            }
-                            if (error.field === "otherAcctAndInves") {
-                                requestOrderErrors.push({fieldName: 'otherAcctAndInves', errorMessage: error.msg || error.message});
-                            }
-                            if (error.field === "vendorId") {
-                                requestOrderErrors.push({fieldName: 'vendorId', errorMessage: error.msg || error.message});
-                            }
-                            if (error.field === "justification") {
-                                requestOrderErrors.push({fieldName: 'justification', errorMessage: error.msg || error.message});
-                            }
-                            if (error.field === "shippingInfoId") {
-                                requestOrderErrors.push({fieldName: 'shippingInfoId', errorMessage: error.msg || error.message});
-                            }
-                            if (error.field === "shippingAttentionTo") {
-                                requestOrderErrors.push({fieldName: 'shippingAttentionTo', errorMessage: error.msg || error.message});
-                            }
-                        });
-                        if (requestOrderErrors.length > 0) {
-                            const updatedRequestOrderObj = produce(requestOrderModel, (draft: Draft<RequestOrderModel>) => {
-                                draft['errorMsg'] = requestOrderErrors?.length > 1 ? (msg + 's.') : (msg + '.');
-                                draft['errors'] = requestOrderErrors;
+                                // catch errors for Line Items panel.
+                                // Note: server throws error on the first sign on error, so will only see errors on the one
+                                // line item that error actually occurred on, and will not show all the other line items that might have errors
+                                if (error.field === "item") {
+                                    lineItemErrors.push({fieldName: 'item', errorMessage: error.msg || error.message});
+                                }
+                                else if (error.field === "itemUnit") {
+                                    lineItemErrors.push({fieldName: 'itemUnit', errorMessage: error.msg || error.message});
+                                }
+                                else if (error.field === "unitCost") {
+                                    lineItemErrors.push({fieldName: 'unitCost', errorMessage: error.msg || error.message});
+                                }
+                                else if (error.field === "quantity") {
+                                    lineItemErrors.push({fieldName: 'quantity', errorMessage: error.msg || error.message});
+                                }
+                                else if (error.field === "rowIndex") {
+                                    const txt = error.msg || error.message;//this is just the row index set on server side to identify error on specific index
+                                    errorOnIndex = parseInt(txt, 10);
+                                }
                             });
-                            setRequestOrderModel(updatedRequestOrderObj);
+                            if (lineItemErrors.length > 0 && errorOnIndex >= 0) {
+                                lineItemsErrorCount += lineItemErrors.length;
+                                const updatedLineItem = produce(lineItems[errorOnIndex], (draft: Draft<LineItemModel>) => {
+                                    draft['errors'] = lineItemErrors;
+                                });
+                                const updatedLineItems = produce(lineItems, (draft: Draft<LineItemModel>) => {
+                                    draft[errorOnIndex] = updatedLineItem;
+                                });
+                                setLineItems(updatedLineItems);
+                                hasLineItemError = true;
+                            }
                         }
+                    });
+                    if (requestOrderErrors.length > 0) {
+                        const updatedRequestOrderObj = produce(requestOrderModel, (draft: Draft<RequestOrderModel>) => {
+                            draft['errorMsg'] = requestOrderErrors?.length > 1 ? (msg + 's.') : (msg + '.');
+                            draft['errors'] = requestOrderErrors;
+                        });
+                        setRequestOrderModel(updatedRequestOrderObj);
                     }
-                });
-        }
 
+                    if (hasLineItemError) {
+                        setLineItemErrorMsg(lineItemsErrorCount > 1 ? (msg + 's.') : (msg + '.'));
+                    }
+                }
+            });
+    // }
     }, [requestOrderModel, lineItems, lineItemRowsToDelete, purchaseAdminModel, documentAttachmentModel, isSaving]);
 
     return (
@@ -323,10 +317,18 @@ export const App : FC = memo(() => {
                 </div>
             }
             {
-                (!!requestOrderModel.errorMsg || !!lineItemErrorMsg) &&
-                        requestOrderModel?.errors?.map((error) => {
+                (!!requestOrderModel.errorMsg) &&
+                    requestOrderModel?.errors?.map((error) => {
+                        return <div className='alert alert-danger'> {error.errorMessage} </div>
+                    })
+            }
+            {
+                (!!lineItemErrorMsg) &&
+                    lineItems?.map((lineItem) => {
+                        return lineItem?.errors?.map((error) => {
                             return <div className='alert alert-danger'> {error.errorMessage} </div>
                         })
+                    })
             }
         </>
     )

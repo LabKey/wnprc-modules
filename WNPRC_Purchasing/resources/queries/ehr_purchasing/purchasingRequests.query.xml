@@ -15,14 +15,6 @@
                             <fkColumnName>RowId</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="vendorId">
-                        <columnTitle>Vendor</columnTitle>
-                        <required>true</required>
-                        <fk>
-                            <fkDbSchema>ehr_purchasing</fkDbSchema>
-                            <fkTable>vendor</fkTable>
-                        </fk>
-                    </column>
                     <column columnName="account">
                         <fk>
                             <fkDbSchema>ehr_billingLinked</fkDbSchema>
@@ -32,8 +24,28 @@
                     <column columnName="otherAcctAndInves">
                         <columnTitle>Other Acct and Investigator</columnTitle>
                     </column>
+                    <column columnName="vendorId">
+                        <columnTitle>Vendor</columnTitle>
+                        <nullable>false</nullable>
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>vendor</fkTable>
+                        </fk>
+                    </column>
+                    <column columnName="justification">
+                        <nullable>false</nullable>
+                        <columnTitle>Business purpose</columnTitle>
+                    </column>
+
                     <column columnName="shippingInfoId">
-                        <required>true</required>
+                        <nullable>false</nullable>
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>shippingInfo</fkTable>
+                        </fk>
+                    </column>
+                    <column columnName="shippingAttentionTo">
+                        <nullable>false</nullable>
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>shippingInfo</fkTable>

@@ -24,6 +24,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -62,11 +63,11 @@ public class WNPRC_PurchasingController extends SpringActionController
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
-            ValidationException validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
+            List<ValidationException> validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
 
-            if (validationExceptions.hasErrors())
+            if (validationExceptions.size() > 0)
             {
-                throw new ValidationException(validationExceptions);
+                throw new BatchValidationException(validationExceptions, null);
             }
 
             ApiSimpleResponse response = new ApiSimpleResponse();

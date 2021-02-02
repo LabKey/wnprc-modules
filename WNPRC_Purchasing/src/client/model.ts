@@ -110,6 +110,7 @@ export class LineItemModel {
     [immerable] = true;
 
     readonly rowId?: number;
+    readonly rowIndex?: number; //mainly to identify errors coming from the server
     readonly requestRowId?: number;
     readonly item: string;
     readonly controlledSubstance: boolean = false;

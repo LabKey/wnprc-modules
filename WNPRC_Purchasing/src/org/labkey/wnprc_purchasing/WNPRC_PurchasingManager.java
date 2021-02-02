@@ -112,12 +112,14 @@ public class WNPRC_PurchasingManager
         }
     }
 
-    public ValidationException submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
+    public List<ValidationException> submitRequestForm(User user, Container container, WNPRC_PurchasingController.RequestForm requestForm)
     {
         UserSchema us = QueryService.get().getUserSchema(user, container, "ehr_purchasing");
         boolean isNewRequest = null == requestForm.getRowId();
         List<Map<String, Object>> insertedPurchasingReq = new ArrayList<>();
-        ValidationException validationErrors = new ValidationException();
+        List<ValidationException> validationErrors = new ArrayList<>();
+        ValidationException requestOrderErrors = new ValidationException();
+        ValidationException lineItemErrors = new ValidationException();
 
         Map<String, Object> row;
 
@@ -148,42 +150,44 @@ public class WNPRC_PurchasingManager
             row.put("rowId", requestForm.getRowId());
 
         //handle validation
-
         if (null != requestForm.getAccount())
         {
             if (requestForm.getAccount() == -1 && StringUtils.isBlank(requestForm.getAccountOther()))
-                validationErrors.addError(new PropertyValidationError("Required value for 'Account & Principal Investigator' not provided", "otherAcctAndInves"));
+                requestOrderErrors.addError(new PropertyValidationError("Required value for 'Account & Principal Investigator' not provided", "otherAcctAndInves"));
             else if (requestForm.getAccount() == -1 && StringUtils.isNotBlank(requestForm.getAccountOther()))
                 row.put("otherAcctAndInves", requestForm.getAccountOther());
             else if (requestForm.getAccount() > 0)
                 row.put("account", requestForm.getAccount());
         }
         else
-            validationErrors.addError(new PropertyValidationError("Required value for 'Account to charge' not provided", "account"));
+            requestOrderErrors.addError(new PropertyValidationError("Required value for 'Account to charge' not provided", "account"));
 
         if (null == requestForm.getVendor())
-            validationErrors.addError(new PropertyValidationError("Required value for 'Vendor' not provided", "vendorId"));
+            requestOrderErrors.addError(new PropertyValidationError("Required value for 'Vendor' not provided", "vendorId"));
         else
             row.put("vendorId", requestForm.getVendor());
 
         if (null == requestForm.getPurpose())
-            validationErrors.addError(new PropertyValidationError("Required value for 'Business purpose' not provided", "justification"));
+            requestOrderErrors.addError(new PropertyValidationError("Required value for 'Business purpose' not provided", "justification"));
         else
             row.put("justification", requestForm.getPurpose());
 
         if (null == requestForm.getShippingDestination())
-            validationErrors.addError(new PropertyValidationError("Required value for 'Shipping destination' not provided", "shippingInfoId"));
+            requestOrderErrors.addError(new PropertyValidationError("Required value for 'Shipping destination' not provided", "shippingInfoId"));
         else
             row.put("shippingInfoId", requestForm.getShippingDestination());
 
         if (null == requestForm.getShippingAttentionTo())
-            validationErrors.addError(new PropertyValidationError("Required value for 'Delivery attention to' not provided", "shippingAttentionTo"));
+            requestOrderErrors.addError(new PropertyValidationError("Required value for 'Delivery attention to' not provided", "shippingAttentionTo"));
         else
             row.put("shippingAttentionTo", requestForm.getShippingAttentionTo());
 
         //return errors, if any
-        if (validationErrors.hasErrors())
+        if (requestOrderErrors.hasErrors())
+        {
+            validationErrors.add(requestOrderErrors);
             return validationErrors;
+        }
 
         //otherwise, continue adding non-required values
         row.put("comments", requestForm.getComments());
@@ -233,7 +237,7 @@ public class WNPRC_PurchasingManager
                     requestForm.setRowId((Integer) insertedPurchasingReq.get(0).get("rowId"));
                 else
                 {
-                    validationErrors.addError(new SimpleValidationError("Unable to submit purchasing request"));
+                    requestOrderErrors.addError(new SimpleValidationError("Unable to submit purchasing request"));
                     return validationErrors;
                 }
             }
@@ -242,14 +246,40 @@ public class WNPRC_PurchasingManager
             List<Map<String, Object>> newLineItemsData = new ArrayList<>();
             List<Map<String, Object>> updatedLineItemsData = new ArrayList<>();
             List<Map<String, Object>> deleteLineItemsData = new ArrayList<>();
+            int index = 0;
             for (JSONObject lineItem : requestForm.getLineItems())
             {
                 row = new CaseInsensitiveHashMap<>();
                 row.put("requestRowId", insertedPurchasingReq.get(0).get("rowId"));
-                row.put("item", lineItem.get("item"));
-                row.put("itemUnitId", lineItem.get("itemUnit"));
-                row.put("unitCost", lineItem.get("unitCost"));
-                row.put("quantity", lineItem.get("quantity"));
+
+                if (null == lineItem.get("item"))
+                    lineItemErrors.addError(new PropertyValidationError("Required value for 'Part no./Item description' not provided", "item"));
+                else
+                    row.put("item", lineItem.get("item"));
+
+                if (null == lineItem.get("itemUnit"))
+                    lineItemErrors.addError(new PropertyValidationError("Required value for 'Unit' not provided", "itemUnit"));
+                else
+                    row.put("itemUnitId", lineItem.get("itemUnit"));
+
+                if (null == lineItem.get("unitCost"))
+                    lineItemErrors.addError(new PropertyValidationError("Required value for 'Unit Cost' not provided", "unitCost"));
+                else
+                    row.put("unitCost", lineItem.get("unitCost"));
+
+                if (null == lineItem.get("quantity"))
+                    lineItemErrors.addError(new PropertyValidationError("Required value for 'Quantity' not provided", "quantity"));
+                else
+                    row.put("quantity", lineItem.get("quantity"));
+
+                //if errors, then return errors
+                if(lineItemErrors.hasErrors())
+                {
+                    lineItemErrors.addError(new PropertyValidationError("" + index, "rowIndex"));
+                    validationErrors.add(lineItemErrors);
+                    return validationErrors;
+                }
+
                 row.put("controlledSubstance", lineItem.get("controlledSubstance"));
 
                 if(null != lineItem.get("rowId"))
@@ -259,6 +289,8 @@ public class WNPRC_PurchasingManager
                 }
                 else
                     newLineItemsData.add(row);
+
+                index++;
             }
 
             if (null != requestForm.getLineItemsToDelete()) {
@@ -283,14 +315,16 @@ public class WNPRC_PurchasingManager
                     qus.deleteRows(user, container, deleteLineItemsData, null, null);
             }
 
-            if (validationErrors.hasErrors())
-                return validationErrors;
+            if (errors.hasErrors())
+                return errors.getRowErrors();
 
             transaction.commit();
         }
         catch (Exception e)
         {
-            throw new RuntimeException(e);
+            List<ValidationException> rowErrors = new ArrayList<>();
+            rowErrors.add(new ValidationException().addError(new SimpleValidationError(e.getMessage())));
+            return rowErrors;
         }
         return validationErrors;
     }

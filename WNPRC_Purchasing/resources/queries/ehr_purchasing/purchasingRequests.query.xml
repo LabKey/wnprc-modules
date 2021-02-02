@@ -46,10 +46,6 @@
                     </column>
                     <column columnName="shippingAttentionTo">
                         <nullable>false</nullable>
-                        <fk>
-                            <fkDbSchema>ehr_purchasing</fkDbSchema>
-                            <fkTable>shippingInfo</fkTable>
-                        </fk>
                     </column>
                     <column columnName="creditCardOptionId">
                         <fk>

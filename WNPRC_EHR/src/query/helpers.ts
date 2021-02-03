@@ -54,7 +54,6 @@ export const setupJsonData = (values: any[], schemaName: string, queryName: stri
 
 export const saveRowsDirect = (jsonData: jsonDataType) => {
 
-  console.log('in save rows')
   return new Promise((resolve, reject) => {
     let options: SaveRowsOptions = {
       commands: jsonData.commands,
@@ -62,7 +61,6 @@ export const saveRowsDirect = (jsonData: jsonDataType) => {
       success: (data) => {resolve(data)},
       failure: (data) => {reject(data)},
     };
-    console.log(JSON.stringify(options));
     Query.saveRows(options);
   });
 };

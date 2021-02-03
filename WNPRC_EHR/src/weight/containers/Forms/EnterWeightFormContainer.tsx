@@ -298,13 +298,11 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     let newValues = [...formdata];
     newValues[index][name]["value"] = value;
     setFormDataInAppContext(newValues);
-    console.log(errorLevel);
   };
   const liftUpValidationState = (name: string, value: string | number | object | boolean, index: number) => {
     let newValues = [...formdata];
     newValues[index][name]["value"] = value;
     setFormDataInAppContext(newValues);
-    console.log(errorLevel);
   };
 
   const liftUpInfoState = (state: AnimalInfoStates) => {

@@ -60,7 +60,7 @@ const BulkEditFields: React.FunctionComponent<BulkEditFieldProps> = props => {
               className="form-control"
               onChange={handleDateChange}
               name="date"
-              customInput={<DateInput value={date} opendate={openDatepicker} />}
+              customInput={<DateInput opendate={openDatepicker} />}
             />
           </div>
         </div>

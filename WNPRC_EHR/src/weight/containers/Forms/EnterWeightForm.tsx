@@ -103,7 +103,6 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
 
 
   const startSessionTimer = () => {
-    console.log('isRecording ', isRecording);
     if (isRecording)
       return;
     setIsRecordingInAppContext(true);
@@ -173,7 +172,6 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
         Filter.create("Id", animalid, Filter.Types.EQUAL)
       ]
     };
-    console.log(config);
     labkeyActionSelectWithPromise(config).then(data => {
       //cache animal info
       if (data["rows"][0]) {
@@ -283,7 +281,6 @@ const EnterWeightForm: React.FunctionComponent<WeightFormProps> = props => {
             onChange={handleDateChange}
             onFocus={getAnimalInfo}
             customInput={<DateInput
-              value={date}
               opendate={openDatepicker}
               iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}
               />}

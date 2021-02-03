@@ -1423,6 +1423,7 @@ public class WNPRC_EHRController extends SpringActionController
         private List<Date> starts;
         private List<Date> ends;
         private boolean allDay;
+        private String body;
         private String subject;
         private String eventId;
 
@@ -1474,6 +1475,11 @@ public class WNPRC_EHRController extends SpringActionController
         public boolean getAllDay()
         {
             return allDay;
+        }
+
+        public String getBody()
+        {
+            return body;
         }
 
         public String getSubject()
@@ -1536,6 +1542,11 @@ public class WNPRC_EHRController extends SpringActionController
             this.allDay = allDay;
         }
 
+        public void setBody(String body)
+        {
+            this.body = body;
+        }
+
         public void setSubject(String title)
         {
             this.subject = title;
@@ -1562,7 +1573,7 @@ public class WNPRC_EHRController extends SpringActionController
 
                 ZonedDateTime start = ZonedDateTime.ofInstant(event.getStart().toInstant(), ZoneId.of("America/Chicago"));
                 ZonedDateTime end = ZonedDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.of("America/Chicago"));
-                Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, null, event.getAllDay());
+                Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, event.getBody(), null, event.getAllDay());
                 updatedEvent.id = event.getEventId();
 
                 calendar.updateUnmanagedEvent(event.getCalendarId(), updatedEvent, response);
@@ -1618,7 +1629,7 @@ public class WNPRC_EHRController extends SpringActionController
                         ZonedDateTime start = newStart.atZone(ZoneId.of("America/Chicago"));
                         ZonedDateTime end = newEnd.atZone(ZoneId.of("America/Chicago"));
 
-                        Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, Graph.buildAttendeeList(event.getRoomEmails().get(i)), false);
+                        Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, null, Graph.buildAttendeeList(event.getRoomEmails().get(i)), false);
                         updatedEvent.id = (String) roomRow.get("event_id");
                         updatedEvents.add(updatedEvent);
 
@@ -1647,7 +1658,7 @@ public class WNPRC_EHRController extends SpringActionController
                             ZonedDateTime start = ((Timestamp) roomRow.get("date")).toInstant().atZone(ZoneId.of("America/Chicago"));
                             ZonedDateTime end = ((Timestamp) roomRow.get("enddate")).toInstant().atZone(ZoneId.of("America/Chicago"));
 
-                            Event resetEvent = Graph.buildEvent(start, end, null, null, Graph.buildAttendeeList((String) roomRow.get("room_fs_email")), false);
+                            Event resetEvent = Graph.buildEvent(start, end, null, null, null, Graph.buildAttendeeList((String) roomRow.get("room_fs_email")), false);
                             resetEvent.id = (String) roomRow.get("event_id");
 
                             resetEvents.add(resetEvent);

@@ -144,12 +144,20 @@
         middleDiv.classList.add("col-xs-8");
         let inputDiv = document.createElement("div");
         inputDiv.classList.add("input-group");
-        let inputEl = document.createElement("input");
-        inputEl.type = inputType;
-        if (inputType === "checkbox") {
-            inputEl.classList.add("form-check-input");
+        let inputEl;
+        if (inputType !== "textarea") {
+            inputEl = document.createElement("input");
+            inputEl.type = inputType;
+            if (inputType === "checkbox") {
+                inputEl.classList.add("form-check-input");
+            }
+            else {
+                inputEl.classList.add("form-control");
+            }
         } else {
-            inputEl.classList.add("form-control");
+            inputEl = document.createElement("textarea");
+            inputEl.rows = "4";
+            inputEl.cols = "40";
         }
         inputEl.id = id;
         inputEl.name = id;
@@ -172,6 +180,19 @@
         let value = year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
 
         return value;
+    }
+
+    function displayDateAsString(date, showTime) {
+        let year = date.getFullYear();
+        let month = ("0" + (date.getMonth() + 1)).slice(-2);
+        let day = ("0" + date.getDate()).slice(-2);
+        let hours = ("0" + date.getHours()).slice(-2);
+        let minutes = ("0" + date.getMinutes()).slice(-2);
+        if (showTime) {
+            return year + "-" + month + "-" + day + " " + hours + ":" + minutes;
+        } else {
+            return year + "-" + month + "-" + day;
+        }
     }
 
     function dateToDateInputField(date) {
@@ -378,6 +399,7 @@
             }
             requestObj.end = new Date(document.getElementById("modalEndField").value);
             requestObj.eventId = mainEvent.extendedProps.eventId;
+            requestObj.body = document.getElementById("modalCommentsField").value;
         }
 
         console.log(requestObj);
@@ -637,7 +659,7 @@
                 <div id="calendar-checklist"></div>
             </div>
         </div>
-        <div class="panel panel-primary">
+        <div id="surgeryDetailsDiv" class="panel panel-primary">
             <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#surgery-details-collapsible" aria-controls="surgery-details-collapsible" aria-expanded="true">Surgery Details</a></div>
             <div class="panel-body collapse in" id="surgery-details-collapsible" aria-expanded="true" data-bind="with: taskDetails">
                 <%--<!-- ko ifnot: taskid() != '' -->--%>
@@ -681,6 +703,25 @@
                 <%--<a class="btn btn-default" href="{{$parent.viewNecropsyReportURL}}" data-bind="css: { disabled: _.isBlank(taskid()) }">Report</a>--%>
                 <%--<a class="btn btn-default" href="{{$parent.viewNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">View Record</a>--%>
                 <%--<a class="btn btn-primary" href="{{$parent.editNecropsyURL}}"       data-bind="css: { disabled: _.isBlank(taskid()) }">Edit Record</a>--%>
+            </div>
+        </div>
+        <div id="unmanagedEventDetailsDiv" class="panel panel-primary" hidden>
+            <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#unmanaged-details-collapsible" aria-controls="unmanaged-details-collapsible" aria-expanded="true">Event Details</a></div>
+            <div class="panel-body collapse in" id="unmanaged-details-collapsible" aria-expanded="true" data-bind="with: taskDetails">
+                <p><em>Please click on a Surgery in the Calendar to view details for that Surgery.</em></p>
+                <dl class="dl-horizontal">
+                    <dt>Title:      </dt> <dd id="unmanagedEventTitle"></dd>
+                    <dt>Start:      </dt> <dd id="unmanagedEventStart"></dd>
+                    <dt>End:        </dt> <dd id="unmanagedEventEnd"></dd>
+                    <dt>Comments:   </dt> <dd id="unmanagedEventBody"></dd>
+                </dl>
+                <div style="text-align: right;">
+                    <%--//this is if we want to disable the edit/cancel buttons--%>
+                    <%--<a class="btn btn-default" href="#" onclick="WebUtils.VM.editEvent()" data-bind="css: { disabled: _.isBlank(animalid()) }">Edit</a>--%>
+                    <%--<a class="btn btn-danger" href="#" onclick="WebUtils.VM.cancelEvent()" data-bind="css: { disabled: _.isBlank(animalid()) }">Cancel</a>--%>
+                    <a class="btn btn-default" href="#" onclick="WebUtils.VM.editEvent()">Edit</a>
+                    <a class="btn btn-danger" href="#" onclick="WebUtils.VM.cancelEvent()">Cancel</a>
+                </div>
             </div>
         </div>
     </div>
@@ -977,6 +1018,28 @@
                             info.event.setExtendedProp("selected", true);
                             selectedEvent = info.event;
                             if (info.event.extendedProps) {
+                                if (info.event.extendedProps.isUnmanaged) {
+                                    //document.getElementById("surgeryDetailsDiv").style.display = "none";
+                                    //document.getElementById("unmanagedEventDetailsDiv").style.display = "block";
+                                    document.getElementById("surgeryDetailsDiv").hidden = true;
+                                    document.getElementById("unmanagedEventDetailsDiv").hidden = false;
+
+                                    document.getElementById("unmanagedEventTitle").innerHTML = info.event.title;
+                                    if (info.event.allDay) {
+                                        document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, false);
+                                        let endDateTime = new Date(info.event.end);
+                                        endDateTime.setDate(endDateTime.getDate() - 1);
+                                        document.getElementById("unmanagedEventEnd").innerHTML = displayDateAsString(endDateTime, false);
+                                        document.getElementById("unmanagedEventBody").innerHTML = info.event.extendedProps.body;
+                                    } else {
+                                        document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, true);
+                                        document.getElementById("unmanagedEventEnd").innerHTML = displayDateAsString(info.event.end, true);
+                                        document.getElementById("unmanagedEventBody").innerHTML = info.event.extendedProps.body;
+                                    }
+                                } else {
+                                    document.getElementById("surgeryDetailsDiv").hidden = false;
+                                    document.getElementById("unmanagedEventDetailsDiv").hidden = true;
+                                }
                                 jQuery.each(info.event.extendedProps, function (key, value) {
                                     if (key in WebUtils.VM.taskDetails) {
                                         if (key === "date" || key === "enddate") {
@@ -1351,14 +1414,17 @@
                     let startValue = dateToDateTimeInputField(mainEvent.start);
                     let endValue = dateToDateTimeInputField(mainEvent.end);
                     let allDayValue = mainEvent.allDay;
+                    let commentsValue = mainEvent.extendedProps.body;
 
                     let startDiv = createDiv("Start Time", "datetime-local", "modalStartField", startValue);
                     let endDiv = createDiv("End Time", "datetime-local", "modalEndField", endValue);
                     let allDayDiv = createDiv("Add Day Event", "checkbox", "modalAllDayField", allDayValue);
+                    let commentsDiv = createDiv("Comments", "textarea", "modalCommentsField", commentsValue.trim());
 
                     formDiv.appendChild(startDiv);
                     formDiv.appendChild(endDiv);
                     formDiv.appendChild(allDayDiv);
+                    formDiv.appendChild(commentsDiv);
 
                     let allDayCheckbox = document.getElementById("modalAllDayField");
 

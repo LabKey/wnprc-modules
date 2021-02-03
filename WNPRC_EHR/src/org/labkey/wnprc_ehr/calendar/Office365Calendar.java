@@ -223,7 +223,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 props.setProperty("requestid", requestId);
                 props.setProperty("objectid", (String) roomRequest.get("objectid"));
 
-                Event newEvent = Graph.buildEvent(startTime, endTime, subject, props, attendees, false);
+                Event newEvent = Graph.buildEvent(startTime, endTime, subject, props, null, attendees, false);
                 Event createdEvent = Graph.createEvent(getAccessToken(getAccountNames().get(calendarId)), getBaseCalendars().get(calendarId), newEvent);
                 roomRequest.put("event_id", createdEvent.id);
                 createdEvent.calendar = new com.microsoft.graph.models.extensions.Calendar();
@@ -455,6 +455,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
             extendedProps.put("isUnmanaged", true);
             extendedProps.put("eventId", event.id);
+            extendedProps.put("body", event.body.content != null ? event.body.content : "");
             jsonEvent.put("extendedProps", extendedProps);
 
             ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);

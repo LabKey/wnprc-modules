@@ -263,7 +263,7 @@ public class Graph {
 
     // Helper methods below
 
-    public static Event buildEvent(ZonedDateTime start, ZonedDateTime end, String subject, Properties bodyProps, List<Attendee> attendees, boolean isAllDay) throws IOException {
+    public static Event buildEvent(ZonedDateTime start, ZonedDateTime end, String subject, Properties bodyProps, String bodyString, List<Attendee> attendees, boolean isAllDay) throws IOException {
     	Event event = new Event();
     	if (subject != null) {
 			event.subject = subject;
@@ -279,6 +279,9 @@ public class Graph {
 			}
 			eventBody.content = body;
 			event.body = eventBody;
+		} else if (bodyString != null) {
+    		eventBody.content = bodyString;
+    		event.body = eventBody;
 		}
 
     	DateTimeTimeZone eventStart = new DateTimeTimeZone();

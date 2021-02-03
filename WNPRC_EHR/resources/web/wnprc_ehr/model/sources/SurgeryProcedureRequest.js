@@ -38,22 +38,22 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 //     return v || date;
                 // }
             },
-            enddate: {
-                editorConfig: {
-                    dateConfig: {
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
-                    },
-                    timeConfig: {
-                        minValue: '10:00 AM'
-                    }
-                }//,
-                // setInitialValue: function(v){
-                //     var date = (new Date()).add(Date.DAY, 1);
-                //     date.setHours(10);
-                //     date.setMinutes(0);
-                //     return v || date;
-                // }
-            },
+            // enddate: {
+            //     editorConfig: {
+            //         dateConfig: {
+            //             minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
+            //         },
+            //         timeConfig: {
+            //             minValue: '10:00 AM'
+            //         }
+            //     }//,
+            //     // setInitialValue: function(v){
+            //     //     var date = (new Date()).add(Date.DAY, 1);
+            //     //     date.setHours(10);
+            //     //     date.setMinutes(0);
+            //     //     return v || date;
+            //     // }
+            // },
             project: {
                 xtype: 'wnprc-projectentryfield',
             },
@@ -133,6 +133,23 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
             },
             modified: {
                 hidden: true
+            },
+            date: {
+                setInitialValue: function(v){
+
+                    var date = (new Date()).add(Date.DAY, 1);
+                    date.setHours(8);
+                    date.setMinutes(0);
+                    return v || date;
+                }
+            },
+            enddate: {
+                setInitialValue: function(v){
+                    var date = (new Date()).add(Date.DAY, 1);
+                    date.setHours(8);
+                    date.setMinutes(0);
+                    return v || date;
+                }
             }
         },
         'study.foodDeprives': {

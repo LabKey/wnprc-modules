@@ -288,7 +288,7 @@ public class Graph {
 		DateTimeTimeZone eventEnd = new DateTimeTimeZone();
 		if (isAllDay) {
 			eventStart.dateTime = start.format(isoLocalDateFormatter);
-			eventEnd.dateTime = start.plusDays(1).format(isoLocalDateFormatter);
+			eventEnd.dateTime = end.plusDays(1).format(isoLocalDateFormatter);
 		} else {
 			eventStart.dateTime = start.format(isoLocalDateTimeFormatter);
 			eventEnd.dateTime = end.format(isoLocalDateTimeFormatter);

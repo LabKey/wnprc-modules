@@ -394,10 +394,11 @@
             requestObj.allDay = document.getElementById("modalAllDayField").checked;
             if (requestObj.allDay) {
                 requestObj.start = new Date(document.getElementById("modalStartField").value + "T00:00:00");
+                requestObj.end = new Date(document.getElementById("modalEndField").value + "T00:00:00");
             } else {
                 requestObj.start = new Date(document.getElementById("modalStartField").value);
+                requestObj.end = new Date(document.getElementById("modalEndField").value);
             }
-            requestObj.end = new Date(document.getElementById("modalEndField").value);
             requestObj.eventId = mainEvent.extendedProps.eventId;
             requestObj.body = document.getElementById("modalCommentsField").value;
         }
@@ -708,12 +709,11 @@
         <div id="unmanagedEventDetailsDiv" class="panel panel-primary" hidden>
             <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#unmanaged-details-collapsible" aria-controls="unmanaged-details-collapsible" aria-expanded="true">Event Details</a></div>
             <div class="panel-body collapse in" id="unmanaged-details-collapsible" aria-expanded="true" data-bind="with: taskDetails">
-                <p><em>Please click on a Surgery in the Calendar to view details for that Surgery.</em></p>
                 <dl class="dl-horizontal">
                     <dt>Title:      </dt> <dd id="unmanagedEventTitle"></dd>
                     <dt>Start:      </dt> <dd id="unmanagedEventStart"></dd>
                     <dt>End:        </dt> <dd id="unmanagedEventEnd"></dd>
-                    <dt>Comments:   </dt> <dd id="unmanagedEventBody"></dd>
+                    <dt>Comments:   </dt> <dd id="unmanagedEventBody" style="white-space: pre-line"></dd>
                 </dl>
                 <div style="text-align: right;">
                     <%--//this is if we want to disable the edit/cancel buttons--%>
@@ -1025,11 +1025,16 @@
                                     document.getElementById("unmanagedEventDetailsDiv").hidden = false;
 
                                     document.getElementById("unmanagedEventTitle").innerHTML = info.event.title;
+                                    let bodyText = info.event.extendedProps.body;
+                                    if (bodyText) {
+
+                                    }
                                     if (info.event.allDay) {
                                         document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, false);
                                         let endDateTime = new Date(info.event.end);
                                         endDateTime.setDate(endDateTime.getDate() - 1);
                                         document.getElementById("unmanagedEventEnd").innerHTML = displayDateAsString(endDateTime, false);
+                                        let bodyText = info.event.extendedProps.body;
                                         document.getElementById("unmanagedEventBody").innerHTML = info.event.extendedProps.body;
                                     } else {
                                         document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, true);
@@ -1433,15 +1438,21 @@
                         if (isChecked) {
                             document.getElementById("modalStartField").type = "date";
                             document.getElementById("modalStartField").value = dateToDateInputField(mainEvent.start);
-                            document.getElementById("modalStartFieldLabel").innerHTML = "Date";
+                            document.getElementById("modalStartFieldLabel").innerHTML = "Start Date";
 
-                            document.getElementById("modalEndFieldDiv").style.visibility = "hidden";
+                            document.getElementById("modalEndField").type = "date";
+                            let allDayEndDate = mainEvent.end;
+                            allDayEndDate.setDate(allDayEndDate.getDate() - 1);
+                            document.getElementById("modalEndField").value = dateToDateInputField(allDayEndDate);
+                            document.getElementById("modalEndFieldLabel").innerHTML = "End Date";
                         } else {
                             document.getElementById("modalStartField").type = "datetime-local";
                             document.getElementById("modalStartFieldLabel").innerHTML = "Start Time";
                             document.getElementById("modalStartField").value = startValue;
 
-                            document.getElementById("modalEndFieldDiv").style.visibility = "visible";
+                            document.getElementById("modalEndField").type = "datetime-local";
+                            document.getElementById("modalEndFieldLabel").innerHTML = "End Time";
+                            document.getElementById("modalEndField").value = endValue;
                         }
                     });
                     if (mainEvent.allDay && !allDayCheckbox.checked) {

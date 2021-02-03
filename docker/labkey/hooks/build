@@ -1,2 +1,2 @@
-#!/bin/sh
+#!/bin/bash
 docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$branch --build-arg LABKEY_IS_COMMUNITY=false  --no-cache --rm=true -t $IMAGE_NAME .

@@ -51,7 +51,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 qcState: purchasingAdminModel?.qcState || requestOrder.qcState,
                 assignedTo: purchasingAdminModel?.assignedTo,
                 creditCardOption: purchasingAdminModel?.creditCardOption,
-                program: purchasingAdminModel?.program,
+                program: !!purchasingAdminModel?.program ? purchasingAdminModel.program : '4',
                 confirmNum: purchasingAdminModel?.confirmationNum,
                 invoiceNum: purchasingAdminModel?.invoiceNum,
                 orderDate: purchasingAdminModel?.orderDate,

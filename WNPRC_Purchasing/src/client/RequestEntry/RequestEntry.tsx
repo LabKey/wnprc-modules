@@ -50,10 +50,7 @@ export const App : FC = memo(() => {
         Security.getUserPermissions({
             containerPath: getServerContext().container.path,
             success: (data) => {
-                const hasPerm = (data.container.effectivePermissions.indexOf(PermissionTypes.Read) > -1 &&
-                                    data.container.effectivePermissions.indexOf(PermissionTypes.Insert) > -1 &&
-                                    data.container.effectivePermissions.indexOf(PermissionTypes.Update) > -1 &&
-                                    data.container.effectivePermissions.indexOf(PermissionTypes.Delete) > -1);
+                const hasPerm = data.container.effectivePermissions.indexOf(PermissionTypes.Admin) > -1
                 setHasPurchasingAdminPermission(hasPerm);
             },
             failure: (error) => {
@@ -61,7 +58,7 @@ export const App : FC = memo(() => {
                 setHasPurchasingAdminPermission(false);
             }
         });
-        if (reqRowId && hasPurchasingAdminPermission)
+        if (reqRowId)
         {
             //get ehr_purchasing.purchasingRequests data
             const filter = [Filter.create('rowId', reqRowId)];
@@ -83,7 +80,9 @@ export const App : FC = memo(() => {
                     qcState: vals[0].qcState,
                     program: vals[0].program,
                     confirmationNum: vals[0].confirmationNum,
-                    invoiceNum: vals[0].invoiceNum
+                    invoiceNum: vals[0].invoiceNum,
+                    orderDate: new Date(vals[0].orderDate),
+                    cardPostDate: new Date(vals[0].cardPostDate)
                 }));
             });
 

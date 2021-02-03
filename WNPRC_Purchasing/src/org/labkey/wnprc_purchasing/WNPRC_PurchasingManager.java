@@ -41,7 +41,6 @@ import org.labkey.api.security.User;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -162,9 +161,9 @@ public class WNPRC_PurchasingManager
         else
             requestOrderErrors.addError(new PropertyValidationError("Required value for 'Account to charge' not provided", "account"));
 
-        if (null == requestForm.getVendor())
+        if (null == requestForm.getVendor() && newVendorData.size() == 0)
             requestOrderErrors.addError(new PropertyValidationError("Required value for 'Vendor' not provided", "vendorId"));
-        else
+        else if (null != requestForm.getVendor() && newVendorData.size() == 0)
             row.put("vendorId", requestForm.getVendor());
 
         if (null == requestForm.getPurpose())

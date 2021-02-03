@@ -1,4 +1,5 @@
 import React, {FC, memo, useCallback, useEffect, useMemo, useState} from "react";
+import DatePicker from 'react-datepicker';
 import {getData} from "../actions";
 import {createOptions} from "./Utils";
 import {PurchasingFormInput} from "./PurchasingFormInput";
@@ -16,7 +17,6 @@ export const AssignedToInput: FC<InputProps> = memo((props) => {
     const [dropDownVals, setDropDownVals] = useState<Array<any>>();
 
     useEffect(() => {
-        // const filter = [Filter.create('Groups', )]
         getData('core', 'Users', 'UserId, DisplayName, Groups', 'DisplayName').then(vals => {
             setDropDownVals(vals);
         });
@@ -32,7 +32,6 @@ export const AssignedToInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Assigned to"
-                required={false}
             >
                 <select
                     className={'assigned-to-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -68,7 +67,6 @@ export const CreditCardOptionInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Credit Card Option"
-                required={false}
             >
                 <select
                     className={'credit-card-option-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -104,7 +102,6 @@ export const StatusInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Status"
-                required={false}
             >
                 <select
                     className={'status-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -130,7 +127,6 @@ export const ProgramInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Program"
-                required={false}
             >
                 <textarea
                     className='program-input form-control'
@@ -154,7 +150,6 @@ export const ConfirmationInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Confirmation No."
-                required={false}
             >
                 <textarea
                     className='confirmation-input form-control'
@@ -178,7 +173,6 @@ export const InvoiceInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Invoice No."
-                required={false}
             >
                 <textarea
                     className='invoice-input form-control'
@@ -202,11 +196,10 @@ export const OrderDateInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Order date"
-                required={false}
             >
-                <input
-                    type="date"
-                    value={value}
+                <DatePicker
+                    dateFormat="yyyy-MM-dd"
+                    selected={!!value ? new Date(value) : null}
                     onChange={onValueChange}
                     id="order-date-id"
                 />
@@ -226,11 +219,10 @@ export const CardPostDateInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Card post date"
-                required={false}
             >
-                <input
-                    type="date"
-                    value={value}
+                <DatePicker
+                    dateFormat="yyyy-MM-dd"
+                    selected={!!value ? new Date(value) : null}
                     onChange={onValueChange}
                     id="card-post-date-id"
                 />

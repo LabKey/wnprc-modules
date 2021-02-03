@@ -46,9 +46,13 @@ function onInit(event, helper){
 //     console.log('row: ' + JSON.stringify(row));
 // }
 
-function onInsert(helper, scriptErrors, row, oldRow) {
-
+function onUpsert(helper, scriptErrors, row, oldRow) {
+    if (row.date) {
+        row.endDate = row.date;
+    }
 }
+
+
 
 function onAfterUpsert(helper, scriptErrors, row, oldRow){
     //WNPRC.Utils.getJavaHelper().setSurgeryProcedureStartEndTimes(row.requestid);

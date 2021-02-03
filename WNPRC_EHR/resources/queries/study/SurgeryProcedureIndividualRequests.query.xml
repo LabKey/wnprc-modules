@@ -21,8 +21,8 @@
                         <nullable>false</nullable>
                     </column>
                     <column columnName="date">
-                        <columnTitle>Start Table Time</columnTitle>
-                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Surgery/Procedure Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
                         <nullable>false</nullable>
                     </column>
                     <column columnName="enddate">

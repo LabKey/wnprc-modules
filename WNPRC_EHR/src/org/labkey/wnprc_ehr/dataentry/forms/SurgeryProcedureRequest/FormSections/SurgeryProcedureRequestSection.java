@@ -19,7 +19,7 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
         return Arrays.asList(
                 "Id",
                 "date",
-                "enddate",
+                //"enddate",
                 "procedurecategory",
                 "procedurename",
                 "project",

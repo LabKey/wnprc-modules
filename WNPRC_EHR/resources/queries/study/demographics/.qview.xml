@@ -17,6 +17,8 @@
         <column name="dam"/>
         <column name="sire"/>
         <column name="origin"/>
+        <column name="geographic_origin"/>
+        <column name="ancestry"/>
         <column name="birth"/>
         <column name="death"/>
         <!--<column name="Id/MostRecentArrival/MostRecentArrival">-->

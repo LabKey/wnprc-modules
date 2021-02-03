@@ -1,8 +1,8 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <tableTitle>SurgeryProcedure</tableTitle>
             <table tableName="surgery_procedure" tableDbType="TABLE">
+                <tableTitle>SurgeryProcedure</tableTitle>
                 <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer" />
                 <!--<tableUrl>/EHR/necropsyDetails.view?key=${objectid}</tableUrl>-->
                 <!--<insertUrl/>-->

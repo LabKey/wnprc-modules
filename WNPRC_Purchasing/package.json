@@ -16,8 +16,8 @@
     "tsx"
   ],
   "dependencies": {
-    "@labkey/components": "1.16.0-fb-wnprc-purchasing-epic8151.2",
-    "@labkey/api": "1.1.4"
+    "@labkey/components": "1.19.0-fb-wnprc-purchasing-epic8151.1",
+    "@labkey/api": "1.1.6"
   },
   "devDependencies": {
     "@labkey/build": "1.1.2",

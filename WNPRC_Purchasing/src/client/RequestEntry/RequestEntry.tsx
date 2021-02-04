@@ -39,6 +39,7 @@ export const App : FC = memo(() => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
     const [hasPurchasingAdminPermission, setHasPurchasingAdminPermission] = useState<boolean>(false);
+    const [hasPermissionLoaded, setHasPermissionLoaded] = useState<boolean>(false);
     const [permissionError, setPermissionError] = useState<string>();
 
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
@@ -52,6 +53,7 @@ export const App : FC = memo(() => {
             success: (data) => {
                 const hasPerm = data.container.effectivePermissions.indexOf(PermissionTypes.Admin) > -1
                 setHasPurchasingAdminPermission(hasPerm);
+                setHasPermissionLoaded(true);
             },
             failure: (error) => {
                 setPermissionError(error.exception);
@@ -312,6 +314,7 @@ export const App : FC = memo(() => {
     }, [requestOrderModel, lineItems, lineItemRowsToDelete, purchaseAdminModel, documentAttachmentModel, isSaving]);
 
     return (
+        hasPermissionLoaded &&
         <>
             {
                 //has to be a purchasing admin to update the existing request

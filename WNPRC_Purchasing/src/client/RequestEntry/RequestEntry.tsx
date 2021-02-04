@@ -81,8 +81,8 @@ export const App : FC = memo(() => {
                     program: vals[0].program,
                     confirmationNum: vals[0].confirmationNum,
                     invoiceNum: vals[0].invoiceNum,
-                    orderDate: new Date(vals[0].orderDate),
-                    cardPostDate: new Date(vals[0].cardPostDate)
+                    orderDate: !!vals[0].orderDate ? new Date(vals[0].orderDate) : null,
+                    cardPostDate: !!vals[0].cardPostDate ? new Date(vals[0].cardPostDate) : null
                 }));
             });
 
@@ -177,8 +177,15 @@ export const App : FC = memo(() => {
         setIsDirty(false);
         event.preventDefault();
         const returnUrl = ActionURL.getParameter('returnUrl');
-        window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
-    }, [isDirty]);
+
+        //TODO: this is temporary until purchasing admin page is created, then change it to get routed to the admin page
+        if (!!requestId && hasPurchasingAdminPermission) {
+            window.location.href = ActionURL.buildURL('query', 'executeQuery', getServerContext().container.path, {schemaName: "ehr_purchasing", ['query.queryName']: "purchasingRequests"});
+        }
+        else {
+            window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
+        }
+    }, [isDirty, requestId, hasPurchasingAdminPermission]);
 
     const onSaveBtnHandler = useCallback((event) => {
 
@@ -194,8 +201,14 @@ export const App : FC = memo(() => {
             .then(r => {
                 if (r.success || r.fileNames?.length > 0)
                 {
-                    //navigate to purchasing overview grid/main page
-                    window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path)
+                    //TODO: this is temporary until purchasing admin page is created, then change it to get routed to the admin page
+                    if (!!requestId) {
+                        window.location.href = ActionURL.buildURL('query', 'executeQuery', getServerContext().container.path, {schemaName: "ehr_purchasing", ['query.queryName']: "purchasingRequests"});
+                    }
+                    else {
+                        //navigate to purchasing overview grid/main page
+                        window.location.href = ActionURL.buildURL('project', 'begin', getServerContext().container.path);
+                    }
                 }
             })
             .catch(reject => {

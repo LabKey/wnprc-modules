@@ -188,8 +188,8 @@ export const InvoiceInput: FC<InputProps> = memo((props) => {
 export const OrderDateInput: FC<InputProps> = memo((props) => {
 
     const {onChange, value} = props;
-    const onValueChange = useCallback((evt) => {
-        onChange('orderDate', evt.target.value);
+    const onValueChange = useCallback((date) => {
+        onChange('orderDate', date);
     }, [onChange]);
 
     return (
@@ -211,8 +211,8 @@ export const OrderDateInput: FC<InputProps> = memo((props) => {
 export const CardPostDateInput: FC<InputProps> = memo((props) => {
 
     const {onChange, value} = props;
-    const onValueChange = useCallback((evt) => {
-        onChange('cardPostDate', evt.target.value);
+    const onValueChange = useCallback((date) => {
+        onChange('cardPostDate', date);
     }, [onChange]);
 
     return (

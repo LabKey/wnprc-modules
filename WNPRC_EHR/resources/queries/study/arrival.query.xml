@@ -1,0 +1,146 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Arrival" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Arrival Date</columnTitle>
+                    </column>
+                    <column columnName="source">
+                        <columnTitle>Source/Vendor</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>source</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="acquisitionType">
+                        <columnTitle>Acquisition Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>AcquistionType</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="rearingType">
+                        <columnTitle>Rearing Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>RearingType</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="gender">
+                        <columnTitle>Gender</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>gender_codes</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="species">
+                        <columnTitle>Species</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>species</fkTable>
+                            <fkColumnName>common</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="geographic_origin">
+                        <columnTitle>Geographic Origin</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>geographic_origins</fkTable>
+                            <fkColumnName>meaning</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="dam">
+                        <columnTitle>Dam</columnTitle>
+                        <!--<fk>-->
+                        <!--<fkDbSchema>study</fkDbSchema>-->
+                        <!--<fkTable>animal</fkTable>-->
+                        <!--<fkColumnName>id</fkColumnName>-->
+                        <!--</fk>-->
+                        <url>/ehr/participantView.view?participantId=${dam}</url>
+                    </column>
+                    <column columnName="sire">
+                        <columnTitle>Sire</columnTitle>
+                        <!--<fk>-->
+                        <!--<fkDbSchema>study</fkDbSchema>-->
+                        <!--<fkTable>animal</fkTable>-->
+                        <!--<fkColumnName>id</fkColumnName>-->
+                        <!--</fk>-->
+                        <url>/ehr/participantView.view?participantId=${sire}</url>
+                    </column>
+                    <column columnName="birth">
+                        <columnTitle>Birth</columnTitle>
+                        <formatString>Date</formatString>
+                    </column>
+                    <column columnName="estimated">
+                        <columnTitle>Birth Is Estimated?</columnTitle>
+                    </column>
+                    <column columnName="originalId">
+                        <columnTitle>Original ID</columnTitle>
+                    </column>
+                    <column columnName="arrivalId">
+                        <columnTitle>Arrival ID</columnTitle>
+                    </column>
+                    <column columnName="cites">
+                        <columnTitle>CITES Number</columnTitle>
+                    </column>
+                    <column columnName="customsDate">
+                        <columnTitle>Customs Date</columnTitle>
+                    </column>
+                    <column columnName="initialRoom">
+                        <nullable>true</nullable>
+                        <isHidden>true</isHidden>
+                        <columnTitle>Room</columnTitle>
+                        <!--<url>/EHR/cageDetails.view?-->
+                        <!--room=${room}&amp;-->
+                        <!--cage=${cage}&amp;-->
+                        <!--</url>-->
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="initialCage">
+                        <nullable>true</nullable>
+                        <isHidden>true</isHidden>
+                        <columnTitle>Cage</columnTitle>
+                        <url>/EHR/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cage}&amp;
+                        </url>
+                    </column>
+                    <column columnName="initialCond">
+                        <nullable>true</nullable>
+                        <isHidden>true</isHidden>
+                        <columnTitle>Condition</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>housing_condition_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                        <!--<fkDbSchema>study</fkDbSchema>-->
+                        <!--<fkTable>studyDataParent</fkTable>-->
+                        <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

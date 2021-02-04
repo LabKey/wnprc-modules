@@ -1143,7 +1143,7 @@ EHR.reports['abstract'] = function(panel, tab){
         return '<p style="color: red"><strong>' + message + '</strong></p>';
     };
 
-    if (animalList.length <= 2 && !(animalId.match(/multiple rooms selected/i) || animalId.match(/^Room:/i)) && !animalId == "") {
+    if (animalList.length <= 1 && !(animalId.match(/multiple rooms selected/i) || animalId.match(/^Room:/i)) && !animalId == "") {
 
         var config = {
             xtype: 'ldk-webpartpanel',

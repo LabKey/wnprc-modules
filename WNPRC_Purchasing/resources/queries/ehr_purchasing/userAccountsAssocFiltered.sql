@@ -12,7 +12,7 @@ FROM (
                WHERE ua.accessToAllAccounts = true
                  AND ua.account IS NULL) u
 
-         UNION ALL
+         UNION
 
 -- get accounts associated with user
          SELECT a.rowid    AS rowid,

@@ -43,7 +43,7 @@ public class WNPRC_EHRTestController extends SpringActionController
             Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
             assert module != null;
 
-            File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(),
+            File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(),
                     "study.xml");
             DatasetImportHelper.importDatasetMetadata(getUser(), getContainer(), file);
             return new ApiSimpleResponse("success", true);

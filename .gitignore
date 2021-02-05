@@ -21,4 +21,6 @@ docker/nginx/key.pem
 **/app.js
 **/app.js.map
 
-WNPRC_EHR/resources/web/wnprc_ehr/gen/
+# generated artifacts from @labkey/build
+*/resources/web/*/gen/
+*/resources/views/gen/

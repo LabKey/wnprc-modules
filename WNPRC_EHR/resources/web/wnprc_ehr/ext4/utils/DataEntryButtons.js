@@ -635,6 +635,51 @@
         }
     }));
 
+    EHR.DataEntryUtils.registerGridButton("WNPRC_ADD_ROOM", function (config) {
+        return Ext4.Object.merge({
+            text: "Add Room",
+            tooltip: "Click to add a room to the request",
+            handler: function (btn) {
+                let grid = btn.up("gridpanel");
+                let mainPanel = grid.up("panel");
+                let items = mainPanel.items.items;
+                let formPanel;
+                let parentPanelFound = false;
+                for (let i = 0; i < items.length; i++) {
+                    //if using on a form other than surgery/procedure request, add in a check for that form here
+                    if (items[i].title === "Surgery or Procedure") {
+                        formPanel = items[i];
+                        parentPanelFound = true;
+                        break;
+                    }
+                }
+
+                let cellEditing = grid.getPlugin(grid.editingPluginId);
+                if(cellEditing) {
+                    cellEditing.completeEdit();
+                }
+
+                let model = LDK.StoreUtils.createModelInstance(grid.store, null, true);
+
+                if (parentPanelFound) {
+                    let values = formPanel.getValues();
+                    let parentDate = values.date + "T00:00:00";
+                    model.set({
+                        date: parentDate,
+                        endDate: parentDate
+                    });
+                }
+
+                grid.store.insert(0, [model]); //add a blank record in the first position
+
+                if(cellEditing) {
+                    cellEditing.startEditByPosition({row: 0, column: this.firstEditableColumn || 0});
+                }
+
+            }
+        }, config);
+    });
+
     /*
      * Enable the save template button for all users.
      */

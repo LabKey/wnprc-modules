@@ -135,21 +135,8 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 hidden: true
             },
             date: {
-                setInitialValue: function(v){
-
-                    var date = (new Date()).add(Date.DAY, 1);
-                    date.setHours(8);
-                    date.setMinutes(0);
-                    return v || date;
-                }
             },
             enddate: {
-                setInitialValue: function(v){
-                    var date = (new Date()).add(Date.DAY, 1);
-                    date.setHours(8);
-                    date.setMinutes(0);
-                    return v || date;
-                }
             }
         },
         'study.foodDeprives': {

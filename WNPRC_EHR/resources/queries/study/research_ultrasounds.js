@@ -66,6 +66,9 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                 console.log("Insert rows error for ehr.tasks: " + JSON.stringify(error));
             }
         });
+
+        row.findings = row.ultrasoundFindings;
+        row.remark = row.ultrasoundRemarks;
     }
 
     //if there are any data for an ultrasound review, then add that record as well

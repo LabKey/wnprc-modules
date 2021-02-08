@@ -8,6 +8,87 @@ interface PaneProps {
   infoState?: string;
 }
 
+//jsx doesn't respect new lines in a string
+const splitText = function(text:string) {
+  if (text) {
+    return text.split ('\n').map ((item, i) => <div key={i}>{item}</div>);
+  }
+}
+
+// this will return the name of the field,
+// sometimes it has to "drilldown" for a field like "Id/curLocation/room"
+const getNameOfField = (field:object) => {
+  let arr = [];
+  let item = field["fieldKey"]
+  let fieldName = item.name;
+  while (item.parent){
+    arr.unshift(item.parent.name);
+    item = item.parent;
+  }
+  arr.push(fieldName);
+  let finalName = arr.join("/");
+  return finalName;
+}
+
+// create an array with two values per index
+// uses the 'metadata' property from LabKey selectRows() to build the data struct
+let constructArrayForTable = (animalInfo) => {
+  let arr = [];
+  // each row in the abstract table will have 4 columns,
+  // <tr>(<td>label</td> <td>value</td> | <td>label</td> <td>value</td>)</tr>
+  // so here we construct an array, each row shows 2 values
+  // and their respective labels
+  for (let i = 0; i < animalInfo["metaData"]["fields"].length-1; i+=2)
+  {
+    let firstItemMetadata = animalInfo["metaData"]["fields"][i];
+    let secondItemMetadata = animalInfo["metaData"]["fields"][i + 1]
+    let firstKey = getNameOfField(firstItemMetadata);
+    let secondKey = getNameOfField(secondItemMetadata);
+    let firstItemVal = animalInfo["rows"][0][firstKey];
+    let secondItemVal = animalInfo["rows"][0][secondKey];
+
+    //cover the case where value could be an array
+    if (Array.isArray(firstItemVal) && firstItemVal.length > 0){
+      firstItemVal = firstItemVal[0];
+    }
+    if (Array.isArray(secondItemVal) && secondItemVal.length > 0){
+      secondItemVal = secondItemVal[0];
+    }
+
+    let items = [];
+    items[0] = {
+      'label': firstItemMetadata["caption"],
+      'displayValue': firstItemVal["displayValue"],
+      'url': firstItemVal["url"],
+      'value': firstItemVal["value"],
+    }
+    items[1] = {
+      'label': secondItemMetadata["caption"],
+      'displayValue': secondItemVal["displayValue"],
+      'value': secondItemVal["value"],
+      'url': secondItemVal["url"],
+    }
+    arr.push(items);
+  }
+
+  return arr;
+}
+
+let constructColumns = (val:any,key:number) => {
+  let item = val[key];
+  let label = item['label'];
+  let value;
+  if (item['displayValue'] && !item['url']){
+    value = item['displayValue']
+  } else if (!item['displayValue'] && !item['url']){
+    value = item['value']
+  } else if (item['displayValue'] && item['url']) {
+    value = <a href={item['url']}>{item['displayValue']}</a>
+  } else if (!item['displayValue'] && item['url']) {
+    value = <a href={item['url']}>{item['value']}</a>
+  }
+  return <><td>{label}</td><td>{value}</td></>
+}
 /**
  * Displays animal info given a successful state.
  */
@@ -15,7 +96,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
   const { animalInfo, infoState } = props;
 
   if (infoState == "waiting") {
-    return <div id="animal-info-empty"><EHRSpinner text={'loading...'}></EHRSpinner></div>;
+    return <div id="animal-info-empty"><EHRSpinner text={'loading...'}/></div>;
   }
 
   if (infoState == "loading-unsuccess") {
@@ -25,17 +106,11 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
   if (infoState == "loading") {
     return (
       <div id="animal-info-empty">
-        Loading...
+        <EHRSpinner text={'loading...'}/>
       </div>
     );
   }
 
-  //jsx doesn't respect new lines in a string
-  const splitText = function(text:string) {
-    if (text) {
-      return text.split ('\n').map ((item, i) => <div key={i}>{item}</div>);
-    }
-  }
 
   if (infoState == "loading-success") {
     return (
@@ -49,159 +124,10 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td>Id</td>
-            <td>
-              <a href={animalInfo._labkeyurl_Id}>{animalInfo.Id}</a>
-            </td>
-            <td>Most Recent Alopecia Score</td>
-            <td>
-              {animalInfo["mostRecentAlopeciaScore/score"]}
-            </td>
-          </tr>
-          <tr>
-            <td>Room</td>
-            <td>
-              <a href={animalInfo["_labkeyurl_Id/curLocation/room"]}>{animalInfo["Id/curLocation/room"]}</a>
-            </td>
-            <td>Most Recent BCS</td>
-            <td>
-              {animalInfo["mostRecentBodyConditionScore/score"]}
-            </td>
-          </tr>
-          <tr>
-            <td>Cage</td>
-            <td>
-              <a href={animalInfo["_labkeyurl_Id/curLocation/cage"]}>{animalInfo["Id/curLocation/cage"]}</a>
-            </td>
-            <td>Current Weight</td>
-            <td>
-              <a
-                href={
-                  animalInfo[
-                    "_labkeyurl_Id/MostRecentWeight/MostRecentWeight"
-                    ]
-                }
-              >
-                {animalInfo["Id/MostRecentWeight/MostRecentWeight"]}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>Gender</td>
-            <td>
-              <a href={animalInfo._labkeyurl_gender}>{animalInfo["gender/meaning"]}</a>
-            </td>
-            <td>Weight Date</td>
-            <td>
-              <a
-                href={
-                  animalInfo[
-                    "_labkeyurl_Id/MostRecentWeight/MostRecentWeightDate"
-                    ]
-                }
-              >
-                {animalInfo["Id/MostRecentWeight/MostRecentWeightDate"]}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>Status</td>
-            <td>
-              <a href={animalInfo._labkeyurl_calculated_status}>{animalInfo.calculated_status}</a>
-            </td>
-            <td>Hold</td>
-            <td>
-              {animalInfo.hold}
-            </td>
-          </tr>
-          <tr>
-            <td>Avail</td>
-            <td>
-              {animalInfo["Id/activeAssignments/Availability"][0]}
-            </td>
-            <td>Condition</td>
-            <td>
-              <a href={animalInfo["_labkeyurl_Id/curLocation/cond"]}>
-                {animalInfo["Id/curLocation/cond"]}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>Age</td>
-            <td>
-              {animalInfo["Id/age/AgeFriendly"]}
-            </td>
-            <td># of Animals In Cage</td>
-            <td>
-              {animalInfo["Id/numRoommates/AnimalsInCage"]}
-            </td>
-          </tr>
-          <tr>
-            <td>Birth</td>
-            <td>
-              <a href={animalInfo._labkeyurl_birth}>
-                {animalInfo.birth}
-              </a>
-            </td>
-            <td>Current Behavior(s)</td>
-            <td>
-              {animalInfo["Id/CurrentBehavior/currentBehaviors"]}
-            </td>
-          </tr>
-          <tr>
-            <td>Dam</td>
-            <td>
-              <a href={animalInfo._labkeyurl_dam}>{animalInfo.dam}</a>
-            </td>
-            <td>Death</td>
-            <td>
-              <a href={animalInfo._labkeyurl_death}>
-                {animalInfo.death}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>Sire</td>
-            <td>
-              <a href={animalInfo._labkeyurl_sire}>{animalInfo.sire}</a>
-            </td>
-            <td>Source/Vendor</td>
-            <td>
-              <a href={animalInfo["_labkeyurl_origin"]}>
-                {animalInfo["origin/meaning"]}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td>Medical</td>
-            <td>{animalInfo.medical}</td>
-            <td>Most Recent Arrival</td>
-            <td>
-              <a href={animalInfo["_labkeyurl_Id/MostRecentArrival/MostRecentArrival"]}>{animalInfo["Id/MostRecentArrival/MostRecentArrival"]}</a>
-            </td>
-          </tr>
-          <tr>
-            <td>Most Recent TB Date</td>
-            <td>
-              <a href={animalInfo["_labkeyurl_Id/MostRecentTB/MostRecentTBDate"]}>{animalInfo["Id/MostRecentTB/MostRecentTBDate"]}</a>
-            </td>
-            <td>Most Recent Departure</td>
-            <td>
-              <a href={animalInfo["_labkeyurl_Id/MostRecentDeparture/MostRecentDeparture"]}>{animalInfo["Id/MostRecentDeparture/MostRecentDeparture"]}</a>
-            </td>
-          </tr>
-          <tr>
-            <td>Replacement prepaid by</td>
-            <td>
-              {animalInfo["prepaid"]}
-            </td>
-            <td>Pathology Notes</td>
-            <td>
-              {splitText(animalInfo["necropsyAbstractNotes/remark"])}
-            </td>
-
-          </tr>
+          {constructArrayForTable(animalInfo).map((item, index) => {
+            return <tr key={index}>{constructColumns(item,0)}{constructColumns(item,1)}</tr>
+          }
+          )}
           </tbody>
         </Table>
       </div>

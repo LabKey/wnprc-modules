@@ -90,13 +90,7 @@
                         <!--</fk>-->
                         <url>/ehr/participantView.view?participantId=${sire}</url>
                     </column>
-                    <column columnName="origin">
-                        <columnTitle>Origin</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>source</fkTable>
-                            <fkColumnName>Code</fkColumnName>
-                        </fk>
+                    <column columnName="origin/source">
                     </column>
                     <column columnName="birth">
                         <formatString>yyyy-MM-dd</formatString>
@@ -219,7 +213,6 @@
                         <!--</fk>-->
                     </column>
                     <column columnName="geographic_origin">
-                        <columnTitle>Geographic Origin</columnTitle>
                     </column>
                     <!--<column columnName="behavior">
                         <isHidden>true</isHidden>

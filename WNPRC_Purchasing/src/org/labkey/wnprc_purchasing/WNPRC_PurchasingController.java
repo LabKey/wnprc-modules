@@ -51,7 +51,10 @@ public class WNPRC_PurchasingController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors)
         {
-            return ModuleHtmlView.get(ModuleLoader.getInstance().getModule("WNPRC_Purchasing"), ModuleHtmlView.getGeneratedViewPath("RequestEntry"));
+            ModuleHtmlView view = ModuleHtmlView.get(ModuleLoader.getInstance().getModule("WNPRC_Purchasing"), ModuleHtmlView.getGeneratedViewPath("RequestEntry"));
+            getPageConfig().setTitle("Purchasing Request Entry Form");
+
+            return view;
         }
 
         public void addNavTrail(NavTree root) { }

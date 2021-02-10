@@ -62,10 +62,16 @@
   margin-left: -25% !important;
 }
 
-.request-order-form-row {
+.request-form-row {
   margin-top: 1%;
   margin-left: 1%;
   margin-bottom: 0.50%;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.other-acct-label-wrap {
+  white-space: pre-wrap;
 }
 
 .account-input, .vendor-input, .shipping-dest-input, .assigned-to-input, .credit-card-option-input, .status-input {
@@ -97,12 +103,12 @@
 }
 
 .calc-total {
-  margin-left:57.40%;
+  text-align: right;
   font-weight: bold;
 }
 
 .calc-total-val {
-  margin-left:-4.65%;
+  text-align: center;
   font-weight: bold;
 }
 

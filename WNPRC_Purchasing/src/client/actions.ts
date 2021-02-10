@@ -19,7 +19,7 @@ export function getData(schemaName: string, queryName: string, colNames: string,
             sort: sort,
             filterArray: filter,
             success: function(results) {
-                if (results && results.rows) {
+                if (results?.rows) {
                     resolve(results.rows);
                 }
             },
@@ -51,14 +51,14 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 qcState: purchasingAdminModel?.qcState || requestOrder.qcState,
                 assignedTo: purchasingAdminModel?.assignedTo,
                 creditCardOption: purchasingAdminModel?.creditCardOption,
-                program: !!purchasingAdminModel?.program ? purchasingAdminModel.program : '4',
+                program: purchasingAdminModel?.program ? purchasingAdminModel.program : '4',
                 confirmNum: purchasingAdminModel?.confirmationNum,
                 invoiceNum: purchasingAdminModel?.invoiceNum,
                 orderDate: purchasingAdminModel?.orderDate,
                 cardPostDate: purchasingAdminModel?.cardPostDate,
                 lineItems: lineItems,
                 lineItemsToDelete: lineItemsToDelete,
-                hasNewVendor: (!!(requestOrder.vendorId === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor))),
+                hasNewVendor: (requestOrder.vendorId === 'Other' && VendorModel.getDisplayString(requestOrder.newVendor)),
                 newVendorName: requestOrder.newVendor.vendorName,
                 newVendorStreetAddress: requestOrder.newVendor.streetAddress,
                 newVendorCity: requestOrder.newVendor.city,
@@ -75,7 +75,7 @@ export async function submitRequest (requestOrder: RequestOrderModel, lineItems:
                 if (documentAttachmentModel?.filesToUpload?.size > 0) {
                     uploadFiles(documentAttachmentModel, getServerContext().container.name, response.requestId).then((files: Array<string>) => {
                         const fileNames = documentAttachmentModel?.savedFiles?.length > 0 ? files.concat(documentAttachmentModel.savedFiles.map((file:SavedFileModel) => file.fileName)) : files;
-                        resolve({fileNames: fileNames});
+                        resolve({success: fileNames?.length > 0});
                     });
                 }
                 else {
@@ -130,7 +130,7 @@ export async function getSavedFiles(container: string, directory?: string, inclu
             })
             .catch(response => {
                 if (response) {
-                    const msg = 'Unable to load files in ' + (directory ? directory : 'root') + ': ' + response;
+                    const msg = `Unable to load files in ${(directory ? directory : 'root')}: ${response}`;
                     reject(msg);
                 }
             });

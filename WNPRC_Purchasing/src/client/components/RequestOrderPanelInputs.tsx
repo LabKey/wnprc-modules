@@ -63,15 +63,14 @@ export const AccountOtherInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Account & Principal Investigator *"
-                required={false}
+                label="Account & PI *"
             >
                 <textarea
                     className={'account-input other-account-input form-control ' + (hasError ? 'field-validation-error' : (hasOtherAcctWarning ? 'other-account-warning-box' : ''))}
                     value={value}
                     onChange={onTextChange}
                     id="account-and-pi-id"
-                    placeholder="You selected 'Other' account, please provide account and principal investigator (Required)"
+                    placeholder="You selected 'Other' for 'Account to charge', please provide an account and principal investigator (Required)"
                 >
                 </textarea>
             </PurchasingFormInput>
@@ -212,7 +211,6 @@ export const SpecialInstructionInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Special instructions"
-                required={false}
             >
                 <textarea
                     className='special-instr-input form-control'
@@ -270,7 +268,6 @@ export const DeliveryAttentionInput: FC<InputProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Delivery attention to *"
-                required={true}
             >
                 <textarea
                     className={'delivery-attn-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -296,7 +293,6 @@ export const NewVendorDisplay: FC<VendorDisplayProps> = memo((props) => {
         <div>
             <PurchasingFormInput
                 label="Other vendor"
-                required={false}
             >
                 <textarea
                     className='new-vendor-display form-control'

@@ -38,9 +38,7 @@ export const App : FC = memo(() => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
-    const [hasPurchasingAdminPermission, setHasPurchasingAdminPermission] = useState<boolean>(false);
-    const [hasPermissionLoaded, setHasPermissionLoaded] = useState<boolean>(false);
-    const [permissionError, setPermissionError] = useState<string>();
+    const [hasPurchasingAdminPermission, setHasPurchasingAdminPermission] = useState<boolean>(getServerContext().user.isAdmin);
 
     //equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
@@ -48,60 +46,54 @@ export const App : FC = memo(() => {
         // is fired on component mount
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
-        Security.getUserPermissions({
-            containerPath: getServerContext().container.path,
-            success: (data) => {
-                const hasPerm = data.container.effectivePermissions.indexOf(PermissionTypes.Admin) > -1
-                setHasPurchasingAdminPermission(hasPerm);
-                setHasPermissionLoaded(true);
-            },
-            failure: (error) => {
-                setPermissionError(error.exception);
-                setHasPurchasingAdminPermission(false);
-            }
-        });
+
         if (reqRowId)
         {
             //get ehr_purchasing.purchasingRequests data
             const filter = [Filter.create('rowId', reqRowId)];
             getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter).then(vals => {
-                setRequestOrderModel(RequestOrderModel.create({
-                    rowId: vals[0].rowId,
-                    account: !!vals[0].otherAcctAndInves ? "Other" : vals[0].account,
-                    otherAcctAndInves: !!vals[0].otherAcctAndInves ? vals[0].otherAcctAndInves : undefined,
-                    vendorId: vals[0].vendorId,
-                    justification: vals[0].justification,
-                    shippingInfoId: vals[0].shippingInfoId,
-                    shippingAttentionTo: vals[0].shippingAttentionTo,
-                    comments: vals[0].comments,
-                    otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add 'Account & Principal Investigator' value '" + vals[0].otherAcctAndInves + "' into the system." : undefined
-                }));
-                setPurchaseAdminModel(PurchaseAdminModel.create({
-                    assignedTo: vals[0].assignedTo,
-                    creditCardOption: vals[0].creditCardOptionId,
-                    qcState: vals[0].qcState,
-                    program: vals[0].program,
-                    confirmationNum: vals[0].confirmationNum,
-                    invoiceNum: vals[0].invoiceNum,
-                    orderDate: !!vals[0].orderDate ? new Date(vals[0].orderDate) : null,
-                    cardPostDate: !!vals[0].cardPostDate ? new Date(vals[0].cardPostDate) : null
-                }));
+                if (vals && vals.length > 0)
+                {
+                    setRequestOrderModel(RequestOrderModel.create({
+                        rowId: vals[0].rowId,
+                        account: vals[0].otherAcctAndInves ? "Other" : vals[0].account,
+                        otherAcctAndInves: vals[0].otherAcctAndInves || undefined,
+                        vendorId: vals[0].vendorId,
+                        justification: vals[0].justification,
+                        shippingInfoId: vals[0].shippingInfoId,
+                        shippingAttentionTo: vals[0].shippingAttentionTo,
+                        comments: vals[0].comments,
+                        otherAcctAndInvesWarning: vals[0].otherAcctAndInves ? "Warning: Please add 'Account & Principal Investigator' value '" + vals[0].otherAcctAndInves + "' into the system." : undefined
+                    }));
+                    setPurchaseAdminModel(PurchaseAdminModel.create({
+                        assignedTo: vals[0].assignedTo,
+                        creditCardOption: vals[0].creditCardOptionId,
+                        qcState: vals[0].qcState,
+                        program: vals[0].program,
+                        confirmationNum: vals[0].confirmationNum,
+                        invoiceNum: vals[0].invoiceNum,
+                        orderDate: vals[0].orderDate ? new Date(vals[0].orderDate) : null,
+                        cardPostDate: vals[0].cardPostDate ? new Date(vals[0].cardPostDate) : null
+                    }));
+                }
             });
 
             //get ehr_purchasing.lineItems data
             const requestRowIdFilter = [Filter.create('requestRowId', reqRowId)];
             getData('ehr_purchasing', 'lineItems', 'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, unitCost, itemStatusId', undefined, requestRowIdFilter).then(vals => {
                 let lineItems = vals.map(val => {
-                   return LineItemModel.create({
-                        rowId: val.rowId,
-                        requestRowId: reqRowId,
-                        item: val.item,
-                        controlledSubstance: val.controlledSubstance,
-                        itemUnit: val.itemUnitId,
-                        quantity: val.quantity,
-                        unitCost: val.unitCost,
-                        status: val.itemStatusId
-                    });
+                    if (val) {
+                        return LineItemModel.create({
+                            rowId: val.rowId,
+                            requestRowId: reqRowId,
+                            item: val.item,
+                            controlledSubstance: val.controlledSubstance,
+                            itemUnit: val.itemUnitId,
+                            quantity: val.quantity,
+                            unitCost: val.unitCost,
+                            status: val.itemStatusId
+                        });
+                    }
                 });
                 setLineItems(lineItems);
             });
@@ -197,14 +189,14 @@ export const App : FC = memo(() => {
 
         submitRequest(requestOrderModel,
             lineItems,
-            !!requestId ? purchaseAdminModel : undefined,
+            requestId ? purchaseAdminModel : undefined,
             (documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0) ? documentAttachmentModel : undefined,
             lineItemRowsToDelete)
             .then(r => {
-                if (r.success || r.fileNames?.length > 0)
+                if (r.success)
                 {
                     //TODO: this is temporary until purchasing admin page is created, then change it to get routed to the admin page
-                    if (!!requestId) {
+                    if (requestId) {
                         window.location.href = ActionURL.buildURL('query', 'executeQuery', getServerContext().container.path, {schemaName: "ehr_purchasing", ['query.queryName']: "purchasingRequests"});
                     }
                     else {
@@ -230,56 +222,48 @@ export const App : FC = memo(() => {
                             const lineItemErrors = [];
                             error.errors.map((error) => {
 
-                                // Errors for Request Order panel
-                                if (error.field === "account") {
-                                    requestOrderErrors.push({fieldName: 'account', errorMessage: error.msg || error.message});
-                                }
-                                else if (error.field === "otherAcctAndInves") {
-                                    requestOrderErrors.push({
-                                        fieldName: 'otherAcctAndInves',
-                                        errorMessage: error.msg || error.message
-                                    });
-                                }
-                                else if (error.field === "vendorId") {
-                                    requestOrderErrors.push({fieldName: 'vendorId', errorMessage: error.msg || error.message});
-                                }
-                                else if (error.field === "justification") {
-                                    requestOrderErrors.push({
-                                        fieldName: 'justification',
-                                        errorMessage: error.msg || error.message
-                                    });
-                                }
-                                else if (error.field === "shippingInfoId") {
-                                    requestOrderErrors.push({
-                                        fieldName: 'shippingInfoId',
-                                        errorMessage: error.msg || error.message
-                                    });
-                                }
-                                else if (error.field === "shippingAttentionTo") {
-                                    requestOrderErrors.push({
-                                        fieldName: 'shippingAttentionTo',
-                                        errorMessage: error.msg || error.message
-                                    });
-                                }
+                                const errMsg = error.msg || error.message;
 
-                                // Errors for Line Items panel
-                                // Note: server throws error on the first sign on error, so will only see errors on the one
-                                // line item that error actually occurred on, and will not show all the other line items that might have errors
-                                if (error.field === "item") {
-                                    lineItemErrors.push({fieldName: 'item', errorMessage: error.msg || error.message});
-                                }
-                                else if (error.field === "itemUnit") {
-                                    lineItemErrors.push({fieldName: 'itemUnit', errorMessage: error.msg || error.message});
-                                }
-                                else if (error.field === "unitCost") {
-                                    lineItemErrors.push({fieldName: 'unitCost', errorMessage: error.msg || error.message});
-                                }
-                                else if (error.field === "quantity") {
-                                    lineItemErrors.push({fieldName: 'quantity', errorMessage: error.msg || error.message});
-                                }
-                                else if (error.field === "rowIndex") {
-                                    const txt = error.msg || error.message;//this is just the row index set on server side to identify error on specific line item index
-                                    errorOnIndex = parseInt(txt, 10);
+                                // Errors for Request Order panel
+                                switch (error.field) {
+                                    case 'account':
+                                        requestOrderErrors.push({fieldName: 'account', errorMessage: errMsg});
+                                        break;
+                                    case 'otherAcctAndInves':
+                                        requestOrderErrors.push({fieldName: 'otherAcctAndInves', errorMessage: errMsg});
+                                        break;
+                                    case 'vendorId' :
+                                        requestOrderErrors.push({fieldName: 'vendorId', errorMessage: errMsg});
+                                        break;
+                                    case 'justification':
+                                        requestOrderErrors.push({fieldName: 'justification', errorMessage: errMsg});
+                                        break;
+                                    case 'shippingInfoId':
+                                        requestOrderErrors.push({fieldName: 'shippingInfoId', errorMessage: errMsg});
+                                        break;
+                                    case 'shippingAttentionTo':
+                                        requestOrderErrors.push({fieldName: 'shippingAttentionTo', errorMessage: errMsg});
+                                        break;
+
+                                    // Errors for Line Items panel
+                                    // Note: server throws error on the first sign on error, so will only see errors on the one
+                                    // line item that error actually occurred on, and will not show all the other line items that might have errors
+                                    case 'item':
+                                        lineItemErrors.push({fieldName: 'item', errorMessage: errMsg});
+                                        break;
+                                    case 'itemUnit':
+                                        lineItemErrors.push({fieldName: 'itemUnit', errorMessage: errMsg});
+                                        break;
+                                    case 'unitCost':
+                                        lineItemErrors.push({fieldName: 'unitCost', errorMessage: errMsg});
+                                        break;
+                                    case 'quantity':
+                                        lineItemErrors.push({fieldName: 'quantity', errorMessage: errMsg});
+                                        break;
+                                    case 'rowIndex':
+                                        const txt = errMsg;//this is just the row index set on server side to identify error on specific line item index
+                                        errorOnIndex = parseInt(txt, 10);
+                                        break;
                                 }
                             });
                             if (lineItemErrors.length > 0 && errorOnIndex >= 0) {
@@ -314,20 +298,19 @@ export const App : FC = memo(() => {
     }, [requestOrderModel, lineItems, lineItemRowsToDelete, purchaseAdminModel, documentAttachmentModel, isSaving]);
 
     return (
-        hasPermissionLoaded &&
         <>
             {
                 //has to be a purchasing admin to update the existing request
-                ((!!requestId && !hasPurchasingAdminPermission) || !!permissionError) &&
+                (requestId && !hasPurchasingAdminPermission) &&
                 <Alert>You do not have sufficient permissions to update this request.</Alert>
             }
             {
                 //display ui for purchasing admins to update existing request or requesters to enter new request
-                ((!!requestId && hasPurchasingAdminPermission) || (requestId === undefined)) &&
+                ((requestId && hasPurchasingAdminPermission) || (requestId === undefined)) &&
                 <>
                     <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel}/>
                     {
-                        !!requestId &&
+                        requestId &&
                         <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
                     }
                     <DocumentAttachmentPanel onInputChange={documentAttachmentChange} model={documentAttachmentModel}/>

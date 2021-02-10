@@ -13,11 +13,11 @@ export const PurchasingFormInput: FC<PurchasingFormInputProps> = memo((props) =>
 
     return (
         <Row>
-            <Col xs={11} md={9} className='request-order-form-row'>
-                <Col sm={3} md={4}>
+            <Col xs={11} md={9} className={'request-form-row'}>
+                <Col xs={4} md={4}>
                     <label>{label}</label>
                 </Col>
-                <Col xs={9} lg={8}>
+                <Col xs={10} md={8}>
                     {children}
                 </Col>
             </Col>

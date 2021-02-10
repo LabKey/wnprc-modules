@@ -66,7 +66,7 @@ export const CreditCardOptionInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Credit Card Option"
+                label="Credit card option"
             >
                 <select
                     className={'credit-card-option-input form-control ' + (hasError ? 'field-validation-error' : '')}
@@ -149,7 +149,7 @@ export const ConfirmationInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Confirmation No."
+                label="Confirmation no."
             >
                 <textarea
                     className='confirmation-input form-control'
@@ -172,7 +172,7 @@ export const InvoiceInput: FC<InputProps> = memo((props) => {
     return (
         <div>
             <PurchasingFormInput
-                label="Invoice No."
+                label="Invoice no."
             >
                 <textarea
                     className='invoice-input form-control'

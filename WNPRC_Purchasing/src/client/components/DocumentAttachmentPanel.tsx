@@ -4,9 +4,6 @@ import { FileAttachmentForm } from '@labkey/components';
 import {DocumentAttachmentModel} from "../model";
 import { Map } from 'immutable';
 import {Draft, produce} from "immer";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faTimesCircle} from "@fortawesome/free-solid-svg-icons";
-import {REMOVE_ATTACHMENT_ID_PREFIX} from "../constants";
 
 interface Props
 {
@@ -26,31 +23,8 @@ export const DocumentAttachmentPanel: FC<Props> = memo((props) => {
 
     }, [model, onInputChange]);
 
-    // const onRemoveAttachment = useCallback((event: any) => {
-    //
-    //     let { id } = event.target;
-    //
-    //     if (!id) {
-    //         id = event.target.parentElement.id;
-    //     }
-    //     if (!id) {
-    //         id = event.target.parentElement.parentElement.id;
-    //     }
-    //
-    //     const fileIdx = parseInt(id.split(REMOVE_ATTACHMENT_ID_PREFIX)[1]);
-    //     const updatedModel = produce(model, (draft: Draft<DocumentAttachmentModel>) => {
-    //         draft['savedFiles'] = model.savedFiles.filter((fileName, idx) => fileIdx !== idx);
-    //     });
-    //     onInputChange(updatedModel);
-    //
-    // }, [model, onInputChange]);
-
-    const onFileRemove = useCallback((attachmentName: string) => {
-
-    }, [model, onInputChange]);
-
     const showImg = useCallback((evt: any) => {
-        const attachment = model.savedFiles.filter(file => file.fileName === evt.target.innerText)
+        const attachment = model.savedFiles?.filter(file => file.fileName === evt.target.innerText)
         if (attachment) {
             const width = 400;
             const height = 400;
@@ -80,7 +54,6 @@ export const DocumentAttachmentPanel: FC<Props> = memo((props) => {
                         showLabel={false}
                         acceptedFormats={".pdf, .PDF, .jpg, .JPG"}
                         onFileChange={onFileChange}
-                        onFileRemoval={onFileRemove}
                     />
                     {
                         model.savedFiles?.length > 0 &&
@@ -90,14 +63,8 @@ export const DocumentAttachmentPanel: FC<Props> = memo((props) => {
                             <strong>Saved Attachments:</strong>
                         </div>
                         {
-                            model.savedFiles.map((savedFile, idx) => {
+                            model.savedFiles?.map((savedFile, idx) => {
                                 return <div>
-                                            {/*<span*/}
-                                            {/*     id={REMOVE_ATTACHMENT_ID_PREFIX + idx} title={'Remove saved attachment'} className="remove-saved-file-icon"*/}
-                                            {/*     // onClick={onRemoveAttachment}*/}
-                                            {/*>*/}
-                                            {/*<FontAwesomeIcon className='fa-faTimesCircle' icon={faTimesCircle}/>*/}
-                                            {/*</span>*/}
                                             <a href="#" onClick={showImg}>{savedFile.fileName}</a>
                                         </div>
                             })

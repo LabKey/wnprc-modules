@@ -20,6 +20,6 @@ FROM (
                 ua.userId
          FROM ehr_purchasing.userAccountAssociations ua
                   LEFT JOIN ehr_billingLinked.aliases a ON ua.account = a.alias
-         WHERE ua.accessToAllAccounts = false) userAndAccts
+         WHERE ua.accessToAllAccounts IS NULL OR ua.accessToAllAccounts = false) userAndAccts
 
 WHERE ISMEMBEROF(userAndAccts.userId) --only display accounts associated with the current user

@@ -31,16 +31,16 @@ import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.componenes.CreateVendorDialog;
-import org.labkey.test.components.DomainDesignerPage;
-import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.pages.CreateRequestPage;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
+import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
+import org.labkey.test.util.UIPermissionsHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,23 +57,34 @@ import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 @Category({EHR.class, WNPRC_EHR.class})
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
+    //folders
     private static final String FOLDER_TYPE = "WNPRC Purchasing";
-
     private static final String BILLING_FOLDER = "WNPRC Billing";
 
+    //users
     private static final String REQUESTER_USER = "purchaserequester@test.com";
     private static final String ADMIN_USER = "purchaseadmin@test.com";
-    private static int requestCnt = 0;
+    private int _adminUserId;
+    private int _requesterUserId;
+
+    //sample data
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_purchasing/aliases.tsv");
     private final File SHIPPING_INFO_TSV = TestFileUtils.getSampleData("wnprc_purchasing/shippingInfo.tsv");
     private final File VENDOR_TSV = TestFileUtils.getSampleData("wnprc_purchasing/vendor.tsv");
+
+    //account info
     private final String ACCT_100 = "acct100";
     private final String ACCT_101 = "acct101";
     private final String OTHER_ACCT_FIELD_NAME = "otherAcctAndInves";
+
+    //helpers
     public AbstractUserHelper _userHelper = new APIUserHelper(this);
-    private int _adminUserId;
-    private int _requesterUserId;
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
+    private UIPermissionsHelper _permissionsHelper = new UIPermissionsHelper(this);
+    ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
+
+    //other properties
+    private static int requestCnt = 0;
 
     @BeforeClass
     public static void setupProject() throws IOException, CommandException
@@ -128,6 +139,15 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Create ehrBillingLinked schema");
         _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, null, "ehr_billing", "aliases", null);
+
+        addUsersToPurchasingFolder();
+    }
+
+    private void addUsersToPurchasingFolder()
+    {
+        _permissionsHelper.setUserPermissions(ADMIN_USER, "Project Administrator");
+        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
+        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Submitter");
     }
 
     private void createUserAccountAssociations() throws IOException, CommandException
@@ -144,8 +164,18 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         userAcctRow.put("account", ACCT_101);
         userAcctAssocRows.add(userAcctRow);
 
+        userAcctRow = new HashMap<>();
+        userAcctRow.put("userId", _adminUserId);
+        userAcctRow.put("accessToAllAccounts", true);
+        userAcctAssocRows.add(userAcctRow);
+
+        userAcctRow = new HashMap<>();
+        userAcctRow.put("userId", _apiPermissionsHelper.getUserId(getCurrentUser()));
+        userAcctRow.put("accessToAllAccounts", true);
+        userAcctAssocRows.add(userAcctRow);
+
         int rowsInserted = insertData(getRemoteApiConnection(true), "ehr_purchasing", "userAccountAssociations", userAcctAssocRows, getProjectName()).size();
-        assertEquals("Incorrect number of rows created", 2, rowsInserted);
+        assertEquals("Incorrect number of rows created", 4, rowsInserted);
     }
 
     private void uploadPurchasingData() throws IOException, CommandException
@@ -251,6 +281,73 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendorId"));
+    }
+
+    @Test
+    public void testPurchaseAdminWorkflow()
+    {
+        log("-----Create request as lab end user-----");
+        log("Impersonate as " + REQUESTER_USER);
+
+        log("Create new Request - START");
+        log("Fill out inputs in 'Request Order' panel");
+        log("Upload an attachment");
+        log("Add two line items in 'Specify Items' panel");
+        log("Submit form");
+        log("Create new Request - END");
+
+        log("Verify " + REQUESTER_USER + " can view the request submitted");
+
+        log("Verify RequestId is not linked");
+
+        log("Verify createdBy is " + REQUESTER_USER);
+
+        log("Stop impersonating");
+
+        log("-----Update request as Purchasing Admin-----");
+        log("Go to ehr_purchasing.purchasingRequests");
+
+        log("Impersonate as " + ADMIN_USER);
+
+        log("Verify " + ADMIN_USER + " can see request submitted by " + REQUESTER_USER);
+
+        log("Go to existing request by clicking on RowId");
+
+        log("Verify all values submitted by " + REQUESTER_USER + " is present in 'Request Order' panel");
+
+        log("Verify attachment uploaded by " + REQUESTER_USER + " is present and clickable");
+
+        log("Verify all values submitted by " + REQUESTER_USER + " is present in 'Requested Items' panel");
+
+        log("Remove a line item submitted by " + REQUESTER_USER);
+
+        log("Add a line item with negative value");
+
+        log("Upload another attachment");
+
+        log("Verify Status in 'Purchase Admin' panel is 'Review Pending'");
+
+        log("Modify Status in 'Purchase Admin' panel to 'Review Approved'");
+
+        log("Fill out other inputs in 'Purchase Admin' panel");
+        //Note: don't worry about adding 'Credit Card Option' for this test - it needs to be changed to something different in the next story
+
+        log("Submit form");
+
+        log("Verify line items added or updated by " + ADMIN_USER + " in the form are present in ehr_purchasing.lineItems table");
+
+        log("Verify other values added or updated by " + ADMIN_USER + " in the form are present in ehr_purchasing.purchasingRequests table");
+
+        log("Go to existing request by clicking on RowId again");
+
+        log("Verify that request form is getting filled as expected by the updated values by " + ADMIN_USER);
+
+        log("Stop Impersonating");
+
+        log("Go to existing request by clicking on RowId again");
+        log("Impersonate as " + REQUESTER_USER);
+        log("Assert error present 'You do not have sufficient permissions to update this request.'");
+        log("Stop Impersonating");
     }
 
     @Override

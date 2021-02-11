@@ -1,8 +1,8 @@
+import $ from 'jquery';
+import URI from 'urijs';
+
 declare const Ext4: any;
 declare const LABKEY: any;
-
-import * as $ from 'jquery';
-import * as URI from 'urijs';
 
 export class Breeding
 {

@@ -45,7 +45,8 @@ CREATE TABLE wnprc.procedure_names
     modifiedby  userid,
     modified    TIMESTAMP,
 
-    CONSTRAINT pk_procedure_name PRIMARY KEY (name)
+    CONSTRAINT pk_procedure_name PRIMARY KEY (name),
+    CONSTRAINT fk_procedure_categories_category FOREIGN KEY (category) REFERENCES wnprc.procedure_categories (category)
 );
 
 DROP TABLE IF EXISTS wnprc.procedure_scheduled_rooms;

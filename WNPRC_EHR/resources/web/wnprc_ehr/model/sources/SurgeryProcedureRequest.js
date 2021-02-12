@@ -22,7 +22,15 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 }
             },
             procedurename: {
-                xtype: 'wnprc-surgeryprocedurenamefield'
+                xtype: "wnprc-groupedcheckcombo",
+                lookup: {
+                    schemaName: 'wnprc',
+                    queryName: 'procedure_names_with_headers',
+                    displayColumn: 'displayname',
+                    keyColumn: 'name',
+                    columns: 'displayname,name,category/displayname,firstCategoryItem',
+                    sort: 'category,displayname'
+                }
             },
             date: {
                 defaultValue: Ext4.Date.add(new Date()),//'2018-12-05 11:00 AM',

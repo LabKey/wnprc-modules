@@ -1,25 +1,27 @@
-import React, {FC, memo, useCallback, useEffect, useMemo, useState} from "react";
-import {Button} from 'react-bootstrap';
+import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Button } from 'react-bootstrap';
 import { Filter } from '@labkey/api';
-import {getData} from "../actions";
-import {createOptions} from "./Utils";
-import {PurchasingFormInput} from "./PurchasingFormInput";
-import {RequestOrderModel, VendorModel} from "../model";
-import {VendorPopupModal} from "./VendorInputModal";
-import produce, {Draft} from "immer";
 
-interface InputProps
-{
+import produce, { Draft } from 'immer';
+
+import { getData } from '../actions';
+
+import { RequestOrderModel, VendorModel } from '../model';
+
+import { createOptions } from './Utils';
+import { PurchasingFormInput } from './PurchasingFormInput';
+import { VendorPopupModal } from './VendorInputModal';
+
+interface InputProps {
     value: any;
     onChange: (colName, value) => void;
     hasError?: boolean;
-    hasOtherAcctWarning?:boolean;
+    hasOtherAcctWarning?: boolean;
 }
 
-export const AccountInput: FC<InputProps> = memo((props) => {
-
-    const {onChange, value, hasError} = props;
-    const [dropDownVals, setDropDownVals] = useState<Array<any>>();
+export const AccountInput: FC<InputProps> = memo(props => {
+    const { onChange, value, hasError } = props;
+    const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
         getData('ehr_purchasing', 'userAccountsAssocFiltered', 'account, rowid', 'account').then(vals => {
@@ -29,67 +31,70 @@ export const AccountInput: FC<InputProps> = memo((props) => {
 
     const options = useMemo(() => createOptions(dropDownVals, 'rowid', 'account', true), [dropDownVals]);
 
-    const onValueChange = useCallback((evt) => {
-        onChange('account', evt.target.value);
-    }, [onChange]);
+    const onValueChange = useCallback(
+        evt => {
+            onChange('account', evt.target.value);
+        },
+        [onChange]
+    );
 
     return (
         <div>
-            <PurchasingFormInput
-                label="Account to charge *"
-            >
+            <PurchasingFormInput label="Account to charge *">
                 <select
                     className={'account-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onValueChange}
                     placeholder="Please provide the purpose for this purchasing request (Required)"
                 >
-                    <option hidden value="">Select</option>
+                    <option hidden value="">
+                        Select
+                    </option>
                     {options}
                 </select>
             </PurchasingFormInput>
         </div>
     );
-})
+});
 
-export const AccountOtherInput: FC<InputProps> = memo((props) => {
+export const AccountOtherInput: FC<InputProps> = memo(props => {
+    const { onChange, value, hasError, hasOtherAcctWarning } = props;
 
-    const {onChange, value, hasError, hasOtherAcctWarning} = props;
-
-    const onTextChange = useCallback((evt) => {
-        onChange('otherAcctAndInves', evt.target.value);
-    }, [onChange]);
+    const onTextChange = useCallback(
+        evt => {
+            onChange('otherAcctAndInves', evt.target.value);
+        },
+        [onChange]
+    );
 
     return (
         <div>
-            <PurchasingFormInput
-                label="Account & PI *"
-            >
+            <PurchasingFormInput label="Account & PI *">
                 <textarea
-                    className={'account-input other-account-input form-control ' + (hasError ? 'field-validation-error' : (hasOtherAcctWarning ? 'other-account-warning-box' : ''))}
+                    className={
+                        'account-input other-account-input form-control ' +
+                        (hasError ? 'field-validation-error' : hasOtherAcctWarning ? 'other-account-warning-box' : '')
+                    }
                     value={value}
                     onChange={onTextChange}
                     id="account-and-pi-id"
                     placeholder="You selected 'Other' for 'Account to charge', please provide an account and principal investigator (Required)"
-                >
-                </textarea>
+                ></textarea>
             </PurchasingFormInput>
         </div>
     );
-})
+});
 
-interface VendorInputProps
-{
+interface VendorInputProps {
     onChange: (colName, value) => void;
     hasError?: boolean;
-    model: RequestOrderModel
+    model: RequestOrderModel;
     onModelChange: (model: RequestOrderModel) => void;
 }
 
-export const VendorInput: FC<VendorInputProps> = memo((props) => {
-
-    const {onChange, hasError, model, onModelChange} = props;
-    const [dropDownVals, setDropDownVals] = useState<Array<any>>();
+export const VendorInput: FC<VendorInputProps> = memo(props => {
+    const { onChange, hasError, model, onModelChange } = props;
+    const [dropDownVals, setDropDownVals] = useState<any[]>();
     const [showPopup, setShowPopup] = useState<boolean>(false);
 
     useEffect(() => {
@@ -101,93 +106,104 @@ export const VendorInput: FC<VendorInputProps> = memo((props) => {
 
     const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'vendorName', true), [dropDownVals]);
 
-    const onChangeShowPopup = useCallback((show) => {
+    const onChangeShowPopup = useCallback(show => {
         setShowPopup(show);
-    },[]);
+    }, []);
 
     const onClickEditNewVendor = useCallback(() => {
         setShowPopup(true);
-    },[]);
+    }, []);
 
-    const onValueChange = useCallback((evt) => {
-        const val = evt.target.value;
-        if (val === 'Other') {
-            setShowPopup(true);
-        }
-        else {
-            setShowPopup(false);
-        }
-        onChange('vendorId', val);
-    }, [onChange, hasError, model, onModelChange]);
-
-    const onVendorCancel = useCallback((newVendor : VendorModel) => {
-        const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
-            if (!VendorModel.getDisplayString(model.newVendor)) {
-                draft['vendorId'] = ''; //Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+    const onValueChange = useCallback(
+        evt => {
+            const val = evt.target.value;
+            if (val === 'Other') {
+                setShowPopup(true);
+            } else {
+                setShowPopup(false);
             }
-        });
-        onModelChange(updatedModel);
-    }, [onChange, hasError, model, onModelChange]);
+            onChange('vendorId', val);
+        },
+        [onChange, hasError, model, onModelChange]
+    );
 
-    const onVendorAdd = useCallback((newVendor : VendorModel) => {
-        const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
-            draft['newVendor'] = newVendor;
-        });
-        if (!newVendor.errors) {
+    const onVendorCancel = useCallback(
+        (newVendor: VendorModel) => {
+            const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
+                if (!VendorModel.getDisplayString(model.newVendor)) {
+                    draft['vendorId'] = ''; // Reset Vendor input when user hits Cancel and doesn't enter a new vendor
+                }
+            });
             onModelChange(updatedModel);
-        }
-    }, [onChange, hasError, model, onModelChange]);
+        },
+        [onChange, hasError, model, onModelChange]
+    );
+
+    const onVendorAdd = useCallback(
+        (newVendor: VendorModel) => {
+            const updatedModel = produce(model, (draft: Draft<RequestOrderModel>) => {
+                draft['newVendor'] = newVendor;
+            });
+            if (!newVendor.errors) {
+                onModelChange(updatedModel);
+            }
+        },
+        [onChange, hasError, model, onModelChange]
+    );
 
     return (
         <div>
-            <PurchasingFormInput
-                label="Vendor *"
-            >
-                <select className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                        value={model.vendorId}
-                        onChange={onValueChange}
+            <PurchasingFormInput label="Vendor *">
+                <select
+                    className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
+                    value={model.vendorId}
+                    onChange={onValueChange}
                 >
-                    <option hidden value="">Select</option>
+                    <option hidden value="">
+                        Select
+                    </option>
                     {options}
                 </select>
             </PurchasingFormInput>
-            {
-                showPopup &&
+            {showPopup && (
                 <VendorPopupModal
-                        vendorList={dropDownVals}
-                        showPopup={showPopup}
-                        vendorModel={model.newVendor}
-                        onVendorChange={onVendorAdd}
-                        onVendorCancel={onVendorCancel}
-                        onChangeShowPopup={onChangeShowPopup}/>
-            }
-            {
-                model.vendorId === 'Other' && model.newVendor && VendorModel.getDisplayString(model.newVendor).length > 0 &&
-               <>
-                <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
-                   <Button className='edit-other-vendor-button btn btn-default' variant="primary" onClick={onClickEditNewVendor}>
-                   Edit other vendor
-                   </Button>
-               </>
-            }
-
+                    vendorList={dropDownVals}
+                    showPopup={showPopup}
+                    vendorModel={model.newVendor}
+                    onVendorChange={onVendorAdd}
+                    onVendorCancel={onVendorCancel}
+                    onChangeShowPopup={onChangeShowPopup}
+                />
+            )}
+            {model.vendorId === 'Other' && model.newVendor && VendorModel.getDisplayString(model.newVendor).length > 0 && (
+                <>
+                    <NewVendorDisplay vendorModel={model.newVendor} onVendorChange={onVendorAdd} />
+                    <Button
+                        className="edit-other-vendor-button btn btn-default"
+                        variant="primary"
+                        onClick={onClickEditNewVendor}
+                    >
+                        Edit other vendor
+                    </Button>
+                </>
+            )}
         </div>
     );
-})
+});
 
-export const BusinessPurposeInput: FC<InputProps> = memo((props) => {
+export const BusinessPurposeInput: FC<InputProps> = memo(props => {
+    const { onChange, value, hasError } = props;
 
-    const {onChange, value, hasError} = props;
-
-    const onTextChange = useCallback((evt) => {
-        onChange('justification', evt.target.value);
-    }, [onChange]);
+    const onTextChange = useCallback(
+        evt => {
+            onChange('justification', evt.target.value);
+        },
+        [onChange]
+    );
 
     return (
         <div>
-            <PurchasingFormInput
-                label="Business purpose *"
-            >
+            <PurchasingFormInput label="Business purpose *">
                 <textarea
                     className={'business-purpose-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
@@ -198,22 +214,22 @@ export const BusinessPurposeInput: FC<InputProps> = memo((props) => {
             </PurchasingFormInput>
         </div>
     );
-})
+});
 
-export const SpecialInstructionInput: FC<InputProps> = memo((props) => {
-
-    const {onChange, value} = props;
-    const onTextChange = useCallback((evt) => {
-        onChange('comments', evt.target.value);
-    }, [onChange]);
+export const SpecialInstructionInput: FC<InputProps> = memo(props => {
+    const { onChange, value } = props;
+    const onTextChange = useCallback(
+        evt => {
+            onChange('comments', evt.target.value);
+        },
+        [onChange]
+    );
 
     return (
         <div>
-            <PurchasingFormInput
-                label="Special instructions"
-            >
+            <PurchasingFormInput label="Special instructions">
                 <textarea
-                    className='special-instr-input form-control'
+                    className="special-instr-input form-control"
                     value={value}
                     onChange={onTextChange}
                     id="special-instructions-id"
@@ -222,12 +238,11 @@ export const SpecialInstructionInput: FC<InputProps> = memo((props) => {
             </PurchasingFormInput>
         </div>
     );
-})
+});
 
-export const ShippingDestinationInput: FC<InputProps> = memo((props) => {
-
-    const {onChange, value, hasError} = props;
-    const [dropDownVals, setDropDownVals] = useState<Array<any>>();
+export const ShippingDestinationInput: FC<InputProps> = memo(props => {
+    const { onChange, value, hasError } = props;
+    const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
         getData('ehr_purchasing', 'shippingInfo', 'streetAddress, shippingAlias, rowId', 'streetAddress').then(vals => {
@@ -235,40 +250,46 @@ export const ShippingDestinationInput: FC<InputProps> = memo((props) => {
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'streetAddress', false, 'shippingAlias'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'streetAddress', false, 'shippingAlias'), [
+        dropDownVals,
+    ]);
 
-    const onValueChange = useCallback((evt) => {
-        onChange('shippingInfoId', evt.target.value);
-    }, [onChange]);
+    const onValueChange = useCallback(
+        evt => {
+            onChange('shippingInfoId', evt.target.value);
+        },
+        [onChange]
+    );
 
     return (
         <div>
-            <PurchasingFormInput
-                label="Shipping destination *"
-            >
+            <PurchasingFormInput label="Shipping destination *">
                 <select
                     className={'shipping-dest-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onValueChange}
                 >
-                    <option hidden value="">Select</option>
+                    <option hidden value="">
+                        Select
+                    </option>
                     {options}
                 </select>
             </PurchasingFormInput>
         </div>
     );
-})
+});
 
-export const DeliveryAttentionInput: FC<InputProps> = memo((props) => {
-    const {onChange, value, hasError} = props;
-    const onTextChange = useCallback((evt) => {
-        onChange('shippingAttentionTo', evt.target.value);
-    }, [onChange]);
+export const DeliveryAttentionInput: FC<InputProps> = memo(props => {
+    const { onChange, value, hasError } = props;
+    const onTextChange = useCallback(
+        evt => {
+            onChange('shippingAttentionTo', evt.target.value);
+        },
+        [onChange]
+    );
     return (
         <div>
-            <PurchasingFormInput
-                label="Delivery attention to *"
-            >
+            <PurchasingFormInput label="Delivery attention to *">
                 <textarea
                     className={'delivery-attn-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
@@ -279,28 +300,25 @@ export const DeliveryAttentionInput: FC<InputProps> = memo((props) => {
             </PurchasingFormInput>
         </div>
     );
-})
+});
 
 interface VendorDisplayProps {
     vendorModel: VendorModel;
     onVendorChange: (vendorModel: VendorModel) => void;
 }
-export const NewVendorDisplay: FC<VendorDisplayProps> = memo((props) => {
-
-    const {vendorModel} = props;
+export const NewVendorDisplay: FC<VendorDisplayProps> = memo(props => {
+    const { vendorModel } = props;
 
     return (
         <div>
-            <PurchasingFormInput
-                label="Other vendor"
-            >
+            <PurchasingFormInput label="Other vendor">
                 <textarea
-                    className='new-vendor-display form-control'
+                    className="new-vendor-display form-control"
                     value={VendorModel.getDisplayString(vendorModel)}
                     id="new-vendor-display"
                     disabled={true}
                 />
             </PurchasingFormInput>
         </div>
-    )
-})
+    );
+});

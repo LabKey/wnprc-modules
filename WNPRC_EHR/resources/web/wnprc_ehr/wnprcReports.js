@@ -1214,7 +1214,7 @@ EHR.reports.renderWeightData = function(panel, tab, subject){
         });
 
         LABKEY.Utils.requiresCSS("wnprc_ehr/HousingAndAssignmentHistory.css");
-        WNPRC_EHR.Utils.Lib.loadLibrary(['/webutils/lib/webutils'], function() {
+        LABKEY.requiresScript('/webutils/lib/webutils', function() { 
             LABKEY.requiresScript("wnprc_ehr/HousingAndAssignmentHistory.js", function() {
                 var config = {
                     xtype: 'ldk-webpartpanel',

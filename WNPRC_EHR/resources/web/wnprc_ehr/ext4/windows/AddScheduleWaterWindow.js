@@ -105,12 +105,46 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
         var curDate = this.down('#CurDate').getValue();
         var assignedTo =  EHR.DataEntryUtils.ensureArray(this.down('#assigned').getValue()) || [];
         var frequency = EHR.DataEntryUtils.ensureArray(this.down('#frequency').getValue()) || [];
+        var dateOrdered = [];
+        if (frequency[0] === 'Daily - AM'){
+            frequency.push('Daily - AM/PM');
+            dateOrdered.push(curDate.format('Y-m-d')+' 08:00:00');
+        } else if(frequency[0] === 'Daily - PM'){
+            frequency.push('Daily - AM/PM');
+            dateOrdered.push(curDate.format('Y-m-d')+' 14:00:00');
+            switch (curDate.getDay()){
+                case 0:
+                    frequency.push('Sunday - PM');
+                    break;
+                case 1:
+                    frequency.push('Monday - PM');
+                    break;
+                case 2:
+                    frequency.push('Tuesday - PM');
+                    break;
+                case 3:
+                    frequency.push('Wednesday - PM');
+                    break;
+                case 4:
+                    frequency.push('Thursday - PM');
+                    break;
+                case 5:
+                    frequency.push('Friday - PM');
+                    break;
+                case 6:
+                    frequency.push('Saturday - PM');
+                    break;                
+                default:
+                    frequency.push('Daily - AM/PM');
+            }
+        }
 
         var filtersArray = [];
 
         filtersArray.push(LABKEY.Filter.create('date', curDate.format('Y-m-d'), LABKEY.Filter.Types.DATE_EQUAL));
         filtersArray.push(LABKEY.Filter.create('assignedToTitle', assignedTo.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
         filtersArray.push(LABKEY.Filter.create('frequencyMeaning', frequency.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
+        filtersArray.push(LABKEY.Filter.create('dateOrdered', dateOrdered.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
         //TODO: add the action required column filterArray
         filtersArray.push(LABKEY.Filter.create('actionRequired',true, LABKEY.Filter.Types.EQUAL));
         filtersArray.push(LABKEY.Filter.create('qcstate','10', LABKEY.Filter.Types.EQUAL));

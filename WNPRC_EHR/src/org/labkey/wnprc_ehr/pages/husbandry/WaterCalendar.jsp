@@ -400,7 +400,7 @@ DO NOT UNCOMMENT --%>
         WebUtils.VM.husbandryAssignmentLookup = husbandryAssignmentLookup;
         var $animalId = "<%= animalIds %>";
         var $numberOfRenders = "<%= numberOfRenders %>";
-
+        debugger;
         
         var $calendar = $('#calendar');
         /*if ($numberOfRenders > 0){

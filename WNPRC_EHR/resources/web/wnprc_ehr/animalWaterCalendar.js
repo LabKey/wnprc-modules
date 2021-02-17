@@ -1,15 +1,21 @@
 Ext4.namespace('EHR.Reports');
 let calendarRender = 0;
+let entireColony = false;
 
 EHR.reports.animalWaterCalendar = function (panel, tab){
 
     var animalIds = [];
+    debugger;
     if (tab.filters.subjects){
         // tab.filters.subjects.forEach (animalId => animalIds+=animalId+';');
         // animalIds = animalIds.substring(0, animalIds.length-1);
         animalIds = tab.filters.subjects;
         renderCalendar (animalIds, tab);
         calendarRender++;
+    } if (panel.getFilterArray(tab).nonRemovable.length === 0){
+        entireColony = true;
+        panel.resolveSubjectsFromHousing(tab,renderCalendar,this);
+        //renderCalendar('null', tab)
     }
     else{
         panel.resolveSubjectsFromHousing(tab,renderCalendar,this);
@@ -52,14 +58,24 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
             targetElement.addCls('labkeyWaterMonitoringDiv');
             var id = Ext4.id(targetElement, "waterMonitoring");
 
+            let objectConfig ={}
+            if(!entireColony){
+                objectConfig = {animalIds : concatAnimals,numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,calendarLegend,waterExceptionPanel'};
+
+            }else if(entireColony){
+                objectConfig = {animalIds : 'null',numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,calendarLegend,waterExceptionPanel'};
+            }
             // Render the web part to the div
             //TODO: add condition to check to request webpart only the first time
+
             var waterCalendar = new LABKEY.WebPart({
                 partName: 'Water Calendar',
                 renderTo: id,
                 //partConfig: {animalIds : concatAnimals,numberOfRenders: calendarRender}
-                partConfig: {animalIds : concatAnimals,numberOfRenders: calendarRender,unbindComponents:'waterInfoPanel,calendarLegend,waterExceptionPanel'}
+                partConfig: objectConfig
             });
+
+
             waterCalendar.render();
 
             // We know the height of the component, so just set it explicitly instead of making ExtJS get the layout

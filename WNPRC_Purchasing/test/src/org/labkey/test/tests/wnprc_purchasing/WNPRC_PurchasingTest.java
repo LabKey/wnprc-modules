@@ -37,12 +37,11 @@ import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
 import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.Maps;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.UIPermissionsHelper;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
 @Category({EHR.class, WNPRC_EHR.class})
@@ -367,6 +367,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickAndWait(Locator.linkWithText(requestID));
         checker().verifyFalse("Requester should not be able to edit the request ",
                 isElementPresent(Locator.tagWithAttribute("div", "class", "panel-title").withText("Request Order")));
+
+        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry",  Maps.of("requestRowId", requestID)));
+        assertTextPresent("You do not have sufficient permissions to update this request.");
         stopImpersonating();
     }
 

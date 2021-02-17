@@ -9,7 +9,7 @@
                 <updateUrl />
                 <deleteUrl />
                 <columns>
-                    <column columnName="Id">
+                    <column columnName="animalId">
                         <fk>
                             <fkDbSchema>study</fkDbSchema>
                             <fkTable>animal</fkTable>
@@ -49,6 +49,12 @@
                     </column>
                     <column columnName="WaterReamining">
 
+                    </column>
+                    <column columnName="InnerMlsPerKg">
+                        <columnTitle>Allowed MlsPerKg</columnTitle>
+                    </column>
+                    <column columnName="RecentMlsPerKg">
+                        <columnTitle>Date of Allowed MlsPerKg</columnTitle>
                     </column>
 
                 </columns>

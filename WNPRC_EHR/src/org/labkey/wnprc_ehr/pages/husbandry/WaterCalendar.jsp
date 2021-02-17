@@ -530,7 +530,7 @@ DO NOT UNCOMMENT --%>
                                             rawRowData: row
                                         };
 
-                                        if (row.mlsPerKg >= 20){
+                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
                                             eventObj.color = '#000CFF';
                                         }else{
                                             eventObj.color = '#EE2020'
@@ -556,6 +556,11 @@ DO NOT UNCOMMENT --%>
                                             allDay: true,
                                             rawRowData: row
                                         };
+                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
+                                            eventObj.color = '#000CFF';
+                                        }else{
+                                            eventObj.color = '#EE2020'
+                                        }
                                         return eventObj;
                                     }))
 

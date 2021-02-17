@@ -16,7 +16,11 @@ voGi.InnerWeight,
 
 
 TRUNCATE(ROUND(CAST(voGi.TotalWater /voGi.InnerWeight AS NUMERIC),2),2) AS mlsPerKg,
-voGi.InnerWeight*20 - voGi.TotalWater AS WaterRemaining,
+voGi.InnerWeight*voGi.InnerMlsPerKg - voGi.TotalWater AS WaterRemaining,
+--(SELECT waterCond.mlsperKg from study.demographicsMostRecentWaterCondition waterCond WHERE waterCond.id = voGi.id) AS mostRecentMlsPerKg,
+voGi.RecentMlsPerKg,
+voGi.InnerMlsPerKg,
+
 'waterGiven' AS dataSource
 --voGi.Innerweight*20 - voGi.TotalSub AS waterRemaining
 --COALESCE ((SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.water_given iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0 AND iwg.assignto LIKE 'animalcare'),0) AS volumeGivenInCage,
@@ -50,12 +54,26 @@ FROM (
         (SELECT MAX(wen.date)
             FROM study.weight wen
             WHERE (wen.id=wa.id AND timestampdiff('SQL_TSI_DAY',wa.date,wen.date)>=0 AND wen.weight IS NOT NULL AND wa.date >= wen.date)
-        ) AS RecentWeight
+        ) AS RecentWeight,
+
+        --Showing latest mlsPerKg from Water Schedules Dataset
+        (SELECT wsa.mlsperKg
+         FROM study.waterScheduledAnimals wsa
+         WHERE wsa.id = wa.id AND wsa.date = (
+             SELECT MAX(wsaDate.date)
+             FROM study.waterScheduledAnimals wsaDate
+             WHERE (wsaDate.id=wa.id AND wsaDate.mlsperKg IS NOT NULL AND wsaDate.date <= wa.date)
+         )
+        ) AS InnerMlsPerKg,
+        (SELECT MAX(wsa.date)
+         FROM study.waterScheduledAnimals wsa
+         WHERE (wsa.id=wa.id AND wsa.mlsperKg IS NOT NULL AND wa.date >= wsa.date)
+        ) AS RecentMlsPerKg
 
     FROM study.waterGiven wa
 
 ) voGi
 WHERE voGi.InnerWeight IS NOT NULL
-GROUP BY voGi.id, voGi.date,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight
+GROUP BY voGi.id, voGi.date,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight,voGi.RecentMlsPerKg,voGi.InnerMlsPerKg
        
 --voGi.Weight

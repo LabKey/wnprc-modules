@@ -1777,6 +1777,7 @@ public class WNPRC_EHRController extends SpringActionController
                         waterOrderRecord.put("taskid", woRow.get("taskid"));
                         waterOrderRecord.put("objectid", event.getObjectId());
                         waterOrderRecord.put("enddate", event.getEndDate());
+                        waterOrderRecord.put("skipWaterRegulationCheck", true);
                         rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord);
 
                         ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
@@ -1825,6 +1826,7 @@ public class WNPRC_EHRController extends SpringActionController
                     waterOrderRow.put("frequency", event.getFrequency());
                     waterOrderRow.put("volume", event.getVolume());
                     waterOrderRow.put("assignedTo", event.getAssignedTo());
+                    waterOrderRow.put("waterSource","regulated");
 
                     rowToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRow);
 

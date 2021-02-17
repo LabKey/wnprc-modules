@@ -814,7 +814,7 @@ DO NOT UNCOMMENT --%>
                         endDate:                waterOrder.date,
                         dataSource:             waterOrder.dataSource,
                         project:                waterOrder.projectCoalesced,
-                        frequency:              waterOrder.frequency,
+                        frequency:              waterOrder.frequencyCoalesced,
                         assignedTo:             waterOrder.assignedToCoalesced,
                         volume:                 waterOrder.volume
 

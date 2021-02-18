@@ -7,7 +7,8 @@ networks:
 services:
 
   postgres:
-    image: postgres:9.4
+    image: postgres:11
+    restart: always
     volumes:
       - "${PG_CONF_FILE}:/conf/postgresql.conf"
       - "${PG_DATA_DIR}:/var/lib/postgresql/data"
@@ -21,6 +22,8 @@ services:
       - network1
     environment:
       TZ: America/Chicago
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASS}
     command: postgres -c log_directory=/logs -c config_file=/conf/postgresql.conf -c hba_file=/conf/pg_hba.conf
     stop_signal: SIGTERM
     stop_grace_period: "120s"
@@ -51,6 +54,7 @@ services:
       - "postgres"
     volumes:
       - "${LABKEY_FILES_DIR}:/backups/new_files_dir"
+      - "${LABKEY_NEW_FILES}:/space/ehr_files"
       - "${LABKEY_LOG_DIR}:/usr/local/tomcat/logs"
       - "${LABKEY_MODULE_DEPLOY_DIR}:/usr/local/modules"
       - "${LABKEY_SESSION_DIR}:/usr/local/labkey/sessions"
@@ -72,7 +76,7 @@ services:
       TZ: America/Chicago
 
   nginx:
-    image: nginx:1.13.0
+    image: nginx:1.18.0
     depends_on:
       - "labkey"
     volumes:

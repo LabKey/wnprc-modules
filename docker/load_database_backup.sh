@@ -144,7 +144,7 @@ fi
 #-------------------------------------------------------------------------------
 if [[ -z $filepath ]]; then
     filename="labkey_$(date +'%Y%m%d')_0100.pg"
-    scp ${username}ehr.primate.wisc.edu:/backups/labkey/labkey_backup/database/daily/${filename} $tmpdir || exit 1
+    scp ${username}ehr.primate.wisc.edu:/space/backups/labkey_backup/database/daily/${filename} $tmpdir || exit 1
     filepath="$tmpdir/$filename"
 fi
 

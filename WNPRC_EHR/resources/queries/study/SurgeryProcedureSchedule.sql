@@ -22,6 +22,16 @@ SELECT a.lsid
      , a.project
      , a.project.protocol          AS protocol
      , a.account
+     , a.surgeon
+     , a.consultrequest
+     , a.biopsyneeded
+     , a.surgerytechneeded
+     , a.spineeded
+     , a.vetneeded
+     , a.vetneededreason
+     , a.equipment
+     , a.drugslab
+     , a.drugssurgery
      , a.requestid.qcstate         AS qcstate
      , a.statuschangereason
      , a.comments

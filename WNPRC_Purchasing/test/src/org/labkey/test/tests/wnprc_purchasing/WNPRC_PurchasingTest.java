@@ -26,21 +26,22 @@ import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
+import org.labkey.test.Pages.CreateRequestPage;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.componenes.CreateVendorDialog;
-import org.labkey.test.components.DomainDesignerPage;
-import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.SiteNavBar;
-import org.labkey.test.pages.CreateRequestPage;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
+import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.Maps;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
+import org.labkey.test.util.UIPermissionsHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,34 +53,42 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
 @Category({EHR.class, WNPRC_EHR.class})
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
+    //folders
     private static final String FOLDER_TYPE = "WNPRC Purchasing";
-
     private static final String BILLING_FOLDER = "WNPRC Billing";
 
+    //users
     private static final String REQUESTER_USER = "purchaserequester@test.com";
+    private static final String requesterName = "purchaserequester";
     private static final String ADMIN_USER = "purchaseadmin@test.com";
+    //other properties
     private static int requestCnt = 0;
+    //sample data
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_purchasing/aliases.tsv");
     private final File SHIPPING_INFO_TSV = TestFileUtils.getSampleData("wnprc_purchasing/shippingInfo.tsv");
     private final File VENDOR_TSV = TestFileUtils.getSampleData("wnprc_purchasing/vendor.tsv");
+    //account info
     private final String ACCT_100 = "acct100";
     private final String ACCT_101 = "acct101";
     private final String OTHER_ACCT_FIELD_NAME = "otherAcctAndInves";
+    //helpers
     public AbstractUserHelper _userHelper = new APIUserHelper(this);
+    ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
     private int _adminUserId;
     private int _requesterUserId;
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
+    private UIPermissionsHelper _permissionsHelper = new UIPermissionsHelper(this);
 
     @BeforeClass
     public static void setupProject() throws IOException, CommandException
     {
         WNPRC_PurchasingTest init = (WNPRC_PurchasingTest) getCurrentTest();
-
         init.doSetup();
     }
 
@@ -107,9 +116,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         goToProjectHome();
 
-        log("Add extensible columns");
-        addExtensibleColumns();
-
         log("Creating a purchasing admin user");
         _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
 
@@ -131,18 +137,15 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Create ehrBillingLinked schema");
         _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, null, "ehr_billing", "aliases", null);
+
+        addUsersToPurchasingFolder();
     }
 
-    private void addExtensibleColumns()
+    private void addUsersToPurchasingFolder()
     {
-        goToSchemaBrowser();
-        selectQuery("ehr_purchasing", "purchasingRequests");
-        clickAndWait(Locator.linkWithText("create definition"));
-        DomainDesignerPage domainDesignerPage = new DomainDesignerPage(getDriver());
-        DomainFormPanel panel = domainDesignerPage.fieldsPanel();
-        panel.manuallyDefineFields(OTHER_ACCT_FIELD_NAME);
-        domainDesignerPage.clickSave();
-        goToProjectHome();
+        _permissionsHelper.setUserPermissions(ADMIN_USER, "Project Administrator");
+        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
+        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Submitter");
     }
 
     private void createUserAccountAssociations() throws IOException, CommandException
@@ -159,8 +162,18 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         userAcctRow.put("account", ACCT_101);
         userAcctAssocRows.add(userAcctRow);
 
+        userAcctRow = new HashMap<>();
+        userAcctRow.put("userId", _adminUserId);
+        userAcctRow.put("accessToAllAccounts", true);
+        userAcctAssocRows.add(userAcctRow);
+
+        userAcctRow = new HashMap<>();
+        userAcctRow.put("userId", _apiPermissionsHelper.getUserId(getCurrentUser()));
+        userAcctRow.put("accessToAllAccounts", true);
+        userAcctAssocRows.add(userAcctRow);
+
         int rowsInserted = insertData(getRemoteApiConnection(true), "ehr_purchasing", "userAccountAssociations", userAcctAssocRows, getProjectName()).size();
-        assertEquals("Incorrect number of rows created", 2, rowsInserted);
+        assertEquals("Incorrect number of rows created", 4, rowsInserted);
     }
 
     private void uploadPurchasingData() throws IOException, CommandException
@@ -199,7 +212,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
         log("Verifying the validation for mandatory fields");
-        requestPage.submitForReview();
+        requestPage.submitExpectingError();
         checker().verifyEquals("Invalid error message", "Unable to submit request, missing required fields.", requestPage.getAlertMessage());
 
         log("Creating a request order");
@@ -266,6 +279,98 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendorId"));
+    }
+
+    @Test
+    public void testPurchaseAdminWorkflow()
+    {
+        File jpgFile = new File(TestFileUtils.getSampleData("fileTypes"), "jpg_sample.jpg");
+        File pdfFile = new File(TestFileUtils.getSampleData("fileTypes"), "pdf_sample.pdf");
+
+        log("-----Create request as lab end user-----");
+        log("Impersonate as " + REQUESTER_USER);
+        impersonate(REQUESTER_USER);
+
+        log("Create new Request - START");
+        goToProjectHome();
+        clickButton("Create Request");
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+
+        requestPage.setAccountsToCharge("acct100")
+                .setVendor("Real Santa Claus")
+                .setBusinessPurpose("Holiday Party")
+                .setSpecialInstructions("Ho Ho Ho")
+                .setShippingDestination("456 Thompson lane (Math bldg)")
+                .setDeliveryAttentionTo("Mrs Claus")
+                .setItemDesc("Pen")
+                .setUnitInput("CS")
+                .setUnitCost("10")
+                .setQuantity("25");
+
+        log("Upload an attachment");
+        requestPage.addAttachment(jpgFile)
+                .submitForReview();
+
+        log("Verify " + REQUESTER_USER + " can view the request submitted");
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        String requestID = table.getDataAsText(0, "rowId");
+        checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
+        checker().verifyEquals("Invalid request status ", "Review Pending",
+                table.getDataAsText(0, "requestStatus"));
+        checker().verifyEquals("Invalid requester", requesterName, table.getDataAsText(0, "requester"));
+        stopImpersonating();
+
+        log("-----Update request as Purchasing Admin-----");
+        goToProjectHome();
+        goToSchemaBrowser();
+        DataRegionTable requestsTable = viewQueryData("ehr_purchasing", "purchasingRequests");
+
+        log("Impersonate as " + ADMIN_USER);
+        impersonate(ADMIN_USER);
+        requestsTable.setFilter("rowId", "Equals", requestID);
+
+        checker().verifyEquals("Admin is not seeing the request " + requestID, 1, requestsTable.getDataRowCount());
+        clickAndWait(Locator.linkWithText(requestID));
+
+        requestPage = new CreateRequestPage(getDriver());
+        checker().verifyEquals("Invalid value for Accounts to charge ", "acct100", requestPage.getAccountsToCharge());
+        checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage.getVendor());
+        checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage.getBusinessPurpose());
+        checker().verifyEquals("Invalid value for Special Instructions ", "Ho Ho Ho", requestPage.getSpecialInstructions());
+        checker().verifyEquals("Invalid value for Shipping Destination", "456 Thompson lane (Math bldg)", requestPage.getShippingDestination());
+        checker().verifyEquals("Invalid value for Delivery Attention to ", "Mrs Claus", requestPage.getDeliveryAttentionTo());
+        checker().verifyEquals("Invalid value for Line Item ", "Pen", requestPage.getItemDesc());
+        checker().verifyEquals("Invalid value for Unit Input ", "CS", requestPage.getUnitInput());
+        checker().verifyEquals("Invalid value for Unit cost ", "10", requestPage.getUnitCost());
+        checker().verifyEquals("Invalid value for Quantity ", "25", requestPage.getQuantity());
+
+        log("Add a line item with negative value");
+        requestPage.setQuantity("-10");
+
+        log("Upload another attachment");
+        requestPage.addAttachment(pdfFile);
+
+        log("Verify Status in 'Purchase Admin' panel is 'Review Pending'");
+        checker().verifyEquals("Invalid Assigned to value ", requesterName, requestPage.getAssignedTo());
+        checker().verifyEquals("Invalid Program value", "4", requestPage.getProgram());
+        checker().verifyEquals("Invalid status ", "Review Pending", requestPage.getStatus());
+
+        requestPage.setStatus("Request Approved")
+                .setConfirmationNo("12345")
+                .submit();
+
+        stopImpersonating(false);
+
+        log("Impersonate as " + REQUESTER_USER);
+        impersonate(REQUESTER_USER);
+        clickAndWait(Locator.linkWithText(requestID));
+        checker().verifyFalse("Requester should not be able to edit the request ",
+                isElementPresent(Locator.tagWithAttribute("div", "class", "panel-title").withText("Request Order")));
+
+        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry",  Maps.of("requestRowId", requestID)));
+        assertTextPresent("You do not have sufficient permissions to update this request.");
+        stopImpersonating();
     }
 
     @Override

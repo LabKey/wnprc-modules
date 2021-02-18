@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tables xmlns="http://labkey.org/data/xml">
+    <table tableName="creditCardOptions" tableDbType="TABLE" useColumnOrder="true">
+        <tableTitle>Credit Card Options</tableTitle>
+        <titleColumn>cardOption</titleColumn>
+        <auditLogging>DETAILED</auditLogging>
+        <insertUrl/>
+        <columns>
+            <column columnName="rowId"/>
+            <column columnName="cardOption"/>
+            <column columnName="container"/>
+            <column columnName="createdBy"/>
+            <column columnName="created"/>
+            <column columnName="modifiedBy"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+</tables>

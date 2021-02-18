@@ -22,7 +22,10 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.FolderTypeManager;
+import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.query.DefaultSchema;
+import org.labkey.api.query.QuerySchema;
 import org.labkey.api.view.WebPartFactory;
 
 import java.util.Collection;
@@ -42,13 +45,13 @@ public class WNPRC_PurchasingModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return null;
+        return 21.002;
     }
 
     @Override
     public boolean hasScripts()
     {
-        return false;
+        return true;
     }
 
     @Override
@@ -72,6 +75,14 @@ public class WNPRC_PurchasingModule extends DefaultModule
 
         FolderTypeManager.get().registerFolderType(this, new WNPRC_PurchasingFolderType(this));
 
+        DefaultSchema.registerProvider(WNPRC_PurchasingSchema.NAME, new DefaultSchema.SchemaProvider(this)
+        {
+            @Override
+            public QuerySchema createSchema(final DefaultSchema schema, Module module)
+            {
+                return new WNPRC_PurchasingUserSchema(WNPRC_PurchasingSchema.NAME, schema.getUser(), schema.getContainer());
+            }
+        });
     }
 
     @Override

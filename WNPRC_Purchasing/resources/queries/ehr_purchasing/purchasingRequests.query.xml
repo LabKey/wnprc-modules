@@ -3,12 +3,16 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="purchasingRequests" tableDbType="TABLE" useColumnOrder="true">
                 <tableTitle>Purchasing Requests</tableTitle>
+                <javaCustomizer class="org.labkey.wnprc_purchasing.table.WNPRC_PurchasingCustomizer"/>
+                <titleColumn>rowId</titleColumn>
                 <columns>
-                    <column columnName="vendorId">
-                        <columnTitle>Vendor</columnTitle>
+                    <column columnName="rowId"/>
+                    <column columnName="qcState">
+                        <columnTitle>Status</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_purchasing</fkDbSchema>
-                            <fkTable>vendor</fkTable>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>QCState</fkTable>
+                            <fkColumnName>RowId</fkColumnName>
                         </fk>
                     </column>
                     <column columnName="account">
@@ -20,12 +24,41 @@
                     <column columnName="otherAcctAndInves">
                         <columnTitle>Other Acct and Investigator</columnTitle>
                     </column>
+                    <column columnName="vendorId">
+                        <columnTitle>Vendor</columnTitle>
+                        <nullable>false</nullable>
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>vendor</fkTable>
+                        </fk>
+                    </column>
+                    <column columnName="justification">
+                        <nullable>false</nullable>
+                        <columnTitle>Business purpose</columnTitle>
+                    </column>
+
                     <column columnName="shippingInfoId">
+                        <nullable>false</nullable>
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>shippingInfo</fkTable>
                         </fk>
                     </column>
+                    <column columnName="shippingAttentionTo">
+                        <nullable>false</nullable>
+                    </column>
+                    <column columnName="creditCardOptionId">
+                        <fk>
+                            <fkDbSchema>wnprc_purchasing</fkDbSchema>
+                            <fkTable>creditCardOptions</fkTable>
+                            <fkColumnName>rowId</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="attachments">
+                        <columnTitle>Attachments</columnTitle>
+                    </column>
+                    <column columnName="orderDate"/>
+                    <column columnName="cardPostDate"/>
                 </columns>
             </table>
         </tables>

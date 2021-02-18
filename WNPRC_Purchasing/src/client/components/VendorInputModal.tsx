@@ -1,19 +1,22 @@
-import {VendorModel} from "../model";
-import React, {FC, memo, useCallback, useEffect, useState} from "react";
-import {Button, Modal, Form} from 'react-bootstrap';
-import {VendorFormInput} from "./PurchasingFormInput";
-import produce, {Draft} from "immer";
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import { Button, Modal, Form } from 'react-bootstrap';
+
+import produce, { Draft } from 'immer';
+
+import { VendorModel } from '../model';
+
+import { VendorFormInput } from './PurchasingFormInput';
 
 interface VendorInputProps {
     vendorList: any;
     vendorModel: VendorModel;
     onVendorChange: (vendorModel: VendorModel) => void;
     onVendorCancel: (vendorModel: VendorModel) => void;
-    showPopup: boolean,
+    showPopup: boolean;
     onChangeShowPopup: (showPopup: boolean) => void;
 }
 
-export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
+export const VendorPopupModal: FC<VendorInputProps> = memo(props => {
     const { vendorList, vendorModel, onVendorChange, showPopup, onChangeShowPopup, onVendorCancel } = props;
 
     const [show, setShow] = useState(showPopup);
@@ -26,39 +29,39 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
     const onAddingNewVendor = useCallback(() => {
         const errors = [];
         setShow(false);
-        const isDuplicateVendor = vendorList.findIndex(vendor => vendor.vendorName === updatedNewVendor.vendorName) >= 0;
+        const isDuplicateVendor =
+            vendorList.findIndex(vendor => vendor.vendorName === updatedNewVendor.vendorName) >= 0;
 
         if (!updatedNewVendor.vendorName || isDuplicateVendor) {
-            errors.push({fieldName: 'vendorName'})
+            errors.push({ fieldName: 'vendorName' });
         }
         if (!updatedNewVendor.streetAddress) {
-            errors.push({fieldName: 'streetAddress'})
+            errors.push({ fieldName: 'streetAddress' });
         }
         if (!updatedNewVendor.city) {
-            errors.push({fieldName: 'city'})
+            errors.push({ fieldName: 'city' });
         }
         if (!updatedNewVendor.state) {
-            errors.push({fieldName: 'state'})
+            errors.push({ fieldName: 'state' });
         }
         if (!updatedNewVendor.country) {
-            errors.push({fieldName: 'country'})
+            errors.push({ fieldName: 'country' });
         }
         if (!updatedNewVendor.zip) {
-            errors.push({fieldName: 'zip'})
+            errors.push({ fieldName: 'zip' });
         }
         const updatedModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
             if (errors.length > 0) {
                 draft.errors = errors;
                 let msg = 'Please fix error' + (errors.length > 1 ? 's' : '') + ' before saving:  ';
-                if (isDuplicateVendor){
-                    msg += "duplicate vendor, ";
+                if (isDuplicateVendor) {
+                    msg += 'duplicate vendor, ';
                 }
                 msg += 'missing required field' + (errors.length > 1 ? 's' : '');
 
                 draft.errorMsg = msg;
                 setShow(true);
-            }
-            else {
+            } else {
                 draft.errors = undefined;
             }
         });
@@ -66,41 +69,40 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
         setUpdatedNewVendor(updatedModel);
         if (errors.length > 0) {
             onChangeShowPopup(true);
-        }
-        else {
+        } else {
             onChangeShowPopup(false);
         }
     }, [updatedNewVendor, onVendorChange]);
 
     const handleClose = useCallback(() => {
-
         // scenario when user hits Cancel without Saving and there is no new vendor data, then cleanup and create and empty new vendor
-        if (VendorModel.getDisplayString(vendorModel).length == 0) {
+        if (VendorModel.getDisplayString(vendorModel).length === 0) {
             onVendorChange(VendorModel.create());
-        }
-        else {
+        } else {
             setUpdatedNewVendor(vendorModel);
         }
         onVendorCancel(vendorModel);
         onChangeShowPopup(false);
         setShow(false);
-
     }, [vendorModel, onVendorChange]);
 
-    const onInputChange = useCallback((colName, value) => {
-        const updatedVendorModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
-            if (updatedNewVendor.errors?.length > 0) {
-                const updatedErrors = updatedNewVendor.errors.filter((field) => field.fieldName !== colName);
-                draft['errors'] = updatedErrors;
-            }
-            if (draft['errors']?.length === 0) {
-                draft['errorMsg'] = undefined;
-            }
-            draft[colName] = value;
-        });
+    const onInputChange = useCallback(
+        (colName, value) => {
+            const updatedVendorModel = produce(updatedNewVendor, (draft: Draft<VendorModel>) => {
+                if (updatedNewVendor.errors?.length > 0) {
+                    const updatedErrors = updatedNewVendor.errors.filter(field => field.fieldName !== colName);
+                    draft['errors'] = updatedErrors;
+                }
+                if (draft['errors']?.length === 0) {
+                    draft['errorMsg'] = undefined;
+                }
+                draft[colName] = value;
+            });
 
-        setUpdatedNewVendor(updatedVendorModel);
-    }, [updatedNewVendor, onVendorChange]);
+            setUpdatedNewVendor(updatedVendorModel);
+        },
+        [updatedNewVendor, onVendorChange]
+    );
 
     return (
         <>
@@ -112,84 +114,84 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                     <Form>
                         <NewVendorInput
                             required={true}
-                            column={'vendorName'}
-                            columnTitle={'Vendor Name'}
+                            column="vendorName"
+                            columnTitle="Vendor Name"
                             value={updatedNewVendor.vendorName}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'vendorName')}
+                            hasError={updatedNewVendor.errors?.find(field => field.fieldName === 'vendorName')}
                         />
                         <NewVendorTextArea
                             required={true}
-                            column={'streetAddress'}
-                            columnTitle={'Street Address'}
+                            column="streetAddress"
+                            columnTitle="Street Address"
                             value={updatedNewVendor.streetAddress}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'streetAddress')}
+                            hasError={updatedNewVendor.errors?.find(field => field.fieldName === 'streetAddress')}
                         />
                         <NewVendorInput
                             required={true}
-                            column={'city'}
-                            columnTitle={'City'}
+                            column="city"
+                            columnTitle="City"
                             value={updatedNewVendor.city}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'city')}
+                            hasError={updatedNewVendor.errors?.find(field => field.fieldName === 'city')}
                         />
                         <NewVendorInput
                             required={true}
-                            column={'state'}
-                            columnTitle={'State'}
+                            column="state"
+                            columnTitle="State"
                             value={updatedNewVendor.state}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'state')}
+                            hasError={updatedNewVendor.errors?.find(field => field.fieldName === 'state')}
                         />
                         <NewVendorInput
                             required={true}
-                            column={'country'}
-                            columnTitle={'Country'}
+                            column="country"
+                            columnTitle="Country"
                             value={updatedNewVendor.country}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'country')}
+                            hasError={updatedNewVendor.errors?.find(field => field.fieldName === 'country')}
                         />
                         <NewVendorInput
                             required={true}
-                            column={'zip'}
-                            columnTitle={'Zip Code'}
+                            column="zip"
+                            columnTitle="Zip Code"
                             value={updatedNewVendor.zip}
                             onChange={onInputChange}
-                            hasError={updatedNewVendor.errors?.find((field) => field.fieldName === 'zip')}
+                            hasError={updatedNewVendor.errors?.find(field => field.fieldName === 'zip')}
                         />
                         <NewVendorInput
                             required={false}
-                            column={'phoneNumber'}
-                            columnTitle={'Phone'}
+                            column="phoneNumber"
+                            columnTitle="Phone"
                             value={updatedNewVendor.phoneNumber}
                             onChange={onInputChange}
                         />
                         <NewVendorInput
                             required={false}
-                            column={'faxNumber'}
-                            columnTitle={'Fax'}
+                            column="faxNumber"
+                            columnTitle="Fax"
                             value={updatedNewVendor.faxNumber}
                             onChange={onInputChange}
                         />
                         <NewVendorInput
                             required={false}
-                            column={'email'}
-                            columnTitle={'Email'}
+                            column="email"
+                            columnTitle="Email"
                             value={updatedNewVendor.email}
                             onChange={onInputChange}
                         />
                         <NewVendorTextArea
                             required={false}
-                            column={'url'}
-                            columnTitle={'Company website'}
+                            column="url"
+                            columnTitle="Company website"
                             value={updatedNewVendor.url}
                             onChange={onInputChange}
                         />
                         <NewVendorTextArea
                             required={false}
-                            column={'notes'}
-                            columnTitle={'Notes'}
+                            column="notes"
+                            columnTitle="Notes"
                             value={updatedNewVendor.notes}
                             onChange={onInputChange}
                         />
@@ -203,45 +205,37 @@ export const VendorPopupModal: FC<VendorInputProps> = memo((props) => {
                         Save
                     </Button>
                 </Modal.Footer>
-                {
-                    (updatedNewVendor.errorMsg) &&
-                    <div className='alert alert-danger'>
-                        {updatedNewVendor.errorMsg}
-                    </div>
-                }
-
+                {updatedNewVendor.errorMsg && <div className="alert alert-danger">{updatedNewVendor.errorMsg}</div>}
             </Modal>
         </>
     );
-})
+});
 
-interface VendorProps
-{
+interface VendorProps {
     required: boolean;
     column: string;
     columnTitle: string;
     value: any;
-    onChange: (column:string, value:any) => void;
+    onChange: (column: string, value: any) => void;
     hasError?: boolean;
 }
 
-const NewVendorInput: FC<VendorProps> = memo((props) => {
+const NewVendorInput: FC<VendorProps> = memo(props => {
+    const { required, column, columnTitle, value, onChange, hasError } = props;
 
-    const {required, column, columnTitle, value, onChange, hasError} = props;
-
-    const onValueChange = useCallback((evt) => {
-        onChange(column, evt.target.value);
-    }, [required, column, columnTitle, value, onChange]);
+    const onValueChange = useCallback(
+        evt => {
+            onChange(column, evt.target.value);
+        },
+        [required, column, columnTitle, value, onChange]
+    );
 
     return (
-        <div className='vendor-modal'>
-            <VendorFormInput
-                label={columnTitle}
-                required={required}
-            >
+        <div className="vendor-modal">
+            <VendorFormInput label={columnTitle} required={required}>
                 <input
                     className={'form-control vendor-new-input ' + (hasError ? 'field-validation-error' : '')}
-                    style={{width:'80%'}}
+                    style={{ width: '80%' }}
                     value={value}
                     onChange={onValueChange}
                     id={'vendor-input-' + column}
@@ -250,22 +244,21 @@ const NewVendorInput: FC<VendorProps> = memo((props) => {
             </VendorFormInput>
         </div>
     );
-})
+});
 
-const NewVendorTextArea: FC<VendorProps> = memo((props) => {
+const NewVendorTextArea: FC<VendorProps> = memo(props => {
+    const { required, column, columnTitle, value, onChange, hasError } = props;
 
-    const {required, column, columnTitle, value, onChange, hasError} = props;
-
-    const onValueChange = useCallback((evt) => {
-        onChange(column, evt.target.value);
-    }, [required, column, columnTitle, value, onChange]);
+    const onValueChange = useCallback(
+        evt => {
+            onChange(column, evt.target.value);
+        },
+        [required, column, columnTitle, value, onChange]
+    );
 
     return (
-        <div style={{width:'100%'}}>
-            <VendorFormInput
-                label={columnTitle}
-                required={required}
-            >
+        <div style={{ width: '100%' }}>
+            <VendorFormInput label={columnTitle} required={required}>
                 <textarea
                     className={'form-control vendor-new-text-area-input ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
@@ -276,4 +269,4 @@ const NewVendorTextArea: FC<VendorProps> = memo((props) => {
             </VendorFormInput>
         </div>
     );
-})
+});

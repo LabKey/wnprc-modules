@@ -2,6 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="purchasingRequestsOverview" tableDbType="NOT_IN_DB" useColumnOrder="true">
+                <javaCustomizer class="org.labkey.wnprc_purchasing.table.WNPRC_PurchasingCustomizer"/>
                 <tableTitle>Purchase Requests</tableTitle>
                 <columns>
                     <column columnName="rowId">
@@ -22,8 +23,6 @@
                             <fkTable>aliases</fkTable>
                         </fk>
                     </column>
-                    <column columnName="OtherAcctAndInves"/>
-                    <column columnName="requester"/>
                     <column columnName="totalCost">
                         <formatString>$###,##0.00</formatString>
                     </column>
@@ -33,6 +32,8 @@
                             <fkTable>QCState</fkTable>
                         </fk>
                     </column>
+                    <column columnName="OtherAcctAndInves"/>
+                    <column columnName="requester"/>
                 </columns>
             </table>
         </tables>

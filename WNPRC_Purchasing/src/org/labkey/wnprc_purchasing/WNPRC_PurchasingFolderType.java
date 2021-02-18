@@ -34,10 +34,13 @@ public class WNPRC_PurchasingFolderType extends DefaultFolderType
     @Override
     public void configureContainer(Container c, User user)
     {
+        //populate tables with initial set of values
         WNPRC_PurchasingManager.get().addQCStatus(c, user);
-        WNPRC_PurchasingManager.get().addLineItems(c, user);
+        WNPRC_PurchasingManager.get().addLineItemStatus(c, user);
         WNPRC_PurchasingManager.get().addItemUnits(c, user);
 
+        //Add extensibleColumns
+       WNPRC_PurchasingManager.get().addExtensibleColumns(c, user);
     }
 
 }

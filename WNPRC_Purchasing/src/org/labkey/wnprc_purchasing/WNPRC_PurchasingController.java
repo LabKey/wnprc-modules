@@ -24,6 +24,8 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -31,6 +33,7 @@ import org.labkey.api.view.NavTree;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Date;
 import java.util.List;
 
 public class WNPRC_PurchasingController extends SpringActionController
@@ -48,22 +51,31 @@ public class WNPRC_PurchasingController extends SpringActionController
     {
         public ModelAndView getView(Object o, BindException errors)
         {
-            return ModuleHtmlView.get(ModuleLoader.getInstance().getModule("WNPRC_Purchasing"), ModuleHtmlView.getGeneratedViewPath("RequestEntry"));
+            ModuleHtmlView view = ModuleHtmlView.get(ModuleLoader.getInstance().getModule("WNPRC_Purchasing"), ModuleHtmlView.getGeneratedViewPath("RequestEntry"));
+            getPageConfig().setTitle("Purchasing Request Entry Form");
+
+            return view;
         }
 
         public void addNavTrail(NavTree root) { }
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class SubmitNewRequestAction extends MutatingApiAction<RequestForm>
+    public class SubmitRequestAction extends MutatingApiAction<RequestForm>
     {
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
-           WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
+            List<ValidationException> validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
+
+            if (validationExceptions.size() > 0)
+            {
+                throw new BatchValidationException(validationExceptions, null);
+            }
 
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
+            response.put("requestId", requestForm.getRowId());
 
             return response;
         }
@@ -72,14 +84,23 @@ public class WNPRC_PurchasingController extends SpringActionController
     public static class RequestForm
     {
         List<JSONObject> _lineItems;
+        List<Integer> _lineItemsToDelete;
+        Integer _rowId;
         Integer _account;
         String _accountOther;
         Integer _vendor;
         String _purpose;
         Integer _shippingDestination;
-        String _deliveryAttentionTo;
+        String _shippingAttentionTo;
         String _comments;
         String _qcState;
+        Integer _assignedTo;
+        Integer _creditCardOption;
+        String _program;
+        String _confirmNum;
+        String _invoiceNum;
+        Date _orderDate;
+        Date _cardPostDate;
         Boolean _hasNewVendor;
         String _newVendorName;
         String _newVendorStreetAddress;
@@ -101,6 +122,26 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setLineItems(List<JSONObject> lineItems)
         {
             _lineItems = lineItems;
+        }
+
+        public List<Integer> getLineItemsToDelete()
+        {
+            return _lineItemsToDelete;
+        }
+
+        public void setLineItemsToDelete(List<Integer> lineItemsToDelete)
+        {
+            _lineItemsToDelete = lineItemsToDelete;
+        }
+
+        public Integer getRowId()
+        {
+            return _rowId;
+        }
+
+        public void setRowId(Integer rowId)
+        {
+            _rowId = rowId;
         }
 
         public Integer getAccount()
@@ -153,14 +194,14 @@ public class WNPRC_PurchasingController extends SpringActionController
             _shippingDestination = shippingDestination;
         }
 
-        public String getDeliveryAttentionTo()
+        public String getShippingAttentionTo()
         {
-            return _deliveryAttentionTo;
+            return _shippingAttentionTo;
         }
 
-        public void setDeliveryAttentionTo(String deliveryAttentionTo)
+        public void setShippingAttentionTo(String shippingAttentionTo)
         {
-            _deliveryAttentionTo = deliveryAttentionTo;
+            _shippingAttentionTo = shippingAttentionTo;
         }
 
         public String getComments()
@@ -181,6 +222,76 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setQcState(String qcState)
         {
             _qcState = qcState;
+        }
+
+        public Integer getAssignedTo()
+        {
+            return _assignedTo;
+        }
+
+        public void setAssignedTo(Integer assignedTo)
+        {
+            _assignedTo = assignedTo;
+        }
+
+        public Integer getCreditCardOption()
+        {
+            return _creditCardOption;
+        }
+
+        public void setCreditCardOption(Integer creditCardOption)
+        {
+            _creditCardOption = creditCardOption;
+        }
+
+        public String getProgram()
+        {
+            return _program;
+        }
+
+        public void setProgram(String program)
+        {
+            _program = program;
+        }
+
+        public String getConfirmNum()
+        {
+            return _confirmNum;
+        }
+
+        public void setConfirmNum(String confirmNum)
+        {
+            _confirmNum = confirmNum;
+        }
+
+        public String getInvoiceNum()
+        {
+            return _invoiceNum;
+        }
+
+        public void setInvoiceNum(String invoiceNum)
+        {
+            _invoiceNum = invoiceNum;
+        }
+
+        public Date getOrderDate()
+        {
+            return _orderDate;
+        }
+
+        public void setOrderDate(Date orderDate)
+        {
+            _orderDate = orderDate;
+        }
+
+        public Date getCardPostDate()
+        {
+            return _cardPostDate;
+        }
+
+        public void setCardPostDate(Date cardPostDate)
+        {
+            _cardPostDate = cardPostDate;
         }
 
         public Boolean getHasNewVendor()

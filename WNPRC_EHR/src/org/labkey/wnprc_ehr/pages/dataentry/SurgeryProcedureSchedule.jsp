@@ -130,7 +130,7 @@
         return mainDiv;
     }
 
-    function createDiv(label, inputType, id, value) {
+    function createInputDiv(label, inputType, id, value) {
         let mainDiv = document.createElement("div");
         mainDiv.id = id + "Div";
         mainDiv.classList.add("form-group");
@@ -167,6 +167,39 @@
         middleDiv.appendChild(inputDiv);
         mainDiv.appendChild(labelEl);
         mainDiv.appendChild(middleDiv);
+
+        return mainDiv;
+    }
+
+    function createStaticDiv(label, id, value) {
+        let mainDiv = document.createElement("div");
+        mainDiv.id = id + "Div";
+        mainDiv.classList.add("col-xs-12");
+
+        let labelDiv = document.createElement("div");
+        labelDiv.classList.add("col-xs-4");
+        labelDiv.style.textAlign = "right";
+
+        let labelEl = document.createElement("label");
+        labelEl.id = id + "Label";
+        labelEl.htmlFor = id;
+        labelEl.innerHTML = label;
+
+        let inputDiv = document.createElement("div");
+        inputDiv.classList.add("col-xs-8");
+
+        let inputEl = document.createElement("input");
+        inputEl.type = "text";
+        inputEl.id = id;
+        inputEl.name = id;
+        inputEl.value = value;
+        inputEl.disabled = true;
+        inputEl.style.border = "0px";
+
+        labelDiv.appendChild(labelEl);
+        inputDiv.appendChild(inputEl);
+        mainDiv.appendChild(labelDiv);
+        mainDiv.appendChild(inputDiv);
 
         return mainDiv;
     }
@@ -737,7 +770,7 @@
 </div>
 
 <div class="col-xs-12 col-xl-10">
-    <div class="col-xs-12 col-md-8">
+    <div class="col-xs-12 col-md-4">
         <div id="pending-requests" class="panel panel-primary">
             <div class="panel-heading"><span>Pending Requests</span></div>
             <div class="panel-body">
@@ -756,7 +789,7 @@
         </div>
     </div>
 
-    <div class="col-xs-12 col-md-4">
+    <div class="col-xs-12 col-md-8">
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Schedule Request</span></div>
             <div class="panel-body" id="scheduleRequestDiv" data-bind="with: form">
@@ -766,7 +799,7 @@
                 </p>
                 <!-- /ko -->
 
-                <form id="scheduleRequestForm" class="form-horizontal scheduleForm"></form>
+                <div id="schedule-request-col-all" class="col-xs-12"></div>
                 <div style="text-align: right;">
                     <button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>
                     <button class="btn btn-danger" data-bind="click: $root.denyForm">Deny</button>
@@ -1156,12 +1189,10 @@
                 }
             }),
             pendingRequestTable: new WebUtils.Models.Table({
-                rowHeaders: ["Request ID", "Priority", "Animal ID(s)", "Requested By", "Requested On", "Requested Start", "Requested End"],
+                rowHeaders: ["Animal ID(s)", "Requested By", "Requested On", "Requested Start", "Requested End"],
                 rows: pendingRequests.map(function(row) {
                     return new WebUtils.Models.TableRow({
                         data: [
-                            row.rowid,
-                            row.priority,
                             row.animalid,
                             row.requestor,
                             displayDate(row.created),
@@ -1187,15 +1218,28 @@
 
                 createPlaceholderEvents(rooms);
 
-                let formDiv = document.getElementById("scheduleRequestForm");
+                let scheduleRequestDiv = document.getElementById("schedule-request-col-all");
 
-                while (formDiv.firstChild) {
-                    formDiv.removeChild(formDiv.lastChild);
+                while (scheduleRequestDiv.firstChild) {
+                    scheduleRequestDiv.removeChild(scheduleRequestDiv.lastChild);
                 }
 
-                let titleDiv = createDiv("Title", "text", "scheduleTitleField", getEventSubject(form));
-                formDiv.appendChild(titleDiv);
-                formDiv.appendChild(document.createElement("hr"));
+                let col1 = document.createElement("div");
+                col1.id = "schedule-request-col-1";
+                col1.classList.add("col-xs-6");
+                let col2 = document.createElement("div");
+                col2.id = "schedule-request-col-2";
+                col2.classList.add("col-xs-6");
+                scheduleRequestDiv.appendChild(col1);
+                scheduleRequestDiv.appendChild(col2);
+
+                let colDiv = document.getElementById("schedule-request-col-1");
+
+                let titleDiv = createInputDiv("Title", "text", "scheduleTitleField", getEventSubject(form));
+                colDiv.appendChild(titleDiv);
+
+                let spacerDiv = createStaticDiv("", "spacer_0", "");
+                colDiv.appendChild(spacerDiv);
 
                 for (let i = 0; i < rooms.length; i++) {
                     rooms[i].date = dateToDateTimeInputField(new Date(rooms[i].date));
@@ -1209,15 +1253,16 @@
                     let calendarId = rooms[i].email;
 
                     let roomDiv = createSelectDiv("Room", "scheduleRoomField_" + i, calendarId);
-                    let startDiv = createDiv("Start Time", "datetime-local", "scheduleStartField_" + i, startValue);
-                    let endDiv = createDiv("End Time", "datetime-local", "scheduleEndField_" + i, endValue);
+                    let startDiv = createInputDiv("Start Time", "datetime-local", "scheduleStartField_" + i, startValue);
+                    let endDiv = createInputDiv("End Time", "datetime-local", "scheduleEndField_" + i, endValue);
 
                     if (i > 0) {
-                        formDiv.appendChild(document.createElement("hr"));
+                        let spacerDiv = createStaticDiv("", "spacer_" + i, "");
+                        colDiv.appendChild(spacerDiv);
                     }
-                    formDiv.appendChild(roomDiv);
-                    formDiv.appendChild(startDiv);
-                    formDiv.appendChild(endDiv);
+                    colDiv.appendChild(roomDiv);
+                    colDiv.appendChild(startDiv);
+                    colDiv.appendChild(endDiv);
 
                     document.getElementById("scheduleRoomField_" + i).addEventListener("change", function() {
                         rooms[i].email = this.value;
@@ -1235,7 +1280,28 @@
                         clearPlaceholderEvents();
                         createPlaceholderEvents(rooms);
                     });
+                }
+                spacerDiv = createStaticDiv("", "spacer_" + rooms.length, "");
+                colDiv.appendChild(spacerDiv);
 
+                let includedFields = ["Animal ID:animalid", "Procedure(s):procedurename", "Project:project", "Protocol:protocol_fs_protocol",
+                    "Account:account", "Surgeon:surgeon", "Consult Request:consultrequest", "Biopsy Needed:biopsyneeded",
+                    "Surgery Tech Needed:surgerytechneeded", "SPI Needed:spineeded", "Vet Needed:vetneeded",
+                    "Reason Vet is Needed:vetneededreason", "Special Equipment/Supplies Requested:equipment",
+                    "Drugs Lab Will Provide:drugslab", "Drugs Surgery Staff Requested to Provide:drugssurgery",
+                    "Comments:comments"];
+
+                for (let i = 0; i < includedFields.length; i++) {
+                    if (i < 5 && rooms.length <= 1) {
+                        colDiv = document.getElementById("schedule-request-col-1");
+                    } else {
+                        colDiv = document.getElementById("schedule-request-col-2");
+                    }
+                    let data = includedFields[i].split(":");
+                    let label = data[0];
+                    let field = data[1];
+                    let div = createStaticDiv(label, field, request[field]);
+                    colDiv.appendChild(div);
                 }
             }
         });
@@ -1264,10 +1330,10 @@
                     }
                 });
                 clearPlaceholderEvents();
-                let formDiv = document.getElementById("scheduleRequestForm");
+                let scheduleRequestDiv = document.getElementById("schedule-request-col-all");
 
-                while (formDiv.firstChild) {
-                    formDiv.removeChild(formDiv.lastChild);
+                while (scheduleRequestDiv.firstChild) {
+                    scheduleRequestDiv.removeChild(scheduleRequestDiv.lastChild);
                 }
             },
             updateForm: function(requestid) {
@@ -1385,7 +1451,7 @@
                     formDiv.removeChild(formDiv.lastChild);
                 }
 
-                let titleDiv = createDiv("Title", "text", "modalTitleField", mainEvent.title);
+                let titleDiv = createInputDiv("Title", "text", "modalTitleField", mainEvent.title);
                 formDiv.appendChild(titleDiv);
                 formDiv.appendChild(document.createElement("hr"));
 
@@ -1404,9 +1470,9 @@
                         oldEventValues["modalRoomField_" + i] = roomEmail;
                         let roomDiv = createSelectDiv("Room", "modalRoomField_" + i, roomEmail);
                         oldEventValues["modalStartField_" + i] = startValue;
-                        let startDiv = createDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
+                        let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
                         oldEventValues["modalEndField_" + i] = endValue;
-                        let endDiv = createDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
+                        let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
 
                         if (i > 0) {
                             formDiv.appendChild(document.createElement("hr"));
@@ -1421,10 +1487,10 @@
                     let allDayValue = mainEvent.allDay;
                     let commentsValue = mainEvent.extendedProps.body;
 
-                    let startDiv = createDiv("Start Time", "datetime-local", "modalStartField", startValue);
-                    let endDiv = createDiv("End Time", "datetime-local", "modalEndField", endValue);
-                    let allDayDiv = createDiv("Add Day Event", "checkbox", "modalAllDayField", allDayValue);
-                    let commentsDiv = createDiv("Comments", "textarea", "modalCommentsField", commentsValue.trim());
+                    let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField", startValue);
+                    let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField", endValue);
+                    let allDayDiv = createInputDiv("Add Day Event", "checkbox", "modalAllDayField", allDayValue);
+                    let commentsDiv = createInputDiv("Comments", "textarea", "modalCommentsField", commentsValue.trim());
 
                     formDiv.appendChild(startDiv);
                     formDiv.appendChild(endDiv);

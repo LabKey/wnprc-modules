@@ -116,7 +116,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {
                     ActionURL url = new ActionURL("ehr", "dataEntryFormDetails.view", ti.getUserSchema().getContainer());
-                    int rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "rowid"));
+                    Integer rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "rowid"));
                     String reqId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "requestid"));
                     String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "formtype"));
 
@@ -1040,15 +1040,16 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
    {
        boolean isExt4Form = false;
 
-       SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, queryName);
-       TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
-       TableSelector ts = new TableSelector(ti, filter, null);
-       String framework;
-       if (ts.getMap() != null && ts.getMap().get("framework") != null)
-       {
-           framework = (String) ts.getMap().get("framework");
-           if ("extjs4".equalsIgnoreCase(framework)) {
-               isExt4Form = true;
+       if (schemaName != null && queryName != null) {
+           SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, queryName);
+           TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
+           TableSelector ts = new TableSelector(ti, filter, null);
+           String framework;
+           if (ts.getMap() != null && ts.getMap().get("framework") != null) {
+               framework = (String) ts.getMap().get("framework");
+               if ("extjs4".equalsIgnoreCase(framework)) {
+                   isExt4Form = true;
+               }
            }
        }
 

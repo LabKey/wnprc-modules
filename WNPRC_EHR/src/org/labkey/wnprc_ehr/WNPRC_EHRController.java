@@ -1863,10 +1863,13 @@ public class WNPRC_EHRController extends SpringActionController
                 /**
                  * Update task record
                  */
-                JSONObject taskRecord = new JSONObject();
-                taskRecord.put("taskid", taskId);
-                taskRecord.put("QCStateLabel", event.getQCStateLabel());
-                updateRecord(taskRecord, "ehr", "tasks");
+                if (taskId != null)
+                {
+                    JSONObject taskRecord = new JSONObject();
+                    taskRecord.put("taskid", taskId);
+                    taskRecord.put("QCStateLabel", event.getQCStateLabel());
+                    updateRecord(taskRecord, "ehr", "tasks");
+                }
 
                 if ("Request: Pending".equals(event.getQCStateLabel()))
                 {

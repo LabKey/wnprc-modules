@@ -6,8 +6,8 @@ import org.labkey.api.ehr.dataentry.RequestFormSection;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
-import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureDrugSection;
 import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureFoodDepriveSection;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureInstructionsFormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureRequestSection;
 import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureRoomsSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleRequestForm;
@@ -24,13 +24,12 @@ public class SurgeryProcedureRequestForm extends SimpleRequestForm
 
     public SurgeryProcedureRequestForm(DataEntryFormContext ctx, Module owner) {
         super(ctx, owner, NAME, "Request Surgery or Procedure", WNPRCConstants.DataEntrySections.PATHOLOGY_CLINPATH, Arrays.<FormSection>asList(
+                new SurgeryProcedureInstructionsFormSection(),
                 new RequestFormSection(),
                 new AnimalDetailsPanel(),
                 new SurgeryProcedureRequestSection(),
                 new SurgeryProcedureRoomsSection(),
-                //new SurgeryProcedureDrugSection(),
                 new SurgeryProcedureFoodDepriveSection()
-                //new SimpleFormPanelSection("wnprc", "surgeries", "Surgery Request"),
         ));
 
         for(FormSection section: this.getFormSections()) {

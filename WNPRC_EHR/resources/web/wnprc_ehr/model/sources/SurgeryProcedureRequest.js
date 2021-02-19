@@ -6,6 +6,12 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                     checked: true
                 }
             },
+            priority: {
+                hidden: true
+            },
+            QCState: {
+                hidden: true
+            }
         },
         'study.surgery_procedure': {
             QCState: {
@@ -160,6 +166,27 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 shownInGrid: false,
                 hidden: true
             },
+            date: {
+                getInitialValue: function(val, record){
+                    if (val){
+                        return val;
+                    }
+
+                    let collectionId = record.storeCollection.collectionId;
+                    let storeName = collectionId + "-" + "surgery_procedure";
+                    let store = Ext4.StoreManager.get(storeName);
+                    let procedureRecord = null;
+                    if(store) {
+                        procedureRecord = store.getAt(0);
+                    }
+                    let date = null;
+                    if(procedureRecord) {
+                        date = procedureRecord.get('date');
+                    }
+
+                    return date;
+                }
+            }
         }
     }
 });

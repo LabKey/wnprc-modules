@@ -22,7 +22,8 @@ SELECT a.lsid
      , a.project
      , a.project.protocol          AS protocol
      , a.account
-     , a.surgeon
+     , a.surgeon                   AS surgeon_userid
+     , a.surgeon.displayname       AS surgeon
      , a.consultrequest
      , a.biopsyneeded
      , a.surgerytechneeded

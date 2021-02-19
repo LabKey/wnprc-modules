@@ -696,10 +696,10 @@
         <div id="surgeryDetailsDiv" class="panel panel-primary">
             <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#surgery-details-collapsible" aria-controls="surgery-details-collapsible" aria-expanded="true">Surgery Details</a></div>
             <div class="panel-body collapse in" id="surgery-details-collapsible" aria-expanded="true" data-bind="with: taskDetails">
-                <%--<!-- ko ifnot: taskid() != '' -->--%>
+                <%--<!-- ko ifnot: requestid() != '' -->--%>
                 <p><em>Please click on a Surgery in the Calendar to view details for that Surgery.</em></p>
                 <%--<!-- /ko -->--%>
-                <%--<!-- ko if: taskid() != '' -->--%>
+                <%--<!-- ko if: requestid() != '' -->--%>
                 <dl class="dl-horizontal">
                     <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
                     <dt>Procedure Type:     </dt> <dd>{{procedurecategory}}</dd>

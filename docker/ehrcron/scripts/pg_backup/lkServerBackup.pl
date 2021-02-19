@@ -6,7 +6,7 @@ lkServerBackup.pl
 
 =head1 DESCRIPTION
 
-This script is used to backup LabKey servers  
+This script is used to backup LabKey servers
 
 One or more DB schemas can be selected. Each schema gets dumped into a separate file. These
 files are automatically rotated according to the user defined schedule.
@@ -16,7 +16,7 @@ files are automatically rotated according to the user defined schedule.
 This package and its accompanying libraries are free software; you can
 redistribute it and/or modify it under the terms of the GPL (either
 version 1, or at your option, any later version) or the Artistic
-License 2.0.   
+License 2.0.
 
 =head1 AUTHOR
 
@@ -37,7 +37,7 @@ This script can save a record in a labkey list the job completes.  This requires
 several steps:
 
 To save a log in labkey, you must provide the baseURL and a containerPath for your labkey server.  Entries
-will be made in the audit.auditLog table.  If selected, authentication to LabKey is handled using a file 
+will be made in the audit.auditLog table.  If selected, authentication to LabKey is handled using a file
 named .netrc located in the user's home directory. The machine in the netrc file should match the domain of
 your labkey URL.
 
@@ -46,22 +46,22 @@ NOTE: Crypt::SSLeay or Net::SSLeay required for HTTPS
 Example .netrc file:
 
 machine labkey.com
-login backup_user@wisc.edu 
+login backup_user@wisc.edu
 password yourPassword
 
- 
+
 You must also include a [lk_config] section in the INI file.  Below is an example INI
 file with comments explaining each line.
 
 [general]
 compress = 1	    					;0 or 1.  determines whether DB dumps are compressed. if using postgres custom format, it will not re-compress the file
 pg_dbname = labkey           			;name of postgres schema(s).  separate multiple schemas with whitespace (ie. 'labkey postgres').  the name 'globals' can be used to run pg_dumpall to backup global items
-pgdump_format = c           			;format used by pgdump.  see pgdump doc.  
+pgdump_format = c           			;format used by pgdump.  see pgdump doc.
 pg_host = someserver.com	 			;the postgres host.  can be omitted if running on the same server
 pg_user = labkey	    				;user connecting to postgres. can be omitted if using IDENT or other form of authentication
 pg_path = /usr/local/pgsql/bin			;optional. the location of pg_dump
 backup_dest = /labkey/backup/  			;the directory where backups will be stored
-tar_backup_dirs = /labkey/files/		;optional. a whitespace separated list of folders to be archived into a TAR file.  
+tar_backup_dirs = /labkey/files/		;optional. a whitespace separated list of folders to be archived into a TAR file.
 tar_excluded_dirs = /labkey/backup*		;optional. a whitespace separated list of patterns to be excluded from the TAR file.
 rsync_backup_dir = /usr/local/labkey	;optional. a folder to be copied using rsync
 
@@ -73,7 +73,7 @@ containerPath = shared          	   ;the containerPath where you want to insert 
 [file_rotation]		;can be omited, which will use defaults
 maxDaily = 7		;maximum daily backups to keep.  default: 7
 maxWeekly = 5		;maximum daily backups to keep.  default: 5
-maxMonthly = 100	;maximum daily backups to keep.  default: 0 
+maxMonthly = 100	;maximum daily backups to keep.  default: 0
 
 
 The restore procedure for one of the backup files should be roughly the following commands,
@@ -114,14 +114,14 @@ my %config = $settings->get_entry('general');
 my %lk_config = $settings->get_entry('lk_config');
 my %rotation = $settings->get_entry('file_rotation');
 
-# Variables 
+# Variables
 my ($path, $status);
 
 # Find today's date to append to filenames
 my $tm = localtime;
 my $datestr = sprintf("%04d%02d%02d_%02d%02d", $tm->year + 1900, ($tm->mon) + 1, $tm->mday, $tm->hour, $tm->min);
 
-# make sure the destination folder exists 
+# make sure the destination folder exists
 
 chdir($config{backup_dest});
 checkFolder($config{backup_dest});
@@ -173,6 +173,7 @@ sub runPgBackup {
     my $result = 0;
 
     my $backupdir = File::Spec->catfile($config{backup_dest}, "database");
+    my $primatefsdir = File::Spec->catfile($config{primatefs_dest}, "database");
 
     $log->entry("Starting pg_dump of: $db");
     $log->commit;
@@ -203,24 +204,33 @@ sub runPgBackup {
     $rotation{'maxDaily'} ||= 7;
     _rotateFiles($path, $rotation{'maxDaily'}, $file_prefix);
 
+    #copy/rotate additional daily backups
+    if ($rotation{'maxDaily_PrFS'} > 0) {
+        $path = File::Spec->catfile($primatefsdir, "daily");
+        checkFolder($path);
+        copy($dailyBackupFile, "/mnt/IT-Backups/$dailyBackupFile") or onExit("PrimateFS Daily Pgsql File Copy failed: $!");
+        $rotation{'maxDaily_PrFS'} ||= 10;
+        _rotateFiles($path, $rotation{'maxDaily_PrFS'}, $file_prefix);
+    }
+
     #add/rotate weekly backups on saturday
     if ($tm->wday == 6 && $rotation{'maxWeekly'} > 0) {
-        $path = File::Spec->catfile($backupdir, "weekly");
+        $path = File::Spec->catfile($primatefsdir, "weekly");
         checkFolder($path);
         my $weeklyFile = $dailyBackupFile;
         $weeklyFile =~ s/daily/weekly/;
-        copy($dailyBackupFile, $weeklyFile) or onExit("Weekly Pgsql File Copy failed: $!");
+        copy($dailyBackupFile, "/mnt/IT-Backups/$weeklyFile") or onExit("Weekly Pgsql File Copy failed: $!");
         $rotation{'maxWeekly'} ||= 5;
         _rotateFiles($path, $rotation{'maxWeekly'}, $file_prefix);
     }
 
     #add monthly backups on the 1st of the month.
     if ($tm->mday == 1 && $rotation{'maxMonthly'} > 0) {
-        $path = File::Spec->catfile($backupdir, "monthly");
+        $path = File::Spec->catfile($primatefsdir, "monthly");
         checkFolder($path);
         my $monthlyFile = $dailyBackupFile;
         $monthlyFile =~ s/daily/monthly/;
-        copy($dailyBackupFile, $monthlyFile) or onExit("Monthly Pgsql File Copy failed: $!");
+        copy($dailyBackupFile, "/mnt/IT-Backups/$monthlyFile") or onExit("Monthly Pgsql File Copy failed: $!");
         _rotateFiles($path, $rotation{'maxMonthly'}, $file_prefix);
     }
 
@@ -284,7 +294,7 @@ sub checkFolder {
 
 =item _pg_dump($bkpostgresfile, $pg_dbname)
 
-_pg_dump() will backup the schema defined by $pg_dbname into the file specified by $bkpostgresfile 
+_pg_dump() will backup the schema defined by $pg_dbname into the file specified by $bkpostgresfile
 
 =cut
 
@@ -314,7 +324,7 @@ sub _pg_dump {
 
 =item _pg_dumpall($bkpostgresfile)
 
-_pg_dumpall() will backup global settings into the file specified by $bkpostgresfile 
+_pg_dumpall() will backup global settings into the file specified by $bkpostgresfile
 
 =cut
 
@@ -343,7 +353,7 @@ sub _pg_dumpall {
 
 =item _compressFile(fileName, deleteOrig)
 
-_compressFile() will compress the specified file.  
+_compressFile() will compress the specified file.
 
 =cut
 

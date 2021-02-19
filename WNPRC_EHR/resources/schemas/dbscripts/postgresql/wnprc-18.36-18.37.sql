@@ -117,6 +117,21 @@ CREATE TABLE wnprc.procedure_calendars
     CONSTRAINT fk_azure_accounts_name FOREIGN KEY (account_name) REFERENCES wnprc.azure_accounts (name)
 );
 
+DROP TABLE IF EXISTS wnprc.procedure_surgeons;
+CREATE TABLE wnprc.procedure_surgeons
+(
+    userid            userid NOT NULL,
+
+    -- Default fields for LabKey.
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+
+    CONSTRAINT pk_procedure_surgeons_id PRIMARY KEY (userid)
+);
+
 -- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';
 --
 -- INSERT INTO study.qcstate (label, description, container, publicdata)

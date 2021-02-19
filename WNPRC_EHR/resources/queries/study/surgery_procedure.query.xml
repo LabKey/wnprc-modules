@@ -59,6 +59,12 @@
                     <column columnName="surgeon">
                         <columnTitle>Surgeon</columnTitle>
                         <nullable>false</nullable>
+                        <fk>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>procedure_surgeons_dropdown</fkTable>
+                            <fkColumnName>userid</fkColumnName>
+                            <fkDisplayColumnName>displayname</fkDisplayColumnName>
+                        </fk>
                     </column>
                     <column columnName="consultRequest">
                         <columnTitle>New Project / Consult Request</columnTitle>

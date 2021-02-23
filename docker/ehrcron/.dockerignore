@@ -1,6 +1,5 @@
 # ignore everything unless otherwise specified
 *
-scripts/pg_backup/lkbackup.ini
 
 # whitelist the following files:
 !netrc

@@ -1,5 +1,5 @@
 SELECT
-persons.personid,
+DISTINCT(persons.personid),
 last_name,
 first_name,
 middle_name,

@@ -1,10 +1,10 @@
 [general]
-backup_dest = /backups/labkey_backup/
-primatefs_dest = /mnt/IT-Backups/backups/labkey_backup/
+backup_dest = /primary_backup/location
+primatefs_dest = /longterm/backup/location/
 compress = 1
-pg_dbname = labkey
-pg_host = postgres
-pg_user = postgres
+pg_dbname = dbname
+pg_host = servicename
+pg_user = pguser
 pg_path = /usr/lib/postgresql/11/bin
 pgdump_format = c
 

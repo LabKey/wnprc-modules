@@ -1,2 +1,4 @@
 #!/bin/bash
+echo "image name pass to build "$IMAGE_NAME
+echo "path of the docker file  "$DOCKERFILE_PATH
 docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$branch --rm=true -f $DOCKERFILE_PATH -t $IMAGE_NAME .

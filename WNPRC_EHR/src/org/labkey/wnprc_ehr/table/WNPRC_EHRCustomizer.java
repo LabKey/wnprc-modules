@@ -627,7 +627,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
             SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, birthColumn, sql, JdbcType.VARCHAR);
+            ExprColumn newCol = new ExprColumn(table, birthColumn, sql, JdbcType.DATE);
             newCol.setLabel("Birth");
             newCol.setDescription("Returns the animal's birth date.");
             //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=study&query.queryName=Birth&query.Id~eq={id}"));

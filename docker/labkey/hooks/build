@@ -1,5 +1,2 @@
 #!/bin/bash
-echo "image name pass to build "$IMAGE_NAME
-echo "debug username  "$teamcityUser
-echo "debug branch used " $branch
 docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$branch --rm=true -t $IMAGE_NAME .

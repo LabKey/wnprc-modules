@@ -17,20 +17,14 @@ RUN apk update \
     && apk add --no-cache wget tar ca-certificates && update-ca-certificates
 
 RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRANCH}; fi \
- && if [ "$LABKEY_VERSION" = 17.2 ] ; then \
-        LABKEY_SNAPSHOT="-" ; \
-        if [ "$LABKEY_IS_PREMIUM" = true ] ; then \
-            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Premium_Installers" ; \
-            LABKEY_DISTRIBUTION="wisc" ; \
-            LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
-        else \
-            LABKEY_TEAMCITY_CONFIG="LabKey_172wnprc_Community_Installers" ; \
-            LABKEY_DISTRIBUTION="wisc_community" ; \
-            LABKEY_FILE_NAME="UWisc-Community-bin.tar.gz" ; \
-        fi \
-    elif [ "$LABKEY_VERSION" = 18.3 ] ; then \
+ && if [ "$LABKEY_VERSION" = 18.3 ] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_183wnprc_2_Premium_Installers" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
+    elif [ "$LABKEY_VERSION" = 20.7 ] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_207Release_Premium_SnapshotInstallers" ; \
+        LABKEY_SNAPSHOT="-Beta-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
     fi \

@@ -118,7 +118,6 @@ const FeedingForm: React.FunctionComponent<any> = (props) => {
             onChange={handleDateChange}
             customInput={
               <DateInput
-                value={values.date.value}
                 opendate={openDatepicker}
                 iconpath={`${ActionURL.getContextPath()}/wnprc_ehr/static/images/icons8-calendar-24.png`}/>
             }

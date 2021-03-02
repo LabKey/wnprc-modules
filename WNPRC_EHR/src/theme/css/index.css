@@ -42,6 +42,7 @@
 
 .remove-record-button {
   margin-left: 0px;
+  margin-right: -5px !important;
   float: right;
   background: none;
 }
@@ -67,6 +68,10 @@
   border: 1px solid;
   border-color: #e0e0e0;
   margin-bottom: 2rem;
+}
+
+.card-body > div > .row > .col-xs-2 {
+  margin-right: 5px;
 }
 
 .card {
@@ -123,6 +128,14 @@ select.form-control {
   padding-left: 75px;
 }
 
+.modal-title {
+  float: left;
+}
+
+.modal-content > .modal-header {
+  padding: 15px;
+}
+
 .centered-wrapper {
   margin: auto;
   max-width: 500px;
@@ -134,7 +147,11 @@ select.form-control {
 
 .animal-info-pane {
   position: fixed;
-  left: 55%;
+  transform: translate(115%);
+}
+
+.panel-portal-left, .animal-info-pane {
+  max-width: 500px;
 }
 
 button {
@@ -144,7 +161,8 @@ button {
 }
 
 input[id^="animalid"],
-input[id^="weight"] {
+input[id^="weight"],
+select[id^="restraint"] {
   margin-bottom: 5px;
   text-transform: lowercase;
 }
@@ -174,6 +192,12 @@ input[id^="weight"] {
   animation: slidein 3s linear 1s infinite alternate;
 }
 
+#invalid-tooltip {
+  float:right;
+  margin: 4px;
+  z-index: 0;
+}
+
 @keyframes slideout {
   from {
     opacity: 1;
@@ -183,7 +207,7 @@ input[id^="weight"] {
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1023px) {
   input.form-control,
   textarea.form-control,
   select.form-control {
@@ -194,7 +218,7 @@ input[id^="weight"] {
   #date-calendar-img {
     display: inline-block;
     position: absolute;
-    right: -4px;
+    right: -6px;
     top: 1px;
     cursor: pointer;
   }

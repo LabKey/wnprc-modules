@@ -3,6 +3,7 @@ interface jsonDataType {
 }
 import {Query,ActionURL,Filter} from '@labkey/api';
 import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 
 export const groupCommands = (values: Array<any>) => {
   return values.reduce((acc, item) => {
@@ -53,15 +54,13 @@ export const setupJsonData = (values: any[], schemaName: string, queryName: stri
 
 export const saveRowsDirect = (jsonData: jsonDataType) => {
 
-  console.log('in save rows')
   return new Promise((resolve, reject) => {
-    let options = {
+    let options: SaveRowsOptions = {
       commands: jsonData.commands,
       containerPath: ActionURL.getContainer(),
       success: (data) => {resolve(data)},
       failure: (data) => {reject(data)},
     };
-    console.log(JSON.stringify(options));
     Query.saveRows(options);
   });
 };

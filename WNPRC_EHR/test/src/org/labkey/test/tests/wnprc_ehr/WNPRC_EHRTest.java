@@ -62,9 +62,11 @@ import org.labkey.test.util.ext4cmp.Ext4FileFieldRef;
 import org.labkey.test.util.ext4cmp.Ext4GridRef;
 import org.labkey.test.util.external.labModules.LabModuleHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -147,6 +149,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     private Map<String, Object> aliasesMap = new HashMap<>();
 
     protected static final Double FEEDING_AMT = 12.12;
+    protected static final Double WEIGHT_VAL = 12.12;
     protected static final Double NEW_WEIGHT_VAL = 12.13;
     protected static final Double LOW_VAL = 0.1;
     protected static final Double HIGH_VAL = 0.12;
@@ -179,6 +182,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+
 
         initTest.createFinanceManagementFolders();
         initTest.clickFolder("Private");
@@ -387,11 +391,25 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         rowMap.put("schemaname", "study");
         rowMap.put("queryname", "feeding");
         rowMap.put("framework", "reactjs");
+        rowMap.put("url","/wnprc_ehr/feeding.view");
         insertCmd.addRow(rowMap);
 
         insertCmd.execute(cn, EHR_FOLDER_PATH);
 
         log("Inserted feeding as a reactjs form type into ehr.form_framework_types");
+        log("Inserting weight as a reactjs form type into ehr.form_framework_types");
+
+        InsertRowsCommand insertCmd2 = new InsertRowsCommand("ehr", "form_framework_types");
+        Map<String,Object> rowMap2 = new HashMap<>();
+        rowMap2.put("schemaname", "study");
+        rowMap2.put("queryname", "weight");
+        rowMap2.put("framework", "reactjs");
+        rowMap2.put("url", "/wnprc_ehr/weight.view");
+        insertCmd2.addRow(rowMap2);
+
+        insertCmd2.execute(cn, EHR_FOLDER_PATH);
+
+        log("Inserted weight as a reactjs form type into ehr.form_framework_types");
     }
 
     @Override
@@ -410,6 +428,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         beginAt(buildURL("wnprc_ehr", getContainerPath(), "feeding"));
     }
 
+    public void navigateToWeights()
+    {
+        beginAt(buildURL("wnprc_ehr", getContainerPath(), "weight"));
+    }
+
     public WebElement fillAnInput(String inputId, String value)
     {
         WebElement el = Locator.id(inputId).findElement(getDriver());
@@ -425,6 +448,16 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         WebElement el3 = fillAnInput("type_" + index.toString(), "l");
         WebElement el4 = fillAnInput("amount_" + index.toString(), weightVal);
         WebElement el5 = fillAnInput("remark_"+ index.toString(), "Entered from automated test");
+    }
+
+    public void fillWeightForm(String weightVal, Integer index)
+    {
+        fillAnInput("animalid_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
+        WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
+        el2.sendKeys(Keys.TAB);
+        el2.sendKeys(Keys.TAB);
+        fillAnInput("remark_"+ index.toString(), "Entered from automated test");
+        fillAnInput("restraint_" + index.toString(), "T");
     }
 
     public void waitUntilElementIsClickable(String id)
@@ -447,6 +480,17 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         cmd.setMaxRows(100);
         return cmd.execute(cn, EHR_FOLDER_PATH);
 
+    }
+
+    public SelectRowsResponse fetchWeightData() throws IOException, CommandException
+    {
+        Connection cn = this.createDefaultConnection(false);
+        SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
+        cmd.setRequiredVersion(9.1);
+        cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid", "objectid", "restraint_objectid"));
+        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
+        cmd.setMaxRows(100);
+        return cmd.execute(cn, EHR_FOLDER_PATH);
     }
 
 
@@ -1494,7 +1538,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickAndWait(Locator.bodyLinkContainingText(tableName));
     }
 
-    @Test
+    //@Test - old ext form
     public void testWeightDataEntry()
     {
         goToEHRFolder();
@@ -2144,6 +2188,361 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         Assert.assertEquals(null, FEEDING_AMT, wt.get("value"));
 
     }
+
+    @Test
+    public void testWeights() throws IOException, CommandException
+    {
+      //dummy test
+
+    }
+    @Test
+    public void testEnterWeights() throws IOException, CommandException
+    {
+        navigateToWeights();
+        fillWeightForm(WEIGHT_VAL.toString(),0);
+        waitUntilElementIsClickable("submit-all-btn");
+        //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
+    }
+
+    @Test
+    public void testWeightWarning() throws IOException, CommandException
+    {
+        navigateToWeights();
+        fillWeightForm(LOW_VAL.toString(),0);
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, LOW_VAL, wt.get("value"));
+
+        //beginAt(buildURL("wnprc_ehr", getContainerPath(), "dataEntry"));
+        //beginAt(buildURL("project", getContainerPath(), "begin"));
+        navigateToWeights();
+        fillWeightForm(HIGH_VAL.toString(),0);
+        sleep(1000);
+        assertElementPresent(Locator.id("weight-warning"));
+        sleep(2000);
+
+    }
+    public SelectRowsResponse fetchTaskData(String taskid) throws IOException, CommandException
+    {
+        Connection cn = this.createDefaultConnection(false);
+        SelectRowsCommand cmd = new SelectRowsCommand("ehr", "tasks");
+        cmd.setRequiredVersion(9.1);
+        cmd.setColumns(Arrays.asList("rowid", "updateTitle", "formtype", "assignedto", "duedate", "createdby", "created", "qcstate"));
+        cmd.addFilter("taskId", taskid, Filter.Operator.EQUAL);
+        cmd.setSorts(Arrays.asList(new Sort("duedate", Sort.Direction.DESCENDING), new Sort("created", Sort.Direction.DESCENDING)));
+
+        return cmd.execute(cn, EHR_FOLDER_PATH);
+
+    }
+
+    @Test
+    public void testWeightSubmitForReview() throws IOException, CommandException
+    {
+        navigateToWeights();
+        fillWeightForm(WEIGHT_VAL.toString(),0);
+        waitUntilElementIsClickable("submit-review-btn");
+        clickNewButton("submit-review-btn");
+        sleep(1000);
+        //waitForElement(Locator.id("reviewers"),10000);
+        waitForText("Submit for Review");
+
+        WebElement c = Locator.id("reviewers").findElement(getDriver());
+        TestLogger.log(FULL_SUBMITTER.getGroup());
+
+        Select select = new Select(c);
+        sleep(1000);
+        select.selectByIndex(2);
+        List<WebElement> l = select.getAllSelectedOptions();
+        WebElement option = l.get(0);
+        String defaultItem = option.getAttribute("value");
+        TestLogger.log(defaultItem);
+        //System.out.println(defaultItem );
+
+        sleep(1000);
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
+
+        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        String taskid = taskidob.get("value").toString();
+
+        SelectRowsResponse t = fetchTaskData(taskid);
+        //assert that this task's assigned to is the same as info entered above
+        JSONObject id = (JSONObject) t.getRows().get(0).get("assignedto");
+        Assert.assertEquals(null, defaultItem, id.get("value").toString());
+
+    }
+
+    @Test
+    public void testSaveWeightDraft() throws IOException, CommandException
+    {
+        navigateToWeights();
+        fillWeightForm(LOW_VAL.toString(),0);
+        waitUntilElementIsClickable("save-draft-btn");
+        clickNewButton("save-draft-btn");
+        //clickNewButton("submit-final");
+        waitForText("Saved");
+        //and check that it was actually saved and QC state is "In Progress"
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, LOW_VAL, wt.get("value"));
+        JSONObject qc = (JSONObject) r.getRows().get(0).get("QCState");
+        Assert.assertEquals(null, "In Progress", qc.get("displayValue"));
+
+    }
+
+    public SelectRowsResponse fetchWeightDataGivenTaskRowId(String taskrowid) throws IOException, CommandException
+    {
+        Connection cn = this.createDefaultConnection(false);
+        SelectRowsCommand cmd = new SelectRowsCommand("study", "weight");
+        cmd.setRequiredVersion(9.1);
+        cmd.setColumns(Arrays.asList("Id", "date", "weight", "remark", "QCState", "taskid"));
+        cmd.addFilter("taskid/rowid", taskrowid, Filter.Operator.EQUAL);
+        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
+        return cmd.execute(cn, EHR_FOLDER_PATH);
+    }
+
+    @Test
+    public void testEditAndDelete() throws IOException, CommandException
+    {
+        navigateToWeights();
+        fillWeightForm(WEIGHT_VAL.toString(),0);
+        clickNewButton("add-record");
+        fillWeightForm(WEIGHT_VAL.toString(),1);
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+
+        waitForText("Success");
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
+
+        navigateToWeightsTable();
+        JSONObject taskidob = (JSONObject) r.getRows().get(0).get("taskid");
+        String taskid = taskidob.get("value").toString();
+        SelectRowsResponse t = fetchTaskData(taskid);
+        JSONObject id = (JSONObject) t.getRows().get(0).get("rowid");
+        TestLogger.log("testEditAndDelete: Navigating to task id...");
+        TestLogger.log(id.get("value").toString());
+        waitAndClick(Locator.linkWithText(id.get("value").toString()));
+        waitForText("Task Details");
+        //waitAndClick(Locator.linkWithText("Weight"));
+        //since clicking the link directly opens a new tab and loses focus, go to url directly
+        waitForElement(Locator.linkWithText("Weight"));
+        WebElement el = Locator.linkWithText("Weight").findElement(getDriver());
+        String url = el.getAttribute("href");
+        getDriver().navigate().to(url);
+        TestLogger.log("waiting for button..");
+        sleep(2000);
+        //query weights and go to the weights view
+        waitForText(ANIMAL_SUBSET_EHR_TEST[0]);
+        //TestLogger.log(Locator.className("content-left").findElement(getDriver()).getAttribute("outerHTML"));
+        clickNewButton("remove-record-btn_1");
+        sleep(2000);
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+        //verify that it was deleted by counting that task has only 1 record in it
+        //do a a query to get weights filtered by taskid
+        SelectRowsResponse r2 =  fetchWeightDataGivenTaskRowId(id.get("value").toString());
+        Assert.assertEquals(1,r2.getRows().size());
+        TestLogger.log(String.valueOf(countText(id.get("value").toString())));
+    }
+
+    public void addBatchByIds()
+    {
+        clickNewButton("add-batch");
+        waitForElement(Locator.id("ids"));
+        WebElement el = Locator.id("ids").findElement(getDriver());
+        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
+            el.sendKeys(ANIMAL_SUBSET_EHR_TEST[i]);
+            if (i < ANIMAL_SUBSET_EHR_TEST.length-1 ){
+                el.sendKeys(",");
+            }
+        }
+        clickNewButton("submit-batch");
+        sleep(10000);
+    }
+
+    public void addBatchByLocation()
+    {
+        clickNewButton("add-batch");
+        waitForElement(Locator.id("locations"));
+        WebElement el = Locator.id("locations").findElement(getDriver());
+        WebElement in = el.findElement(By.tagName("input"));
+        in.sendKeys(ROOM_ID_EHR_TEST);
+        sleep(2000);
+        in.sendKeys(Keys.ENTER);
+        clickNewButton("submit-batch");
+        sleep(5000);
+    }
+
+    public SelectRowsResponse fetchRestraintDataGivenObjectId(String objectid) throws IOException, CommandException
+    {
+        Connection cn = this.createDefaultConnection(false);
+        SelectRowsCommand cmd = new SelectRowsCommand("study", "restraints");
+        cmd.setRequiredVersion(9.1);
+        cmd.setColumns(Arrays.asList("Id", "date", "restraintType", "objectid"));
+        cmd.addFilter("objectid", objectid, Filter.Operator.EQUAL);
+        cmd.setSorts(Collections.singletonList(new Sort("date", Sort.Direction.DESCENDING)));
+        cmd.setMaxRows(100);
+        return cmd.execute(cn, EHR_FOLDER_PATH);
+
+    }
+
+    @Test
+    public void testAddBatchIds()
+    {
+        navigateToWeights();
+        addBatchByIds();
+        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
+            assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
+        }
+    }
+
+    @Test
+    public void testEditBatch() throws IOException, CommandException
+    {
+        navigateToWeights();
+        addBatchByLocation();
+        clickNewButton("edit-batch");
+        WebElement el = Locator.id("weight-bulk").findElement(getDriver());
+        el.sendKeys(WEIGHT_VAL.toString());
+        clickNewButton("submit-bulk");
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++)
+        {
+            JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
+            Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
+        }
+    }
+
+    @Test
+    public void testAddBatch()
+    {
+        navigateToWeights();
+        addBatchByLocation();
+        for (int i = 0; i < ANIMAL_SUBSET_EHR_TEST.length; i++){
+            assertTextPresent(ANIMAL_SUBSET_EHR_TEST[i]);
+        }
+    }
+
+
+    @Test
+    public void testDisplayAnimalInfo() throws IOException, CommandException
+    {
+        navigateToWeights();
+        WebElement f = fillAnInput("animalid_0", ANIMAL_SUBSET_EHR_TEST[0]);
+        f.sendKeys(Keys.TAB);
+        f.sendKeys(Keys.TAB);
+        waitForElement(Locator.byClass("animal-info-table"));
+
+    }
+
+    @Test
+    public void testAddRestraint() throws IOException, CommandException
+    {
+        navigateToWeights();
+        fillWeightForm(WEIGHT_VAL.toString(),0);
+        /*WebElement el2 = fillAnInput("restraint_0", "T");*/
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
+        JSONObject objectid = (JSONObject) r.getRows().get(0).get("restraint_objectid");
+
+        SelectRowsResponse c = fetchRestraintDataGivenObjectId(objectid.get("value").toString());
+        JSONObject rt = (JSONObject) c.getRows().get(0).get("restraintType");
+        Assert.assertEquals(null, "Table-Top", rt.get("value"));
+
+    }
+
+    public void navigateToWeightsTable()
+    {
+        beginAt(buildURL("ehr", getContainerPath(), "updateQuery.view?schemaName=study&queryName=weight"));
+    }
+
+
+    public Boolean isCurrentlyImpersonating()
+    {
+        return (Boolean)executeScript("return LABKEY.impersonatingUser != undefined;");
+    }
+    @Test
+    public void testUpdateSingleRecordThroughEHR() throws IOException, CommandException
+    {
+        navigateToWeights();
+        fillWeightForm(WEIGHT_VAL.toString(),0);
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        navigateToWeightsTable();
+        DataRegionTable table = new DataRegionTable("query", getDriver());
+        String id = table.getDataAsText(0, "Id");
+        table.clickEditRow(0);
+        waitForText(id);
+
+        //delete the previous weight and replace it
+        WebElement we = Locator.inputById("weight_0").findElement(getDriver());
+        for (int i = 0; i < 10; i++){
+            we.sendKeys(Keys.BACK_SPACE);
+            sleep(500);
+        }
+        fillAnInput("weight_0",NEW_WEIGHT_VAL.toString());
+        waitUntilElementIsClickable("submit-all-btn");
+        clickNewButton("submit-all-btn");
+        clickNewButton("submit-final");
+        waitForText("Success");
+
+        SelectRowsResponse r = fetchWeightData();
+        JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
+        TestLogger.log(wt.get("value").toString());
+        Assert.assertEquals(null, NEW_WEIGHT_VAL, wt.get("value"));
+
+    }
+
+    @Test
+    public void testAddBulkThenSave() throws IOException, CommandException
+    {
+        navigateToWeights();
+        addBatchByLocation();
+        // look that the error text DOES NOT exist
+        waitUntilElementIsClickable("save-draft-btn");
+        clickNewButton("save-draft-btn");
+        sleep(2000);
+        clickNewButton("save-draft-btn");
+        sleep(2000);
+        assertTextNotPresent("Error during operation");
+    }
+
 
     @Override
     protected String getModuleDirectory()

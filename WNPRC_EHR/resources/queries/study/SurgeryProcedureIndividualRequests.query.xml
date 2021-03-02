@@ -13,7 +13,7 @@
                 <columns>
                     <column columnName="editLink">
                         <columnTitle>Edit Link</columnTitle>
-                        <url>/EHR/dataEntryForm.view?formType=${formtype}&amp;requestid=${requestid}</url>
+                        <url>/EHR/dataEntryForm.view?formType=${formtype}&amp;requestid=${requestid}&amp;returnUrl=${returnUrl}</url>
                     </column>
                     <column columnName="Id">
                         <columnTitle>Animal ID</columnTitle>

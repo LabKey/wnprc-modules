@@ -381,6 +381,10 @@
         <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
         <isHidden>true</isHidden>
       </column>
+      <column columnName="ancestry">
+        <datatype>varchar</datatype>
+        <columnTitle>Ancestry</columnTitle>
+      </column>
     </columns>
     <tableTitle>Birth</tableTitle>
   </table>
@@ -2745,6 +2749,13 @@
         <columnTitle>Weight (kg)</columnTitle>
         <isMvEnabled>true</isMvEnabled>
       </column>
+      <column columnName="restraint_objectid">
+        <datatype>varchar</datatype>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+      </column>
       <column columnName="remark">
         <datatype>varchar</datatype>
         <inputType>textarea</inputType>
@@ -4413,6 +4424,14 @@
       <column columnName="geoOrigin">
         <datatype>varchar</datatype>
         <columnTitle>Geo Origin</columnTitle>
+      </column>
+      <column columnName="geographic_origin">
+        <datatype>varchar</datatype>
+        <columnTitle>Geo Origin</columnTitle>
+      </column>
+      <column columnName="ancestry">
+        <datatype>varchar</datatype>
+        <columnTitle>Ancestry</columnTitle>
       </column>
     </columns>
     <tableTitle>Arrival</tableTitle>

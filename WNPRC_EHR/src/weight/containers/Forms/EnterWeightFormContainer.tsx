@@ -279,6 +279,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     let config:ConfigProps = {
       schemaName: "ehr_lookups",
       queryName: "restraint_type",
+      filterArray: [Filter.create("type", "Table-Top", Filter.Types.EQUAL)]
     };
     labkeyActionSelectWithPromise(config).then((data) => {
       setRestraintsInAppContext(data.rows);

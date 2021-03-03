@@ -24,3 +24,6 @@ CREATE TABLE wnprc.session_log
     CONSTRAINT pk_session_log_rowid PRIMARY KEY (rowid),
     CONSTRAINT fk_session_log_form_framework_type FOREIGN KEY (form_framework_type) REFERENCES ehr.form_framework_types (rowid)
 );
+
+update ehr.form_framework_types set url ='/wnprc_ehr/weight.view' where queryname = 'weight';
+

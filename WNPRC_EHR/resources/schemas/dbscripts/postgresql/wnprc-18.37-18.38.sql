@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS wnprc.procedure_rooms;
+DROP TABLE IF EXISTS wnprc.procedure_rooms CASCADE;
 CREATE TABLE wnprc.procedure_rooms
 (
     room                VARCHAR(50),
@@ -17,7 +17,7 @@ CREATE TABLE wnprc.procedure_rooms
     CONSTRAINT pk_procedure_room PRIMARY KEY (room)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_categories;
+DROP TABLE IF EXISTS wnprc.procedure_categories CASCADE;
 CREATE TABLE wnprc.procedure_categories
 (
     displayname VARCHAR(50),
@@ -72,7 +72,7 @@ CREATE TABLE wnprc.procedure_scheduled_rooms
     CONSTRAINT fk_procedure_scheduled_rooms_requestid FOREIGN KEY (requestid) REFERENCES ehr.requests (requestid)
 );
 
-DROP TABLE IF EXISTS wnprc.azure_accounts;
+DROP TABLE IF EXISTS wnprc.azure_accounts CASCADE;
 CREATE TABLE wnprc.azure_accounts
 (
     display_name        VARCHAR(100),

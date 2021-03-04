@@ -1,0 +1,38 @@
+<script type="text/javascript">
+
+    function goToRequestDataEntry() {
+        window.location = LABKEY.ActionURL.buildURL('WNPRC_Purchasing', 'purchasingRequest', LABKEY.ActionURL.getContainer(), {isNewRequest: true});
+    }
+
+    function goToVendorsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'vendor'});
+    }
+
+    function goToUserAccountAssociationsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'userAccountAssociations'});
+    }
+
+    function goToShippingInfoView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'shippingInfo'});
+    }
+
+    function goToOpenRequestsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'purchasingRequestsOverview', 'query.viewName':'OpenRequests'});
+    }
+
+    function goToCompletedRequestsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'purchasingRequestsOverview', 'query.viewName':'CompletedRequests'});
+    }
+</script>
+
+<div id="<%=h('wnprc_purchasing-admin-page')%>"></div>
+<h4 style="font-family: Roboto;font-size: 14px;font-weight: bold;">Purchasing Requests</h4>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToRequestDataEntry()">Enter Request</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToOpenRequestsView()">Open Requests</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToCompletedRequestsView()">Completed Requests</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:getRequestDataEntryUrl()">All Requests</a></span></div>
+
+<h4 style="font-family: Roboto;font-size: 14px;font-weight: bold; padding-top:10px;">Reference Tables</h4>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToVendorsView()">Vendors</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToUserAccountAssociationsView()">User Account Associations</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToShippingInfoView()">Shipping Info</a></span></div>

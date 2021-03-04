@@ -190,8 +190,7 @@ public class WNPRC_PurchasingManager
 
         //otherwise, continue adding non-required values
         row.put("comments", requestForm.getComments());
-        //TODO: update assignedTo
-        row.put("assignedTo", null != requestForm.getAssignedTo() ? requestForm.getAssignedTo() : user.getUserId());
+        row.put("assignedTo", requestForm.getAssignedTo());
         row.put("qcState", requestForm.getQcState());
         row.put("creditCardOptionId", requestForm.getCreditCardOption());
         row.put("program", requestForm.getProgram());

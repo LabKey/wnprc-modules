@@ -94,7 +94,7 @@ fi
 
 echo -n 'value of dock '$dock
 if [[ -z $dock ]]; then
-  docker-compose down -v
+  docker-compose -f docker-compose.prod.yml -f docker-compose.yml down -v
   if [[ ! -e .env ]]; then
       cp default.env .env
   fi

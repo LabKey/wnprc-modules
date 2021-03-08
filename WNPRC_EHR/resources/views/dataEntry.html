@@ -428,7 +428,7 @@
                             queries: ['Treatment Orders']
                         },
                         {
-                            url: makeTaskDataEntryURL("Weight"),
+                            url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'weight', ctx['EHRStudyContainer']),
                             title: 'Enter Weights',
                             queries: ['Weight']
                         },
@@ -672,6 +672,11 @@
                             url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'feeding', ctx['EHRStudyContainer']),
                             title:   'Enter Feeding Orders',
                             queries:['feeding']
+                        },
+                        {
+                            url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'weight', ctx['EHRStudyContainer']),
+                            title:   'Enter Weights',
+                            queries:['weight']
                         },
 
                     ]

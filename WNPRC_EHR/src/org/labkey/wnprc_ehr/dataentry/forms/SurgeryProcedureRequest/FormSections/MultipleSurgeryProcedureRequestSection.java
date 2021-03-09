@@ -6,15 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SurgeryProcedureMultipleRequestSection extends SimpleGridSection
+public class MultipleSurgeryProcedureRequestSection extends SimpleGridSection
 {
-    public SurgeryProcedureMultipleRequestSection() {
+    public MultipleSurgeryProcedureRequestSection() {
         super("study", "surgery_procedure", "Surgeries or Procedures");
         //setTemplateMode(TEMPLATE_MODE.NONE);
 
         //this.maxItemsPerColumn = 14;
-
-        //setClientStoreClass("WNPRC.ext.data.SingleAnimal.SurgeryProcedureClientStore");
+        setClientStoreClass("WNPRC.ext.data.SingleAnimal.SurgeryProcedureClientStore");
     }
 
     @Override

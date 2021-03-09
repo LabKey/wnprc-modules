@@ -1,0 +1,16 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="editLink"/>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="project"/>
+        <column name="surgeon"/>
+        <column name="consultRequest"/>
+        <column name="biopsyNeeded"/>
+        <column name="surgeryTechNeeded"/>
+        <column name="spiNeeded"/>
+        <column name="vetNeeded"/>
+        <column name="rooms"/>
+        <column name="qcstate"/>
+    </columns>
+</customView>

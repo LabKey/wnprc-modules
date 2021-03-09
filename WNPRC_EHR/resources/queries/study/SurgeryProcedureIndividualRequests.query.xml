@@ -88,6 +88,9 @@
                         <columnTitle>Reason Vet is Needed</columnTitle>
                         <nullable>false</nullable>
                     </column>
+                    <column columnName="rooms">
+                        <columnTitle>Rooms</columnTitle>
+                    </column>
                     <column columnName="statusChangeReason">
                         <columnTitle>Hold/Deny Reason</columnTitle>
                         <nullable>true</nullable>

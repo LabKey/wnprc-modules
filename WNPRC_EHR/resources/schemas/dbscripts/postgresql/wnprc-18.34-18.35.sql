@@ -13,7 +13,3 @@ insert into ehr_lookups.lookups (set_name,container,value) select setname, conta
 alter table wnprc.animal_requests rename column project to optionalproject;
 alter table wnprc.animal_requests add column project integer;
 insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'Conventional and SPF4' as value from ehr_lookups.lookup_sets where setname='viral_status';
-
-update ehr.form_framework_types set url ='/wnprc_ehr/weight.view' where queryname = 'weight';
-update ehr.form_framework_types set url ='/wnprc_ehr/feeding.view' where queryname = 'feeding';
-

@@ -279,6 +279,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     let config:ConfigProps = {
       schemaName: "ehr_lookups",
       queryName: "restraint_type",
+      filterArray: [Filter.create("type", "Table-Top", Filter.Types.EQUAL)]
     };
     labkeyActionSelectWithPromise(config).then((data) => {
       setRestraintsInAppContext(data.rows);
@@ -415,7 +416,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
       //for now just on submit, need to revisit other submit buttons
       setEndTimeInAppContext(new Date());
 
-      wait(3).then(() => {
+      wait(2).then(() => {
         window.location.href = ActionURL.buildURL(
           "wnprc_ehr",
           "dataEntry.view",
@@ -536,12 +537,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         //TODO wait til this is done rather than sleep
         submit();
         setEndTimeInAppContext(new Date());
-        wait(4).then(() => {
+        wait(2).then(() => {
           window.location.href = ActionURL.buildURL(
-            "ehr",
-            "executeQuery.view?schemaName=study&query.queryName=weight",
+            "wnprc_ehr",
+            "dataEntry.view",
             ActionURL.getContainer()
-          );
+          )
         });
       })
       .catch(e => {

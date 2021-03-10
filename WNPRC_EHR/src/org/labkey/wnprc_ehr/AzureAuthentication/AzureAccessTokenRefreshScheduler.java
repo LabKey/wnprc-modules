@@ -32,7 +32,7 @@ public class AzureAccessTokenRefreshScheduler {
     }
 
     public synchronized void schedule(String name) {
-        AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+        AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
 
         if (settings.isEnabled(name)) {
             try {
@@ -67,7 +67,7 @@ public class AzureAccessTokenRefreshScheduler {
     }
 
     public synchronized void unschedule(String name) {
-        AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+        AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
 
         if (_jobs.get(name) != null) {
             try {
@@ -81,7 +81,7 @@ public class AzureAccessTokenRefreshScheduler {
     }
 
     public void onSettingsChange(String name) {
-        AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+        AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
 
         if (!settings.isEnabled(name)) {
             if (_jobs.get(name) != null) {

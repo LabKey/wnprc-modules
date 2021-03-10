@@ -313,7 +313,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             endTimes.add(LocalDateTime.parse(event.end.dateTime));
         }
 
-        AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+        AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
         for (int i = 0; i < events.size(); i++) {
             Event event = events.get(i);
             eventProps.load(new StringReader(event.body.content));

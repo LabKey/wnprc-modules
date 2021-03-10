@@ -143,20 +143,57 @@ Ext4.define('WNPRC.panel.AzureAuthenticationSettingsPanel', {
         Ext4.Msg.alert('Error', msg);
     },
 
-    doRefreshToken: function (account) {
+    doRefreshToken: async function (account) {
         Ext4.Msg.wait('Refreshing Access Token...');
 
+        let tokenRefreshed = false;
+        let refreshFailure = false;
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'refreshAzureAccessToken', null, {
                 name: account.name
             }),
             method: 'POST',
             success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                Ext4.Msg.hide();
-                Ext4.Msg.alert('Success', account.display_name + ' access token refresh was successful');
+                if (response.success) {
+                    tokenRefreshed = true;
+                    Ext4.Msg.hide();
+                    Ext4.Msg.alert('Success!', account.display_name + ' access token refresh was successful');
+                }
             }, this),
-            failure: LABKEY.Utils.getCallbackWrapper(this.onError, this)
+            failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                refreshFailure = true;
+                Ext4.Msg.hide();
+                Ext4.Msg.alert('Failed!', account.display_name + ' access token refresh failed');
+                this.onError();
+            }, this)
         });
+
+        await this.sleep(5000);
+        while (!tokenRefreshed && !refreshFailure) {
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('wnprc_ehr', 'getAzureAuthenticationDeviceCodeValues', null, {
+                    name: account.name
+                }),
+                method: 'POST',
+                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                    if (response.success) {
+                        tokenRefreshed = true;
+                        Ext4.Msg.hide();
+                        Ext4.Msg.alert('Authentication Required!',
+                                'Please visit the following link to authenticate. Your code is ' + response.userCode +
+                                '<br><br>' +
+                                '<a target="_blank" rel="noopener noreferrer" href="' + response.uri + '">Click Here</a> to authenticate');
+                    }
+                }, this),
+                failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                    refreshFailure = true;
+                    Ext4.Msg.hide();
+                    Ext4.Msg.alert('Failed!', account.display_name + ' access token refresh failed');
+                    this.onError();
+                }, this)
+            });
+            await this.sleep(10000);
+        }
     },
 
     doSaveSettings: function (account) {
@@ -204,5 +241,9 @@ Ext4.define('WNPRC.panel.AzureAuthenticationSettingsPanel', {
                 }
             }
         }
+    },
+
+    sleep: function(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 });

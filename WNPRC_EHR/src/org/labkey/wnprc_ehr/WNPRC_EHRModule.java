@@ -320,9 +320,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         AdminConsole.addLink(AdminConsole.SettingsLinkType.Management, "azure auth settings", DetailsURL.fromString("/WNPRC_EHR/azureAuthenticationSettings.view").getActionURL(), AdminOperationsPermission.class);
 
         //Schedule jobs to refresh the access tokens for all Microsoft Azure accounts
-        AzureAccessTokenRefreshSettings azureAccessTokenRefreshSettings = new AzureAccessTokenRefreshSettings();
-        List<String> azureNames = azureAccessTokenRefreshSettings.getNames();
-        for (String name : azureNames) {
+        for (String name : AzureAccessTokenRefreshSettings.get().getNames()) {
             Thread refreshThread = new Thread(new AzureAccessTokenRefreshRunnable(name));
             refreshThread.setDaemon(true);
             refreshThread.start();

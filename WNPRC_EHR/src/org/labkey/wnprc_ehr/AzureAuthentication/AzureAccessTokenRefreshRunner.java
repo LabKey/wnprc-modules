@@ -1,11 +1,11 @@
 package org.labkey.wnprc_ehr.AzureAuthentication;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.PropertyManager;
 import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator.AzureTokenStatus;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,10 +25,10 @@ public class AzureAccessTokenRefreshRunner implements Job {
         doTokenRefresh(name);
     }
 
-    public void doTokenRefresh(String name) {
-        AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
-
-        _log.info("Azure access token refresh started for '" + settings.getDisplayName(name) + "'");
+    public AzureTokenStatus doTokenRefresh(String name) {
+        AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
+        String displayName = settings.getDisplayName(name);
+        _log.info("Azure access token refresh - Started for '" + displayName + "'");
 
         AzureActiveDirectoryAuthenticator authenticator = new AzureActiveDirectoryAuthenticator(
                 settings.getApplicationId(name),
@@ -37,12 +37,16 @@ public class AzureAccessTokenRefreshRunner implements Job {
                 name,
                 settings.getScopes(name));
 
-        String accessToken = authenticator.getUserAccessToken();
+        AzureTokenStatus status = authenticator.getUserAccessToken();
 
-        PropertyManager.PropertyMap properties = PropertyManager.getEncryptedStore().getWritableProperties(name + ".Credentials", true);
-        properties.put("AccessToken", accessToken);
-        properties.save();
+        if (AzureTokenStatus.SUCCESS.equals(status)) {
+            _log.info("Azure access token refresh - Completed for '" + displayName + "'");
+        } else if (AzureTokenStatus.AUTH_REQUIRED.equals(status)) {
+            _log.info("Azure access token refresh - Authentication required for '" + displayName + "'");
+        } else {
+            _log.info("Azure access token refresh - Failed for '" + displayName + "'");
+        }
 
-        _log.info("Azure access token refresh completed for '" + settings.getDisplayName(name) + "'");
+        return status;
     }
 }

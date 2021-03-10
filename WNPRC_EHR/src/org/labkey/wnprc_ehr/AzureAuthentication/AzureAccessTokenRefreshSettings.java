@@ -29,14 +29,19 @@ import java.util.TreeMap;
 public class AzureAccessTokenRefreshSettings {
 
     private static Map<String, Map<String, Object>> _settings = null;
+    private static final AzureAccessTokenRefreshSettings _instance = new AzureAccessTokenRefreshSettings();
 
-    public AzureAccessTokenRefreshSettings() {
+    private AzureAccessTokenRefreshSettings() {
         if (_settings == null) {
             refreshSettingsMap();
         }
     }
 
-    public static void refreshSettingsMap() {
+    public static AzureAccessTokenRefreshSettings get() {
+        return _instance;
+    }
+
+    public void refreshSettingsMap() {
         _settings = new TreeMap<>();
 
         DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);

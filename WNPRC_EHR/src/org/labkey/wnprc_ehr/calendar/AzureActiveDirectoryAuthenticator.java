@@ -21,7 +21,15 @@ import java.util.function.Consumer;
 
 public class AzureActiveDirectoryAuthenticator {
 
+	public enum AzureTokenStatus {
+		SUCCESS,
+		FAILURE,
+		AUTH_REQUIRED
+	}
+
 	private static Logger _log = Logger.getLogger(WNPRC_EHRController.class);
+	private static final String DC_USER_CODE = "DeviceCodeUserCode";
+	private static final String DC_URI = "DeviceCodeURI";
     private String applicationId;
     private String upn;
     private String authority;
@@ -37,7 +45,7 @@ public class AzureActiveDirectoryAuthenticator {
         this.scopes = scopes;
     }
 
-    public String getUserAccessToken() {
+    public AzureTokenStatus getUserAccessToken() {
         if (applicationId == null) {
             System.out.println("You must initialize Authentication before calling getUserAccessToken");
 			return null;
@@ -62,7 +70,7 @@ public class AzureActiveDirectoryAuthenticator {
 						.build();
 			}
 			catch (MalformedURLException e) {
-				return null;
+				return AzureTokenStatus.FAILURE;
 			}
 		} else {
         	try {
@@ -75,7 +83,7 @@ public class AzureActiveDirectoryAuthenticator {
 						.build();
 			}
 			catch (MalformedURLException e) {
-				return null;
+				return AzureTokenStatus.FAILURE;
 			}
 		}
 
@@ -86,6 +94,9 @@ public class AzureActiveDirectoryAuthenticator {
 			// Print the login information to the console
 			_log.warn(deviceCode.message());
 			System.out.println(deviceCode.message());
+			properties.put(DC_USER_CODE, deviceCode.userCode());
+			properties.put(DC_URI, deviceCode.verificationUri());
+			properties.save();
 		};
 
 		Set<IAccount> accounts = app.getAccounts().join();
@@ -115,27 +126,50 @@ public class AzureActiveDirectoryAuthenticator {
 			}
 		} catch (Exception e) {
 			if (e.getCause() instanceof MsalException) {
-				result = app.acquireToken(
-						DeviceCodeFlowParameters
-							.builder(scopes, deviceCodeConsumer)
-							.build()
+				Thread deviceCodeThread = new Thread() {
+					@Override
+					public void run() {
+						IAuthenticationResult result = app.acquireToken(
+								DeviceCodeFlowParameters
+										.builder(scopes, deviceCodeConsumer)
+										.build()
 						).exceptionally(ex -> {
 							System.out.println("Unable to authenticate - " + ex.getMessage());
+							properties.put(DC_USER_CODE, null);
+							properties.put(DC_URI, null);
+							properties.save();
 							return null;
 						}).join();
+
+						updateProperties(properties, result, app);
+						pool.shutdown();
+					}
+				};
+				deviceCodeThread.setDaemon(true);
+				deviceCodeThread.start();
+
+				return AzureTokenStatus.AUTH_REQUIRED;
 			}
 		}
 
-		properties.put("TokenCache", app.tokenCache().serialize());
-		properties.save();
-
+		updateProperties(properties, result, app);
 		pool.shutdown();
 
 		if (result != null) {
-			return result.accessToken();
+			return AzureTokenStatus.SUCCESS;
 		}
 
-		return null;
+		return AzureTokenStatus.FAILURE;
+	}
+
+	private void updateProperties(PropertyManager.PropertyMap props, IAuthenticationResult result, PublicClientApplication app) {
+		props.put("TokenCache", app.tokenCache().serialize());
+		if (result != null) {
+			props.put("AccessToken", result.accessToken());
+		}
+		props.put(DC_USER_CODE, null);
+		props.put(DC_URI, null);
+		props.save();
 	}
 
 	static class TokenPersistence implements ITokenCacheAccessAspect{

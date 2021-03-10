@@ -37,6 +37,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
@@ -88,6 +89,7 @@ import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
+import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator.AzureTokenStatus;
 import org.labkey.wnprc_ehr.calendar.Calendar;
 import org.labkey.wnprc_ehr.calendar.Graph;
 import org.labkey.wnprc_ehr.calendar.Office365Calendar;
@@ -121,7 +123,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -1041,9 +1042,37 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
 
-            AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+            AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
             response.put("accounts", settings.getAllSettings());
             response.put("success", true);
+
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    @ActionNames("getAzureAuthenticationDeviceCodeValues")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class GetAzureAuthenticationDeviceCodeValuesAction extends ReadOnlyApiAction<AzureAccessTokenEvent>
+    {
+        public ApiResponse execute(AzureAccessTokenEvent event, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            String name = event.getName();
+            if (name != null)
+            {
+                PropertyManager.PropertyMap properties = PropertyManager.getEncryptedStore().getProperties(name + ".Credentials");
+                String userCode = properties.get("DeviceCodeUserCode");
+                String uri = properties.get("DeviceCodeURI");
+
+                if (userCode != null && uri != null)
+                {
+                    response.put("success", true);
+                    response.put("userCode", userCode);
+                    response.put("uri", uri);
+                }
+            }
 
             return new ApiSimpleResponse(response);
         }
@@ -1066,7 +1095,7 @@ public class WNPRC_EHRController extends SpringActionController
             try {
                 List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
 
-                AzureAccessTokenRefreshSettings settings = new AzureAccessTokenRefreshSettings();
+                AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
                 if (!settings.updateSettings(rowsToUpdate, getUser())) {
                     response.put("success", false);
                 }
@@ -1089,8 +1118,17 @@ public class WNPRC_EHRController extends SpringActionController
             response.put("success", false);
 
             AzureAccessTokenRefreshRunner azureAccessTokenRefreshRunner = new AzureAccessTokenRefreshRunner();
-            azureAccessTokenRefreshRunner.doTokenRefresh(event.getName());
-	        response.put("success", true);
+            AzureTokenStatus status = azureAccessTokenRefreshRunner.doTokenRefresh(event.getName());
+
+            if (AzureTokenStatus.SUCCESS.equals(status)) {
+	            response.put("success", true);
+            } else if (AzureTokenStatus.AUTH_REQUIRED.equals(status)) {
+                response.put("success", false);
+                response.put("auth_required", true);
+            } else {
+                response.put("success", false);
+                response.put("auth_required", false);
+            }
 
             return new ApiSimpleResponse(response);
         }

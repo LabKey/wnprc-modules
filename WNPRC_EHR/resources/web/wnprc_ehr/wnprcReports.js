@@ -1154,23 +1154,18 @@ EHR.reports['abstract'] = function(panel, tab){
             style: 'margin-bottom: 20px'
         };
         var elementHTML = '';
-        for (var i = 0; i < animalList.length; i ++){
-            // here we generate a random number to force the react component to refresh,
-            // since it became a problem when jumping between the same report in Clinical and General
-            // Animal History tabs with the same animal id
-            var randNum = Math.random().toString();
-            elementHTML += '<div id="abstract-section' + animalList[i] + randNum +'"></div>'
-        }
+        // here we generate a random number to force the react component to refresh,
+        // since it became a problem when jumping between the same report in Clinical and General
+        // Animal History tabs with the same animal id
+        var randNum = Math.random().toString();
+        elementHTML += '<div id="abstract-section' + animalId + randNum +'"></div>'
         Ext4.apply(config, {
             html: elementHTML,
             listeners: {
                 afterrender: {
                     fn: function () {
                         LABKEY.requiresScript("/wnprc_ehr/gen/abstract.js",true, function() {
-                            for (var i = 0; i < animalList.length; i ++){
-                                Abstract.renderAnimalAbstract(animalList[i], randNum)
-                            }
-
+                            Abstract.renderAnimalAbstract(animalId, randNum)
                         });
                     }
                 }

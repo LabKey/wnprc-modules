@@ -57,5 +57,5 @@
     CAST(pdt.adate AS DATE) >= CAST(cr1.startDate AS DATE) AND
     (CAST(pdt.adate AS DATE) <= cr1.enddate OR cr1.enddate IS NULL))
   LEFT JOIN ehr_billing.chargeableItems ci1 ON ci1.rowid = cr1.chargeId) pdr
-  WHERE (pdr.item = 'Per diems' AND pdr.project.projectType != 'Other') --Excluding research projects from reduce perDiem
+  WHERE (pdr.item = 'Per diems' AND pdr.project.projectType IS NULL) --Excluding research projects from reduce perDiem
      OR (pdr.item = 'Special Animal Per Diem' AND pdr.project.projectType = 'Other')  --Only assigning reduce perDiem to U24 projects

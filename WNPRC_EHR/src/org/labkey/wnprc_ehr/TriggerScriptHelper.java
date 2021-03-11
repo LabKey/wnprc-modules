@@ -738,7 +738,8 @@ public class TriggerScriptHelper {
         for (int i = 0; i < arrivals.length(); i++)
         {
             String vendorId = (String) arrivals.getJSONObject(i).get("vendor_id");
-            if (vendorId != null){
+            if (vendorId != null)
+            {
                 if (!enteredVendorId.equals(vendorId))
                 {
                     l.add(vendorId);

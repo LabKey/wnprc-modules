@@ -17,12 +17,14 @@ function onInit(event, helper){
 
 
 function onUpsert(helper, scriptErrors, row, oldRow) {
+
+    //check for other arrival records to see if entered vendor id matches previous vendor ids
     if (!!row.vendor_id){
         var vendorIdsObj = WNPRC.Utils.getJavaHelper().checkOldVendorIds(row.objectid, row.Id, row.vendor_id);
         var vendorIdsArray = Object.keys(vendorIdsObj).map(function(_) { return vendorIdsObj[_]; })
         var uniqueVendorIds = WNPRC.Utils.uniqueArray(vendorIdsArray);
         if (uniqueVendorIds.length > 0){
-            EHR.Server.Utils.addError(scriptErrors, 'vendor_id', 'This vendor id does not match ' + vendorIdsArray.length + ' record(s) of that have vendor id(s) ' + uniqueVendorIds.join(';') , 'ERROR');
+            EHR.Server.Utils.addError(scriptErrors, 'vendor_id', 'This vendor id does not match ' + vendorIdsArray.length + ' record(s) of that have vendor id(s) ' + uniqueVendorIds.join(';') , 'WARN');
         }
     }
 }

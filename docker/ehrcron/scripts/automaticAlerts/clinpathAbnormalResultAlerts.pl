@@ -49,10 +49,8 @@ use List::MoreUtils qw/ uniq /;
 # Find today's date
 my $tm = localtime;
 my $datetimestr=sprintf("%04d-%02d-%02d at %02d:%02d", $tm->year+1900, ($tm->mon)+1, $tm->mday, $tm->hour, $tm->min);
-my $datestr=sprintf("%04d-%02d-%02d", $tm->year+1900, ($tm->mon)+1, $tm->mday);
-my $timestr = sprintf("%02d:%02d", $tm->hour, $tm->min);
 
-my $email_html = "This email contains abnormal clinpath results entered since: $datetimestr.<p>";
+my $email_html = "";
 my $results;
 my $doSend = 0;
 
@@ -62,7 +60,9 @@ if(!-e $file){
 	touch($file);
 }
 my $lastRun = localtime(stat($file)->mtime);
-$lastRun = sprintf("%04d-%02d-%02d %02d:%02d", $lastRun->year+1900, ($lastRun->mon)+1, $lastRun->mday, $lastRun->hour, $lastRun->min);
+
+my $lastRunFormatted = sprintf("%04d-%02d-%02d %02d:%02d", $lastRun->year+1900, ($lastRun->mon)+1, $lastRun->mday, $lastRun->hour, $lastRun->min);
+my $lastRunMinusAWeek = sprintf("%04d-%02d-%02d %02d:%02d", $lastRun->year+1900, ($lastRun->mon)+1, ($lastRun->mday)-7, $lastRun->hour, $lastRun->min);
 
 #we find any record requested since the last email
 $results = LabKey::Query::selectRows(
@@ -75,8 +75,9 @@ $results = LabKey::Query::selectRows(
     -columns => 'Id,date,Id/curLocation/area,Id/curLocation/room,Id/curLocation/cage,alertStatus,taskid/datecompleted,testid,result,units,status,ref_range_min,ref_range_max,ageAtTime',
     -filterArray => [
 		['qcstate/PublicData', 'eq', 'true'],
-		['taskid/datecompleted', 'gte', $lastRun],
+		['taskid/datecompleted', 'gte', $lastRunFormatted],
 		['taskid/datecompleted', 'nonblank', ''],
+		['date', 'gte', $lastRunMinusAWeek],
 		#['alertStatus', 'eq', 'true'],
     ],
     #-debug => 1,
@@ -112,8 +113,8 @@ if(@{$results->{rows}}){
     				
 }
 	
-$email_html .= "There have been ".@{$results->{rows}}." abnormal results since $lastRun. <br>";
-$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ClinpathRefRange&query.taskid/datecompleted~gte=".$lastRun."&&query.taskid/datecompleted~nonblank&query.qcstate/PublicData~eq=true"."'>Click here to view them</a><p>\n";	
+$email_html .= "There have been ".@{$results->{rows}}." abnormal clinpath results since $lastRunFormatted. <br>";
+$email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ClinpathRefRange&query.date~dategte=".$lastRunMinusAWeek."&query.taskid/datecompleted~gte=".$lastRunFormatted."&query.taskid/datecompleted~nonblank&query.qcstate/PublicData~eq=true"."'>Click here to view them</a><p>\n";	
 	
 my $prevRoom = '';
 foreach my $area (sort(keys %$summary)){

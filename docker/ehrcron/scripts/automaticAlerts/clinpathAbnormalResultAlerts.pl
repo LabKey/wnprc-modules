@@ -113,8 +113,10 @@ if(@{$results->{rows}}){
     				
 }
 	
-$email_html .= "There have been ".@{$results->{rows}}." abnormal clinpath results since $lastRunFormatted. <br>";
+$email_html .= "There have been ".@{$results->{rows}}." clinpath tasks completed since $lastRunFormatted. <br>";
 $email_html .= "<p><a href='".$baseUrl."query/".$studyContainer."executeQuery.view?schemaName=study&query.queryName=ClinpathRefRange&query.date~dategte=".$lastRunMinusAWeek."&query.taskid/datecompleted~gte=".$lastRunFormatted."&query.taskid/datecompleted~nonblank&query.qcstate/PublicData~eq=true"."'>Click here to view them</a><p>\n";	
+
+$email_html .= "<p>Listed below are the abnormal records.</p>\n";
 	
 my $prevRoom = '';
 foreach my $area (sort(keys %$summary)){

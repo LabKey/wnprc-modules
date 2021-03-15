@@ -16,8 +16,8 @@ SELECT a.lsid
      , a.Id.curLocation.cond.title AS cur_cond
      , a.date
      , a.enddate
-     , a.procedurecategory
      , a.procedurename
+     , a.procedureunit.unit_display_name AS procedureunit
      , a.created
      , a.project
      , a.project.protocol          AS protocol

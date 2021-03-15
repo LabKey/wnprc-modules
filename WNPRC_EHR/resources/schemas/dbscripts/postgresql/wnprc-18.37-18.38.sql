@@ -132,6 +132,22 @@ CREATE TABLE wnprc.procedure_surgeons
     CONSTRAINT pk_procedure_surgeons_id PRIMARY KEY (userid)
 );
 
+DROP TABLE IF EXISTS wnprc.procedure_units;
+CREATE TABLE wnprc.procedure_units
+(
+    unit_display_name   VARCHAR(100),
+    unit                VARCHAR(100),
+
+    -- Default fields for LabKey.
+    container         entityid NOT NULL,
+    createdby         userid,
+    created           TIMESTAMP,
+    modifiedby        userid,
+    modified          TIMESTAMP,
+
+    CONSTRAINT pk_procedure_units_unit PRIMARY KEY (unit)
+);
+
 -- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';
 --
 -- INSERT INTO study.qcstate (label, description, container, publicdata)

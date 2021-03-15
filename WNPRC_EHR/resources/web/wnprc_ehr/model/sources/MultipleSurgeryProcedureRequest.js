@@ -22,11 +22,6 @@ EHR.model.DataModelManager.registerMetadata('MultipleSurgeryProcedureRequest', {
                     plugins: ['wnprc-animalfield']
                 }
             },
-            procedurecategory: {
-                editorConfig: {
-                    plugins: ['wnprc-procedurefield']
-                }
-            },
             procedurename: {
                 xtype: "wnprc-groupedcheckcombo",
                 lookup: {
@@ -37,6 +32,9 @@ EHR.model.DataModelManager.registerMetadata('MultipleSurgeryProcedureRequest', {
                     columns: 'displayname,name,category/displayname,firstCategoryItem',
                     sort: 'category,displayname'
                 }
+            },
+            procedureunit: {
+
             },
             date: {
                 defaultValue: Ext4.Date.add(new Date()),//'2018-12-05 11:00 AM',

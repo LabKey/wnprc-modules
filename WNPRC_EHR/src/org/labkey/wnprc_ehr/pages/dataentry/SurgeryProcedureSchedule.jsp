@@ -292,10 +292,10 @@
         let requestObj;
         if (action === 'addToCalendar') {
             let calendarId;
-            if (form.procedurecategory === 'surgery') {
+            if (form.procedureunit === 'vet') {
                 calendarId = 'surgeries_' + calendarIdSuffix;
             }
-            else if (form.procedurecategory === 'imaging' || form.procedurecategory === 'other') {
+            else if (form.procedureunit === 'spi') {
                 calendarId = 'procedures_' + calendarIdSuffix;
             }
             requestObj = {
@@ -702,8 +702,8 @@
                 <%--<!-- ko if: requestid() != '' -->--%>
                 <dl class="dl-horizontal">
                     <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
-                    <dt>Procedure Type:     </dt> <dd>{{procedurecategory}}</dd>
                     <dt>Procedure Name:     </dt> <dd>{{procedurename}}</dd>
+                    <dt>Unit:               </dt> <dd>{{procedureunit}}</dd>
                     <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalid}}</a></dd>
                     <dt>Sex:                </dt> <dd>{{sex}}</dd>
                     <dt>Age:                </dt> <dd>{{age}}</dd>
@@ -1136,8 +1136,8 @@
                 objectid:             ko.observable(),
                 requestid:            ko.observable(),
                 taskid:               ko.observable(''),
-                procedurecategory:    ko.observable(),
                 procedurename:        ko.observable(),
+                procedureunit:    ko.observable(),
                 age:                  ko.observable(),
                 animalid:             ko.observable(),
                 account:              ko.observable(),
@@ -1165,8 +1165,8 @@
                 priority:           '',
                 date:               '',
                 enddate:            '',
-                procedurecategory:  '',
                 procedurename:      '',
+                procedureunit:  '',
                 comments:           '',
                 statuschangereason: ''
             }),
@@ -1284,7 +1284,7 @@
                 spacerDiv = createStaticDiv("", "spacer_" + rooms.length, "");
                 colDiv.appendChild(spacerDiv);
 
-                let includedFields = ["Animal ID:animalid", "Procedure(s):procedurename", "Project:project", "Protocol:protocol_fs_protocol",
+                let includedFields = ["Animal ID:animalid", "Procedure(s):procedurename", "Unit:procedureunit", "Project:project", "Protocol:protocol_fs_protocol",
                     "Account:account", "Surgeon:surgeon", "Consult Request:consultrequest", "Biopsy Needed:biopsyneeded",
                     "Surgery Tech Needed:surgerytechneeded", "SPI Needed:spineeded", "Vet Needed:vetneeded",
                     "Reason Vet is Needed:vetneededreason", "Special Equipment/Supplies Requested:equipment",

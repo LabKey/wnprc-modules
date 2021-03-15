@@ -385,8 +385,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                         extendedProps.put("rowid", surgeryInfo.get("rowid"));
                         extendedProps.put("priority", surgeryInfo.get("priority"));
                         extendedProps.put("requestor", surgeryInfo.get("requestor"));
-                        extendedProps.put("procedurecategory", surgeryInfo.get("procedurecategory"));
                         extendedProps.put("procedurename", surgeryInfo.get("procedurename"));
+                        extendedProps.put("procedureunit", surgeryInfo.get("procedureunit"));
                         extendedProps.put("age", surgeryInfo.get("age"));
                         extendedProps.put("animalid", surgeryInfo.get("animalid"));
                         extendedProps.put("created", surgeryInfo.get("created"));

@@ -1,9 +1,9 @@
 SELECT CASE WHEN sp.qcstate.label = 'Request: Denied' THEN 'EDIT' ELSE '' END as editLink,
-       sp.participantid,
+       sp.Id,
        sp.date,
        sp.enddate,
-       sp.procedurecategory,
        sp.procedurename,
+       sp.procedureunit AS procedureunit,
        sp.project,
        sp.account,
        sp.surgeon,
@@ -22,4 +22,5 @@ FROM study.surgery_procedure sp
 WHERE sp.requestid IN (SELECT r.requestid
                        FROM ehr.requests r
                        WHERE ISMEMBEROF(r.createdby)
-                         AND r.formtype in ('SurgeryProcedureRequest', 'MultipleSurgeryProcedureRequest'));
+                         AND r.formtype in ('SurgeryProcedureRequest', 'MultipleSurgeryProcedureRequest'))
+ORDER BY sp.date DESC;

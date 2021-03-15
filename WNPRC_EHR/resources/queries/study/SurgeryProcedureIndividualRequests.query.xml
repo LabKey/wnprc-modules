@@ -29,15 +29,6 @@
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="procedureCategory">
-                        <columnTitle>Procedure Category</columnTitle>
-                        <fk>
-                            <fkDbSchema>wnprc</fkDbSchema>
-                            <fkTable>procedure_categories</fkTable>
-                            <fkColumnName>category</fkColumnName>
-                        </fk>
-                        <nullable>false</nullable>
-                    </column>
                     <column columnName="procedureName">
                         <columnTitle>Procedure</columnTitle>
                         <fk>
@@ -46,6 +37,15 @@
                             <fkColumnName>name</fkColumnName>
                         </fk>
                         <nullable>false</nullable>
+                    </column>
+                    <column columnName="procedureUnit">
+                        <columnTitle>Unit Confirming Request</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>procedure_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName>unit_display_name</fkDisplayColumnName>
+                        </fk>
                     </column>
                     <column columnName="project">
                         <columnTitle>Project</columnTitle>

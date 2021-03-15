@@ -4,12 +4,9 @@
         <column name="Id"/>
         <column name="date"/>
         <column name="project"/>
+        <column name="procedureName"/>
+        <column name="procedureUnit"/>
         <column name="surgeon"/>
-        <column name="consultRequest"/>
-        <column name="biopsyNeeded"/>
-        <column name="surgeryTechNeeded"/>
-        <column name="spiNeeded"/>
-        <column name="vetNeeded"/>
         <column name="rooms"/>
         <column name="qcstate"/>
     </columns>

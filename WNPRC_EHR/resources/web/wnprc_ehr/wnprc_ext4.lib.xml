@@ -3,8 +3,6 @@
         <script path="/wnprc_ehr/ext4/components/MultiSelectField.js"/>
         <script path="/wnprc_ehr/ext4/components/Participant.js"/>
         <script path="/wnprc_ehr/ext4/components/Procedure.js"/>
-        <script path="/wnprc_ehr/ext4/components/fields/SurgeryProcedureRoomField.js"/>
-        <script path="/wnprc_ehr/ext4/components/fields/SurgeryProcedureNameField.js"/>
         <script path="/wnprc_ehr/ext4/components/fields/GroupedCheckCombo.js"/>
         <script path="/wnprc_ehr/ext4/components/PregnancyDueDateCalculation.js"/>
         <script path="/wnprc_ehr/ext4/components/GestationCalculation.js"/>

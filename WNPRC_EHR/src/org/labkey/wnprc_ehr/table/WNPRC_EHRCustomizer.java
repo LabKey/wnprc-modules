@@ -92,6 +92,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeDemographicsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "tasks")) {
                 customizeTasksTable((AbstractTableInfo) table);
+            } else if (matches(table, "study", "surgery_procedure")) {
+                customizeProcedureNameColumn((AbstractTableInfo) table);
             }
         }
     }
@@ -940,6 +942,66 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     public Object getDisplayValue(RenderContext ctx)
                     {
                         return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
+                    }
+                });
+            }
+        }
+    }
+
+    private void customizeProcedureNameColumn(AbstractTableInfo ti) {
+        ColumnInfo procedureName = ti.getColumn("procedureName");
+        if (procedureName != null)
+        {
+            UserSchema us = getUserSchema(ti, "study");
+            if (us != null)
+            {
+                procedureName.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
+
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        ActionURL url = new ActionURL("query", "detailsQueryRow.view", us.getContainer());
+                        String joinedProcedureNames = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "procedureName"));
+                        if (joinedProcedureNames != null)
+                        {
+                            String[] procedureNames = joinedProcedureNames.split(",");
+                            url.addParameter("schemaName", "wnprc");
+                            url.addParameter("query.queryName", "procedure_names");
+
+                            StringBuilder urlString = new StringBuilder();
+                            for (int i = 0; i < procedureNames.length; i++)
+                            {
+                                String procedureNameValue = procedureNames[i];
+                                SimplerFilter filter = new SimplerFilter("name", CompareType.EQUAL, procedureNameValue);
+                                DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+                                TableInfo ti = schema.getTable("procedure_names");
+                                TableSelector ts = new TableSelector(ti, filter, null);
+                                String procedureDisplayName;
+                                if (ts.getMap() != null && ts.getMap().get("displayname") != null)
+                                {
+                                    procedureDisplayName = (String) ts.getMap().get("displayname");
+                                    url.replaceParameter("name", procedureNameValue);
+                                    urlString.append("<a href=\"").append(PageFlowUtil.filter(url)).append("\">");
+                                    urlString.append(PageFlowUtil.filter(procedureDisplayName));
+                                    urlString.append("</a>");
+                                }
+                                else
+                                {
+                                    urlString.append(PageFlowUtil.filter("<" + procedureNameValue + ">"));
+                                }
+                                if (i + 1 < procedureNames.length)
+                                {
+                                    urlString.append(", ");
+                                }
+                            }
+                            out.write(urlString.toString());
+                        }
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "procedureName"));
                     }
                 });
             }

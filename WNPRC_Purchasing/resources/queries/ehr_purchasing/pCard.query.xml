@@ -45,7 +45,9 @@
                     <column columnName="invoiceNum">
                         <columnTitle>Invoice No</columnTitle>
                     </column>
-
+                    <column columnName="paymentOptionId">
+                        <columnTitle>Payment Option</columnTitle>
+                    </column>
                 </columns>
             </table>
         </tables>

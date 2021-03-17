@@ -4,16 +4,16 @@ SELECT
        pr.justification,
        pr.orderDate,
        pr.cardPostDate,
-       items.totalCost, -- this needs to be changed to totalCharge - will it be different than totalCost? should there be a new field?
+       items.totalCost,
        pr.account,
 
        pr.program,
        pr.createdBy,
        pr.comments,
---        pr.orderNum, --new field?
-       pr.invoiceNum
---        pr.confirmationNum, -- not used here?
---     pr.pkslip -- new field? attachment related
+       pr.rowId AS orderNum,
+       pr.invoiceNum,
+       pr.paymentOptionId
+
 FROM ehr_purchasing.purchasingRequests pr
 LEFT JOIN
     (

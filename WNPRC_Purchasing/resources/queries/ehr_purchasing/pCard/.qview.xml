@@ -7,11 +7,13 @@
         <column name="cardPostDate"/>
         <column name="totalCost"/>
         <column name="account"/>
-<!--        <column name="account/uw_fund"/>-->
-<!--        <column name="account/uw_udds"/>-->
+        <column name="account/uw_fund"/>
+        <column name="account/uw_udds"/>
         <column name="program"/>
         <column name="createdBy"/>
         <column name="comments"/>
+        <column name="orderNum"/>
         <column name="invoiceNum"/>
+        <column name="paymentOptionId"/>
     </columns>
 </customView>

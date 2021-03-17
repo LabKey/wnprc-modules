@@ -7,7 +7,7 @@ import { PurchaseAdminModel } from '../model';
 
 import {
     AssignedToInput,
-    CreditCardOptionInput,
+    PaymentOptionInput,
     ConfirmationInput,
     InvoiceInput,
     ProgramInput,
@@ -55,7 +55,7 @@ export const PurchaseAdminPanel: FC<Props> = memo(props => {
                 </Row>
                 <Row>
                     <Col xs={11} lg={6}>
-                        <CreditCardOptionInput value={model.creditCardOption} onChange={onValueChange} />
+                        <PaymentOptionInput value={model.paymentOption} onChange={onValueChange} />
                     </Col>
                     <Col xs={11} lg={6}>
                         <ConfirmationInput value={model.confirmationNum} onChange={onValueChange} />

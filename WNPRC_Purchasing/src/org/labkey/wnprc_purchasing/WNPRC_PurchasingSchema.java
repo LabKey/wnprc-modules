@@ -27,7 +27,7 @@ public class WNPRC_PurchasingSchema
     public static final String NAME = "wnprc_purchasing";
 
     //wnprc_purchasing tables
-    public static final String CREDIT_CARD_OPTIONS_TABLE = "creditCardOptions";
+    public static final String PAYMENT_OPTIONS_TABLE = "paymentOptions";
 
     public static WNPRC_PurchasingSchema getInstance()
     {
@@ -51,8 +51,8 @@ public class WNPRC_PurchasingSchema
         return getSchema().getSqlDialect();
     }
 
-    public TableInfo getCreditCardOptionsTable()
+    public TableInfo getPaymentOptionsTable()
     {
-        return getSchema().getTable(CREDIT_CARD_OPTIONS_TABLE);
+        return getSchema().getTable(PAYMENT_OPTIONS_TABLE);
     }
 }

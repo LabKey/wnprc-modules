@@ -19,14 +19,14 @@ public class WNPRC_PurchasingUserSchema extends SimpleUserSchema
 
     public enum TableType
     {
-        creditCardOptions
+        paymentOptions
         {
             @Override
             public TableInfo createTable(WNPRC_PurchasingUserSchema schema, ContainerFilter cf)
             {
                 SimpleUserSchema.SimpleTable<WNPRC_PurchasingUserSchema> table =
                         new SimpleUserSchema.SimpleTable<>(
-                                schema, WNPRC_PurchasingSchema.getInstance().getCreditCardOptionsTable(), cf).init();
+                                schema, WNPRC_PurchasingSchema.getInstance().getPaymentOptionsTable(), cf).init();
                 return table;
             }
         };

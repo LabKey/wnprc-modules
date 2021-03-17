@@ -95,7 +95,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _comments;
         String _qcState;
         Integer _assignedTo;
-        Integer _creditCardOption;
+        Integer _paymentOption;
         String _program;
         String _confirmNum;
         String _invoiceNum;
@@ -234,14 +234,14 @@ public class WNPRC_PurchasingController extends SpringActionController
             _assignedTo = assignedTo;
         }
 
-        public Integer getCreditCardOption()
+        public Integer getPaymentOption()
         {
-            return _creditCardOption;
+            return _paymentOption;
         }
 
-        public void setCreditCardOption(Integer creditCardOption)
+        public void setPaymentOption(Integer paymentOption)
         {
-            _creditCardOption = creditCardOption;
+            _paymentOption = paymentOption;
         }
 
         public String getProgram()

@@ -60,7 +60,7 @@ export async function submitRequest(
                 comments: requestOrder.comments,
                 qcState: purchasingAdminModel?.qcState || requestOrder.qcState,
                 assignedTo: purchasingAdminModel?.assignedTo,
-                creditCardOption: purchasingAdminModel?.creditCardOption,
+                paymentOption: purchasingAdminModel?.paymentOption,
                 program: purchasingAdminModel?.program ? purchasingAdminModel.program : '4',
                 confirmNum: purchasingAdminModel?.confirmationNum,
                 invoiceNum: purchasingAdminModel?.invoiceNum,

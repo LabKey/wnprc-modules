@@ -47,10 +47,10 @@
                     <column columnName="shippingAttentionTo">
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="creditCardOptionId">
+                    <column columnName="paymentOptionId">
                         <fk>
                             <fkDbSchema>wnprc_purchasing</fkDbSchema>
-                            <fkTable>creditCardOptions</fkTable>
+                            <fkTable>paymentOptions</fkTable>
                             <fkColumnName>rowId</fkColumnName>
                         </fk>
                     </column>

@@ -41,6 +41,7 @@ public class WNPRC_PurchasingFolderType extends DefaultFolderType
 
         //Add extensibleColumns
        WNPRC_PurchasingManager.get().addExtensibleColumns(c, user);
+        WNPRC_PurchasingManager.get().addPaymentOptions(c, user);
     }
 
 }

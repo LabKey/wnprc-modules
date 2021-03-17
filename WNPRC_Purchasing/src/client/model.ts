@@ -84,7 +84,7 @@ export class PurchaseAdminModel {
 
     readonly rowId?: number;
     readonly assignedTo: number;
-    readonly creditCardOption: number;
+    readonly paymentOption: number;
     readonly qcState: number;
     readonly program: string = '4';
     readonly confirmationNum?: string;

@@ -9,6 +9,8 @@
         <column name="speciesneeded"></column>
         <column name="originneeded"></column>
         <column name="numberofanimals"></column>
+        <column name="animalidstooffer"></column>
+        <column name="animal_history_link"></column>
         <column name="QCState"></column>
 
     </columns>

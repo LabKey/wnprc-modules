@@ -93,6 +93,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeDemographicsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "tasks")) {
                 customizeTasksTable((AbstractTableInfo) table);
+            } else if (matches(table, "wnprc", "animal_requests")) {
+                customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
         }
     }
@@ -861,6 +863,40 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             }
         }
     }
+
+    private void customizeAnimalRequestsTable(AbstractTableInfo table)
+    {
+
+        UserSchema us = getStudyUserSchema(table);
+        if (us == null)
+        {
+            return;
+        }
+
+        if (table.getColumn("animal_history_link") == null)
+        {
+            String animal_history_link = "animal_history_link";
+            String theQuery  = "( " +
+                    "(SELECT " +
+                    " CASE WHEN a.animalidstooffer is not null " +
+                        "THEN 'Report Link' " +
+                        "ELSE '' " +
+                     " END AS animal_history_link " +
+                    " FROM wnprc.animal_requests a " +
+                    "WHERE a.rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid  LIMIT 1)  " +
+                    ")";
+            //String theQuery = "(Select 'testValue' as animal_history_link from wnprc.animal_requests LIMIT 1)";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, animal_history_link, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Animal History Link");
+            newCol.setDescription("Provides a link to the animal history records given the animal ids that were selected.");
+            newCol.setURL(StringExpressionFactory.create("ehr-animalHistory.view?#subjects:${animalidstooffer}&inputType:multiSubject&showReport:0&activeReport:abstract"));
+            table.addColumn(newCol);
+        }
+    }
+
 
     private ColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
     {

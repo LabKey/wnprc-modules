@@ -59,6 +59,13 @@
                     </column>
                     <column columnName="orderDate"/>
                     <column columnName="cardPostDate"/>
+                    <column columnName="assignedTo">
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>Users</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

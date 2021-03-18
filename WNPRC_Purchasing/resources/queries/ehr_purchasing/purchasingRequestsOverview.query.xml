@@ -13,7 +13,7 @@
                     </column>
                     <column columnName="vendorId">
                         <fk>
-                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkDbSchema>ehr_purchasingLinked</fkDbSchema>
                             <fkTable>vendor</fkTable>
                         </fk>
                     </column>
@@ -28,7 +28,7 @@
                     </column>
                     <column columnName="requestStatus">
                         <fk>
-                            <fkDbSchema>core</fkDbSchema>
+                            <fkDbSchema>coreLinked</fkDbSchema>
                             <fkTable>QCState</fkTable>
                         </fk>
                     </column>

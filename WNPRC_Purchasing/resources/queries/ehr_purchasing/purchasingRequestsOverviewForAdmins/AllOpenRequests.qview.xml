@@ -8,8 +8,9 @@
         <column name="requestStatus"/>
         <column name="otherAccountAndInves"/>
         <column name="requester"/>
+        <column name="assignedTo"/>
     </columns>
     <filters>
-        <filter column="requestStatus/Label" operator="eq" value="Review Pending" />
+        <filter column="requestStatus/Label" operator="in" value="Review Pending; Request Approved" />
     </filters>
 </customView>

@@ -24,4 +24,3 @@ LEFT JOIN
         GROUP BY requestRowId
     ) items
 ON pr.rowId = items.requestRowId
-WHERE ISMEMBEROF(pr.createdBy)

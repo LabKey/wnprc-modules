@@ -6,14 +6,14 @@ SELECT
        pr.qcState   AS requestStatus,
        pr.created   AS requestDate,
        pr.createdBy AS requester,
-       items.totalCost
-FROM ehr_purchasingLinked.purchasingRequests pr
+       items.totalCost,
+       pr.assignedTo
+FROM ehr_purchasing.purchasingRequests pr
 LEFT JOIN
     (
         SELECT requestRowId,
                round(sum(quantity * unitCost), 2) AS totalCost
-        FROM ehr_purchasingLinked.lineItems
+        FROM ehr_purchasing.lineItems
         GROUP BY requestRowId
     ) items
 ON pr.rowId = items.requestRowId
-WHERE ISMEMBEROF(pr.createdBy)

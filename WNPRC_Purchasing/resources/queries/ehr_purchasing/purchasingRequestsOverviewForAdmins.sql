@@ -1,5 +1,5 @@
 SELECT
-       pr.rowId,
+       pr.rowId AS requestNum,
        pr.vendorId,
        pr.account,
        pr.otherAcctAndInves,

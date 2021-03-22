@@ -1,6 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
-        <column name="rowId"/>
+        <column name="requestNum"/>
         <column name="requestDate"/>
         <column name="vendorId"/>
         <column name="account"/>

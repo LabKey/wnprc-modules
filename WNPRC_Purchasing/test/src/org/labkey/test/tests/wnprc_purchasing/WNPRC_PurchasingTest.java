@@ -26,6 +26,7 @@ import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
+import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.Pages.CreateRequestPage;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
@@ -62,6 +63,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     //folders
     private static final String FOLDER_TYPE = "WNPRC Purchasing";
     private static final String BILLING_FOLDER = "WNPRC Billing";
+    private static final String FOLDER_FOR_REQUESTERS = "WNPRC Purchasing Requester";
 
     //users
     private static final String REQUESTER_USER = "purchaserequester@test.com";
@@ -97,11 +99,22 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     {
         _containerHelper.deleteProject(getProjectName(), afterTest);
         _containerHelper.deleteProject(BILLING_FOLDER, afterTest);
+        _containerHelper.deleteProject(FOLDER_FOR_REQUESTERS, afterTest);
     }
 
     private void doSetup() throws IOException, CommandException
     {
-        log("Creating 'WNPRC Billing' folder");
+        goToHome();
+
+        log("Create a purchasing admin user");
+        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
+
+        log("Create a purchasing requester user");
+        _requesterUserId = _userHelper.createUser(REQUESTER_USER).getUserId().intValue();
+
+        goToHome();
+
+        log("Create 'WNPRC Billing' folder");
         _containerHelper.createProject(BILLING_FOLDER, FOLDER_TYPE);
         _containerHelper.enableModules(Arrays.asList("EHR_Billing"));
 
@@ -111,41 +124,63 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         goToHome();
 
-        log("Creating a 'WNPRC Purchasing' folder");
+        log("Create a 'WNPRC Purchasing' folder for Admins");
         _containerHelper.createProject(getProjectName(), FOLDER_TYPE);
 
-        goToProjectHome();
-
-        log("Creating a purchasing admin user");
-        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
-
-        log("Creating a purchasing requester user");
-        _requesterUserId = _userHelper.createUser(REQUESTER_USER).getUserId().intValue();
-
-        goToProjectHome();
-
-        log("Adding WNPRC Purchasing webpart");
+        log("Add WNPRC Purchasing Admin webpart");
         new SiteNavBar(getDriver()).enterPageAdminMode();
-        (new PortalHelper(this)).addWebPart("WNPRC Purchasing");
+        (new PortalHelper(this)).addWebPart("WNPRC Purchasing Admin");
         new SiteNavBar(getDriver()).exitPageAdminMode();
 
-        log("Uploading purchasing data");
+        goToProjectHome();
+
+        log("Upload purchasing data");
         uploadPurchasingData();
 
-        log("Creating user-account associations");
+        log("Create user-account associations");
         createUserAccountAssociations();
 
         log("Create ehrBillingLinked schema");
-        _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, null, "ehr_billing", "aliases", null);
+        _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, "ehr_billingLinked", null, null, null);
 
-        addUsersToPurchasingFolder();
+        addUsersToPurchasingAdminFolder();
+
+        goToHome();
+
+        log("Create a 'WNPRC Purchasing' folder for Requesters");
+        _containerHelper.createProject(FOLDER_FOR_REQUESTERS, FOLDER_TYPE);
+
+        log("Create ehrBillingLinked schema");
+        _schemaHelper.createLinkedSchema(FOLDER_FOR_REQUESTERS, "ehr_purchasingLinked", getProjectName(), "ehr_purchasingLinked", null, null, null);
+        _schemaHelper.createLinkedSchema(FOLDER_FOR_REQUESTERS, "coreLinked", getProjectName(), "coreLinked", null, null, null);
+
+        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Purchasing", "/"+ FOLDER_FOR_REQUESTERS, "EHRPurchasingContainer", "/" + getProjectName())));
+        log("Add WNPRC Purchasing Requester webpart");
+        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        new SiteNavBar(getDriver()).enterPageAdminMode();
+        (new PortalHelper(this)).addWebPart("WNPRC Purchasing Requester");
+        new SiteNavBar(getDriver()).exitPageAdminMode();
+
+        addUsersToPurchasingRequesterFolder();
     }
 
-    private void addUsersToPurchasingFolder()
+    private void addUsersToPurchasingAdminFolder()
     {
+        goToProjectHome();
         _permissionsHelper.setUserPermissions(ADMIN_USER, "Project Administrator");
-        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
+        _permissionsHelper.setUserPermissions(getCurrentUser(), "Project Administrator");
         _permissionsHelper.setUserPermissions(REQUESTER_USER, "Submitter");
+        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
+    }
+
+    private void addUsersToPurchasingRequesterFolder()
+    {
+        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        _permissionsHelper.setUserPermissions(ADMIN_USER, "Project Administrator");
+        _permissionsHelper.setUserPermissions(getCurrentUser(), "Project Administrator");
+
+        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
     }
 
     private void createUserAccountAssociations() throws IOException, CommandException
@@ -207,7 +242,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     @Test
     public void testCreateRequest()
     {
-        goToProjectHome();
+        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        impersonate(REQUESTER_USER);
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
@@ -234,12 +270,14 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid number of requests ", ++requestCnt, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
+        stopImpersonating();
     }
 
     @Test
     public void testOtherVendorRequest()
     {
-        goToProjectHome();
+        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        impersonate(REQUESTER_USER);
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
         requestPage.setVendor("Other");
@@ -279,6 +317,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendorId"));
+        stopImpersonating();
     }
 
     @Test
@@ -292,7 +331,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         impersonate(REQUESTER_USER);
 
         log("Create new Request - START");
-        goToProjectHome();
+        goToProjectHome(FOLDER_FOR_REQUESTERS);
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
@@ -323,14 +362,13 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("-----Update request as Purchasing Admin-----");
         goToProjectHome();
-        goToSchemaBrowser();
-        DataRegionTable requestsTable = viewQueryData("ehr_purchasing", "purchasingRequests");
-
         log("Impersonate as " + ADMIN_USER);
         impersonate(ADMIN_USER);
-        requestsTable.setFilter("rowId", "Equals", requestID);
+        clickAndWait(Locator.linkContainingText("All Open Requests"));
+        DataRegionTable requestsQueryForAdmins = new DataRegionTable("query", getDriver());
+        requestsQueryForAdmins.setFilter("requestNum", "Equals", requestID);
 
-        checker().verifyEquals("Admin is not seeing the request " + requestID, 1, requestsTable.getDataRowCount());
+        checker().verifyEquals("Admin is not seeing the request " + requestID, 1, requestsQueryForAdmins.getDataRowCount());
         clickAndWait(Locator.linkWithText(requestID));
 
         requestPage = new CreateRequestPage(getDriver());
@@ -352,7 +390,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         requestPage.addAttachment(pdfFile);
 
         log("Verify Status in 'Purchase Admin' panel is 'Review Pending'");
-        checker().verifyEquals("Invalid Assigned to value ", requesterName, requestPage.getAssignedTo());
+        checker().verifyEquals("Invalid Assigned to value ", "Select", requestPage.getAssignedTo());
         checker().verifyEquals("Invalid Program value", "4", requestPage.getProgram());
         checker().verifyEquals("Invalid status ", "Review Pending", requestPage.getStatus());
 
@@ -362,13 +400,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         stopImpersonating(false);
 
+        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry",  Maps.of("requestRowId", requestID)));
         log("Impersonate as " + REQUESTER_USER);
         impersonate(REQUESTER_USER);
-        clickAndWait(Locator.linkWithText(requestID));
-        checker().verifyFalse("Requester should not be able to edit the request ",
-                isElementPresent(Locator.tagWithAttribute("div", "class", "panel-title").withText("Request Order")));
-
-        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry",  Maps.of("requestRowId", requestID)));
         assertTextPresent("You do not have sufficient permissions to update this request.");
         stopImpersonating();
     }

@@ -67,12 +67,12 @@ public class DatasetImportHelperIntegrationTest extends Assert
 
         // ACT: load the dataset metadata from the reference study in the resources
         File file = new File(Paths.get(ModuleLoader.getInstance().getModule("WNPRC_EHR")
-                .getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
+                .getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(), "study.xml");
         DatasetImportHelper.importDatasetMetadata(_user, _container, file);
 
         // ASSERT: make sure that the datasets we are expecting got created
         List<? extends Dataset> datasets = study.getDatasets();
-        Assert.assertArrayEquals(new String[]{"breeding_encounters", "pregnancies", "pregnancy_outcomes", "ultrasounds"},
+        Assert.assertArrayEquals(new String[]{"breeding_encounters", "pregnancies", "pregnancy_outcomes", "tissue_samples", "ultrasounds"},
                 datasets.stream().map(Dataset::getName).sorted().toArray());
     }
 }

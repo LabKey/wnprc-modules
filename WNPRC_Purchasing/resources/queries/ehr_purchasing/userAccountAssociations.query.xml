@@ -1,0 +1,26 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="userAccountAssociations" tableDbType="TABLE" useColumnOrder="true">
+                <tableTitle>User Account Associations</tableTitle>
+                <columns>
+                    <column columnName="userId">
+                        <columnTitle>User</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>Users</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="account">
+                        <fk>
+                            <fkDbSchema>ehr_billingLinked</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                            <fkColumnName>alias</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

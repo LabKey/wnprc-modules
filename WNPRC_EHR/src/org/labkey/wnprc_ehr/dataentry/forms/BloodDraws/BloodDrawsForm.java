@@ -24,7 +24,7 @@ public class BloodDrawsForm extends TaskForm {
                 new DrugAdministrationFormSection()
         ));
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/BloodDraws.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/BloodDraws.js"));
 
         for(FormSection section: this.getFormSections()) {
             section.addConfigSource("BloodDraws");

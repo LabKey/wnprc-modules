@@ -43,10 +43,10 @@ public class NecropsyForm extends SimpleTaskForm {
         }
 
         setStoreCollectionClass("WNPRC.ext.data.NecropsyStoreCollection");
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Necropsy.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Pathology.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyServerStore.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyStoreCollection.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Necropsy.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Pathology.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyServerStore.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/NecropsyStoreCollection.js"));
     }
 
     @Override

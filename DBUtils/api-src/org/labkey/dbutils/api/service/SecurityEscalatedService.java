@@ -1,6 +1,7 @@
 package org.labkey.dbutils.api.service;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
@@ -37,7 +38,7 @@ import java.util.Set;
  * Created by jon on 10/25/16.
  */
 public abstract class SecurityEscalatedService {
-    private static Logger _log = Logger.getLogger(SecurityEscalatedService.class);
+    private static Logger _log = LogManager.getLogger(SecurityEscalatedService.class);
 
     protected User user;
     protected Container container;

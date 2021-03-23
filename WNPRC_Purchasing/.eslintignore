@@ -1,0 +1,13 @@
+# exclude everything by default
+*.*
+
+# exclude these directories
+resources/web/gen
+src/java
+test/
+
+# white-list files
+!*.js
+!*.jsx
+!*.ts
+!*.tsx

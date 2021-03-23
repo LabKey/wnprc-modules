@@ -1,0 +1,79 @@
+import React, { FC, memo, useCallback } from 'react';
+import { Panel } from 'react-bootstrap';
+import { FileAttachmentForm } from '@labkey/components';
+
+import { Map } from 'immutable';
+import produce, { Draft } from 'immer';
+
+import { DocumentAttachmentModel } from '../model';
+
+interface Props {
+    model: DocumentAttachmentModel;
+    onInputChange: (model: DocumentAttachmentModel) => void;
+}
+
+export const DocumentAttachmentPanel: FC<Props> = memo(props => {
+    const { model, onInputChange } = props;
+
+    const onFileChange = useCallback(
+        (files: Map<string, File>) => {
+            const updatedModel = produce(model, (draft: Draft<DocumentAttachmentModel>) => {
+                draft['filesToUpload'] = files;
+            });
+            onInputChange(updatedModel);
+        },
+        [model, onInputChange]
+    );
+
+    const showImg = useCallback(
+        (evt: any) => {
+            const attachment = model.savedFiles?.filter(file => file.fileName === evt.target.innerText);
+            if (attachment) {
+                window.open(attachment[0].href, 'popwin');
+            }
+        },
+        [model, onInputChange]
+    );
+
+    return (
+        <>
+            <Panel
+                className="panel panel-default"
+                expanded={true}
+                onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
+            >
+                <div className="bg-primary">
+                    <Panel.Heading>
+                        <div className="panel-title">Attachments</div>
+                    </Panel.Heading>
+                </div>
+                <Panel.Body>
+                    <FileAttachmentForm
+                        allowDirectories={false}
+                        allowMultiple={true}
+                        showLabel={false}
+                        acceptedFormats=".pdf, .PDF, .jpg, .JPG"
+                        onFileChange={onFileChange}
+                    />
+                    {model.savedFiles?.length > 0 && (
+                        <>
+                            <br />
+                            <div className="saved-attachment-label">
+                                <strong>Saved Attachments:</strong>
+                            </div>
+                            {model.savedFiles?.map(savedFile => {
+                                return (
+                                    <div>
+                                        <a href="#" onClick={showImg}>
+                                            {savedFile.fileName}
+                                        </a>
+                                    </div>
+                                );
+                            })}
+                        </>
+                    )}
+                </Panel.Body>
+            </Panel>
+        </>
+    );
+});

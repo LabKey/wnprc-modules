@@ -1,6 +1,7 @@
 package org.labkey.dbutils.file;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -12,7 +13,7 @@ import java.util.*;
  * Created by jon on 5/25/17.
  */
 public class FileToucher extends Thread {
-    private static Logger _log = Logger.getLogger(FileToucher.class);
+    private static Logger _log = LogManager.getLogger(FileToucher.class);
     private static final String SOURCE_DIR = "/LabKey/sources/";
 
     @Override

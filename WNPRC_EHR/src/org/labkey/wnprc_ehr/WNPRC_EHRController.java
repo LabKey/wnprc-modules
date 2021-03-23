@@ -20,12 +20,12 @@ import au.com.bytecode.opencsv.CSVWriter;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
@@ -33,7 +33,8 @@ import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.ReadOnlyApiAction;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -65,6 +66,7 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
@@ -100,6 +102,7 @@ import org.labkey.wnprc_ehr.email.MessageIdentifier;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -483,7 +486,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public static class ReleaseAnimalFromBehaviorAssignmentAction extends ApiAction<ReleaseAnimalFromBehaviorAssignmentForm>
+    public static class ReleaseAnimalFromBehaviorAssignmentAction extends MutatingApiAction<ReleaseAnimalFromBehaviorAssignmentForm>
     {
 
         @Override
@@ -521,7 +524,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public static class ValidateAnimalIdAction extends ApiAction<ValidateAnimalIdForm>
+    public static class ValidateAnimalIdAction extends ReadOnlyApiAction<ValidateAnimalIdForm>
     {
         @Override
         public Object execute(ValidateAnimalIdForm form, BindException errors)
@@ -592,7 +595,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresLogin
     @ActionNames("checkIfAnimalIsAssigned")
-    public static class CheckIfAnimalIsAssigned extends ApiAction<CheckAnimalAssignment>
+    public static class CheckIfAnimalIsAssigned extends ReadOnlyApiAction<CheckAnimalAssignment>
     {
         @Override
         public Object execute(CheckAnimalAssignment form, BindException errors)
@@ -642,9 +645,10 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @ActionNames("getChanges")
     @CSRF(CSRF.Method.POST)
-    public class GetChangeLists extends ApiAction<Void>
+    public class GetChangeLists extends ReadOnlyApiAction<Object>
     {
-        public ApiResponse execute(Void form, BindException errors) throws Exception
+        @Override
+        public ApiResponse execute(Object form, BindException errors) throws Exception
         {
             Map<String, Object> props = new HashMap<>();
 
@@ -686,9 +690,10 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     @RequiresLogin
     @ActionNames("getColonyPopulationPerMonth")
-    public class GetPopulationPerMonth extends ApiAction<Void>
+    public class GetPopulationPerMonth extends ReadOnlyApiAction<Object>
     {
-        public ApiResponse execute(Void form, BindException errors)
+        @Override
+        public ApiResponse execute(Object form, BindException errors)
         {
             ColonyCensus colonyCensus = new ColonyCensus(getContainer(), getUser());
             Map<String, Map<LocalDate, PopulationInstant>> populations = colonyCensus.getPopulationsPerMonthForAllSpecies();
@@ -704,6 +709,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("getPopulationChangeEventsOverPeriod")
     public class GetPopulationEventsOverPeriod extends MutatingApiAction<PopulationEventsOverPeriodForm>
     {
+        @Override
         public ApiResponse execute(PopulationEventsOverPeriodForm form, BindException errors)
         {
             DateTime start = new DateTime(form.getStartdate());
@@ -723,6 +729,7 @@ public class WNPRC_EHRController extends SpringActionController
     @CSRF(CSRF.Method.POST)
     public class GetAnimalDemographicsForRoomAction extends MutatingApiAction<GetAnimalDemographicsForRoomForm>
     {
+        @Override
         public ApiResponse execute(GetAnimalDemographicsForRoomForm form, BindException errors)
         {
             Map<String, Object> props = new HashMap<>();
@@ -790,7 +797,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresLogin()
     @ActionNames("billablePerDiems")
-    public class BillablePerDiemsAction extends ApiAction<BillablePerDiemsForm>
+    public class BillablePerDiemsAction extends ReadOnlyApiAction<BillablePerDiemsForm>
     {
         @Override
         public Object execute(BillablePerDiemsForm form, BindException errors)
@@ -897,7 +904,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresNoPermission()
-    public class ExampleEmailAction extends ApiAction<EmailForm>
+    public class ExampleEmailAction extends MutatingApiAction<EmailForm>
     {
         @Override
         public ApiResponse execute(EmailForm form, BindException errors) throws Exception
@@ -921,7 +928,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("listEmails")
     @RequiresNoPermission()
-    public class ListEmailsAction extends ApiAction<EmailServerForm>
+    public class ListEmailsAction extends ReadOnlyApiAction<EmailServerForm>
     {
         @Override
         public ApiResponse execute(EmailServerForm form, BindException errors) throws Exception
@@ -932,7 +939,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("getVirologyResultsFromEmail")
     @RequiresNoPermission()
-    public class GetVirologyResultsFromEmailAction extends ApiAction<VirologyResultsForm>
+    public class GetVirologyResultsFromEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -948,7 +955,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("deleteEmail")
     @RequiresNoPermission()
-    public class deleteEmailAction extends ApiAction<VirologyResultsForm>
+    public class deleteEmailAction extends MutatingApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -963,7 +970,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("previewEmailExcelAttachment")
     @RequiresNoPermission()
-    public class previewEmailAction extends ApiAction<VirologyResultsForm>
+    public class previewEmailAction extends ReadOnlyApiAction<VirologyResultsForm>
     {
         @Override
         public ApiResponse execute(VirologyResultsForm form, BindException errors) throws Exception
@@ -1012,7 +1019,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("FetchOnCallScheduleGoogleEvents")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
-    public class FetchOnCallScheduleGoogleEventsAction extends ApiAction<DateRangeEvent>
+    public class FetchOnCallScheduleGoogleEventsAction extends ReadOnlyApiAction<DateRangeEvent>
     {
         @Override
         public Object execute(DateRangeEvent event, BindException errors)
@@ -1358,7 +1365,7 @@ public class WNPRC_EHRController extends SpringActionController
     }
 
     @RequiresLogin
-    public class AddBehaviorAssignmentAction extends ApiAction<AddBehaviorAssignmentForm>
+    public class AddBehaviorAssignmentAction extends MutatingApiAction<AddBehaviorAssignmentForm>
     {
 
         @Override
@@ -1378,10 +1385,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UploadBCReports")
-    public class uploadBCReportAction extends ApiAction<Void>
+    public class uploadBCReportAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors) throws NotFoundException
+        public Object execute(Object form, BindException errors) throws NotFoundException
         {
             BCReportManager manager = new BCReportManager(getUser(), getContainer());
             manager.uploadReports();
@@ -1392,7 +1399,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("MakeUserWriterForBCReports")
-    public class ShareBCReportsWithUserAction extends ApiAction<UserForm>
+    public class ShareBCReportsWithUserAction extends MutatingApiAction<UserForm>
     {
         @Override
         public Object execute(UserForm form, BindException errors) throws Exception
@@ -1411,10 +1418,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("ScheduleBCReports")
-    public class ScheduleBCReportsAction extends ApiAction<Void>
+    public class ScheduleBCReportsAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors)
+        public Object execute(Object form, BindException errors)
         {
             BCReportRunner.schedule();
             return new JSONObject();
@@ -1423,10 +1430,10 @@ public class WNPRC_EHRController extends SpringActionController
 
     @RequiresSiteAdmin
     @ActionNames("UnscheduleBCReports")
-    public class UnscheduleBCReportsAction extends ApiAction<Void>
+    public class UnscheduleBCReportsAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Void form, BindException errors)
+        public Object execute(Object form, BindException errors)
         {
             BCReportRunner.unschedule();
             return new JSONObject();
@@ -1440,7 +1447,7 @@ public class WNPRC_EHRController extends SpringActionController
     @SuppressWarnings("unused")
     @RequiresLogin
     @ActionNames("manageWnprcTask")
-    public class ManageWnprcTaskAction extends RedirectAction<java.lang.Void>
+    public class ManageWnprcTaskAction extends SimpleRedirectAction<Object>
     {
         // these constants are here to hopefully prevent us from mistyping the capitalization
         // later in the method. also, they should be different enough to avoid one-off typos
@@ -1449,7 +1456,7 @@ public class WNPRC_EHRController extends SpringActionController
         private static final String LOWERCASE_FORMTYPE = "formtype";
 
         @Override
-        public URLHelper getSuccessURL(java.lang.Void aVoid)
+        public @Nullable URLHelper getRedirectURL(Object aVoid)
         {
             ActionURL oldUrl = getViewContext().getActionURL();
             ActionURL newUrl;
@@ -1498,31 +1505,58 @@ public class WNPRC_EHRController extends SpringActionController
             return newUrl;
         }
 
-        @Override
-        public boolean doAction(java.lang.Void aVoid, BindException errors)
-        {
-            return true;
-        }
     }
 
     public String getVLStatus(User user, Container container, Integer status) throws SQLException
     {
+      SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
+      QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
 
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Key"), status);
-        QueryHelper viralLoadQuery = new QueryHelper(container, user, "lists", "status");
+      // Define columns to get
+      List<FieldKey> columns = new ArrayList<>();
+      columns.add(FieldKey.fromString("Key"));
+      columns.add(FieldKey.fromString("Status"));
+      // Execute the query
+      String thestatus = null;
+      try ( Results rs = viralLoadQuery.select(columns, filter) )
+      {
+          if (rs.next()){
+              thestatus = rs.getString(FieldKey.fromString("Status"));
+          }
+      }
+      return thestatus;
+    }
 
-        // Define columns to get
-        List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("Key"));
-        columns.add(FieldKey.fromString("Status"));
-
-        // Execute the query
-        String thestatus = null;
-        try ( Results rs = viralLoadQuery.select(columns, filter) )
+    /**
+     * Action definition to import historical/test data for the breeding datasets. Called from the web application,
+     * not from Java.
+     */
+    @SuppressWarnings("unused")
+    @RequiresPermission(AdminPermission.class)
+    public static class ImportDatasetDataAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object aVoid, BindException errors)
         {
-            if (rs.next()){
-                thestatus = rs.getString(FieldKey.fromString("Status"));
-            }
+            // TODO: create, parse, and load some test data
+            return new ApiSimpleResponse("success", true);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresPermission(AdminPermission.class)
+    public static class ImportDatasetMetadataAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object aVoid, BindException errors) throws Exception
+        {
+            Module module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
+            assert module != null;
+
+            File file = new File(Paths.get(module.getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(),
+                    "study.xml");
+            DatasetImportHelper.importDatasetMetadata(getUser(), getContainer(), file);
+            return new ApiSimpleResponse("success", true);
         }
         return thestatus;
     }

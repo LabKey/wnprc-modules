@@ -1,37 +1,32 @@
 <%
-    /*
-     * Copyright (c) 2013-2014 LabKey Corporation
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *     http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     */
+/*
+ * Copyright (c) 2013-2014 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 %>
 <%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.UnauthorizedException" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
-<%@ page import="java.util.Hashtable" %>
+<%@ page import="org.labkey.api.data.ConvertHelper" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.LinkedList" %>
-<%@ page import="org.labkey.api.data.ConvertHelper" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     Container c = getContainer();
 
     HashMap<String,HashMap> form = (HashMap<String,HashMap>)getModelBean();
 
-    boolean isAdmin = getUser().isSiteAdmin();
+    boolean isAdmin = getUser().hasSiteAdminPermission();
 %>
 
 <style>
@@ -52,7 +47,7 @@
 
         if ( area != null) {
 %>
-<h4><%= areaName %></h4>
+<h4><%=h(areaName)%></h4>
 <table>
     <thead>
     <tr>
@@ -76,15 +71,15 @@
         <%
             if (animals.getFirst() == treatmentInfo) {
         %>
-        <td rowspan="<%= animals.size() %>"><%= roomName %></td>
+        <td rowspan="<%= animals.size() %>"><%=h(roomName)%></td>
         <%
             }
         %>
-        <td><%= treatmentInfo.get("id") %></td>
-        <td><%= treatmentInfo.get("date") %></td>
-        <td><%= treatmentInfo.get("meaning") %></td>
-        <td><%= treatmentInfo.get("performedby") %></td>
-        <td><%= treatmentInfo.get("drug_performedby") %></td>
+        <td><%=h(treatmentInfo.get("id"))%></td>
+        <td><%=h(treatmentInfo.get("date"))%></td>
+        <td><%=h(treatmentInfo.get("meaning"))%></td>
+        <td><%=h(treatmentInfo.get("performedby"))%></td>
+        <td><%=h(treatmentInfo.get("drug_performedby"))%></td>
         <td>
 
         <%
@@ -108,32 +103,32 @@
             String drug_vol_units     = ConvertHelper.convert(treatmentInfo.get("drug_vol_units"),     String.class);
 
             if (route!=null &&!route.equals(drug_route)){
-                %>Route Ordered: <%= route %><br>
-                Route Entered: <%= drug_route %><br>
+                %>Route Ordered: <%=h(route)%><br>
+                Route Entered: <%=h(drug_route)%><br>
             <%
                 }
                 if (concentration!=null && (!concentration.equals(drug_concentration) || !conc_units.equals(drug_conc_units))){
             %>
-                Concentration Ordered: <%=concentration%> <%=conc_units%> <br>
-                Concentration Entered: <b><%=drug_concentration%> <%=drug_conc_units %> </b><br>
+                Concentration Ordered: <%=h(concentration)%> <%=h(conc_units)%> <br>
+                Concentration Entered: <b><%=h(drug_concentration)%> <%=h(drug_conc_units)%> </b><br>
             <%
                 }
                 if ((dosage!=null) && (dosage_units!=null) && (!dosage.equals(drug_dosage) || !dosage_units.equals(drug_dosage_units))){
             %>
-                Dosage Ordered: <%=dosage%> <%=dosage_units%> <br>
-                Dosage Entered: <b><%=drug_route%> <%=drug_dosage_units%> </b><br>
+                Dosage Ordered: <%=h(dosage)%> <%=h(dosage_units)%> <br>
+                Dosage Entered: <b><%=h(drug_route)%> <%=h(drug_dosage_units)%> </b><br>
             <%
                 }
                 if ((amount!=null) && (amount_units!=null) && (!amount.equals(drug_amount) || !amount_units.equals(drug_amount_units))){
             %>
-                Amount Ordered: <%=amount%> <%=amount_units%> <br>
-                Amount Entered: <b><%=drug_amount%> <%=drug_amount_units%></b><br>
+                Amount Ordered: <%=h(amount)%> <%=h(amount_units)%> <br>
+                Amount Entered: <b><%=h(drug_amount)%> <%=h(drug_amount_units)%></b><br>
             <%
                 }
                 if (volume!=null && !volume.equals(drug_volume) || !vol_units.equals(drug_vol_units)){
             %>
-                Volume Ordered: <%=volume%> <%=vol_units%><br>
-                Volume Entered: <b><%=drug_volume%> <%=drug_vol_units%></b><br>
+                Volume Ordered: <%=h(volume)%> <%=h(vol_units)%><br>
+                Volume Entered: <b><%=h(drug_volume)%> <%=h(drug_vol_units)%></b><br>
             <% } %>
 
 

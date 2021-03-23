@@ -3,6 +3,7 @@
         <permission name="login"/>
     </permissions>
     <dependencies>
-        <dependency path="animalrequests/app/app.js"/>
+        <dependency path="animalrequests/gen/app/app.js"/>
+        <dependency path="animalrequests/gen/app/app.css"/>
     </dependencies>
 </view>

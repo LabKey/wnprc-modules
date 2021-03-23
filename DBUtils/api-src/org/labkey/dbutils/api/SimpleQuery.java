@@ -240,10 +240,12 @@ public class SimpleQuery<RowType> extends QueryHelper {
         }
     }
 
+    @Override
     public Results select() {
         return super.select(this.getDefaultColumns(), null);
     }
 
+    @Override
     public Results select(SimpleFilter filter) {
         return super.select(this.getDefaultColumns(), filter);
     }
@@ -318,6 +320,7 @@ public class SimpleQuery<RowType> extends QueryHelper {
     }
 
     // Copied from parent class
+    @Override
     protected CustomView getCustomView() {
         return QueryService.get().getCustomView(_user, _container, _user, getSchemaName(), getQueryName(), getViewName());
     }

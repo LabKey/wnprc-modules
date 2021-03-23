@@ -26,18 +26,17 @@ BuildUtils.includeModules(this.settings, rootDir, [BuildUtils.SERVER_MODULES_DIR
 
 // include the modules required for base EHR
 BuildUtils.includeModules(this.settings, [
-         ":externalModules:labModules:GenotypeAssays"
-        ,":externalModules:labModules:laboratory"
-        ,":externalModules:labModules:LDK"
-        ,":externalModules:labModules:SequenceAnalysis"
-        ,":externalModules:labModules:Viral_Load_Assay"
-        ,":externalModules:DISCVR:OpenLdapSync"
-        ,":server:customModules:ehr"
-        ,":server:customModules:EHR_ComplianceDB"
-        ,":server:customModules:fcsexpress"
-        ,":server:customModules:genotyping"
-        ,":server:customModules:specimencheck"
-        ,":server:customModules:targetedms"
+         ":server:modules:LabDevKitModules:GenotypeAssays"
+        ,":server:modules:LabDevKitModules:laboratory"
+        ,":server:modules:LabDevKitModules:LDK"
+        ,":server:modules:DiscvrLabKeyModules:SequenceAnalysis"
+        ,":server:modules:ehrModules:Viral_Load_Assay"
+        ,":server:modules:DiscvrLabKeyModules:OpenLdapSync"
+        ,":server:modules:ehrModules:ehr"
+        ,":server:modules:ehrModules:EHR_ComplianceDB"
+        ,":server:modules:fcsexpress"
+        ,":server:modules:OConnorLabModules:genotyping"
+        ,":server:modules:targetedms"
 ])
 
 // include the WNPRC modules from the git clone

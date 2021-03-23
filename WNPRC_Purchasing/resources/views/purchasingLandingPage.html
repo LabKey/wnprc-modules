@@ -1,0 +1,19 @@
+<div id="<%=h('wnprc_purchasing-report')%>"></div>
+<script type="text/javascript">
+    var webpart = <%=webpartContext%>;
+    var qwp = new LABKEY.QueryWebPart({
+        renderTo: webpart.wrapperDivId,
+        schemaName: 'ehr_purchasing',
+        queryName: 'purchasingRequestsOverview',
+        buttonBar: {
+            items:[
+                LABKEY.QueryWebPart.standardButtons.views,
+                LABKEY.QueryWebPart.standardButtons.charts,
+                LABKEY.QueryWebPart.standardButtons.exportRows,
+                LABKEY.QueryWebPart.standardButtons.print,
+                LABKEY.QueryWebPart.standardButtons.pageSize,
+                {text: 'Create Request', url: LABKEY.ActionURL.buildURL('WNPRC_Purchasing', 'purchasingRequest', null, {isNewRequest: true})}
+            ]}
+    });
+    qwp.render();
+</script>

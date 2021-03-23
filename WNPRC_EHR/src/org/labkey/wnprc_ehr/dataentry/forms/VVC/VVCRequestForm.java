@@ -10,6 +10,7 @@ import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.FormSections.VVCInfoSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleRequestForm;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public class VVCRequestForm extends SimpleRequestForm
 {
@@ -20,14 +21,14 @@ public class VVCRequestForm extends SimpleRequestForm
                 new RequestFormSection(),
                 new VVCInfoSection()
         ));
-        for(ClientDependency dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
+        for(Supplier<ClientDependency> dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
             this.addClientDependency(dependency);
         }
 
         for (FormSection s: getFormSections()){
             s.addConfigSource("Default");
         }
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Default.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Default.js"));
 
 
 

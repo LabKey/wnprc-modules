@@ -21,6 +21,6 @@ public class HousingRequestForm extends TaskForm {
                 new HousingSection()
         ));
 
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Request.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Request.js"));
     }
 }

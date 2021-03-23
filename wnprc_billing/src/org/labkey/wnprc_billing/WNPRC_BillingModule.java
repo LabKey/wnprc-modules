@@ -17,6 +17,7 @@
 package org.labkey.wnprc_billing;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
@@ -60,9 +61,9 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
-        return 18.32;
+        return 21.000;
     }
 
     @Override
@@ -104,6 +105,7 @@ public class WNPRC_BillingModule extends ExtendedSimpleModule
     {
         DefaultSchema.registerProvider(WNPRC_BillingSchema.NAME, new DefaultSchema.SchemaProvider(this)
         {
+            @Override
             public QuerySchema createSchema(final DefaultSchema schema, Module module)
             {
                 return new WNPRC_BillingUserSchema(WNPRC_BillingSchema.NAME, null, schema.getUser(), schema.getContainer(), WNPRC_BillingSchema.getInstance().getSchema());

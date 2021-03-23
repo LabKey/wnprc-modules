@@ -30,7 +30,7 @@ public class JspPage extends JspView<JspPageModel> {
                 "/webutils/models/models"
         );
         for(String path : dependencyPaths) {
-            this.addClientDependency(ClientDependency.fromPath(path));
+            this.addClientDependency(ClientDependency.supplierFromPath(path));
         }
 
         // Add some Knockout templates.

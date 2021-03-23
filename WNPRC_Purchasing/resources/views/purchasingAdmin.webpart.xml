@@ -1,4 +1,4 @@
-<webpart xmlns="http://labkey.org/data/xml/webpart" title="WNPRC Purchasing Admin Page">
+<webpart xmlns="http://labkey.org/data/xml/webpart" title="WNPRC Purchasing Admin">
     <view name="purchasingAdmin"/>
     <locations>
         <location name="body"/>

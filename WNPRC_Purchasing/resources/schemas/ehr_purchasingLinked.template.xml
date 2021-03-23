@@ -1,0 +1,12 @@
+<!--Linked Schema named ehr_purchasingLinked with this template to be created in Purchasing Requester Folder-->
+
+<templateSchema xmlns="http://labkey.org/data/xml/externalSchema"
+                xmlns:dat="http://labkey.org/data/xml"
+                xmlns:cv="http://labkey.org/data/xml/queryCustomView"
+                sourceSchemaName="ehr_purchasing">
+    <tables>
+        <tableName>purchasingRequests</tableName>
+        <tableName>lineItems</tableName>
+        <tableName>vendor</tableName>
+    </tables>
+</templateSchema>

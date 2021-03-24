@@ -19,15 +19,15 @@ public class WNPRC_PurchasingFolderType extends DefaultFolderType
     {
         super(NAME,
              "Folder type used for WNPRC Purchasing Requests",
+             Arrays.asList(createWebPart("WNPRC Purchasing Landing Page")),
              Collections.emptyList(),
-             Arrays.asList(createWebPart("WNPRC Purchasing")),
              getDefaultModuleSet(getModule("EHR_Purchasing"), module),
              module);
     }
 
     private static @Nullable Portal.WebPart createWebPart(String name)
     {
-        WebPartFactory factory = Portal.getPortalPart(name);
+        WebPartFactory factory = Portal.getPortalPartCaseInsensitive(name);
         return null != factory ? factory.createWebPart(WebPartFactory.LOCATION_BODY) : null;
     }
 
@@ -41,7 +41,7 @@ public class WNPRC_PurchasingFolderType extends DefaultFolderType
 
         //Add extensibleColumns
        WNPRC_PurchasingManager.get().addExtensibleColumns(c, user);
-        WNPRC_PurchasingManager.get().addPaymentOptions(c, user);
+       WNPRC_PurchasingManager.get().addPaymentOptions(c, user);
     }
 
 }

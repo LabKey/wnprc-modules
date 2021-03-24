@@ -27,9 +27,12 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.WebPartFactory;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -44,6 +47,32 @@ public class WNPRC_PurchasingController extends SpringActionController
     public WNPRC_PurchasingController()
     {
         setActionResolver(_actionResolver);
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class RequesterAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors)
+        {
+            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Requester");
+            Portal.WebPart part = factory.createWebPart();
+            return Portal.getWebPartViewSafe(factory, getViewContext(), part);
+        }
+
+        public void addNavTrail(NavTree root) { }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class PurchaseAdminAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors)
+        {
+            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Admin");
+            Portal.WebPart part = factory.createWebPart();
+            return Portal.getWebPartViewSafe(factory, getViewContext(), part);
+        }
+
+        public void addNavTrail(NavTree root) { }
     }
 
     @RequiresPermission(ReadPermission.class)

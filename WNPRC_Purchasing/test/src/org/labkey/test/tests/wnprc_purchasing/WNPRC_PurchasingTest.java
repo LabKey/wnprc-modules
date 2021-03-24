@@ -26,7 +26,6 @@ import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
-import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.Pages.CreateRequestPage;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
@@ -99,7 +98,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     {
         _containerHelper.deleteProject(getProjectName(), afterTest);
         _containerHelper.deleteProject(BILLING_FOLDER, afterTest);
-        _containerHelper.deleteProject(FOLDER_FOR_REQUESTERS, afterTest);
     }
 
     private void doSetup() throws IOException, CommandException
@@ -124,12 +122,12 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         goToHome();
 
-        log("Create a 'WNPRC Purchasing' folder for Admins");
+        log("Create a 'WNPRC Purchasing' folder");
         _containerHelper.createProject(getProjectName(), FOLDER_TYPE);
 
-        log("Add WNPRC Purchasing Admin webpart");
+        log("Add WNPRC Purchasing Landing page webpart");
         new SiteNavBar(getDriver()).enterPageAdminMode();
-        (new PortalHelper(this)).addWebPart("WNPRC Purchasing Admin");
+        (new PortalHelper(this)).addWebPart("WNPRC Purchasing Landing Page");
         new SiteNavBar(getDriver()).exitPageAdminMode();
 
         goToProjectHome();
@@ -143,29 +141,12 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Create ehrBillingLinked schema");
         _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, "ehr_billingLinked", null, null, null);
 
-        addUsersToPurchasingAdminFolder();
+        addUsersToPurchasingFolder();
 
         goToHome();
-
-        log("Create a 'WNPRC Purchasing' folder for Requesters");
-        _containerHelper.createProject(FOLDER_FOR_REQUESTERS, FOLDER_TYPE);
-
-        log("Create ehrBillingLinked schema");
-        _schemaHelper.createLinkedSchema(FOLDER_FOR_REQUESTERS, "ehr_purchasingLinked", getProjectName(), "ehr_purchasingLinked", null, null, null);
-        _schemaHelper.createLinkedSchema(FOLDER_FOR_REQUESTERS, "coreLinked", getProjectName(), "coreLinked", null, null, null);
-
-        goToProjectHome(FOLDER_FOR_REQUESTERS);
-        setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Purchasing", "/"+ FOLDER_FOR_REQUESTERS, "EHRPurchasingContainer", "/" + getProjectName())));
-        log("Add WNPRC Purchasing Requester webpart");
-        goToProjectHome(FOLDER_FOR_REQUESTERS);
-        new SiteNavBar(getDriver()).enterPageAdminMode();
-        (new PortalHelper(this)).addWebPart("WNPRC Purchasing Requester");
-        new SiteNavBar(getDriver()).exitPageAdminMode();
-
-        addUsersToPurchasingRequesterFolder();
     }
 
-    private void addUsersToPurchasingAdminFolder()
+    private void addUsersToPurchasingFolder()
     {
         goToProjectHome();
         _permissionsHelper.setUserPermissions(ADMIN_USER, "Project Administrator");
@@ -174,13 +155,14 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
     }
 
-    private void addUsersToPurchasingRequesterFolder()
+    private void goToPurchaseAdminPage()
     {
-        goToProjectHome(FOLDER_FOR_REQUESTERS);
-        _permissionsHelper.setUserPermissions(ADMIN_USER, "Project Administrator");
-        _permissionsHelper.setUserPermissions(getCurrentUser(), "Project Administrator");
+        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "purchaseAdmin"));
+    }
 
-        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
+    private void goToRequesterPage()
+    {
+        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requester"));
     }
 
     private void createUserAccountAssociations() throws IOException, CommandException
@@ -242,7 +224,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     @Test
     public void testCreateRequest()
     {
-        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        goToRequesterPage();
         impersonate(REQUESTER_USER);
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
@@ -276,7 +258,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     @Test
     public void testOtherVendorRequest()
     {
-        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        goToRequesterPage();
         impersonate(REQUESTER_USER);
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
@@ -331,7 +313,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         impersonate(REQUESTER_USER);
 
         log("Create new Request - START");
-        goToProjectHome(FOLDER_FOR_REQUESTERS);
+        goToRequesterPage();
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
@@ -361,7 +343,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         stopImpersonating();
 
         log("-----Update request as Purchasing Admin-----");
-        goToProjectHome();
+        goToPurchaseAdminPage();
         log("Impersonate as " + ADMIN_USER);
         impersonate(ADMIN_USER);
         clickAndWait(Locator.linkContainingText("All Open Requests"));

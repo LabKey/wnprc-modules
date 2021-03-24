@@ -47,7 +47,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
-import org.labkey.ehr.EHRSchema;
+//import org.labkey.ehr.EHRSchema;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -965,7 +965,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
        boolean isExt4Form = false;
 
        SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, queryName);
-       TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
+       //TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
+       TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable("form_framework_types");
        TableSelector ts = new TableSelector(ti, filter, null);
        String framework;
        if (ts.getMap() != null && ts.getMap().get("framework") != null)

@@ -155,7 +155,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
         ColumnInfo sourceMaterialColumn = ti.getColumn("sourceMaterial");
         if (sourceMaterialColumn != null) {
             TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo();
-            ColumnInfo liquidColumn = sourceMaterialTable.getColumn("liquid");
+            BaseColumnInfo liquidColumn = (BaseColumnInfo) sourceMaterialTable.getColumn("liquid");
             if (liquidColumn != null) {
                 liquidColumn.setLabel("Units");
                 liquidColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
@@ -167,7 +167,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
             }
         }
 
-        ColumnInfo batchedColumn = ti.getColumn("batched");
+        BaseColumnInfo batchedColumn = (BaseColumnInfo) ti.getColumn("batched");
 
         if (batchedColumn != null) {
             batchedColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
@@ -260,11 +260,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
         @Override
         public Object getDisplayValue(RenderContext ctx) {
             return getValue(ctx);
-        }
-
-        @Override
-        public String getFormattedValue(RenderContext ctx) {
-            return h(getValue(ctx));
         }
     }
 }

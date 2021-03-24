@@ -17,7 +17,7 @@ package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
 //import com.google.common.base.MoreObjects;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -110,6 +110,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -1558,6 +1559,5 @@ public class WNPRC_EHRController extends SpringActionController
             DatasetImportHelper.importDatasetMetadata(getUser(), getContainer(), file);
             return new ApiSimpleResponse("success", true);
         }
-        return thestatus;
     }
 }

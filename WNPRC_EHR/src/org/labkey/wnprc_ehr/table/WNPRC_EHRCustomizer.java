@@ -892,7 +892,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             ExprColumn newCol = new ExprColumn(table, animal_history_link, sql, JdbcType.VARCHAR);
             newCol.setLabel("Animal History Link");
             newCol.setDescription("Provides a link to the animal history records given the animal ids that were selected.");
-            newCol.setURL(StringExpressionFactory.create("ehr-animalHistory.view?#subjects:${animalidstooffer}&inputType:multiSubject&showReport:0&activeReport:abstract"));
+            newCol.setURL(StringExpressionFactory.create("ehr-animalHistory.view?#subjects:${animalidstooffer}&inputType:multiSubject&showReport:0&activeReport:assignmentsReport"));
             table.addColumn(newCol);
         }
     }

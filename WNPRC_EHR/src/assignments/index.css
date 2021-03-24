@@ -1,0 +1,4 @@
+div[id^="assignments-section"] {
+    max-width:800px;
+}
+

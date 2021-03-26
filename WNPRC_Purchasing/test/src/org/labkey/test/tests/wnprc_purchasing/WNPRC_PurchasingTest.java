@@ -16,6 +16,7 @@
 
 package org.labkey.test.tests.wnprc_purchasing;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.query.InsertRowsCommand;
 import org.labkey.remoteapi.query.SaveRowsResponse;
+import org.labkey.remoteapi.query.TruncateTableCommand;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.Pages.CreateRequestPage;
@@ -45,6 +47,8 @@ import org.labkey.test.util.UIPermissionsHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,7 +73,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private static final String requesterName = "purchaserequester";
     private static final String ADMIN_USER = "purchaseadmin@test.com";
     //other properties
-    private static int requestCnt = 0;
+
     //sample data
     private final File ALIASES_TSV = TestFileUtils.getSampleData("wnprc_purchasing/aliases.tsv");
     private final File SHIPPING_INFO_TSV = TestFileUtils.getSampleData("wnprc_purchasing/shippingInfo.tsv");
@@ -222,8 +226,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     }
 
     @Test
-    public void testCreateRequest()
+    public void testCreateRequest() throws IOException, CommandException
     {
+        clearAllRequest();
         goToRequesterPage();
         impersonate(REQUESTER_USER);
         clickButton("Create Request");
@@ -249,15 +254,16 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Verifying the request created");
         waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
-        checker().verifyEquals("Invalid number of requests ", ++requestCnt, table.getDataRowCount());
+        checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         stopImpersonating();
     }
 
     @Test
-    public void testOtherVendorRequest()
+    public void testOtherVendorRequest() throws IOException, CommandException
     {
+        clearAllRequest();
         goToRequesterPage();
         impersonate(REQUESTER_USER);
         clickButton("Create Request");
@@ -295,7 +301,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Verifying the request created");
         waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
-        checker().verifyEquals("Invalid number of requests ", ++requestCnt, table.getDataRowCount());
+        checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
         checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendorId"));
@@ -303,10 +309,12 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     }
 
     @Test
-    public void testPurchaseAdminWorkflow()
+    public void testPurchaseAdminWorkflow() throws IOException, CommandException
     {
         File jpgFile = new File(TestFileUtils.getSampleData("fileTypes"), "jpg_sample.jpg");
         File pdfFile = new File(TestFileUtils.getSampleData("fileTypes"), "pdf_sample.pdf");
+
+        clearAllRequest();
 
         log("-----Create request as lab end user-----");
         log("Impersonate as " + REQUESTER_USER);
@@ -382,11 +390,187 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         stopImpersonating(false);
 
-        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry",  Maps.of("requestRowId", requestID)));
+        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry", Maps.of("requestRowId", requestID)));
         log("Impersonate as " + REQUESTER_USER);
         impersonate(REQUESTER_USER);
         assertTextPresent("You do not have sufficient permissions to update this request.");
         stopImpersonating();
+    }
+
+    @Test
+    public void testReferenceTables()
+    {
+        goToProjectHome();
+        clickAndWait(Locator.linkWithText("Purchasing Admin"));
+
+        log("Checking if the link is present on the Purchasing Admin page");
+        checker().verifyTrue("Vendors reference is not present", isElementPresent(Locator.linkWithText("Vendors")));
+        checker().verifyTrue("User Account Associations reference is not present", isElementPresent(Locator.linkWithText("User Account Associations")));
+        checker().verifyTrue("Shipping Info reference is not present", isElementPresent(Locator.linkWithText("Shipping Info")));
+        checker().verifyTrue("Item Units reference is not present", isElementPresent(Locator.linkWithText("Item Units")));
+        checker().verifyTrue("Line Items reference is not present", isElementPresent(Locator.linkWithText("Line Items")));
+
+        log("Verifying if link navigates to correct query");
+        checker().verifyEquals("Incorrect link for Vendors", "Vendor", getQueryName("Vendors"));
+        checker().verifyEquals("Incorrect link for User Account Associations", "User Account Associations",
+                getQueryName("User Account Associations"));
+        checker().verifyEquals("Incorrect link for Shipping Info", "Shipping Info", getQueryName("Shipping Info"));
+        checker().verifyEquals("Incorrect link for Item Units", "Item Units", getQueryName("Item Units"));
+        checker().verifyEquals("Incorrect link for Line Items", "Line Items", getQueryName("Line Items"));
+    }
+
+    @Test
+    public void testAdminPage() throws IOException, CommandException
+    {
+        clearAllRequest();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime date = LocalDateTime.now();
+
+        log("Verifying requester does not access to admin web part");
+        goToProjectHome();
+        impersonate(REQUESTER_USER);
+        goToPurchaseAdminPage();
+        checker().verifyTrue(REQUESTER_USER + "user should not permission for admin page",
+                isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
+                        .withText("You do not have the permissions required to access this page.")));
+        goBack();
+
+        log("Creating request as " + REQUESTER_USER);
+        goToRequesterPage();
+        clickAndWait(Locator.linkWithText("Create Request"));
+        Map<String, String> requesterRequest = new HashMap<>();
+        requesterRequest.put("Account to charge", "acct100");
+        requesterRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        requesterRequest.put("Vendor", "Dunder Mifflin");
+        requesterRequest.put("Delivery attention to", "testing the workflow");
+        requesterRequest.put("Business purpose", "regression test");
+        requesterRequest.put("Item description", "Item1");
+        requesterRequest.put("Unit", "Term");
+        requesterRequest.put("Unit Cost", "10");
+        requesterRequest.put("Quantity", "6");
+
+        String requestId1 = createRequest(requesterRequest, null);
+        stopImpersonating();
+
+        log("Creating request as " + ADMIN_USER);
+        impersonate(ADMIN_USER);
+        goToPurchaseAdminPage();
+        Map<String, String> adminRequest = new HashMap<>();
+        adminRequest.put("Account to charge", "acct101");
+        adminRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        adminRequest.put("Vendor", "Real Santa Claus");
+        adminRequest.put("Delivery attention to", "testing the workflow - Admin");
+        adminRequest.put("Business purpose", "regression test -Admin request");
+        adminRequest.put("Item description", "Item1");
+        adminRequest.put("Unit", "Term");
+        adminRequest.put("Unit Cost", "20");
+        adminRequest.put("Quantity", "3");
+        clickAndWait(Locator.linkWithText("Enter Request"));
+        String requestId2 = createRequest(requesterRequest, null);
+
+        log("Verifying all open requests");
+        goToPurchaseAdminPage();
+        clickAndWait(Locator.linkWithText("All Open Requests"));
+        DataRegionTable table = new DataRegionTable("query", getDriver());
+        checker().verifyEquals("Incorrect request Id's", Arrays.asList(requestId1, requestId2),
+                table.getColumnDataAsText("requestNum"));
+        checker().verifyEquals("Incorrect requester's", Arrays.asList("purchaserequester", "purchaseadmin"),
+                table.getColumnDataAsText("requester"));
+
+        log("Changing the assignment of the request");
+        clickAndWait(Locator.linkWithText(requestId1));
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setAssignedTo("purchaseadmin")
+                .setPurchaseOptions("Direct Payment")
+                .setStatus("Request Approved")
+                .setOrderDate(dtf.format(date))
+                .setCardPostDate(dtf.format(date))
+                .submit();
+
+        goToPurchaseAdminPage();
+        waitAndClickAndWait(Locator.linkWithText("My Open Requests"));
+        table = new DataRegionTable("query", getDriver());
+
+        checker().verifyEquals("Incorrect request in my open request", requestId1,
+                table.getDataAsText(0, "requestNum"));
+        checker().verifyEquals("Incorrect status", "Request Approved",
+                table.getDataAsText(0, "requestStatus"));
+
+        log("Completing the order");
+        goToPurchaseAdminPage();
+        waitAndClickAndWait(Locator.linkWithText("All Open Requests"));
+        clickAndWait(Locator.linkWithText(requestId2));
+        requestPage = new CreateRequestPage(getDriver());
+        requestPage.setStatus("Order Complete").submit();
+
+        waitAndClickAndWait(Locator.linkWithText("Purchasing Admin"));
+        clickAndWait(Locator.linkWithText("Completed Requests"));
+        table = new DataRegionTable("query", getDriver());
+        checker().verifyEquals("Incorrect request in my open request", requestId2,
+                table.getDataAsText(0, "requestNum"));
+        checker().verifyEquals("Incorrect status", "Order Complete",
+                table.getDataAsText(0, "requestStatus"));
+
+        goToPurchaseAdminPage();
+        clickAndWait(Locator.linkWithText("All Open Requests"));
+        table = new DataRegionTable("query", getDriver());
+        checker().verifyEquals("Completed order should not be present", Arrays.asList(requestId1),
+                table.getColumnDataAsText("requestNum"));
+        stopImpersonating();
+
+        log("Verifying the P-Card view");
+        goToPurchaseAdminPage();
+        clickAndWait(Locator.linkWithText("P-Card View"));
+        table = new DataRegionTable("query", getDriver());
+        checker().verifyEquals("Incorrect number of rows in P-Card view", 2, table.getDataRowCount());
+    }
+
+    private String getQueryName(String linkName)
+    {
+        clickAndWait(Locator.linkWithText(linkName));
+        String retVal = Locator.tag("h3").findElement(getDriver()).getText();
+        goBack();
+
+        return retVal;
+    }
+
+    private String createRequest(Map<String, String> request, @Nullable File fileName)
+    {
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+
+        requestPage.setAccountsToCharge(request.get("Account to charge"))
+                .setVendor(request.get("Vendor"))
+                .setBusinessPurpose(request.get("Business purpose"))
+                .setShippingDestination(request.get("Shipping destination"))
+                .setDeliveryAttentionTo(request.get("Delivery attention to"))
+                .setItemDesc(request.get("Item description"))
+                .setUnitInput(request.get("Unit"))
+                .setUnitCost(request.get("Unit Cost"))
+                .setQuantity(request.get("Quantity"));
+
+        if (request.containsKey("Special instructions"))
+            requestPage.setSpecialInstructions(request.get("Special instructions"));
+
+        if (fileName != null)
+            requestPage.addAttachment(fileName);
+
+        requestPage.submitForReview();
+        if (getCurrentUser().equals("purchaseadmin@test.com"))
+        {
+            clickAndWait(Locator.linkWithText("All Open Requests"));
+            DataRegionTable table = new DataRegionTable("query", getDriver());
+            table.setFilter("requester", "Equals", "purchaseadmin");
+            return table.getDataAsText(0, "requestNum");
+        }
+        else
+            return DataRegionTable.DataRegion(getDriver()).find().getDataAsText(0, "rowId");
+    }
+
+    private void clearAllRequest() throws IOException, CommandException
+    {
+        Connection cn = createDefaultConnection();
+        new TruncateTableCommand("ehr_purchasing", "lineItems").execute(cn, getProjectName());
+        new TruncateTableCommand("ehr_purchasing", "purchasingRequests").execute(cn, getProjectName());
     }
 
     @Override

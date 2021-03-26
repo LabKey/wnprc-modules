@@ -63,7 +63,6 @@
   },
   "dependencies": {
     "@labkey/api": "1.0.0",
-    "@labkey/components": "1.2.0",
     "@wnprc/primate-id": "^1.1.7",
     "blockui": "^1.0.0",
     "bootstrap": "^3.0.0",

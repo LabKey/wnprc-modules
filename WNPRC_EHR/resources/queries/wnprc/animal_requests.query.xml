@@ -128,8 +128,6 @@
                     </column>
                     <column columnName="animalidstooffer">
                         <columnTitle>Animal Ids to Offer</columnTitle>
-                        <url>/ehr/animalHistory.view?#subjects:${anaimalidstooffer}&amp;inputType:multiSubject
-                        </url>
                     </column>
                     <column columnName="animalsorigin">
                         <columnTitle>Animal Origin</columnTitle>

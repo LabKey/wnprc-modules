@@ -112,6 +112,7 @@ import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
+import org.labkey.wnprc_ehr.security.roles.WNPRCAnimalRequestsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
@@ -445,6 +446,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerRole(new BehaviorServiceWorker());
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
+        RoleManager.registerRole(new WNPRCAnimalRequestsRole());
     }
 
     public Set<Container> getWNPRCStudyContainers()

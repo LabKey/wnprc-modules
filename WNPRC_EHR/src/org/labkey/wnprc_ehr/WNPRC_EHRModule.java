@@ -170,7 +170,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     public @Nullable Double getSchemaVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 20.000;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 21.000;
     }
 
     @Override

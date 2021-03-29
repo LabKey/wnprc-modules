@@ -1,3 +1,4 @@
+-- this is the query that displays on the requesters page
 SELECT
        pr.rowId,
        pr.vendorId,
@@ -6,14 +7,6 @@ SELECT
        pr.qcState   AS requestStatus,
        pr.created   AS requestDate,
        pr.createdBy AS requester,
-       items.totalCost
+       pr.totalCost
 FROM ehr_purchasing.purchasingRequests pr
-LEFT JOIN
-    (
-        SELECT requestRowId,
-               round(sum(quantity * unitCost), 2) AS totalCost
-        FROM ehr_purchasing.lineItems
-        GROUP BY requestRowId
-    ) items
-ON pr.rowId = items.requestRowId
-WHERE ISMEMBEROF(pr.createdBy)
+WHERE ISMEMBEROF(pr.createdBy) -- only sees requests created by the current user/requester

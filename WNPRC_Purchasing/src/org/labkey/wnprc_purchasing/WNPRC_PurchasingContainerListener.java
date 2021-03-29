@@ -19,6 +19,7 @@ package org.labkey.wnprc_purchasing;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager.ContainerListener;
+import org.labkey.api.data.DatabaseTableType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
@@ -44,9 +45,11 @@ public class WNPRC_PurchasingContainerListener implements ContainerListener
         SimpleFilter containerFilter = SimpleFilter.createContainerFilter(c);
         try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
-            TableInfo creditCardOptionsTable = WNPRC_PurchasingSchema.getInstance().getCreditCardOptionsTable();
-            Table.delete(creditCardOptionsTable, containerFilter);
-
+            TableInfo paymentOptionsTable = WNPRC_PurchasingSchema.getInstance().getPaymentOptionsTable();
+            if (null != paymentOptionsTable && paymentOptionsTable.getTableType() == DatabaseTableType.TABLE)
+            {
+                Table.delete(paymentOptionsTable, containerFilter);
+            }
             transaction.commit();
         }
     }

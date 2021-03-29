@@ -1,0 +1,19 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="vendorName"/>
+        <column name="streetAddress"/>
+        <column name="city"/>
+        <column name="state"/>
+        <column name="country"/>
+        <column name="zip"/>
+        <column name="phoneNumber"/>
+        <column name="faxNumber"/>
+        <column name="email"/>
+        <column name="url"/>
+        <column name="notes"/>
+        <column name="isValidVendor"/>
+    </columns>
+    <sorts>
+        <sort column="vendorName" descending="false" />
+    </sorts>
+</customView>

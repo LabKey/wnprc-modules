@@ -35,7 +35,10 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Results;
@@ -71,11 +74,13 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
+import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
@@ -1368,7 +1373,6 @@ public class WNPRC_EHRController extends SpringActionController
         private Date start;
         private Date end;
         private String subject;
-        private List<String> categories;
         private String assignedTo;
         private String calendarId;
         private JSONArray rooms;
@@ -1391,10 +1395,6 @@ public class WNPRC_EHRController extends SpringActionController
         public String getSubject()
         {
             return subject;
-        }
-
-        public List<String> getCategories() {
-            return categories;
         }
 
         public String getAssignedTo()
@@ -1428,11 +1428,6 @@ public class WNPRC_EHRController extends SpringActionController
         public void setSubject(String title)
         {
             this.subject = title;
-        }
-
-        public void setCategories(List<String> categories)
-        {
-            this.categories = categories;
         }
 
         public void setAssignedTo(String assignedTo)
@@ -2013,6 +2008,57 @@ public class WNPRC_EHRController extends SpringActionController
     {
         List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
         updateRecords(rowsToUpdate, schema, table);
+    }
+
+    @ActionNames("FetchSurgeryProcedureCalendarsAndRooms")
+    @RequiresLogin()
+    public class FetchSurgeryProcedureCalendarsAndRoomsAction extends ReadOnlyApiAction<Object>
+    {
+        @Override
+        public Object execute(Object form, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try {
+                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "wnprc").getTable("procedure_calendars_and_rooms");
+                TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "display_name", "show_by_default", "default_bg_color", "requires_authorization", "authorized_groups"), null, null);
+                Map<String, Object>[] queryResults = ts.getMapArray();
+
+                if (queryResults != null && queryResults.length > 0) {
+                    JSONObject data = new JSONObject();
+                    JSONArray rows = new JSONArray();
+
+                    for (int i = 0; i < queryResults.length; i++) {
+                        if (queryResults[i].get("requires_authorization") != null && (Boolean) queryResults[i].get("requires_authorization")) {
+                            String authorizedGroupsString = (String) queryResults[i].get("authorized_groups");
+
+                            if (authorizedGroupsString != null) {
+                                String[] authorizedGroups = authorizedGroupsString.trim().split("\\s*,\\s*");
+                                for (int j = 0; j < authorizedGroups.length; j++) {
+                                    Group authorizedGroup = GroupManager.getGroup(getContainer(), authorizedGroups[j], GroupEnumType.SITE);
+                                    if (getUser().isInGroup(authorizedGroup.getUserId()) || getUser().isInSiteAdminGroup()) {
+                                        rows.put(queryResults[i]);
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            rows.put(queryResults[i]);
+                        }
+                    }
+                    data.put("rows", rows);
+                    response.put("data", data);
+                    response.put("success", true);
+                }
+
+            } catch (Exception e) {
+                int x = 3;
+                //TODO add exception handling (is it necessary here?)
+            }
+
+            return response;
+        }
     }
 
     public static class FetchCalendarEvent

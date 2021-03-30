@@ -46,7 +46,7 @@ function onInit(event, helper){
 //     console.log('row: ' + JSON.stringify(row));
 // }
 
-function onUpsert(helper, scriptErrors, row, oldRow) {
+function onInsert(helper, scriptErrors, row, oldRow) {
     if (row.date) {
         row.endDate = row.date;
     }

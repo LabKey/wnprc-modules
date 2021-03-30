@@ -4,21 +4,26 @@ import com.microsoft.graph.models.extensions.Attendee;
 import com.microsoft.graph.models.extensions.Event;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.security.Group;
+import org.labkey.api.security.GroupManager;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.security.xml.GroupEnumType;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 
@@ -465,8 +470,50 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     private JSONObject getCalendarEvents(String start, String end) throws IOException {
-        JSONObject baseCalendarEvents = getJsonEventList(getCalendarAppointments(start, end, getBaseCalendars()));
-        JSONObject unmanagedEvents = getUnmanagedJsonEventList(getCalendarAppointments(start, end, getUnmanagedCalendars()));
+        Map<String, String> authorizedBaseCalendars = new HashMap<>();
+        Map<String, String> authorizedUnmanagedCalendars = new HashMap<>();
+
+        SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.IN, List.of("Office365", "Office365Unmanaged"));
+        DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+        TableInfo ti = schema.getTable("procedure_calendars");
+        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "folder_id", "calendar_type", "requires_authorization", "authorized_groups"), filter, null);
+        Map<String, Object>[] queryResults = ts.getMapArray();
+
+        //Only return calendars that the user is authorized to view
+        for (int i = 0; i < queryResults.length; i++) {
+            String calendarId = (String) queryResults[i].get("calendar_id");
+            String folderId = (String) queryResults[i].get("folder_id");
+
+            if (calendarId != null && folderId != null) {
+                if (queryResults[i].get("requires_authorization") != null && (Boolean) queryResults[i].get("requires_authorization")) {
+                    String authorizedGroupsString = (String) queryResults[i].get("authorized_groups");
+
+                    if (authorizedGroupsString != null) {
+                        String[] authorizedGroups = authorizedGroupsString.trim().split("\\s*,\\s*");
+                        for (int j = 0; j < authorizedGroups.length; j++) {
+                            Group authorizedGroup = GroupManager.getGroup(container, authorizedGroups[j], GroupEnumType.SITE);
+                            if (user.isInGroup(authorizedGroup.getUserId()) || user.isInSiteAdminGroup()) {
+                                if (queryResults[i].get("calendar_type").equals("Office365")) {
+                                    authorizedBaseCalendars.put(calendarId, folderId);
+                                } else if (queryResults[i].get("calendar_type").equals("Office365Unmanaged")) {
+                                    authorizedUnmanagedCalendars.put(calendarId, folderId);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    if (queryResults[i].get("calendar_type").equals("Office365")) {
+                        authorizedBaseCalendars.put(calendarId, folderId);
+                    } else if (queryResults[i].get("calendar_type").equals("Office365Unmanaged")) {
+                        authorizedUnmanagedCalendars.put(calendarId, folderId);
+                    }
+                }
+            }
+        }
+
+        JSONObject baseCalendarEvents = getJsonEventList(getCalendarAppointments(start, end, authorizedBaseCalendars));
+        JSONObject unmanagedEvents = getUnmanagedJsonEventList(getCalendarAppointments(start, end, authorizedUnmanagedCalendars));
 
         for (Map.Entry entry : unmanagedEvents.entrySet()) {
             ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", entry.getValue());

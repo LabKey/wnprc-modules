@@ -880,245 +880,255 @@
         $(document).ready(function() {
             document.getElementById('calendar-checklist').innerHTML = '';
 
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureCalendarsAndRooms", null, null),
+                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                    if (response.success) {
+                        let data = response.data;
+                        if (data.rows && data.rows.length > 0) {
+                            let calendarChecklist = document.getElementById('calendar-checklist');
+
+                            let div = document.createElement('div');
+                            let checkbox = document.createElement('input');
+                            let label = document.createElement('label');
+                            let description = document.createTextNode('Select All');
+                            div.id = 'select_all_div';
+                            checkbox.type = 'checkbox';
+                            checkbox.id = 'select_all_checkbox';
+                            checkbox.checked = false;
+                            checkbox.value = '';
+                            checkbox.addEventListener('change', function() {
+                                let isChecked = document.getElementById('select_all_checkbox').checked;
+                                if (calendarEvents) {
+                                    for (let cal in calendarEvents) {
+                                        if (calendarEvents.hasOwnProperty(cal)) {
+                                            let calCheckbox = document.getElementById(cal);
+                                            if (calCheckbox.checked != isChecked) {
+                                                calCheckbox.click();
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+
+                            checkbox.style.display = 'inline-block';
+                            checkbox.style.cssFloat = 'left';
+                            label.for = checkbox.id;
+                            label.style.marginTop = '3px';
+                            label.appendChild(description);
+
+                            div.appendChild(checkbox);
+                            div.appendChild(label);
+
+                            calendarChecklist.appendChild(div);
+
+                            for (let i = 0; i < data.rows.length; i++) {
+
+                                let div = document.createElement('div');
+                                let checkbox = document.createElement('input');
+                                let label = document.createElement('label');
+                                let description = document.createTextNode(data.rows[i].display_name);
+                                let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+
+                                div.id = data.rows[i].calendar_id + '_checkbox';
+
+                                checkbox.type = 'checkbox';
+                                checkbox.id = data.rows[i].calendar_id;
+                                if (data.rows[i].show_by_default) {
+                                    checkbox.checked = true;
+                                }
+                                checkbox.value = '';
+                                checkbox.addEventListener('change', function() {
+                                    if (calendar) {
+                                        let calId = this.id;
+                                        let events = calendarEvents[calId].events;
+                                        let displayProp = this.checked ? "auto" : "none";
+                                        calendar.batchRendering(() => {
+                                            for (let i = 0; i < events.length; i++) {
+                                                calendar.getEventById(events[i].id).setProp("display", displayProp);
+                                            }
+                                            if (placeholderEvents[calId]) {
+                                                for (let i = 0; i < placeholderEvents[calId].length; i++) {
+                                                    calendar.getEventById(placeholderEvents[calId][i].id).setProp("display", displayProp);
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+
+                                checkbox.style.display = 'inline-block';
+                                checkbox.style.cssFloat = 'left';
+
+                                label.for = checkbox.id;
+                                label.style.marginTop = '3px';
+                                label.appendChild(description);
+
+                                legend.setAttribute('width', '25px');
+                                legend.setAttribute('height', '15px');
+                                legend.style.marginLeft = '5px';
+                                legend.style.marginRight = '5px';
+                                rect.style.fill = data.rows[i].default_bg_color;
+                                rect.setAttribute('width', '25px');
+                                rect.setAttribute('height', '15px');
+                                legend.appendChild(rect);
+
+                                div.appendChild(checkbox);
+                                div.appendChild(legend);
+                                div.appendChild(label);
+
+                                calendarChecklist.appendChild(div);
+                            }
+                        }
+
+                        $('#calendar-selection').block({
+                            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
+                            css: {
+                                border: 'none',
+                                padding: '15px',
+                                backgroundColor: '#000',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .5,
+                                color: '#fff'
+                            }
+                        });
+
+                        $('#procedure-calendar').block({
+                            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
+                            css: {
+                                border: 'none',
+                                padding: '15px',
+                                backgroundColor: '#000',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .5,
+                                color: '#fff'
+                            }
+                        });
+
+                        $('#pending-requests').block({
+                            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
+                            css: {
+                                border: 'none',
+                                padding: '15px',
+                                backgroundColor: '#000',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .5,
+                                color: '#fff'
+                            }
+                        });
+
+                        calendar = new FullCalendar.Calendar(calendarEl, {
+                            themeSystem: 'bootstrap',
+                            initialView: 'dayGridMonth',
+                            //rerenderDelay: 50,
+                            headerToolbar: {
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                            },
+                            eventClassNames: function (arg) {
+                                if (arg.event.id.startsWith("PLACEHOLDER")) {
+                                    return ["placeholder-event"];
+                                } else if (arg.event.extendedProps.selected) {
+                                    return ["event-selected"];
+                                } else {
+                                    return [];
+                                }
+                            },
+                            eventClick: function(info) {
+                                //TODO REMOVE LOGGING
+                                console.log(info.event.id);
+                                if (selectedEvent.id) {
+                                    let event = calendar.getEventById(selectedEvent.id);
+                                    if (event) {
+                                        event.setExtendedProp("selected", false);
+                                    }
+                                }
+                                info.event.setExtendedProp("selected", true);
+                                selectedEvent = info.event;
+                                if (info.event.extendedProps) {
+                                    if (info.event.extendedProps.isUnmanaged) {
+                                        //document.getElementById("surgeryDetailsDiv").style.display = "none";
+                                        //document.getElementById("unmanagedEventDetailsDiv").style.display = "block";
+                                        document.getElementById("surgeryDetailsDiv").hidden = true;
+                                        document.getElementById("unmanagedEventDetailsDiv").hidden = false;
+
+                                        document.getElementById("unmanagedEventTitle").innerHTML = info.event.title;
+                                        let bodyText = info.event.extendedProps.body;
+                                        if (bodyText) {
+
+                                        }
+                                        if (info.event.allDay) {
+                                            document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, false);
+                                            let endDateTime = new Date(info.event.end);
+                                            endDateTime.setDate(endDateTime.getDate() - 1);
+                                            document.getElementById("unmanagedEventEnd").innerHTML = displayDateAsString(endDateTime, false);
+                                            let bodyText = info.event.extendedProps.body;
+                                            document.getElementById("unmanagedEventBody").innerHTML = info.event.extendedProps.body;
+                                        } else {
+                                            document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, true);
+                                            document.getElementById("unmanagedEventEnd").innerHTML = displayDateAsString(info.event.end, true);
+                                            document.getElementById("unmanagedEventBody").innerHTML = info.event.extendedProps.body;
+                                        }
+                                    } else {
+                                        document.getElementById("surgeryDetailsDiv").hidden = false;
+                                        document.getElementById("unmanagedEventDetailsDiv").hidden = true;
+                                    }
+                                    jQuery.each(info.event.extendedProps, function (key, value) {
+                                        if (key in WebUtils.VM.taskDetails) {
+                                            if (key === "date" || key === "enddate") {
+                                                value = displayDateTimeISO(value);
+                                            }
+                                            WebUtils.VM.taskDetails[key](value);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        calendar.render();
+
+                        if (data.rows && data.rows.length > 0) {
+                            LABKEY.Ajax.request({
+                                url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureEvents", null, null),
+                                success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                    if (response.success) {
+                                        for (let cal in response.events) {
+                                            if (response.events.hasOwnProperty(cal)) {
+                                                calendarEvents[cal] = response.events[cal];
+                                                calendar.addEventSource(response.events[cal]);
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        alert("Houston, we have a problem: " + response.exception);
+                                    }
+                                    $('#calendar-selection').unblock();
+                                    $('#procedure-calendar').unblock();
+                                    $('#pending-requests').unblock();
+                                }, this),
+                                failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                                    alert("Something went wrong: " + JSON.stringify(response));
+                                    $('#calendar-selection').unblock();
+                                    $('#procedure-calendar').unblock();
+                                    $('#pending-requests').unblock();
+                                }, this)
+                            });
+                        }
+                    }
+                }, this)
+            });
+
             LABKEY.Query.selectRows({
                 schemaName: 'wnprc',
                 queryName: 'procedure_calendars_and_rooms',
                 columns: 'calendar_id,calendar_type,display_name,api_action,folder_id,show_by_default,default_bg_color',
                 scope: this,
                 success: function(data){
-                    if (data.rows && data.rows.length > 0) {
-                        let calendarChecklist = document.getElementById('calendar-checklist');
 
-                        let div = document.createElement('div');
-                        let checkbox = document.createElement('input');
-                        let label = document.createElement('label');
-                        let description = document.createTextNode('Select All');
-                        div.id = 'select_all_div';
-                        checkbox.type = 'checkbox';
-                        checkbox.id = 'select_all_checkbox';
-                        checkbox.checked = false;
-                        checkbox.value = '';
-                        checkbox.addEventListener('change', function() {
-                            let isChecked = document.getElementById('select_all_checkbox').checked;
-                            if (calendarEvents) {
-                                for (let cal in calendarEvents) {
-                                    if (calendarEvents.hasOwnProperty(cal)) {
-                                        let calCheckbox = document.getElementById(cal);
-                                        if (calCheckbox.checked != isChecked) {
-                                            calCheckbox.click();
-                                        }
-                                    }
-                                }
-                            }
-                        });
-
-                        checkbox.style.display = 'inline-block';
-                        checkbox.style.cssFloat = 'left';
-                        label.for = checkbox.id;
-                        label.style.marginTop = '3px';
-                        label.appendChild(description);
-
-                        div.appendChild(checkbox);
-                        div.appendChild(label);
-
-                        calendarChecklist.appendChild(div);
-
-                        for (let i = 0; i < data.rows.length; i++) {
-
-                            let div = document.createElement('div');
-                            let checkbox = document.createElement('input');
-                            let label = document.createElement('label');
-                            let description = document.createTextNode(data.rows[i].display_name);
-                            let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                            let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-
-                            div.id = data.rows[i].calendar_id + '_checkbox';
-
-                            checkbox.type = 'checkbox';
-                            checkbox.id = data.rows[i].calendar_id;
-                            if (data.rows[i].show_by_default) {
-                                checkbox.checked = true;
-                            }
-                            checkbox.value = '';
-                            checkbox.addEventListener('change', function() {
-                                if (calendar) {
-                                    let calId = this.id;
-                                    let events = calendarEvents[calId].events;
-                                    let displayProp = this.checked ? "auto" : "none";
-                                    calendar.batchRendering(() => {
-                                        for (let i = 0; i < events.length; i++) {
-                                            calendar.getEventById(events[i].id).setProp("display", displayProp);
-                                        }
-                                        if (placeholderEvents[calId]) {
-                                            for (let i = 0; i < placeholderEvents[calId].length; i++) {
-                                                calendar.getEventById(placeholderEvents[calId][i].id).setProp("display", displayProp);
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-
-                            checkbox.style.display = 'inline-block';
-                            checkbox.style.cssFloat = 'left';
-
-                            label.for = checkbox.id;
-                            label.style.marginTop = '3px';
-                            label.appendChild(description);
-
-                            legend.setAttribute('width', '25px');
-                            legend.setAttribute('height', '15px');
-                            legend.style.marginLeft = '5px';
-                            legend.style.marginRight = '5px';
-                            rect.style.fill = data.rows[i].default_bg_color;
-                            rect.setAttribute('width', '25px');
-                            rect.setAttribute('height', '15px');
-                            legend.appendChild(rect);
-
-                            div.appendChild(checkbox);
-                            div.appendChild(legend);
-                            div.appendChild(label);
-
-                            calendarChecklist.appendChild(div);
-                        }
-                    }
-
-                    $('#calendar-selection').block({
-                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
-                        css: {
-                            border: 'none',
-                            padding: '15px',
-                            backgroundColor: '#000',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .5,
-                            color: '#fff'
-                        }
-                    });
-
-                    $('#procedure-calendar').block({
-                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
-                        css: {
-                            border: 'none',
-                            padding: '15px',
-                            backgroundColor: '#000',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .5,
-                            color: '#fff'
-                        }
-                    });
-
-                    $('#pending-requests').block({
-                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
-                        css: {
-                            border: 'none',
-                            padding: '15px',
-                            backgroundColor: '#000',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .5,
-                            color: '#fff'
-                        }
-                    });
-
-                    calendar = new FullCalendar.Calendar(calendarEl, {
-                        themeSystem: 'bootstrap',
-                        initialView: 'dayGridMonth',
-                        //rerenderDelay: 50,
-                        headerToolbar: {
-                            left: 'prev,next today',
-                            center: 'title',
-                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                        },
-                        eventClassNames: function (arg) {
-                            if (arg.event.id.startsWith("PLACEHOLDER")) {
-                                return ["placeholder-event"];
-                            } else if (arg.event.extendedProps.selected) {
-                                return ["event-selected"];
-                            } else {
-                                return [];
-                            }
-                        },
-                        eventClick: function(info) {
-                            //TODO REMOVE LOGGING
-                            console.log(info.event.id);
-                            if (selectedEvent.id) {
-                                let event = calendar.getEventById(selectedEvent.id);
-                                if (event) {
-                                    event.setExtendedProp("selected", false);
-                                }
-                            }
-                            info.event.setExtendedProp("selected", true);
-                            selectedEvent = info.event;
-                            if (info.event.extendedProps) {
-                                if (info.event.extendedProps.isUnmanaged) {
-                                    //document.getElementById("surgeryDetailsDiv").style.display = "none";
-                                    //document.getElementById("unmanagedEventDetailsDiv").style.display = "block";
-                                    document.getElementById("surgeryDetailsDiv").hidden = true;
-                                    document.getElementById("unmanagedEventDetailsDiv").hidden = false;
-
-                                    document.getElementById("unmanagedEventTitle").innerHTML = info.event.title;
-                                    let bodyText = info.event.extendedProps.body;
-                                    if (bodyText) {
-
-                                    }
-                                    if (info.event.allDay) {
-                                        document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, false);
-                                        let endDateTime = new Date(info.event.end);
-                                        endDateTime.setDate(endDateTime.getDate() - 1);
-                                        document.getElementById("unmanagedEventEnd").innerHTML = displayDateAsString(endDateTime, false);
-                                        let bodyText = info.event.extendedProps.body;
-                                        document.getElementById("unmanagedEventBody").innerHTML = info.event.extendedProps.body;
-                                    } else {
-                                        document.getElementById("unmanagedEventStart").innerHTML = displayDateAsString(info.event.start, true);
-                                        document.getElementById("unmanagedEventEnd").innerHTML = displayDateAsString(info.event.end, true);
-                                        document.getElementById("unmanagedEventBody").innerHTML = info.event.extendedProps.body;
-                                    }
-                                } else {
-                                    document.getElementById("surgeryDetailsDiv").hidden = false;
-                                    document.getElementById("unmanagedEventDetailsDiv").hidden = true;
-                                }
-                                jQuery.each(info.event.extendedProps, function (key, value) {
-                                    if (key in WebUtils.VM.taskDetails) {
-                                        if (key === "date" || key === "enddate") {
-                                            value = displayDateTimeISO(value);
-                                        }
-                                        WebUtils.VM.taskDetails[key](value);
-                                    }
-                                });
-                            }
-                        }
-                    });
-
-                    calendar.render();
-
-                    if (data.rows && data.rows.length > 0) {
-                        LABKEY.Ajax.request({
-                            url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureEvents", null, null),
-                            success: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                if (response.success) {
-                                    for (let cal in response.events) {
-                                        if (response.events.hasOwnProperty(cal)) {
-                                            calendarEvents[cal] = response.events[cal];
-                                            calendar.addEventSource(response.events[cal]);
-                                        }
-                                    }
-                                }
-                                else {
-                                    alert("Houston, we have a problem: " + response.exception);
-                                }
-                                $('#calendar-selection').unblock();
-                                $('#procedure-calendar').unblock();
-                                $('#pending-requests').unblock();
-                            }, this),
-                            failure: LABKEY.Utils.getCallbackWrapper(function (response) {
-                                alert("Something went wrong: " + JSON.stringify(response));
-                                $('#calendar-selection').unblock();
-                                $('#procedure-calendar').unblock();
-                                $('#pending-requests').unblock();
-                            }, this)
-                        });
-                    }
                 }
             });
         });
@@ -1292,7 +1302,9 @@
                     "Comments:comments"];
 
                 for (let i = 0; i < includedFields.length; i++) {
-                    if (i < 5 && rooms.length <= 1) {
+                    if (i < 9 && rooms.length <= 1) {
+                        colDiv = document.getElementById("schedule-request-col-1");
+                    } else if (i < 6 && rooms.length === 2) {
                         colDiv = document.getElementById("schedule-request-col-1");
                     } else {
                         colDiv = document.getElementById("schedule-request-col-2");
@@ -1300,9 +1312,11 @@
                     let data = includedFields[i].split(":");
                     let label = data[0];
                     let field = data[1];
-                    let div = createStaticDiv(label, field, request[field]);
+                    let div = createStaticDiv(label, "schedule-" + field, request[field]);
                     colDiv.appendChild(div);
                 }
+                let statusChangeDiv = createInputDiv("Denial/Hold Reason", "text", "scheduleStatusChangeField", request.statuschangereason);
+                colDiv.appendChild(statusChangeDiv);
             }
         });
         WebUtils.VM.taskDetails.animalLink = ko.pureComputed(function() {

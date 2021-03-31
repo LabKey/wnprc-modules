@@ -72,6 +72,11 @@ public class WNPRC_PurchasingManager
         addData(c, user, "ehr_purchasing", "itemUnits", "itemUnits.tsv");
     }
 
+    public void addPaymentOptions(Container c, User user)
+    {
+        addData(c, user, "wnprc_purchasing", "paymentOptions", "paymentOptions.tsv");
+    }
+
     public void addQCStatus(Container c, User user)
     {
         addData(c, user, "core", "QCState", "QCStatus.tsv");
@@ -190,10 +195,9 @@ public class WNPRC_PurchasingManager
 
         //otherwise, continue adding non-required values
         row.put("comments", requestForm.getComments());
-        //TODO: update assignedTo
-        row.put("assignedTo", null != requestForm.getAssignedTo() ? requestForm.getAssignedTo() : user.getUserId());
+        row.put("assignedTo", requestForm.getAssignedTo());
         row.put("qcState", requestForm.getQcState());
-        row.put("creditCardOptionId", requestForm.getCreditCardOption());
+        row.put("paymentOptionId", requestForm.getPaymentOption());
         row.put("program", requestForm.getProgram());
         row.put("confirmationNum", requestForm.getConfirmNum());
         row.put("invoiceNum", requestForm.getInvoiceNum());
@@ -347,7 +351,7 @@ public class WNPRC_PurchasingManager
         extensibleCols.add(otherAcctAndInves);
 
         GWTPropertyDescriptor ccOptionId = new GWTPropertyDescriptor();
-        ccOptionId.setName("creditCardOptionId");
+        ccOptionId.setName("paymentOptionId");
         ccOptionId.setRangeURI("int");
         extensibleCols.add(ccOptionId);
 

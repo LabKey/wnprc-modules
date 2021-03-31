@@ -1,0 +1,62 @@
+<script type="text/javascript">
+
+    function goToRequestDataEntry() {
+        window.location = LABKEY.ActionURL.buildURL('WNPRC_Purchasing', 'purchasingRequest', LABKEY.ActionURL.getContainer(), {isNewRequest: true, returnUrl:window.location});
+    }
+
+    function goToVendorsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'vendor'});
+    }
+
+    function goToUserAccountAssociationsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'userAccountAssociations'});
+    }
+
+    function goToShippingInfoView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'shippingInfo'});
+    }
+
+    function goToItemUnitsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'itemUnits'});
+    }
+
+    function goToLineItemsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'lineItems'});
+    }
+
+    function goToMyOpenRequestsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'myOpenRequests'});
+    }
+
+    function goToOpenRequestsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'purchasingRequestsOverviewForAdmins', 'query.viewName':'AllOpenRequests'});
+    }
+
+    function goToCompletedRequestsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'purchasingRequestsOverviewForAdmins', 'query.viewName':'CompletedRequests'});
+    }
+
+    function goToRequestsView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'purchasingRequestsOverviewForAdmins'});
+    }
+
+    function goToPCardView() {
+        window.location = LABKEY.ActionURL.buildURL('query', 'executeQuery', LABKEY.ActionURL.getContainer(), {schemaName: 'ehr_purchasing', 'query.queryName': 'pCard'});
+    }
+</script>
+
+<div id="<%=h('wnprc_purchasing-admin-page')%>"></div>
+<h4 style="font-family: Roboto;font-size: 14px;font-weight: bold;">Purchasing Requests</h4>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToRequestDataEntry()">Enter Request</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToMyOpenRequestsView()">My Open Requests</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToOpenRequestsView()">All Open Requests</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToCompletedRequestsView()">Completed Requests</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToRequestsView()">All Requests</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToPCardView()">P-Card View</a></span></div>
+
+<h4 style="font-family: Roboto;font-size: 14px;font-weight: bold; padding-top:10px;">Reference Tables</h4>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToVendorsView()">Vendors</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToUserAccountAssociationsView()">User Account Associations</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToShippingInfoView()">Shipping Info</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToItemUnitsView()">Item Units</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToLineItemsView()">Line Items</a></span></div>

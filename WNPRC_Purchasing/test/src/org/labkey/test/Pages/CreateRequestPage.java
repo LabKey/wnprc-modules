@@ -4,7 +4,6 @@ import org.labkey.test.Locator;
 import org.labkey.test.components.html.Input;
 import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.pages.LabKeyPage;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -201,6 +200,50 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
     {
         SelectWrapper.Select(Locator.byClass("status-input form-control"))
                 .findWhenNeeded(getDriver()).selectByVisibleText(status);
+        return this;
+    }
+
+    public CreateRequestPage setAssignedTo(String value)
+    {
+        SelectWrapper.Select(Locator.byClass("assigned-to-input form-control"))
+                .findWhenNeeded(getDriver()).selectByVisibleText(value);
+        return this;
+    }
+
+    public String getPurchaseOptions()
+    {
+        return SelectWrapper.Select(Locator.byClass("payment-option-input form-control"))
+                .findWhenNeeded(getDriver())
+                .getFirstSelectedOption()
+                .getText();
+    }
+
+    public CreateRequestPage setPurchaseOptions(String value)
+    {
+        SelectWrapper.Select(Locator.byClass("payment-option-input form-control"))
+                .findWhenNeeded(getDriver()).selectByVisibleText(value);
+        return this;
+    }
+
+    public String getOrderDate()
+    {
+        return Locator.id("order-date-id").findElement(getDriver()).getText();
+    }
+
+    public CreateRequestPage setOrderDate(String date)
+    {
+        setFormElement(Locator.id("order-date-id"), date);
+        return this;
+    }
+
+    public String getCardPostDate()
+    {
+        return Locator.id("card-post-date-id").findElement(getDriver()).getText();
+    }
+
+    public CreateRequestPage setCardPostDate(String date)
+    {
+        setFormElement(Locator.id("card-post-date-id"), date);
         return this;
     }
 

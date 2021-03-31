@@ -27,9 +27,12 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.WebPartFactory;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -44,6 +47,32 @@ public class WNPRC_PurchasingController extends SpringActionController
     public WNPRC_PurchasingController()
     {
         setActionResolver(_actionResolver);
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class RequesterAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors)
+        {
+            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Requester");
+            Portal.WebPart part = factory.createWebPart();
+            return Portal.getWebPartViewSafe(factory, getViewContext(), part);
+        }
+
+        public void addNavTrail(NavTree root) { }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class PurchaseAdminAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors)
+        {
+            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Admin");
+            Portal.WebPart part = factory.createWebPart();
+            return Portal.getWebPartViewSafe(factory, getViewContext(), part);
+        }
+
+        public void addNavTrail(NavTree root) { }
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -95,7 +124,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _comments;
         String _qcState;
         Integer _assignedTo;
-        Integer _creditCardOption;
+        Integer _paymentOption;
         String _program;
         String _confirmNum;
         String _invoiceNum;
@@ -234,14 +263,14 @@ public class WNPRC_PurchasingController extends SpringActionController
             _assignedTo = assignedTo;
         }
 
-        public Integer getCreditCardOption()
+        public Integer getPaymentOption()
         {
-            return _creditCardOption;
+            return _paymentOption;
         }
 
-        public void setCreditCardOption(Integer creditCardOption)
+        public void setPaymentOption(Integer paymentOption)
         {
-            _creditCardOption = creditCardOption;
+            _paymentOption = paymentOption;
         }
 
         public String getProgram()

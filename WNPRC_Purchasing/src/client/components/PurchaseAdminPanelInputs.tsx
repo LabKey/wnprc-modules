@@ -49,30 +49,30 @@ export const AssignedToInput: FC<InputProps> = memo(props => {
     );
 });
 
-export const CreditCardOptionInput: FC<InputProps> = memo(props => {
+export const PaymentOptionInput: FC<InputProps> = memo(props => {
     const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
-        getData('wnprc_purchasing', 'creditCardOptions', 'rowId, cardOption', 'cardOption').then(vals => {
+        getData('wnprc_purchasing', 'paymentOptions', 'rowId, paymentOption', 'paymentOption').then(vals => {
             setDropDownVals(vals);
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'cardOption'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'rowId', 'paymentOption'), [dropDownVals]);
 
     const onValueChange = useCallback(
         evt => {
-            onChange('creditCardOption', evt.target.value);
+            onChange('paymentOption', evt.target.value);
         },
         [onChange]
     );
 
     return (
         <div>
-            <PurchasingFormInput label="Credit card option">
+            <PurchasingFormInput label="Purchase option">
                 <select
-                    className={'credit-card-option-input form-control ' + (hasError ? 'field-validation-error' : '')}
+                    className={'payment-option-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onValueChange}
                 >

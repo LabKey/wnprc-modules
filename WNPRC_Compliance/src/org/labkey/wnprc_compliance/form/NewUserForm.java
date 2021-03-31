@@ -15,6 +15,7 @@ public class NewUserForm {
     public Date dateOfBirth;
     public String description;
     public boolean isEmployee;
+    public boolean hold;
     public List<Integer> userIds;
     public List<Integer> cardNumbers;
 }

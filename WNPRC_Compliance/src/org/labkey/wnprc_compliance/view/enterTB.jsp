@@ -121,21 +121,29 @@
                         </div>
 
 
+
+
                         <div class="col-xs-4">
                             <div class="panel panel-primary">
                                 <div class="panel-heading">Attributes</div>
 
                                 <div class="panel-body">
                                     <form>
+                                        <div class="form-group col-sm-4">
+                                            <label class="col-sm-5 control-label">DOB </label>
+                                                <input type="text" class="form-control" data-bind="dateTimePicker: dateOfBirth, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
+                                            </label>
+                                        </div>
                                         <div class="checkbox">
                                             <label class="control-label">
                                                 <input type="checkbox" data-bind="checked: isEmployee">
                                                 This person is an employee
                                             </label>
                                         </div>
-                                        <div class="form-group col-sm-4">
-                                            <label class="col-sm-5 control-label">DOB </label>
-                                                <input type="text" class="form-control" data-bind="dateTimePicker: dateOfBirth, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
+                                        <div class="checkbox">
+                                            <label class="control-label">
+                                                <input type="checkbox" data-bind="checked: hold">
+                                                Hold for barrier access
                                             </label>
                                         </div>
                                     </form>
@@ -371,6 +379,7 @@
             dateOfBirth: ko.observable(''),
             notes:      ko.observable(''),
             isEmployee: ko.observable(false),
+            hold: ko.observable(false),
             userMatches: ko.observableArray([]),
             cardMatches: ko.observableArray([]),
             selectedUsers: ko.observableArray([]),
@@ -472,6 +481,7 @@
             VM.newUserForm.dateOfBirth('');
             VM.newUserForm.notes('');
             VM.newUserForm.isEmployee(false);
+            VM.newUserForm.hold(false);
             VM.newUserForm.userMatches([]);
             VM.newUserForm.cardMatches([]);
             VM.newUserForm.selectedUsers([]);
@@ -498,6 +508,7 @@
                     lastName:    form.lastName,
                     dateOfBirth: form.dateOfBirth,
                     description: form.notes,
+                    hold: form.hold,
                     cardNumbers: _.map(form.selectedCards, function(card) { return card.id }),
                     userIds:     _.map(form.selectedUsers, function(user) { return user.id })
                 };
@@ -528,7 +539,8 @@
                 submission.url = "<%= new ActionURL(WNPRC_ComplianceController.UpdatePersonClearanceAPI.class, getContainer()) %>";
 
                 submission.data = {
-                    personid: VM.selectedPerson()
+                    personid: VM.selectedPerson(),
+                    hold: form.hold
                 };
 
                 if (!measlesForm.disabled()) {

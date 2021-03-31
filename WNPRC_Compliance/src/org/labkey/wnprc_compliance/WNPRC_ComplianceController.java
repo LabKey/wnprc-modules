@@ -255,6 +255,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 String personId = service.newUser((NewUserForm) form);
+                String hold = service.newUser((NewUserForm) form);
 
                 if (form.tbInfo != null) {
                     if (form.tbInfo.pending) {
@@ -270,6 +271,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                 }
 
                 returnJSON.put("personid", personId);
+                returnJSON.put("hold", hold);
 
                 transaction.commit();
             }

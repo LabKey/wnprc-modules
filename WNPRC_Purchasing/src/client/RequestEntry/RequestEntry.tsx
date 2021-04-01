@@ -81,7 +81,7 @@ export const App: FC = memo(() => {
                     setPurchaseAdminModel(
                         PurchaseAdminModel.create({
                             assignedTo: vals[0].assignedTo,
-                            creditCardOption: vals[0].creditCardOptionId,
+                            paymentOption: vals[0].paymentOptionId,
                             qcState: vals[0].qcState,
                             program: vals[0].program,
                             confirmationNum: vals[0].confirmationNum,
@@ -206,17 +206,8 @@ export const App: FC = memo(() => {
             setIsDirty(false);
             event.preventDefault();
             const returnUrl = ActionURL.getParameter('returnUrl');
+            window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
 
-            // TODO: this is temporary until purchasing admin page is created, then change it to get routed to the admin page
-            if (!!requestId && hasPurchasingAdminPermission) {
-                window.location.href = ActionURL.buildURL('query', 'executeQuery', getServerContext().container.path, {
-                    schemaName: 'ehr_purchasing',
-                    'query.queryName': 'purchasingRequests',
-                });
-            } else {
-                window.location.href =
-                    returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
-            }
         },
         [isDirty, requestId, hasPurchasingAdminPermission]
     );
@@ -238,22 +229,8 @@ export const App: FC = memo(() => {
             )
                 .then(r => {
                     if (r.success) {
-                        // TODO: this is temporary until purchasing admin page is created, then change it to get routed to the admin page
-                        if (requestId) {
-                            window.location.href = ActionURL.buildURL(
-                                'query',
-                                'executeQuery',
-                                getServerContext().container.path,
-                                { schemaName: 'ehr_purchasing', 'query.queryName': 'purchasingRequests' }
-                            );
-                        } else {
-                            // navigate to purchasing overview grid/main page
-                            window.location.href = ActionURL.buildURL(
-                                'project',
-                                'begin',
-                                getServerContext().container.path
-                            );
-                        }
+                        const returnUrl = ActionURL.getParameter('returnUrl');
+                        window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
                     }
                 })
                 .catch(reject => {

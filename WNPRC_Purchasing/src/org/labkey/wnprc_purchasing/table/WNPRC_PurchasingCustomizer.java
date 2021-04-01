@@ -23,6 +23,7 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
             {
                 addAttachmentsCol((AbstractTableInfo) tableInfo);
                 addRequestLink((AbstractTableInfo) tableInfo);
+                addTotalCostColumn((AbstractTableInfo) tableInfo);
             }
         }
     }
@@ -46,6 +47,21 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
             col.setUserEditable(false);
             purchasingRequestsTable.addColumn(col);
             col.setDisplayColumnFactory(new AttachmentDisplayColumnFactory());
+        }
+    }
+
+    private void addTotalCostColumn(AbstractTableInfo purchasingRequestsTable)
+    {
+        String name = "totalCost";
+        if (purchasingRequestsTable.getColumn(name) == null)
+        {
+            SQLFragment sql = new SQLFragment("(SELECT x.totalCost FROM (SELECT requestRowId, sum(quantity * unitCost) AS totalCost FROM ehr_purchasing.lineItems items GROUP BY items.requestRowId) x ");
+            sql.append("WHERE " + ExprColumn.STR_TABLE_ALIAS + ".rowId = x.requestRowId)");
+            ExprColumn col = new ExprColumn(purchasingRequestsTable, name, sql, JdbcType.DECIMAL);
+            col.setFormat("$###,##0.00");
+            col.setLabel("Total Cost");
+            col.setUserEditable(false);
+            purchasingRequestsTable.addColumn(col);
         }
     }
 }

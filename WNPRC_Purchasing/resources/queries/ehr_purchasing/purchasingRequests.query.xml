@@ -47,10 +47,10 @@
                     <column columnName="shippingAttentionTo">
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="creditCardOptionId">
+                    <column columnName="paymentOptionId">
                         <fk>
                             <fkDbSchema>wnprc_purchasing</fkDbSchema>
-                            <fkTable>creditCardOptions</fkTable>
+                            <fkTable>paymentOptions</fkTable>
                             <fkColumnName>rowId</fkColumnName>
                         </fk>
                     </column>
@@ -59,6 +59,13 @@
                     </column>
                     <column columnName="orderDate"/>
                     <column columnName="cardPostDate"/>
+                    <column columnName="assignedTo">
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>Users</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

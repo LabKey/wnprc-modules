@@ -146,6 +146,12 @@
                                                 Hold for barrier access
                                             </label>
                                         </div>
+                                        <div class="checkbox">
+                                            <label class="control-label">
+                                                <input type="checkbox" data-bind="checked: measles_required">
+                                                Measles required
+                                            </label>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
@@ -271,15 +277,6 @@
                         <div class="col-sm-6">
                         <form class="form-horizontal">
                             <div class="form-group">
-                                <div class="col-sm-offset-3 col-sm-8">
-                                    <div class="checkbox">
-                                        <label class="control-label">
-                                            <input type="checkbox" data-bind="checked: required"> Required
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
                                 <label class="col-sm-3 control-label">Clearance Date</label>
                                 <div class="col-sm-8">
                                     <input type="text" class="form-control" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
@@ -380,6 +377,7 @@
             notes:      ko.observable(''),
             isEmployee: ko.observable(false),
             hold: ko.observable(false),
+            measles_required: ko.observable(false),
             userMatches: ko.observableArray([]),
             cardMatches: ko.observableArray([]),
             selectedUsers: ko.observableArray([]),
@@ -482,6 +480,7 @@
             VM.newUserForm.notes('');
             VM.newUserForm.isEmployee(false);
             VM.newUserForm.hold(false);
+            VM.newUserForm.measles_required(false);
             VM.newUserForm.userMatches([]);
             VM.newUserForm.cardMatches([]);
             VM.newUserForm.selectedUsers([]);
@@ -509,6 +508,7 @@
                     dateOfBirth: form.dateOfBirth,
                     description: form.notes,
                     hold: form.hold,
+                    measles_required: form.measles_required,
                     cardNumbers: _.map(form.selectedCards, function(card) { return card.id }),
                     userIds:     _.map(form.selectedUsers, function(user) { return user.id })
                 };
@@ -540,7 +540,8 @@
 
                 submission.data = {
                     personid: VM.selectedPerson(),
-                    hold: form.hold
+                    hold: form.hold,
+                    measles_required: form.measles_required
                 };
 
                 if (!measlesForm.disabled()) {

@@ -255,7 +255,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
             try (DbScope.Transaction transaction = DbSchema.get(WNPRC_ComplianceSchema.NAME).getScope().ensureTransaction()) {
                 String personId = service.newUser((NewUserForm) form);
-                String hold = service.newUser((NewUserForm) form);
+                //String hold = service.newUser((NewUserForm) form);
 
                 if (form.tbInfo != null) {
                     if (form.tbInfo.pending) {
@@ -271,7 +271,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                 }
 
                 returnJSON.put("personid", personId);
-                returnJSON.put("hold", hold);
+                returnJSON.put("hold", form.hold);
 
                 transaction.commit();
             }
@@ -504,7 +504,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String id;
         public String _row;
         public String table_name;
-        public String required;
         public boolean mutated;
     }
     public static class Clearances {
@@ -530,7 +529,6 @@ public class WNPRC_ComplianceController extends SpringActionController {
                     JSONObject tbClearance = new JSONObject();
                     tbClearance.put("id", tbform.id);
                     tbClearance.put("date", tbform.date);
-                    tbClearance.put("required", tbform.required);
                     tbClearance.put("container", getContainer().getId());
                     clearancesToUpdate.add(tbClearance);
                 }

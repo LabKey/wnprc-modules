@@ -36,6 +36,7 @@ public class PersonService {
         newPerson.put("middle_name", form.middleName);
         newPerson.put("last_name", form.lastName);
         newPerson.put("hold", form.hold);
+        newPerson.put("measles_required", form.measles_required);
         newPerson.put("date_of_birth", form.dateOfBirth);
         newPerson.put("notes", form.description);
         newPerson.put("container", container.getId());
@@ -77,7 +78,6 @@ public class PersonService {
         requirementInfo.put("date", form.dateCompleted);
         requirementInfo.put("comment",   form.notes);
         requirementInfo.put("container", container.getId());
-        requirementInfo.put("required", form.required);
         queryUpdater.upsert(requirementInfo);
 
         JSONObject lookupInfo = new JSONObject();

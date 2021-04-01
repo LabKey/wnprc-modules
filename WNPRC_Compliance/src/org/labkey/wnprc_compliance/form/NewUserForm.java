@@ -16,6 +16,7 @@ public class NewUserForm {
     public String description;
     public boolean isEmployee;
     public boolean hold;
+    public boolean measles_required;
     public List<Integer> userIds;
     public List<Integer> cardNumbers;
 }

@@ -1,4 +1,4 @@
-FROM openjdk:14.0.1-jdk-oraclelinux7
+FROM openjdk:15.0.2-jdk-oraclelinux7
 
 ENV LANG en_US.utf8
 

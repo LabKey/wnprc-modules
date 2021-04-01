@@ -67,6 +67,7 @@
     "blockui": "^1.0.0",
     "bootstrap": "^3.0.0",
     "dayjs": "^1.8.24",
+    "fsevents": "^1.2.4",
     "fullcalendar": "^3.0.0",
     "jquery": "^3.5.0",
     "knockout": "3.5.0",

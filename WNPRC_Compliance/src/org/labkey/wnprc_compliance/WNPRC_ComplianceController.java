@@ -271,7 +271,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                 }
 
                 returnJSON.put("personid", personId);
-                returnJSON.put("hold", form.hold);
+                returnJSON.put("barrier_access_requested", form.barrier_access_requested);
 
                 transaction.commit();
             }

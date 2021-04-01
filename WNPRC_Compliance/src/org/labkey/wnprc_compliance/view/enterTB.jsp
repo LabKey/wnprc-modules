@@ -142,8 +142,8 @@
                                         </div>
                                         <div class="checkbox">
                                             <label class="control-label">
-                                                <input type="checkbox" data-bind="checked: hold">
-                                                Hold for barrier access
+                                                <input type="checkbox" data-bind="checked: barrier_access_requested">
+                                                Hold (for barrier access)
                                             </label>
                                         </div>
                                         <div class="checkbox">
@@ -376,7 +376,7 @@
             dateOfBirth: ko.observable(''),
             notes:      ko.observable(''),
             isEmployee: ko.observable(false),
-            hold: ko.observable(false),
+            barrier_access_requested: ko.observable(false),
             measles_required: ko.observable(false),
             userMatches: ko.observableArray([]),
             cardMatches: ko.observableArray([]),
@@ -479,7 +479,7 @@
             VM.newUserForm.dateOfBirth('');
             VM.newUserForm.notes('');
             VM.newUserForm.isEmployee(false);
-            VM.newUserForm.hold(false);
+            VM.newUserForm.barrier_access_requested(false);
             VM.newUserForm.measles_required(false);
             VM.newUserForm.userMatches([]);
             VM.newUserForm.cardMatches([]);
@@ -507,7 +507,7 @@
                     lastName:    form.lastName,
                     dateOfBirth: form.dateOfBirth,
                     description: form.notes,
-                    hold: form.hold,
+                    barrier_access_requested: form.barrier_access_requested,
                     measles_required: form.measles_required,
                     cardNumbers: _.map(form.selectedCards, function(card) { return card.id }),
                     userIds:     _.map(form.selectedUsers, function(user) { return user.id })
@@ -540,7 +540,7 @@
 
                 submission.data = {
                     personid: VM.selectedPerson(),
-                    hold: form.hold,
+                    barrier_access_requested: form.barrier_access_requested,
                     measles_required: form.measles_required
                 };
 

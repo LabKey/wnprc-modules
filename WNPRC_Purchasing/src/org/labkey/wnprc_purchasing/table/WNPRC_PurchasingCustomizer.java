@@ -8,6 +8,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 
 import java.util.Objects;
@@ -25,16 +26,29 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
                 addRequestLink((AbstractTableInfo) tableInfo);
                 addTotalCostColumn((AbstractTableInfo) tableInfo);
             }
+            else if (matches(tableInfo, "ehr_purchasing", "purchasingReceiverOverview"))
+            {
+                addRequestUpdateLinks((AbstractTableInfo) tableInfo);
+            }
         }
     }
 
     private void addRequestLink(AbstractTableInfo ti)
     {
-        if (ti.hasPermission(Objects.requireNonNull(ti.getUserSchema()).getUser(), UpdatePermission.class))
+        if (ti.hasPermission(Objects.requireNonNull(ti.getUserSchema()).getUser(), AdminPermission.class))
         {
             MutableColumnInfo rowId = (MutableColumnInfo) ti.getColumn("rowId");
             rowId.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${rowId}"));
         }
+    }
+
+    private void addRequestUpdateLinks(AbstractTableInfo ti)
+    {
+        MutableColumnInfo requestRowId = (MutableColumnInfo) ti.getColumn("requestRowId");
+        requestRowId.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${requestRowId}"));
+
+        MutableColumnInfo quantityReceived = (MutableColumnInfo) ti.getColumn("quantityReceived");
+        quantityReceived.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${requestRowId}"));
     }
 
     private void addAttachmentsCol(AbstractTableInfo purchasingRequestsTable)

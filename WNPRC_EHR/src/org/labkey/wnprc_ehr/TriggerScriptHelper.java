@@ -1293,9 +1293,10 @@ public class TriggerScriptHelper {
         //TODO: Check is the animal is at least one time in the WaterSchedule Table
         if(checkIfAnimalInCondition(animalId,clientStartDate).size()==0){
 
-            returnErrors.put("field", "id");
+            returnErrors.put("field", "Id");
             returnErrors.put("severity","ERROR");
             returnErrors.put("message","Animal not in waterScheduledAnimals table, contact compliance staff to enter new animals into the water monitoring system");
+            errorMap.put(objectId, returnErrors);
 
             //returnMessage = "Error animal not in WaterScheduleAnimal table or is already in "+waterSource +" condition";
 
@@ -1421,7 +1422,7 @@ public class TriggerScriptHelper {
                                 //Adding dataSource, objetcId, severity and message to the exception in case of error
                                 returnErrors.put("dataSource", waterRecord.getDataSource());
                                 returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
-                                        " End Date: " + endFormattedDate + " Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "'><b> EDIT</b></a>");
+                                        " End Date: " + endFormattedDate +" Frequency: "+waterRecord.getFrequency() +" Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "'><b> EDIT</b></a>");
                                 returnErrors.put("objectId", waterRecord.getObjectId());
                                 returnErrors.put("severity", "ERROR");
 

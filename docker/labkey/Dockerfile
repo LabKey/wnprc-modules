@@ -34,10 +34,10 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
     elif [ "$LABKEY_VERSION" = 21.3 ] ; then \
-        LABKEY_TEAMCITY_CONFIG="LabKey_213Release_Premium_SnapshotInstallers" ; \
-        LABKEY_SNAPSHOT="-Beta-" ; \
+        LABKEY_TEAMCITY_CONFIG="LabKey_213Release_External_Wnprc_Installers" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
-        LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     fi \
  && W="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/id`" \
  && X="`wget -qO- --http-user="${LABKEY_TEAMCITY_USERNAME}" --http-password="${LABKEY_TEAMCITY_PASSWORD}" https://teamcity.labkey.org/httpAuth/app/rest/buildTypes/${LABKEY_TEAMCITY_CONFIG}/builds/status:success${B}/number`" \

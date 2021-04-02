@@ -129,11 +129,6 @@
 
                                 <div class="panel-body">
                                     <form>
-                                        <div class="form-group col-sm-4">
-                                            <label class="col-sm-5 control-label">DOB </label>
-                                                <input type="text" class="form-control" data-bind="dateTimePicker: dateOfBirth, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
-                                            </label>
-                                        </div>
                                         <div class="checkbox">
                                             <label class="control-label">
                                                 <input type="checkbox" data-bind="checked: isEmployee">
@@ -150,6 +145,11 @@
                                             <label class="control-label">
                                                 <input type="checkbox" data-bind="checked: measles_required">
                                                 Measles required
+                                            </label>
+                                        </div>
+                                        <div class="row ">
+                                            <label class="control-label" style="padding-left:5px">DOB </label>
+                                            <input type="text" data-bind="dateTimePicker: dateOfBirth, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
                                             </label>
                                         </div>
                                     </form>

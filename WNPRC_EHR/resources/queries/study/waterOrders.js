@@ -85,7 +85,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {
                 var errorObject = JSON.parse(jsonArray[i]);
-                console.log(i + " " + errorObject.message);
                 EHR.Server.Utils.addError(scriptErrors, errorObject.field, errorObject.message, errorObject.severity);
             }
         }

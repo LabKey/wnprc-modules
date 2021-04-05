@@ -446,8 +446,7 @@
             $element: $('#measles-form-body'),
             disabled: ko.observable(),
             notes: ko.observable(''),
-            date: ko.observable(''),
-            required: ko.observable(false)
+            date: ko.observable('')
         };
         VM.measlesForm = measlesForm;
 
@@ -480,7 +479,6 @@
             VM.newUserForm.notes('');
             VM.newUserForm.isEmployee(false);
             VM.newUserForm.barrier_access_requested(false);
-            VM.newUserForm.measles_required(false);
             VM.newUserForm.userMatches([]);
             VM.newUserForm.cardMatches([]);
             VM.newUserForm.selectedUsers([]);
@@ -522,8 +520,7 @@
                     }
                     submission.data.measlesInfo = {
                         notes: measlesForm.notes(),
-                        dateCompleted: dateCompleted,
-                        required: measlesForm.required()
+                        dateCompleted: dateCompleted
                     };
                 }
 
@@ -553,8 +550,7 @@
                     }
                     submission.data.measlesInfo = {
                         notes: measlesForm.notes(),
-                        dateCompleted: dateCompleted,
-                        required: measlesForm.required()
+                        dateCompleted: dateCompleted
                     };
                 }
 

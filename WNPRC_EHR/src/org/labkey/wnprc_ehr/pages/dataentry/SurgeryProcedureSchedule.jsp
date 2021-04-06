@@ -188,8 +188,15 @@
         let inputDiv = document.createElement("div");
         inputDiv.classList.add("col-xs-8");
 
-        let inputEl = document.createElement("input");
-        inputEl.type = "text";
+        let inputEl;
+        if (value && value.length > 20) {
+            inputEl = document.createElement("textarea");
+            inputEl.rows = Math.floor(value.length / 30);
+            inputEl.cols = 40;
+        } else {
+            inputEl = document.createElement("input");
+            inputEl.type = "text";
+        }
         inputEl.id = id;
         inputEl.name = id;
         inputEl.value = value;

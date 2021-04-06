@@ -3,7 +3,7 @@ SELECT CASE WHEN sp.qcstate.label = 'Request: Denied' THEN 'EDIT' ELSE '' END as
        sp.date,
        sp.enddate,
        sp.procedurename,
-       sp.procedureunit AS procedureunit,
+       sp.procedureunit.unit_display_name AS procedureunit,
        sp.project,
        sp.account,
        sp.surgeon,

@@ -1,11 +1,27 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="requestRowId"/>
+        <column name="requestRowId/qcState/Label">
+            <properties>
+                <property name="columnTitle" value="Request Status"/>
+            </properties>
+        </column>
         <column name="item"/>
         <column name="itemUnitId"/>
         <column name="controlledSubstance"/>
         <column name="quantity"/>
+        <column name="quantityReceived"/>
         <column name="unitCost"/>
+        <column name="requestRowId/createdBy">
+            <properties>
+                <property name="columnTitle" value="Requester"/>
+            </properties>
+        </column>
+        <column name="requestRowId/assignedTo">
+            <properties>
+                <property name="columnTitle" value="Assigned To"/>
+            </properties>
+        </column>
     </columns>
     <sorts>
         <sort column="requestRowId" descending="true" />

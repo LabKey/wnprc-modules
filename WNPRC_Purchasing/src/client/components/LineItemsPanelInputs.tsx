@@ -6,12 +6,13 @@ import { createOptions, formatCurrency } from './Utils';
 
 interface InputProps {
     value: any;
-    onChange: (colName, value) => void;
+    onChange?: (colName, value) => void;
     hasError?: boolean;
+    isReadOnly?: boolean;
 }
 
 export const DescriptionInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
 
     const onTextChange = useCallback(
         evt => {
@@ -28,12 +29,13 @@ export const DescriptionInput: FC<InputProps> = memo(props => {
             value={value}
             onChange={onTextChange}
             id="item-description-id"
+            readOnly={isReadOnly}
         />
     );
 });
 
 export const UnitInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
@@ -56,6 +58,7 @@ export const UnitInput: FC<InputProps> = memo(props => {
             className={'line-item-row-input unit-input form-control ' + (hasError ? 'field-validation-error' : '')}
             value={value}
             onChange={onValueChange}
+            disabled={isReadOnly}
         >
             <option hidden value="">
                 Select
@@ -67,8 +70,9 @@ export const UnitInput: FC<InputProps> = memo(props => {
 
 interface NumericInputProps {
     value: number;
-    onChange: (colName, value) => void;
+    onChange?: (colName, value) => void;
     hasError?: boolean;
+    isReadOnly?: boolean;
 }
 
 export const UnitCostInput: FC<NumericInputProps> = memo(props => {
@@ -94,7 +98,7 @@ export const UnitCostInput: FC<NumericInputProps> = memo(props => {
 });
 
 export const UnitQuantityInput: FC<NumericInputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
 
     const onValueChange = useCallback(
         evt => {
@@ -111,6 +115,30 @@ export const UnitQuantityInput: FC<NumericInputProps> = memo(props => {
             pattern="[0-9]*"
             id="unit-quantity-id"
             type="number"
+            readOnly={isReadOnly}
+        />
+    );
+});
+
+export const QuantityReceivedInput: FC<NumericInputProps> = memo(props => {
+    const { onChange, value, hasError, isReadOnly } = props;
+
+    const onValueChange = useCallback(
+        evt => {
+            onChange('quantityReceived', evt.target.value);
+        },
+        [onChange]
+    );
+
+    return (
+        <input
+            className={'line-item-row-input quantity-received-input form-control ' + (hasError ? 'field-validation-error' : '')}
+            value={value}
+            onChange={onValueChange}
+            pattern="[0-9]*"
+            id="quantity-received-id"
+            type="number"
+            readOnly={isReadOnly}
         />
     );
 });
@@ -145,7 +173,7 @@ export const SubtotalInput: FC<SubtotalInputProps> = memo(props => {
 });
 
 export const ControlledSubstance: FC<InputProps> = memo(props => {
-    const { onChange, value } = props;
+    const { onChange, value, isReadOnly } = props;
 
     const onInputChange = useCallback(
         evt => {
@@ -161,6 +189,7 @@ export const ControlledSubstance: FC<InputProps> = memo(props => {
             checked={value}
             onChange={onInputChange}
             id="control-substance-id"
+            disabled={isReadOnly}
         />
     );
 });

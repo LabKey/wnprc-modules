@@ -49,6 +49,9 @@ export const App: FC = memo(() => {
     const [hasPurchasingAdminPermission, setHasPurchasingAdminPermission] = useState<boolean>(
         getServerContext().user.isAdmin
     );
+    const [hasPurchasingUpdatePermission, setHasPurchasingUpdatePermission] = useState<boolean>(
+        getServerContext().user.canUpdate
+    );
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
@@ -98,7 +101,7 @@ export const App: FC = memo(() => {
             getData(
                 'ehr_purchasing',
                 'lineItems',
-                'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, unitCost, itemStatusId',
+                'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, quantityReceived, unitCost, itemStatusId',
                 undefined,
                 requestRowIdFilter
             ).then(vals => {
@@ -111,6 +114,7 @@ export const App: FC = memo(() => {
                             controlledSubstance: val.controlledSubstance,
                             itemUnit: val.itemUnitId,
                             quantity: val.quantity,
+                            quantityReceived: val.quantityReceived,
                             unitCost: val.unitCost,
                             status: val.itemStatusId,
                         });
@@ -209,7 +213,7 @@ export const App: FC = memo(() => {
             window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
 
         },
-        [isDirty, requestId, hasPurchasingAdminPermission]
+        [isDirty, requestId, hasPurchasingAdminPermission, hasPurchasingUpdatePermission]
     );
 
     const onSaveBtnHandler = useCallback(
@@ -345,17 +349,22 @@ export const App: FC = memo(() => {
     return (
         <>
             {
-                // has to be a purchasing admin to update the existing request
-                requestId && !hasPurchasingAdminPermission && (
+                // has to be a purchasing editors to update the existing request
+                requestId && !hasPurchasingUpdatePermission && (
                     <Alert>You do not have sufficient permissions to update this request.</Alert>
                 )
             }
             {
-                // display ui for purchasing admins to update existing request or requesters to enter new request
-                ((requestId && hasPurchasingAdminPermission) || requestId === undefined) && (
+                // display ui for purchasing editors to update existing request or requesters to enter new request
+                ((requestId && hasPurchasingUpdatePermission) || requestId === undefined) && (
                     <>
-                        <RequestOrderPanel onInputChange={requestOrderModelChange} model={requestOrderModel} />
-                        {requestId && (
+                        <RequestOrderPanel
+                            onInputChange={requestOrderModelChange}
+                            model={requestOrderModel}
+                            isAdmin={hasPurchasingAdminPermission}
+                            canUpdate={hasPurchasingUpdatePermission}
+                        />
+                        {requestId && hasPurchasingAdminPermission && (
                             <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
                         )}
                         <DocumentAttachmentPanel
@@ -367,6 +376,8 @@ export const App: FC = memo(() => {
                             lineItems={lineItems}
                             errorMsg={lineItemErrorMsg}
                             hasRequestId={!!requestId}
+                            isAdmin={hasPurchasingAdminPermission}
+                            canUpdate={hasPurchasingUpdatePermission}
                         />
                         <button
                             disabled={isSaving}

@@ -284,6 +284,7 @@ public class WNPRC_PurchasingManager
                 }
 
                 row.put("controlledSubstance", lineItem.get("controlledSubstance"));
+                row.put("quantityReceived", lineItem.get("quantityReceived"));
 
                 if(null != lineItem.get("rowId"))
                 {

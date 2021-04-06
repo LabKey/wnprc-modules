@@ -116,6 +116,7 @@ export class LineItemModel {
     readonly controlledSubstance: boolean = false;
     readonly itemUnit: number; // rowId of ehr_purchasing.itemUnits
     readonly quantity: number;
+    readonly quantityReceived?: number;
     readonly unitCost: number;
     readonly subTotal: number = 0;
     readonly status?: string;

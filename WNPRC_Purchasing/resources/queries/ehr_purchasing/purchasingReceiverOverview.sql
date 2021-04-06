@@ -10,3 +10,4 @@ quantityReceived,
 itemUnitId.itemUnit,
 controlledSubstance
 FROM ehr_purchasing.lineItems
+WHERE requestRowId.qcState.Label = 'Order Placed'

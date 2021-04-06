@@ -57,6 +57,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         {
             WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Requester");
             Portal.WebPart part = factory.createWebPart();
+            getPageConfig().setTitle("Purchasing Requester");
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }
 
@@ -69,6 +70,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         public ModelAndView getView(Object o, BindException errors)
         {
             WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Admin");
+            getPageConfig().setTitle("Purchasing Admin");
             Portal.WebPart part = factory.createWebPart();
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }
@@ -82,6 +84,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         public ModelAndView getView(Object o, BindException errors)
         {
             WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Receiver");
+            getPageConfig().setTitle("Purchasing Receiver");
             Portal.WebPart part = factory.createWebPart();
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }

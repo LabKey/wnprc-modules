@@ -5,11 +5,16 @@
                 <tableTitle>User Account Associations</tableTitle>
                 <columns>
                     <column columnName="userId">
-                        <columnTitle>User</columnTitle>
+                        <columnTitle>User or Group</columnTitle>
                         <fk>
                             <fkDbSchema>core</fkDbSchema>
-                            <fkTable>Users</fkTable>
+                            <fkTable>UsersAndGroups</fkTable>
                             <fkColumnName>UserId</fkColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="DisplayName" operator="neq" value="Users"/>
+                                </filterGroup>
+                            </filters>
                         </fk>
                     </column>
                     <column columnName="account">

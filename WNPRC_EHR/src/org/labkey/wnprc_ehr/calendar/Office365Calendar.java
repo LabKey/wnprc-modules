@@ -245,8 +245,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         cancelEvent(eventId, PROCEDURE_ACCOUNT_NAME);
     }
 
-    public void cancelEvent(String eventId, String calendarName) {
-        Graph.deleteEvent(getAccessToken(getAccountNames().get(calendarName)), eventId);
+    public void cancelEvent(String eventId, String accountName) {
+        Graph.deleteEvent(getAccessToken(accountName), eventId);
     }
 
     private JSONObject getJsonEventList(List<Event> events) throws IOException {
@@ -383,32 +383,14 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                     //Add data for details panel on Surgery Schedule page
                     JSONObject extendedProps = new JSONObject();
                     if (surgeryInfo != null) {
-                        extendedProps.put("lsid", surgeryInfo.get("lsid"));
-                        extendedProps.put("taskid", surgeryInfo.get("taskid"));
+                        surgeryInfo.keySet().forEach(keyStr ->
+                        {
+                            Object keyValue = surgeryInfo.get(keyStr);
+                            extendedProps.put(keyStr, keyValue);
+                        });
                         extendedProps.put("objectid", isBaseCalendar ? surgeryInfo.get("objectid") : objectId);
-                        extendedProps.put("requestid", surgeryInfo.get("requestid"));
-                        extendedProps.put("rowid", surgeryInfo.get("rowid"));
-                        extendedProps.put("priority", surgeryInfo.get("priority"));
-                        extendedProps.put("requestor", surgeryInfo.get("requestor"));
-                        extendedProps.put("procedurename", surgeryInfo.get("procedurename"));
-                        extendedProps.put("procedureunit", surgeryInfo.get("procedureunit"));
-                        extendedProps.put("age", surgeryInfo.get("age"));
-                        extendedProps.put("animalid", surgeryInfo.get("animalid"));
-                        extendedProps.put("created", surgeryInfo.get("created"));
                         extendedProps.put("date", start);
                         extendedProps.put("enddate", end);
-                        extendedProps.put("account", surgeryInfo.get("account"));
-                        extendedProps.put("cur_room", surgeryInfo.get("cur_room"));
-                        extendedProps.put("cur_cage", surgeryInfo.get("cur_cage"));
-                        extendedProps.put("cur_cond", surgeryInfo.get("cur_cond"));
-                        extendedProps.put("location", surgeryInfo.get("location"));
-                        extendedProps.put("rooms", surgeryInfo.get("rooms"));
-                        extendedProps.put("medical", surgeryInfo.get("medical"));
-                        extendedProps.put("project", surgeryInfo.get("project"));
-                        extendedProps.put("protocol", surgeryInfo.get("protocol"));
-                        extendedProps.put("sex", surgeryInfo.get("sex"));
-                        extendedProps.put("weight", surgeryInfo.get("weight"));
-                        extendedProps.put("comments", surgeryInfo.get("comments"));
                         extendedProps.put("selected", false);
                         jsonEvent.put("extendedProps", extendedProps);
                     }

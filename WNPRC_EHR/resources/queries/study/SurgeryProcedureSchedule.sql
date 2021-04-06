@@ -16,8 +16,11 @@ SELECT a.lsid
      , a.Id.curLocation.cond.title AS cur_cond
      , a.date
      , a.enddate
-     , a.procedurename
-     , a.procedureunit.unit_display_name AS procedureunit
+     , (SELECT GROUP_CONCAT(b.displayname, ', ') FROM wnprc.procedure_names b
+        WHERE b.name IN (SELECT UNNEST(STRING_TO_ARRAY(a.procedurename, ',')))) AS procedurename
+     --, a.procedurename AS procedurename
+     , a.procedureunit.unit_display_name AS procedureunitdisplay
+     , a.procedureunit             AS procedureunit
      , a.created
      , a.project
      , a.project.protocol          AS protocol

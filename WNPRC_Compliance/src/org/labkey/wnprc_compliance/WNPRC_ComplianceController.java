@@ -196,7 +196,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
 
     public static class AddDataToExistingPersonForm {
         public String personid;
-        public boolean barrier_access_requested;
+        public boolean hold;
         public boolean measles_required;
         public RequirementForm tbInfo;
         public RequirementForm measlesInfo;
@@ -273,7 +273,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
                 }
 
                 returnJSON.put("personid", personId);
-                returnJSON.put("barrier_access_requested", form.barrier_access_requested);
+                returnJSON.put("hold", form.hold);
 
                 transaction.commit();
             }
@@ -502,7 +502,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
         public String middle_name;
         public String personid;
         public boolean measles_required;
-        public boolean barrier_access_requested;
+        public boolean hold;
         @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
         public Date date;
         public String id;

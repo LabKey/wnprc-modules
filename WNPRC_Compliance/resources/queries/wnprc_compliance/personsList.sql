@@ -9,7 +9,7 @@ notes,
 tbResults.lastClearance as lastTbClearance,
 measlesResults.lastClearance as measlesClearance,
 measles_required,
-barrier_access_requested as hold,
+hold,
 archived_for_access_purposes as isArchived
 
 FROM persons

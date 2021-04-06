@@ -137,8 +137,8 @@
                                         </div>
                                         <div class="checkbox">
                                             <label class="control-label">
-                                                <input type="checkbox" data-bind="checked: barrier_access_requested">
-                                                Hold (for barrier access)
+                                                <input type="checkbox" data-bind="checked: hold">
+                                                Hold
                                             </label>
                                         </div>
                                         <div class="checkbox">
@@ -376,7 +376,7 @@
             dateOfBirth: ko.observable(''),
             notes:      ko.observable(''),
             isEmployee: ko.observable(false),
-            barrier_access_requested: ko.observable(false),
+            hold: ko.observable(false),
             measles_required: ko.observable(false),
             userMatches: ko.observableArray([]),
             cardMatches: ko.observableArray([]),
@@ -478,7 +478,7 @@
             VM.newUserForm.dateOfBirth('');
             VM.newUserForm.notes('');
             VM.newUserForm.isEmployee(false);
-            VM.newUserForm.barrier_access_requested(false);
+            VM.newUserForm.hold(false);
             VM.newUserForm.userMatches([]);
             VM.newUserForm.cardMatches([]);
             VM.newUserForm.selectedUsers([]);
@@ -505,7 +505,7 @@
                     lastName:    form.lastName,
                     dateOfBirth: form.dateOfBirth,
                     description: form.notes,
-                    barrier_access_requested: form.barrier_access_requested,
+                    hold: form.hold,
                     measles_required: form.measles_required,
                     cardNumbers: _.map(form.selectedCards, function(card) { return card.id }),
                     userIds:     _.map(form.selectedUsers, function(user) { return user.id })
@@ -537,7 +537,7 @@
 
                 submission.data = {
                     personid: VM.selectedPerson(),
-                    barrier_access_requested: form.barrier_access_requested,
+                    hold: form.hold,
                     measles_required: form.measles_required
                 };
 

@@ -633,6 +633,23 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=study&query.queryName=Birth&query.Id~eq={id}"));
             table.addColumn(newCol);
         }
+        if (table.getColumn("vendor_id") == null)
+        {
+            String vendorIdColumn = "vendor_id";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            String theQuery = "(" +
+                    "SELECT vendor_id FROM studydataset." + arrival.getName() + " w where w.participantid="
+                      + ExprColumn.STR_TABLE_ALIAS + ".participantid and w.vendor_id is not null LIMIT 1" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, vendorIdColumn, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Vendor ID");
+            newCol.setDescription("Returns the animal's original vendor id.");
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)

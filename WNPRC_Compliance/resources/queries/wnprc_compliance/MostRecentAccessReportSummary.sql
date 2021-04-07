@@ -5,7 +5,7 @@ card_info.card_id,
 cards.exempt,
 cards.exempt_reason,
 personsList.lastTbClearance,
-personsList.measlesClearance,
+personsList.measles_required,
 personsList.isArchived,
 
 card_info.first_name,

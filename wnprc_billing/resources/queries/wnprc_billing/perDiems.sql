@@ -89,6 +89,7 @@ SELECT * FROM
             (CAST(assgn.date AS DATE) <= EndDate AND CAST(assgn.enddate AS DATE) >= StartDate)
     ) pd
     WHERE pd.research = TRUE -- only get research accounts
+        OR pd.project.projectType = 'Marmoset U24' --IN (SELECT project FROM lists.specialFinanceProjects)  -- adding special project to reduce the perDiem
     GROUP BY -- group by to avoid duplicates rows when an animal is moved around in different rooms in a same day. For ex. animal id cj1363, for month of May 2016
         pd.id,
         pd.project,

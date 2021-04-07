@@ -26,8 +26,8 @@ public class IrregularObservationsFormType extends TaskForm {
                 new OKRoomsSection()
         ));
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/IrregularObs_OKRooms.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/IrregularObs.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/IrregularObs_OKRooms.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/IrregularObs.js"));
 
         for(FormSection section: this.getFormSections()) {
             section.addConfigSource("IrregularObservations");

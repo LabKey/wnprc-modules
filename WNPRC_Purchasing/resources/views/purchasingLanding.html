@@ -1,0 +1,16 @@
+<script type="text/javascript">
+
+    function goToRequestersPage() {
+        window.location = LABKEY.ActionURL.buildURL('WNPRC_Purchasing', 'requester', LABKEY.ActionURL.getContainer());
+    }
+
+    function goToPurchaseAdminPage() {
+        window.location = LABKEY.ActionURL.buildURL('WNPRC_Purchasing', 'purchaseAdmin', LABKEY.ActionURL.getContainer());
+    }
+
+</script>
+
+<div id="<%=h('wnprc_purchasing-admin-page')%>"></div>
+<h4 style="font-family: Roboto;font-size: 14px;font-weight: bold;">WNPRC Purchasing Portal</h4>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToRequestersPage()">Purchasing Requests</a></span></div>
+<div style="margin-left:10px;height: 25px;"><span><a class="labkey-text-link" href="javascript:goToPurchaseAdminPage()">Purchasing Admin</a></span></div>

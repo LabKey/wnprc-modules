@@ -1,6 +1,7 @@
 package org.labkey.dbutils;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.ExtendedSimpleModule;
@@ -16,7 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class dbutilsModule extends ExtendedSimpleModule {
-    private static Logger _log = Logger.getLogger(dbutilsModule.class);
+    private static Logger _log = LogManager.getLogger(dbutilsModule.class);
 
     @Override
     public boolean hasScripts() { return true; }

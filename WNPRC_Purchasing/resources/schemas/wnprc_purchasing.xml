@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tables xmlns="http://labkey.org/data/xml">
+    <table tableName="paymentOptions" tableDbType="TABLE" useColumnOrder="true">
+        <tableTitle>Payment Options</tableTitle>
+        <titleColumn>paymentOption</titleColumn>
+        <auditLogging>DETAILED</auditLogging>
+        <insertUrl/>
+        <columns>
+            <column columnName="rowId"/>
+            <column columnName="paymentOption"/>
+            <column columnName="container"/>
+            <column columnName="createdBy"/>
+            <column columnName="created"/>
+            <column columnName="modifiedBy"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+</tables>

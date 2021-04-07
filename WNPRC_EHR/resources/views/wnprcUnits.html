@@ -1,21 +1,11 @@
 <html>
 <script type="text/javascript">
-LABKEY.requiresScript("/ehr/ext3/navMenu.js");
-</script>
 
-<script type="text/javascript">
-
-Ext.onReady(createNavMenu);
+Ext4.onReady(createNavMenu);
 
 function createNavMenu()
 {
-    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
-    {
-        createNavMenu.defer(10);
-        return;
-    }
-
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'animalServices',
         sections: [
             {header: 'All Staff Minutes',
@@ -72,7 +62,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'opServices',
         sections: [
             {header: 'Facilities Management',
@@ -108,12 +98,14 @@ function createNavMenu()
             ]},
             {header: 'Purchasing Services',
             items: [
-                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Purchasing/Issue_Tracker/start.view?'}
+                {name: 'Issue Tracker', url: '<%=contextPath%>/project/WNPRC/WNPRC_Units/Operation_Services/Purchasing/Issue_Tracker/start.view?'},
+                {name: 'Purchasing Requests', url: '<%=contextPath%>/WNPRC/WNPRC_Units/Operation_Services/Purchasing/WNPRC_Purchasing-requester.view?'},
+                {name: 'Purchasing Admin', url: '<%=contextPath%>/WNPRC/WNPRC_Units/Operation_Services/Purchasing/WNPRC_Purchasing-purchaseAdmin.view?'}
             ]}
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'researchServices',
         sections: [
             {header: 'Assay Services',
@@ -146,7 +138,7 @@ function createNavMenu()
         ]
     });
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'directorsOffice',
         sections: [
             {header: 'Misc. Pages',
@@ -159,7 +151,7 @@ function createNavMenu()
     });
 
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         renderTo: 'miscPages',
         sections: [
             {header: 'Misc. Pages',

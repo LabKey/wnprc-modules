@@ -1,7 +1,7 @@
 package org.labkey.apikey;
 
 import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.module.Module;
@@ -21,7 +21,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class ApiKeyController extends SpringActionController {
+public class ApiKeyController extends SpringActionController
+{
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ApiKeyController.class);
     public static final String NAME = "apikey";
 
@@ -31,21 +32,26 @@ public class ApiKeyController extends SpringActionController {
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction {
-        public ModelAndView getView(Object o, BindException errors) throws Exception {
+    public class BeginAction extends SimpleViewAction
+    {
+        @Override
+        public ModelAndView getView(Object o, BindException errors) throws Exception
+        {
             return new JspView("/org/labkey/apikey/view/hello.jsp");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 
     @RequiresNoPermission
-    public class ExecuteServiceAction extends ApiAction<Void> {
+    public class ExecuteServiceAction extends ReadOnlyApiAction<Object>
+    {
         @Override
-        public Object execute(Void v, BindException errors) throws Exception {
+        public Object execute(Object v, BindException errors) throws Exception
+        {
             HttpServletRequest req = getViewContext().getRequest();
 
             String moduleName   = req.getHeader("ModuleName");
@@ -72,9 +78,11 @@ public class ApiKeyController extends SpringActionController {
     }
 
     @RequiresNoPermission
-    public class GetKeyInfoAction extends ApiAction<Void> {
+    public class GetKeyInfoAction extends ReadOnlyApiAction<Object>
+    {
         @Override
-        public Object execute(Void v, BindException errors) throws Exception {
+        public Object execute(Object v, BindException errors) throws Exception
+        {
             HttpServletRequest req = getViewContext().getRequest();
 
             String apiKeyString = req.getHeader("API-Key");

@@ -1,7 +1,8 @@
 package org.labkey.wnprc_ehr;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
@@ -26,7 +27,7 @@ import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
-import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
+//import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
@@ -34,7 +35,6 @@ import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
-import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 public class TriggerScriptHelper {
     protected final Container container;
     protected final User user;
-    protected static final Logger _log = Logger.getLogger(TriggerScriptHelper.class);
+    protected static final Logger _log = LogManager.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
 
     private TriggerScriptHelper(int userId, String containerId) {
@@ -257,8 +257,8 @@ public class TriggerScriptHelper {
                         stopExecution = true;
                     }
                 }
-                housingRow.put("sex", EHRDemographicsServiceImpl.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
-                filteredHousingRows.add(housingRow);
+//                housingRow.put("sex", EHRDemographicsServiceImpl.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
+//                filteredHousingRows.add(housingRow);
             }
         }
 

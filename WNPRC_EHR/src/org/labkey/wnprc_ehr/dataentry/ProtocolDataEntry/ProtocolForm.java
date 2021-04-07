@@ -13,6 +13,7 @@ import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 //import org.labkey.wnprc_ehr.dataentry.generics.sections.SimpleFormSection;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 /**
  * Created by fdnicolalde on 7/25/16.
@@ -27,26 +28,26 @@ public class ProtocolForm extends AbstractDataEntryForm
         updateProtocol protocolSection = new updateProtocol();
         this.addSection(protocolSection);
 
-        for(ClientDependency dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
+        for(Supplier<ClientDependency> dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
             this.addClientDependency(dependency);
         }
         for (FormSection s: getFormSections()){
             s.addConfigSource("Default");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Default.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Default.js"));
 
     }
 
-    public class updateProtocol extends SimpleFormSection
+    public static class updateProtocol extends SimpleFormSection
     {
 
         public updateProtocol()
         {
             super("ehr", "protocol", "Enter Protocol Information", "ehr-protocoleditorgridpanel", EHRService.FORM_SECTION_LOCATION.Body);
             this.addConfigSource("Default");
-            addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/plugins/ProtocolRowEditor.js"));
-            addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/panel/ProtocolEditorGridPanel.js"));
+            addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/plugins/ProtocolRowEditor.js"));
+            addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/panel/ProtocolEditorGridPanel.js"));
             _allowRowEditing = true;
 
             /*fieldNamesAtStartInOrder = Arrays.asList(

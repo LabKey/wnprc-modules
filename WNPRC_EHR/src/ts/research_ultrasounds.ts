@@ -140,7 +140,7 @@ export class ResearchUltrasounds
         this.detailElementId = detailElementId;
         this.gridElementId = gridElementId;
         ResearchUltrasounds.updateBrowserState('subjects', subjects);
-        this.renderGrid(URI(document.location).query(true) as UltrasoundState);
+        this.renderGrid(URI(document.location).query(true) as unknown as UltrasoundState);
     }
 
     // noinspection JSUnusedGlobalSymbols

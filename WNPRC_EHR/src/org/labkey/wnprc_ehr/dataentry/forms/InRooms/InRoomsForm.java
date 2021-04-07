@@ -27,6 +27,6 @@ public class InRoomsForm extends TaskForm {
             section.addConfigSource("InRooms");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/InRooms.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/InRooms.js"));
     }
 }

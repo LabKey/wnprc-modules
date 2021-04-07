@@ -14,6 +14,7 @@ import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleTaskForm;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class NecropsyAbstractForm extends SimpleTaskForm
 {
@@ -28,7 +29,7 @@ public class NecropsyAbstractForm extends SimpleTaskForm
         ));
 
 
-        for(ClientDependency dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
+        for(Supplier<ClientDependency> dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
             this.addClientDependency(dependency);
         }
 

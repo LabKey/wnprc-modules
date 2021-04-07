@@ -41,6 +41,6 @@ public class ClinpathForm extends TaskForm {
                 new CytologyManualSection()
         ));
 
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Assay.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Assay.js"));
     }
 }

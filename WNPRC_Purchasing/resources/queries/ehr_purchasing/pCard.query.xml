@@ -1,0 +1,55 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="pCard" tableDbType="NOT_IN_DB" useColumnOrder="true">
+                <tableTitle>P-Card View</tableTitle>
+                <columns>
+                    <column columnName="vendorId">
+                        <columnTitle>Vendor</columnTitle>
+                        <nullable>false</nullable>
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>vendor</fkTable>
+                        </fk>
+                    </column>
+                    <column columnName="description"/>
+                    <column columnName="justification">
+                        <columnTitle>Business purpose</columnTitle>
+                    </column>
+                    <column columnName="orderDate">
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="cardPostDate">
+                        <formatString>yyyy-MM-dd</formatString>
+                        <columnTitle>Post Date</columnTitle>
+                    </column>
+                    <column columnName="totalCost">
+                        <formatString>###,##0.00</formatString>
+                    </column>
+                    <column columnName="account">
+                        <columnTitle>Acct code</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_billingLinked</fkDbSchema>
+                            <fkTable>aliases</fkTable>
+                        </fk>
+                    </column>
+                    <column columnName="program">
+                        <columnTitle>Prog</columnTitle>
+                    </column>
+                    <column columnName="createdBy">
+                        <columnTitle>Requested by</columnTitle>
+                    </column>
+                    <column columnName="comments">
+                        <columnTitle>Notes/Internal Ref#</columnTitle>
+                    </column>
+                    <column columnName="invoiceNum">
+                        <columnTitle>Invoice No</columnTitle>
+                    </column>
+                    <column columnName="paymentOptionId">
+                        <columnTitle>Payment Option</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

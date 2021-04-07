@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.xmlbeans.XmlException;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.NullSafeBindException;
@@ -28,7 +29,7 @@ public final class DatasetImportHelper
     /**
      * Logger for logging the logs
      */
-    private static final Logger LOG = Logger.getLogger(DatasetImportHelper.class);
+    private static final Logger LOG = LogManager.getLogger(DatasetImportHelper.class);
 
     /**
      * Executes the dataset metadata import utilizing LabKey's predefined dataset definition importer.

@@ -1,7 +1,6 @@
 package org.labkey.wnprc_billing.table;
 
 import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.TableInfo;
@@ -83,26 +82,34 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
         {
             return;
         }
-
-        ColumnInfo chargeGroup = table.getColumn("chargeGroup");
+        var chargeGroup = table.getMutableColumn("chargeGroup");
         if (chargeGroup != null)
         {
-            chargeGroup.setFk(new QueryForeignKey(us, us.getContainer(), "chargeUnits",
-                    "groupName", null, true));
+            chargeGroup.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                    .container(us.getContainer())
+                    .table("chargeUnits")
+                    .key("groupName")
+                    .raw(true));
         }
 
-        ColumnInfo debitedAcct = table.getColumn("debitedAccount");
+        var debitedAcct = table.getMutableColumn("debitedAccount");
         if (debitedAcct != null)
         {
-            debitedAcct.setFk(new QueryForeignKey(us, us.getContainer(), "aliases",
-                    "alias", null, true));
+            debitedAcct.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                    .container(us.getContainer())
+                    .table("aliases")
+                    .key("alias")
+                    .raw(true));
         }
 
-        ColumnInfo chargeId= table.getColumn("chargeId");
+        var chargeId = table.getMutableColumn("chargeId");
         if (chargeId != null)
         {
-            chargeId.setFk(new QueryForeignKey(us, us.getContainer(), "chargeableItems",
-                    "rowid", null, true));
+            chargeId.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                    .container(us.getContainer())
+                    .table("chargeableItems")
+                    .key("rowid")
+                    .raw(true));
         }
     }
 

@@ -13,6 +13,7 @@ import org.labkey.wnprc_ehr.dataentry.forms.FoodDeprives.FormSections.FoodDepriv
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Created by fdnicolalde on 3/9/16.
@@ -27,20 +28,20 @@ public class FoodDeprivesStartForm extends TaskForm
                 new AnimalDetailsFormSection(),
                 new FoodDeprivesFormSections(NAME)
         ));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Husbandry.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Husbandry.js"));
 
         for(FormSection section: this.getFormSections()) {
             section.addConfigSource("Husbandry");
         }
 
-        for(ClientDependency dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
+        for(Supplier<ClientDependency> dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
             this.addClientDependency(dependency);
         }
 
         setStoreCollectionClass("EHR.data.FoodDepriveStore");
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/foodDepriveStore.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
-        //addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/BoxSelect.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/data/foodDepriveStore.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        //addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/BoxSelect.js"));
 
     }
 

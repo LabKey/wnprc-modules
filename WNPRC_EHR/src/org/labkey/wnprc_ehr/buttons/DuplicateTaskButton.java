@@ -34,6 +34,7 @@ public class DuplicateTaskButton extends SimpleButtonConfigFactory
 
     }
 
+    @Override
     public boolean isAvailable(TableInfo ti)
     {
         if (!super.isAvailable(ti))

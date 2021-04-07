@@ -1,0 +1,48 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="lineItems" tableDbType="TABLE" useColumnOrder="true">
+                <tableTitle>Line Items</tableTitle>
+                <columns>
+                    <column columnName="rowId">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="requestRowId">
+                        <columnTitle>Request No.</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>purchasingRequests</fkTable>
+                        </fk>
+                    </column>
+                    <column columnName="item">
+                        <required>true</required>
+                    </column>
+                    <column columnName="itemUnitId">
+                        <columnTitle>Item Unit</columnTitle>
+                        <required>true</required>
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>itemUnits</fkTable>
+                        </fk>
+                    </column>
+                    <column columnName="controlledSubstance"/>
+                    <column columnName="quantity">
+                        <required>true</required>
+                        <formatString>###,##0.00</formatString>
+                    </column>
+                    <column columnName="unitCost">
+                        <required>true</required>
+                        <formatString>$###,##0.00</formatString>
+                    </column>
+                    <column columnName="itemStatusId">
+                        <columnTitle>Item Status</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_purchasing</fkDbSchema>
+                            <fkTable>lineItemStatus</fkTable>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

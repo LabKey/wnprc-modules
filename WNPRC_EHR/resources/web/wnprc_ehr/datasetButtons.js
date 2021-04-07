@@ -394,11 +394,8 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param [config.formType]
          */
         addCreateTaskFromIdsBtn: function(dataRegionName, menu, config){
-            menu.add({
-                text: 'Schedule '+config.formType,
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Schedule ' + config.formType, function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -539,8 +536,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                         Ext.Msg.hide();
 
                     }
-                }
-            });
+                });
         },
 
         /**
@@ -861,6 +857,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                     window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "feeding", null, {formtype: 'Feeding'});
                 }
             });
+
         },
 
 

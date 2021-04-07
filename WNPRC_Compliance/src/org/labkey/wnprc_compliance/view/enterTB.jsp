@@ -1,13 +1,15 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController" %>
-<%@ page import="org.labkey.api.action.Action" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.BeginAction" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.NewUserAPI" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.SearchUserAPI" %>
+<%@ page import="org.labkey.wnprc_compliance.WNPRC_ComplianceController.UpdatePersonClearanceAPI" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    String url = (new ActionURL(WNPRC_ComplianceController.BeginAction.class, getContainer())).toString();
+    ActionURL url = urlFor(BeginAction.class);
 %>
 <div class="text-center" style="margin-bottom: 10px;">
-    <a class="btn btn-primary" href="<%= url %>">
+    <a class="btn btn-primary" href="<%=h(url)%>">
         <span class="glyphicon glyphicon-home"></span>
         TB Dashboard
     </a>
@@ -385,7 +387,7 @@
         };
 
         <%
-            ActionURL searchQuery = new ActionURL(WNPRC_ComplianceController.SearchUserAPI.class, getContainer());
+            ActionURL searchQuery = urlFor(SearchUserAPI.class);
         %>
 
         VM.searchTerm.subscribe(function(query) {
@@ -395,7 +397,7 @@
                 return;
             }
 
-            var url = LABKEY.ActionURL.buildURL('<%= searchQuery.getController() %>', '<%= searchQuery.getAction()%>', null, {
+            var url = LABKEY.ActionURL.buildURL(<%=q(searchQuery.getController())%>, <%=q(searchQuery.getAction())%>, null, {
                 query: query
             });
 
@@ -497,7 +499,7 @@
             var form = ko.mapping.toJS(VM.newUserForm);
 
             if (VM.createNewUser() == 'yes') {
-                submission.url = "<%= new ActionURL(WNPRC_ComplianceController.NewUserAPI.class, getContainer()) %>";
+                submission.url = <%=q(urlFor(NewUserAPI.class))%>;
 
                 submission.data = {
                     firstName:   form.firstName,
@@ -533,7 +535,7 @@
                 }
             }
             else {
-                submission.url = "<%= new ActionURL(WNPRC_ComplianceController.UpdatePersonClearanceAPI.class, getContainer()) %>";
+                submission.url = <%=q(urlFor(UpdatePersonClearanceAPI.class))%>;
 
                 submission.data = {
                     personid: VM.selectedPerson(),

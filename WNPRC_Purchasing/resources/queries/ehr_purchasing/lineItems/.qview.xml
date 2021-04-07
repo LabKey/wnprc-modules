@@ -1,0 +1,13 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="requestRowId"/>
+        <column name="item"/>
+        <column name="itemUnitId"/>
+        <column name="controlledSubstance"/>
+        <column name="quantity"/>
+        <column name="unitCost"/>
+    </columns>
+    <sorts>
+        <sort column="requestRowId" descending="true" />
+    </sorts>
+</customView>

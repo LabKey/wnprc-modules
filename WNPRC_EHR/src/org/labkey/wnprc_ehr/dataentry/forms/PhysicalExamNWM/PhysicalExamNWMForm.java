@@ -14,6 +14,6 @@ public class PhysicalExamNWMForm extends PhysicalExamForm {
             section.addConfigSource("PhysicalExamNWM");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/PhysicalExamNWM.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/PhysicalExamNWM.js"));
     }
 }

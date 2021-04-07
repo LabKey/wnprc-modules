@@ -9,6 +9,7 @@ import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Created by jon on 3/4/16.
@@ -17,7 +18,7 @@ public class SimpleRequestForm extends RequestForm {
     protected SimpleRequestForm(DataEntryFormContext ctx, Module owner, String name, String label, String category, List<FormSection> sections) {
         super(ctx, owner, name, label, category, sections);
 
-        for(ClientDependency dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
+        for(Supplier<ClientDependency> dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
             this.addClientDependency(dependency);
         }
 

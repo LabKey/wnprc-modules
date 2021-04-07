@@ -127,6 +127,7 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
         return _description;
     }
 
+    @Override
     public int compareTo(PopulationChangeEvent otherEvent) {
         return _dateTimeComparator.compare(this.getTimestamp(), otherEvent.getTimestamp());
     }
@@ -146,6 +147,7 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
         return apiResponse;
     }
 
+    @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
 
@@ -160,6 +162,7 @@ public class PopulationChangeEvent implements Comparable<PopulationChangeEvent>,
     }
 
     // Override for JSONObject.
+    @Override
     public String toJSONString() {
         return toJSON().toString();
     }

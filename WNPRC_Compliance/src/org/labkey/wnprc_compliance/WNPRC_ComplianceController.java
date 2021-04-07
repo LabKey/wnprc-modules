@@ -312,7 +312,8 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
 
         @Override
-        protected String getResponse(Map files, FileUploadForm form) throws UploadException {
+        public String getResponse(FileUploadForm form, Map files) throws UploadException
+        {
             return "";
         }
     }
@@ -467,7 +468,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("getClearances")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
+    @CSRF(CSRF.Method.NONE)
     public class GetClearancesFromPerson extends ReadOnlyApiAction<SearchClearanceFromPersonForm> {
         public Object execute(SearchClearanceFromPersonForm form, BindException errors) throws Exception {
 
@@ -518,7 +519,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("updateClearance")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
+    @CSRF(CSRF.Method.POST)
     public class UpdateClearanceAPI extends MutatingApiAction<Clearances> {
         @Override
         public Object execute(Clearances form, BindException errors) throws Exception {
@@ -550,7 +551,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     @ActionNames("getMeaslesClearances")
     @RequiresPermission(ComplianceAdminPermission.class)
     @Marshal(Marshaller.Jackson)
-    @CSRF
+    @CSRF(CSRF.Method.NONE)
     public class GetMeaslesClearanceFromPerson extends ReadOnlyApiAction<SearchPersonFromCardForm> {
         public Object execute(SearchPersonFromCardForm form, BindException errors) throws Exception {
             JSONObject json = new JSONObject();

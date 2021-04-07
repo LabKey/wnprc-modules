@@ -224,7 +224,11 @@ function onUpdate(helper, scriptErrors, row, oldRow) {
     for (let measurementName in validMeasurements) {
         if (validMeasurements.hasOwnProperty(measurementName)) {
             if (row[measurementName] != oldRow[measurementName]) {
-                row[measurementName] = formatMeasurements(row[measurementName]);
+                if (row[measurementName] != null && row[measurementName].length > 0) {
+                    row[measurementName] = formatMeasurements(row[measurementName]);
+                } else {
+                    row[measurementName] = "";
+                }
                 updateRows.push({
                     Id: row.Id,
                     date: row.date,
@@ -270,6 +274,7 @@ function setDescription(row, helper){
 }
 
 function formatMeasurements(measurements) {
+    console.log('measurements: ' + measurements);
     let measurementArray = measurements.replace(/[\s,;]+/g, ' ').trim().replace(/[\s]+/g, ';').split(';');
     measurementArray.sort(function(a, b){return a - b});
     let formattedMeasurements = '';

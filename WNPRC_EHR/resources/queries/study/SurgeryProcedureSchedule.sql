@@ -15,6 +15,7 @@ SELECT a.lsid
      , a.Id.curLocation.cage       AS cur_cage
      , a.Id.curLocation.cond.title AS cur_cond
      , a.date
+     , a.starttabletime
      , a.enddate
      , (SELECT GROUP_CONCAT(b.displayname, ', ') FROM wnprc.procedure_names b
         WHERE b.name IN (SELECT UNNEST(STRING_TO_ARRAY(a.procedurename, ',')))) AS procedurename

@@ -1370,6 +1370,7 @@ public class WNPRC_EHRController extends SpringActionController
     public static class SurgeryProcedureEvent
     {
         private String requestId;
+        private Date startTableTime;
         private Date start;
         private Date end;
         private String subject;
@@ -1380,6 +1381,11 @@ public class WNPRC_EHRController extends SpringActionController
         public String getRequestId()
         {
             return requestId;
+        }
+
+        public Date getStartTableTime()
+        {
+            return startTableTime;
         }
 
         public Date getStart()
@@ -1413,6 +1419,11 @@ public class WNPRC_EHRController extends SpringActionController
         public void setRequestId(String requestId)
         {
             this.requestId = requestId;
+        }
+
+        public void setStartTableTime(Date startTableTime)
+        {
+            this.startTableTime = startTableTime;
         }
 
         public void setStart(Date start)
@@ -1761,6 +1772,7 @@ public class WNPRC_EHRController extends SpringActionController
                         //surgeryRecord.put("apptid", apptId);
                         surgeryRecord.put("QCStateLabel", "Scheduled");
                         surgeryRecord.put("taskid", spRow.get("taskid"));
+                        surgeryRecord.put("startTableTime", event.getStartTableTime());
                         surgeryRecord.put("date", event.getStart());
                         surgeryRecord.put("enddate", event.getEnd());
                         updateRecord(surgeryRecord, "study", "surgery_procedure");

@@ -50,6 +50,13 @@ EHR.model.DataModelManager.registerMetadata('MultipleSurgeryProcedureRequest', {
                 //     return v || date;
                 // }
             },
+            startTableTime: {
+                xtype: 'xdatetime',
+                editorConfig: {
+                    dateFormat: 'Y-m-d',
+                    timeFormat: 'H:i'
+                },
+            },
             // enddate: {
             //     editorConfig: {
             //         dateConfig: {

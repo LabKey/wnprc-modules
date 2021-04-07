@@ -307,6 +307,7 @@
             }
             requestObj = {
                 requestId: form.requestid,
+                startTableTime: document.getElementById("scheduleStartTableTimeField").value,
                 start: form.date,
                 end: form.enddate,
                 subject: getEventSubject(form),
@@ -712,6 +713,7 @@
                     <dt>Procedure Name:     </dt> <dd>{{procedurename}}</dd>
                     <dt>Unit:               </dt> <dd>{{procedureunitdisplay}}</dd>
                     <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalid}}</a></dd>
+                    <dt>Start Table Time:   </dt> <dd>{{starttabletime}}</dd>
                     <dt>Sex:                </dt> <dd>{{sex}}</dd>
                     <dt>Age:                </dt> <dd>{{age}}</dd>
                     <dt>Weight:             </dt> <dd>{{weight}}</dd>
@@ -1086,7 +1088,7 @@
                                     }
                                     jQuery.each(info.event.extendedProps, function (key, value) {
                                         if (key in WebUtils.VM.taskDetails) {
-                                            if (key === "date" || key === "enddate") {
+                                            if (key === "date" || key === "enddate" || key === "starttabletime") {
                                                 value = displayDateTimeISO(value);
                                             }
                                             WebUtils.VM.taskDetails[key](value);
@@ -1158,6 +1160,7 @@
                 procedureunitdisplay: ko.observable(),
                 age:                  ko.observable(),
                 animalid:             ko.observable(),
+                starttabletime:       ko.observable(),
                 account:              ko.observable(),
                 cur_room:             ko.observable(),
                 cur_cage:             ko.observable(),
@@ -1179,6 +1182,7 @@
                 requestid:          '',
                 taskid:             '',
                 animalid:           '',
+                starttabletime:     '',
                 rooms:              '',
                 priority:           '',
                 date:               '',
@@ -1266,6 +1270,11 @@
                 }
                 rooms.sort(compareRooms("date", "enddate"));
 
+                let startTableTimeDiv = createInputDiv("Start Table Time", "datetime-local", "scheduleStartTableTimeField", dateToDateTimeInputField(new Date(request["starttabletime"])));
+                colDiv.appendChild(startTableTimeDiv);
+                spacerDiv = createStaticDiv("", "spacer_1", "");
+                colDiv.appendChild(spacerDiv);
+
                 for (let i = 0; i < rooms.length; i++) {
                     let startValue = rooms[i].date;
                     let endValue = rooms[i].enddate;
@@ -1276,7 +1285,7 @@
                     let endDiv = createInputDiv("End Time", "datetime-local", "scheduleEndField_" + i, endValue);
 
                     if (i > 0) {
-                        let spacerDiv = createStaticDiv("", "spacer_" + i, "");
+                        let spacerDiv = createStaticDiv("", "spacer_" + i + 1, "");
                         colDiv.appendChild(spacerDiv);
                     }
                     colDiv.appendChild(roomDiv);
@@ -1299,8 +1308,11 @@
                         clearPlaceholderEvents();
                         createPlaceholderEvents(rooms);
                     });
+                    document.getElementById("scheduleStartTableTimeField").addEventListener("change", function() {
+                        request["starttabletime"] = this.value;
+                    });
                 }
-                spacerDiv = createStaticDiv("", "spacer_" + rooms.length, "");
+                spacerDiv = createStaticDiv("", "spacer_" + rooms.length + 1, "");
                 colDiv.appendChild(spacerDiv);
 
                 let includedFields = ["Animal ID:animalid", "Procedure(s):procedurename", "Unit:procedureunitdisplay", "Project:project", "Protocol:protocol_fs_protocol",
@@ -1313,7 +1325,7 @@
                 for (let i = 0; i < includedFields.length; i++) {
                     if (i < 9 && rooms.length <= 1) {
                         colDiv = document.getElementById("schedule-request-col-1");
-                    } else if (i < 6 && rooms.length === 2) {
+                    } else if (i < 7 && rooms.length === 2) {
                         colDiv = document.getElementById("schedule-request-col-1");
                     } else {
                         colDiv = document.getElementById("schedule-request-col-2");
@@ -1321,7 +1333,13 @@
                     let data = includedFields[i].split(":");
                     let label = data[0];
                     let field = data[1];
-                    let div = createStaticDiv(label, "schedule-" + field, request[field]);
+                    let value = request[field];
+                    if (value === true) {
+                        value = "Yes";
+                    } else if (value === false) {
+                        value = "No";
+                    }
+                    let div = createStaticDiv(label, "schedule-" + field, value);
                     colDiv.appendChild(div);
                 }
                 let statusChangeDiv = createInputDiv("Denial/Hold Reason", "text", "scheduleStatusChangeField", request.statuschangereason);
@@ -1366,7 +1384,7 @@
                 }
                 jQuery.each(request, function(key, value) {
                     if (key in WebUtils.VM.form) {
-                        if (key === "date" || key === "enddate") { //TODO modified???
+                        if (key === "date" || key === "enddate" || key === "starttabletime") { //TODO modified???
                             value = displayDateTimeISO(value);
                         }
                         WebUtils.VM.form[key](value);

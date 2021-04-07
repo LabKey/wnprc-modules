@@ -21,7 +21,8 @@ public class MultipleSurgeryProcedureRequestSection extends SimpleGridSection
         return Arrays.asList(
                 "Id",
                 "date",
-                "enddate",
+                "startTableTime",
+                //"enddate",
                 "procedurename",
                 "procedureunit",
                 "project",

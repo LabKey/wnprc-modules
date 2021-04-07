@@ -19,6 +19,7 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
         return Arrays.asList(
                 "Id",
                 "date",
+                "startTableTime",
                 //"enddate",
                 "procedurename",
                 "procedureunit",

@@ -29,7 +29,7 @@ export const DescriptionInput: FC<InputProps> = memo(props => {
             value={value}
             onChange={onTextChange}
             id="item-description-id"
-            readOnly={isReadOnly}
+            disabled={isReadOnly}
         />
     );
 });
@@ -115,13 +115,13 @@ export const UnitQuantityInput: FC<NumericInputProps> = memo(props => {
             pattern="[0-9]*"
             id="unit-quantity-id"
             type="number"
-            readOnly={isReadOnly}
+            disabled={isReadOnly}
         />
     );
 });
 
 export const QuantityReceivedInput: FC<NumericInputProps> = memo(props => {
-    const { onChange, value, hasError, isReadOnly } = props;
+    const { onChange, value, hasError } = props;
 
     const onValueChange = useCallback(
         evt => {
@@ -138,7 +138,6 @@ export const QuantityReceivedInput: FC<NumericInputProps> = memo(props => {
             pattern="[0-9]*"
             id="quantity-received-id"
             type="number"
-            readOnly={isReadOnly}
         />
     );
 });

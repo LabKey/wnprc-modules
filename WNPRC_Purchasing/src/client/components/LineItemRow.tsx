@@ -73,15 +73,15 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             />
                         </Col>
                         <Col xs={1}>
-                            <QuantityReceivedInput
-                                value={model.quantityReceived}
-                                onChange={onValueChange}
-                            />
-                        </Col>
-                        <Col xs={2}>
                             <ControlledSubstance
                                 value={model.controlledSubstance}
                                 isReadOnly={true}
+                            />
+                        </Col>
+                        <Col xs={1}>
+                            <QuantityReceivedInput
+                                value={model.quantityReceived}
+                                onChange={onValueChange}
                             />
                         </Col>
                     </Row>

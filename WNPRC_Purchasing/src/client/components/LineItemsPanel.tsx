@@ -74,8 +74,8 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                 <Col xs={4}>Part no./Item description *</Col>
                                 <Col xs={1}>Unit *</Col>
                                 <Col xs={1}>Quantity *</Col>
+                                <Col xs={1}>Controlled substance</Col>
                                 <Col xs={1}>Quantity received</Col>
-                                <Col xs={2}>Controlled substance</Col>
                             </Row>)
                         }
                         {

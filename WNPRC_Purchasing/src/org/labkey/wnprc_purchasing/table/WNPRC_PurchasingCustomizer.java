@@ -37,18 +37,20 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
     {
         if (ti.hasPermission(Objects.requireNonNull(ti.getUserSchema()).getUser(), AdminPermission.class))
         {
+            String returnUrl = ti.getUserSchema().getContainer().getPath() + "/WNPRC_Purchasing-purchaseAdmin.view?";
             MutableColumnInfo rowId = (MutableColumnInfo) ti.getColumn("rowId");
-            rowId.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${rowId}"));
+            rowId.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${rowId}&returnUrl="+returnUrl));
         }
     }
 
     private void addRequestUpdateLinks(AbstractTableInfo ti)
     {
+        String returnUrl = ti.getUserSchema().getContainer().getPath() + "/WNPRC_Purchasing-purchaseReceiver.view?";
         MutableColumnInfo requestRowId = (MutableColumnInfo) ti.getColumn("requestRowId");
-        requestRowId.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${requestRowId}"));
+        requestRowId.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${requestRowId}&returnUrl="+returnUrl));
 
         MutableColumnInfo quantityReceived = (MutableColumnInfo) ti.getColumn("quantityReceived");
-        quantityReceived.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${requestRowId}"));
+        quantityReceived.setURL(DetailsURL.fromString("/WNPRC_Purchasing-purchasingRequest.view?requestRowId=${requestRowId}&returnUrl="+returnUrl));
     }
 
     private void addAttachmentsCol(AbstractTableInfo purchasingRequestsTable)

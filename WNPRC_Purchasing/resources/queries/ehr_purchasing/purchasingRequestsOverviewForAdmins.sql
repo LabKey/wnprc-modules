@@ -7,5 +7,6 @@ SELECT
        pr.created   AS requestDate,
        pr.createdBy AS requester,
        pr.totalCost,
-       pr.assignedTo
+       pr.assignedTo,
+       pr.attachments
 FROM ehr_purchasing.purchasingRequests pr

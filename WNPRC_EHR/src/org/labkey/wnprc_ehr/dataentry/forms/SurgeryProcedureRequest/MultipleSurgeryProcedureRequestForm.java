@@ -9,6 +9,7 @@ import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureFoodDepriveSection;
 import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureInstructionsFormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.MultipleSurgeryProcedureRequestSection;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureRoomsInstructionsFormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.FormSections.SurgeryProcedureRoomsSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleRequestForm;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.AnimalDetailsPanel;
@@ -28,6 +29,7 @@ public class MultipleSurgeryProcedureRequestForm extends SimpleRequestForm
                 new RequestFormSection(),
                 new AnimalDetailsPanel(),
                 new MultipleSurgeryProcedureRequestSection(),
+                new SurgeryProcedureRoomsInstructionsFormSection(),
                 new SurgeryProcedureRoomsSection(),
                 new SurgeryProcedureFoodDepriveSection()
         ));

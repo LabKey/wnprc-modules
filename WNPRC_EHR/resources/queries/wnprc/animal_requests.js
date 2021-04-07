@@ -63,6 +63,10 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
     row.animalidstooffer = subjectArray.join(";");
 
+    //row.animal_history_link = "https://" + LABKEY.serverName + "/ehr-animalHistory.view?#subjects:" + row.animalidstooffer + "&inputType:multiSubject&showReport:0&activeReport:abstractReport"
+    //row.animal_history_link = '<a href="https://' + LABKEY.serverName + '/ehr-animalHistory.view?#subjects:' + row.animalidstooffer + '&inputType:multiSubject&showReport:0&activeReport:abstractReport">Link</a>'
+    //row.animal_history_link = row.animalidstooffer;
+
 }
 
 function onAfterInsert(helper,errors,row){

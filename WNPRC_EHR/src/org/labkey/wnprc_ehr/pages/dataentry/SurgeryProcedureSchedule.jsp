@@ -479,7 +479,9 @@
                         }
                     }
                     else {
-                        alert("Houston, we have a problem: " + response.error);
+                        alert("There was a problem completing your request\n\n" +
+                            response.error ? "Error: " + response.error + "\n" : "" +
+                            response.exception ? "Exception: " + response.exception : "");
                     }
                     $('#calendar-selection').unblock();
                     $('#procedure-calendar').unblock();
@@ -511,7 +513,9 @@
                         }
                     }
                     else {
-                        alert("Houston, we have a problem: " + response.error);
+                        alert("There was a problem completing your request\n\n" +
+                            response.error ? "Error: " + response.error + "\n" : "" +
+                            response.exception ? "Exception: " + response.exception : "");
                     }
                     $('#calendar-selection').unblock();
                     $('#procedure-calendar').unblock();
@@ -1113,7 +1117,9 @@
                                         }
                                     }
                                     else {
-                                        alert("Houston, we have a problem: " + response.exception);
+                                        alert("There was a problem completing your request\n\n" +
+                                            response.error ? "Error: " + response.error + "\n" : "" +
+                                            response.exception ? "Exception: " + response.exception : "");
                                     }
                                     $('#calendar-selection').unblock();
                                     $('#procedure-calendar').unblock();

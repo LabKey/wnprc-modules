@@ -73,6 +73,7 @@ interface NumericInputProps {
     onChange?: (colName, value) => void;
     hasError?: boolean;
     isReadOnly?: boolean;
+    hidden?: boolean;
 }
 
 export const UnitCostInput: FC<NumericInputProps> = memo(props => {

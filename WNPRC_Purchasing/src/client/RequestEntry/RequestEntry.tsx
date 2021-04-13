@@ -25,6 +25,7 @@ import {
     PurchaseAdminModel,
     DocumentAttachmentModel,
     SavedFileModel,
+    QCStateModel,
 } from '../model';
 import { LineItemsPanel } from '../components/LineItemsPanel';
 import { getData, getSavedFiles, submitRequest } from '../actions';
@@ -37,6 +38,7 @@ export const App: FC = memo(() => {
     const [requestOrderModel, setRequestOrderModel] = useState<RequestOrderModel>(RequestOrderModel.create());
     const [purchaseAdminModel, setPurchaseAdminModel] = useState<PurchaseAdminModel>(PurchaseAdminModel.create());
     const [lineItems, setLineItems] = useState<LineItemModel[]>([LineItemModel.create()]);
+    const [qcStates, setQCStates] = useState<QCStateModel[]>([QCStateModel.create()]);
     const [lineItemRowsToDelete, setLineItemRowsToDelete] = useState<number[]>([]);
     const [documentAttachmentModel, setDocumentAttachmentModel] = useState<DocumentAttachmentModel>(
         DocumentAttachmentModel.create()
@@ -52,12 +54,28 @@ export const App: FC = memo(() => {
     const [hasPurchasingUpdatePermission, setHasPurchasingUpdatePermission] = useState<boolean>(
         getServerContext().user.canUpdate
     );
+    const [hasPurchasingInsertPermission, setHasPurchasingInsertPermission] = useState<boolean>(
+        getServerContext().user.canInsert
+    );
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
         // is fired on component mount
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
+
+        //get QCStates
+        getData('core', 'qcState', 'RowId, Label').then(vals => {
+            const states = vals.map(val => {
+                if (val) {
+                    return QCStateModel.create({
+                        rowId: val.RowId,
+                        label: val.Label
+                    });
+                }
+            });
+            setQCStates(states);
+        });
 
         if (reqRowId) {
             // get ehr_purchasing.purchasingRequests data
@@ -213,7 +231,7 @@ export const App: FC = memo(() => {
             window.location.href = returnUrl || ActionURL.buildURL('project', 'begin', getServerContext().container.path);
 
         },
-        [isDirty, requestId, hasPurchasingAdminPermission, hasPurchasingUpdatePermission]
+        [isDirty, requestId]
     );
 
     const onSaveBtnHandler = useCallback(
@@ -225,6 +243,7 @@ export const App: FC = memo(() => {
             submitRequest(
                 requestOrderModel,
                 lineItems,
+                qcStates,
                 requestId ? purchaseAdminModel : undefined,
                 documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0
                     ? documentAttachmentModel
@@ -378,6 +397,7 @@ export const App: FC = memo(() => {
                             hasRequestId={!!requestId}
                             isAdmin={hasPurchasingAdminPermission}
                             canUpdate={hasPurchasingUpdatePermission}
+                            canInsert={hasPurchasingInsertPermission}
                         />
                         <button
                             disabled={isSaving}

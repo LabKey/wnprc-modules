@@ -23,7 +23,4 @@
             </properties>
         </column>
     </columns>
-    <sorts>
-        <sort column="requestRowId" descending="true" />
-    </sorts>
 </customView>

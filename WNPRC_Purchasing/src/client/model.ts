@@ -116,7 +116,7 @@ export class LineItemModel {
     readonly controlledSubstance: boolean = false;
     readonly itemUnit: number; // rowId of ehr_purchasing.itemUnits
     readonly quantity: number;
-    readonly quantityReceived?: number;
+    readonly quantityReceived?: number = 0;
     readonly unitCost: number;
     readonly subTotal: number = 0;
     readonly status?: string;
@@ -164,5 +164,23 @@ export class DocumentAttachmentModel {
 
     static create(raw?: any): DocumentAttachmentModel {
         return new DocumentAttachmentModel({ ...raw });
+    }
+}
+
+export class QCStateModel {
+    /**
+     * @hidden
+     */
+    [immerable] = true;
+
+    readonly rowId: number;
+    readonly label: string;
+
+    constructor(values?: Partial<QCStateModel>) {
+        Object.assign(this, values);
+    }
+
+    static create(raw?: any): QCStateModel {
+        return new QCStateModel({ ...raw });
     }
 }

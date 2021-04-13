@@ -277,9 +277,9 @@ public class WNPRC_PurchasingManager
                 else
                     row.put("quantity", lineItem.get("quantity"));
 
-                if (Integer.valueOf(String.valueOf(lineItem.get("quantityReceived"))) < 0)
+                if (null != lineItem.get("quantityReceived") && Integer.valueOf(String.valueOf(lineItem.get("quantityReceived"))) < 0)
                     lineItemErrors.addError(new PropertyValidationError("'Quantity received' value cannot be negative.", "quantityReceived"));
-                else
+                else if (null != lineItem.get("quantityReceived"))
                     row.put("quantityReceived", lineItem.get("quantityReceived"));
 
                 //if errors, then return errors

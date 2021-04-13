@@ -23,10 +23,12 @@ interface LineItemProps {
     rowIndex: number;
     isAdmin: boolean;
     canUpdate: boolean;
+    canInsert: boolean;
+    hasRequestId?: boolean;
 }
 
 export const LineItemRow: FC<LineItemProps> = memo(props => {
-    const { model, onInputChange, onDelete, rowIndex, isAdmin, canUpdate } = props;
+    const { model, onInputChange, onDelete, rowIndex, isAdmin, canUpdate, canInsert, hasRequestId } = props;
 
     const onValueChange = useCallback(
         (colName, value) => {
@@ -51,99 +53,77 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
     return (
         <>
             {
-                !isAdmin && canUpdate &&
-                (
-                    <Row className="line-item-row" key={'line-item-row-' + rowIndex}>
-                        <Col xs={4}>
-                            <DescriptionInput
-                                value={model.item}
-                                isReadOnly={true}
-                            />
-                        </Col>
-                        <Col xs={1}>
-                            <UnitInput
-                                value={model.itemUnit}
-                                isReadOnly={true}
-                            />
-                        </Col>
-                        <Col xs={1}>
-                            <UnitQuantityInput
-                                value={model.quantity}
-                                isReadOnly={true}
-                            />
-                        </Col>
-                        <Col xs={1}>
-                            <ControlledSubstance
-                                value={model.controlledSubstance}
-                                isReadOnly={true}
-                            />
-                        </Col>
-                        <Col xs={1}>
-                            <QuantityReceivedInput
-                                value={model.quantityReceived}
-                                onChange={onValueChange}
-                            />
-                        </Col>
-                    </Row>
-                )
-            }
-            {
-                (isAdmin || !canUpdate) &&
-                (
-                    <Row className="line-item-row" key={'line-item-row-' + rowIndex}>
-                        <Col xs={4}>
-                            <DescriptionInput
-                                value={model.item}
-                                hasError={model.errors?.find(field => field.fieldName === 'item')}
-                                onChange={onValueChange}
-                            />
-                        </Col>
-                        <Col xs={1}>
-                            <UnitInput
-                                value={model.itemUnit}
-                                hasError={model.errors?.find(field => field.fieldName === 'itemUnit')}
-                                onChange={onValueChange}
-                            />
-                        </Col>
+                <Row className="line-item-row" key={'line-item-row-' + rowIndex}>
+                    <Col xs={4}>
+                        <DescriptionInput
+                            value={model.item}
+                            hasError={model.errors?.find(field => field.fieldName === 'item')}
+                            onChange={onValueChange}
+                            isReadOnly={!isAdmin && canUpdate}
+                        />
+                    </Col>
+                    <Col xs={1}>
+                        <UnitInput
+                            value={model.itemUnit}
+                            hasError={model.errors?.find(field => field.fieldName === 'itemUnit')}
+                            onChange={onValueChange}
+                            isReadOnly={!isAdmin && canUpdate}
+                        />
+                    </Col>
+                    { (isAdmin || !canUpdate) &&
                         <Col xs={1}>
                             <UnitCostInput
-                                value={model.unitCost}
-                                hasError={model.errors?.find(field => field.fieldName === 'unitCost')}
-                                onChange={onValueChange}
+                                    value={model.unitCost}
+                                    hasError={model.errors?.find(field => field.fieldName === 'unitCost')}
+                                    onChange={onValueChange}
                             />
                         </Col>
-                        <Col xs={1}>
-                            <UnitQuantityInput
-                                value={model.quantity}
-                                hasError={model.errors?.find(field => field.fieldName === 'quantity')}
-                                onChange={onValueChange}
-                            />
-                        </Col>
+                    }
+                    <Col xs={1}>
+                        <UnitQuantityInput
+                            value={model.quantity}
+                            hasError={model.errors?.find(field => field.fieldName === 'quantity')}
+                            onChange={onValueChange}
+                            isReadOnly={!isAdmin && canUpdate}
+                        />
+                    </Col>
+                    { (isAdmin || !canUpdate) &&
                         <Col xs={1}>
                             <SubtotalInput unitCost={model.unitCost} quantity={model.quantity} />
                         </Col>
+                    }
+                    <Col xs={!hasRequestId ? 2 : 1}>
+                        <ControlledSubstance
+                            value={model.controlledSubstance}
+                            onChange={onValueChange}
+                            isReadOnly={!isAdmin && canUpdate}/>
+                    </Col>
+
+                    { hasRequestId && (isAdmin || canUpdate) &&
                         <Col xs={1}>
                             <QuantityReceivedInput
                                 value={model.quantityReceived}
                                 onChange={onValueChange}
                             />
                         </Col>
-                        <Col xs={2}>
-                            <ControlledSubstance value={model.controlledSubstance} onChange={onValueChange} />
-                        </Col>
+                    }
+
+                    <Col xs={2}/>
+                    <Col xs={1}/>
+                    {(isAdmin || !canUpdate) &&
                         <Col xs={1}>
-                        <span
-                            id={'delete-line-item-row-' + rowIndex}
-                            title="Delete item"
-                            className="delete-item-icon"
-                            onClick={onDeleteRow}
-                        >
-                            <FontAwesomeIcon className="fa-faTimesCircle" icon={faTimesCircle} />
-                        </span>
+                                <span
+                                        id={'delete-line-item-row-' + rowIndex}
+                                        title="Delete item"
+                                        className="delete-item-icon"
+                                        onClick={onDeleteRow}
+                                >
+                                    <FontAwesomeIcon className="fa-faTimesCircle" icon={faTimesCircle}/>
+                                </span>
                         </Col>
-                    </Row>
-                )
+                    }
+                </Row>
             }
         </>
-    );
+    )
 });

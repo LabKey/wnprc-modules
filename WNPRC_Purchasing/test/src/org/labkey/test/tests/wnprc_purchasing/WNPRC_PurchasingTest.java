@@ -70,6 +70,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
     //users
     private static final String REQUESTER_USER = "purchaserequester@test.com";
+    private static final String RECEIVER_USER = "purchasereceiver@test.com";
     private static final String requesterName = "purchaserequester";
     private static final String ADMIN_USER = "purchaseadmin@test.com";
     //other properties
@@ -87,6 +88,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
     private int _adminUserId;
     private int _requesterUserId;
+    private int _receiverUserId;
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
     private UIPermissionsHelper _permissionsHelper = new UIPermissionsHelper(this);
 
@@ -113,6 +115,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Create a purchasing requester user");
         _requesterUserId = _userHelper.createUser(REQUESTER_USER).getUserId().intValue();
+
+        log("Create a purchasing receiver user");
+        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId().intValue();
 
         goToHome();
 
@@ -157,6 +162,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         _permissionsHelper.setUserPermissions(getCurrentUser(), "Project Administrator");
         _permissionsHelper.setUserPermissions(REQUESTER_USER, "Submitter");
         _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
+        _permissionsHelper.setUserPermissions(RECEIVER_USER, "Editor");
     }
 
     private void goToPurchaseAdminPage()

@@ -17,10 +17,11 @@ interface Props {
     hasRequestId?: boolean;
     isAdmin: boolean;
     canUpdate: boolean;
+    canInsert: boolean;
 }
 
 export const LineItemsPanel: FC<Props> = memo(props => {
-    const { lineItems, onChange, errorMsg, hasRequestId, isAdmin, canUpdate } = props;
+    const { lineItems, onChange, errorMsg, hasRequestId, isAdmin, canUpdate, canInsert } = props;
 
     const lineItemRowChange = useCallback(
         (lineItem, updatedRowIndex) => {
@@ -69,26 +70,21 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                     </div>
                     <div>
                         {
-                            !isAdmin && canUpdate && (
                             <Row className="line-item-row-header">
                                 <Col xs={4}>Part no./Item description *</Col>
                                 <Col xs={1}>Unit *</Col>
+                                { (isAdmin || !canUpdate) &&
+                                    <Col xs={1}>Unit Cost ($) *</Col>
+                                }
                                 <Col xs={1}>Quantity *</Col>
-                                <Col xs={1}>Controlled substance</Col>
-                                <Col xs={1}>Quantity received</Col>
-                            </Row>)
-                        }
-                        {
-                            (isAdmin || !canUpdate) && (
-                            <Row className="line-item-row-header">
-                                <Col xs={4}>Part no./Item description *</Col>
-                                <Col xs={1}>Unit *</Col>
-                                <Col xs={1}>Unit Cost ($) *</Col>
-                                <Col xs={1}>Quantity *</Col>
-                                <Col xs={1}>Subtotal ($)</Col>
-                                <Col xs={1}>Quantity received</Col>
-                                <Col xs={2}>Controlled substance</Col>
-                            </Row>)
+                                { (isAdmin || !canUpdate) &&
+                                    <Col xs={1}>Subtotal ($)</Col>
+                                }
+                                <Col xs={!hasRequestId ? 2 : 1}>Controlled substance</Col>
+                                { hasRequestId && (isAdmin || canUpdate) &&
+                                    <Col xs={1}>Quantity received</Col>
+                                }
+                            </Row>
                         }
                     </div>
                     <div>
@@ -102,6 +98,8 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                     onDelete={onDeleteRow}
                                     isAdmin={isAdmin}
                                     canUpdate={canUpdate}
+                                    canInsert={canInsert}
+                                    hasRequestId={hasRequestId}
                                 />
                             );
                         })}

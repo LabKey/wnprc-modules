@@ -72,7 +72,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                 >
                     <div className="bg-primary">
                         <Panel.Heading>
-                            <div className="panel-title">Request Order</div>
+                            <div className="panel-title">Request Info</div>
                         </Panel.Heading>
                     </div>
                     <Form className="form-margin">
@@ -115,7 +115,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                 >
                     <div className="bg-primary">
                         <Panel.Heading>
-                            <div className="panel-title">Request Order</div>
+                            <div className="panel-title">Request Info</div>
                         </Panel.Heading>
                     </div>
                     <Form className="form-margin">

@@ -72,17 +72,17 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                         {
                             <Row className="line-item-row-header">
                                 <Col xs={4}>Part no./Item description *</Col>
+                                <Col xs={1}>Controlled substance</Col>
                                 <Col xs={1}>Unit *</Col>
                                 { (isAdmin || !canUpdate) &&
                                     <Col xs={1}>Unit Cost ($) *</Col>
                                 }
                                 <Col xs={1}>Quantity *</Col>
-                                { (isAdmin || !canUpdate) &&
-                                    <Col xs={1}>Subtotal ($)</Col>
-                                }
-                                <Col xs={!hasRequestId ? 2 : 1}>Controlled substance</Col>
                                 { hasRequestId && (isAdmin || canUpdate) &&
                                     <Col xs={1}>Quantity received</Col>
+                                }
+                                { (isAdmin || !canUpdate) &&
+                                    <Col xs={1}>Subtotal ($)</Col>
                                 }
                             </Row>
                         }
@@ -113,6 +113,10 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                             <Col xs={4}></Col>
                                             <Col xs={1}></Col>
                                             <Col xs={1}></Col>
+                                            {hasRequestId && (isAdmin || canUpdate) &&
+                                                <Col xs={1}></Col>
+                                            }
+                                            <Col xs={1}></Col>
                                             <Col className="calc-total" xs={1}>
                                                 Total ($):
                                             </Col>
@@ -125,8 +129,6 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                                     }, 0)
                                                 )}
                                             </Col>
-                                            <Col xs={1}></Col>
-                                            <Col xs={1}></Col>
                                         </Row>
                                     </div>
                                     <div className="add-item">

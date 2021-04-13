@@ -63,6 +63,12 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                         />
                     </Col>
                     <Col xs={1}>
+                        <ControlledSubstance
+                            value={model.controlledSubstance}
+                            onChange={onValueChange}
+                            isReadOnly={!isAdmin && canUpdate}/>
+                    </Col>
+                    <Col xs={1}>
                         <UnitInput
                             value={model.itemUnit}
                             hasError={model.errors?.find(field => field.fieldName === 'itemUnit')}
@@ -87,29 +93,25 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             isReadOnly={!isAdmin && canUpdate}
                         />
                     </Col>
+                    { hasRequestId && (isAdmin || canUpdate) &&
+                    <Col xs={1}>
+                        <QuantityReceivedInput
+                                value={model.quantityReceived}
+                                onChange={onValueChange}
+                        />
+                    </Col>
+                    }
                     { (isAdmin || !canUpdate) &&
                         <Col xs={1}>
                             <SubtotalInput unitCost={model.unitCost} quantity={model.quantity} />
                         </Col>
                     }
-                    <Col xs={!hasRequestId ? 2 : 1}>
-                        <ControlledSubstance
-                            value={model.controlledSubstance}
-                            onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}/>
-                    </Col>
-
-                    { hasRequestId && (isAdmin || canUpdate) &&
-                        <Col xs={1}>
-                            <QuantityReceivedInput
-                                value={model.quantityReceived}
-                                onChange={onValueChange}
-                            />
-                        </Col>
-                    }
 
                     <Col xs={2}/>
                     <Col xs={1}/>
+                    { !hasRequestId &&
+                        <Col xs={2}/>
+                    }
                     {(isAdmin || !canUpdate) &&
                         <Col xs={1}>
                                 <span

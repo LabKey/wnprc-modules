@@ -81,7 +81,7 @@ export const UnitCostInput: FC<NumericInputProps> = memo(props => {
 
     const onValueChange = useCallback(
         evt => {
-            onChange('unitCost', evt.target.value);
+            onChange?.('unitCost', evt.target.value);
         },
         [onChange]
     );
@@ -103,7 +103,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = memo(props => {
 
     const onValueChange = useCallback(
         evt => {
-            onChange('quantity', evt.target.value);
+            onChange?.('quantity', evt.target.value);
         },
         [onChange]
     );
@@ -126,7 +126,7 @@ export const QuantityReceivedInput: FC<NumericInputProps> = memo(props => {
 
     const onValueChange = useCallback(
         evt => {
-            onChange('quantityReceived', evt.target.value);
+            onChange?.('quantityReceived', evt.target.value);
         },
         [onChange]
     );
@@ -177,7 +177,7 @@ export const ControlledSubstance: FC<InputProps> = memo(props => {
 
     const onInputChange = useCallback(
         evt => {
-            onChange('controlledSubstance', evt.target.checked);
+            onChange?.('controlledSubstance', evt.target.checked);
         },
         [onChange]
     );

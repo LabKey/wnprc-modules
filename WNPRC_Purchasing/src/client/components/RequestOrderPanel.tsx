@@ -63,8 +63,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
 
     return (
         <>
-        {
-            !isAdmin && canUpdate && (
+        { !isAdmin && canUpdate && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}
@@ -106,8 +105,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                 </Panel>
             )
         }
-        {
-            (isAdmin || !canUpdate) && (
+        { (isAdmin || !canUpdate) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}

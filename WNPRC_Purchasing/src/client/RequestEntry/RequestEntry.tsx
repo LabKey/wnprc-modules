@@ -48,15 +48,7 @@ export const App: FC = memo(() => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
-    const [hasPurchasingAdminPermission, setHasPurchasingAdminPermission] = useState<boolean>(
-        getServerContext().user.isAdmin
-    );
-    const [hasPurchasingUpdatePermission, setHasPurchasingUpdatePermission] = useState<boolean>(
-        getServerContext().user.canUpdate
-    );
-    const [hasPurchasingInsertPermission, setHasPurchasingInsertPermission] = useState<boolean>(
-        getServerContext().user.canInsert
-    );
+    const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
@@ -64,100 +56,109 @@ export const App: FC = memo(() => {
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
 
-        //get QCStates
-        getData('core', 'qcState', 'RowId, Label').then(vals => {
-            const states = vals.map(val => {
-                if (val) {
-                    return QCStateModel.create({
-                        rowId: val.RowId,
-                        label: val.Label
-                    });
-                }
-            });
-            setQCStates(states);
-        });
-
-        if (reqRowId) {
-            // get ehr_purchasing.purchasingRequests data
-            const filter = [Filter.create('rowId', reqRowId)];
-            getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter).then(vals => {
-                if (vals && vals.length > 0) {
-                    setRequestOrderModel(
-                        RequestOrderModel.create({
-                            rowId: vals[0].rowId,
-                            account: vals[0].otherAcctAndInves ? 'Other' : vals[0].account,
-                            otherAcctAndInves: vals[0].otherAcctAndInves || undefined,
-                            vendorId: vals[0].vendorId,
-                            justification: vals[0].justification,
-                            shippingInfoId: vals[0].shippingInfoId,
-                            shippingAttentionTo: vals[0].shippingAttentionTo,
-                            comments: vals[0].comments,
-                            otherAcctAndInvesWarning: vals[0].otherAcctAndInves
-                                ? "Warning: Please add 'Account & Principal Investigator' value '" +
-                                  vals[0].otherAcctAndInves +
-                                  "' into the system."
-                                : undefined,
-                        })
-                    );
-                    setPurchaseAdminModel(
-                        PurchaseAdminModel.create({
-                            assignedTo: vals[0].assignedTo,
-                            paymentOption: vals[0].paymentOptionId,
-                            qcState: vals[0].qcState,
-                            program: vals[0].program,
-                            confirmationNum: vals[0].confirmationNum,
-                            invoiceNum: vals[0].invoiceNum,
-                            orderDate: vals[0].orderDate ? new Date(vals[0].orderDate) : null,
-                            cardPostDate: vals[0].cardPostDate ? new Date(vals[0].cardPostDate) : null,
-                        })
-                    );
-                }
-            });
-
-            // get ehr_purchasing.lineItems data
-            const requestRowIdFilter = [Filter.create('requestRowId', reqRowId)];
-            getData(
-                'ehr_purchasing',
-                'lineItems',
-                'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, quantityReceived, unitCost, itemStatusId',
-                undefined,
-                requestRowIdFilter
-            ).then(vals => {
-                const li = vals.map(val => {
-                    if (val) {
-                        return LineItemModel.create({
-                            rowId: val.rowId,
-                            requestRowId: reqRowId,
-                            item: val.item,
-                            controlledSubstance: val.controlledSubstance,
-                            itemUnit: val.itemUnitId,
-                            quantity: val.quantity,
-                            quantityReceived: val.quantityReceived,
-                            unitCost: val.unitCost,
-                            status: val.itemStatusId,
+        (async () => {
+            //get QCStates
+            getData('core', 'qcState', 'RowId, Label').then(vals => {
+                const states = vals.map(val => {
+                    if (val)
+                    {
+                        return QCStateModel.create({
+                            rowId: val.RowId,
+                            label: val.Label
                         });
                     }
                 });
-                setLineItems(li);
+                setQCStates(states);
             });
 
-            // get saved files
-            const dir = PURCHASING_REQUEST_ATTACHMENTS_DIR + '/' + reqRowId;
-            getSavedFiles(ActionURL.getContainer(), dir, false).then((files: SavedFileModel[]) => {
-                if (files?.length > 0) {
-                    const updatedModel = produce(documentAttachmentModel, (draft: Draft<DocumentAttachmentModel>) => {
-                        draft['savedFiles'] = files;
+            if (reqRowId)
+            {
+                // get ehr_purchasing.purchasingRequests data
+                const filter = [Filter.create('rowId', reqRowId)];
+                getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter).then(vals => {
+                    if (vals && vals.length > 0)
+                    {
+                        setRequestOrderModel(
+                            RequestOrderModel.create({
+                                rowId: vals[0].rowId,
+                                account: vals[0].otherAcctAndInves ? 'Other' : vals[0].account,
+                                otherAcctAndInves: vals[0].otherAcctAndInves || undefined,
+                                vendorId: vals[0].vendorId,
+                                justification: vals[0].justification,
+                                shippingInfoId: vals[0].shippingInfoId,
+                                shippingAttentionTo: vals[0].shippingAttentionTo,
+                                comments: vals[0].comments,
+                                otherAcctAndInvesWarning: vals[0].otherAcctAndInves
+                                    ? "Warning: Please add 'Account & Principal Investigator' value '" +
+                                    vals[0].otherAcctAndInves +
+                                    "' into the system."
+                                    : undefined,
+                            })
+                        );
+                        setPurchaseAdminModel(
+                            PurchaseAdminModel.create({
+                                assignedTo: vals[0].assignedTo,
+                                paymentOption: vals[0].paymentOptionId,
+                                qcState: vals[0].qcState,
+                                program: vals[0].program,
+                                confirmationNum: vals[0].confirmationNum,
+                                invoiceNum: vals[0].invoiceNum,
+                                orderDate: vals[0].orderDate ? new Date(vals[0].orderDate) : null,
+                                cardPostDate: vals[0].cardPostDate ? new Date(vals[0].cardPostDate) : null,
+                            })
+                        );
+                    }
+                });
+
+                // get ehr_purchasing.lineItems data
+                const requestRowIdFilter = [Filter.create('requestRowId', reqRowId)];
+                getData(
+                    'ehr_purchasing',
+                    'lineItems',
+                    'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, quantityReceived, unitCost, itemStatusId',
+                    undefined,
+                    requestRowIdFilter
+                ).then(vals => {
+                    const li = vals.map(val => {
+                        if (val)
+                        {
+                            return LineItemModel.create({
+                                rowId: val.rowId,
+                                requestRowId: reqRowId,
+                                item: val.item,
+                                controlledSubstance: val.controlledSubstance,
+                                itemUnit: val.itemUnitId,
+                                quantity: val.quantity,
+                                quantityReceived: val.quantityReceived,
+                                unitCost: val.unitCost,
+                                status: val.itemStatusId,
+                            });
+                        }
                     });
-                    setDocumentAttachmentModel(updatedModel);
-                }
-            });
-        } else {
-            getData('core', 'qcState', 'RowId, Label').then(vals => {
-                const idx = vals.findIndex(qcstate => qcstate['Label'] === 'Review Pending');
-                setRequestOrderModel(RequestOrderModel.create({ qcState: vals[idx].RowId }));
-                setLineItems([LineItemModel.create({ qcState: vals[idx].RowId })]);
-            });
-        }
+                    setLineItems(li);
+                });
+
+                // get saved files
+                const dir = PURCHASING_REQUEST_ATTACHMENTS_DIR + '/' + reqRowId;
+                getSavedFiles(ActionURL.getContainer(), dir, false).then((files: SavedFileModel[]) => {
+                    if (files?.length > 0)
+                    {
+                        const updatedModel = produce(documentAttachmentModel, (draft: Draft<DocumentAttachmentModel>) => {
+                            draft['savedFiles'] = files;
+                        });
+                        setDocumentAttachmentModel(updatedModel);
+                    }
+                });
+            }
+            else
+            {
+                getData('core', 'qcState', 'RowId, Label').then(vals => {
+                    const idx = vals.findIndex(qcstate => qcstate['Label'] === 'Review Pending');
+                    setRequestOrderModel(RequestOrderModel.create({qcState: vals[idx].RowId}));
+                    setLineItems([LineItemModel.create({qcState: vals[idx].RowId})]);
+                });
+            }
+        })();
     }, []);
 
     const handleWindowBeforeUnload = useCallback(

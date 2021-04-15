@@ -136,7 +136,7 @@ export const VendorInput: FC<VendorInputProps> = memo(props => {
                     draft['vendorId'] = ''; // Reset Vendor input when user hits Cancel and doesn't enter a new vendor
                 }
             });
-            onModelChange(updatedModel);
+            onModelChange?.(updatedModel);
         },
         [onChange, hasError, model, onModelChange]
     );
@@ -147,7 +147,7 @@ export const VendorInput: FC<VendorInputProps> = memo(props => {
                 draft['newVendor'] = newVendor;
             });
             if (!newVendor.errors) {
-                onModelChange(updatedModel);
+                onModelChange?.(updatedModel);
             }
         },
         [onChange, hasError, model, onModelChange]

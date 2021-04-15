@@ -935,6 +935,7 @@
 
                             calendarChecklist.appendChild(div);
 
+                            let allChecked = true;
                             for (let i = 0; i < data.rows.length; i++) {
 
                                 let div = document.createElement('div');
@@ -950,6 +951,8 @@
                                 checkbox.id = data.rows[i].calendar_id;
                                 if (data.rows[i].show_by_default) {
                                     checkbox.checked = true;
+                                } else {
+                                    allChecked = false;
                                 }
                                 checkbox.value = '';
                                 checkbox.addEventListener('change', function() {
@@ -992,6 +995,7 @@
 
                                 calendarChecklist.appendChild(div);
                             }
+                            checkbox.checked = allChecked;
                         }
 
                         $('#calendar-selection').block({

@@ -322,6 +322,9 @@ export const App: FC = memo(() => {
                                         case 'quantity':
                                             lineItemErrors.push({ fieldName: 'quantity', errorMessage: errMsg });
                                             break;
+                                        case 'quantityReceived':
+                                            lineItemErrors.push({ fieldName: 'quantityReceived', errorMessage: errMsg });
+                                            break;
                                         case 'rowIndex':
                                             const txt = errMsg; // this is just the row index set on server side to identify error on specific line item index
                                             errorOnIndex = parseInt(txt, 10);
@@ -356,7 +359,38 @@ export const App: FC = memo(() => {
                         }
 
                         if (hasLineItemError) {
-                            setLineItemErrorMsg(lineItemsErrorCount > 1 ? msg + 's.' : msg + '.');
+                            let lineItemErrMsg = "Unable to submit request, ";
+                            let negQuantityErrMsg = "";
+
+                            lineItems?.forEach((lineItem) => {
+                                if (lineItem.quantity < 0 || lineItem.quantityReceived < 0)
+                                    negQuantityErrMsg += "invalid quantity"
+                            });
+
+                            let missingReqFieldCount = 0;
+                            let missingReqFieldMsg = "missing required field";
+
+                            if (lineItems?.length > 0) {
+                                if (!lineItems[errorOnIndex].item)
+                                    ++missingReqFieldCount;
+                                if (!lineItems[errorOnIndex].itemUnit)
+                                    ++missingReqFieldCount;
+                                if (!lineItems[errorOnIndex].quantity)
+                                    ++missingReqFieldCount;
+                                if (!lineItems[errorOnIndex].unitCost)
+                                    ++missingReqFieldCount;
+                            }
+
+                            if (missingReqFieldCount > 0) {
+                                lineItemErrMsg = missingReqFieldCount > 1 ? (lineItemErrMsg + missingReqFieldMsg + 's') : (lineItemErrMsg + missingReqFieldMsg)
+                            }
+                            if (missingReqFieldCount > 0 && negQuantityErrMsg.length > 0) {
+                                lineItemErrMsg += " & ";
+                            }
+                            if (negQuantityErrMsg.length > 0) {
+                                lineItemErrMsg += negQuantityErrMsg;
+                            }
+                            setLineItemErrorMsg(lineItemErrMsg + ".");
                         }
                     } else if (reject?.exception) {
                         setGlobalErrorMsg(reject.exception);

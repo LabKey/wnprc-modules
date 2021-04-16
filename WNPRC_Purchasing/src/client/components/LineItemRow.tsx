@@ -33,7 +33,7 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
     const onValueChange = useCallback(
         (colName, value) => {
             const updatedModel = produce(model, (draft: Draft<LineItemModel>) => {
-                draft[colName] = value;
+                draft[colName] = value === "" ? null : value;
                 if (model.errors?.length > 0) {
                     draft['errors'] = model.errors.filter(field => field.fieldName !== colName);
                 }
@@ -97,6 +97,7 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                     <Col xs={1}>
                         <QuantityReceivedInput
                                 value={model.quantityReceived}
+                                hasError={model.errors?.find(field => field.fieldName === 'quantityReceived')}
                                 onChange={onValueChange}
                         />
                     </Col>

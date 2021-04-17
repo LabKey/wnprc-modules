@@ -86,10 +86,18 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     const copyformdata: Array<RowObj> = [...formdata];
 
     copyformdata.forEach(item => {
-      item["weight"] = vals["weight"]["value"] != "" ? Object.assign({}, vals["weight"]) : Object.assign({}, item["weight"]);
-      item["date"] = vals["date"]["value"] != "" ? Object.assign({}, vals["date"]) : Object.assign({}, item["date"]);
-      item["restraint"] = vals["restraint"]["value"] != "" ? Object.assign({}, vals["restraint"]) : Object.assign({}, item["restraint"]);
-      item["remark"] = vals["remark"]["value"] != "" ? Object.assign({}, vals["remark"]) : Object.assign({}, item["remark"]);
+      if (vals["weight"]["value"]){
+        item["weight"] = Object.assign({}, vals["weight"]);
+      }
+      if (vals["date"]["value"]){
+        item["date"] = Object.assign({}, vals["date"]);
+      }
+      if (vals["restraint"]["value"]){
+        item["restraint"] = Object.assign({}, vals["restraint"]);
+      }
+      if (vals["remark"]["value"]){
+        item["remark"] = Object.assign({}, vals["remark"]);
+      }
     });
 
     setFormDataInAppContext(copyformdata);

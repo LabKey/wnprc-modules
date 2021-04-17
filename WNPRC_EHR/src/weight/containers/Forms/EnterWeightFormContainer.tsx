@@ -105,7 +105,6 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     setBulkEditUsedInAppContext();
   };
   const triggerIds = (ids: any) => {
-    setFormDataInAppContext([]);
     setIds(ids);
     setBatchAddUsedInAppContext();
   };
@@ -466,10 +465,10 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   }, []);
 
   const setFormIds = () => {
-    let t: Array<RowObj> = [];
+    let copyformdata: Array<RowObj> = [...formdata]
     ids.forEach((id, i) => {
       let restraintObjectId = Utils.generateUUID().toUpperCase();
-      t.push({
+      copyformdata.push({
         animalid: { value: id, error: "" },
         date: { value: new Date(), error: "" },
         weight: { value: undefined, error: "" },
@@ -491,7 +490,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
         validated: {value: false, error: ""}
       });
     });
-    setFormDataInAppContext(t);
+    setFormDataInAppContext(copyformdata);
   };
 
   const toggleCollapse = (item: RowObj, i) => {

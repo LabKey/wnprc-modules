@@ -127,7 +127,7 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         return this;
     }
 
-    public CreateRequestPage submitExpectingError()
+    public CreateRequestPage submitForReviewExpectingError()
     {
         elementCache().submitForReview.click();
         clearCache();
@@ -143,7 +143,7 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
 
     public CreateRequestPage submit()
     {
-        clickAndWait(Locator.button("Submit").findElement(getDriver()));
+        clickAndWait(elementCache().submit);
         return this;
     }
     public CreateRequestPage cancel()
@@ -165,7 +165,7 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
 
     public String getAlertMessage()
     {
-        return Locator.byClass("alert alert-danger").findWhenNeeded(getDriver()).getText();
+        return elementCache().alertMessage.getText();
     }
 
     public String getAssignedTo()
@@ -258,6 +258,16 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         return this;
     }
 
+    public CreateRequestPage setQuantityReceived(String value)
+    {
+        setFormElement(Locator.id("quantity-received-id"),value);
+        return this;
+    }
+
+    public String getQuantityReceived()
+    {
+        return Locator.id("quantity-received-id").findElement(getDriver()).getText();
+    }
     @Override
     protected CreateRequestPage.ElementCache newElementCache()
     {
@@ -283,7 +293,9 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         final WebElement attachment = Locator.id("fileUpload").findWhenNeeded(this).withTimeout(200);
 
         final WebElement submitForReview = Locator.button("Submit for Review").findWhenNeeded(this);
+        final WebElement submit = Locator.button("Submit").findWhenNeeded(this);
         final WebElement cancel = Locator.button("Cancel").findWhenNeeded(this);
+        final WebElement alertMessage = Locator.byClass("alert alert-danger").findWhenNeeded(this);
         final Select accountToCharge = SelectWrapper.Select(Locator.byClass("account-input form-control "))
                 .findWhenNeeded(this);
         final Select vendor = SelectWrapper.Select(Locator.byClass("vendor-input form-control "))

@@ -25,10 +25,15 @@
                             <fkTable>itemUnits</fkTable>
                         </fk>
                     </column>
-                    <column columnName="controlledSubstance"/>
+                    <column columnName="controlledSubstance">
+                        <formatString>Yes;No;</formatString>
+                    </column>
                     <column columnName="quantity">
                         <required>true</required>
-                        <formatString>###,##0.00</formatString>
+                        <formatString>###,##0</formatString>
+                    </column>
+                    <column columnName="quantityReceived">
+                        <formatString>###,##0</formatString>
                     </column>
                     <column columnName="unitCost">
                         <required>true</required>

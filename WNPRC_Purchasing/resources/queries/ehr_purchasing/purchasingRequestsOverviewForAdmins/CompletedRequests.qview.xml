@@ -8,6 +8,7 @@
         <column name="requestStatus"/>
         <column name="otherAccountAndInves"/>
         <column name="requester"/>
+        <column name="attachments"/>
     </columns>
     <filters>
         <filter column="requestStatus/Label" operator="eq" value="Order Complete" />

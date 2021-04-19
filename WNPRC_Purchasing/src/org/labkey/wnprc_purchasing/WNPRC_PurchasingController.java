@@ -30,6 +30,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
@@ -49,13 +50,14 @@ public class WNPRC_PurchasingController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(ReadPermission.class)
+    @RequiresPermission(InsertPermission.class)
     public class RequesterAction extends SimpleViewAction
     {
         public ModelAndView getView(Object o, BindException errors)
         {
             WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Requester");
             Portal.WebPart part = factory.createWebPart();
+            getPageConfig().setTitle("Purchasing Requester");
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }
 
@@ -68,6 +70,21 @@ public class WNPRC_PurchasingController extends SpringActionController
         public ModelAndView getView(Object o, BindException errors)
         {
             WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Admin");
+            getPageConfig().setTitle("Purchasing Admin");
+            Portal.WebPart part = factory.createWebPart();
+            return Portal.getWebPartViewSafe(factory, getViewContext(), part);
+        }
+
+        public void addNavTrail(NavTree root) { }
+    }
+
+    @RequiresPermission(UpdatePermission.class)
+    public class PurchaseReceiverAction extends SimpleViewAction
+    {
+        public ModelAndView getView(Object o, BindException errors)
+        {
+            WebPartFactory factory = Portal.getPortalPartCaseInsensitive("WNPRC Purchasing Receiver");
+            getPageConfig().setTitle("Purchasing Receiver");
             Portal.WebPart part = factory.createWebPart();
             return Portal.getWebPartViewSafe(factory, getViewContext(), part);
         }

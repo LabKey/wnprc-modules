@@ -7,6 +7,7 @@ SELECT
     pr.account || pr.otherAcctAndInves AS account,
     pr.qcState   AS requestStatus,
     pr.createdBy AS requester,
-    pr.assignedTo
+    pr.assignedTo,
+    pr.attachments
 FROM ehr_purchasing.purchasingRequests pr
 WHERE ISMEMBEROF(pr.assignedTo)

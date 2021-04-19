@@ -5,14 +5,14 @@ import { getWebDavFiles, uploadWebDavFile, WebDavFile } from '@labkey/components
 import {
     DocumentAttachmentModel,
     LineItemModel,
-    PurchaseAdminModel,
+    PurchaseAdminModel, QCStateModel,
     RequestOrderModel,
     SavedFileModel,
     VendorModel,
 } from './model';
 import { PURCHASING_REQUEST_ATTACHMENTS_DIR } from './constants';
 
-export function getData(
+export async function getData(
     schemaName: string,
     queryName: string,
     colNames: string,
@@ -38,9 +38,43 @@ export function getData(
     });
 }
 
+function getQCState(purchasingAdminModel: PurchaseAdminModel, requestOrder: RequestOrderModel, lineItems: LineItemModel[], qcStates: QCStateModel[])
+{
+    let qcState = purchasingAdminModel?.qcState || requestOrder.qcState;
+
+    // check for the final/complete state
+    let completeState = qcStates.filter((qcState) => {
+        return qcState.label === 'Order Complete';
+    });
+
+    // if 'order complete' state is set, return
+    if (completeState?.[0]?.rowId === qcState) {
+        return qcState;
+    }
+
+    // otherwise, identify if all the line items are received
+    let receivedCount = 0;
+    lineItems.forEach((lineItem: LineItemModel)=> {
+        if (lineItem.quantityReceived >= lineItem.quantity) {
+            ++receivedCount;
+        }
+    });
+
+    // if all the line items are received, set state to 'order delivered'
+    if (receivedCount === lineItems.length) {
+        let deliveredState = qcStates.filter((qcState) => {
+            return qcState.label === 'Order Delivered';
+        });
+        qcState = deliveredState?.[0]?.rowId;
+    }
+
+    return qcState;
+}
+
 export async function submitRequest(
     requestOrder: RequestOrderModel,
     lineItems: LineItemModel[],
+    qcStates: QCStateModel[],
     purchasingAdminModel?: PurchaseAdminModel,
     documentAttachmentModel?: DocumentAttachmentModel,
     lineItemsToDelete?: number[]
@@ -58,7 +92,7 @@ export async function submitRequest(
                 shippingDestination: requestOrder.shippingInfoId,
                 shippingAttentionTo: requestOrder.shippingAttentionTo,
                 comments: requestOrder.comments,
-                qcState: purchasingAdminModel?.qcState || requestOrder.qcState,
+                qcState: getQCState(purchasingAdminModel, requestOrder, lineItems, qcStates),
                 assignedTo: purchasingAdminModel?.assignedTo,
                 paymentOption: purchasingAdminModel?.paymentOption,
                 program: purchasingAdminModel?.program ? purchasingAdminModel.program : '4',

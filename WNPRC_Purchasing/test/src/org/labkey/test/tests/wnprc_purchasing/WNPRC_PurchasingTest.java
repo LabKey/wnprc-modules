@@ -70,6 +70,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
     //users
     private static final String REQUESTER_USER = "purchaserequester@test.com";
+    private static final String RECEIVER_USER = "purchasereceiver@test.com";
     private static final String requesterName = "purchaserequester";
     private static final String ADMIN_USER = "purchaseadmin@test.com";
     //other properties
@@ -85,8 +86,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     //helpers
     public AbstractUserHelper _userHelper = new APIUserHelper(this);
     ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
+    File pdfFile = new File(TestFileUtils.getSampleData("fileTypes"), "pdf_sample.pdf");
     private int _adminUserId;
     private int _requesterUserId;
+    private int _receiverUserId;
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
     private UIPermissionsHelper _permissionsHelper = new UIPermissionsHelper(this);
 
@@ -113,6 +116,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Create a purchasing requester user");
         _requesterUserId = _userHelper.createUser(REQUESTER_USER).getUserId().intValue();
+
+        log("Create a purchasing receiver user");
+        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId().intValue();
 
         goToHome();
 
@@ -157,6 +163,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         _permissionsHelper.setUserPermissions(getCurrentUser(), "Project Administrator");
         _permissionsHelper.setUserPermissions(REQUESTER_USER, "Submitter");
         _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
+        _permissionsHelper.setUserPermissions(RECEIVER_USER, "Editor");
     }
 
     private void goToPurchaseAdminPage()
@@ -167,6 +174,11 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private void goToRequesterPage()
     {
         beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requester"));
+    }
+
+    private void goToReceiverPage()
+    {
+        beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "purchaseReceiver"));
     }
 
     private void createUserAccountAssociations() throws IOException, CommandException
@@ -235,7 +247,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
         log("Verifying the validation for mandatory fields");
-        requestPage.submitExpectingError();
+        requestPage.submitForReviewExpectingError();
         checker().verifyEquals("Invalid error message", "Unable to submit request, missing required fields.", requestPage.getAlertMessage());
 
         log("Creating a request order");
@@ -312,7 +324,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     public void testPurchaseAdminWorkflow() throws IOException, CommandException
     {
         File jpgFile = new File(TestFileUtils.getSampleData("fileTypes"), "jpg_sample.jpg");
-        File pdfFile = new File(TestFileUtils.getSampleData("fileTypes"), "pdf_sample.pdf");
 
         clearAllRequest();
 
@@ -372,9 +383,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid value for Unit Input ", "CS", requestPage.getUnitInput());
         checker().verifyEquals("Invalid value for Unit cost ", "10", requestPage.getUnitCost());
         checker().verifyEquals("Invalid value for Quantity ", "25", requestPage.getQuantity());
-
-        log("Add a line item with negative value");
-        requestPage.setQuantity("-10");
 
         log("Upload another attachment");
         requestPage.addAttachment(pdfFile);
@@ -503,7 +511,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         requestPage = new CreateRequestPage(getDriver());
         requestPage.setStatus("Order Complete").submit();
 
-        waitAndClickAndWait(Locator.linkWithText("Purchasing Admin"));
         clickAndWait(Locator.linkWithText("Completed Requests"));
         table = new DataRegionTable("query", getDriver());
         checker().verifyEquals("Incorrect request in my open request", requestId2,
@@ -525,6 +532,85 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Incorrect number of rows in P-Card view", 2, table.getDataRowCount());
     }
 
+    @Test
+    public void testReceiverActions()
+    {
+        goToProjectHome();
+        impersonate(REQUESTER_USER);
+        goToRequesterPage();
+
+        log("Creating the first request as" + REQUESTER_USER);
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
+        Map<String, String> requestInputs = new HashMap<>();
+        requestInputs.put("Account to charge", "acct101");
+        requestInputs.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        requestInputs.put("Vendor", "Dunder Mifflin");
+        requestInputs.put("Delivery attention to", "testing the workflow - receiver");
+        requestInputs.put("Business purpose", "regression test -receiver request");
+        requestInputs.put("Item description", "Item1");
+        requestInputs.put("Unit", "Term");
+        requestInputs.put("Unit Cost", "20");
+        requestInputs.put("Quantity", "3");
+        String requestId1 = createRequest(requestInputs, null);
+
+        log("Creating the second request as" + REQUESTER_USER);
+        requestInputs = new HashMap<>();
+        requestInputs.put("Account to charge", "acct100");
+        requestInputs.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        requestInputs.put("Vendor", "Real Santa Claus");
+        requestInputs.put("Delivery attention to", "testing the workflow - receiver");
+        requestInputs.put("Business purpose", "regression test -receiver request");
+        requestInputs.put("Item description", "Item2");
+        requestInputs.put("Unit", "CS");
+        requestInputs.put("Unit Cost", "20");
+        requestInputs.put("Quantity", "300");
+        clickAndWait(Locator.linkWithText("Create Request"));
+        String requestId2 = createRequest(requestInputs, null);
+        stopImpersonating();
+
+        log("Updating the request by " + ADMIN_USER);
+        goToPurchaseAdminPage();
+        impersonate(ADMIN_USER);
+        clickAndWait(Locator.linkWithText("All Open Requests"));
+        clickAndWait(Locator.linkWithText(requestId1));
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setQuantityReceived("4");
+        requestPage.setStatus("Order Placed");
+        requestPage.submit();
+
+        waitAndClickAndWait(Locator.linkWithText("All Open Requests"));
+        clickAndWait(Locator.linkWithText(requestId2));
+        requestPage = new CreateRequestPage(getDriver());
+        requestPage.setQuantityReceived("40");
+        requestPage.setStatus("Order Placed");
+        requestPage.submit();
+        stopImpersonating();
+
+        log("Testing as receiver");
+        impersonate(RECEIVER_USER);
+        goToPurchaseAdminPage();
+        checker().verifyTrue("Receiver should not have permission to access admin page",
+                isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
+                        .withText("You do not have the permissions required to access this page.")));
+        goToReceiverPage();
+        waitAndClickAndWait(Locator.linkWithText(requestId2));
+        requestPage = new CreateRequestPage(getDriver());
+        requestPage.addAttachment(pdfFile);
+        requestPage.setQuantityReceived("300");
+        requestPage.submit();
+
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        checker().verifyEquals("The line item table should be empty", 0, table.getDataRowCount());
+        stopImpersonating();
+
+        goToPurchaseAdminPage();
+        waitAndClickAndWait(Locator.linkWithText("All Requests"));
+
+        table = new DataRegionTable("query", getDriver());
+        table.setFilter("requestNum", "Equals One Of (example usage: a;b;c)", requestId1 + ";" + requestId2);
+        checker().verifyEquals("Incorrect order status", Arrays.asList("Order Delivered", "Order Delivered"), table.getColumnDataAsText("requestStatus"));
+    }
+
     private String getQueryName(String linkName)
     {
         clickAndWait(Locator.linkWithText(linkName));
@@ -537,7 +623,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private String createRequest(Map<String, String> request, @Nullable File fileName)
     {
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
-
         requestPage.setAccountsToCharge(request.get("Account to charge"))
                 .setVendor(request.get("Vendor"))
                 .setBusinessPurpose(request.get("Business purpose"))
@@ -563,7 +648,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
             return table.getDataAsText(0, "requestNum");
         }
         else
-            return DataRegionTable.DataRegion(getDriver()).find().getDataAsText(0, "rowId");
+        {
+            DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+            return table.getDataAsText(table.getDataRowCount() - 1, "rowId");
+        }
     }
 
     private void clearAllRequest() throws IOException, CommandException

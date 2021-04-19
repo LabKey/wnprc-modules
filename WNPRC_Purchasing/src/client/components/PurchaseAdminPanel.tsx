@@ -41,7 +41,7 @@ export const PurchaseAdminPanel: FC<Props> = memo(props => {
         >
             <div className="bg-primary">
                 <Panel.Heading>
-                    <div className="panel-title">Purchase Admin Input</div>
+                    <div className="panel-title">Purchasing Details (for internal use)</div>
                 </Panel.Heading>
             </div>
             <Form className="form-margin">

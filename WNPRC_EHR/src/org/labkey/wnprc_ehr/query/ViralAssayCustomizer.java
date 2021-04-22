@@ -152,21 +152,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
             statusFlags.setDimension(false);
         }
 
-        ColumnInfo sourceMaterialColumn = ti.getColumn("sourceMaterial");
-        if (sourceMaterialColumn != null) {
-            TableInfo sourceMaterialTable = sourceMaterialColumn.getFkTableInfo();
-            BaseColumnInfo liquidColumn = (BaseColumnInfo) sourceMaterialTable.getColumn("liquid");
-            if (liquidColumn != null) {
-                liquidColumn.setLabel("Units");
-                liquidColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
-                    @Override
-                    public DisplayColumn createRenderer(ColumnInfo colInfo) {
-                        return new ViralLoadUnitsColumn(colInfo);
-                    }
-                });
-            }
-        }
-
         BaseColumnInfo batchedColumn = (BaseColumnInfo) ti.getColumn("batched");
 
         if (batchedColumn != null) {
@@ -206,37 +191,6 @@ public class ViralAssayCustomizer implements TableCustomizer {
         }
 
         customizeButtonBar(ti, AssayProtocolSchema.BATCHES_TABLE_NAME);
-    }
-
-    public static class ViralLoadUnitsColumn extends DataColumn {
-        public ViralLoadUnitsColumn(ColumnInfo colInfo) {
-            super(colInfo);
-        }
-
-        @Override
-        public Object getValue(RenderContext ctx) {
-            Object value = super.getValue(ctx);
-            if (value instanceof Boolean) {
-                boolean liquid = (boolean) value;
-                if (liquid) {
-                    return "mL";
-                }
-                else {
-                    return "mg";
-                }
-            }
-            return "";
-        }
-
-        @Override
-        public Object getDisplayValue(RenderContext ctx) {
-            return getValue(ctx);
-        }
-
-        @Override
-        public HtmlString getFormattedHtml(RenderContext ctx) {
-            return HtmlString.of(getValue(ctx));
-        }
     }
 
     public static class ViralLoadBatchedColumn extends DataColumn {

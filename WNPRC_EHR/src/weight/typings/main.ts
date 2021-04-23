@@ -12,6 +12,7 @@ export interface InfoProps {
     _labkeyurl_dam: string;
     birth: string;
     _labkeyurl_birth: string;
+    medical: string;
 }
 
 export interface PaneProps {

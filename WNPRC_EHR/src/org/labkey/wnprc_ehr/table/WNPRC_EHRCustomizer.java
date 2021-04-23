@@ -893,14 +893,26 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         @Override
-        public Object getValue(RenderContext ctx) {
+        public Object getValue(RenderContext ctx)
+        {
             if (!"Request: Pending".equals(ctx.get("QCState$Label")))
             {
                 return super.getValue(ctx);
             } else {
-                return "";
+                return "not shown gv";
             }
         }
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return super.getDisplayValue(ctx);
+            } else {
+                return "not shown gdv";
+            }
+        }
+
     }
     public static class AnimalReportLink extends DataColumn {
         public AnimalReportLink(ColumnInfo colInfo) {
@@ -914,19 +926,33 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     public static class AnimalReportLinkQCStateConditional extends DataColumn {
-        public AnimalReportLinkQCStateConditional(ColumnInfo colInfo) {
+        private User _currentUser;
+        public AnimalReportLinkQCStateConditional(ColumnInfo colInfo, User currentUser) {
             super(colInfo);
+            _currentUser = currentUser;
         }
 
         @Override
-        public Object getValue(RenderContext ctx) {
+        public Object getValue(RenderContext ctx)
+        {
             if (!"Request: Pending".equals(ctx.get("QCState$Label")))
             {
                 return super.getValue(ctx);
             } else {
-                return "";
+                return "not shown gv";
             }
         }
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return super.getDisplayValue(ctx);
+            } else {
+                return "not shown gdv";
+            }
+        }
+
     }
 
     private void customizeAnimalRequestsTable(AbstractTableInfo table)
@@ -936,6 +962,21 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         if (us == null)
         {
             return;
+        }
+
+        if (table.getColumn("editLink") == null){
+
+            ColumnInfo col = table.getColumn("editLink");
+            String editLink = "editLink";
+
+            String theQuery  = "( " +
+                    "(SELECT 'editLink')" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, editLink, sql, JdbcType.VARCHAR);
+            table.addColumn(newCol);
         }
 
         User currentUser = us.getUser();
@@ -998,6 +1039,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     else
                     {
                         col.setReadOnly(true);
+                        DisplayColumn ds =  new AnimalIdsToOfferColumnQCStateConditional(colInfo);
                         return new AnimalIdsToOfferColumnQCStateConditional(colInfo);
                     }
                 }
@@ -1037,7 +1079,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                         }
                         else
                         {
-                            return new AnimalReportLinkQCStateConditional(colInfo);
+                            return new AnimalReportLinkQCStateConditional(colInfo, currentUser);
                         }
                     }
                 });

@@ -2,9 +2,15 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="animal_requests" tableDbType="TABLE" useColumnOrder="true">
-                <tableTitle>Animal Requests</tableTitle>
-                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
+                <tableTitle>Animal Requestsss test</tableTitle>
+                <javaCustomizer class="org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer"/>
+                <updateUrl />
+
                 <columns>
+                    <column columnName="editLink" >
+                        <columnTitle>EDIT!!</columnTitle>
+                    </column>
+
                     <column columnName="date" >
                         <columnTitle>Date Requested</columnTitle>
                         <formatString>yyyy-MM-dd hh:mm</formatString>

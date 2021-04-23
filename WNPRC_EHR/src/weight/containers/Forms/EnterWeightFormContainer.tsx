@@ -113,7 +113,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     if (location.length == 0) {
       return;
     }
-    let animaldata: Array<RowObj> = [...formdata];
+    let animaldata: Array<RowObj>;
+    if (formdata[0] && formdata[0].animalid.value != ""){
+      animaldata = [...formdata];
+    } else {
+      animaldata = [];
+    }
     setLocLoading(true);
     Promise.all(getlocations(location)).then(d => {
       d.forEach((promise, i) => {
@@ -465,7 +470,12 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
   }, []);
 
   const setFormIds = () => {
-    let copyformdata: Array<RowObj> = [...formdata]
+    let copyformdata: Array<RowObj>;
+    if (formdata[0] && formdata[0].animalid.value != ""){
+      copyformdata = [...formdata]
+    } else {
+      copyformdata = []
+    }
     ids.forEach((id, i) => {
       let restraintObjectId = Utils.generateUUID().toUpperCase();
       copyformdata.push({

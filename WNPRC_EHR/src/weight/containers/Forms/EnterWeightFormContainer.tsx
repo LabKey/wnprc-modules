@@ -113,7 +113,7 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
     if (location.length == 0) {
       return;
     }
-    let animaldata: Array<RowObj> = [];
+    let animaldata: Array<RowObj> = [...formdata];
     setLocLoading(true);
     Promise.all(getlocations(location)).then(d => {
       d.forEach((promise, i) => {

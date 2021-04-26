@@ -22,6 +22,34 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                     plugins: ['wnprc-animalfield']
                 }
             },
+            date: {
+                //defaultValue: Ext4.Date.add(new Date()),//'2018-12-05 11:00 AM',
+                editorConfig: {
+                    // dateConfig: {
+                    //     minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
+                    // },
+                    listeners: {
+                        change: function(field, val){
+                            let theForm = this.ownerCt.ownerCt.ownerCt.getForm();
+
+                            if(theForm){
+                                let startTableTimeField = theForm.findField("startTableTime");
+                                let procedureUnitField = theForm.findField("procedureUnit");
+                                let startTableTimeTimeValue = startTableTimeField.timeField.rawValue;
+                                if (procedureUnitField.value === "vet" && field.value && (startTableTimeTimeValue === "00:00" || !startTableTimeTimeValue)) {
+                                    startTableTimeField.setValue(field.value);
+                                }
+                            }
+                        }
+                    }
+                }//,
+                // setInitialValue: function(v){
+                //     var date = (new Date()).add(Date.DAY, 1);
+                //     date.setHours(8);
+                //     date.setMinutes(0);
+                //     return v || date;
+                // }
+            },
             procedurename: {
                 xtype: "wnprc-groupedcheckcombo",
                 lookup: {
@@ -34,21 +62,20 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
                 }
             },
             procedureunit: {
-
-            },
-            date: {
-                defaultValue: Ext4.Date.add(new Date()),//'2018-12-05 11:00 AM',
                 editorConfig: {
-                    dateConfig: {
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, 1)
+                    listeners: {
+                        select: function(field, val){
+                            let theForm = this.ownerCt.ownerCt.ownerCt.getForm();
+
+                            if(theForm){
+                                let idField = theForm.findField("Id");
+                                if (field.value === "spi" && !idField.value) {
+                                    idField.setValue("ph9999");
+                                }
+                            }
+                        }
                     }
-                }//,
-                // setInitialValue: function(v){
-                //     var date = (new Date()).add(Date.DAY, 1);
-                //     date.setHours(8);
-                //     date.setMinutes(0);
-                //     return v || date;
-                // }
+                }
             },
             startTableTime: {
                 xtype: 'xdatetime',

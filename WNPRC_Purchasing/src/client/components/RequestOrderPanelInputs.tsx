@@ -14,9 +14,10 @@ import { VendorPopupModal } from './VendorInputModal';
 
 interface InputProps {
     value: any;
-    onChange: (colName, value) => void;
+    onChange?: (colName, value) => void;
     hasError?: boolean;
     hasOtherAcctWarning?: boolean;
+    isReadOnly?: boolean;
 }
 
 export const AccountInput: FC<InputProps> = memo(props => {
@@ -86,14 +87,15 @@ export const AccountOtherInput: FC<InputProps> = memo(props => {
 });
 
 interface VendorInputProps {
-    onChange: (colName, value) => void;
+    onChange?: (colName, value) => void;
     hasError?: boolean;
     model: RequestOrderModel;
-    onModelChange: (model: RequestOrderModel) => void;
+    onModelChange?: (model: RequestOrderModel) => void;
+    isReadOnly?: boolean;
 }
 
 export const VendorInput: FC<VendorInputProps> = memo(props => {
-    const { onChange, hasError, model, onModelChange } = props;
+    const { onChange, hasError, model, onModelChange, isReadOnly } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
     const [showPopup, setShowPopup] = useState<boolean>(false);
 
@@ -134,7 +136,7 @@ export const VendorInput: FC<VendorInputProps> = memo(props => {
                     draft['vendorId'] = ''; // Reset Vendor input when user hits Cancel and doesn't enter a new vendor
                 }
             });
-            onModelChange(updatedModel);
+            onModelChange?.(updatedModel);
         },
         [onChange, hasError, model, onModelChange]
     );
@@ -145,7 +147,7 @@ export const VendorInput: FC<VendorInputProps> = memo(props => {
                 draft['newVendor'] = newVendor;
             });
             if (!newVendor.errors) {
-                onModelChange(updatedModel);
+                onModelChange?.(updatedModel);
             }
         },
         [onChange, hasError, model, onModelChange]
@@ -158,6 +160,7 @@ export const VendorInput: FC<VendorInputProps> = memo(props => {
                     className={'vendor-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={model.vendorId}
                     onChange={onValueChange}
+                    disabled={isReadOnly}
                 >
                     <option hidden value="">
                         Select
@@ -217,7 +220,7 @@ export const BusinessPurposeInput: FC<InputProps> = memo(props => {
 });
 
 export const SpecialInstructionInput: FC<InputProps> = memo(props => {
-    const { onChange, value } = props;
+    const { onChange, value, isReadOnly } = props;
     const onTextChange = useCallback(
         evt => {
             onChange('comments', evt.target.value);
@@ -234,6 +237,7 @@ export const SpecialInstructionInput: FC<InputProps> = memo(props => {
                     onChange={onTextChange}
                     id="special-instructions-id"
                     placeholder="Please add any special instructions or comments (Optional)"
+                    readOnly={isReadOnly}
                 />
             </PurchasingFormInput>
         </div>
@@ -241,7 +245,7 @@ export const SpecialInstructionInput: FC<InputProps> = memo(props => {
 });
 
 export const ShippingDestinationInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
@@ -268,8 +272,9 @@ export const ShippingDestinationInput: FC<InputProps> = memo(props => {
                     className={'shipping-dest-input form-control ' + (hasError ? 'field-validation-error' : '')}
                     value={value}
                     onChange={onValueChange}
+                    disabled={isReadOnly}
                 >
-                    <option hidden value="">
+                    <option hidden value="" disabled={isReadOnly}>
                         Select
                     </option>
                     {options}
@@ -280,7 +285,7 @@ export const ShippingDestinationInput: FC<InputProps> = memo(props => {
 });
 
 export const DeliveryAttentionInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
     const onTextChange = useCallback(
         evt => {
             onChange('shippingAttentionTo', evt.target.value);
@@ -296,6 +301,7 @@ export const DeliveryAttentionInput: FC<InputProps> = memo(props => {
                     onChange={onTextChange}
                     id="delivery-attn-id"
                     placeholder="Name of the person package delivery should be addressed to (Required)"
+                    readOnly={isReadOnly}
                 />
             </PurchasingFormInput>
         </div>

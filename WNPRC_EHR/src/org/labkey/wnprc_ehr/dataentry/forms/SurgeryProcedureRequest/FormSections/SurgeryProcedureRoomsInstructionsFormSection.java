@@ -9,7 +9,7 @@ public class SurgeryProcedureRoomsInstructionsFormSection extends HTMLSection{
     @Override
     public String getHTML() {
         return "<p style=\"padding: 10px\">\n" +
-                "<strong>Insert instruction text here.</strong>" +
+                "<strong>You must select at least 1 room to reserve. Please make sure that the start and end times reflect the ENTIRE time that the room will be in use, including any prep and cleanup time.</strong>" +
                 "</p>";
     }
 }

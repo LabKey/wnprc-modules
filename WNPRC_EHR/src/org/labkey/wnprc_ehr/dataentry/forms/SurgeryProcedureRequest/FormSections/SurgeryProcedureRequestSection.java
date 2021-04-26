@@ -18,11 +18,10 @@ public class SurgeryProcedureRequestSection extends SimpleFormSection
     protected List<String> getFieldNames() {
         return Arrays.asList(
                 "Id",
-                "date",
-                "startTableTime",
-                //"enddate",
-                "procedurename",
                 "procedureunit",
+                "date",
+                "procedurename",
+                "startTableTime",
                 "project",
                 "account",
                 "surgeon",

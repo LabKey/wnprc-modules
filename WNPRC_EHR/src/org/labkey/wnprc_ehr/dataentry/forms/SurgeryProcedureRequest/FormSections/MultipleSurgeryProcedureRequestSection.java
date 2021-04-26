@@ -20,11 +20,10 @@ public class MultipleSurgeryProcedureRequestSection extends SimpleGridSection
     protected List<String> getFieldNames() {
         return Arrays.asList(
                 "Id",
-                "date",
-                "startTableTime",
-                //"enddate",
-                "procedurename",
                 "procedureunit",
+                "date",
+                "procedurename",
+                "startTableTime",
                 "project",
                 "account",
                 "surgeon",

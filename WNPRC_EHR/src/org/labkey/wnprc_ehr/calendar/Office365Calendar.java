@@ -2,8 +2,10 @@ package org.labkey.wnprc_ehr.calendar;
 
 import com.microsoft.graph.models.extensions.Attendee;
 import com.microsoft.graph.models.extensions.Event;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -26,6 +28,7 @@ import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.security.xml.GroupEnumType;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
+import org.labkey.wnprc_ehr.WNPRC_EHRController;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -57,6 +60,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private static final String PROCEDURE_ACCOUNT_NAME = "ProcedureCalendar";
     public static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     public static final String DEFAULT_BG_COLOR = "#3788D8";
+
+    private static Logger _log = Logger.getLogger(WNPRC_EHRController.class);
 
     //Populate the calendar maps when the object is first created
     public Office365Calendar(User user, Container container) {
@@ -262,7 +267,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         Set<String> requestIds = new HashSet<>();
         for (Event event : events) {
             eventProps.load(new StringReader(event.body.content));
-            requestIds.add(eventProps.getProperty("requestid"));
+            requestIds.add(Jsoup.parse(eventProps.getProperty("requestid")).text());
         }
         SimpleFilter sf = new SimpleFilter(FieldKey.fromString("requestid"), requestIds, CompareType.IN);
 
@@ -304,7 +309,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         Map<String, Map<String, List<LocalDateTime>>> eventTimesByRequestId = new HashMap<>();
         for (Event event : events) {
             eventProps.load(new StringReader(event.body.content));
-            String requestId = eventProps.getProperty("requestid");
+            String requestId = Jsoup.parse(eventProps.getProperty("requestid")).text();
             if (eventTimesByRequestId.get(requestId) == null) {
                 Map<String, List<LocalDateTime>> eventTimes = new HashMap<>();
                 eventTimes.put("startTimes", new ArrayList<>());
@@ -322,8 +327,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         for (int i = 0; i < events.size(); i++) {
             Event event = events.get(i);
             eventProps.load(new StringReader(event.body.content));
-            String requestId = eventProps.getProperty("requestid");
-            String objectId = eventProps.getProperty("objectid");
+            String requestId = Jsoup.parse(eventProps.getProperty("requestid")).text();
+            String objectId = Jsoup.parse(eventProps.getProperty("objectid")).text();
 
             JSONObject surgeryInfo = surgeryRequestResults.get(requestId);
             //Skip the event if there's not a corresponding record in the study.surgery_procedure dataset
@@ -494,8 +499,17 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             }
         }
 
-        JSONObject baseCalendarEvents = getJsonEventList(getCalendarAppointments(start, end, authorizedBaseCalendars));
-        JSONObject unmanagedEvents = getUnmanagedJsonEventList(getCalendarAppointments(start, end, authorizedUnmanagedCalendars));
+        long startTime = System.currentTimeMillis();
+        List<Event> baseCalendarEventsList = getCalendarAppointments(start, end, authorizedBaseCalendars);
+        List<Event> unmanagedEventsList = getCalendarAppointments(start, end, authorizedUnmanagedCalendars);
+        long endTime = System.currentTimeMillis();
+        _log.debug("Time to fetch events: " + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        JSONObject baseCalendarEvents = getJsonEventList(baseCalendarEventsList);
+        JSONObject unmanagedEvents = getUnmanagedJsonEventList(unmanagedEventsList);
+        endTime = System.currentTimeMillis();
+        _log.debug("Time to organize events: " + (endTime - startTime));
 
         for (Map.Entry entry : unmanagedEvents.entrySet()) {
             ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", entry.getValue());

@@ -13,7 +13,6 @@
                 <columns>
                     <column columnName="Id">
                         <columnTitle>Animal ID</columnTitle>
-                        <nullable>false</nullable>
                     </column>
                     <column columnName="date">
                         <columnTitle>Surgery/Procedure Date</columnTitle>
@@ -23,6 +22,15 @@
                     <column columnName="enddate">
                         <columnTitle>End Time</columnTitle>
                         <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="procedureUnit">
+                        <columnTitle>Unit Approving Request</columnTitle>
+                        <fk>
+                            <fkDbSchema>wnprc</fkDbSchema>
+                            <fkTable>procedure_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName>unit_display_name</fkDisplayColumnName>
+                        </fk>
                         <nullable>false</nullable>
                     </column>
                     <column columnName="procedureName">
@@ -34,15 +42,9 @@
                         </fk>
                         <nullable>false</nullable>
                     </column>
-                    <column columnName="procedureUnit">
-                        <columnTitle>Unit Confirming Request</columnTitle>
-                        <fk>
-                            <fkDbSchema>wnprc</fkDbSchema>
-                            <fkTable>procedure_units</fkTable>
-                            <fkColumnName>unit</fkColumnName>
-                            <fkDisplayColumnName>unit_display_name</fkDisplayColumnName>
-                        </fk>
-                        <nullable>false</nullable>
+                    <column columnName="startTableTime">
+                        <columnTitle>Start Table Time</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="project">
                         <columnTitle>Project</columnTitle>
@@ -51,15 +53,12 @@
                             <fkTable>project</fkTable>
                             <fkColumnName>project</fkColumnName>
                         </fk>
-                        <nullable>false</nullable>
                     </column>
                     <column columnName="account">
                         <columnTitle>Grant</columnTitle>
-                        <nullable>false</nullable>
                     </column>
                     <column columnName="surgeon">
                         <columnTitle>Surgeon</columnTitle>
-                        <nullable>false</nullable>
                         <fk>
                             <fkDbSchema>wnprc</fkDbSchema>
                             <fkTable>procedure_surgeons_dropdown</fkTable>
@@ -89,19 +88,15 @@
                     </column>
                     <column columnName="vetNeededReason">
                         <columnTitle>Reason Vet is Needed</columnTitle>
-                        <nullable>false</nullable>
                     </column>
                     <column columnName="equipment">
                         <columnTitle>Special Equipment/Supplies Requested</columnTitle>
-                        <nullable>false</nullable>
                     </column>
                     <column columnName="drugsLab">
                         <columnTitle>Drugs Lab Will Provide</columnTitle>
-                        <nullable>false</nullable>
                     </column>
                     <column columnName="drugsSurgery">
                         <columnTitle>Drugs Surgery Staff Requested to Provide</columnTitle>
-                        <nullable>false</nullable>
                     </column>
                     <column columnName="comments">
                         <columnTitle>Comments</columnTitle>

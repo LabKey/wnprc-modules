@@ -2,67 +2,54 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
 require("ehr/triggers").initScript(this);
 
-//FYI: Get's called on every single key press!
 function onInit(event, helper){
-    // console.log('onInit');
-    // helper.registerRowProcessor(function(helper, row) {
-    //     if (!row)
-    //         return;
-    //
-    //     if (!row.requestId || !row.protocol)
-    //     {
-    //         return;
-    //     }
-    // })
-
+    helper.setScriptOptions({
+        allowAnyId: true,
+        skipIdFormatCheck: true,
+    });
 }
-//
-// function onBeforeInsert(row, errors){
-//     // if (this.extraContext.targetQC) {
-//     //     row.QCStateLabel = this.extraContext.targetQC;
-//     // }
-//     console.log('onBeforeInsert');
-//     console.log('row: ' + JSON.stringify(row));
-//     //EHR.Server.Utils.onFailure;
-// }
-//
-// function onAfterInsert(row, errors) {
-//     console.log('onAfterInsert');
-//     console.log('row: ' + JSON.stringify(row));
-// }
-//
-// function onBeforeUpdate(row, errors) {
-//     console.log('onBeforeUpdate');
-//     console.log('row: ' + JSON.stringify(row));
-// }
-//
-// function onAfterUpdate(row, errors) {
-//     console.log('onAfterUpdate');
-//     console.log('row: ' + JSON.stringify(row));
-// }
-//
-// function onInsert(row, errors) {
-//     console.log('onInsert');
-//     console.log('row: ' + JSON.stringify(row));
-// }
 
-function onInsert(helper, scriptErrors, row, oldRow) {
-    if (row.date) {
-        row.endDate = row.date;
+function onUpsert(helper, scriptErrors, row, oldRow) {
+    if (row.procedureUnit === "spi") {
+        //do nothing
+    } else if (row.procedureUnit === "vet") {
+        //add lots of required fields for surgeries
+        if (!row.startTableTime) {
+            EHR.Server.Utils.addError(scriptErrors, "startTableTime", "Start Table Time is required", "ERROR");
+        }
+        if (!row.project) {
+            EHR.Server.Utils.addError(scriptErrors, "project", "Project is required", "ERROR");
+        }
+        if (!row.account) {
+            EHR.Server.Utils.addError(scriptErrors, "account", "Grant is required", "ERROR");
+        }
+        if (!row.surgeon) {
+            EHR.Server.Utils.addError(scriptErrors, "surgeon", "Surgeon is required", "ERROR");
+        }
+        if (!row.vetNeededReason) {
+            EHR.Server.Utils.addError(scriptErrors, "vetNeededReason", "Reason Vet is Needed is required", "ERROR");
+        }
+        if (!row.equipment) {
+            EHR.Server.Utils.addError(scriptErrors, "equipment", "Special Equipment/Supplies Requested is required", "ERROR");
+        }
+        if (!row.drugsLab) {
+            EHR.Server.Utils.addError(scriptErrors, "drugsLab", "Drugs Lab Will Provide is required", "ERROR");
+        }
+        if (!row.drugsSurgery) {
+            EHR.Server.Utils.addError(scriptErrors, "drugsSurgery", "Drugs Surgery Staff Requested to Provide is required", "ERROR");
+        }
+
+        if (!!row.startTableTime) {
+            console.log(row.startTableTime);
+            if (row.startTableTime.hours === 0 && row.startTableTime.minutes === 0) {
+                EHR.Server.Utils.addError(scriptErrors, "startTableTime", "You must select a 'Start Table Time'", "ERROR");
+            }
+        }
+    }
+
+    if (!!row.date && !!row.startTableTime) {
+        if (row.date.year !== row.startTableTime.year || row.date.month !== row.startTableTime.month || row.date.date !== row.startTableTime.date) {
+            EHR.Server.Utils.addError(scriptErrors, "startTableTime", "'Start Table Time' should almost always be on the same date as 'Surgery/Procedure Date'. Are you sure this is correct?", "WARN");
+        }
     }
 }
-
-
-
-function onAfterUpsert(helper, scriptErrors, row, oldRow){
-    //WNPRC.Utils.getJavaHelper().setSurgeryProcedureStartEndTimes(row.requestid);
-}
-
-// function onUpdate(row, errors) {
-//     console.log('onUpdate');
-//     console.log('row: ' + JSON.stringify(row));
-// }
-//
-// function onComplete(event,errors, helper) {
-//
-// }

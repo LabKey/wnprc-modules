@@ -703,7 +703,7 @@
                 return section.items.length > 0;
             });
 
-            Ext4.create('EHR.NavMenu', menuCfg);
+            new EHR.ext.NavMenu(menuCfg).render();
 
             //only give a task manager if they have access to at least 1 form
             if(menuCfg.sections.length){

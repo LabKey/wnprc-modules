@@ -40,7 +40,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             <tr>
               <td>Gender</td>
               <td>
-                <a href={animalInfo._labkeyurl_genderd} target={"_blank"}>{animalInfo.gender}</a>
+                <a href={animalInfo._labkeyurl_gender} target={"_blank"}>{animalInfo.gender}</a>
               </td>
             </tr>
             <tr>
@@ -112,16 +112,7 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             <tr>
               <td>Avail</td>
               <td>
-                <a
-                  href={
-                    animalInfo[
-                      "_labkeyurl_Id/activeAssignments/Availability"
-                      ]
-                  }
-                  target={"_blank"}
-                >
-                  {animalInfo["Id/activeAssignments/Availability"]}
-                </a>
+                {animalInfo["Id/activeAssignments/Availability"]}
               </td>
             </tr>
             <tr>

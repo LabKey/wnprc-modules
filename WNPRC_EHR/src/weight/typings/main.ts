@@ -7,7 +7,7 @@ export interface InfoProps {
     calculated_status: string;
     _labkeyurl_calculated_status: string;
     gender: string;
-    _labkeyurl_genderd: string;
+    _labkeyurl_gender: string;
     dam: string;
     _labkeyurl_dam: string;
     birth: string;

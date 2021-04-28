@@ -272,8 +272,15 @@ public class WNPRC_PurchasingManager
 
                 if (null == lineItem.get("quantity"))
                     lineItemErrors.addError(new PropertyValidationError("Required numeric value for 'Quantity' not provided", "quantity"));
+                else if (Integer.valueOf(String.valueOf(lineItem.get("quantity"))) < 0)
+                    lineItemErrors.addError(new PropertyValidationError("'Quantity' value cannot be negative.", "quantity"));
                 else
                     row.put("quantity", lineItem.get("quantity"));
+
+                if (null != lineItem.get("quantityReceived") && Integer.valueOf(String.valueOf(lineItem.get("quantityReceived"))) < 0)
+                    lineItemErrors.addError(new PropertyValidationError("'Quantity received' value cannot be negative.", "quantityReceived"));
+                else if (null != lineItem.get("quantityReceived"))
+                    row.put("quantityReceived", lineItem.get("quantityReceived"));
 
                 //if errors, then return errors
                 if(lineItemErrors.hasErrors())

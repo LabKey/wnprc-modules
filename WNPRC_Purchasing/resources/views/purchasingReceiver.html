@@ -1,0 +1,10 @@
+<div id="<%=h('wnprc_purchasing-receiver')%>"></div>
+<script type="text/javascript">
+    var webpart = <%=webpartContext%>;
+    var qwp = new LABKEY.QueryWebPart({
+        renderTo: webpart.wrapperDivId,
+        schemaName: 'ehr_purchasing',
+        queryName: 'purchasingReceiverOverview'
+    });
+    qwp.render();
+</script>

@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useState } from 'react';
+import React, {FC, memo, useCallback, useEffect, useState} from 'react';
 import { Form, Panel, Row, Col } from 'react-bootstrap';
 
 import produce, { Draft } from 'immer';
@@ -18,10 +18,12 @@ import {
 interface Props {
     model: RequestOrderModel;
     onInputChange: (model: RequestOrderModel) => void;
+    isAdmin: boolean;
+    canUpdate: boolean;
 }
 
 export const RequestOrderPanel: FC<Props> = memo(props => {
-    const { model, onInputChange } = props;
+    const { model, onInputChange, isAdmin, canUpdate } = props;
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
@@ -60,111 +62,119 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
     );
 
     return (
-        <Panel
-            className="panel panel-default"
-            expanded={true}
-            onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
-        >
-            <div className="bg-primary">
-                <Panel.Heading>
-                    <div className="panel-title">Request Order</div>
-                </Panel.Heading>
-            </div>
-            <Form className="form-margin">
-                <Row>
-                    <Col xs={11} lg={6}>
-                        <AccountInput
-                            value={model.account}
-                            hasError={model.errors?.find(field => field.fieldName === 'account')}
-                            onChange={onValueChange}
-                        />
-                        {(showOtherAcct || model.account === 'Other') && (
-                            <AccountOtherInput
-                                value={model.otherAcctAndInves}
-                                hasError={model.errors?.find(field => field.fieldName === 'otherAcctAndInves')}
-                                hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
-                                onChange={onValueChange}
-                            />
-                        )}
-                    </Col>
-                    <Col xs={11} lg={6}>
-                        <ShippingDestinationInput
-                            value={model.shippingInfoId}
-                            hasError={model.errors?.find(field => field.fieldName === 'shippingInfoId')}
-                            onChange={onValueChange}
-                        />
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={11} lg={6}>
-                        <VendorInput
-                            hasError={model.errors?.find(field => field.fieldName === 'vendorId')}
-                            onChange={onValueChange}
-                            model={model}
-                            onModelChange={onModelChange}
-                        />
-                    </Col>
-                    <Col xs={11} lg={6}>
-                        <DeliveryAttentionInput
-                            value={model.shippingAttentionTo}
-                            hasError={model.errors?.find(field => field.fieldName === 'shippingAttentionTo')}
-                            onChange={onValueChange}
-                        />
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={11} lg={6}>
-                        <BusinessPurposeInput
-                            value={model.justification}
-                            hasError={model.errors?.find(field => field.fieldName === 'justification')}
-                            onChange={onValueChange}
-                        />
-                    </Col>
-                    <Col xs={11} lg={6}>
-                        <SpecialInstructionInput value={model.comments} onChange={onValueChange} />
-                    </Col>
-                </Row>
-                {/* <AccountInput*/}
-                {/*    value={model.account}*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'account')}*/}
-                {/*    onChange={onValueChange}*/}
-                {/* />*/}
-                {/* {*/}
-                {/*    (showOtherAcct || model.account === "Other") &&*/}
-                {/*    <AccountOtherInput*/}
-                {/*            value={model.otherAcctAndInves}*/}
-                {/*            hasError={model.errors?.find((field) => field.fieldName === 'otherAcctAndInves')}*/}
-                {/*            hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}*/}
-                {/*            onChange={onValueChange}*/}
-                {/*    />*/}
-                {/* }*/}
-                {/* <VendorInput*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'vendorId')}*/}
-                {/*    onChange={onValueChange}*/}
-                {/*    model={model}*/}
-                {/*    onModelChange={onModelChange}*/}
-                {/* />*/}
-                {/* <BusinessPurposeInput*/}
-                {/*    value={model.justification}*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'justification')}*/}
-                {/*    onChange={onValueChange}*/}
-                {/* />*/}
-                {/* <SpecialInstructionInput*/}
-                {/*    value={model.comments}*/}
-                {/*    onChange={onValueChange}*/}
-                {/* />*/}
-                {/* <ShippingDestinationInput*/}
-                {/*    value={model.shippingInfoId}*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'shippingInfoId')}*/}
-                {/*    onChange={onValueChange}*/}
-                {/* />*/}
-                {/* <DeliveryAttentionInput*/}
-                {/*    value={model.shippingAttentionTo}*/}
-                {/*    hasError={model.errors?.find((field) => field.fieldName === 'shippingAttentionTo')}*/}
-                {/*    onChange={onValueChange}*/}
-                {/* />*/}
-            </Form>
-            {model.errorMsg && <div className="alert alert-danger">{model.errorMsg}</div>}
-        </Panel>
+        <>
+        { !isAdmin && canUpdate && (
+                <Panel
+                    className="panel panel-default"
+                    expanded={true}
+                    onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
+                >
+                    <div className="bg-primary">
+                        <Panel.Heading>
+                            <div className="panel-title">Request Info</div>
+                        </Panel.Heading>
+                    </div>
+                    <Form className="form-margin">
+                        <Row>
+                            <Col xs={11} lg={6}>
+                                <VendorInput
+                                    model={model}
+                                    isReadOnly={true}
+                                />
+                            </Col>
+                            <Col xs={11} lg={6}>
+                                <ShippingDestinationInput
+                                    value={model.shippingInfoId}
+                                    isReadOnly={true}
+                                />
+                            </Col>
+                            <Col xs={11} lg={6}>
+                                <DeliveryAttentionInput
+                                    value={model.shippingAttentionTo}
+                                    isReadOnly={true}
+                                />
+                            </Col>
+                            <Col xs={11} lg={6}>
+                                <SpecialInstructionInput
+                                    value={model.comments}
+                                    isReadOnly={true}
+                                />
+                            </Col>
+                        </Row>
+                    </Form>
+                </Panel>
+            )
+        }
+        { (isAdmin || !canUpdate) && (
+                <Panel
+                    className="panel panel-default"
+                    expanded={true}
+                    onToggle={function () {}} // this is added to suppress JS warning about providing an expanded prop without onToggle
+                >
+                    <div className="bg-primary">
+                        <Panel.Heading>
+                            <div className="panel-title">Request Info</div>
+                        </Panel.Heading>
+                    </div>
+                    <Form className="form-margin">
+                        <Row>
+                            <Col xs={11} lg={6}>
+                                <AccountInput
+                                    value={model.account}
+                                    hasError={model.errors?.find(field => field.fieldName === 'account')}
+                                    onChange={onValueChange}
+                                />
+                                {(showOtherAcct || model.account === 'Other') && (
+                                    <AccountOtherInput
+                                        value={model.otherAcctAndInves}
+                                        hasError={model.errors?.find(field => field.fieldName === 'otherAcctAndInves')}
+                                        hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
+                                        onChange={onValueChange}
+                                    />
+                                )}
+                            </Col>
+                            <Col xs={11} lg={6}>
+                                <ShippingDestinationInput
+                                    value={model.shippingInfoId}
+                                    hasError={model.errors?.find(field => field.fieldName === 'shippingInfoId')}
+                                    onChange={onValueChange}
+                                />
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col xs={11} lg={6}>
+                                <VendorInput
+                                    hasError={model.errors?.find(field => field.fieldName === 'vendorId')}
+                                    onChange={onValueChange}
+                                    model={model}
+                                    onModelChange={onModelChange}
+                                />
+                            </Col>
+                            <Col xs={11} lg={6}>
+                                <DeliveryAttentionInput
+                                    value={model.shippingAttentionTo}
+                                    hasError={model.errors?.find(field => field.fieldName === 'shippingAttentionTo')}
+                                    onChange={onValueChange}
+                                />
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col xs={11} lg={6}>
+                                <BusinessPurposeInput
+                                    value={model.justification}
+                                    hasError={model.errors?.find(field => field.fieldName === 'justification')}
+                                    onChange={onValueChange}
+                                />
+                            </Col>
+                            <Col xs={11} lg={6}>
+                                <SpecialInstructionInput value={model.comments} onChange={onValueChange} />
+                            </Col>
+                        </Row>
+                    </Form>
+                    {model.errorMsg && <div className="alert alert-danger">{model.errorMsg}</div>}
+                </Panel>
+            )
+        }
+        </>
     );
 });

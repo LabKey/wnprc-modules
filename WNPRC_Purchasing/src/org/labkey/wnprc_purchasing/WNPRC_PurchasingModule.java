@@ -26,7 +26,10 @@ import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.security.roles.RoleManager;
+import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.wnprc_purchasing.security.WNPRC_PurchasingDirectorRole;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,6 +68,9 @@ public class WNPRC_PurchasingModule extends DefaultModule
     protected void init()
     {
         addController(WNPRC_PurchasingController.NAME, WNPRC_PurchasingController.class);
+        EmailTemplateService.get().registerTemplate(NewRequestEmailTemplate.class);
+
+        RoleManager.registerRole(new WNPRC_PurchasingDirectorRole());
     }
 
     @Override

@@ -22,23 +22,43 @@ import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.admin.notification.NotificationService;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.InvalidKeyException;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.SecurityManager;
+import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
@@ -119,16 +139,80 @@ public class WNPRC_PurchasingController extends SpringActionController
                 throw new BatchValidationException(validationExceptions, null);
             }
 
+            String requestRowIdParam = getViewContext().getRequest().getParameter("requestRowId");
+            if (null == requestRowIdParam)
+            {
+                sendNewRequestEmailNotification(requestForm);
+            }
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
             response.put("requestId", requestForm.getRowId());
 
             return response;
         }
+
+        private void sendNewRequestEmailNotification(RequestForm requestForm) throws MessagingException, IOException, ValidationException, QueryUpdateServiceException, InvalidKeyException, SQLException
+        {
+            NewRequestEmailTemplate requestEmailTemplate = EmailTemplateService.get().getEmailTemplate(NewRequestEmailTemplate.class);
+            double totalCost = getLineItemsTotal(requestForm.getLineItems());
+            requestForm.setTotalCost(totalCost);
+            requestForm.setRequester(getUser());
+            requestForm.setCreatedOn(new Date());
+            requestForm.setVendorName(getVendorName(requestForm.getVendor()));
+            requestEmailTemplate.setNotificationBean(requestForm);
+
+            if (totalCost >= 5000.0)
+            {
+                //get purchase director user
+            }
+            else
+            {
+                //get folder admin users
+                Set<Class<? extends Permission>> perms = Collections.singleton(AdminPermission.class);
+                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), perms);
+
+                //send emails to admin users
+                for (User user : adminUsers)
+                {
+                    NotificationService.get().sendMessageForRecipient(
+                            getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                            requestEmailTemplate.getSubject(), requestEmailTemplate.getBody(),
+                            this.getViewContext().getActionURL(), requestForm.getRowId().toString(), "New request");
+                }
+            }
+        }
+
+        private String getVendorName(Integer vendorId) throws QueryUpdateServiceException, InvalidKeyException, SQLException
+        {
+            TableInfo vendorTableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("vendor", null);
+            assert vendorTableInfo != null;
+
+            QueryUpdateService qus = vendorTableInfo.getUpdateService();
+            assert qus != null;
+
+            Map<String, Object> keys = Collections.singletonMap("rowId", vendorId);
+            List<Map<String, Object>> rows = qus.getRows(getUser(), getContainer(), Collections.singletonList(keys));
+            return rows.size() == 1 ? (String) rows.get(0).get(String.valueOf(vendorId)) : "";
+        }
+
+        private double getLineItemsTotal(List<JSONObject> lineItems)
+        {
+            double totalCost = 0.0;
+            for (JSONObject lineItem : lineItems)
+            {
+                String cost = (String) lineItem.get("unitCost");
+                String quantity = (String) lineItem.get("quantity");
+                totalCost += (Double.valueOf(cost) * Double.valueOf(quantity));
+            }
+            return totalCost;
+        }
     }
 
     public static class RequestForm
     {
+        DecimalFormat _dollarFormat = new DecimalFormat("$#,##0.00");
+        DateFormat _dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
         List<JSONObject> _lineItems;
         List<Integer> _lineItemsToDelete;
         Integer _rowId;
@@ -159,6 +243,10 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _newVendorEmail;
         String _newVendorUrl;
         String _newVendorNotes;
+        Double _totalCost;
+        User _requester;
+        Date _createdOn;
+        String _vendorName;
 
         public List<JSONObject> getLineItems()
         {
@@ -458,6 +546,51 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setNewVendorNotes(String newVendorNotes)
         {
             _newVendorNotes = newVendorNotes;
+        }
+
+        public Double getTotalCost()
+        {
+            return _totalCost;
+        }
+
+        public void setTotalCost(Double totalCost)
+        {
+            _totalCost = totalCost;
+        }
+
+        public String getFormattedTotalCost()
+        {
+            return _dollarFormat.format(_totalCost);
+        }
+
+        public void setRequester(User user)
+        {
+            _requester = user;
+        }
+
+        public String getRequester()
+        {
+            return _requester.getFriendlyName();
+        }
+
+        public String getCreatedOn()
+        {
+            return _dateFormat.format(_createdOn);
+        }
+
+        public void setCreatedOn(Date createdOn)
+        {
+            _createdOn = createdOn;
+        }
+
+        public String getVendorName()
+        {
+            return _vendorName;
+        }
+
+        public void setVendorName(String vendorName)
+        {
+            _vendorName = vendorName;
         }
     }
 

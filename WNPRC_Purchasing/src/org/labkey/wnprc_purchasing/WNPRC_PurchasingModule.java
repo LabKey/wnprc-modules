@@ -69,7 +69,6 @@ public class WNPRC_PurchasingModule extends DefaultModule
     {
         addController(WNPRC_PurchasingController.NAME, WNPRC_PurchasingController.class);
         EmailTemplateService.get().registerTemplate(NewRequestEmailTemplate.class);
-
         RoleManager.registerRole(new WNPRC_PurchasingDirectorRole());
     }
 

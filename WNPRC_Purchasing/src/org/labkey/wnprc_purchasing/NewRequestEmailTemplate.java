@@ -5,7 +5,6 @@ import org.labkey.api.util.emailTemplate.EmailTemplate;
 import org.labkey.api.view.ActionURL;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class NewRequestEmailTemplate  extends EmailTemplate
@@ -13,18 +12,19 @@ public class NewRequestEmailTemplate  extends EmailTemplate
     protected static final String DEFAULT_SUBJECT = "Purchase request ^requestNum^ of ^totalCost^ submitted";
     protected static final String DEFAULT_DESCRIPTION = "New request notification";
     protected static final String NAME = "New request notification ";
-    protected static final String DEFAULT_BODY = "A new purchasing request ^requestNum^ from vendor ^vendor^ " +
-            "by user ^requester^ was submitted on ^created^ for the total of ^total^.\n"+
-            "Purpose of this request: ^purpose^'\n"+
+    protected static final String DEFAULT_BODY = "A new purchasing request ^requestNum^ " +
+            "by ^requester^ was submitted on ^created^ for the total of ^total^.\n"+
+            "Purpose of this request: ^purpose^ \n"+
             "More info on the request can be found here: ^detailsUrl^\n";
 
     private final List<ReplacementParam> _replacements = new ArrayList<>();
     private WNPRC_PurchasingController.RequestForm _notificationBean;
 
-    public NewRequestEmailTemplate()
+    public NewRequestEmailTemplate(WNPRC_PurchasingController.RequestForm notificationBean)
     {
         super(NAME, DEFAULT_SUBJECT, DEFAULT_BODY, DEFAULT_DESCRIPTION);
         setEditableScopes(EmailTemplate.Scope.SiteOrFolder);
+        _notificationBean = notificationBean;
 
         _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number")
         {
@@ -79,13 +79,10 @@ public class NewRequestEmailTemplate  extends EmailTemplate
         _replacements.addAll(super.getValidReplacements());
     }
 
-    public WNPRC_PurchasingController.RequestForm getNotificationBean()
+    @Override
+    public List<ReplacementParam> getValidReplacements()
     {
-        return _notificationBean;
+        return _replacements;
     }
 
-    public void setNotificationBean(WNPRC_PurchasingController.RequestForm notificationBean)
-    {
-        _notificationBean = notificationBean;
-    }
 }

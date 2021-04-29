@@ -41,7 +41,6 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
@@ -153,13 +152,14 @@ public class WNPRC_PurchasingController extends SpringActionController
 
         private void sendNewRequestEmailNotification(RequestForm requestForm) throws MessagingException, IOException, ValidationException, QueryUpdateServiceException, InvalidKeyException, SQLException
         {
-            NewRequestEmailTemplate requestEmailTemplate = EmailTemplateService.get().getEmailTemplate(NewRequestEmailTemplate.class);
             double totalCost = getLineItemsTotal(requestForm.getLineItems());
             requestForm.setTotalCost(totalCost);
             requestForm.setRequester(getUser());
             requestForm.setCreatedOn(new Date());
             requestForm.setVendorName(getVendorName(requestForm.getVendor()));
-            requestEmailTemplate.setNotificationBean(requestForm);
+
+            NewRequestEmailTemplate requestEmailTemplate = new NewRequestEmailTemplate(requestForm);
+            String emailBody = requestEmailTemplate.renderBody(getContainer());
 
             if (totalCost >= 5000.0)
             {
@@ -176,7 +176,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                 {
                     NotificationService.get().sendMessageForRecipient(
                             getContainer(), UserManager.getUser(getUser().getUserId()), user,
-                            requestEmailTemplate.getSubject(), requestEmailTemplate.getBody(),
+                            requestEmailTemplate.getSubject(), emailBody,
                             this.getViewContext().getActionURL(), requestForm.getRowId().toString(), "New request");
                 }
             }
@@ -192,7 +192,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             Map<String, Object> keys = Collections.singletonMap("rowId", vendorId);
             List<Map<String, Object>> rows = qus.getRows(getUser(), getContainer(), Collections.singletonList(keys));
-            return rows.size() == 1 ? (String) rows.get(0).get(String.valueOf(vendorId)) : "";
+            return rows.size() == 1 ? (String) rows.get(0).get("vendorname") : "";
         }
 
         private double getLineItemsTotal(List<JSONObject> lineItems)

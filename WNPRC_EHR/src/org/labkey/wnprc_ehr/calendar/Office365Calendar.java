@@ -447,7 +447,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
 
             extendedProps.put("isUnmanaged", true);
             extendedProps.put("eventId", event.id);
-            extendedProps.put("body", event.body.content != null ? event.body.content : "");
+            extendedProps.put("body", event.body.content != null ? Jsoup.parse(event.body.content).text() : "");
             jsonEvent.put("extendedProps", extendedProps);
 
             ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);

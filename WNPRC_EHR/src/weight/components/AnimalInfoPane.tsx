@@ -34,51 +34,19 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             <tr>
               <td>Id</td>
               <td>
-                <a href={animalInfo._labkeyurl_Id}>{animalInfo.Id}</a>
-              </td>
-            </tr>
-            <tr>
-              <td>Status</td>
-              <td>
-                <a href={animalInfo._labkeyurl_calculated_status}>
-                  {animalInfo.calculated_status}
-                </a>
+                <a href={animalInfo._labkeyurl_Id} target={"_blank"}>{animalInfo.Id}</a>
               </td>
             </tr>
             <tr>
               <td>Gender</td>
               <td>
-                <a href={animalInfo._labkeyurl_genderd}>{animalInfo.gender}</a>
+                <a href={animalInfo._labkeyurl_gender} target={"_blank"}>{animalInfo.gender}</a>
               </td>
-            </tr>
-            <tr>
-              <td>Dam</td>
-              <td>
-                <a href={animalInfo._labkeyurl_dam}>{animalInfo.dam}</a>
-              </td>
-            </tr>
-            <tr>
-              <td>Active Assignments</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Avail</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Birth</td>
-              <td>
-                <a href={animalInfo._labkeyurl_birth}>{animalInfo.birth}</a>
-              </td>
-            </tr>
-            <tr>
-              <td>Age</td>
-              <td></td>
             </tr>
             <tr>
               <td>Room</td>
               <td>
-                <a href={animalInfo["_labkeyurl_Id/curLocation/room"]}>
+                <a href={animalInfo["_labkeyurl_Id/curLocation/room"]} target={"_blank"}>
                   {animalInfo["Id/curLocation/room"]}
                 </a>
               </td>
@@ -86,16 +54,8 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
             <tr>
               <td>Cage</td>
               <td>
-                <a href={animalInfo["_labkeyurl_Id/curLocation/cage"]}>
+                <a href={animalInfo["_labkeyurl_Id/curLocation/cage"]} target={"_blank"}>
                   {animalInfo["Id/curLocation/cage"]}
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>Condition</td>
-              <td>
-                <a href={animalInfo["_labkeyurl_Id/curLocation/cond"]}>
-                  {animalInfo["Id/curLocation/cond"]}
                 </a>
               </td>
             </tr>
@@ -106,24 +66,89 @@ const AnimalInfoPane: React.FunctionComponent<PaneProps> = props => {
                   href={
                     animalInfo[
                       "_labkeyurl_Id/MostRecentWeight/MostRecentWeight"
-                    ]
+                      ]
                   }
+                  target={"_blank"}
                 >
                   {animalInfo["Id/MostRecentWeight/MostRecentWeight"]}
                 </a>
               </td>
             </tr>
             <tr>
-              <td>Medical</td>
-              <td></td>
+              <td>Weight Date</td>
+              <td>
+                <a
+                  href={
+                    animalInfo[
+                      "_labkeyurl_Id/MostRecentWeight/MostRecentWeightDate"
+                      ]
+                  }
+                  target={"_blank"}
+                >
+                  {animalInfo["Id/MostRecentWeight/MostRecentWeightDate"]}
+                </a>
+              </td>
             </tr>
             <tr>
-              <td>Medical Obs</td>
-              <td></td>
+              <td>Status</td>
+              <td>
+                <a href={animalInfo._labkeyurl_calculated_status} target={"_blank"}>
+                  {animalInfo.calculated_status}
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td>Medical</td>
+              <td>
+                {animalInfo.medical}
+              </td>
+            </tr>
+            <tr>
+              <td>Dam</td>
+              <td>
+                <a href={animalInfo._labkeyurl_dam} target={"_blank"}>{animalInfo.dam}</a>
+              </td>
+            </tr>
+            <tr>
+              <td>Avail</td>
+              <td>
+                {animalInfo["Id/activeAssignments/Availability"]}
+              </td>
+            </tr>
+            <tr>
+              <td>Birth</td>
+              <td>
+                <a href={animalInfo._labkeyurl_birth} target={"_blank"}>{animalInfo.birth}</a>
+              </td>
+            </tr>
+            <tr>
+              <td>Age</td>
+              <td>
+                {animalInfo["Id/age/AgeFriendly"]}
+              </td>
+            </tr>
+            <tr>
+              <td>Condition</td>
+              <td>
+                <a href={animalInfo["_labkeyurl_Id/curLocation/cond"]} target={"_blank"}>
+                  {animalInfo["Id/curLocation/cond"]}
+                </a>
+              </td>
             </tr>
             <tr>
               <td>Current Behavior(s)</td>
-              <td></td>
+              <td>
+                <a
+                  href={
+                    animalInfo[
+                      "_labkeyurl_Id/CurrentBehavior/currentBehaviors"
+                      ]
+                  }
+                  target={"_blank"}
+                >
+                  {animalInfo["Id/CurrentBehavior/currentBehaviors"]}
+                </a>
+              </td>
             </tr>
           </tbody>
         </Table>

@@ -79,6 +79,8 @@ import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.dbutils.api.SimpleQuery;
+import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.googledrive.api.DriveSharePermission;
@@ -1966,25 +1968,15 @@ public class WNPRC_EHRController extends SpringActionController
 
     private List<Map<String, Object>> getSurgeryProcedureRooms(String requestId) throws java.sql.SQLException
     {
-        List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("objectid"));
-        columns.add(FieldKey.fromString("room"));
-        columns.add(FieldKey.fromString("room/email"));
-        columns.add(FieldKey.fromString("date"));
-        columns.add(FieldKey.fromString("enddate"));
-        columns.add(FieldKey.fromString("event_id"));
-        columns.add(FieldKey.fromString("requestid"));
-
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
-        QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "wnprc", "procedure_scheduled_rooms");
         List<Map<String, Object>> roomRows = new ArrayList<>();
-        try (Results rs = spQuery.select(columns, filter))
-        {
-            while (rs.next())
-            {
-                roomRows.add(rs.getRowMap());
-            }
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
+        JSONArray jsonRooms = queryFactory.selectRows("wnprc", "SurgeryProcedureRoomSchedule", filter);
+
+        for (int i = 0; i < jsonRooms.length(); i++) {
+            roomRows.add(jsonRooms.getJSONObject(i));
         }
+
         return roomRows;
     }
 

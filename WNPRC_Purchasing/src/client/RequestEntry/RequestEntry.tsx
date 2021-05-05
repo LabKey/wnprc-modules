@@ -249,7 +249,8 @@ export const App: FC = memo(() => {
                 documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0
                     ? documentAttachmentModel
                     : undefined,
-                lineItemRowsToDelete
+                lineItemRowsToDelete,
+                ActionURL.getParameter('isNewRequest')
             )
                 .then(r => {
                     if (r.success) {

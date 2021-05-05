@@ -7,14 +7,16 @@
                 <columns>
                     <column columnName="rowId">
                         <columnTitle>Request No.</columnTitle>
+                        <isKeyField>true</isKeyField>
                     </column>
                     <column columnName="requestDate">
                         <formatString>Date</formatString>
                     </column>
-                    <column columnName="vendorId">
+                    <column columnName="vendor">
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>vendor</fkTable>
+                            <fkDisplayColumnName useRawValue="false"/>
                         </fk>
                     </column>
                     <column columnName="account">
@@ -30,6 +32,7 @@
                         <fk>
                             <fkDbSchema>core</fkDbSchema>
                             <fkTable>QCState</fkTable>
+                            <fkDisplayColumnName useRawValue="false"/>
                         </fk>
                     </column>
                     <column columnName="OtherAcctAndInves"/>

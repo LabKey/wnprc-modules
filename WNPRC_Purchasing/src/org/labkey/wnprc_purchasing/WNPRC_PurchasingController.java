@@ -23,13 +23,15 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.notification.NotificationService;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
@@ -38,9 +40,9 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
@@ -49,6 +51,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -57,7 +60,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
@@ -138,10 +140,15 @@ public class WNPRC_PurchasingController extends SpringActionController
                 throw new BatchValidationException(validationExceptions, null);
             }
 
-            String requestRowIdParam = getViewContext().getRequest().getParameter("requestRowId");
-            if (null == requestRowIdParam)
+            EmailTemplateForm emailTemplateForm = getValuesForEmailTemplate(requestForm);
+
+            if (null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest())
             {
-                sendNewRequestEmailNotification(requestForm);
+                sendNewRequestEmailNotification(emailTemplateForm);
+            }
+            else
+            {
+                sendChangeRequestEmailNotification(emailTemplateForm);
             }
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
@@ -150,69 +157,183 @@ public class WNPRC_PurchasingController extends SpringActionController
             return response;
         }
 
-        private void sendNewRequestEmailNotification(RequestForm requestForm) throws MessagingException, IOException, ValidationException, QueryUpdateServiceException, InvalidKeyException, SQLException
+        private void sendChangeRequestEmailNotification(EmailTemplateForm emailTemplateForm) throws MessagingException, IOException, ValidationException
         {
-            double totalCost = getLineItemsTotal(requestForm.getLineItems());
-            requestForm.setTotalCost(totalCost);
-            requestForm.setRequester(getUser());
-            requestForm.setCreatedOn(new Date());
-            requestForm.setVendorName(getVendorName(requestForm.getVendor()));
+            //request status change email notification
+            if (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") || emailTemplateForm.getRequestStatus().equalsIgnoreCase("Order Placed"))
+            {
+                RequestStatusChangeEmailTemplate requestEmailTemplate = new RequestStatusChangeEmailTemplate(emailTemplateForm);
+                String emailSubject = requestEmailTemplate.renderSubject(getContainer());
+                String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-            NewRequestEmailTemplate requestEmailTemplate = new NewRequestEmailTemplate(requestForm);
+                ActionURL requesterViewUrl = new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer());
+
+                List<User> labEndUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(InsertPermission.class));
+
+                //send emails to lab end users
+                for (User user : labEndUsers)
+                {
+                    if (!getContainer().hasPermission(user, AdminPermission.class))
+                    {
+                        NotificationService.get().sendMessageForRecipient(
+                                getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                emailSubject, emailBody,
+                                requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Request status change");
+                    }
+                }
+            }
+        }
+
+        private void sendNewRequestEmailNotification(EmailTemplateForm emailTemplateForm) throws MessagingException, IOException, ValidationException
+        {
+            NewRequestEmailTemplate requestEmailTemplate = new NewRequestEmailTemplate(emailTemplateForm);
+            String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
+            ActionURL detailsUrl = new ActionURL("query", "executeQuery", getContainer());
+            detailsUrl.addParameter("schemaName", "ehr_purchasing");
+            detailsUrl.addParameter("query.queryName", "purchasingRequestsOverviewForAdmins");
+            detailsUrl.addParameter("query.viewName", "AllOpenRequests");
+            detailsUrl.addParameter("query.requestNum~eq", emailTemplateForm.getRowId());
 
-            if (totalCost >= 5000.0)
+            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) == 1)
             {
                 //get purchase director user
             }
             else
             {
                 //get folder admin users
-                Set<Class<? extends Permission>> perms = Collections.singleton(AdminPermission.class);
-                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), perms);
+                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
 
                 //send emails to admin users
                 for (User user : adminUsers)
                 {
                     NotificationService.get().sendMessageForRecipient(
                             getContainer(), UserManager.getUser(getUser().getUserId()), user,
-                            requestEmailTemplate.getSubject(), emailBody,
-                            this.getViewContext().getActionURL(), requestForm.getRowId().toString(), "New request");
+                            emailSubject, emailBody,
+                            detailsUrl, String.valueOf(emailTemplateForm.getRowId()), "New request");
                 }
             }
         }
 
-        private String getVendorName(Integer vendorId) throws QueryUpdateServiceException, InvalidKeyException, SQLException
+        private EmailTemplateForm getValuesForEmailTemplate(RequestForm requestForm) throws QueryUpdateServiceException, InvalidKeyException, SQLException
         {
-            TableInfo vendorTableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("vendor", null);
-            assert vendorTableInfo != null;
+            TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("purchasingRequestsOverview", null);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("rowId"), requestForm.getRowId());
+            TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
 
-            QueryUpdateService qus = vendorTableInfo.getUpdateService();
-            assert qus != null;
+            EmailTemplateForm emailTemplateForm = new EmailTemplateForm();
+            Map<String, Object> map = tableSelector.getMap();
+            emailTemplateForm.setRowId((Integer) map.get("rowid"));
+            emailTemplateForm.setVendor((String) map.get("vendor"));
+            emailTemplateForm.setRequester(UserManager.getUser((Integer) map.get("requester")));
+            emailTemplateForm.setRequestDate((Date) map.get("requestdate"));
+            emailTemplateForm.setTotalCost((BigDecimal)map.get("totalcost"));
+            emailTemplateForm.setRequestStatus((String)map.get("requeststatus"));
+            if (null != map.get("orderdate"))
+            {
+                emailTemplateForm.setOrderDate((Date) map.get("orderdate"));
+            }
 
-            Map<String, Object> keys = Collections.singletonMap("rowId", vendorId);
-            List<Map<String, Object>> rows = qus.getRows(getUser(), getContainer(), Collections.singletonList(keys));
-            return rows.size() == 1 ? (String) rows.get(0).get("vendorname") : "";
+            return emailTemplateForm;
+        }
+    }
+
+    public class EmailTemplateForm
+    {
+        Integer _rowId;
+        String _vendor;
+        String _requestStatus;
+        Date _requestDate;
+        Date _orderDate;
+        User _requester;
+        BigDecimal _totalCost;
+
+        DateFormat _dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DecimalFormat _dollarFormat = new DecimalFormat("$#,##0.00");
+
+        public Integer getRowId()
+        {
+            return _rowId;
         }
 
-        private double getLineItemsTotal(List<JSONObject> lineItems)
+        public void setRowId(Integer rowId)
         {
-            double totalCost = 0.0;
-            for (JSONObject lineItem : lineItems)
-            {
-                String cost = (String) lineItem.get("unitCost");
-                String quantity = (String) lineItem.get("quantity");
-                totalCost += (Double.valueOf(cost) * Double.valueOf(quantity));
-            }
-            return totalCost;
+            this._rowId = rowId;
+        }
+
+        public String getVendor()
+        {
+            return _vendor;
+        }
+
+        public void setVendor(String vendor)
+        {
+            this._vendor = vendor;
+        }
+
+        public String getRequestStatus()
+        {
+            return _requestStatus;
+        }
+
+        public void setRequestStatus(String requestStatus)
+        {
+            this._requestStatus = requestStatus;
+        }
+
+        public String getRequestDate()
+        {
+            return _dateFormat.format(_requestDate);
+        }
+
+        public void setRequestDate(Date requestDate)
+        {
+            this._requestDate = requestDate;
+        }
+
+        public String getOrderDate()
+        {
+            return _dateFormat.format(_orderDate);
+        }
+
+        public void setOrderDate(Date orderDate)
+        {
+            this._orderDate = orderDate;
+        }
+
+        public String getRequesterFriendlyName()
+        {
+            return _requester.getFriendlyName();
+        }
+
+        public User getRequester()
+        {
+            return _requester;
+        }
+
+        public void setRequester(User requester)
+        {
+            this._requester = requester;
+        }
+
+        public BigDecimal getTotalCost()
+        {
+            return _totalCost;
+        }
+
+        public String getFormattedTotalCost()
+        {
+            return _dollarFormat.format(_totalCost);
+        }
+
+        public void setTotalCost(BigDecimal totalCost)
+        {
+            this._totalCost = totalCost;
         }
     }
 
     public static class RequestForm
     {
-        DecimalFormat _dollarFormat = new DecimalFormat("$#,##0.00");
-        DateFormat _dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
         List<JSONObject> _lineItems;
         List<Integer> _lineItemsToDelete;
         Integer _rowId;
@@ -223,7 +344,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         Integer _shippingDestination;
         String _shippingAttentionTo;
         String _comments;
-        String _qcState;
+        Integer _qcState;
         Integer _assignedTo;
         Integer _paymentOption;
         String _program;
@@ -244,9 +365,8 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _newVendorUrl;
         String _newVendorNotes;
         Double _totalCost;
-        User _requester;
-        Date _createdOn;
-        String _vendorName;
+        String _qcStateLabel;
+        Boolean _isNewRequest;
 
         public List<JSONObject> getLineItems()
         {
@@ -348,12 +468,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             _comments = comments;
         }
 
-        public String getQcState()
+        public Integer getQcState()
         {
             return _qcState;
         }
 
-        public void setQcState(String qcState)
+        public void setQcState(Integer qcState)
         {
             _qcState = qcState;
         }
@@ -558,39 +678,24 @@ public class WNPRC_PurchasingController extends SpringActionController
             _totalCost = totalCost;
         }
 
-        public String getFormattedTotalCost()
+        public String getQcStateLabel()
         {
-            return _dollarFormat.format(_totalCost);
+            return _qcStateLabel;
         }
 
-        public void setRequester(User user)
+        public void setQcStateLabel(String qcStateLabel)
         {
-            _requester = user;
+            _qcStateLabel = qcStateLabel;
         }
 
-        public String getRequester()
+        public Boolean getIsNewRequest()
         {
-            return _requester.getFriendlyName();
+            return _isNewRequest;
         }
 
-        public String getCreatedOn()
+        public void setIsNewRequest(Boolean newRequest)
         {
-            return _dateFormat.format(_createdOn);
-        }
-
-        public void setCreatedOn(Date createdOn)
-        {
-            _createdOn = createdOn;
-        }
-
-        public String getVendorName()
-        {
-            return _vendorName;
-        }
-
-        public void setVendorName(String vendorName)
-        {
-            _vendorName = vendorName;
+            _isNewRequest = newRequest;
         }
     }
 

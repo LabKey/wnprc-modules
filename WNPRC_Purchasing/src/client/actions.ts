@@ -77,13 +77,15 @@ export async function submitRequest(
     qcStates: QCStateModel[],
     purchasingAdminModel?: PurchaseAdminModel,
     documentAttachmentModel?: DocumentAttachmentModel,
-    lineItemsToDelete?: number[]
+    lineItemsToDelete?: number[],
+    isNewRequest?: boolean
 ): Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
             url: ActionURL.buildURL('WNPRC_Purchasing', 'submitRequest.api'),
             method: 'POST',
             jsonData: {
+                isNewRequest: isNewRequest,
                 rowId: requestOrder.rowId,
                 account: requestOrder.account !== 'Other' ? requestOrder.account : -1,
                 accountOther: requestOrder.otherAcctAndInves,

@@ -1,6 +1,7 @@
 package org.labkey.dbutils.jooq;
 
 import org.jooq.*;
+import org.jooq.Record;
 import org.jooq.impl.DefaultRecordListener;
 import org.json.JSONObject;
 import org.labkey.api.audit.AbstractAuditTypeProvider;

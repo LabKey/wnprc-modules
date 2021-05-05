@@ -89,6 +89,19 @@
 
 <script type="text/javascript">
 
+    let blockObj = {
+        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Processing...',
+        css: {
+            border: 'none',
+            padding: '15px',
+            backgroundColor: '#000',
+            '-webkit-border-radius': '10px',
+            '-moz-border-radius': '10px',
+            opacity: .5,
+            color: '#fff'
+        }
+    };
+
     function createSelectDiv(label, id, selectedOption) {
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("form-group");
@@ -350,18 +363,7 @@
     }
 
     function scheduleSurgeryProcedure(apiAction, requestObj) {
-        $('#scheduleRequestDiv').block({
-            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Processing...',
-            css: {
-                border: 'none',
-                padding: '15px',
-                backgroundColor: '#000',
-                '-webkit-border-radius': '10px',
-                '-moz-border-radius': '10px',
-                opacity: .5,
-                color: '#fff'
-            }
-        });
+        $('#scheduleRequestDiv').block(blockObj);
 
         // Call the WNPRC_EHRController->ScheduleSurgeryProcedureAction method to
         // update the study.surgery_procedure, ehr.request, and ehr.task tables
@@ -1005,44 +1007,11 @@
                             checkbox.checked = allChecked;
                         }
 
-                        $('#calendar-selection').block({
-                            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
-                            css: {
-                                border: 'none',
-                                padding: '15px',
-                                backgroundColor: '#000',
-                                '-webkit-border-radius': '10px',
-                                '-moz-border-radius': '10px',
-                                opacity: .5,
-                                color: '#fff'
-                            }
-                        });
+                        $('#calendar-selection').block(blockObj);
 
-                        $('#procedure-calendar').block({
-                            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
-                            css: {
-                                border: 'none',
-                                padding: '15px',
-                                backgroundColor: '#000',
-                                '-webkit-border-radius': '10px',
-                                '-moz-border-radius': '10px',
-                                opacity: .5,
-                                color: '#fff'
-                            }
-                        });
+                        $('#procedure-calendar').block(blockObj);
 
-                        $('#pending-requests').block({
-                            message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
-                            css: {
-                                border: 'none',
-                                padding: '15px',
-                                backgroundColor: '#000',
-                                '-webkit-border-radius': '10px',
-                                '-moz-border-radius': '10px',
-                                opacity: .5,
-                                color: '#fff'
-                            }
-                        });
+                        $('#pending-requests').block(blockObj);
 
                         calendar = new FullCalendar.Calendar(calendarEl, {
                             themeSystem: 'bootstrap',
@@ -1075,8 +1044,6 @@
                                 selectedEvent = info.event;
                                 if (info.event.extendedProps) {
                                     if (info.event.extendedProps.isUnmanaged) {
-                                        //document.getElementById("surgeryDetailsDiv").style.display = "none";
-                                        //document.getElementById("unmanagedEventDetailsDiv").style.display = "block";
                                         document.getElementById("surgeryDetailsDiv").hidden = true;
                                         document.getElementById("unmanagedEventDetailsDiv").hidden = false;
 
@@ -1438,7 +1405,6 @@
                                     eventToRemove.remove();
                                 }
 
-                                //new code start
                                 let allRemovedEvents = [];
                                 for (let i = 0; i < eventRooms.length; i++) {
                                     let removedEvents = removeEventFromCalendar(eventRooms[i].email, eventRequestId);
@@ -1462,9 +1428,7 @@
                                     WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
                                     pendingRequestsIndex[eventToRemove.extendedProps.requestid] = eventToRemove.extendedProps;
                                     pendingRoomsIndex[eventToRemove.extendedProps.requestid] = eventRooms;
-                                    //TODO something with pendingRoomsIndex....
                                 }
-                                //new code end
 
                                 clearSelectedEvent();
                             }

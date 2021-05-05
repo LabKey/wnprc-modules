@@ -289,6 +289,29 @@
         }
     }
 
+    function addEventToCalendar(event, cal) {
+        calendarEvents[cal].events.push(event);
+        let eventSource = calendar.getEventSourceById(cal);
+        calendar.addEvent(event, eventSource);
+    }
+
+    function removeEventFromCalendar(cal, requestId) {
+        let removedEventArray = [];
+        let removedEvent;
+        for (let j = calendarEvents[cal].events.length - 1; j >= 0; j--) {
+            if (calendarEvents[cal].events[j].extendedProps.requestid === requestId) {
+                let eventId = calendarEvents[cal].events[j].id;
+                let event = calendar.getEventById(eventId);
+                removedEvent = calendarEvents[cal].events.splice(j, 1);
+                removedEventArray.push(removedEvent);
+                if (event) {
+                    event.remove();
+                }
+            }
+        }
+        return removedEventArray;
+    }
+
     function getEventSubject(form) {
         return form.animalid + ' - ' + form.procedurename;
     }
@@ -350,15 +373,13 @@
                 if (response.success) {
                     WebUtils.VM.pendingRequestTable.rows.remove(WebUtils.VM.requestRowInForm);
                     pendingRequestsIndex[requestId] = {};
+                    pendingRoomsIndex[requestId] = {};
 
                     //Add the newly added events to the calendarEvents object as well as on the fullcalendar
                     for (let cal in response.events) {
                         if (response.events.hasOwnProperty(cal)) {
                             for (let i = 0; i < response.events[cal].events.length; i++) {
-                                let event = response.events[cal].events[i];
-                                calendarEvents[cal].events.push(event);
-                                let eventSource = calendar.getEventSourceById(cal);
-                                calendar.addEvent(event, eventSource);
+                                addEventToCalendar(response.events[cal].events[i], cal);
                             }
                         }
                     }
@@ -382,7 +403,7 @@
         let isEHRManaged = !mainEvent.extendedProps.isUnmanaged;
 
         if (isEHRManaged) {
-            if (selectedEvent.extendedProps.parentid) {
+            if (mainEvent.extendedProps.parentid) {
                 mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
             }
         }
@@ -455,25 +476,14 @@
                         //First remove the 'old' events from the calendarEvents object as well as on fullcalendar
                         mainEvent.remove();
                         for (let i = 0; i < roomIds.length; i++) {
-                            let roomEventToRemove = calendar.getEventById(roomIds[i]);
-                            for (let j = calendarEvents[oldRoomEmails[i]].events.length - 1; j >= 0; j--) {
-                                if (calendarEvents[oldRoomEmails[i]].events[j].extendedProps.requestid === requestObj.requestId) {
-                                    calendarEvents[oldRoomEmails[i]].events.splice(j, 1);
-                                    if (roomEventToRemove) {
-                                        roomEventToRemove.remove();
-                                    }
-                                }
-                            }
+                            removeEventFromCalendar(oldRoomEmails[i], requestObj.requestId);
                         }
 
                         //Then add the updated events back to the calendarEvents object as well as on the fullcalendar
                         for (let cal in response.events) {
                             if (response.events.hasOwnProperty(cal)) {
                                 for (let i = 0; i < response.events[cal].events.length; i++) {
-                                    let event = response.events[cal].events[i];
-                                    calendarEvents[cal].events.push(event);
-                                    let eventSource = calendar.getEventSourceById(cal);
-                                    calendar.addEvent(event, eventSource);
+                                    addEventToCalendar(response.events[cal].events[i], cal);
                                 }
                             }
                         }
@@ -497,17 +507,14 @@
                 url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateUnmanagedEvent", null, requestObj),
                 success: LABKEY.Utils.getCallbackWrapper(function (response) {
                     if (response.success) {
-                        //First remove the 'old' events from the calendarEvents object as well as on fullcalendar
+                        //First remove the 'old' event from the calendarEvents object as well as on fullcalendar
                         mainEvent.remove();
 
-                        //Then add the updated events back to the calendarEvents object as well as on the fullcalendar
+                        //Then add the updated event back to the calendarEvents object as well as on the fullcalendar
                         for (let cal in response.events) {
                             if (response.events.hasOwnProperty(cal)) {
                                 for (let i = 0; i < response.events[cal].length; i++) {
-                                    let event = response.events[cal][i];
-                                    calendarEvents[cal].events.push(event);
-                                    let eventSource = calendar.getEventSourceById(cal);
-                                    calendar.addEvent(event, eventSource);
+                                    addEventToCalendar(response.events[cal][i], cal);
                                 }
                             }
                         }
@@ -1432,18 +1439,10 @@
                                 }
 
                                 //new code start
-                                let removedEventArray = [];
+                                let allRemovedEvents = [];
                                 for (let i = 0; i < eventRooms.length; i++) {
-                                    let eventRoom = eventRooms[i].room_fs_email;
-                                    for (let j = calendarEvents[eventRoom].events.length - 1; j >= 0; j--) {
-                                        if (calendarEvents[eventRoom].events[j].extendedProps.requestid === eventRequestId) {
-                                            let roomEventToRemove = calendar.getEventById(calendarEvents[eventRoom].events[j].id)
-                                            removedEventArray = removedEventArray.concat(calendarEvents[eventRoom].events.splice(j, 1));
-                                            if (roomEventToRemove) {
-                                                roomEventToRemove.remove();
-                                            }
-                                        }
-                                    }
+                                    let removedEvents = removeEventFromCalendar(eventRooms[i].email, eventRequestId);
+                                    allRemovedEvents = allRemovedEvents.concat(removedEvents);
                                 }
 
                                 if (eventToRemove) {
@@ -1462,6 +1461,8 @@
                                     });
                                     WebUtils.VM.pendingRequestTable.rows.push(newPendingRequestRow);
                                     pendingRequestsIndex[eventToRemove.extendedProps.requestid] = eventToRemove.extendedProps;
+                                    pendingRoomsIndex[eventToRemove.extendedProps.requestid] = eventRooms;
+                                    //TODO something with pendingRoomsIndex....
                                 }
                                 //new code end
 
@@ -1575,9 +1576,6 @@
                     }
                 }
 
-                //document.getElementById("eventModalTitleField").value = selectedEvent.title;
-                //document.getElementById("eventModalStartField").value = startValue;
-                //document.getElementById("eventModalEndField").value = endValue;
                 $("#eventModal").modal();
             },
             viewNecropsyReportURL: ko.pureComputed(function() {

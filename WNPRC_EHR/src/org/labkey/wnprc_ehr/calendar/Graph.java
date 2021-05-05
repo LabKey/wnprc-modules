@@ -71,17 +71,17 @@ public class Graph {
         return me;
     }
 
-    public synchronized static List<Calendar> readCalendars(String accessToken) {
-    	ensureGraphClient(accessToken);
-
-    	ICalendarCollectionPage calendarPage = graphClient
-    		.me()
-    		.calendars()
-    		.buildRequest()
-    		.get();
-
-    	return calendarPage.getCurrentPage();
-    }
+//    public synchronized static List<Calendar> readCalendars(String accessToken) {
+//    	ensureGraphClient(accessToken);
+//
+//    	ICalendarCollectionPage calendarPage = graphClient
+//    		.me()
+//    		.calendars()
+//    		.buildRequest()
+//    		.get();
+//
+//    	return calendarPage.getCurrentPage();
+//    }
 
     public synchronized static Event createEvent(String accessToken, String calendarId, Event newEvent) {
     	ensureGraphClient(accessToken);
@@ -97,64 +97,64 @@ public class Graph {
     	return addedEvent;
     }
 
-    public synchronized static List<Event> createEvents(String accessToken, List<Event> newEvents) {
-    	ensureGraphClient(accessToken);
+//    public synchronized static List<Event> createEvents(String accessToken, List<Event> newEvents) {
+//    	ensureGraphClient(accessToken);
+//
+//    	//TODO do things
+//
+//    	return null;
+//	}
 
-    	//TODO do things
+//    public synchronized static List<Event> readRoomEvents(String accessToken, String roomEmailAddress, String start, String end) {
+//    	ensureGraphClient(accessToken);
+//
+//    	// Use HeaderOption to specify that we want the event body to be text rather than html
+//        List<Option> options = new LinkedList<Option>();
+//        options = addPreferTextHeader(options);
+//    	options = addPreferCentralTimeZone(options);
+//    	options = addDateFilters(options, start, end);
+//
+//    	IEventCollectionPage eventPage = graphClient
+//    		.users(roomEmailAddress)
+//    		.events()
+//    		.buildRequest(options)
+//    		.get();
+//
+//    	List<Event> events = new ArrayList<>();
+//
+//        // Page through to get all events (default is 10 per page)
+//        events.addAll(eventPage.getCurrentPage());
+//        while (eventPage.getNextPage() != null && (eventPage = eventPage.getNextPage().buildRequest(options).get()) != null) {
+//        	events.addAll(eventPage.getCurrentPage());
+//        }
+//
+//        return events;
+//    }
 
-    	return null;
-	}
-
-    public synchronized static List<Event> readRoomEvents(String accessToken, String roomEmailAddress, String start, String end) {
-    	ensureGraphClient(accessToken);
-
-    	// Use HeaderOption to specify that we want the event body to be text rather than html
-        List<Option> options = new LinkedList<Option>();
-        options = addPreferTextHeader(options);
-    	options = addPreferCentralTimeZone(options);
-    	options = addDateFilters(options, start, end);
-
-    	IEventCollectionPage eventPage = graphClient
-    		.users(roomEmailAddress)
-    		.events()
-    		.buildRequest(options)
-    		.get();
-
-    	List<Event> events = new ArrayList<>();
-
-        // Page through to get all events (default is 10 per page)
-        events.addAll(eventPage.getCurrentPage());
-        while (eventPage.getNextPage() != null && (eventPage = eventPage.getNextPage().buildRequest().get()) != null) {
-        	events.addAll(eventPage.getCurrentPage());
-        }
-
-        return events;
-    }
-
-    public synchronized static Event readEvent(String accessToken, String eventId) {
-    	ensureGraphClient(accessToken);
-
-    	List<Option> options = new LinkedList<>();
-    	options = addPreferTextHeader(options);
-    	options = addPreferCentralTimeZone(options);
-    	options.add(new QueryOption("expand", "calendar"));
-
-    	Event event = graphClient
-			.me()
-			.events(eventId)
-			.buildRequest(options)
-			.get();
-
-    	Calendar calendar = graphClient
-    		.me()
-    		.calendars(event.calendar.id)
-    		.buildRequest()
-    		.get();
-
-    	event.calendar = calendar;
-
-    	return event;
-	}
+//    public synchronized static Event readEvent(String accessToken, String eventId) {
+//    	ensureGraphClient(accessToken);
+//
+//    	List<Option> options = new LinkedList<>();
+//    	options = addPreferTextHeader(options);
+//    	options = addPreferCentralTimeZone(options);
+//    	options.add(new QueryOption("expand", "calendar"));
+//
+//    	Event event = graphClient
+//			.me()
+//			.events(eventId)
+//			.buildRequest(options)
+//			.get();
+//
+//    	Calendar calendar = graphClient
+//    		.me()
+//    		.calendars(event.calendar.id)
+//    		.buildRequest()
+//    		.get();
+//
+//    	event.calendar = calendar;
+//
+//    	return event;
+//	}
 
     public synchronized static List<Event> readEvents(String accessToken, String calendarId, String start, String end) {
         ensureGraphClient(accessToken);
@@ -175,11 +175,12 @@ public class Graph {
             .byId(calendarId)
             .events()
             .buildRequest(options)
+			.top(999)
             .get();
 
         // Page through to get all events (default is 10 per page)
         events.addAll(eventPage.getCurrentPage());
-        while (eventPage.getNextPage() != null && (eventPage = eventPage.getNextPage().buildRequest().get()) != null) {
+        while (eventPage.getNextPage() != null && (eventPage = eventPage.getNextPage().buildRequest(options).get()) != null) {
         	events.addAll(eventPage.getCurrentPage());
         }
 
@@ -198,13 +199,13 @@ public class Graph {
     	return updatedEvent;
     }
 
-    public synchronized static List<Event> updateEvents(String accessToken, List<Event> events, List<Map<String, Object>> oldEvents)  {
-    	ensureGraphClient(accessToken);
-
-    	//TODO things
-
-    	return null;
-	}
+//    public synchronized static List<Event> updateEvents(String accessToken, List<Event> events, List<Map<String, Object>> oldEvents)  {
+//    	ensureGraphClient(accessToken);
+//
+//    	//TODO things
+//
+//    	return null;
+//	}
 
     public synchronized static void deleteEvent(String accessToken, String eventId) {
     	ensureGraphClient(accessToken);
@@ -238,11 +239,12 @@ public class Graph {
     		.calendar()
     		.getSchedule(attendees, endTime, startTime, duration)
     		.buildRequest(options)
+			.top(999)
     		.post();
 
     	// Page through to get all events (default is 10 per page)
     	scheduleInfos.addAll(schedulePage.getCurrentPage());
-        while (schedulePage.getNextPage() != null && (schedulePage = schedulePage.getNextPage().buildRequest().post()) != null) {
+        while (schedulePage.getNextPage() != null && (schedulePage = schedulePage.getNextPage().buildRequest(options).post()) != null) {
         	scheduleInfos.addAll(schedulePage.getCurrentPage());
         }
 

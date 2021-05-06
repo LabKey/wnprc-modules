@@ -150,8 +150,3 @@ CREATE TABLE wnprc.procedure_units
 
     CONSTRAINT pk_procedure_units_unit PRIMARY KEY (unit)
 );
-
--- DELETE FROM study.qcstate WHERE label = 'Request: On Hold';
---
--- INSERT INTO study.qcstate (label, description, container, publicdata)
--- VALUES ('Request: On Hold', 'Request has been put on hold', '29e3860b-02b5-102d-b524-493dbd27b599', FALSE);

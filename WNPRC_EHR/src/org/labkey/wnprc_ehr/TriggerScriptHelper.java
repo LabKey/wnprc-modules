@@ -1285,14 +1285,14 @@ public class TriggerScriptHelper {
         String meaningFrequency = getMeaningFromRowid( frequency, "husbandry_frequency" );
         JSONArray arrayOfErrors = new JSONArray();
         JSONArray extraContextArray = new JSONArray();
-        JSONObject returnErrors = new JSONObject();
+
         boolean existingOrder = false;
 
         Map<String, JSONObject> errorMap = new HashMap<>();
 
         //TODO: Check is the animal is at least one time in the WaterSchedule Table
         if(checkIfAnimalInCondition(animalId,clientStartDate).size()==0){
-
+            JSONObject returnErrors = new JSONObject();
             returnErrors.put("field", "Id");
             returnErrors.put("severity","ERROR");
             returnErrors.put("message","Animal not in waterScheduledAnimals table, contact compliance staff to enter new animals into the water monitoring system");
@@ -1333,8 +1333,8 @@ public class TriggerScriptHelper {
         waterOrdersFromDatabase.setNamedParameters(parameters);
         waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
-       // JSONObject returnErrors = new JSONObject();
-        JSONObject extraContextObject = new JSONObject();
+        JSONObject returnErrors = new JSONObject();
+
 
         for (WaterDataBaseRecord waterRecord : waterRecords)
         {
@@ -1448,6 +1448,8 @@ public class TriggerScriptHelper {
                 //This validation is outside the previous loop because this waterAmounts will be outside the new date range.
 
                 if (waterRecord.getDataSource().equals("waterAmount")){
+                    //JSONObject returnErrors = new JSONObject();
+                    JSONObject extraContextObject = new JSONObject();
 
                     //check if waterAmounts are outside the new order interval add warnings to users
                     //In waterAmount StartDate and EndDate are the same
@@ -1481,7 +1483,7 @@ public class TriggerScriptHelper {
                         //extraContext.put("objectId",waterRecord.getObjectId());
                     }
                 }
-                if (!returnErrors.isEmpty()){
+                if (!returnErrors.isEmpty() && checkIfAnimalInCondition(animalId,clientStartDate).size()>0){
                     errorMap.put(waterRecord.getObjectId(), returnErrors);
                     extraContext.put("extraContextArray", extraContextArray);
                 }

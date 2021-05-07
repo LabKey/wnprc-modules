@@ -23,12 +23,12 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 }
             }
         });
-        var animalRestricted = false;
+        var animalRestricted = {};
         animalRestricted = WNPRC.Utils.getJavaHelper().checkIfAnimalInCondition(row.Id, row.date);
-
-        /*if (!animalRestricted && !row.skipWaterRegulationCheck){
+        console.log (animalRestricted);
+        if (!animalRestricted && !row.skipWaterRegulationCheck){
             EHR.Server.Utils.addError(scriptErrors,'Id', 'Animal not assigned to water restriction protocol or is already in ' + row.waterSource + ' condition.', 'ERROR');
-        }*/
+        }
 
 
 
@@ -80,7 +80,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
    console.log ('skipWaterRegulation '+ row.skipWaterRegulationCheck);
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
     if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck) {
-        console.log('value of row: ' + row + ' frequency ' + row.frequency + ' value of waterSource ' + row.waterSource);
+        console.log('value of row: frequency ' + row.frequency + ' value of waterSource ' + row.waterSource);
         let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterRegulation(row.id, row.date, row.enddate ? row.enddate : null, row.frequency, row.waterSource, row.objectid, row.project, this.extraContext);
         if (jsonArray != null) {
             for (var i = 0; i < jsonArray.length; i++) {

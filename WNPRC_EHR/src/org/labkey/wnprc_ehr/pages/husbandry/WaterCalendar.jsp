@@ -28,10 +28,10 @@
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("clientapi/ext4");
-        dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.js");
-        dependencies.add("/webutils/lib/fullcalendar-3.10.0/fullcalendar.min.css");
+        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.css");
+        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.js");
         dependencies.add("/webutils/lib/webutils_core/api.js");
-        dependencies.add("//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js");
+
         dependencies.add("https://unpkg.com/popper.js/dist/umd/popper.min.js");
         dependencies.add("https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js");
         //dependencies.add("/mypath/mydependency.js");
@@ -95,6 +95,8 @@ DO NOT UNCOMMENT --%>
 
 
 %>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 
 <style type="text/css">
     /* Full Calendar heading */
@@ -160,11 +162,47 @@ DO NOT UNCOMMENT --%>
     .server-return-message {
         display: none;
     }
+    .event-text-light {
+        color: black !important;
+    }
+
+    .event-text-dark {
+        color: white !important;
+    }
+    .event-selected {
+        border: 1px solid white;
+        border-radius: 3px;
+    }
+
+    .event-selected:before {
+        border: 3px solid black;
+        border-radius: 6px;
+        background: none;
+        content: "";
+        display: block;
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        pointer-events: none;
+    }
 </style>
+    <script type ="text/javascript">
+        function clearSelectedEvent() {
+        selectedEvent = {};
+        for (let key in WebUtils.VM.taskDetails) {
+            if (key != 'animalLink'  && key != 'displayDate') {
+                WebUtils.VM.taskDetails[key](null);
+            }
+        }
+    }
+
+    </script>
 
 <%--<div class="col-xs-12 col-xl-8">--%>
 <div class="row" >
-    <div class="col-md-4">
+    <div class="col-md-3">
 
         <div class="row">
             <div class="panel panel-primary">
@@ -208,6 +246,7 @@ DO NOT UNCOMMENT --%>
 
                                 </div>
                                 <div class="modal-footer">
+                                    <button id="proceedButton" type="button" class="btn btn-default hidden" data-bind="click: $root.proceed" >Proceed</button>
                                     <button type="button" class="btn btn-default" data-bind="click: $root.endWaterOrder">End Water Order</button>
                                     <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: $root.enterNewWaterOrder">End and Start New Water Order</button>
                                     <button type="button" class="btn btn-default" data-bind="click: $root.closeModalWindow" data-dismiss="modal">Close Window</button>
@@ -328,7 +367,7 @@ DO NOT UNCOMMENT --%>
                                             %>
                                         </select>
                                     </p>
-                                    
+
 
                                 </div>
                             </div>
@@ -337,7 +376,7 @@ DO NOT UNCOMMENT --%>
                                 <div class="col-xs-4 control-label">Edit Multiple:</div>
                                 <div class="col-xs-2 control-label">
                                     <label class="toggle-check">
-                                        <input type="checkbox" class="toggle-check-input" data-bind="checked: $root.wantsSpam"  />
+                                        <input id="multiple" type="checkbox" class="toggle-check-input" data-bind="checked: $root.editMultiple()"  />
                                         <span class="toggle-check-text"></span>
                                     </label>
                                 </div>
@@ -365,7 +404,7 @@ DO NOT UNCOMMENT --%>
         </div>
     </div>
 
-    <div class="col-xs-12 col-md-8">
+    <div class="col-xs-6 col-md-8">
         <div class="panel panel-primary">
             <div class="panel-heading"><span>Calendar</span></div>
             <div class="panel-body">
@@ -391,7 +430,35 @@ DO NOT UNCOMMENT --%>
 
 
 <script>
+    let selectedEvent = {};
+    let calendar = {};
+    let calendarEvents = {};
+    let hideEditPanel = true;
     (function() {
+        let calendarEl = document.getElementById('calendar');
+        calendarEl.addEventListener("click", function(clickEvent) {
+            if (clickEvent.target.type !== "button" && clickEvent.target.parentElement.type !== "button") {
+                if (selectedEvent.id) {
+                    let event = calendar.getEventById(selectedEvent.id);
+                    if (event) {
+                        event.setExtendedProp("selected", false);
+                    }
+                }
+                clearSelectedEvent();
+            }
+        }, true);
+
+        /*let displayDate = function(dateString) {
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY');
+        };*/
+
+        let displayDateTime = function(dateString) {
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('MMM D[,] YYYY [at] h:mm a');
+        };
+
+        let displayDateTimeISO = function(dateString) {
+            return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
+        };
 
         var previousCalendarEvent;
         var previousCalendarColor;
@@ -400,41 +467,69 @@ DO NOT UNCOMMENT --%>
         WebUtils.VM.husbandryAssignmentLookup = husbandryAssignmentLookup;
         var $animalId = "<%= animalIds %>";
         var $numberOfRenders = "<%= numberOfRenders %>";
-        debugger;
-        
-        var $calendar = $('#calendar');
-        /*if ($numberOfRenders > 0){
-            $calendar.fullCalendar('destroy');
 
-        }*/
-        $(document).ready(function () {
-            $calendar.fullCalendar({
-                header: {
-                    left: 'prev,next today',
+        var userId = <%=userid.toString() %>;
+        console.log (userId);
+        let isAdmin = <%=isAdmin%>;
+
+        var waterAccessControlled = <%=userAccessWater.toString() %>;
+        WebUtils.VM.waterAccessControlled = waterAccessControlled;
+        let $allowProjects;
+        let firstEntry = true;
+        jQuery.each(waterAccessControlled, function(key,value){
+            if(key in WebUtils.VM.waterAccessControlled){
+                if (key == userId){
+                    let jsonArray = value;
+                    $allowProjects = jsonArray.join(';');
+
+                    console.log ("allowed Project " + $allowProjects);
+
+
+                }
+
+            }
+        });
+        $(document).ready(function(){
+            calendar = new FullCalendar.Calendar(calendarEl, {
+
+                themeSystem: 'bootstrap',
+                height: 800,
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next,today',
                     center: 'title',
-                    right: 'month,basicWeek,basicDay'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                views:{
-                    month:{
-                        titleFormat: 'MMM, YYYY'
-                    }
-                },
-                eventSources:[
-                    {events: function (startMoment, endMoment, timezone, callback) {
-                            var date = new Date();
-                           // date.setDate(date.getDate() - 60);
+
+            eventSources:[
+                    {
+                        events: function (fetchInfo, successCallback, failureCallback) {
+
+                            console.log(" startStr" + fetchInfo.startStr);
+
+                            console.log("inside eventSource " + $allowProjects);
+                           // let events = [];
+                           // events.push({title:'test event',start:'2021-04-21'});
+
+                            <%--successCallback(events.map(function(row){
+                                return {title:row.title,start:row.start}
+                            }));
+                            failureCallback(function(){
+                                console.log ('error');
+                            });--%>
+
+                            // date.setDate(date.getDate() - 60);
                             if ($animalId == 'undefined' || $animalId == "null"){
+                                let queryConfig ={};
+                                queryConfig = queryConfigFunc(fetchInfo,isAdmin);
 
+                                WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data)
+                                {
 
-                                WebUtils.API.selectRows("study", "waterScheduleWithWeight", {
-                                    "date~gte":         startMoment.format('Y-MM-DD'),
-                                    "date~lte":         endMoment.format('Y-MM-DD'),
-                                    "parameters":       {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                                    "qcstate/label~eq": "Scheduled"
-                                }).then(function (data) {
-                                    var events = data.rows;
+                                   var events = data.rows;
 
-                                    callback(events.map(function (row) {
+                                    successCallback(
+                                        events.map(function (row) {
                                         var volume;
                                         if (row.volume) {
                                             volume = row.volume + 'mL';
@@ -442,12 +537,12 @@ DO NOT UNCOMMENT --%>
                                         else {
                                             volume = "On Lixit";
                                         }
-
                                         var eventObj = {
+                                            id : LABKEY.Utils.generateUUID(),
                                             title: row.animalId + ' ' + volume,
-                                            start: row.date,
+                                            start: new Date(row.date),
                                             allDay: true,
-                                            // vol: row.volume,
+                                             //vol: row.volume,
                                             rawRowData: row,
                                             //editable: true,
                                             description: 'Water for animal ' + row.animalId
@@ -463,22 +558,26 @@ DO NOT UNCOMMENT --%>
 
 
                                         return eventObj;
-                                    }))
+                                        })
+                                    );
+
+
+                                        failureCallback((function(data){
+                                            console.log ("error!!");
+                                        }));
                                 })
+
                             }
                             //Render calendar for one animal of a group of animals
                             //Display panel in the animal history
                             else{
-                                WebUtils.API.selectRows("study", "waterScheduleWithWeight", {
-                                    "date~gte":         startMoment.format('Y-MM-DD'),
-                                    "date~lte":         endMoment.format('Y-MM-DD'),
-                                    "parameters":       {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                                    "animalid~in":      $animalId,
-                                    "qcstate/label~eq": "Scheduled"
-                                }).then(function (data) {
+                                let queryConfig ={};
+                                queryConfig = queryConfigFunc(fetchInfo,isAdmin, $animalId);
+
+                                WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
 
-                                    callback(events.map(function (row) {
+                                    successCallback(events.map(function (row) {
                                         var volume;
                                         if (row.volume) {
                                             volume = row.volume+ 'ml';
@@ -488,8 +587,9 @@ DO NOT UNCOMMENT --%>
                                         }
 
                                         var eventObj = {
+                                            id : LABKEY.Utils.generateUUID(),
                                             title: row.animalId + ' ' + volume,
-                                            start: row.date,
+                                            start: new Date(row.date),
                                             allDay: true,
                                             // vol: row.volume,
                                             rawRowData: row,
@@ -504,84 +604,104 @@ DO NOT UNCOMMENT --%>
                                         else {
                                             eventObj.color = '#F78181';
                                         }
-
-
                                         return eventObj;
                                     }))
                                 })
 
                             }
                         }
-                    },
-                    {
-                        events:function (startMoment, endMoment, timezone, callback) {
-                            if ($animalId == 'undefined' || $animalId == "null"){
-                                WebUtils.API.selectRows("study", "waterPrePivot", {
-                                    "date~gte": startMoment.format('Y-MM-DD'),
-                                    "date~lte": endMoment.format('Y-MM-DD')
-                                }).then(function (data) {
-                                    var events = data.rows;
+                },
+                {
+                    events:function (fetchInfo, successCallback, failureCallback) {
+                        if ($animalId == 'undefined' || $animalId == "null"){
+                        WebUtils.API.selectRows("study", "waterPrePivot", {
+                            "date~gte": fetchInfo.start.format('Y-m-d'),
+                            "date~lte": fetchInfo.end.format('Y-m-d')
+                        }).then(function (data) {
+                            var events = data.rows;
 
-                                    callback(events.map(function (row) {
+                            successCallback(events.map(function (row) {
+                                var eventObj = {
+                                    id : LABKEY.Utils.generateUUID(),
+                                    title: row.animalId + " Total: " + row.TotalWater,
+                                    start: row.Date,
+                                    allDay: true,
+                                    rawRowData: row
+                                };
+
+                                if (row.mlsPerKg >= row.InnerMlsPerKg){
+                                    eventObj.color = '#000CFF';
+                                }else{
+                                    eventObj.color = '#EE2020'
+                                }
+                                return eventObj;
+                            }))
+
+                        })
+
+                        }else{
+
+                            WebUtils.API.selectRows("study", "waterPrePivot", {
+                            "date~gte": fetchInfo.start.format('Y-m-d'),
+                            "date~lte": fetchInfo.end.format('Y-m-d'),
+                            "animalId~in": $animalId
+                            }).then(function (data) {
+                                var events = data.rows;
+
+                                successCallback(events.map(function (row) {
                                         var eventObj = {
+                                            id : LABKEY.Utils.generateUUID(),
                                             title: row.animalId + " Total: " + row.TotalWater,
                                             start: row.Date,
                                             allDay: true,
                                             rawRowData: row
                                         };
-
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
                                             eventObj.color = '#000CFF';
                                         }else{
                                             eventObj.color = '#EE2020'
                                         }
-                                        return eventObj;
+                                            return eventObj;
                                     }))
-
-                                })
-
-                            }else{
-
-                                WebUtils.API.selectRows("study", "waterPrePivot", {
-                                    "date~gte": startMoment.format('Y-MM-DD'),
-                                    "date~lte": endMoment.format('Y-MM-DD'),
-                                    "animalId~in": $animalId
-                                }).then(function (data) {
-                                    var events = data.rows;
-
-                                    callback(events.map(function (row) {
-                                        var eventObj = {
-                                            title: row.animalId + " Total: " + row.TotalWater,
-                                            start: row.Date,
-                                            allDay: true,
-                                            rawRowData: row
-                                        };
-                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#000CFF';
-                                        }else{
-                                            eventObj.color = '#EE2020'
-                                        }
-                                        return eventObj;
-                                    }))
-
                                 })
                             }
                         }
-                    },
-                    {
-                        events:[
+                },
+                {
+                    events:[
                         {
                             title: 'Test123 this is a really long string to see what happens!',
-                            start: '2019-11-22',
-                            end:   '2019-11-23'
+                            start: '2021-05-21',
+                            end: '2021-05-21'
                         }
-                            ],
-                            color: 'yellow',
-                            eventTextColor: 'red'
-                        }
-                ],
-                eventClick: function (calEvent, jsEvent, view) {
-                    $('#waterInfo').attr('disabled', 'disabled');
+                    ],
+                    color: 'yellow',
+                    eventTextColor: 'red'
+                }
+            ],
+            eventClassNames: function(arg) {
+                if (arg.event.extendedProps.selected) {
+                    return ["event-selected"];
+                } else {
+                    return [];
+                }
+            },
+            eventClick: function (info){
+                debugger;
+                console.log(info.event.id)
+                //$('#multiple').bootstrapToggle('off');
+
+                let event;
+                if (selectedEvent.id){
+                    event = calendar.getEventById(selectedEvent.id);
+                    if (event){
+                        event.setExtendedProp("selected",false)
+                    }
+                }
+                info.event.setExtendedProp("selected",true);
+                selectedEvent = info.event;
+
+                /*$('#waterInfo').attr('disabled', 'disabled');
                     $('#enterWaterOrder').attr('disabled', 'disabled');
                     $('#waterInfo').text('Enter Single Day Water');
                     document.getElementById("modelServerResponse").innerHTML = "";
@@ -589,16 +709,16 @@ DO NOT UNCOMMENT --%>
 
                     if (previousCalendarEvent){
                         previousCalendarEvent.color = previousCalendarColor;
-                        $calendar.fullCalendar('updateEvent', previousCalendarEvent )
+                        //$calendar.fullCalendar('updateEvent', previousCalendarEvent )
                     }
-                    previousCalendarEvent = calEvent;
-                    previousCalendarColor = calEvent.color;
-                    calEvent.color = '#848484';
-                    $calendar.fullCalendar('updateEvent', calEvent )
+                    previousCalendarEvent = selectedEvent;
+                    previousCalendarColor = selectedEvent.color;
+                    event.setProp('backgroundColor','#848484');*/
+                   // $calendar.fullCalendar('updateEvent', info.event )
 
 
                     var momentDate;
-                    jQuery.each(calEvent.rawRowData, function (key, value) {
+                    jQuery.each(info.event.extendedProps.rawRowData, function (key, value) {
 
                         if (key in WebUtils.VM.taskDetails) {
                             if (key == "date") {
@@ -612,8 +732,11 @@ DO NOT UNCOMMENT --%>
                             }
 
                             WebUtils.VM.taskDetails[key](value);
+                            if (hideEditPanel){
+                                $('#waterExceptionPanel').collapse('hide');
+                            }
 
-                            $('#waterExceptionPanel').collapse('hide');
+
 
                             var today = moment();
 
@@ -632,17 +755,15 @@ DO NOT UNCOMMENT --%>
                             }
                         }
                     });
-                }
+            },
 
-            })
+        },);
+        calendar.render();
+
+
         });
 
 
-        var displayDate = function(dateString) {
-            return moment(dateString, "YYYY/MM/DD HH:mm:ss").calendar(null, {
-                sameElse: 'MMM D[,] YYYY'
-            })
-        };
 
 
 
@@ -651,6 +772,8 @@ DO NOT UNCOMMENT --%>
         //$assignedToField.css('background-color', '');
 
        // var $scheduleForm = $('.scheduleForm');
+
+
 
         _.extend(WebUtils.VM, {
 
@@ -670,8 +793,7 @@ DO NOT UNCOMMENT --%>
                 assignedToTitleCoalesced:   ko.observable(),
                 frequencyCoalesced:         ko.observable(),
                 frequencyMeaningCoalesced:  ko.observable(),
-                rawDate:                    ko.observable(),
-                wantsSpam:                  ko.observable(),
+                rawDate:                    ko.observable()
 
             },
             form: ko.mapping.fromJS({
@@ -699,6 +821,63 @@ DO NOT UNCOMMENT --%>
             },
             collapseSingleWater: function(){
                 $('#waterExceptionPanel').collapse('hide');
+
+            },
+
+            proceed: function(row){
+                WebUtils.VM.requestRowInForm = row;
+                var waterOrder = ko.mapping.toJS(row);
+
+                //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
+                //TODO: should have the QC Status of Started and not complete
+
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL("wnprc_ehr", "CloseWaterOrder", null, {
+                        lsid:               waterOrder.lsid,
+                        taskId:             waterOrder.taskid,
+                        objectId:           waterOrder.objectIdCoalesced,
+                        animalId:           waterOrder.animalId,
+                        endDate:            waterOrder.date,
+                        dataSource:         waterOrder.dataSource,
+                        skipWaterRegulationCheck:     true
+
+                    }),
+                    success: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        if (response.success){
+
+                            // Refresh the calendar view.
+                            calendar.refetchEvents();
+
+                            $('#waterInfoPanel').unblock();
+                            $('#myModal').modal('hide');
+
+
+                        }else if (response.errors){
+                            document.getElementById("returnTitle").style.display = "block";
+                            document.getElementById("modelServerResponse").style.display = "block";
+
+                            //let jsonArray = response.errors[0].errors;
+                            let jsonArray;
+
+                            var returnMessage = "";
+
+
+
+
+                            document.getElementById("modelServerResponse").innerHTML = "<p>"+returnMessage+"</p>";
+
+                            //$('#myModal')
+                            //LABKEY.Utils.alert("Update failed", response.errors);
+                        }
+                        else {
+                            alert('Water cannot be closed')
+                        }
+
+
+                    }, this)
+
+                });
 
             },
 
@@ -739,31 +918,46 @@ DO NOT UNCOMMENT --%>
                         if (response.success){
 
                             // Refresh the calendar view.
-                            $calendar.fullCalendar('refetchEvents');
+                            calendar.refetchEvents();
 
                             $('#waterInfoPanel').unblock();
+                            $('#myModal').modal('hide');
+
 
                         }else if (response.errors){
+
                             document.getElementById("returnTitle").style.display = "block";
                             document.getElementById("modelServerResponse").style.display = "block";
 
                             //let jsonArray = response.errors[0].errors;
-                            let jsonArray = response.extraContext.extraContextArray;
+                            let jsonArray;
+
                             var returnMessage = "";
+                            if (response.extraContext.extraContextArray && response.extraContext.extraContextArray.length>0){
+                                jsonArray = response.extraContext.extraContextArray;
+                            }
+                            else {
+
+                                returnMessage = response.errors[0].exception;
+                            }
+
+
                             if (jsonArray != null){
                                 for (var i = 0; i < jsonArray.length; i++ ){
                                     var errorObject = jsonArray[i];
                                     let clientObjectId = Ext4.util.Format.htmlEncode(errorObject.objectId);
                                     let volume = Ext4.util.Format.htmlEncode(errorObject.volume);
                                     let date = Ext4.util.Format.htmlEncode(errorObject.date);
-                                    returnMessage += "The is another waterAmount on "+date+" for the volume of "+volume+" " +
+                                    returnMessage += "There is another waterAmount on "+date+" for the volume of "+volume+" " +
                                             " <button onclick=\"updateWaterAmount('"+clientObjectId+"')\">Update</button> " +
                                             "<button onclick=\"deleteWaterAmount('"+clientObjectId+"')\">Delete</button><br>";
-                                    
+
                                 }
 
                             }
                             document.getElementById("modelServerResponse").innerHTML = "<p>"+returnMessage+"</p>";
+                            document.getElementById("proceedButton").classList.remove("hidden");
+
                             //$('#myModal')
                             //LABKEY.Utils.alert("Update failed", response.errors);
                         }
@@ -824,7 +1018,7 @@ DO NOT UNCOMMENT --%>
                         if (response.success){
 
                             // Refresh the calendar view.
-                            $calendar.fullCalendar('refetchEvents');
+                            calendar.refetchEvents();
 
                             $('#waterInfoPanel').unblock();
                             console.log(response.taskId);
@@ -855,10 +1049,6 @@ DO NOT UNCOMMENT --%>
             closeModalWindow: function (row){
                 $('#waterInfoPanel').unblock();
             }
-
-
-
-
         });
 
         WebUtils.VM.taskDetails.animalLink = ko.pureComputed(function() {
@@ -988,7 +1178,7 @@ DO NOT UNCOMMENT --%>
                             if (response.success){
 
                                 // Refresh the calendar view.
-                                $calendar.fullCalendar('refetchEvents');
+                                calendar.refetchEvents();
 
                                 //$('#waterInfoPanel').unblock();
 
@@ -1006,33 +1196,76 @@ DO NOT UNCOMMENT --%>
 
 
                 $('#waterExceptionPanel').collapse('hide')
-
                 // Refresh the calendar view.
-                $calendar.fullCalendar('refetchEvents');
-
+                calendar.refetchEvents();
                 //Unblock
                 $('#calendar').unblock();
 
             },
-            ViewModel: function (){
-                var self = this;
-                self.wantsSpam = ko.observable(false);
-                self.wantsSpam.subscribe(function(){
-                    self.thealertIwantTosend();
-                })
-                self.thealertIwantTosend = function(){
-                    if(self.wantsSpam() == true){
-                        alert('I want Spam!')}
-                    else{
-                        alert('I dont want Spam!')
-                    }
+            editMultiple: function (){
+                if (document.getElementById('multiple').checked){
+                    hideEditPanel = false;
+                }else {
+                    hideEditPanel = true;
                 }
+                console.log("get Spam");
+
+
 
             },
+
         });
 
 
     })();
+
+    function queryConfigFunc (fetchInfo, isAdmin, animalId){
+        let configObject = {};
+        let date = new Date();
+        if (isAdmin){
+            if (animalId){
+                configObject = {
+                    "date~gte": fetchInfo.start.format('Y-m-d'),
+                    "date~lte": fetchInfo.end.format('Y-m-d'),
+                    "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                    "animalid~in": animalId,
+                    "qcstate/label~eq": "Scheduled"
+                }
+            }else{
+                configObject= {
+                    "date~gte": fetchInfo.start.format('Y-m-d'),
+                    "date~lte": fetchInfo.end.format('Y-m-d'),
+                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                    "qcstate/label~eq": "Scheduled"
+                }
+            }
+        }
+
+
+        else{
+            if (animalId){
+                configObject ={
+                    "date~gte": fetchInfo.start.format('Y-m-d'),
+                    "date~lte": fetchInfo.end.format('Y-m-d'),
+                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                    "qcstate/label~eq": "Scheduled",
+                    "animalid~in": animalId,
+                    "projectCoalesced~in": $allowProjects
+                }
+            }else{
+                configObject ={
+                    "date~gte": fetchInfo.start.format('Y-m-d'),
+                    "date~lte": fetchInfo.end.format('Y-m-d'),
+                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+                    "qcstate/label~eq": "Scheduled",
+                    "projectCoalesced~in": $allowProjects
+                }
+
+            }
+        }
+        return configObject;
+
+    }
 
     function deleteWaterAmount(objectId){
 
@@ -1047,8 +1280,12 @@ DO NOT UNCOMMENT --%>
             {
                 if (response.success){
 
+
                     // Refresh the calendar view.
-                    //$calendar.fullCalendar('refetchEvents');
+                    calendar.refetchEvents();
+
+                    //Clearing error message
+                    document.getElementById("modelServerResponse").innerHTML = "";
 
                     //$('#waterInfoPanel').unblock();
 
@@ -1065,7 +1302,7 @@ DO NOT UNCOMMENT --%>
     function updateWaterAmount(objectId){
 
         var updateWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'manageRecord', null, {
-            schemaName: 'study',
+            schemaName:         'study',
             queryName:          "Water Amount",
             keyField:           "objectId",
             key:                objectId
@@ -1073,6 +1310,12 @@ DO NOT UNCOMMENT --%>
         //schemaName: 'study', 'query.queryName': 'demographicsParentStatus', 'query.Id~eq': this.subjectId})
 
         window.open(updateWaterOrder,'_blank');
+
+        //TODO: add a wait for user to update water
+
+        // Refresh the calendar view.
+        calendar.refetchEvents();
+
 
         /*LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("EHR", "manageRecord", null, {
@@ -1103,24 +1346,11 @@ DO NOT UNCOMMENT --%>
 
     }
 
-    function ViewModel(){
-        var self = this;
-        self.wantsSpam = ko.observable(false);
-        self.wantsSpam.subscribe(function(){
-            self.thealertIwantTosend();
-        })
-        self.thealertIwantTosend = function(){
-            if(self.wantsSpam() == true){
-                alert('I want Spam!')}
-            else{
-                alert('I dont want Spam!')
-            }
-        }
-
-    }
 
     function sleep(delay) {
         var start = new Date().getTime();
         while (new Date().getTime() < start + delay);
     }
+
+
 </script>

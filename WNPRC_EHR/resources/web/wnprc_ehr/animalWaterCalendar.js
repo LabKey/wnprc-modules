@@ -72,7 +72,8 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
                 partName: 'Water Calendar',
                 renderTo: id,
                 //partConfig: {animalIds : concatAnimals,numberOfRenders: calendarRender}
-                partConfig: objectConfig
+                partConfig: objectConfig,
+                supressRenderErrors: true
             });
 
 
@@ -80,7 +81,7 @@ EHR.reports.animalWaterCalendar = function (panel, tab){
 
             // We know the height of the component, so just set it explicitly instead of making ExtJS get the layout
             // and sizing correct
-            tab.setHeight(800);
+            tab.setHeight(1000);
         }
 
 

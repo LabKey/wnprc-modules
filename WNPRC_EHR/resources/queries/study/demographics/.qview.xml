@@ -17,6 +17,7 @@
         <column name="dam"/>
         <column name="sire"/>
         <column name="origin"/>
+        <column name="vendor_id"/>
         <column name="geographic_origin"/>
         <column name="ancestry"/>
         <column name="Id/age/AgeFriendly">

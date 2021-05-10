@@ -57,6 +57,35 @@
     SimpleQuery futureWaters = queryFactory.makeQuery("study", "waterScheduleCoalesced");
     List<JSONObject> waterList = JsonUtils.getListFromJSONArray(futureWaters.getResults().getJSONArray("rows"));
 
+    //SimpleQuery waterAccessControlled = queryFactory.selectRows("wnprc", "watermonitoring_access");
+    List<JSONObject> waterAccess = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "watermonitoring_access"));
+
+    JSONObject userAccessWater = new JSONObject();
+
+    for(JSONObject json : waterAccess){
+        CaseInsensitiveHashMap<String> map = new CaseInsensitiveHashMap(json);
+
+        String allowUser = String.valueOf(map.get("alloweduser"));
+        if (userAccessWater.isNull(allowUser)){
+            if (map.get("project") != null){
+                JSONArray projectList = new JSONArray();
+                projectList.put(map.get("project"));
+                userAccessWater.put(allowUser, projectList);
+            }
+        }else {
+            if (map.get("project") != null)
+            {
+                JSONArray projectList = userAccessWater.getJSONArray(allowUser);
+                projectList.put(map.get("project"));
+            }
+
+        }
+
+
+    }
+    String userid = String.valueOf(getUser().getUserId());
+    boolean isAdmin =  getUser().isInSiteAdminGroup();
+
     JSONObject husbandryAssignmentLookup = new JSONObject();
     List<JSONObject> husbandryAssigned = JsonUtils.getListFromJSONArray(queryFactory.selectRows("ehr_lookups", "husbandry_assigned"));
 

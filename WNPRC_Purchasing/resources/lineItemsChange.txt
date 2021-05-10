@@ -1,0 +1,52 @@
+<html>
+<body>
+<div>
+    <p>Your purchase request ^requestNum^ from vendor ^vendor^ submitted on ^created^ has been modified.</p>
+    <br>
+    Updated line items:
+    <br>
+</div>
+<table width="500px">
+    <tr>
+        <td valign="top"><b>Item id</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Description</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Unit cost</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Quantity</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Quantity received</b></td>
+    </tr>
+    ^updatedLineItems^
+</table>
+
+<div>
+    <br>
+    Previously saved line items:
+    <br>
+</div>
+<table width="500px">
+    <tr>
+        <td valign="top"><b>Item id</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Description</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Unit cost</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Quantity</b></td>
+    </tr>
+    <tr>
+        <td valign="top"><b>Quantity received</b></td>
+    </tr>
+    ^oldLineItems^
+</table>
+</body>
+</html>

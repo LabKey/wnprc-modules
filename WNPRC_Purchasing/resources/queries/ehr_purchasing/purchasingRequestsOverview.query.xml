@@ -16,7 +16,6 @@
                         <fk>
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>vendor</fkTable>
-                            <fkDisplayColumnName useRawValue="false"/>
                         </fk>
                     </column>
                     <column columnName="account">
@@ -32,7 +31,6 @@
                         <fk>
                             <fkDbSchema>core</fkDbSchema>
                             <fkTable>QCState</fkTable>
-                            <fkDisplayColumnName useRawValue="false"/>
                         </fk>
                     </column>
                     <column columnName="OtherAcctAndInves"/>

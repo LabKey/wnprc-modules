@@ -9,19 +9,18 @@ import java.util.List;
 public class NewRequestEmailTemplate  extends EmailTemplate
 {
     protected static final String DEFAULT_SUBJECT = "A new purchase request for ^total^ is submitted";
-    protected static final String DEFAULT_DESCRIPTION = "New request notification";
-    protected static final String NAME = "New request notification ";
+    protected static final String DEFAULT_DESCRIPTION = "WNPRC Purchasing - New request notification";
+    protected static final String NAME = "WNPRC Purchasing - New request notification ";
     protected static final String DEFAULT_BODY = "A new purchasing request ^requestNum^ " +
             "by ^requester^ was submitted on ^created^ for the total of ^total^.\n";
 
     private final List<ReplacementParam> _replacements = new ArrayList<>();
     private WNPRC_PurchasingController.EmailTemplateForm _notificationBean;
 
-    public NewRequestEmailTemplate(WNPRC_PurchasingController.EmailTemplateForm notificationBean)
+    public NewRequestEmailTemplate()
     {
         super(NAME, DEFAULT_SUBJECT, DEFAULT_BODY, DEFAULT_DESCRIPTION);
         setEditableScopes(EmailTemplate.Scope.SiteOrFolder);
-        _notificationBean = notificationBean;
 
         _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number")
         {
@@ -54,6 +53,11 @@ public class NewRequestEmailTemplate  extends EmailTemplate
         });
 
         _replacements.addAll(super.getValidReplacements());
+    }
+
+    public void setNotificationBean(WNPRC_PurchasingController.EmailTemplateForm notificationBean)
+    {
+        _notificationBean = notificationBean;
     }
 
     @Override

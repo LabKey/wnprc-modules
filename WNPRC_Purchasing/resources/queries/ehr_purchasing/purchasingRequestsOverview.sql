@@ -1,10 +1,10 @@
 -- this is the query that displays on the requesters page
 SELECT
        pr.rowId,
-       pr.vendorId.vendorName AS vendor,
+       pr.vendorId AS vendor,
        pr.account,
        pr.otherAcctAndInves,
-       pr.qcState.Label   AS requestStatus,
+       pr.qcState   AS requestStatus,
        pr.created   AS requestDate,
        pr.orderDate,
        pr.createdBy AS requester,

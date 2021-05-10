@@ -8,21 +8,19 @@ import java.util.List;
 
 public class RequestStatusChangeEmailTemplate extends EmailTemplate
 {
-    protected static final String DEFAULT_SUBJECT = "Purchase request no. ^requestNum^ has been updated";
+    protected static final String DEFAULT_SUBJECT = "Purchase request no. ^requestNum^ status update";
     protected static final String DEFAULT_DESCRIPTION = "Request status change notification";
-    protected static final String NAME = "Request status change notification";
+    protected static final String NAME = "WNPRC Purchasing - Request status change notification";
     protected static final String DEFAULT_BODY = "Your purchase request ^requestNum^ from vendor ^vendor^" +
             " submitted on ^created^ for the total of ^total^ has been ^status^ by the purchasing department.\n";
 
-    protected static final String DEFAULT_BODY_PLUS_ORDER_PLACED = DEFAULT_BODY + " The order was placed on ^orderDate^.";
     private final List<ReplacementParam> _replacements = new ArrayList<>();
     private WNPRC_PurchasingController.EmailTemplateForm _notificationBean;
 
-    public RequestStatusChangeEmailTemplate(WNPRC_PurchasingController.EmailTemplateForm notificationBean)
+    public RequestStatusChangeEmailTemplate()
     {
-        super(NAME, DEFAULT_SUBJECT, (notificationBean.getRequestStatus().equalsIgnoreCase("order placed") ? DEFAULT_BODY_PLUS_ORDER_PLACED : DEFAULT_BODY), DEFAULT_DESCRIPTION);
+        super(NAME, DEFAULT_SUBJECT, DEFAULT_BODY, DEFAULT_DESCRIPTION);
         setEditableScopes(Scope.SiteOrFolder);
-        _notificationBean = notificationBean;
 
         _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number")
         {
@@ -41,6 +39,8 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             @Override
             public String getValue(Container c)
             {
+                if (_notificationBean == null)
+                    return null;
                 if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))
                     return "rejected";
                 if (_notificationBean.getRequestStatus().equalsIgnoreCase("Order Placed"))
@@ -68,6 +68,11 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
         });
 
         _replacements.addAll(super.getValidReplacements());
+    }
+
+    public void setNotificationBean(WNPRC_PurchasingController.EmailTemplateForm notificationBean)
+    {
+        _notificationBean = notificationBean;
     }
 
     @Override

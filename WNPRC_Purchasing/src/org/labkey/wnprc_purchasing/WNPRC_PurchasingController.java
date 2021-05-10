@@ -17,12 +17,19 @@
 package org.labkey.wnprc_purchasing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.notification.NotificationService;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -30,9 +37,7 @@ import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.SecurityManager;
@@ -52,14 +57,17 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
@@ -133,6 +141,31 @@ public class WNPRC_PurchasingController extends SpringActionController
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
+            //get old line items to compare the difference with new incoming changes
+            List<LineItem> oldLineItems = null;
+            if (requestForm.getRowId() != null)
+            {
+                TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("lineItems", null);
+                Filter filter = new SimpleFilter(FieldKey.fromString("requestRowId"), requestForm.getRowId());
+                TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
+                oldLineItems = tableSelector.getArrayList(LineItem.class);
+            }
+
+            //get old status to compare the difference with new status change
+            String oldStatusVal = "";
+            if (requestForm.getRowId() != null)
+            {
+                TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("purchasingRequests", null);
+                Filter filter = new SimpleFilter(FieldKey.fromString("rowId"), requestForm.getRowId());
+                Set<FieldKey> columns = new HashSet<>();
+                columns.add(FieldKey.fromString("rowId"));
+                columns.add(FieldKey.fromString("qcState/Label"));
+                final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(tableInfo, columns);
+                TableSelector tableSelector = new TableSelector(tableInfo, colMap.values(), filter, null);
+                oldStatusVal = String.valueOf(tableSelector.getMap().get("qcstate_fs_label"));
+
+            }
+
             List<ValidationException> validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
 
             if (validationExceptions.size() > 0)
@@ -142,13 +175,14 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             EmailTemplateForm emailTemplateForm = getValuesForEmailTemplate(requestForm);
 
+            //if its a new request
             if (null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest())
             {
                 sendNewRequestEmailNotification(emailTemplateForm);
             }
             else
             {
-                sendChangeRequestEmailNotification(emailTemplateForm);
+                sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
             }
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
@@ -157,23 +191,27 @@ public class WNPRC_PurchasingController extends SpringActionController
             return response;
         }
 
-        private void sendChangeRequestEmailNotification(EmailTemplateForm emailTemplateForm) throws MessagingException, IOException, ValidationException
+        private void sendRequestChangeEmailNotification(String oldStatus, EmailTemplateForm emailTemplateForm, RequestForm requestForm, @Nullable List<LineItem> oldLineItems) throws MessagingException, IOException, ValidationException
         {
+            List<User> labEndUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(InsertPermission.class));
+
             //request status change email notification
-            if (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") || emailTemplateForm.getRequestStatus().equalsIgnoreCase("Order Placed"))
+            if ((StringUtils.isBlank(oldStatus) || !emailTemplateForm.getRequestStatus().equalsIgnoreCase(oldStatus))
+                    && (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected")
+                        || emailTemplateForm.getRequestStatus().equalsIgnoreCase("Order Placed"))
+               )
             {
-                RequestStatusChangeEmailTemplate requestEmailTemplate = new RequestStatusChangeEmailTemplate(emailTemplateForm);
+                RequestStatusChangeEmailTemplate requestEmailTemplate = new RequestStatusChangeEmailTemplate();
+                requestEmailTemplate.setNotificationBean(emailTemplateForm);
                 String emailSubject = requestEmailTemplate.renderSubject(getContainer());
                 String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-                ActionURL requesterViewUrl = new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer());
+                ActionURL requesterViewUrl = new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer()); //TODO change url to actual form
 
-                List<User> labEndUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(InsertPermission.class));
-
-                //send emails to lab end users
+                //send email to lab end user who originated the request
                 for (User user : labEndUsers)
                 {
-                    if (!getContainer().hasPermission(user, AdminPermission.class))
+                    if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
                     {
                         NotificationService.get().sendMessageForRecipient(
                                 getContainer(), UserManager.getUser(getUser().getUserId()), user,
@@ -182,13 +220,55 @@ public class WNPRC_PurchasingController extends SpringActionController
                     }
                 }
             }
+            else
+            {
+                if (oldLineItems != null)
+                {
+                    //identify line item changes
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<LineItem> incomingLineItems = mapper.readValue(requestForm.getLineItems().toString(), new TypeReference<ArrayList<LineItem>>(){});
+
+                    //deleted rows
+                    List<LineItem> removed = oldLineItems.stream().filter(o1 -> incomingLineItems.stream().noneMatch(o2 -> o2.getRowId() == o1.getRowId())).collect(Collectors.toList());
+
+                    //newly added rows and modified existing rows
+                    List<LineItem> changed = incomingLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o2.equals(o1))).collect(Collectors.toList());
+
+                    if (removed.size() > 0 || changed.size() > 0)
+                    {
+                        LineItemChangeEmailTemplate lineItemChangeEmailTemplate = new LineItemChangeEmailTemplate();
+                        lineItemChangeEmailTemplate.setUpdatedLineItemsList(incomingLineItems);
+                        lineItemChangeEmailTemplate.setOldLineItemsList(oldLineItems);
+                        lineItemChangeEmailTemplate.setNotificationBean(emailTemplateForm);
+                        String emailSubject = lineItemChangeEmailTemplate.renderSubject(getContainer());
+                        String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer());
+
+                        ActionURL requesterViewUrl = new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer()); //TODO change url to actual form
+
+                        //send email to lab end user who originated the request
+                        for (User user : labEndUsers)
+                        {
+                            if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
+                            {
+                                NotificationService.get().sendMessageForRecipient(
+                                        getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                        emailSubject, emailBody,
+                                        requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Line Item changes");
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void sendNewRequestEmailNotification(EmailTemplateForm emailTemplateForm) throws MessagingException, IOException, ValidationException
         {
-            NewRequestEmailTemplate requestEmailTemplate = new NewRequestEmailTemplate(emailTemplateForm);
+            NewRequestEmailTemplate requestEmailTemplate = new NewRequestEmailTemplate();
+            requestEmailTemplate.setNotificationBean(emailTemplateForm);
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
+
+            //TODO change url to actual form
             ActionURL detailsUrl = new ActionURL("query", "executeQuery", getContainer());
             detailsUrl.addParameter("schemaName", "ehr_purchasing");
             detailsUrl.addParameter("query.queryName", "purchasingRequestsOverviewForAdmins");
@@ -204,7 +284,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                 //get folder admin users
                 List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
 
-                //send emails to admin users
+                //send emails to ALL folder admins
                 for (User user : adminUsers)
                 {
                     NotificationService.get().sendMessageForRecipient(
@@ -215,15 +295,14 @@ public class WNPRC_PurchasingController extends SpringActionController
             }
         }
 
-        private EmailTemplateForm getValuesForEmailTemplate(RequestForm requestForm) throws QueryUpdateServiceException, InvalidKeyException, SQLException
+        private EmailTemplateForm getValuesForEmailTemplate(RequestForm requestForm)
         {
-            TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("purchasingRequestsOverview", null);
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("rowId"), requestForm.getRowId());
+            TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("purchasingRequestsOverviewForEmailTemplate", null);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("requestNum"), requestForm.getRowId());
             TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
-
             EmailTemplateForm emailTemplateForm = new EmailTemplateForm();
             Map<String, Object> map = tableSelector.getMap();
-            emailTemplateForm.setRowId((Integer) map.get("rowid"));
+            emailTemplateForm.setRowId((Integer) map.get("requestNum"));
             emailTemplateForm.setVendor((String) map.get("vendor"));
             emailTemplateForm.setRequester(UserManager.getUser((Integer) map.get("requester")));
             emailTemplateForm.setRequestDate((Date) map.get("requestdate"));
@@ -235,6 +314,130 @@ public class WNPRC_PurchasingController extends SpringActionController
             }
 
             return emailTemplateForm;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    public static class LineItem
+    {
+        @JsonProperty("rowId")
+        int _rowId;
+
+        @JsonProperty("requestRowId")
+        int _requestRowId;
+
+        @JsonProperty("item")
+        String _item;
+
+        @JsonProperty("itemUnit")
+        int _itemUnitId;
+
+        @JsonProperty("controlledSubstance")
+        boolean _controlledSubstance;
+
+        @JsonProperty("quantity")
+        double _quantity;
+
+        @JsonProperty("quantityReceived")
+        double _quantityReceived;
+
+        @JsonProperty("unitCost")
+        double _unitCost;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            LineItem that = (LineItem) o;
+            return  this.getRowId() == that.getRowId() &&
+                    this.getRequestRowId() == that.getRequestRowId() &&
+                    this.getItem().equals(that.getItem()) &&
+                    this.getItemUnitId() == that.getItemUnitId()&&
+                    this.getControlledSubstance() == that.getControlledSubstance() &&
+                    this.getQuantity() == that.getQuantity() &&
+                    this.getQuantityReceived() == that.getQuantityReceived() &&
+                    this.getUnitCost() == that.getUnitCost();
+        }
+
+        public int getRowId()
+        {
+            return _rowId;
+        }
+
+        public void setRowId(int rowId)
+        {
+            _rowId = rowId;
+        }
+
+        public int getRequestRowId()
+        {
+            return _requestRowId;
+        }
+
+        public void setRequestRowId(int requestRowId)
+        {
+            _requestRowId = requestRowId;
+        }
+
+        public String getItem()
+        {
+            return _item;
+        }
+
+        public void setItem(String item)
+        {
+            _item = item;
+        }
+
+        public int getItemUnitId()
+        {
+            return _itemUnitId;
+        }
+
+        public void setItemUnitId(int itemUnitId)
+        {
+            _itemUnitId = itemUnitId;
+        }
+
+        public boolean getControlledSubstance()
+        {
+            return _controlledSubstance;
+        }
+
+        public void setControlledSubstance(boolean controlledSubstance)
+        {
+            _controlledSubstance = controlledSubstance;
+        }
+
+        public double getQuantity()
+        {
+            return _quantity;
+        }
+
+        public void setQuantity(double quantity)
+        {
+            _quantity = quantity;
+        }
+
+        public double getQuantityReceived()
+        {
+            return _quantityReceived;
+        }
+
+        public void setQuantityReceived(double quantityReceived)
+        {
+            _quantityReceived = quantityReceived;
+        }
+
+        public double getUnitCost()
+        {
+            return _unitCost;
+        }
+
+        public void setUnitCost(double unitCost)
+        {
+            _unitCost = unitCost;
         }
     }
 
@@ -696,71 +899,6 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setIsNewRequest(Boolean newRequest)
         {
             _isNewRequest = newRequest;
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown=true)
-    public static class LineItem
-    {
-        String _item;
-        Boolean _controlledSubstance;
-        String _itemUnit;
-        Number _quantity;
-        Number _unitCost;
-
-        public String getItem()
-        {
-            return _item;
-        }
-
-        public void setItem(String item)
-        {
-            _item = item;
-        }
-
-        public Boolean isControlledSubstance()
-        {
-            return _controlledSubstance;
-        }
-
-        public void setControlledSubstance(Boolean controlledSubstance)
-        {
-            _controlledSubstance = controlledSubstance;
-        }
-
-        public String getItemUnit()
-        {
-            return _itemUnit;
-        }
-
-        public void setItemUnit(String itemUnit)
-        {
-            _itemUnit = itemUnit;
-        }
-
-        public Boolean getControlledSubstance()
-        {
-            return _controlledSubstance;
-        }
-
-        public Number getQuantity()
-        {
-            return _quantity;
-        }
-
-        public void setQuantity(Number quantity)
-        {
-            _quantity = quantity;
-        }
-
-        public Number getUnitCost()
-        {
-            return _unitCost;
-        }
-
-        public void setUnitCost(Number unitCost)
-        {
-            _unitCost = unitCost;
         }
     }
 

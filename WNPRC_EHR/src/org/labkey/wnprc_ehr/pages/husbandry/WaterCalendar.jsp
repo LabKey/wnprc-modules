@@ -446,19 +446,15 @@
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
         };
 
-        var previousCalendarEvent;
-        var previousCalendarColor;
-
-        var husbandryAssignmentLookup = <%= husbandryAssignmentLookup.toString() %>;
+        var husbandryAssignmentLookup = "<%= husbandryAssignmentLookup.toString() %>";
         WebUtils.VM.husbandryAssignmentLookup = husbandryAssignmentLookup;
         var $animalId = "<%= animalIds %>";
         var $numberOfRenders = "<%= numberOfRenders %>";
 
-        var userId = <%= userid.toString() %>;
-        console.log (userId);
-        let isAdmin = <%= isAdmin %>;
+        var userId = "<%= userid.toString() %>";
+        let isAdmin = "<%= isAdmin %>";
 
-        var waterAccessControlled = <%= userAccessWater.toString() %>;
+        var waterAccessControlled = "<%= userAccessWater.toString() %>";
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
         let $allowProjects;
         let firstEntry = true;
@@ -686,21 +682,6 @@
                 }
                 info.event.setExtendedProp("selected",true);
                 selectedEvent = info.event;
-
-                /*$('#waterInfo').attr('disabled', 'disabled');
-                    $('#enterWaterOrder').attr('disabled', 'disabled');
-                    $('#waterInfo').text('Enter Single Day Water');
-                    document.getElementById("modelServerResponse").innerHTML = "";
-                    $('#waterInfoPanel').unblock();
-
-                    if (previousCalendarEvent){
-                        previousCalendarEvent.color = previousCalendarColor;
-                        //$calendar.fullCalendar('updateEvent', previousCalendarEvent )
-                    }
-                    previousCalendarEvent = selectedEvent;
-                    previousCalendarColor = selectedEvent.color;
-                    event.setProp('backgroundColor','#848484');*/
-                   // $calendar.fullCalendar('updateEvent', info.event )
 
 
                     var momentDate;

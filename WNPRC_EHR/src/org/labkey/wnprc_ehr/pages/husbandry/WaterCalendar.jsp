@@ -38,20 +38,6 @@
     }
 %>
 
-
-<%--Uncommenting this section brings the undefined to the calendar view
-DO NOT UNCOMMENT --%>
-<%--<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.0/fullcalendar.min.css' />
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.0/fullcalendar.min.js'></script>
-<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js'></script>
-<script src= 'https://unpkg.com/popper.js/dist/umd/popper.min.js'></script>
-<script src= 'https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js'></script>--%>
-<%--<script src= '/labkey/webutils/lib/ko/core/knockout-3.4.0.js' type="text/javascript"></script>--%>
-<%--<script src= '/labkey/webutils/lib/webutils_core/api.js' type="text/javascript"></script>--%>
-<%--<script src= '/WebUtils/src/org/labkey/webutils/view/JspPage.jsp' type="text/jsp"></script>--%>
-
-
-
 <%
     String animalIds = request.getParameter("animalIds");
     String numberOfRenders = request.getParameter("numberOfRenders");
@@ -468,11 +454,11 @@ DO NOT UNCOMMENT --%>
         var $animalId = "<%= animalIds %>";
         var $numberOfRenders = "<%= numberOfRenders %>";
 
-        var userId = <%=userid.toString() %>;
+        var userId = <%= userid.toString() %>;
         console.log (userId);
-        let isAdmin = <%=isAdmin%>;
+        let isAdmin = <%= isAdmin %>;
 
-        var waterAccessControlled = <%=userAccessWater.toString() %>;
+        var waterAccessControlled = <%= userAccessWater.toString() %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
         let $allowProjects;
         let firstEntry = true;

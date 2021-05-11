@@ -107,8 +107,6 @@
 
     //List<JSONObject> husbandryFrequency = JsonUtils.getListFromJSONArray(queryFactory.selectRows("ehr_lookups", "husbandry_frequency"));
 
-
-
 %>
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
@@ -475,7 +473,7 @@
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
         };
 
-        var husbandryAssignmentLookup = "<%= husbandryAssignmentLookup.toString() %>";
+        var husbandryAssignmentLookup = <%= husbandryAssignmentLookup.toString() %>;
         WebUtils.VM.husbandryAssignmentLookup = husbandryAssignmentLookup;
         var $animalId = "<%= animalIds %>";
         var $numberOfRenders = "<%= numberOfRenders %>";
@@ -483,7 +481,7 @@
         var userId = "<%= userid.toString() %>";
         let isAdmin = "<%= isAdmin %>";
 
-        var waterAccessControlled = "<%= userAccessWater.toString() %>";
+        var waterAccessControlled = <%= userAccessWater.toString() %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
         let $allowProjects;
         let firstEntry = true;
@@ -555,6 +553,7 @@
                                             allDay: true,
                                              //vol: row.volume,
                                             rawRowData: row,
+                                            textColor: '#000000',
                                             //editable: true,
                                             description: 'Water for animal ' + row.animalId
                                         };
@@ -602,6 +601,7 @@
                                             title: row.animalId + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
+                                            textColor: '#ff0000',
                                             // vol: row.volume,
                                             rawRowData: row,
                                             //editable: true,
@@ -637,6 +637,7 @@
                                     title: row.animalId + " Total: " + row.TotalWater,
                                     start: row.Date,
                                     allDay: true,
+                                    textColor: '#ff0000',
                                     rawRowData: row
                                 };
 
@@ -790,7 +791,6 @@
                 frequencyCoalesced:         ko.observable(),
                 frequencyMeaningCoalesced:  ko.observable(),
                 rawDate:                    ko.observable()
-
             },
             form: ko.mapping.fromJS({
                 lsid:           '',

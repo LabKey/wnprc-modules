@@ -170,7 +170,6 @@
 
         // Use a try block to ensure that we always show the hidden div.
         try {
-            debugger;
             if ($numberOfRenders == 0){
                 ko.applyBindings(WebUtils.VM);
             }else{

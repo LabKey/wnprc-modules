@@ -47,8 +47,9 @@ function getQCState(purchasingAdminModel: PurchaseAdminModel, requestOrder: Requ
         return qcState.label === 'Order Complete';
     });
 
-    // if 'order complete' state is set, return
-    if (completeState?.[0]?.rowId === qcState) {
+    // if 'order complete' state is set, return.
+    // Note: using double equals instead of triple to perform type coercion, qcState value is with "", and rowId value is without.
+    if (completeState?.[0]?.rowId == qcState) {
         return qcState;
     }
 

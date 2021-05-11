@@ -3,6 +3,7 @@ package org.labkey.wnprc_purchasing;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.emailTemplate.EmailTemplate;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +12,8 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     protected static final String DEFAULT_SUBJECT = "Purchase request no. ^requestNum^ status update";
     protected static final String DEFAULT_DESCRIPTION = "Request status change notification";
     protected static final String NAME = "WNPRC Purchasing - Request status change notification";
-    protected static final String DEFAULT_BODY = "Your purchase request ^requestNum^ from vendor ^vendor^" +
-            " submitted on ^created^ for the total of ^total^ has been ^status^ by the purchasing department.\n";
+    protected static final String DEFAULT_BODY = "Purchase request no. ^requestNum^ from vendor ^vendor^" +
+            " submitted on ^created^ for the total of ^total^ has been ^status^ by the ^role^.\n";
 
     private final List<ReplacementParam> _replacements = new ArrayList<>();
     private WNPRC_PurchasingController.EmailTemplateForm _notificationBean;
@@ -45,6 +46,8 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
                     return "rejected";
                 if (_notificationBean.getRequestStatus().equalsIgnoreCase("Order Placed"))
                     return "ordered";
+                if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved"))
+                    return "approved";
                 return _notificationBean.getRequestStatus();
             }
         });
@@ -65,6 +68,23 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
         {
             @Override
             public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();}
+        });
+
+        _replacements.add(new ReplacementParam<String>("role", String.class, "Purchasing dept or purchasing director")
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null)
+                {
+                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0)
+                    {
+                        return "purchasing director";
+                    }
+                    return "purchasing department";
+                }
+                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
+            }
         });
 
         _replacements.addAll(super.getValidReplacements());

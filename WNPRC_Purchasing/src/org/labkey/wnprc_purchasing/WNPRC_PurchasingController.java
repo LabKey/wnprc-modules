@@ -40,6 +40,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RoleAssignment;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
@@ -47,6 +48,7 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.security.roles.Role;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
@@ -63,6 +65,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -197,8 +200,9 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             //request status change email notification
             if ((StringUtils.isBlank(oldStatus) || !emailTemplateForm.getRequestStatus().equalsIgnoreCase(oldStatus))
-                    && (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected")
-                        || emailTemplateForm.getRequestStatus().equalsIgnoreCase("Order Placed"))
+                    && (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
+                        emailTemplateForm.getRequestStatus().equalsIgnoreCase("Order Placed") ||
+                        emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved"))
                )
             {
                 RequestStatusChangeEmailTemplate requestEmailTemplate = new RequestStatusChangeEmailTemplate();
@@ -206,17 +210,50 @@ public class WNPRC_PurchasingController extends SpringActionController
                 String emailSubject = requestEmailTemplate.renderSubject(getContainer());
                 String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-                ActionURL requesterViewUrl = new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer()); //TODO change url to actual form
-
-                //send email to lab end user who originated the request
-                for (User user : labEndUsers)
+                //request over 5000k is approved or rejected - send notif to purchase admins
+                ActionURL requesterViewUrl = new ActionURL(RequesterAction.class, getContainer()); //TODO change url to actual form
+//TODO change url to actual form
+                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0 &&
+                        (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
+                        emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved")))
                 {
-                    if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
+                    //identify purchasing dir userId
+                    Map<Integer, String> purchasingDirUserIds = new HashMap<>();
+                    for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
                     {
-                        NotificationService.get().sendMessageForRecipient(
-                                getContainer(), UserManager.getUser(getUser().getUserId()), user,
-                                emailSubject, emailBody,
-                                requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Request status change");
+                        if (roleAssignment.getRole().getName().equals("WNPRC Purchasing Director"))
+                        {
+                            purchasingDirUserIds.put(roleAssignment.getUserId(), roleAssignment.getRole().getName());
+                        }
+                    }
+                    //get folder admin users
+                    List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
+
+                    //send emails to admins minus purchasing director
+                    for (User user : adminUsers)
+                    {
+                        if (!purchasingDirUserIds.containsKey(user.getUserId()))
+                        {
+                            NotificationService.get().sendMessageForRecipient(
+                                    getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                    emailSubject, emailBody,
+                                    requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Request approved or rejected status");
+                        }
+                    }
+                }
+                else
+                {
+
+                    //send email to lab end user who originated the request
+                    for (User user : labEndUsers)
+                    {
+                        if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
+                        {
+                            NotificationService.get().sendMessageForRecipient(
+                                    getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                    emailSubject, emailBody,
+                                    requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Request status change");
+                        }
                     }
                 }
             }
@@ -275,9 +312,20 @@ public class WNPRC_PurchasingController extends SpringActionController
             detailsUrl.addParameter("query.viewName", "AllOpenRequests");
             detailsUrl.addParameter("query.requestNum~eq", emailTemplateForm.getRowId());
 
-            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) == 1)
+            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0)
             {
-                //get purchase director user
+                for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
+                {
+                    //send emails to purchasing director(s)
+                    if (roleAssignment.getRole().getName().equals("WNPRC Purchasing Director"))
+                    {
+                        User user = UserManager.getUser(roleAssignment.getUserId());
+                        NotificationService.get().sendMessageForRecipient(
+                                getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                emailSubject, emailBody,
+                                detailsUrl, String.valueOf(emailTemplateForm.getRowId()), "New request over 5000k");
+                    }
+                }
             }
             else
             {

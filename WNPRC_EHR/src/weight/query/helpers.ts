@@ -107,7 +107,7 @@ export const getlocations = (location:Array<any>): Array<Promise<any>> => {
       schemaName: "study",
       queryName: "demographicsCurLocation",
       columns: ["Id,location"],
-      sort: "Id",
+      sort: "location",
       filterArray: [
         Filter.create(
           "location",

@@ -86,7 +86,7 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                 <Col xs={1}>Unit Cost ($) *</Col>
                             }
                             <Col xs={1}>Quantity *</Col>
-                            { hasRequestId && (isAdmin || canUpdate) &&
+                            { (hasRequestId && (isAdmin || canUpdate || (canInsert && !isAdmin))) &&
                                 <Col xs={1}>Quantity received</Col>
                             }
                             { (isAdmin || !canUpdate) &&
@@ -117,7 +117,7 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                 <div>
                                     <Row>
                                         <Col xs={6}></Col>
-                                        {hasRequestId && (isAdmin || canUpdate) &&
+                                        {hasRequestId &&
                                             <Col xs={1}></Col>
                                         }
                                         <Col xs={1}></Col>
@@ -128,13 +128,17 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                         </Col>
                                     </Row>
                                 </div>
-                                <div className="add-item">
-                                    <span id="add-line-item-row" title="Add item" className="add-item-icon"
-                                          onClick={onClickAddRow}>
-                                    <FontAwesomeIcon className="fa-faPlusCircle" icon={faPlusCircle} color="green"/> Add item
-                                    </span>
-                                </div>
-                                {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+                                {(isAdmin || (!hasRequestId && canInsert && !isAdmin)) && (
+                                    <>
+                                    <div className="add-item">
+                                        <span id="add-line-item-row" title="Add item" className="add-item-icon"
+                                              onClick={onClickAddRow}>
+                                        <FontAwesomeIcon className="fa-faPlusCircle" icon={faPlusCircle} color="green"/> Add item
+                                        </span>
+                                    </div>
+                                    {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+                                    </>
+                                )}
                             </>
                         )
                     }

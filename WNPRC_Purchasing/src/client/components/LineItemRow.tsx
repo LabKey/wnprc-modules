@@ -59,21 +59,21 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             value={model.item}
                             hasError={model.errors?.find(field => field.fieldName === 'item')}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}
+                            isReadOnly={(!isAdmin && canUpdate) || (hasRequestId && canInsert && !isAdmin)}
                         />
                     </Col>
                     <Col xs={1}>
                         <ControlledSubstance
                             value={model.controlledSubstance}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}/>
+                            isReadOnly={(!isAdmin && canUpdate) || (hasRequestId && canInsert && !isAdmin)}/>
                     </Col>
                     <Col xs={1}>
                         <UnitInput
                             value={model.itemUnit}
                             hasError={model.errors?.find(field => field.fieldName === 'itemUnit')}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}
+                            isReadOnly={(!isAdmin && canUpdate) || (hasRequestId && canInsert && !isAdmin)}
                         />
                     </Col>
                     { (isAdmin || !canUpdate) &&
@@ -82,6 +82,7 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                                     value={model.unitCost}
                                     hasError={model.errors?.find(field => field.fieldName === 'unitCost')}
                                     onChange={onValueChange}
+                                    isReadOnly={hasRequestId && canInsert && !isAdmin}
                             />
                         </Col>
                     }
@@ -90,15 +91,16 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             value={model.quantity}
                             hasError={model.errors?.find(field => field.fieldName === 'quantity')}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}
+                            isReadOnly={(!isAdmin && canUpdate) || (hasRequestId && canInsert && !isAdmin)}
                         />
                     </Col>
-                    { hasRequestId && (isAdmin || canUpdate) &&
+                    { hasRequestId && ((isAdmin || canUpdate) || (canInsert && !isAdmin)) &&
                     <Col xs={1}>
                         <QuantityReceivedInput
                                 value={model.quantityReceived}
                                 hasError={model.errors?.find(field => field.fieldName === 'quantityReceived')}
                                 onChange={onValueChange}
+                                isReadOnly={hasRequestId && !canUpdate && canInsert && !isAdmin}
                         />
                     </Col>
                     }
@@ -113,7 +115,7 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                     { !hasRequestId &&
                         <Col xs={2}/>
                     }
-                    {(isAdmin || !canUpdate) &&
+                    {(isAdmin || (!hasRequestId && canInsert && !isAdmin)) &&
                         <Col xs={1}>
                                 <span
                                         id={'delete-line-item-row-' + rowIndex}

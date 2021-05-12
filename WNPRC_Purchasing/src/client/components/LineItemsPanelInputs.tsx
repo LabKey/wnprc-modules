@@ -77,7 +77,7 @@ interface NumericInputProps {
 }
 
 export const UnitCostInput: FC<NumericInputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
 
     const onValueChange = useCallback(
         evt => {
@@ -94,6 +94,7 @@ export const UnitCostInput: FC<NumericInputProps> = memo(props => {
             id="unit-cost-id"
             pattern="[0-9]*"
             type="number"
+            disabled={isReadOnly}
         />
     );
 });
@@ -122,7 +123,7 @@ export const UnitQuantityInput: FC<NumericInputProps> = memo(props => {
 });
 
 export const QuantityReceivedInput: FC<NumericInputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
 
     const onValueChange = useCallback(
         evt => {
@@ -139,6 +140,7 @@ export const QuantityReceivedInput: FC<NumericInputProps> = memo(props => {
             pattern="[0-9]*"
             id="quantity-received-id"
             type="number"
+            disabled={isReadOnly}
         />
     );
 });

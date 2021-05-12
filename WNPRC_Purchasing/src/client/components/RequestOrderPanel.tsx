@@ -20,10 +20,12 @@ interface Props {
     onInputChange: (model: RequestOrderModel) => void;
     isAdmin: boolean;
     canUpdate: boolean;
+    canInsert: boolean;
+    hasRequestId?: boolean;
 }
 
 export const RequestOrderPanel: FC<Props> = memo(props => {
-    const { model, onInputChange, isAdmin, canUpdate } = props;
+    const { model, onInputChange, isAdmin, canUpdate, canInsert, hasRequestId } = props;
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
@@ -63,7 +65,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
 
     return (
         <>
-        { !isAdmin && canUpdate && (
+        { ((!isAdmin && canUpdate) || (hasRequestId && !canUpdate && !isAdmin)) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}
@@ -76,15 +78,29 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                     </div>
                     <Form className="form-margin">
                         <Row>
+                            { (hasRequestId && !canUpdate && !isAdmin) && (
+                                <Col xs={11} lg={6}>
+                                    <AccountInput
+                                        value={model.account}
+                                        isReadOnly={true}
+                                    />
+                                    {(showOtherAcct || model.account === 'Other') && (
+                                        <AccountOtherInput
+                                            value={model.otherAcctAndInves}
+                                            isReadOnly={true}
+                                        />
+                                    )}
+                                </Col>
+                            )}
                             <Col xs={11} lg={6}>
-                                <VendorInput
-                                    model={model}
+                                <ShippingDestinationInput
+                                    value={model.shippingInfoId}
                                     isReadOnly={true}
                                 />
                             </Col>
                             <Col xs={11} lg={6}>
-                                <ShippingDestinationInput
-                                    value={model.shippingInfoId}
+                                <VendorInput
+                                    model={model}
                                     isReadOnly={true}
                                 />
                             </Col>
@@ -94,6 +110,14 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                     isReadOnly={true}
                                 />
                             </Col>
+                            { (hasRequestId && !canUpdate && !isAdmin) && (
+                                <Col xs={11} lg={6}>
+                                    <BusinessPurposeInput
+                                        value={model.justification}
+                                        isReadOnly={true}
+                                    />
+                                </Col>
+                            )}
                             <Col xs={11} lg={6}>
                                 <SpecialInstructionInput
                                     value={model.comments}
@@ -105,7 +129,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                 </Panel>
             )
         }
-        { (isAdmin || !canUpdate) && (
+        { (isAdmin || (!hasRequestId && canInsert && !isAdmin)) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}

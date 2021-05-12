@@ -449,7 +449,7 @@ export const App: FC = memo(() => {
                         {!isSaving && (
                             <>
                                 <button
-                                    disabled={requestId && hasPurchasingInsertPermission && !hasPurchasingAdminPermission}
+                                    disabled={requestId && !hasPurchasingUpdatePermission}
                                     className="btn btn-primary pull-right"
                                     id={requestId ? 'save' : 'submitForReview'}
                                     name={requestId ? 'save' : 'submitForReview'}

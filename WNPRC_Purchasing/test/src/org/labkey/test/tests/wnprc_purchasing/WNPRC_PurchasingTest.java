@@ -66,13 +66,19 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     //folders
     private static final String FOLDER_TYPE = "WNPRC Purchasing";
     private static final String BILLING_FOLDER = "WNPRC Billing";
-    private static final String FOLDER_FOR_REQUESTERS = "WNPRC Purchasing Requester";
+
+    //user groups
+    private static final String PURCHASE_REQUESTER_GROUP = "Purchase Requesters";
+    private static final String PURCHASE_RECEIVER_GROUP = "Purchase Receivers";
+    private static final String PURCHASE_ADMIN_GROUP = "Purchase Admins";
 
     //users
-    private static final String REQUESTER_USER = "purchaserequester@test.com";
+    private static final String REQUESTER_USER_1 = "purchaserequester1@test.com";
+    private static final String REQUESTER_USER_2 = "purchaserequester2@test.com";
     private static final String RECEIVER_USER = "purchasereceiver@test.com";
-    private static final String requesterName = "purchaserequester";
+    private static final String requester1Name = "purchaserequester1";
     private static final String ADMIN_USER = "purchaseadmin@test.com";
+    private static final String PURCHASE_DIRECTOR_USER = "purchaseadirector@test.com";
     //other properties
 
     //sample data
@@ -88,8 +94,14 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
     File pdfFile = new File(TestFileUtils.getSampleData("fileTypes"), "pdf_sample.pdf");
     private int _adminUserId;
-    private int _requesterUserId;
+    private int _requesterUserId1;
+    private int _requesterUserId2;
     private int _receiverUserId;
+    private int _directorUserId;
+    private int _adminGroupId;
+    private int _receiverGroupId;
+    private int _requesterGroupId;
+
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
     private UIPermissionsHelper _permissionsHelper = new UIPermissionsHelper(this);
 
@@ -109,17 +121,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
     private void doSetup() throws IOException, CommandException
     {
-        goToHome();
-
-        log("Create a purchasing admin user");
-        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
-
-        log("Create a purchasing requester user");
-        _requesterUserId = _userHelper.createUser(REQUESTER_USER).getUserId().intValue();
-
-        log("Create a purchasing receiver user");
-        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId().intValue();
-
         goToHome();
 
         log("Create 'WNPRC Billing' folder");
@@ -145,25 +146,60 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Upload purchasing data");
         uploadPurchasingData();
 
-        log("Create user-account associations");
-        createUserAccountAssociations();
-
         log("Create ehrBillingLinked schema");
         _schemaHelper.createLinkedSchema(getProjectName(), "ehr_billingLinked", BILLING_FOLDER, "ehr_billingLinked", null, null, null);
 
+        log("Create users and groups");
+        createUsersAndGroups();
+        log("Add groups to purchasing folder");
         addUsersToPurchasingFolder();
 
+        log("Create user-account associations");
+        createUserAccountAssociations();
+
         goToHome();
+    }
+
+    private void createUsersAndGroups()
+    {
+        log("Create a purchasing admin user");
+        _adminUserId = _userHelper.createUser(ADMIN_USER).getUserId().intValue();
+
+        log("Create a purchasing requester users");
+        _requesterUserId1 = _userHelper.createUser(REQUESTER_USER_1).getUserId().intValue();
+        _requesterUserId2 = _userHelper.createUser(REQUESTER_USER_2).getUserId().intValue();
+
+        log("Create a purchasing receiver user");
+        _receiverUserId = _userHelper.createUser(RECEIVER_USER).getUserId().intValue();
+
+        log("Create a purchasing director user");
+        _directorUserId = _userHelper.createUser(PURCHASE_DIRECTOR_USER).getUserId().intValue();
+
+        log("Create a purchasing groups");
+        _adminGroupId = _permissionsHelper.createPermissionsGroup(PURCHASE_ADMIN_GROUP);
+        _receiverGroupId = _permissionsHelper.createPermissionsGroup(PURCHASE_RECEIVER_GROUP);
+        _requesterGroupId = _permissionsHelper.createPermissionsGroup(PURCHASE_REQUESTER_GROUP);
     }
 
     private void addUsersToPurchasingFolder()
     {
         goToProjectHome();
-        _permissionsHelper.setUserPermissions(ADMIN_USER, "Project Administrator");
-        _permissionsHelper.setUserPermissions(getCurrentUser(), "Project Administrator");
-        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Submitter");
-        _permissionsHelper.setUserPermissions(REQUESTER_USER, "Reader");
-        _permissionsHelper.setUserPermissions(RECEIVER_USER, "Editor");
+        log("Add users to " + PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(getCurrentUserName(), getProjectName(), PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(_userHelper.getDisplayNameForEmail(ADMIN_USER), getProjectName(), PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(_userHelper.getDisplayNameForEmail(PURCHASE_DIRECTOR_USER), getProjectName(), PURCHASE_ADMIN_GROUP);
+
+        log("Add users to " + PURCHASE_RECEIVER_GROUP);
+        _permissionsHelper.addUserToProjGroup(RECEIVER_USER, getProjectName(), PURCHASE_ADMIN_GROUP);
+
+        log("Add users to " + PURCHASE_REQUESTER_GROUP);
+        _permissionsHelper.addUserToProjGroup(REQUESTER_USER_1, getProjectName(), PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(REQUESTER_USER_2, getProjectName(), PURCHASE_ADMIN_GROUP);
+
+        _permissionsHelper.setPermissions(PURCHASE_ADMIN_GROUP, "Project Administrator");
+        _permissionsHelper.setPermissions(PURCHASE_REQUESTER_GROUP, "Submitter");
+        _permissionsHelper.setPermissions(PURCHASE_RECEIVER_GROUP, "Editor");
+        _permissionsHelper.setUserPermissions(PURCHASE_DIRECTOR_USER, "WNPRC Purchasing Director");
     }
 
     private void goToPurchaseAdminPage()
@@ -186,27 +222,22 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         List<Map<String, Object>> userAcctAssocRows = new ArrayList<>();
 
         Map<String, Object> userAcctRow = new HashMap<>();
-        userAcctRow.put("userId", _requesterUserId);
+        userAcctRow.put("userId", _requesterGroupId);
         userAcctRow.put("account", ACCT_100);
         userAcctAssocRows.add(userAcctRow);
 
         userAcctRow = new HashMap<>();
-        userAcctRow.put("userId", _requesterUserId);
+        userAcctRow.put("userId", _requesterGroupId);
         userAcctRow.put("account", ACCT_101);
         userAcctAssocRows.add(userAcctRow);
 
         userAcctRow = new HashMap<>();
-        userAcctRow.put("userId", _adminUserId);
-        userAcctRow.put("accessToAllAccounts", true);
-        userAcctAssocRows.add(userAcctRow);
-
-        userAcctRow = new HashMap<>();
-        userAcctRow.put("userId", _apiPermissionsHelper.getUserId(getCurrentUser()));
+        userAcctRow.put("userId", _adminGroupId);
         userAcctRow.put("accessToAllAccounts", true);
         userAcctAssocRows.add(userAcctRow);
 
         int rowsInserted = insertData(getRemoteApiConnection(true), "ehr_purchasing", "userAccountAssociations", userAcctAssocRows, getProjectName()).size();
-        assertEquals("Incorrect number of rows created", 4, rowsInserted);
+        assertEquals("Incorrect number of rows created", 3, rowsInserted);
     }
 
     private void uploadPurchasingData() throws IOException, CommandException
@@ -242,7 +273,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     {
         clearAllRequest();
         goToRequesterPage();
-        impersonate(REQUESTER_USER);
+        impersonate(REQUESTER_USER_1);
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
@@ -277,7 +308,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     {
         clearAllRequest();
         goToRequesterPage();
-        impersonate(REQUESTER_USER);
+        impersonate(REQUESTER_USER_1);
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
         requestPage.setVendor("Other");
@@ -328,8 +359,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clearAllRequest();
 
         log("-----Create request as lab end user-----");
-        log("Impersonate as " + REQUESTER_USER);
-        impersonate(REQUESTER_USER);
+        log("Impersonate as " + REQUESTER_USER_1);
+        impersonate(REQUESTER_USER_1);
 
         log("Create new Request - START");
         goToRequesterPage();
@@ -351,14 +382,14 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         requestPage.addAttachment(jpgFile)
                 .submitForReview();
 
-        log("Verify " + REQUESTER_USER + " can view the request submitted");
+        log("Verify " + REQUESTER_USER_1 + " can view the request submitted");
         waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
         String requestID = table.getDataAsText(0, "rowId");
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
-        checker().verifyEquals("Invalid requester", requesterName, table.getDataAsText(0, "requester"));
+        checker().verifyEquals("Invalid requester", requester1Name, table.getDataAsText(0, "requester"));
         stopImpersonating();
 
         log("-----Update request as Purchasing Admin-----");
@@ -399,8 +430,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         stopImpersonating(false);
 
         beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry", Maps.of("requestRowId", requestID)));
-        log("Impersonate as " + REQUESTER_USER);
-        impersonate(REQUESTER_USER);
+        log("Impersonate as " + REQUESTER_USER_1);
+        impersonate(REQUESTER_USER_1);
         assertTextPresent("You do not have sufficient permissions to update this request.");
         stopImpersonating();
     }
@@ -436,14 +467,14 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Verifying requester does not access to admin web part");
         goToProjectHome();
-        impersonate(REQUESTER_USER);
+        impersonate(REQUESTER_USER_1);
         goToPurchaseAdminPage();
-        checker().verifyTrue(REQUESTER_USER + "user should not permission for admin page",
+        checker().verifyTrue(REQUESTER_USER_1 + "user should not permission for admin page",
                 isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
                         .withText("You do not have the permissions required to access this page.")));
         goBack();
 
-        log("Creating request as " + REQUESTER_USER);
+        log("Creating request as " + REQUESTER_USER_1);
         goToRequesterPage();
         clickAndWait(Locator.linkWithText("Create Request"));
         Map<String, String> requesterRequest = new HashMap<>();
@@ -536,10 +567,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     public void testReceiverActions()
     {
         goToProjectHome();
-        impersonate(REQUESTER_USER);
+        impersonate(REQUESTER_USER_1);
         goToRequesterPage();
 
-        log("Creating the first request as" + REQUESTER_USER);
+        log("Creating the first request as" + REQUESTER_USER_1);
         waitAndClickAndWait(Locator.linkWithText("Create Request"));
         Map<String, String> requestInputs = new HashMap<>();
         requestInputs.put("Account to charge", "acct101");
@@ -553,7 +584,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         requestInputs.put("Quantity", "3");
         String requestId1 = createRequest(requestInputs, null);
 
-        log("Creating the second request as" + REQUESTER_USER);
+        log("Creating the second request as" + REQUESTER_USER_1);
         requestInputs = new HashMap<>();
         requestInputs.put("Account to charge", "acct100");
         requestInputs.put("Shipping destination", "456 Thompson lane (Math bldg)");

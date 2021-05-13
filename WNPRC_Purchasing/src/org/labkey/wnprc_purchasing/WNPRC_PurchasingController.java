@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
@@ -44,11 +46,14 @@ import org.labkey.api.security.RoleAssignment;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
+import org.labkey.api.security.ValidEmail;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.security.roles.Role;
+import org.labkey.api.util.ConfigurationException;
+import org.labkey.api.util.MailHelper;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
@@ -56,7 +61,9 @@ import org.labkey.api.view.WebPartFactory;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -74,6 +81,7 @@ import java.util.stream.Collectors;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
+    private static final Logger _log = LogManager.getLogger(WNPRC_PurchasingController.class);
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_PurchasingController.class);
     public static final String NAME = "wnprc_purchasing";
 
@@ -211,8 +219,6 @@ public class WNPRC_PurchasingController extends SpringActionController
                 String emailBody = requestEmailTemplate.renderBody(getContainer());
 
                 //request over 5000k is approved or rejected - send notif to purchase admins
-                ActionURL requesterViewUrl = new ActionURL(RequesterAction.class, getContainer()); //TODO change url to actual form
-//TODO change url to actual form
                 if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0 &&
                         (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
                         emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved")))
@@ -237,13 +243,13 @@ public class WNPRC_PurchasingController extends SpringActionController
                             NotificationService.get().sendMessageForRecipient(
                                     getContainer(), UserManager.getUser(getUser().getUserId()), user,
                                     emailSubject, emailBody,
-                                    requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Request approved or rejected status");
+                                    getDataEntryFormUrl(emailTemplateForm.getRowId(), new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                                    String.valueOf(emailTemplateForm.getRowId()), "Request approved or rejected status");
                         }
                     }
                 }
                 else
                 {
-
                     //send email to lab end user who originated the request
                     for (User user : labEndUsers)
                     {
@@ -252,7 +258,8 @@ public class WNPRC_PurchasingController extends SpringActionController
                             NotificationService.get().sendMessageForRecipient(
                                     getContainer(), UserManager.getUser(getUser().getUserId()), user,
                                     emailSubject, emailBody,
-                                    requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Request status change");
+                                    getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer())),
+                                    String.valueOf(emailTemplateForm.getRowId()), "Request status change");
                         }
                     }
                 }
@@ -280,17 +287,25 @@ public class WNPRC_PurchasingController extends SpringActionController
                         String emailSubject = lineItemChangeEmailTemplate.renderSubject(getContainer());
                         String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer());
 
-                        ActionURL requesterViewUrl = new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer()); //TODO change url to actual form
-
                         //send email to lab end user who originated the request
                         for (User user : labEndUsers)
                         {
                             if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
                             {
-                                NotificationService.get().sendMessageForRecipient(
-                                        getContainer(), UserManager.getUser(getUser().getUserId()), user,
-                                        emailSubject, emailBody,
-                                        requesterViewUrl, String.valueOf(emailTemplateForm.getRowId()), "Line Item changes");
+                                MailHelper.MultipartMessage message = MailHelper.createMultipartMessage();
+                                lineItemChangeEmailTemplate.renderSenderToMessage(message, getContainer());
+                                message.setEncodedHtmlContent(emailBody);
+                                message.setSubject(emailSubject);
+
+                                try
+                                {
+                                    message.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+                                    MailHelper.send(message, getUser(), getContainer());
+                                }
+                                catch (javax.mail.internet.AddressException | NullPointerException e)
+                                {
+                                    _log.error("Error sending line item update message to " + user.getEmail() , e);
+                                }
                             }
                         }
                     }
@@ -305,13 +320,6 @@ public class WNPRC_PurchasingController extends SpringActionController
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-            //TODO change url to actual form
-            ActionURL detailsUrl = new ActionURL("query", "executeQuery", getContainer());
-            detailsUrl.addParameter("schemaName", "ehr_purchasing");
-            detailsUrl.addParameter("query.queryName", "purchasingRequestsOverviewForAdmins");
-            detailsUrl.addParameter("query.viewName", "AllOpenRequests");
-            detailsUrl.addParameter("query.requestNum~eq", emailTemplateForm.getRowId());
-
             if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0)
             {
                 for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
@@ -323,7 +331,8 @@ public class WNPRC_PurchasingController extends SpringActionController
                         NotificationService.get().sendMessageForRecipient(
                                 getContainer(), UserManager.getUser(getUser().getUserId()), user,
                                 emailSubject, emailBody,
-                                detailsUrl, String.valueOf(emailTemplateForm.getRowId()), "New request over 5000k");
+                                getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                                String.valueOf(emailTemplateForm.getRowId()), "New request over 5000k");
                     }
                 }
             }
@@ -338,9 +347,18 @@ public class WNPRC_PurchasingController extends SpringActionController
                     NotificationService.get().sendMessageForRecipient(
                             getContainer(), UserManager.getUser(getUser().getUserId()), user,
                             emailSubject, emailBody,
-                            detailsUrl, String.valueOf(emailTemplateForm.getRowId()), "New request");
+                            getDataEntryFormUrl(emailTemplateForm.getRowId(), new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                            String.valueOf(emailTemplateForm.getRowId()), "New request");
                 }
             }
+        }
+
+        private ActionURL getDataEntryFormUrl(Integer requestId, ActionURL returnUrl)
+        {
+            ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, getContainer());
+            linkUrl.addParameter("requestRowId", requestId);
+            linkUrl.addParameter("returnUrl", returnUrl.getPath());
+            return linkUrl;
         }
 
         private EmailTemplateForm getValuesForEmailTemplate(RequestForm requestForm)
@@ -384,13 +402,15 @@ public class WNPRC_PurchasingController extends SpringActionController
         boolean _controlledSubstance;
 
         @JsonProperty("quantity")
-        double _quantity;
+        int _quantity;
 
         @JsonProperty("quantityReceived")
-        double _quantityReceived;
+        int _quantityReceived;
 
         @JsonProperty("unitCost")
         double _unitCost;
+
+        DecimalFormat _dollarFormat = new DecimalFormat("$#,##0.00");
 
         @Override
         public boolean equals(Object o) {
@@ -458,22 +478,22 @@ public class WNPRC_PurchasingController extends SpringActionController
             _controlledSubstance = controlledSubstance;
         }
 
-        public double getQuantity()
+        public int getQuantity()
         {
             return _quantity;
         }
 
-        public void setQuantity(double quantity)
+        public void setQuantity(int quantity)
         {
             _quantity = quantity;
         }
 
-        public double getQuantityReceived()
+        public int getQuantityReceived()
         {
             return _quantityReceived;
         }
 
-        public void setQuantityReceived(double quantityReceived)
+        public void setQuantityReceived(int quantityReceived)
         {
             _quantityReceived = quantityReceived;
         }
@@ -481,6 +501,11 @@ public class WNPRC_PurchasingController extends SpringActionController
         public double getUnitCost()
         {
             return _unitCost;
+        }
+
+        public String getFormattedUnitCost()
+        {
+            return _dollarFormat.format(getUnitCost());
         }
 
         public void setUnitCost(double unitCost)

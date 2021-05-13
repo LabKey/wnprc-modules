@@ -2,11 +2,10 @@ package org.labkey.wnprc_purchasing;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.util.emailTemplate.EmailTemplate;
+import org.labkey.api.view.ActionURL;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,19 +30,19 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
         super(NAME, DEFAULT_SUBJECT, loadBody(), DEFAULT_DESCRIPTION, ContentType.HTML);
         setEditableScopes(Scope.SiteOrFolder);
 
-        _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number")
+        _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number", ContentType.Plain)
         {
             @Override
             public Integer getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getRowId();}
         });
 
-        _replacements.add(new ReplacementParam<String>("vendor", String.class, "Vendor name")
+        _replacements.add(new ReplacementParam<String>("vendor", String.class, "Vendor name", ContentType.Plain)
         {
             @Override
             public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getVendor();}
         });
 
-        _replacements.add(new ReplacementParam<String>("status", String.class, "Request status")
+        _replacements.add(new ReplacementParam<String>("status", String.class, "Request status", ContentType.Plain)
         {
             @Override
             public String getValue(Container c)
@@ -56,16 +55,32 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
             }
         });
 
-        _replacements.add(new ReplacementParam<String>("created", String.class, "Date of request submission")
+        _replacements.add(new ReplacementParam<String>("created", String.class, "Date of request submission", ContentType.Plain)
         {
             @Override
             public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getRequestDate();}
         });
 
-        _replacements.add(new ReplacementParam<String>("total", String.class, "Total cost")
+        _replacements.add(new ReplacementParam<String>("total", String.class, "Total cost", ContentType.Plain)
         {
             @Override
             public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();}
+        });
+
+        _replacements.add(new ReplacementParam<String>("requestDataEntryUrl", String.class, "Request entry url", ContentType.HTML)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null)
+                {
+                    ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, getContainer());
+                    linkUrl.addParameter("requestRowId", _notificationBean.getRowId());
+                    linkUrl.addParameter("returnUrl", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, c).getPath());
+                    return linkUrl.getBaseServerURI() + c.getPath() + linkUrl.toString();
+                }
+                return null;
+            }
         });
 
         _replacements.add(new ReplacementParam<String>("updatedLineItems", String.class, "Modified or newly added or removed line items", ContentType.HTML)
@@ -75,16 +90,14 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
             {
                 if (getUpdatedLineItemsList() != null)
                 {
-                    HtmlStringBuilder builder = HtmlStringBuilder.of();
+                    StringBuilder builder = new StringBuilder();
 
-                    builder.append(HtmlString.unsafe("<table>"));
                     for (WNPRC_PurchasingController.LineItem _item : getUpdatedLineItemsList())
                     {
-                        builder.append(getHtmlString(_item, builder));
+                        builder.append(getHtmlString(_item));
                     }
-                    builder.append(HtmlString.unsafe("</table>"));
 
-                    return builder.getHtmlString().toString();
+                    return builder.toString();
                 }
                 return null;
             }
@@ -97,16 +110,14 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
             {
                 if (getOldLineItemsList() != null)
                 {
-                    HtmlStringBuilder builder = HtmlStringBuilder.of();
+                    StringBuilder builder = new StringBuilder();
 
-                    builder.append(HtmlString.unsafe("<table>"));
                     for (WNPRC_PurchasingController.LineItem _item : getOldLineItemsList())
                     {
-                        builder.append(getHtmlString(_item, builder));
+                        builder.append(getHtmlString(_item));
                     }
-                    builder.append(HtmlString.unsafe("</table>"));
 
-                    return builder.getHtmlString().toString();
+                    return builder.toString();
                 }
                 return null;
             }
@@ -155,17 +166,18 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
         _updatedLineItemsList = updatedLineItemsList;
     }
 
-    private HtmlString getHtmlString(WNPRC_PurchasingController.LineItem item, HtmlStringBuilder builder)
+    private String getHtmlString(WNPRC_PurchasingController.LineItem item)
     {
-        builder.append(HtmlString.unsafe("<tr>"));
-        builder.append(HtmlString.unsafe("<td>")).append(item.getRowId()).append(HtmlString.unsafe("</td>"));
-        builder.append(HtmlString.unsafe("<td>")).append(item.getItem()).append(HtmlString.unsafe("</td>"));
-        builder.append(HtmlString.unsafe("<td>")).append(String.valueOf(item.getUnitCost())).append(HtmlString.unsafe("</td>"));
-        builder.append(HtmlString.unsafe("<td>")).append(String.valueOf(item.getQuantity())).append(HtmlString.unsafe("</td>"));
-        builder.append(HtmlString.unsafe("<td>")).append(String.valueOf(item.getQuantityReceived())).append(HtmlString.unsafe("</td>"));
-        builder.append(HtmlString.unsafe("</tr>"));
+        StringBuilder builder = new StringBuilder();
+        builder.append("<tr>");
+        builder.append("<td valign=\"top\" style=\"width: 100px\">").append(item.getRowId()).append("</td>");
+        builder.append("<td valign=\"top\" style=\"width: 600px\">").append(item.getItem()).append("</td>");
+        builder.append("<td valign=\"top\" style=\"width: 200px\">").append(item.getFormattedUnitCost()).append("</td>");
+        builder.append("<td valign=\"top\" style=\"width: 100px\">").append(item.getQuantity()).append("</td>");
+        builder.append("<td valign=\"top\" style=\"width: 100px\">").append(item.getQuantityReceived()).append("</td>");
+        builder.append("</tr>");
 
-        return builder.getHtmlString();
+        return builder.toString();
     }
 
     @Override

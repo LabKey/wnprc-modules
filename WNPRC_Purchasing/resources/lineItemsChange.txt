@@ -1,52 +1,47 @@
 <html>
+<head>
+<style>
+table, td {
+  border: 0.25px solid gray;
+}
+</style>
+</head>
 <body>
 <div>
-    <p>Your purchase request ^requestNum^ from vendor ^vendor^ submitted on ^created^ has been modified.</p>
+    <p>Your purchase request# ^requestNum^ from vendor ^vendor^ submitted on ^created^ has been modified.</p>
     <br>
-    Updated line items:
+    <b>Updated line items:</b>
     <br>
 </div>
 <table width="500px">
     <tr>
-        <td valign="top"><b>Item id</b></td>
+        <td valign="top" style="width: 100px"><b>Item id</b></td>
+        <td valign="top" style="width: 600px"><b>Description</b></td>
+        <td valign="top" style="width: 200px"><b>Unit cost</b></td>
+        <td valign="top" style="width: 100px"><b>Quantity</b></td>
+        <td valign="top" style="width: 100px"><b>Quantity received</b></td>
     </tr>
-    <tr>
-        <td valign="top"><b>Description</b></td>
-    </tr>
-    <tr>
-        <td valign="top"><b>Unit cost</b></td>
-    </tr>
-    <tr>
-        <td valign="top"><b>Quantity</b></td>
-    </tr>
-    <tr>
-        <td valign="top"><b>Quantity received</b></td>
-    </tr>
-    ^updatedLineItems^
+     ^updatedLineItems^
 </table>
 
 <div>
     <br>
-    Previously saved line items:
+    <b>Previously saved line items:</b>
     <br>
 </div>
 <table width="500px">
     <tr>
-        <td valign="top"><b>Item id</b></td>
-    </tr>
-    <tr>
-        <td valign="top"><b>Description</b></td>
-    </tr>
-    <tr>
-        <td valign="top"><b>Unit cost</b></td>
-    </tr>
-    <tr>
-        <td valign="top"><b>Quantity</b></td>
-    </tr>
-    <tr>
-        <td valign="top"><b>Quantity received</b></td>
+        <td valign="top" style="width: 100px"><b>Item id</b></td>
+        <td valign="top" style="width: 600px"><b>Description</b></td>
+        <td valign="top" style="width: 200px"><b>Unit cost</b></td>
+        <td valign="top" style="width: 100px"><b>Quantity</b></td>
+        <td valign="top" style="width: 100px"><b>Quantity received</b></td>
     </tr>
     ^oldLineItems^
 </table>
+
+<br>
+View full request <a href="^requestDataEntryUrl^">here</a>.
+<br>
 </body>
 </html>

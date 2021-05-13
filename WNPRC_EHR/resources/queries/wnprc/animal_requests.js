@@ -62,11 +62,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         });
     }
     row.animalidstooffer = subjectArray.join(";");
-
-    //row.animal_history_link = "https://" + LABKEY.serverName + "/ehr-animalHistory.view?#subjects:" + row.animalidstooffer + "&inputType:multiSubject&showReport:0&activeReport:abstractReport"
-    //row.animal_history_link = '<a href="https://' + LABKEY.serverName + '/ehr-animalHistory.view?#subjects:' + row.animalidstooffer + '&inputType:multiSubject&showReport:0&activeReport:abstractReport">Link</a>'
-    //row.animal_history_link = row.animalidstooffer;
-
 }
 
 function onAfterInsert(helper,errors,row){
@@ -76,3 +71,9 @@ function onAfterInsert(helper,errors,row){
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotification(rowid, hostName);
 }
 
+function onAfterUpdate(helper,errors,row,oldRow){
+    console.log ("animal_requests.js: New request updated, rowid: "+ rowid);
+    var rowid = row.rowId;
+    var hostName = 'https://' + LABKEY.serverName;
+    WNPRC.Utils.getJavaHelper().sendAnimalRequestNotificationUpdate(rowid, row, oldRow, hostName);
+}

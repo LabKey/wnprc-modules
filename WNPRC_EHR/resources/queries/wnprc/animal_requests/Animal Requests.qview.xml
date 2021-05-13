@@ -1,7 +1,6 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
-        <column name="editLink" ></column>
-        <column name="rowid" ></column>
+        <column name="edit" ></column>
         <column name="date" ></column>
         <column name="createdBy"/>
         <column name="principalinvestigator"></column>

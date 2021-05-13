@@ -899,7 +899,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 return super.getValue(ctx);
             } else {
-                return "not shown gv";
+                return "";
             }
         }
         @Override
@@ -909,8 +909,112 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 return super.getDisplayValue(ctx);
             } else {
-                return "not shown gdv";
+                return "";
             }
+        }
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return super.getFormattedValue(ctx);
+            } else {
+                return "";
+            }
+        }
+
+    }
+    public static class AnimalRequestsEditLinkConditional extends DataColumn
+    {
+        private User _currentUser;
+
+        public AnimalRequestsEditLinkConditional(ColumnInfo colInfo, User currentUser)
+        {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx)
+        {
+            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getDisplayValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+            {
+                if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+                {
+                    String edit = new String("");
+                    edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                            ctx.getViewContext().getContextPath() +
+                            "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                            ctx.get("rowid").toString() +
+                            "&update=1&returnUrl=%2Flabkey%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                    return edit;
+                } else {
+                    return "";
+                }
+            }
+    }
+    public static class AnimalRequestsEditLinkShow extends DataColumn {
+        private User _currentUser;
+        public AnimalRequestsEditLinkShow(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx)
+        {
+            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getValue(ctx);
+            } else {
+                return "";
+            }
+        }
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getDisplayValue(ctx);
+            } else {
+                return "";
+            }
+        }
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            String edit = new String("");
+            edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                    ctx.get("rowid").toString() +
+                    "&update=1&returnUrl=%2Flabkey%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+            return edit;
+
         }
 
     }
@@ -939,7 +1043,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 return super.getValue(ctx);
             } else {
-                return "not shown gv";
+                return "";
             }
         }
         @Override
@@ -949,7 +1053,17 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 return super.getDisplayValue(ctx);
             } else {
-                return "not shown gdv";
+                return "";
+            }
+        }
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return super.getFormattedValue(ctx);
+            } else {
+                return "";
             }
         }
 
@@ -963,23 +1077,38 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         {
             return;
         }
+        User currentUser = us.getUser();
 
-        if (table.getColumn("editLink") == null){
+        if (table.getColumn("edit") == null){
 
-            ColumnInfo col = table.getColumn("editLink");
-            String editLink = "editLink";
+            ColumnInfo col = table.getColumn("edit");
+            String edit = "edit";
 
             String theQuery  = "( " +
-                    "(SELECT 'editLink')" +
+                    "(SELECT 'edit')" +
                     ")";
 
             SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, editLink, sql, JdbcType.VARCHAR);
+            ExprColumn newCol = new ExprColumn(table, edit, sql, JdbcType.VARCHAR);
             table.addColumn(newCol);
+            newCol.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                    {
+                        return new AnimalRequestsEditLinkShow(colInfo, currentUser);
+                    }
+                    else
+                    {
+                        return new AnimalRequestsEditLinkConditional(colInfo, currentUser);
+                    }
+                }
+            });
         }
 
-        User currentUser = us.getUser();
         //Nail down individual fields for editing
         if (table.getColumn("QCState") != null )
         {

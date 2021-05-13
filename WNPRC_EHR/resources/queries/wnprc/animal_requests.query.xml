@@ -7,8 +7,8 @@
                 <updateUrl />
 
                 <columns>
-                    <column columnName="editLink" >
-                        <columnTitle>EDIT!!</columnTitle>
+                    <column columnName="edit" >
+                        <columnTitle>Edit</columnTitle>
                     </column>
 
                     <column columnName="date" >
@@ -16,7 +16,7 @@
                         <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="createdBy">
-                        <columnTitle>Create By</columnTitle>
+                        <columnTitle>Created By</columnTitle>
                     </column>
                     <column columnName="principalinvestigator">
                     <columnTitle>Principal Investigator</columnTitle>
@@ -77,8 +77,7 @@
                         <columnTitle>Disposition</columnTitle>
                         <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>animal_requests_disposition</fkTable>
-                            <fkColumnName>meaning</fkColumnName>
-                            <fkDisplayColumnName>Origin</fkDisplayColumnName>
+                            <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
                     <column columnName="executivecommitteeapproval">

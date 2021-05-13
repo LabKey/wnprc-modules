@@ -1,9 +1,11 @@
 package org.labkey.wnprc_ehr;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.collections.RowMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -29,6 +31,7 @@ import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
@@ -671,6 +674,13 @@ public class TriggerScriptHelper {
         _log.info("Using java helper to send email for animal request record: "+rowid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
+        notification.sendManually(container, user);
+    }
+    public void sendAnimalRequestNotificationUpdate(Integer rowid, Map<String,Object> row, Map<String,Object> oldRow, String hostName){
+        _log.info("Using java helper to send email for animal request record: "+rowid);
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        AnimalRequestNotificationUpdate notification = new AnimalRequestNotificationUpdate(ehr, rowid, row, oldRow, user, hostName);
+        Maps.difference(row,oldRow);
         notification.sendManually(container, user);
     }
 

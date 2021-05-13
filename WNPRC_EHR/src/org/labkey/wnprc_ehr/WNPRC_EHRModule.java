@@ -94,6 +94,7 @@ import org.labkey.wnprc_ehr.history.DefaultAlopeciaDataSource;
 import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
 import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
@@ -377,6 +378,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new FoodNotCompletedNotification(this),
                 new FoodCompletedProblemsNotification(this),
                 new AnimalRequestNotification(this),
+                new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
                 new ViralLoadQueueNotification(this)

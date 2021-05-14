@@ -12,7 +12,7 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     protected static final String DEFAULT_SUBJECT = "Purchase request no. ^requestNum^ status update";
     protected static final String DEFAULT_DESCRIPTION = "Request status change notification";
     protected static final String NAME = "WNPRC Purchasing - Request status change notification";
-    protected static final String DEFAULT_BODY = "Purchase request no. ^requestNum^ from vendor ^vendor^" +
+    protected static final String DEFAULT_BODY = "Purchase request# ^requestNum^ from vendor ^vendor^" +
             " submitted on ^created^ for the total of ^total^ has been ^status^ by the ^role^.\n";
 
     private final List<ReplacementParam> _replacements = new ArrayList<>();
@@ -77,7 +77,9 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             {
                 if (_notificationBean != null)
                 {
-                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0)
+                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) >= 0
+                            & (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
+                            || _notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected")))
                     {
                         return "purchasing director";
                     }

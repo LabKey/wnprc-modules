@@ -23,7 +23,8 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
 
     private List<WNPRC_PurchasingController.LineItem> _updatedLineItemsList;
     private List<WNPRC_PurchasingController.LineItem> _oldLineItemsList;
-
+    private boolean _hasDeletedLineItems = false;
+    private boolean _hasFullQuantityReceived = false;
 
     public LineItemChangeEmailTemplate()
     {
@@ -65,6 +66,28 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
         {
             @Override
             public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();}
+        });
+
+        _replacements.add(new ReplacementParam<String>("hasDeletedLineItems", String.class, "For deleted line items", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null && _hasDeletedLineItems)
+                    return "Note: There are deleted line items.";
+                return null;
+            }
+        });
+
+        _replacements.add(new ReplacementParam<String>("hasFullQuantityReceived", String.class, "For change in quantity received", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null && _hasFullQuantityReceived)
+                    return "All line items are received.";
+                return null;
+            }
         });
 
         _replacements.add(new ReplacementParam<String>("requestDataEntryUrl", String.class, "Request entry url", ContentType.HTML)
@@ -186,4 +209,13 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
         return _replacements;
     }
 
+    public void setDeletedLineItemFlag(boolean isDeleted)
+    {
+        _hasDeletedLineItems = isDeleted;
+    }
+
+    public void setFullQuantityReceivedFlag(boolean quantityReceived)
+    {
+        _hasFullQuantityReceived = quantityReceived;
+    }
 }

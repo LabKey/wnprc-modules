@@ -8,7 +8,9 @@ table, td {
 </head>
 <body>
 <div>
-    <p>Your purchase request# ^requestNum^ from vendor ^vendor^ submitted on ^created^ has been modified.</p>
+    <p>Your purchase request# ^requestNum^ from vendor ^vendor^ submitted on ^created^ has been updated.</p>
+    <p>^hasFullQuantityReceived^</p>
+    <p><i>^hasDeletedLineItems^</i></p>
     <br>
     <b>Updated line items:</b>
     <br>
@@ -26,7 +28,7 @@ table, td {
 
 <div>
     <br>
-    <b>Previously saved line items:</b>
+    <b>Old line item:</b>
     <br>
 </div>
 <table width="500px">
@@ -41,7 +43,7 @@ table, td {
 </table>
 
 <br>
-View full request <a href="^requestDataEntryUrl^">here</a>.
+View your request details <a href="^requestDataEntryUrl^">here</a>.
 <br>
 </body>
 </html>

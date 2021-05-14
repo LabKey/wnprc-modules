@@ -11,7 +11,7 @@ public class NewRequestEmailTemplate  extends EmailTemplate
     protected static final String DEFAULT_SUBJECT = "A new purchase request for ^total^ is submitted";
     protected static final String DEFAULT_DESCRIPTION = "WNPRC Purchasing - New request notification";
     protected static final String NAME = "WNPRC Purchasing - New request notification ";
-    protected static final String DEFAULT_BODY = "A new purchasing request ^requestNum^ " +
+    protected static final String DEFAULT_BODY = "A new purchasing request# ^requestNum^ " +
             "by ^requester^ was submitted on ^created^ for the total of ^total^.\n";
 
     private final List<ReplacementParam> _replacements = new ArrayList<>();

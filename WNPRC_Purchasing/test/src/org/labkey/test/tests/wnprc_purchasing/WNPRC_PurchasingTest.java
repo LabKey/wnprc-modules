@@ -78,7 +78,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private static final String RECEIVER_USER = "purchasereceiver@test.com";
     private static final String requester1Name = "purchaserequester1";
     private static final String ADMIN_USER = "purchaseadmin@test.com";
-    private static final String PURCHASE_DIRECTOR_USER = "purchaseadirector@test.com";
+    private static final String PURCHASE_DIRECTOR_USER = "purchasedirector@test.com";
     //other properties
 
     //sample data
@@ -190,14 +190,15 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         _permissionsHelper.addUserToProjGroup(_userHelper.getDisplayNameForEmail(PURCHASE_DIRECTOR_USER), getProjectName(), PURCHASE_ADMIN_GROUP);
 
         log("Add users to " + PURCHASE_RECEIVER_GROUP);
-        _permissionsHelper.addUserToProjGroup(RECEIVER_USER, getProjectName(), PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(RECEIVER_USER, getProjectName(), PURCHASE_RECEIVER_GROUP);
 
         log("Add users to " + PURCHASE_REQUESTER_GROUP);
-        _permissionsHelper.addUserToProjGroup(REQUESTER_USER_1, getProjectName(), PURCHASE_ADMIN_GROUP);
-        _permissionsHelper.addUserToProjGroup(REQUESTER_USER_2, getProjectName(), PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(REQUESTER_USER_1, getProjectName(), PURCHASE_REQUESTER_GROUP);
+        _permissionsHelper.addUserToProjGroup(REQUESTER_USER_2, getProjectName(), PURCHASE_REQUESTER_GROUP);
 
         _permissionsHelper.setPermissions(PURCHASE_ADMIN_GROUP, "Project Administrator");
         _permissionsHelper.setPermissions(PURCHASE_REQUESTER_GROUP, "Submitter");
+        _permissionsHelper.setPermissions(PURCHASE_REQUESTER_GROUP, "Reader");
         _permissionsHelper.setPermissions(PURCHASE_RECEIVER_GROUP, "Editor");
         _permissionsHelper.setUserPermissions(PURCHASE_DIRECTOR_USER, "WNPRC Purchasing Director");
     }

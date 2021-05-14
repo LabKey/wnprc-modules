@@ -219,19 +219,13 @@ public class WNPRC_PurchasingController extends SpringActionController
                 String emailBody = requestEmailTemplate.renderBody(getContainer());
 
                 //request over 5000k is approved or rejected - send notif to purchase admins
-                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0 &&
+                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) >= 0 &&
                         (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
                         emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved")))
                 {
-                    //identify purchasing dir userId
-                    Map<Integer, String> purchasingDirUserIds = new HashMap<>();
-                    for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
-                    {
-                        if (roleAssignment.getRole().getName().equals("WNPRC Purchasing Director"))
-                        {
-                            purchasingDirUserIds.put(roleAssignment.getUserId(), roleAssignment.getRole().getName());
-                        }
-                    }
+                    //get purchasing dir userId
+                    Map<Integer, String> purchasingDirUserIds = getPurchasingDirectorUserIds();
+
                     //get folder admin users
                     List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
 
@@ -264,53 +258,64 @@ public class WNPRC_PurchasingController extends SpringActionController
                     }
                 }
             }
-            else
+            //identify line item changes
+            ObjectMapper mapper = new ObjectMapper();
+            List<LineItem> incomingLineItems = mapper.readValue(requestForm.getLineItems().toString(), new TypeReference<ArrayList<LineItem>>(){});
+
+            //deleted rows
+            List<LineItem> removed = oldLineItems.stream().filter(o1 -> incomingLineItems.stream().noneMatch(o2 -> o2.getRowId() == o1.getRowId())).collect(Collectors.toList());
+
+            List<LineItem> quantityChange = incomingLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o1.getRowId() == o2.getRowId()
+                                                                                    && o2.getQuantity() == o1.getQuantity())).collect(Collectors.toList());
+
+            boolean fullQuantityReceived = incomingLineItems.stream().filter(o2 -> o2.getQuantityReceived() == o2.getQuantity()).count() == incomingLineItems.size();
+
+            if (removed.size() > 0 || quantityChange.size() > 0 || fullQuantityReceived)
             {
-                if (oldLineItems != null)
+                LineItemChangeEmailTemplate lineItemChangeEmailTemplate = new LineItemChangeEmailTemplate();
+                lineItemChangeEmailTemplate.setUpdatedLineItemsList(incomingLineItems);
+                lineItemChangeEmailTemplate.setOldLineItemsList(oldLineItems);
+                lineItemChangeEmailTemplate.setDeletedLineItemFlag(removed.size() > 0);
+                lineItemChangeEmailTemplate.setFullQuantityReceivedFlag(fullQuantityReceived);
+                lineItemChangeEmailTemplate.setNotificationBean(emailTemplateForm);
+                String emailSubject = lineItemChangeEmailTemplate.renderSubject(getContainer());
+                String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer());
+
+                //send email to lab end user who originated the request
+                for (User user : labEndUsers)
                 {
-                    //identify line item changes
-                    ObjectMapper mapper = new ObjectMapper();
-                    List<LineItem> incomingLineItems = mapper.readValue(requestForm.getLineItems().toString(), new TypeReference<ArrayList<LineItem>>(){});
-
-                    //deleted rows
-                    List<LineItem> removed = oldLineItems.stream().filter(o1 -> incomingLineItems.stream().noneMatch(o2 -> o2.getRowId() == o1.getRowId())).collect(Collectors.toList());
-
-                    //newly added rows and modified existing rows
-                    List<LineItem> changed = incomingLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o2.equals(o1))).collect(Collectors.toList());
-
-                    if (removed.size() > 0 || changed.size() > 0)
+                    if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
                     {
-                        LineItemChangeEmailTemplate lineItemChangeEmailTemplate = new LineItemChangeEmailTemplate();
-                        lineItemChangeEmailTemplate.setUpdatedLineItemsList(incomingLineItems);
-                        lineItemChangeEmailTemplate.setOldLineItemsList(oldLineItems);
-                        lineItemChangeEmailTemplate.setNotificationBean(emailTemplateForm);
-                        String emailSubject = lineItemChangeEmailTemplate.renderSubject(getContainer());
-                        String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer());
+                        MailHelper.MultipartMessage message = MailHelper.createMultipartMessage();
+                        lineItemChangeEmailTemplate.renderSenderToMessage(message, getContainer());
+                        message.setEncodedHtmlContent(emailBody);
+                        message.setSubject(emailSubject);
 
-                        //send email to lab end user who originated the request
-                        for (User user : labEndUsers)
+                        try
                         {
-                            if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
-                            {
-                                MailHelper.MultipartMessage message = MailHelper.createMultipartMessage();
-                                lineItemChangeEmailTemplate.renderSenderToMessage(message, getContainer());
-                                message.setEncodedHtmlContent(emailBody);
-                                message.setSubject(emailSubject);
-
-                                try
-                                {
-                                    message.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-                                    MailHelper.send(message, getUser(), getContainer());
-                                }
-                                catch (javax.mail.internet.AddressException | NullPointerException e)
-                                {
-                                    _log.error("Error sending line item update message to " + user.getEmail() , e);
-                                }
-                            }
+                            message.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+                            MailHelper.send(message, getUser(), getContainer());
+                        }
+                        catch (javax.mail.internet.AddressException | NullPointerException e)
+                        {
+                            _log.error("Error sending line item update message to " + user.getEmail() , e);
                         }
                     }
                 }
             }
+        }
+
+        private Map<Integer, String> getPurchasingDirectorUserIds()
+        {
+            Map<Integer, String> purchasingDirUserIds = new HashMap<>();
+            for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
+            {
+                if (roleAssignment.getRole().getName().equals("WNPRC Purchasing Director"))
+                {
+                    purchasingDirUserIds.put(roleAssignment.getUserId(), roleAssignment.getRole().getName());
+                }
+            }
+            return purchasingDirUserIds;
         }
 
         private void sendNewRequestEmailNotification(EmailTemplateForm emailTemplateForm) throws MessagingException, IOException, ValidationException
@@ -320,35 +325,38 @@ public class WNPRC_PurchasingController extends SpringActionController
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) > 0)
+            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) >= 0)
             {
-                for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
+                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
+
+                for (User user : adminUsers)
                 {
-                    //send emails to purchasing director(s)
-                    if (roleAssignment.getRole().getName().equals("WNPRC Purchasing Director"))
-                    {
-                        User user = UserManager.getUser(roleAssignment.getUserId());
-                        NotificationService.get().sendMessageForRecipient(
-                                getContainer(), UserManager.getUser(getUser().getUserId()), user,
-                                emailSubject, emailBody,
-                                getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
-                                String.valueOf(emailTemplateForm.getRowId()), "New request over 5000k");
-                    }
+                    NotificationService.get().sendMessageForRecipient(
+                            getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                            emailSubject, emailBody,
+                            getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                            String.valueOf(emailTemplateForm.getRowId()), "New request over 5000k");
                 }
             }
             else
             {
+                //get purchasing dir userId
+                Map<Integer, String> purchasingDirUserIds = getPurchasingDirectorUserIds();
+
                 //get folder admin users
                 List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
 
                 //send emails to ALL folder admins
                 for (User user : adminUsers)
                 {
-                    NotificationService.get().sendMessageForRecipient(
-                            getContainer(), UserManager.getUser(getUser().getUserId()), user,
-                            emailSubject, emailBody,
-                            getDataEntryFormUrl(emailTemplateForm.getRowId(), new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
-                            String.valueOf(emailTemplateForm.getRowId()), "New request");
+                    if (!purchasingDirUserIds.containsKey(user.getUserId()))
+                    {
+                        NotificationService.get().sendMessageForRecipient(
+                                getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                emailSubject, emailBody,
+                                getDataEntryFormUrl(emailTemplateForm.getRowId(), new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                                String.valueOf(emailTemplateForm.getRowId()), "New request");
+                    }
                 }
             }
         }

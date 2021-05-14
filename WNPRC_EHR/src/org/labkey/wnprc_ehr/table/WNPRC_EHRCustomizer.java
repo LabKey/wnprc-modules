@@ -1097,7 +1097,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 @Override
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
-                    if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                    if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
                     {
                         return new AnimalRequestsEditLinkShow(colInfo, currentUser);
                     }

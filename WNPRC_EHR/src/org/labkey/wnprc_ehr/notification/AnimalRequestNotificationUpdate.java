@@ -6,18 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.MailHelper;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
-import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermission;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -54,11 +53,6 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
         _hostName = hostname;
         _row = row;
         _oldrow = oldRow;
-        _ignoreTheseFields.add("createdby");
-        _ignoreTheseFields.add("modifiedby");
-        _ignoreTheseFields.add("modified");
-        _ignoreTheseFields.add("date");
-
     }
 
     @Override
@@ -87,11 +81,10 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
         return DbSchema.get("wnprc", DbSchemaType.Module);
     }
 
-    public String getFieldLabel(Table table, String fieldName)
+    public String getFieldLabel(TableInfo ti, String fieldName)
     {
-        TableInfo t = getSchema().getTable("animal_requests");
-        //DbSchema.get("wnprc", DbSchemaType.Module).getTable("animal_requests").getColumns().get(3).getFieldKey().getCaption()
-        t.getColumns();
+        if (ti != null && fieldName != null)
+            return ti.getColumn(fieldName).getLabel();
         return null;
     }
 
@@ -120,10 +113,9 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
         final StringBuilder msg = new StringBuilder();
         Map<String, ArrayList<String>> theDifferences = new TreeMap<>();
         Map<String, MapDifference.ValueDifference<Object>> getDiff = Maps.difference(_oldrow,_row).entriesDiffering();
-        //FieldKey fk = DbSchema.get("wnprc", DbSchemaType.Module).getTable("animal_requests").getColumns().get(3).getFieldKey();
-        //fk.getLabel();
+        TableInfo ti = QueryService.get().getUserSchema(u, c, "wnprc").getTable("animal_requests");
         for (Map.Entry<String, MapDifference.ValueDifference<Object>> in : getDiff.entrySet()){
-            if (!_ignoreTheseFields.contains(in.getKey())){
+            if (ti.getColumn(in.getKey()).isUserEditable()){
                 ArrayList<String> t = new ArrayList<>();
                 if (in.getValue().leftValue() !=  null)
                 {
@@ -141,7 +133,7 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
                 {
                     t.add("");
                 }
-                theDifferences.put(in.getKey(),t);
+                theDifferences.put(getFieldLabel(ti,in.getKey()),t);
             }
 
         }
@@ -193,7 +185,7 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
     public void sendManually (Container container, User user)
     {
         Collection<UserPrincipal> recipients = getRecipients(container);
-        if (!container.hasPermission(_currentUser, WNPRCAnimalRequestsViewPermission.class) && !container.hasPermission(_currentUser, AdminPermission.class))
+        if (!container.hasPermission(_currentUser, WNPRCAnimalRequestsEditPermission.class) && !container.hasPermission(_currentUser, AdminPermission.class))
         {
             sendMessage(getEmailSubject(container),getMessageBodyHTML(container,user),recipients,user);
         }

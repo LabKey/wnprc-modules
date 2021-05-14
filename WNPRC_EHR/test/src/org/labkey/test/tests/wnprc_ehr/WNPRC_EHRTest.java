@@ -1279,7 +1279,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Test for Overlapping date error during data upload");
         String error1 = "ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).";
         String error2 = "ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).";
-        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_ERROR_TSV);
+        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_ERROR_TSV, error1, error2);
 
         refresh();
 
@@ -1290,7 +1290,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         refresh();
 
-        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV, error1, error2);
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_UPDATE_TSV, CHARGE_RATES_NUM_UPDATE_ROWS, CHARGEABLE_ITEMS_NUM_UPDATE_ROWS);
 
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
@@ -1317,7 +1316,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Import Lookups by Alternate Key");
 
         setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), file.getPath());
-        click(Locator.button("Submit"));
+        waitAndClick(Ext4Helper.Locators.ext4Button("Submit"));
 
         waitForText("ERROR");
         assertTextPresent(errors);

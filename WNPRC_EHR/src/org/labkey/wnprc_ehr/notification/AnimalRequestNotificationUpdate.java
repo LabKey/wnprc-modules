@@ -15,6 +15,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.MailHelper;
+import org.labkey.wnprc_ehr.TriggerScriptHelper;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
 
@@ -76,18 +77,6 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
         return "This notification gets sent every time an Animal Request is updated";
     }
 
-    public DbSchema getSchema()
-    {
-        return DbSchema.get("wnprc", DbSchemaType.Module);
-    }
-
-    public String getFieldLabel(TableInfo ti, String fieldName)
-    {
-        if (ti != null && fieldName != null)
-            return ti.getColumn(fieldName).getLabel();
-        return null;
-    }
-
     public String getUserName(User user)
     {
         if (!"".equals(user.getFullName()))
@@ -107,36 +96,13 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
         return "[EHR Services] Animal Request Updated on " + _dateTimeFormat.format(new Date());
     }
 
+
     @Override
     public String getMessageBodyHTML(Container c, User u)
     {
         final StringBuilder msg = new StringBuilder();
-        Map<String, ArrayList<String>> theDifferences = new TreeMap<>();
-        Map<String, MapDifference.ValueDifference<Object>> getDiff = Maps.difference(_oldrow,_row).entriesDiffering();
         TableInfo ti = QueryService.get().getUserSchema(u, c, "wnprc").getTable("animal_requests");
-        for (Map.Entry<String, MapDifference.ValueDifference<Object>> in : getDiff.entrySet()){
-            if (ti.getColumn(in.getKey()).isUserEditable()){
-                ArrayList<String> t = new ArrayList<>();
-                if (in.getValue().leftValue() !=  null)
-                {
-                    t.add(in.getValue().leftValue().toString());
-                }
-                else
-                {
-                    t.add("");
-                }
-                if (in.getValue().rightValue() !=  null)
-                {
-                    t.add(in.getValue().rightValue().toString());
-                }
-                else
-                {
-                    t.add("");
-                }
-                theDifferences.put(getFieldLabel(ti,in.getKey()),t);
-            }
-
-        }
+        Map<String, ArrayList<String>> theDifferences = TriggerScriptHelper.buildDifferencesMap(ti, _oldrow, _row);
         Date now = new Date();
         msg.append("<p>");
         msg.append(getUserName(_currentUser));

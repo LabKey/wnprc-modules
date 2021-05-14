@@ -1,16 +1,17 @@
 package org.labkey.wnprc_ehr;
 
+import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.labkey.api.collections.RowMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -758,6 +759,43 @@ public class TriggerScriptHelper {
             }
         }
         return l;
+    }
+
+    // get the friendly label of a field given a table and field name
+    public static String getFieldLabel(TableInfo ti, String fieldName)
+    {
+        return (ti != null && fieldName != null) ?  ti.getColumn(fieldName).getLabel() : null;
+    }
+
+    // builds up a difference map with field label -> [old value, new value]
+    public static Map<String, ArrayList<String>> buildDifferencesMap(TableInfo ti, Map<String, Object> oldRow, Map<String, Object> newRow)
+    {
+        Map<String, ArrayList<String>> theDifferences = new TreeMap<>();
+        Map<String, MapDifference.ValueDifference<Object>> getDiff = Maps.difference(oldRow,newRow).entriesDiffering();
+        for (Map.Entry<String, MapDifference.ValueDifference<Object>> in : getDiff.entrySet()){
+            if (ti.getColumn(in.getKey()).isUserEditable()){
+                ArrayList<String> oldValNewValArr = new ArrayList<>();
+                if (in.getValue().leftValue() !=  null)
+                {
+                    oldValNewValArr.add(in.getValue().leftValue().toString());
+                }
+                else
+                {
+                    oldValNewValArr.add("");
+                }
+                if (in.getValue().rightValue() !=  null)
+                {
+                    oldValNewValArr.add(in.getValue().rightValue().toString());
+                }
+                else
+                {
+                    oldValNewValArr.add("");
+                }
+                theDifferences.put(getFieldLabel(ti, in.getKey()), oldValNewValArr);
+            }
+
+        }
+        return theDifferences;
     }
 
 }

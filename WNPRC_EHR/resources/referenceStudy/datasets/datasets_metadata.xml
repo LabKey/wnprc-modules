@@ -7490,7 +7490,7 @@
       </column>
     </columns>
   </table>
-  <table tableName="BehaviorAbstract" tableDbType="TABLE">
+  <table tableName="Behavior Abstract" tableDbType="TABLE">
     <description>Behavior Abstract</description>
     <columns>
       <column columnName="objectid">
@@ -7529,6 +7529,29 @@
   </table>
   <table tableName="breeding_encounters" tableDbType="TABLE">
     <description>Restraints</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
+  </table>
+  <table tableName="research_ultrasounds" tableDbType="TABLE">
+    <description>Research Ultrasounds</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
+  </table>
+  <table tableName="NecropsyAbstract" tableDbType="TABLE">
     <columns>
       <column columnName="objectid">
         <datatype>entityid</datatype>

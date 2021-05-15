@@ -31,6 +31,7 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.notification.NotificationService;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
@@ -50,6 +51,7 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
@@ -528,7 +530,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         User _requester;
         BigDecimal _totalCost;
 
-        DateFormat _dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat _dateFormat = new SimpleDateFormat(DateUtil.getDateFormatString(ContainerManager.getRoot()));
         DecimalFormat _dollarFormat = new DecimalFormat("$#,##0.00");
 
         public Integer getRowId()

@@ -4433,6 +4433,9 @@
         <datatype>varchar</datatype>
         <columnTitle>Ancestry</columnTitle>
       </column>
+      <column columnName="vendor_id">
+        <datatype>varchar</datatype>
+      </column>
     </columns>
     <tableTitle>Arrival</tableTitle>
   </table>

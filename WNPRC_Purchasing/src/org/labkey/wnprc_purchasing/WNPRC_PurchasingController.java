@@ -46,18 +46,16 @@ import org.labkey.api.security.RoleAssignment;
 import org.labkey.api.security.SecurityManager;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
-import org.labkey.api.security.ValidEmail;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.MailHelper;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.wnprc_purchasing.security.WNPRC_PurchasingDirectorRole;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -84,6 +82,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     private static final Logger _log = LogManager.getLogger(WNPRC_PurchasingController.class);
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_PurchasingController.class);
     public static final String NAME = "wnprc_purchasing";
+    public static final Double OVER_FIVE_K = 5000.0;
 
     public WNPRC_PurchasingController()
     {
@@ -173,8 +172,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                 columns.add(FieldKey.fromString("qcState/Label"));
                 final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(tableInfo, columns);
                 TableSelector tableSelector = new TableSelector(tableInfo, colMap.values(), filter, null);
-                oldStatusVal = String.valueOf(tableSelector.getMap().get("qcstate_fs_label"));
-
+                oldStatusVal = String.valueOf(tableSelector.getMap().get(colMap.get(FieldKey.fromString("qcState/Label")).getAlias()));
             }
 
             List<ValidationException> validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
@@ -204,7 +202,11 @@ public class WNPRC_PurchasingController extends SpringActionController
 
         private void sendRequestChangeEmailNotification(String oldStatus, EmailTemplateForm emailTemplateForm, RequestForm requestForm, @Nullable List<LineItem> oldLineItems) throws MessagingException, IOException, ValidationException
         {
-            List<User> labEndUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(InsertPermission.class));
+            List<User> usersWithInsertPerm = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(InsertPermission.class));
+
+            //get the lab end user who originated the request
+            List <User> labEndUsers = usersWithInsertPerm.stream().filter(u -> u.getUserId() == emailTemplateForm.getRequester().getUserId()).collect(Collectors.toList());
+            User endUser = labEndUsers.size() == 1 && labEndUsers.get(0) != null ? labEndUsers.get(0) : null;
 
             //request status change email notification
             if ((StringUtils.isBlank(oldStatus) || !emailTemplateForm.getRequestStatus().equalsIgnoreCase(oldStatus))
@@ -218,8 +220,8 @@ public class WNPRC_PurchasingController extends SpringActionController
                 String emailSubject = requestEmailTemplate.renderSubject(getContainer());
                 String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-                //request over 5000k is approved or rejected - send notif to purchase admins
-                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) >= 0 &&
+                //request over 5k is approved or rejected - send notif to purchase admins
+                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(OVER_FIVE_K)) >= 0 &&
                         (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
                         emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved")))
                 {
@@ -244,17 +246,14 @@ public class WNPRC_PurchasingController extends SpringActionController
                 }
                 else
                 {
-                    //send email to lab end user who originated the request
-                    for (User user : labEndUsers)
+                    //send email to the lab end user who originated the request
+                    if (endUser != null)
                     {
-                        if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
-                        {
-                            NotificationService.get().sendMessageForRecipient(
-                                    getContainer(), UserManager.getUser(getUser().getUserId()), user,
-                                    emailSubject, emailBody,
-                                    getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer())),
-                                    String.valueOf(emailTemplateForm.getRowId()), "Request status change");
-                        }
+                        NotificationService.get().sendMessageForRecipient(
+                                getContainer(), UserManager.getUser(getUser().getUserId()), endUser,
+                                emailSubject, emailBody,
+                                getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer())),
+                                String.valueOf(emailTemplateForm.getRowId()), "Request status change");
                     }
                 }
             }
@@ -282,10 +281,8 @@ public class WNPRC_PurchasingController extends SpringActionController
                 String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer());
 
                 //send email to lab end user who originated the request
-                for (User user : labEndUsers)
+                if (endUser != null)
                 {
-                    if (user.getUserId() == emailTemplateForm.getRequester().getUserId())
-                    {
                         MailHelper.MultipartMessage message = MailHelper.createMultipartMessage();
                         lineItemChangeEmailTemplate.renderSenderToMessage(message, getContainer());
                         message.setEncodedHtmlContent(emailBody);
@@ -293,14 +290,13 @@ public class WNPRC_PurchasingController extends SpringActionController
 
                         try
                         {
-                            message.setRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+                            message.setRecipient(Message.RecipientType.TO, new InternetAddress(endUser.getEmail()));
                             MailHelper.send(message, getUser(), getContainer());
                         }
-                        catch (javax.mail.internet.AddressException | NullPointerException e)
+                        catch (javax.mail.internet.AddressException e)
                         {
-                            _log.error("Error sending line item update message to " + user.getEmail() , e);
+                            _log.error("Error sending line item update message to " + endUser.getEmail() , e);
                         }
-                    }
                 }
             }
         }
@@ -310,7 +306,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             Map<Integer, String> purchasingDirUserIds = new HashMap<>();
             for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
             {
-                if (roleAssignment.getRole().getName().equals("WNPRC Purchasing Director"))
+                if (roleAssignment.getRole().getName().equals(WNPRC_PurchasingDirectorRole.PURCHASING_DIRECTOR_ROLE_NAME))
                 {
                     purchasingDirUserIds.put(roleAssignment.getUserId(), roleAssignment.getRole().getName());
                 }
@@ -325,7 +321,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) >= 0)
+            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(OVER_FIVE_K)) >= 0)
             {
                 List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
 
@@ -335,7 +331,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                             getContainer(), UserManager.getUser(getUser().getUserId()), user,
                             emailSubject, emailBody,
                             getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
-                            String.valueOf(emailTemplateForm.getRowId()), "New request over 5000k");
+                            String.valueOf(emailTemplateForm.getRowId()), "New request over $5000");
                 }
             }
             else
@@ -648,7 +644,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _newVendorEmail;
         String _newVendorUrl;
         String _newVendorNotes;
-        Double _totalCost;
+        BigDecimal _totalCost;
         String _qcStateLabel;
         Boolean _isNewRequest;
 
@@ -952,12 +948,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             _newVendorNotes = newVendorNotes;
         }
 
-        public Double getTotalCost()
+        public BigDecimal getTotalCost()
         {
             return _totalCost;
         }
 
-        public void setTotalCost(Double totalCost)
+        public void setTotalCost(BigDecimal totalCost)
         {
             _totalCost = totalCost;
         }

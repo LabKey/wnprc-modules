@@ -77,8 +77,8 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             {
                 if (_notificationBean != null)
                 {
-                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(5000.0)) >= 0
-                            & (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
+                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.OVER_FIVE_K)) >= 0
+                            && (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
                             || _notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected")))
                     {
                         return "purchasing director";

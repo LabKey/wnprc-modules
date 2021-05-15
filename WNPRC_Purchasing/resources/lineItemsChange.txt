@@ -28,7 +28,7 @@ table, td {
 
 <div>
     <br>
-    <b>Old line item:</b>
+    <b>Old line items:</b>
     <br>
 </div>
 <table width="500px">

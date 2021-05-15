@@ -646,7 +646,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         DataRegionTable jetRegionTable  = new DataRegionTable("query", this);
         assertEquals("Wrong jet item count: ", 1, jetRegionTable.getDataRowCount());
 
-        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "8.00");
+        List<String> expectedRowData = Arrays.asList(NON_GEN_CREDIT_ACCOUNT_ID, "$8.00");
         List<String> actualRowData = jetRegionTable.getRowDataAsText(0, "Project", "Amount");
         assertEquals("Wrong row data for CSV to JET Preview report ", expectedRowData, actualRowData);
     }
@@ -1587,14 +1587,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
         waitForElement(Locator.tagWithText("em", "No data to show."), WAIT_FOR_JAVASCRIPT);
-        _extHelper.clickExtTab("All Tasks");
+        clickTab("All Tasks");
         waitForElement(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, ((Locator) Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a[.='Test weight task']")).findElements(getDriver()).size());
-        _extHelper.clickExtTab("Tasks By Room");
+        clickTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         sleep(WAIT_FOR_JAVASCRIPT); //For the table to completely load - Teamcity error fix.
         assertEquals("Incorrect number of task rows.", 3, ((Locator) Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a[.='Test weight task']")).findElements(getDriver()).size());
-        _extHelper.clickExtTab("Tasks By Id");
+        clickTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         sleep(WAIT_FOR_JAVASCRIPT); //For the table to completely load - Teamcity error fix.
         assertEquals("Incorrect number of task rows.", 3, ((Locator) Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "
@@ -1641,7 +1641,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         recallLocation();
         waitAndClickAndWait(Locator.linkWithText("Enter Data"));
         waitForElement(Locator.xpath("//div[contains(@class, 'my-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
-        _extHelper.clickExtTab("Review Required");
+        clickTab("Tasks Requiring Review");
         waitForElement(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']")));
         String href2 = getAttribute(Locator.linkWithText(TASK_TITLE), "href");
@@ -1693,14 +1693,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
         waitForElement(Locator.tagWithText("em", "No data to show."), WAIT_FOR_JAVASCRIPT);
-        _extHelper.clickExtTab("All Tasks");
+        clickTab("All Tasks");
         //TODO: make these more
         waitForElement(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
-        _extHelper.clickExtTab("Tasks By Room");
+        clickTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
-        _extHelper.clickExtTab("Tasks By Id");
+        clickTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
         stopImpersonating();
@@ -1820,6 +1820,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("returned to data entry page");
         sleep(1500);
         stopImpersonating();
+    }
+
+    private void clickTab(String tab)
+    {
+        Locator loc = Locator.tagWithClass("ul", "nav-tabs").append(Locator.tagWithText("a", tab));
+        click(loc);
     }
 
     @Test

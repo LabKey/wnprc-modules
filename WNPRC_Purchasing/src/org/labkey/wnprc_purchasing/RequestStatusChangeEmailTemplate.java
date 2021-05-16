@@ -77,7 +77,7 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             {
                 if (_notificationBean != null)
                 {
-                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.OVER_FIVE_K)) >= 0
+                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.ADDITIONAL_REVIEW_AMT)) >= 0
                             && (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
                             || _notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected")))
                     {

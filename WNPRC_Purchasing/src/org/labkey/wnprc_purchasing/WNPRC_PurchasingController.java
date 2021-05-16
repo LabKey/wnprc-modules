@@ -84,7 +84,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     private static final Logger _log = LogManager.getLogger(WNPRC_PurchasingController.class);
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_PurchasingController.class);
     public static final String NAME = "wnprc_purchasing";
-    public static final Double OVER_FIVE_K = 5000.0;
+    public static final Double ADDITIONAL_REVIEW_AMT = 5000.0; // additional review is required for requests >= $5000
 
     public WNPRC_PurchasingController()
     {
@@ -208,7 +208,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             //get the lab end user who originated the request
             List <User> labEndUsers = usersWithInsertPerm.stream().filter(u -> u.getUserId() == emailTemplateForm.getRequester().getUserId()).collect(Collectors.toList());
-            User endUser = labEndUsers.size() == 1 && labEndUsers.get(0) != null ? labEndUsers.get(0) : null;
+            User endUser = labEndUsers.size() == 1 ? labEndUsers.get(0) : null;
 
             //request status change email notification
             if ((StringUtils.isBlank(oldStatus) || !emailTemplateForm.getRequestStatus().equalsIgnoreCase(oldStatus))
@@ -223,7 +223,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                 String emailBody = requestEmailTemplate.renderBody(getContainer());
 
                 //request over 5k is approved or rejected - send notif to purchase admins
-                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(OVER_FIVE_K)) >= 0 &&
+                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(ADDITIONAL_REVIEW_AMT)) >= 0 &&
                         (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
                         emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved")))
                 {
@@ -269,7 +269,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             List<LineItem> quantityChange = incomingLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o1.getRowId() == o2.getRowId()
                                                                                     && o2.getQuantity() == o1.getQuantity())).collect(Collectors.toList());
 
-            boolean fullQuantityReceived = incomingLineItems.stream().filter(o2 -> o2.getQuantityReceived() == o2.getQuantity()).count() == incomingLineItems.size();
+            boolean fullQuantityReceived = incomingLineItems.stream().filter(o2 -> o2.getQuantityReceived() >= o2.getQuantity()).count() == incomingLineItems.size();
 
             if (removed.size() > 0 || quantityChange.size() > 0 || fullQuantityReceived)
             {
@@ -323,7 +323,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
 
-            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(OVER_FIVE_K)) >= 0)
+            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(ADDITIONAL_REVIEW_AMT)) >= 0)
             {
                 List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
 

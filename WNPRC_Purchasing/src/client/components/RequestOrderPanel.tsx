@@ -19,13 +19,13 @@ interface Props {
     model: RequestOrderModel;
     onInputChange: (model: RequestOrderModel) => void;
     isAdmin: boolean;
-    canUpdate: boolean;
-    canInsert: boolean;
+    isRequester: boolean;
+    isReceiver: boolean;
     hasRequestId?: boolean;
 }
 
 export const RequestOrderPanel: FC<Props> = memo(props => {
-    const { model, onInputChange, isAdmin, canUpdate, canInsert, hasRequestId } = props;
+    const { model, onInputChange, isAdmin, isRequester, isReceiver, hasRequestId } = props;
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
@@ -65,7 +65,8 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
 
     return (
         <>
-        { ((!isAdmin && canUpdate) || (hasRequestId && !canUpdate && !isAdmin)) && (
+        {/* Read only - for the Requesters and Receivers */}
+        { (hasRequestId && (isReceiver || isRequester)) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}
@@ -78,7 +79,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                     </div>
                     <Form className="form-margin">
                         <Row>
-                            { (hasRequestId && !canUpdate && !isAdmin) && (
+                            { isRequester && (
                                 <Col xs={11} lg={6}>
                                     <AccountInput
                                         value={model.account}
@@ -110,7 +111,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                     isReadOnly={true}
                                 />
                             </Col>
-                            { (hasRequestId && !canUpdate && !isAdmin) && (
+                            { isRequester && (
                                 <Col xs={11} lg={6}>
                                     <BusinessPurposeInput
                                         value={model.justification}
@@ -129,7 +130,9 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                 </Panel>
             )
         }
-        { (isAdmin || (!hasRequestId && canInsert && !isAdmin)) && (
+
+        {/* For the Admins for new and old requests; and for the Requesters for new requests */}
+        { (isAdmin || (!hasRequestId && isRequester)) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}

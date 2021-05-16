@@ -417,9 +417,9 @@ export const App: FC = memo(() => {
                             onInputChange={requestOrderModelChange}
                             model={requestOrderModel}
                             hasRequestId={!!requestId}
+                            isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                             isAdmin={hasPurchasingAdminPermission}
-                            canUpdate={hasPurchasingUpdatePermission}
-                            canInsert={hasPurchasingInsertPermission}
+                            isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
                         />
                         {requestId && hasPurchasingAdminPermission && (
                             <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
@@ -433,9 +433,9 @@ export const App: FC = memo(() => {
                             lineItems={lineItems}
                             errorMsg={lineItemErrorMsg}
                             hasRequestId={!!requestId}
+                            isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                             isAdmin={hasPurchasingAdminPermission}
-                            canUpdate={hasPurchasingUpdatePermission}
-                            canInsert={hasPurchasingInsertPermission}
+                            isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
                         />
                         <button
                             disabled={isSaving}

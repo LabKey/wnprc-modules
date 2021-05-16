@@ -100,7 +100,7 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
                     ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, getContainer());
                     linkUrl.addParameter("requestRowId", _notificationBean.getRowId());
                     linkUrl.addParameter("returnUrl", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, c).getPath());
-                    return linkUrl.getURIString();
+                    return linkUrl.getBaseServerURI() + c.getPath() + linkUrl.toString();
                 }
                 return null;
             }

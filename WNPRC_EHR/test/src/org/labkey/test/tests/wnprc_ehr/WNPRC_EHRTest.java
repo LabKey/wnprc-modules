@@ -2126,8 +2126,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String date = LocalDateTime.now().format(_dateTimeFormatter);
         String amount = "1028.95";
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        waitForText("Invoice");
-        clickAndWait(Locator.bodyLinkContainingText("Invoice"));
+        Locator invoiceLink = Locator.bodyLinkContainingText("Invoice");
+        waitForElement(invoiceLink);
+        scrollIntoView(invoiceLink);
+        clickAndWait(invoiceLink);
         DataRegionTable invoice = new DataRegionTable("query", getDriver());
         invoice.clickEditRow(0);
         setFormElement(Locator.inputByNameContaining("invoiceSentOn"), date);

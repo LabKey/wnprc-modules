@@ -9,10 +9,10 @@ import java.util.List;
 
 public class RequestStatusChangeEmailTemplate extends EmailTemplate
 {
-    protected static final String DEFAULT_SUBJECT = "Purchase request no. ^requestNum^ status update";
+    protected static final String DEFAULT_SUBJECT = "Purchase request # ^requestNum^ status update";
     protected static final String DEFAULT_DESCRIPTION = "Request status change notification";
     protected static final String NAME = "WNPRC Purchasing - Request status change notification";
-    protected static final String DEFAULT_BODY = "Purchase request# ^requestNum^ from vendor ^vendor^" +
+    protected static final String DEFAULT_BODY = "Purchase request # ^requestNum^ from vendor ^vendor^" +
             " submitted on ^created^ for the total of ^total^ has been ^status^ by the ^role^.\n";
 
     private final List<ReplacementParam> _replacements = new ArrayList<>();

@@ -14,7 +14,7 @@ import java.util.List;
 
 public class LineItemChangeEmailTemplate extends EmailTemplate
 {
-    protected static final String DEFAULT_SUBJECT = "Purchase request no. ^requestNum^ has updated line items";
+    protected static final String DEFAULT_SUBJECT = "Purchase request # ^requestNum^ has updated line items";
     protected static final String DEFAULT_DESCRIPTION = "Line item update notification";
     protected static final String NAME = "WNPRC Purchasing - Line item update notification";
 

@@ -53,6 +53,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.MailHelper;
+import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
@@ -217,7 +218,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                         emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved"))
                )
             {
-                RequestStatusChangeEmailTemplate requestEmailTemplate = new RequestStatusChangeEmailTemplate();
+                RequestStatusChangeEmailTemplate requestEmailTemplate = EmailTemplateService.get().getEmailTemplate(RequestStatusChangeEmailTemplate.class);
                 requestEmailTemplate.setNotificationBean(emailTemplateForm);
                 String emailSubject = requestEmailTemplate.renderSubject(getContainer());
                 String emailBody = requestEmailTemplate.renderBody(getContainer());
@@ -273,7 +274,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             if (removed.size() > 0 || quantityChange.size() > 0 || fullQuantityReceived)
             {
-                LineItemChangeEmailTemplate lineItemChangeEmailTemplate = new LineItemChangeEmailTemplate();
+                LineItemChangeEmailTemplate lineItemChangeEmailTemplate = EmailTemplateService.get().getEmailTemplate(LineItemChangeEmailTemplate.class);
                 lineItemChangeEmailTemplate.setUpdatedLineItemsList(incomingLineItems);
                 lineItemChangeEmailTemplate.setOldLineItemsList(oldLineItems);
                 lineItemChangeEmailTemplate.setDeletedLineItemFlag(removed.size() > 0);
@@ -318,7 +319,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
         private void sendNewRequestEmailNotification(EmailTemplateForm emailTemplateForm) throws MessagingException, IOException, ValidationException
         {
-            NewRequestEmailTemplate requestEmailTemplate = new NewRequestEmailTemplate();
+            NewRequestEmailTemplate requestEmailTemplate = EmailTemplateService.get().getEmailTemplate(NewRequestEmailTemplate.class);
             requestEmailTemplate.setNotificationBean(emailTemplateForm);
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());

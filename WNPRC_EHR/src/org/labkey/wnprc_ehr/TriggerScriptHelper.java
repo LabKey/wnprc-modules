@@ -126,7 +126,11 @@ public class TriggerScriptHelper {
 
             for (Map<String, Object> updatedRow : updatedRows) {
                 Pattern separator = Pattern.compile(";");
-                List<Double> newMeasurements = separator.splitAsStream((String) updatedRow.get("measurements_string")).map(Double::parseDouble).collect(Collectors.toList());
+                List<Double> newMeasurements = separator
+                        .splitAsStream((String) updatedRow.get("measurements_string"))
+                        .filter(x -> (x != null && x.length() > 0))
+                        .map(Double::parseDouble)
+                        .collect(Collectors.toList());
                 List<JSONObject> existingMeasurements = getMeasurements(ultrasoundId, (String) updatedRow.get("measurement_name"));
 
                 for (int i = 0; i < existingMeasurements.size(); i++) {

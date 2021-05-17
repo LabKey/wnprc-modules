@@ -893,34 +893,16 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         @Override
-        public Object getValue(RenderContext ctx)
+        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
         {
             if (!"Request: Pending".equals(ctx.get("QCState$Label")))
             {
-                return super.getValue(ctx);
-            } else {
-                return "";
-            }
-        }
-        @Override
-        public Object getDisplayValue(RenderContext ctx)
-        {
-            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+                super.renderGridCellContents(ctx, out);
+            } else
             {
-                return super.getDisplayValue(ctx);
-            } else {
-                return "";
+                out.write("");
             }
-        }
-        @Override
-        public String getFormattedValue(RenderContext ctx)
-        {
-            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
-            {
-                return super.getFormattedValue(ctx);
-            } else {
-                return "";
-            }
+
         }
 
     }
@@ -934,31 +916,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             _currentUser = currentUser;
         }
 
-        @Override
-        public Object getValue(RenderContext ctx)
-        {
-            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
-            {
-                return super.getValue(ctx);
-            }
-            else
-            {
-                return "";
-            }
-        }
-
-        @Override
-        public Object getDisplayValue(RenderContext ctx)
-        {
-            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
-            {
-                return super.getDisplayValue(ctx);
-            }
-            else
-            {
-                return "";
-            }
-        }
 
         @Override
         public String getFormattedValue(RenderContext ctx)
@@ -972,7 +929,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             ctx.get("rowid").toString() +
                             "&update=1&returnUrl=%2Flabkey%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
                     return edit;
-                } else {
+                } else
+                {
                     return "";
                 }
             }
@@ -985,29 +943,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         @Override
-        public Object getValue(RenderContext ctx)
-        {
-            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
-            {
-                return super.getValue(ctx);
-            } else {
-                return "";
-            }
-        }
-        @Override
-        public Object getDisplayValue(RenderContext ctx)
-        {
-            if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
-            {
-                return super.getDisplayValue(ctx);
-            } else {
-                return "";
-            }
-        }
-        @Override
         public String getFormattedValue(RenderContext ctx)
         {
-            String edit = new String("");
+            String edit = "";
             edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
                     ctx.getViewContext().getContextPath() +
                     "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
@@ -1025,15 +963,13 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         @Override
         public Object getValue(RenderContext ctx) {
-                return super.getValue(ctx);
+            return super.getValue(ctx);
         }
     }
 
     public static class AnimalReportLinkQCStateConditional extends DataColumn {
-        private User _currentUser;
         public AnimalReportLinkQCStateConditional(ColumnInfo colInfo, User currentUser) {
             super(colInfo);
-            _currentUser = currentUser;
         }
 
         @Override
@@ -1042,7 +978,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             if (!"Request: Pending".equals(ctx.get("QCState$Label")))
             {
                 return super.getValue(ctx);
-            } else {
+            } else
+            {
                 return "";
             }
         }
@@ -1052,7 +989,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             if (!"Request: Pending".equals(ctx.get("QCState$Label")))
             {
                 return super.getDisplayValue(ctx);
-            } else {
+            } else
+            {
                 return "";
             }
         }
@@ -1062,7 +1000,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             if (!"Request: Pending".equals(ctx.get("QCState$Label")))
             {
                 return super.getFormattedValue(ctx);
-            } else {
+            } else
+            {
                 return "";
             }
         }
@@ -1079,9 +1018,28 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
         User currentUser = us.getUser();
 
+        //Nail down individual fields for editing, unless user has permission
+        List<String> readOnlyFields = new ArrayList<>();
+        readOnlyFields.add("QCState");
+        readOnlyFields.add("dateapprovedordenied");
+        readOnlyFields.add("animalsorigin");
+        readOnlyFields.add("dateordered");
+        readOnlyFields.add("datearrival");
+        for (String item : readOnlyFields)
+        {
+            if (table.getColumn(item) != null)
+            {
+                ColumnInfo col = table.getColumn(item);
+                if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                {
+                    col.setReadOnly(true);
+                }
+            }
+        }
+
+
         if (table.getColumn("edit") == null){
 
-            ColumnInfo col = table.getColumn("edit");
             String edit = "edit";
 
             String theQuery  = "( " +
@@ -1109,48 +1067,6 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             });
         }
 
-        //Nail down individual fields for editing
-        if (table.getColumn("QCState") != null )
-        {
-            ColumnInfo col = table.getColumn("QCState");
-            if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
-            {
-                col.setReadOnly(true);
-            }
-        }
-        if (table.getColumn("dateapprovedordenied") != null )
-        {
-            ColumnInfo col = table.getColumn("dateapprovedordenied");
-            if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
-            {
-                col.setReadOnly(true);
-            }
-        }
-        if (table.getColumn("dateordered") != null )
-        {
-            ColumnInfo col = table.getColumn("dateordered");
-            if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
-            {
-                col.setReadOnly(true);
-            }
-        }
-        if (table.getColumn("datearrival") != null )
-        {
-            ColumnInfo col = table.getColumn("datearrival");
-            if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
-            {
-                col.setReadOnly(true);
-            }
-        }
-        if (table.getColumn("animalsorigin") != null )
-        {
-            ColumnInfo col = table.getColumn("animalsorigin");
-            if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
-            {
-                col.setReadOnly(true);
-            }
-        }
-
         //re-render animalidsoffer column
         if (table.getColumn("animalidstooffer") != null)
         {
@@ -1167,8 +1083,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     }
                     else
                     {
-                        col.setReadOnly(true);
-                        DisplayColumn ds =  new AnimalIdsToOfferColumnQCStateConditional(colInfo);
+                        col.setHidden(true);
                         return new AnimalIdsToOfferColumnQCStateConditional(colInfo);
                     }
                 }

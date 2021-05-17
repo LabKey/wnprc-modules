@@ -764,7 +764,7 @@ public class TriggerScriptHelper {
     // get the friendly label of a field given a table and field name
     public static String getFieldLabel(TableInfo ti, String fieldName)
     {
-        return (ti != null && fieldName != null) ?  ti.getColumn(fieldName).getLabel() : null;
+        return (ti != null && fieldName != null) ? ti.getColumn(fieldName).getLabel() : null;
     }
 
     // builds up a difference map with field label -> [old value, new value]

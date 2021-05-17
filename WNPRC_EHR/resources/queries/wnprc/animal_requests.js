@@ -72,8 +72,8 @@ function onAfterInsert(helper,errors,row){
 }
 
 function onAfterUpdate(helper,errors,row,oldRow){
-    console.log ("animal_requests.js: New request updated, rowid: "+ rowid);
     var rowid = row.rowId;
     var hostName = 'https://' + LABKEY.serverName;
+    console.log ("animal_requests.js: New request updated, rowid: "+ rowid);
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotificationUpdate(rowid, row, oldRow, hostName);
 }

@@ -186,8 +186,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToProjectHome();
         log("Add users to " + PURCHASE_ADMIN_GROUP);
         _permissionsHelper.addUserToProjGroup(getCurrentUserName(), getProjectName(), PURCHASE_ADMIN_GROUP);
-        _permissionsHelper.addUserToProjGroup(_userHelper.getDisplayNameForEmail(ADMIN_USER), getProjectName(), PURCHASE_ADMIN_GROUP);
-        _permissionsHelper.addUserToProjGroup(_userHelper.getDisplayNameForEmail(PURCHASE_DIRECTOR_USER), getProjectName(), PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(ADMIN_USER, getProjectName(), PURCHASE_ADMIN_GROUP);
+        _permissionsHelper.addUserToProjGroup(PURCHASE_DIRECTOR_USER, getProjectName(), PURCHASE_ADMIN_GROUP);
 
         log("Add users to " + PURCHASE_RECEIVER_GROUP);
         _permissionsHelper.addUserToProjGroup(RECEIVER_USER, getProjectName(), PURCHASE_RECEIVER_GROUP);
@@ -348,7 +348,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
-        checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendorId"));
+        checker().verifyEquals("Invalid Vendor ", "Test1", table.getDataAsText(0, "vendor"));
         stopImpersonating();
     }
 
@@ -431,8 +431,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         stopImpersonating(false);
 
         beginAt(buildRelativeUrl("WNPRC_Purchasing", getProjectName(), "requestEntry", Maps.of("requestRowId", requestID)));
-        log("Impersonate as " + REQUESTER_USER_1);
-        impersonate(REQUESTER_USER_1);
+        log("Impersonate as " + REQUESTER_USER_2);
+        impersonate(REQUESTER_USER_2);
         assertTextPresent("You do not have sufficient permissions to update this request.");
         stopImpersonating();
     }
@@ -514,7 +514,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         DataRegionTable table = new DataRegionTable("query", getDriver());
         checker().verifyEquals("Incorrect request Id's", Arrays.asList(requestId1, requestId2),
                 table.getColumnDataAsText("requestNum"));
-        checker().verifyEquals("Incorrect requester's", Arrays.asList("purchaserequester", "purchaseadmin"),
+        checker().verifyEquals("Incorrect requester's", Arrays.asList("purchaserequester1", "purchaseadmin"),
                 table.getColumnDataAsText("requester"));
 
         log("Changing the assignment of the request");

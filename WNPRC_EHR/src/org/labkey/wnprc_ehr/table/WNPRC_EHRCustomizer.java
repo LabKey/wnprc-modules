@@ -15,13 +15,11 @@
  */
 package org.labkey.wnprc_ehr.table;
 
-import net.sourceforge.jtds.jdbc.ColInfo;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerDisplayColumn;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
@@ -30,14 +28,12 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
@@ -54,14 +50,12 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.ehr.EHRSchema;
-import org.labkey.wnprc_ehr.query.ViralAssayCustomizer;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
 import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermission;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 

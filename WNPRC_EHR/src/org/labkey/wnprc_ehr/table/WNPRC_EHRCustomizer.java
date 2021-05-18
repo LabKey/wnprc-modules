@@ -921,7 +921,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             ctx.getViewContext().getContextPath() +
                             "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
                             ctx.get("rowid").toString() +
-                            "&update=1&returnUrl=%2Flabkey%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                            "&update=1&returnUrl=" +
+                            ctx.getViewContext().getContextPath() +
+                            "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
                     return edit;
                 } else
                 {
@@ -944,7 +946,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     ctx.getViewContext().getContextPath() +
                     "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
                     ctx.get("rowid").toString() +
-                    "&update=1&returnUrl=%2Flabkey%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
             return edit;
 
         }

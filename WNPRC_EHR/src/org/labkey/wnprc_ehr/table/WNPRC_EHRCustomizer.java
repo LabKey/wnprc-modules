@@ -882,17 +882,24 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     public static class AnimalIdsToOfferColumnQCStateConditional extends DataColumn {
-        public AnimalIdsToOfferColumnQCStateConditional(ColumnInfo colInfo) {
+        private User _currentUser;
+        public AnimalIdsToOfferColumnQCStateConditional(ColumnInfo colInfo, User currentUser) {
             super(colInfo);
+            _currentUser = currentUser;
         }
 
         @Override
         public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
         {
-            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                out.write("");
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
             {
                 super.renderGridCellContents(ctx, out);
-            } else
+            }
+            else
             {
                 out.write("");
             }
@@ -966,17 +973,24 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     public static class AnimalReportLinkQCStateConditional extends DataColumn {
+        private User _currentUser;
         public AnimalReportLinkQCStateConditional(ColumnInfo colInfo, User currentUser) {
             super(colInfo);
+            _currentUser = currentUser;
         }
 
         @Override
         public Object getValue(RenderContext ctx)
         {
-            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
             {
                 return super.getValue(ctx);
-            } else
+            }
+            else
             {
                 return "";
             }
@@ -984,10 +998,15 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         @Override
         public Object getDisplayValue(RenderContext ctx)
         {
-            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
             {
                 return super.getDisplayValue(ctx);
-            } else
+            }
+            else
             {
                 return "";
             }
@@ -995,10 +1014,15 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         @Override
         public String getFormattedValue(RenderContext ctx)
         {
-            if (!"Request: Pending".equals(ctx.get("QCState$Label")))
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
             {
                 return super.getFormattedValue(ctx);
-            } else
+            }
+            else
             {
                 return "";
             }
@@ -1082,7 +1106,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     else
                     {
                         col.setHidden(true);
-                        return new AnimalIdsToOfferColumnQCStateConditional(colInfo);
+                        return new AnimalIdsToOfferColumnQCStateConditional(colInfo, currentUser);
                     }
                 }
             });

@@ -460,8 +460,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         fillAnInput("animalid_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
-        el2.sendKeys(Keys.TAB);
-        el2.sendKeys(Keys.TAB);
+
+        //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
+//        el2.sendKeys(Keys.TAB);
+//        el2.sendKeys(Keys.TAB);
+
         fillAnInput("remark_"+ index.toString(), "Entered from automated test");
         fillAnInput("restraint_" + index.toString(), "T");
     }

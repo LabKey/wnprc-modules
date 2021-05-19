@@ -176,43 +176,43 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
-        initTest.initProject("EHR");
-        initTest.createTestSubjects();
-        initTest.clickFolder("EHR");
-        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
-        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
-                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+//        initTest.initProject("EHR");
+//        initTest.createTestSubjects();
+//        initTest.clickFolder("EHR");
+//        initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+//        initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
+//                initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
+//
+//
+//        initTest.createFinanceManagementFolders();
+//        initTest.clickFolder("Private");
+//        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
+//
+//        initTest.updateEHRFormFrameworkTypes();
+//
+//        initTest.loadBloodBilledByLookup();
+//        initTest.addFinanceRelatedWebParts();
+//        initTest.clickFolder("Private");
+//        initTest.loadEHRBillingTableDefinitions();
+//
+//        initTest.clickFolder("Private");
+//        initTest.createStudyLinkedSchema();
+//        initTest.createCoreLinkedSchema();
+//        initTest.createEHRLinkedSchema();
+//
+//        initTest.clickFolder("EHR");
+//        initTest.createEHRBillingPublicLinkedSchema();
+//        initTest.createWNPRCBillingLinkedSchema();
+//        initTest.goToProjectHome();
+//        initTest.clickFolder(PI_PORTAL);
+//        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
+//
+//        initTest.createWNPRCBillingPublicLinkedSchema();
 
-
-        initTest.createFinanceManagementFolders();
-        initTest.clickFolder("Private");
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_EHR", "EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
-
-        initTest.updateEHRFormFrameworkTypes();
-
-        initTest.loadBloodBilledByLookup();
-        initTest.addFinanceRelatedWebParts();
-        initTest.clickFolder("Private");
-        initTest.loadEHRBillingTableDefinitions();
-
-        initTest.clickFolder("Private");
-        initTest.createStudyLinkedSchema();
-        initTest.createCoreLinkedSchema();
-        initTest.createEHRLinkedSchema();
-
-        initTest.clickFolder("EHR");
-        initTest.createEHRBillingPublicLinkedSchema();
-        initTest.createWNPRCBillingLinkedSchema();
-        initTest.goToProjectHome();
-        initTest.clickFolder(PI_PORTAL);
-        initTest._containerHelper.enableModules(Arrays.asList("WNPRC_BillingPublic"));
-
-        initTest.createWNPRCBillingPublicLinkedSchema();
-
-        initTest.clickFolder("PI Portal");
-        initTest.addBillingPublicWebParts();
-
-        initTest.uploadBillingDataAndVerify();
+//        initTest.clickFolder("PI Portal");
+//        initTest.addBillingPublicWebParts();
+//
+//        initTest.uploadBillingDataAndVerify();
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -1153,7 +1153,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickButton("Submit And Reload", 0);
         _extHelper.waitForExtDialog("Finalize Form");
         click(Ext4Helper.Locators.ext4Button("Yes"));
-        waitForTextToDisappear("Saving Changes", 5000);
+        waitForTextToDisappear("Saving Changes", 7000);
     }
 
     private void submitForm()

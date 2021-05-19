@@ -34,6 +34,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.ModuleHtmlView;
@@ -160,7 +161,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             {
                 TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("lineItems", null);
                 Filter filter = new SimpleFilter(FieldKey.fromString("requestRowId"), requestForm.getRowId());
-                TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
+                TableSelector tableSelector = new TableSelector(tableInfo, filter, new Sort("rowId"));
                 oldLineItems = tableSelector.getArrayList(LineItem.class);
             }
 
@@ -261,21 +262,25 @@ public class WNPRC_PurchasingController extends SpringActionController
                 }
             }
             //identify line item changes
-            ObjectMapper mapper = new ObjectMapper();
-            List<LineItem> incomingLineItems = mapper.readValue(requestForm.getLineItems().toString(), new TypeReference<ArrayList<LineItem>>(){});
+
+            //get updated line items from the db
+            TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("lineItems", null);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestRowId"), requestForm.getRowId());
+            TableSelector tableSelector = new TableSelector(tableInfo, filter, new Sort("rowId"));
+            List<LineItem> updatedLineItems = tableSelector.getArrayList(LineItem.class);
 
             //deleted rows
-            List<LineItem> removed = oldLineItems.stream().filter(o1 -> incomingLineItems.stream().noneMatch(o2 -> o2.getRowId() == o1.getRowId())).collect(Collectors.toList());
+            List<LineItem> removed = oldLineItems.stream().filter(o1 -> updatedLineItems.stream().noneMatch(o2 -> o2.getRowId() == o1.getRowId())).collect(Collectors.toList());
 
-            List<LineItem> quantityChange = incomingLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o1.getRowId() == o2.getRowId()
+            List<LineItem> quantityChange = updatedLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o1.getRowId() == o2.getRowId()
                                                                                     && o2.getQuantity() == o1.getQuantity())).collect(Collectors.toList());
 
-            boolean fullQuantityReceived = incomingLineItems.stream().filter(o2 -> o2.getQuantityReceived() >= o2.getQuantity()).count() == incomingLineItems.size();
+            boolean fullQuantityReceived = updatedLineItems.stream().filter(o2 -> o2.getQuantityReceived() >= o2.getQuantity()).count() == updatedLineItems.size();
 
             if (removed.size() > 0 || quantityChange.size() > 0 || fullQuantityReceived)
             {
                 LineItemChangeEmailTemplate lineItemChangeEmailTemplate = EmailTemplateService.get().getEmailTemplate(LineItemChangeEmailTemplate.class);
-                lineItemChangeEmailTemplate.setUpdatedLineItemsList(incomingLineItems);
+                lineItemChangeEmailTemplate.setUpdatedLineItemsList(updatedLineItems);
                 lineItemChangeEmailTemplate.setOldLineItemsList(oldLineItems);
                 lineItemChangeEmailTemplate.setDeletedLineItemFlag(removed.size() > 0);
                 lineItemChangeEmailTemplate.setFullQuantityReceivedFlag(fullQuantityReceived);

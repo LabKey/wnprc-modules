@@ -16,7 +16,7 @@
 SELECT
   d.participantid as animalId,
   d.participantid.primateId.primateId AS primateId,
---  ih.value as neprcId,
+  d.vendor_id as neprcId,
   d.birth,
   d.death,
   d.calculated_status.code as status,
@@ -41,7 +41,11 @@ SELECT
   d.dam,
   d.sire,
   d.modified as modified,
-  curdate() as date
+  curdate() as date,
+  CASE d.participantid.activeAssignments.projects
+    WHEN '20210102' THEN true
+    ELSE false
+  END AS U24_Animals
 FROM study.demographics d
 
 LEFT OUTER JOIN study.demographics as ih on d.id = ih.id and ih.origin.code in

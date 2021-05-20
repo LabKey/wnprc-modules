@@ -86,6 +86,15 @@ WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'ld
   AND p.Name = 'enabled'
 ;
 
+UPDATE    prop.Properties p
+SET       Value = 'false'
+WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'org.labkey.ldk.notifications.config'
+          AND p.Name = 'serviceEnabled'
+;
+
+DELETE FROM prop.properties p
+WHERE (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'org.labkey.ldk.notifications.status';
+
 UPDATE    ehr.module_properties p
 SET       stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu'
 WHERE     p.prop_name = 'site_email'

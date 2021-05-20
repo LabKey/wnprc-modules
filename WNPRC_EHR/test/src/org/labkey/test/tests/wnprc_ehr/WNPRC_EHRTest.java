@@ -1156,7 +1156,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickButton("Submit And Reload", 0);
         _extHelper.waitForExtDialog("Finalize Form");
         click(Ext4Helper.Locators.ext4Button("Yes"));
-        waitForTextToDisappear("Saving Changes", 7000);
+        waitForTextToDisappear("Saving Changes", 5000);
+        sleep(5000);
     }
 
     private void submitForm()
@@ -2197,8 +2198,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitUntilElementIsClickable("submit-all-btn");
         //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        clickAndWait(Locator.tagWithId("button","submit-final"));
+        assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
         JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");

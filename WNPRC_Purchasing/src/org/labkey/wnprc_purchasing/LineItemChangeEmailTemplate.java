@@ -97,10 +97,10 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
             {
                 if (_notificationBean != null)
                 {
-                    ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, getContainer());
+                    ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, c);
                     linkUrl.addParameter("requestRowId", _notificationBean.getRowId());
                     linkUrl.addParameter("returnUrl", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, c).getPath());
-                    return linkUrl.getBaseServerURI() + c.getPath() + linkUrl.toString();
+                    return linkUrl.getURIString();
                 }
                 return null;
             }

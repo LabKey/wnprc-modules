@@ -1,9 +1,10 @@
 SELECT DISTINCT
 voGi.id as animalId,
 CAST (voGi.date AS DATE) AS Date,
+voGi.projectConcat AS projectConcat,
+voGi.performedConcat AS performedConcat,
+CAST (voGi.qcstate AS INTEGER) AS qcstate,
 
---max(wa.volume) AS goal,
---COALESCE ((SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.water_given iwg WHERE iwg.id=voGi.id AND (dayofyear(iwg.date)-dayofyear(voGi.date)) =0 AND iwg.assignto LIKE 'laboratory'),0) AS volumeGivenInLab,
 voGi.volumeGivenInLabSub,
 voGi.volumeGivenInCage,
 voGi.volumeGivenInImage,
@@ -17,31 +18,24 @@ voGi.InnerWeight,
 
 TRUNCATE(ROUND(CAST(voGi.TotalWater /voGi.InnerWeight AS NUMERIC),2),2) AS mlsPerKg,
 voGi.InnerWeight*voGi.InnerMlsPerKg - voGi.TotalWater AS WaterRemaining,
---(SELECT waterCond.mlsperKg from study.demographicsMostRecentWaterCondition waterCond WHERE waterCond.id = voGi.id) AS mostRecentMlsPerKg,
+
 voGi.RecentMlsPerKg,
 voGi.InnerMlsPerKg,
 
 'waterGiven' AS dataSource
---voGi.Innerweight*20 - voGi.TotalSub AS waterRemaining
---COALESCE ((SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.water_given iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0 AND iwg.assignto LIKE 'animalcare'),0) AS volumeGivenInCage,
-
---(SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.water_given iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0) AS Total,
---((SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.water_given iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0)-(20*(SELECT dm.id.MostRecentWeight.MostRecentWeight AS MostRecentWieght FROM study.demographics dm WHERE wa.id = dm.id))) AS Weight
-
---FROM study.water_given wa
-
---WHERE wa.Date > '2015-02-13' and  wa.id='r02086'
---WHERE wa.id=wa.id AND (dayofyear(wa.date)-dayofyear(wa.date)) =0
 
 FROM (
 
     SELECT
         wa.id AS id,
         wa.date AS date,
-        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0 AND iwg.location LIKE 'lab'),0) AS volumeGivenInLabSub,
-        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0 AND iwg.location LIKE 'animalRoom'),0) AS volumeGivenInCage,
-        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0 AND iwg.location LIKE 'imaging'),0) AS volumeGivenInImage,
-        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0 AND iwg.location LIKE 'procedureRoom'),0) AS volumeGivenInProcedure,
+        GROUP_CONCAT(DISTINCT wa.project, ';') AS projectConcat,
+        COALESCE((SELECT GROUP_CONCAT(iwg.performedby, ';') FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0),' ') AS performedConcat,
+        COALESCE((SELECT GROUP_CONCAT(DISTINCT iwg.qcstate, ';') FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0),'') AS qcstate,
+        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'lab'),0) AS volumeGivenInLabSub,
+        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'animalRoom'),0) AS volumeGivenInCage,
+        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'imaging'),0) AS volumeGivenInImage,
+        COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'procedureRoom'),0) AS volumeGivenInProcedure,
         COALESCE ((SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0),0) AS TotalWater,
         (SELECT we.weight
             FROM study.weight we
@@ -71,9 +65,10 @@ FROM (
         ) AS RecentMlsPerKg
 
     FROM study.waterGiven wa
+    GROUP BY wa.id, wa.date
 
 ) voGi
 WHERE voGi.InnerWeight IS NOT NULL
-GROUP BY voGi.id, voGi.date,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight,voGi.RecentMlsPerKg,voGi.InnerMlsPerKg
-       
+GROUP BY voGi.id,voGi.date,voGi.projectConcat,voGi.performedConcat,voGi.qcstate,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight,voGi.RecentMlsPerKg,voGi.InnerMlsPerKg
+
 --voGi.Weight

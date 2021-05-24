@@ -3,7 +3,7 @@ voGi.id as animalId,
 CAST (voGi.date AS DATE) AS Date,
 voGi.projectConcat AS projectConcat,
 voGi.performedConcat AS performedConcat,
-CAST (voGi.qcstate AS INTEGER) AS qcstate,
+CAST (voGi.qcstateConcat AS INTEGER) AS qcstate,
 
 voGi.volumeGivenInLabSub,
 voGi.volumeGivenInCage,
@@ -31,7 +31,7 @@ FROM (
         wa.date AS date,
         GROUP_CONCAT(DISTINCT wa.project, ';') AS projectConcat,
         COALESCE((SELECT GROUP_CONCAT(iwg.performedby, ';') FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0),' ') AS performedConcat,
-        COALESCE((SELECT GROUP_CONCAT(DISTINCT iwg.qcstate, ';') FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0),'') AS qcstate,
+        COALESCE((SELECT DISTINCT( iwg.qcstate)  FROM study.waterGiven iwg WHERE iwg.id=wa.id AND iwg.qcstate.label = 'Completed' AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0),'22') AS qcstateConcat,
         COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'lab'),0) AS volumeGivenInLabSub,
         COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'animalRoom'),0) AS volumeGivenInCage,
         COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'imaging'),0) AS volumeGivenInImage,
@@ -65,10 +65,11 @@ FROM (
         ) AS RecentMlsPerKg
 
     FROM study.waterGiven wa
+    WHERE wa.qcstate.label = 'Completed'
     GROUP BY wa.id, wa.date
 
 ) voGi
 WHERE voGi.InnerWeight IS NOT NULL
-GROUP BY voGi.id,voGi.date,voGi.projectConcat,voGi.performedConcat,voGi.qcstate,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight,voGi.RecentMlsPerKg,voGi.InnerMlsPerKg
+GROUP BY voGi.id,voGi.date,voGi.projectConcat,voGi.performedConcat,voGi.qcstateConcat,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight,voGi.RecentMlsPerKg,voGi.InnerMlsPerKg
 
 --voGi.Weight

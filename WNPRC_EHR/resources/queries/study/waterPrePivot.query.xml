@@ -26,6 +26,14 @@
 
 
                     </column>
+                    <column columnName="qcstate">
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>QCState</fkTable>
+                            <fkColumnName>rowId</fkColumnName>
+                            <fkDisplayColumnName>Label</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="Weight">
                         <conditionalFormats>
                             <conditionalFormat>

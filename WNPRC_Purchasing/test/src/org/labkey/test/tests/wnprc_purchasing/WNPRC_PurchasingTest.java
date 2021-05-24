@@ -34,6 +34,7 @@ import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.EHR;
 import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.componenes.CreateVendorDialog;
+import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.components.html.SiteNavBar;
 import org.labkey.test.util.APIUserHelper;
 import org.labkey.test.util.AbstractUserHelper;
@@ -77,6 +78,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private static final String REQUESTER_USER_2 = "purchaserequester2@test.com";
     private static final String RECEIVER_USER = "purchasereceiver@test.com";
     private static final String requester1Name = "purchaserequester1";
+    private static final String requester2Name = "purchaserequester2";
+
     private static final String ADMIN_USER = "purchaseadmin@test.com";
     private static final String PURCHASE_DIRECTOR_USER = "purchasedirector@test.com";
     //other properties
@@ -93,6 +96,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     public AbstractUserHelper _userHelper = new APIUserHelper(this);
     ApiPermissionsHelper _apiPermissionsHelper = new ApiPermissionsHelper(this);
     File pdfFile = new File(TestFileUtils.getSampleData("fileTypes"), "pdf_sample.pdf");
+    DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    LocalDateTime today = LocalDateTime.now();
     private int _adminUserId;
     private int _requesterUserId1;
     private int _requesterUserId2;
@@ -101,7 +106,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     private int _adminGroupId;
     private int _receiverGroupId;
     private int _requesterGroupId;
-
     private SchemaHelper _schemaHelper = new SchemaHelper(this);
     private UIPermissionsHelper _permissionsHelper = new UIPermissionsHelper(this);
 

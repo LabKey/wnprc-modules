@@ -2210,6 +2210,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");
         TestLogger.log(wt.get("value").toString());
         Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
+        testWeightToRestraintObjectIdRelationship();
     }
 
     @Test
@@ -2287,6 +2288,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         JSONObject id = (JSONObject) t.getRows().get(0).get("assignedto");
         Assert.assertEquals(null, defaultItem, id.get("value").toString());
 
+        testWeightToRestraintObjectIdRelationship();
     }
 
     @Test
@@ -2494,6 +2496,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         SelectRowsResponse c = fetchRestraintDataGivenObjectId(objectid.get("value").toString());
         JSONObject rt = (JSONObject) c.getRows().get(0).get("restraintType");
         Assert.assertEquals(null, "Table-Top", rt.get("value"));
+        testWeightToRestraintObjectIdRelationship();
 
     }
 

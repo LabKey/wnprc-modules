@@ -2426,6 +2426,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("edit-batch");
         WebElement el = Locator.id("weight-bulk").findElement(getDriver());
         el.sendKeys(WEIGHT_VAL.toString());
+        WebElement el2 = fillAnInput("restraint-bulk", "T");
         clickNewButton("submit-bulk");
         waitUntilElementIsClickable("submit-all-btn");
         clickNewButton("submit-all-btn");
@@ -2438,6 +2439,18 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
             Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         }
+        testWeightToObjectIdRelationship();
+    }
+
+    //for the most recently entered weight / restraint pair, do we have matching "FK" lookups
+    //from the weight record to the restraint record. e.g., weight|restraint_objectid == restraint|objectid ?
+    public void testWeightToObjectIdRelationship() throws IOException, CommandException
+    {
+        //get the weight data
+        SelectRowsResponse w = fetchWeightData();
+        JSONObject wt = (JSONObject) w.getRows().get(0).get("restraint_objectid");
+        SelectRowsResponse r = fetchRestraintDataGivenObjectId((String) wt.get("value"));
+        Assert.assertEquals(1, r.getRows().size());
     }
 
     @Test

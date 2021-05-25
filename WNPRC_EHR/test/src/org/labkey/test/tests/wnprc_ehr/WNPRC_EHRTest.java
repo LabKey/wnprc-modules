@@ -2439,12 +2439,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
             JSONObject wt = (JSONObject) r.getRows().get(i).get("weight");
             Assert.assertEquals(null, WEIGHT_VAL, wt.get("value"));
         }
-        testWeightToObjectIdRelationship();
+        testWeightToRestraintObjectIdRelationship();
     }
 
     //for the most recently entered weight / restraint pair, do we have matching "FK" lookups
     //from the weight record to the restraint record. e.g., weight|restraint_objectid == restraint|objectid ?
-    public void testWeightToObjectIdRelationship() throws IOException, CommandException
+    public void testWeightToRestraintObjectIdRelationship() throws IOException, CommandException
     {
         //get the weight data
         SelectRowsResponse w = fetchWeightData();

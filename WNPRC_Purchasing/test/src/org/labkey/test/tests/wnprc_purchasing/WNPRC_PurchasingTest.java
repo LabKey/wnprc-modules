@@ -65,7 +65,7 @@ import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     //folders
-    private static final String FOLDER_TYPE = "WNPRC Purchasing";
+    private static final String PURCHASING_FOLDER = "WNPRC Purchasing";
     private static final String BILLING_FOLDER = "WNPRC Billing";
 
     //user groups
@@ -128,8 +128,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToHome();
 
         log("Create 'WNPRC Billing' folder");
-        _containerHelper.createProject(BILLING_FOLDER, FOLDER_TYPE);
-        _containerHelper.enableModules(Arrays.asList("EHR_Billing"));
+        _containerHelper.createProject(BILLING_FOLDER, PURCHASING_FOLDER);
+        _containerHelper.enableModules(Arrays.asList("EHR_Billing", "Dumbster"));
 
         log("Populate ehr_billing.aliases");
         goToProjectHome(BILLING_FOLDER);
@@ -138,7 +138,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToHome();
 
         log("Create a 'WNPRC Purchasing' folder");
-        _containerHelper.createProject(getProjectName(), FOLDER_TYPE);
+        _containerHelper.createProject(getProjectName(), PURCHASING_FOLDER);
 
         log("Add WNPRC Purchasing Landing page webpart");
         new SiteNavBar(getDriver()).enterPageAdminMode();
@@ -647,6 +647,154 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Incorrect order status", Arrays.asList("Order Delivered", "Order Delivered"), table.getColumnDataAsText("requestStatus"));
     }
 
+    @Test
+    public void testEmailNotificationApprovalWorkflow()
+    {
+        log("Delete all the emails from dumbster");
+        enableEmailRecorder();
+
+        goToProjectHome(PURCHASING_FOLDER);
+        impersonate(REQUESTER_USER_2);
+        goToRequesterPage();
+        Map<String, String> emailApprovalRequest = new HashMap<>();
+        emailApprovalRequest.put("Account to charge", "acct100");
+        emailApprovalRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        emailApprovalRequest.put("Vendor", "Stuff, Inc");
+        emailApprovalRequest.put("Delivery attention to", "Testing the email notification approval workflow");
+        emailApprovalRequest.put("Business purpose", "BP");
+        emailApprovalRequest.put("Item description", "Item1");
+        emailApprovalRequest.put("Unit", "Term");
+        emailApprovalRequest.put("Unit Cost", "500");
+        emailApprovalRequest.put("Quantity", "10");
+        clickAndWait(Locator.linkWithText("Create Request"));
+        String requestId = createRequest(emailApprovalRequest, null);
+        stopImpersonating();
+
+        log("Verifying create request emails");
+        goToModule("Dumbster");
+        EmailRecordTable mailTable = new EmailRecordTable(this);
+        String subject = "A new purchase request for $5,000.00 is submitted";
+        checker().verifyEquals("Incorrect To for the emails sent",
+                Arrays.asList(getCurrentUser(), "purchasedirector@test.com", "purchaseadmin@test.com"),
+                mailTable.getColumnDataAsText("To"));
+        mailTable.clickSubjectAtIndex(subject, 0);
+        log("Email body " + mailTable.getMessage(subject).getBody());
+        checker().verifyTrue("Incorrect email body",
+                mailTable.getMessage(subject).getBody().contains("A new purchasing request # " + requestId + " by " + requester2Name + " was submitted on " + _dateTimeFormatter.format(today) + " for the total of $5,000.00."));
+        log("Delete the emails form dumbster");
+        enableEmailRecorder();
+
+        goToPurchaseAdminPage();
+        impersonate(PURCHASE_DIRECTOR_USER);
+        clickAndWait(Locator.linkWithText("All Requests"));
+        clickAndWait(Locator.linkWithText(requestId));
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setStatus("Request Approved").submit();
+        stopImpersonating();
+
+        goToModule("Dumbster");
+        mailTable = new EmailRecordTable(this);
+        subject = "Purchase request # " + requestId + " status update";
+        checker().verifyEquals("Incorrect To for the emails sent after approval", Arrays.asList(getCurrentUser(), ADMIN_USER), mailTable.getColumnDataAsText("To"));
+        mailTable.clickSubjectAtIndex(subject, 0);
+        log("Email body " + mailTable.getMessage(subject).getBody());
+        checker().verifyTrue("Incorrect email body",
+                mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " for the total of $5,000.00 has been approved by the purchasing director."));
+    }
+
+    @Test
+    public void testEmailNotificationRejectWorkflow()
+    {
+        goToProjectHome(PURCHASING_FOLDER);
+        impersonate(REQUESTER_USER_1);
+        goToRequesterPage();
+        Map<String, String> emailApprovalRequest = new HashMap<>();
+        emailApprovalRequest.put("Account to charge", "acct100");
+        emailApprovalRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        emailApprovalRequest.put("Vendor", "Stuff, Inc");
+        emailApprovalRequest.put("Delivery attention to", "Testing the email notification approval workflow");
+        emailApprovalRequest.put("Business purpose", "BP");
+        emailApprovalRequest.put("Item description", "Item1");
+        emailApprovalRequest.put("Unit", "Term");
+        emailApprovalRequest.put("Unit Cost", "500");
+        emailApprovalRequest.put("Quantity", "20");
+        clickAndWait(Locator.linkWithText("Create Request"));
+        String requestId = createRequest(emailApprovalRequest, null);
+        stopImpersonating();
+
+        log("Delete the emails in the dumbster");
+        enableEmailRecorder();
+
+        log("Purchase Director : Rejecting the request");
+        goToPurchaseAdminPage();
+        impersonate(PURCHASE_DIRECTOR_USER);
+        clickAndWait(Locator.linkWithText("All Requests"));
+        clickAndWait(Locator.linkWithText(requestId));
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setStatus("Request Rejected").submit();
+        stopImpersonating();
+
+        goToModule("Dumbster");
+        EmailRecordTable mailTable = new EmailRecordTable(this);
+        String subject = "Purchase request # " + requestId + " status update";
+        checker().verifyEquals("Incorrect To for the emails sent after rejection", Arrays.asList(getCurrentUser(), ADMIN_USER),
+                mailTable.getColumnDataAsText("To"));
+        mailTable.clickSubjectAtIndex(subject, 0);
+        log("Email body " + mailTable.getMessage(subject).getBody());
+        checker().verifyTrue("Incorrect email body",
+                mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " for the total of $10,000.00 has been rejected by the purchasing director."));
+    }
+
+    @Test
+    public void testEmailCustomizationLineItemUpdate()
+    {
+        log("Updating the settings for custom message");
+        goToAdminConsole().clickEmailCustomization();
+        selectOptionByText(Locator.css("select[id='templateClass']"), "WNPRC Purchasing - Line item update notification");
+        setFormElement(Locator.name("emailSubject"), "Custom subject # ^requestNum^ for line item update");
+        clickButton("Save");
+
+        goToRequesterPage();
+        impersonate(REQUESTER_USER_1);
+        goToRequesterPage();
+        Map<String, String> emailApprovalRequest = new HashMap<>();
+        emailApprovalRequest.put("Account to charge", "acct100");
+        emailApprovalRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        emailApprovalRequest.put("Vendor", "Stuff, Inc");
+        emailApprovalRequest.put("Delivery attention to", "Testing the email notification approval workflow");
+        emailApprovalRequest.put("Business purpose", "BP");
+        emailApprovalRequest.put("Item description", "Item1");
+        emailApprovalRequest.put("Unit", "Term");
+        emailApprovalRequest.put("Unit Cost", "500");
+        emailApprovalRequest.put("Quantity", "20");
+        clickAndWait(Locator.linkWithText("Create Request"));
+        String requestId = createRequest(emailApprovalRequest, null);
+        stopImpersonating();
+
+        log("Deleting the emails from dumbster");
+        enableEmailRecorder();
+
+        log("Updating the line item to trigger the");
+        impersonate(ADMIN_USER);
+        goToPurchaseAdminPage();
+        clickAndWait(Locator.linkWithText("All Requests"));
+        clickAndWait(Locator.linkWithText(requestId));
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setQuantity("15").submit();
+        stopImpersonating();
+
+        goToModule("Dumbster");
+        EmailRecordTable mailTable = new EmailRecordTable(this);
+        String subject = "Custom subject # " + requestId + " for line item update";
+        checker().verifyEquals("Incorrect To for the emails sent for line item update", Arrays.asList(REQUESTER_USER_1),
+                mailTable.getColumnDataAsText("To"));
+        mailTable.clickSubjectAtIndex(subject, 0);
+        log("Email body " + mailTable.getMessage(subject).getBody());
+        checker().verifyTrue("Incorrect email body",
+                mailTable.getMessage(subject).getBody().contains("Your purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " has been updated."));
+
+    }
+
     private String getQueryName(String linkName)
     {
         clickAndWait(Locator.linkWithText(linkName));
@@ -706,7 +854,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     @Override
     protected String getProjectName()
     {
-        return "WNPRC Purchasing";
+        return PURCHASING_FOLDER;
     }
 
     @Override

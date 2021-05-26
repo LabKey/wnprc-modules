@@ -274,8 +274,12 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     }
 
     @Test
-    public void testCreateRequest() throws IOException, CommandException
+    public void testCreateRequestAndEmailNotification() throws IOException, CommandException
     {
+        log("Delete emails from dumbster");
+        enableEmailRecorder();
+        goToModule("Dumbster");
+
         clearAllRequest();
         goToRequesterPage();
         impersonate(REQUESTER_USER_1);
@@ -305,7 +309,27 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
                 table.getDataAsText(0, "requestStatus"));
+        String requestId = table.getDataAsText(0, "rowId");
         stopImpersonating();
+
+        goToModule("Dumbster");
+        log("Verify email sent to purchase admins for orders < $5000");
+        EmailRecordTable mailTable = new EmailRecordTable(this);
+        String subject = "A new purchase request for $250.00 is submitted";
+
+        List<String> sortedExpected = Arrays.asList(getCurrentUser(), "purchaseadmin@test.com");
+        sortedExpected.sort(String.CASE_INSENSITIVE_ORDER);
+
+        List<String> sortedActual = mailTable.getColumnDataAsText("To");
+        sortedActual.sort(String.CASE_INSENSITIVE_ORDER);
+
+        checker().verifyEquals("Incorrect To for the emails sent", sortedExpected, sortedActual);
+
+        mailTable.clickSubjectAtIndex(subject, 0);
+        log("Email body " + mailTable.getMessage(subject).getBody());
+        checker().verifyTrue("Incorrect email body",
+                mailTable.getMessage(subject).getBody().contains("A new purchasing request # " + requestId + " by " + requester1Name + " was submitted on " + _dateTimeFormatter.format(today) + " for the total of $250.00."));
+
     }
 
     @Test
@@ -670,7 +694,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         String requestId = createRequest(emailApprovalRequest, null);
         stopImpersonating();
 
-        log("Verifying create request emails");
+        log("Verifying create request emails for request total of $5000");
         goToModule("Dumbster");
         EmailRecordTable mailTable = new EmailRecordTable(this);
         String subject = "A new purchase request for $5,000.00 is submitted";
@@ -681,7 +705,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("A new purchasing request # " + requestId + " by " + requester2Name + " was submitted on " + _dateTimeFormatter.format(today) + " for the total of $5,000.00."));
-        log("Delete the emails form dumbster");
+        log("Delete emails from dumbster");
         enableEmailRecorder();
 
         goToPurchaseAdminPage();
@@ -725,7 +749,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Delete the emails in the dumbster");
         enableEmailRecorder();
 
-        log("Purchase Director : Rejecting the request");
+        log("Purchase Director : Rejecting the request >= $5000");
         goToPurchaseAdminPage();
         impersonate(PURCHASE_DIRECTOR_USER);
         clickAndWait(Locator.linkWithText("All Requests"));
@@ -774,24 +798,53 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Deleting the emails from dumbster");
         enableEmailRecorder();
 
-        log("Updating the line item to trigger the");
+        log("Updating the request status and line item to trigger email notif");
         impersonate(ADMIN_USER);
         goToPurchaseAdminPage();
         clickAndWait(Locator.linkWithText("All Requests"));
         clickAndWait(Locator.linkWithText(requestId));
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setStatus("Order Placed");
         requestPage.setQuantity("15").submit();
         stopImpersonating();
 
         goToModule("Dumbster");
         EmailRecordTable mailTable = new EmailRecordTable(this);
         String subject = "Custom subject # " + requestId + " for line item update";
-        checker().verifyEquals("Incorrect To for the emails sent for line item update", Arrays.asList(REQUESTER_USER_1),
+        checker().verifyEquals("Incorrect To for the emails sent for line item update", Arrays.asList(REQUESTER_USER_1, REQUESTER_USER_1),
                 mailTable.getColumnDataAsText("To"));
-        mailTable.clickSubjectAtIndex(subject, 0);
+        mailTable.clickSubject(subject);
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("Your purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " has been updated."));
+
+        subject = "Purchase request # " + requestId + " status update";
+        mailTable.clickSubject(subject);
+        log("Email body " + mailTable.getMessage(subject).getBody());
+        checker().verifyTrue("Incorrect email body",
+                mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on "+ _dateTimeFormatter.format(today) + " for the total of $7,500.00 has been ordered by the purchasing department."));
+
+
+        log("Delete emails from dumbster");
+        enableEmailRecorder();
+
+        log("Verify quantity received email notif");
+        goToReceiverPage();
+        impersonate(RECEIVER_USER);
+        clickAndWait(Locator.linkWithText(requestId));
+        requestPage = new CreateRequestPage(getDriver());
+        requestPage.setQuantityReceived("15").submit();
+        stopImpersonating();
+
+        goToModule("Dumbster");
+        mailTable = new EmailRecordTable(this);
+        subject = "Custom subject # " + requestId + " for line item update";
+        checker().verifyEquals("Incorrect To for the emails sent for line item update", Arrays.asList(REQUESTER_USER_1),
+                mailTable.getColumnDataAsText("To"));
+        mailTable.clickSubject(subject);
+        log("Email body " + mailTable.getMessage(subject).getBody());
+        checker().verifyTrue("Incorrect email body",
+                mailTable.getMessage(subject).getBody().contains("All line items are received."));
 
     }
 

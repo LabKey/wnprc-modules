@@ -22,13 +22,13 @@ interface LineItemProps {
     onDelete: (rowIndex: number) => void;
     rowIndex: number;
     isAdmin: boolean;
-    canUpdate: boolean;
-    canInsert: boolean;
+    isRequester: boolean;
+    isReceiver: boolean;
     hasRequestId?: boolean;
 }
 
 export const LineItemRow: FC<LineItemProps> = memo(props => {
-    const { model, onInputChange, onDelete, rowIndex, isAdmin, canUpdate, canInsert, hasRequestId } = props;
+    const { model, onInputChange, onDelete, rowIndex, isAdmin, isRequester, isReceiver, hasRequestId } = props;
 
     const onValueChange = useCallback(
         (colName, value) => {
@@ -59,29 +59,31 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             value={model.item}
                             hasError={model.errors?.find(field => field.fieldName === 'item')}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}
+                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
                         />
                     </Col>
                     <Col xs={1}>
                         <ControlledSubstance
                             value={model.controlledSubstance}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}/>
+                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
+                        />
                     </Col>
                     <Col xs={1}>
                         <UnitInput
                             value={model.itemUnit}
                             hasError={model.errors?.find(field => field.fieldName === 'itemUnit')}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}
+                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
                         />
                     </Col>
-                    { (isAdmin || !canUpdate) &&
+                    { (isAdmin || isRequester) &&
                         <Col xs={1}>
                             <UnitCostInput
                                     value={model.unitCost}
                                     hasError={model.errors?.find(field => field.fieldName === 'unitCost')}
                                     onChange={onValueChange}
+                                    isReadOnly={hasRequestId && isRequester}
                             />
                         </Col>
                     }
@@ -90,19 +92,20 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             value={model.quantity}
                             hasError={model.errors?.find(field => field.fieldName === 'quantity')}
                             onChange={onValueChange}
-                            isReadOnly={!isAdmin && canUpdate}
+                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
                         />
                     </Col>
-                    { hasRequestId && (isAdmin || canUpdate) &&
+                    { (hasRequestId) &&
                     <Col xs={1}>
                         <QuantityReceivedInput
                                 value={model.quantityReceived}
                                 hasError={model.errors?.find(field => field.fieldName === 'quantityReceived')}
                                 onChange={onValueChange}
+                                isReadOnly={hasRequestId && isRequester}
                         />
                     </Col>
                     }
-                    { (isAdmin || !canUpdate) &&
+                    { (isAdmin || isRequester) &&
                         <Col xs={1}>
                             <SubtotalInput unitCost={model.unitCost} quantity={model.quantity} />
                         </Col>
@@ -113,7 +116,7 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                     { !hasRequestId &&
                         <Col xs={2}/>
                     }
-                    {(isAdmin || !canUpdate) &&
+                    {(isAdmin || (!hasRequestId && isRequester)) &&
                         <Col xs={1}>
                                 <span
                                         id={'delete-line-item-row-' + rowIndex}

@@ -48,6 +48,7 @@ export const App: FC = memo(() => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
+    const [requester, setRequester] = useState<number>();
     const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
@@ -107,6 +108,7 @@ export const App: FC = memo(() => {
                                 cardPostDate: vals[0].cardPostDate ? new Date(vals[0].cardPostDate) : null,
                             })
                         );
+                        setRequester(vals[0].createdBy);
                     }
                 });
 
@@ -249,7 +251,8 @@ export const App: FC = memo(() => {
                 documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0
                     ? documentAttachmentModel
                     : undefined,
-                lineItemRowsToDelete
+                lineItemRowsToDelete,
+                ActionURL.getParameter('isNewRequest')
             )
                 .then(r => {
                     if (r.success) {
@@ -402,21 +405,21 @@ export const App: FC = memo(() => {
 
     return (
         <>
-            {
-                // has to be a purchasing editors to update the existing request
-                requestId && !hasPurchasingUpdatePermission && (
+            { (requestId && (!hasPurchasingUpdatePermission && hasPurchasingInsertPermission && !hasPurchasingAdminPermission && getServerContext().user.id !== requester)) && (
                     <Alert>You do not have sufficient permissions to update this request.</Alert>
                 )
             }
             {
-                // display ui for purchasing editors to update existing request or requesters to enter new request
-                ((requestId && hasPurchasingUpdatePermission) || requestId === undefined) && (
+                // display ui for purchasing editors to update existing request or requesters to enter new request or requesters to see a read only view of the existing request
+                ((requestId && hasPurchasingUpdatePermission) || requestId === undefined || (requestId && hasPurchasingInsertPermission && getServerContext().user.id === requester)) && (
                     <>
                         <RequestOrderPanel
                             onInputChange={requestOrderModelChange}
                             model={requestOrderModel}
+                            hasRequestId={!!requestId}
+                            isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                             isAdmin={hasPurchasingAdminPermission}
-                            canUpdate={hasPurchasingUpdatePermission}
+                            isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
                         />
                         {requestId && hasPurchasingAdminPermission && (
                             <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
@@ -430,9 +433,9 @@ export const App: FC = memo(() => {
                             lineItems={lineItems}
                             errorMsg={lineItemErrorMsg}
                             hasRequestId={!!requestId}
+                            isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                             isAdmin={hasPurchasingAdminPermission}
-                            canUpdate={hasPurchasingUpdatePermission}
-                            canInsert={hasPurchasingInsertPermission}
+                            isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
                         />
                         <button
                             disabled={isSaving}
@@ -446,6 +449,7 @@ export const App: FC = memo(() => {
                         {!isSaving && (
                             <>
                                 <button
+                                    disabled={requestId && !hasPurchasingUpdatePermission}
                                     className="btn btn-primary pull-right"
                                     id={requestId ? 'save' : 'submitForReview'}
                                     name={requestId ? 'save' : 'submitForReview'}

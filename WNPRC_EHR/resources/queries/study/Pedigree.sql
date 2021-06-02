@@ -6,6 +6,7 @@
 SELECT
 
 d.id as Id,
+CAST(d.id.demographics.birth AS varchar) as BirthDate,
 d.dam as Dam,
 d.sire as Sire,
 '' as Display,
@@ -55,6 +56,7 @@ UNION ALL
 SELECT
 
 p.id as Id,
+CAST(NULL AS varchar) as BirthDate,
 p.dam as Dam,
 p.sire as Sire,
 '' as Display,

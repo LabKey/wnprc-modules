@@ -8,6 +8,5 @@
         <dataset name="pregnancies"         id="6001" category="Colony Management" type="Standard"/>
         <dataset name="pregnancy_outcomes"  id="6002" category="Colony Management" type="Standard"/>
         <dataset name="ultrasounds"         id="6003" category="Colony Management" type="Standard"/>
-        <dataset name="tissue_samples"         id="6004" category="Pathology" type="Standard"/>
     </datasets>
 </datasets>

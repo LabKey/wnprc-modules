@@ -3,6 +3,7 @@
        <column name="Id" />
        <column name="date" />
        <column name="source" />
+       <column name="vendor_id"/>
        <column name="remark" />
        <column name="qcstate" />
        <column name="taskid" />

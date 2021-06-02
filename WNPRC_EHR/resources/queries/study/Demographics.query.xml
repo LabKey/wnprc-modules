@@ -90,13 +90,7 @@
                         <!--</fk>-->
                         <url>/ehr/participantView.view?participantId=${sire}</url>
                     </column>
-                    <column columnName="origin">
-                        <columnTitle>Origin</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>source</fkTable>
-                            <fkColumnName>Code</fkColumnName>
-                        </fk>
+                    <column columnName="origin/source">
                     </column>
                     <column columnName="birth">
                         <formatString>yyyy-MM-dd</formatString>
@@ -219,7 +213,6 @@
                         <!--</fk>-->
                     </column>
                     <column columnName="geographic_origin">
-                        <columnTitle>Geographic Origin</columnTitle>
                     </column>
                     <!--<column columnName="behavior">
                         <isHidden>true</isHidden>
@@ -231,6 +224,15 @@
                         </url>
                         &lt;!&ndash;<formatString>#.##</formatString>&ndash;&gt;
                     </column>-->
+                    <column columnName="Feeding/TypeOfChow">
+                        <columnTitle>Type of Chow</columnTitle>
+                        <isHidden>true</isHidden>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>feeding_types</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
                 </columns>
             </table>
         </tables>

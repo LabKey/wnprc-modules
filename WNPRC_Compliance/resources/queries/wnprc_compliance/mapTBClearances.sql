@@ -6,6 +6,8 @@ first_name,
 middle_name,
 last_name,
 notes,
+hold,
+measles_required,
 tbResults.tbid as id,
 to_char(tbResults.tbdate,'MM/DD/YYYY') as date,
 'tb_clearances' as table_name

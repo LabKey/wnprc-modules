@@ -1,4 +1,6 @@
 (function() {
+    WNPRC_EHR.initQCStates();
+
     var idFilterConfig = {
         'Id~startswith': 'x'
     };

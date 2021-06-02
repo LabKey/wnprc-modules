@@ -26,11 +26,11 @@
                     items: [
                         {
                             name: 'Enter Charges with Animal Ids',
-                            url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'Charges'})
+                            url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'Charges', returnUrl: window.location.href})
                         },
                         {
                             name: 'Enter Charges without Animal Ids',
-                            url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'NonAnimalCharges'})
+                            url: LABKEY.ActionURL.buildURL('ehr', 'dataEntryForm', ctx.EHRStudyContainer, {formType: 'NonAnimalCharges', returnUrl: window.location.href})
                         }
                     ]
                 }]

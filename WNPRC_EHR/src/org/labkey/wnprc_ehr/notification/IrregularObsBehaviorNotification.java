@@ -156,7 +156,6 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     animalId.append(animalEncoded);
                     animalId.append("</a>");
 
-
                     msg.append(createTableBorder(behaviorsDashLength));
 
                     msg.append("<tr>");

@@ -138,7 +138,7 @@ export class Breeding
         this.detailElementId = detailElementId;
         this.gridElementId = gridElementId;
         Breeding.updateBrowserState('subjects', subjects);
-        this.renderGrid(URI(document.location).query(true) as PregnancyState);
+        this.renderGrid(URI(document.location).query(true) as unknown as PregnancyState);
     }
 
     // noinspection JSUnusedGlobalSymbols

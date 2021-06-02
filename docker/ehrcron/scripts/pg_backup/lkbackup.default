@@ -1,0 +1,19 @@
+[general]
+backup_dest = /primary_backup/location
+primatefs_dest = /longterm/backup/location/
+compress = 1
+pg_dbname = dbname
+pg_host = servicename
+pg_user = pguser
+pg_path = /usr/lib/postgresql/11/bin
+pgdump_format = c
+
+[lk_config]
+baseURL= http://labkey:8080/
+containerPath = shared
+
+[file_rotation]
+maxDaily = 7
+maxDaily_PrFS = 10
+maxWeekly = 4
+maxMonthly = 24

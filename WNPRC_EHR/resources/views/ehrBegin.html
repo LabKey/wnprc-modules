@@ -63,7 +63,8 @@ function createNavMenu()
                 {name: 'Treatment Schedule - All', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:roomCage&activeReport:treatmentSchedule'},
                 {name: 'Incomplete Treatment - All', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:none&showReport:1&activeReport:treatmentsIncomplete'},
                 {name: 'Food Deprives Schedule', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/animalHistory.view#inputType:none&showReport:1&activeReport:ScheduledFoodDeprives'},
-                {name: 'Forms Completed Today', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr&query.queryName=TasksByLocation&query.viewName=Completion Times&query.taskid/Created~dateeq='+(new Date()).format('Y-m-d')}
+                {name: 'Forms Completed Today', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr&query.queryName=TasksByLocation&query.viewName=Completion Times&query.taskid/Created~dateeq='+(new Date()).format('Y-m-d')},
+                {name: 'On Call Schedule', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/OnCallCalendar.view?'}
             ]}
         ]
     });
@@ -82,7 +83,9 @@ function createNavMenu()
                 {name: 'Population Summary', url: '<%=contextPath%>/ehr' + ctx['EHRStudyContainer'] + '/populationOverview.view?'},
                 {name: 'Colony Census', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/colonyCensus.view?'},
                 {name: 'Pregnancies', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/breeding.view?'},
+                {name: 'Research Ultrasounds', url: '<%=contextPath%>/wnprc_ehr' + ctx['EHRStudyContainer'] + '/research_ultrasounds.view?'},
                 {name: 'Room Utilization', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=ehr_lookups&query.queryName=roomUtilization'},
+                {name: 'Feeding', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=feeding'},
                 {name: 'Time Chart', url: '<%=contextPath%>/visualization' + ctx['EHRStudyContainer'] + '/timeChartWizard.view?edit=true'},
                 {name: 'Viral Challenges', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=ViralChallenges'},
                 {name: 'Weight: 10% Drop In Last 30 Days', url: '<%=contextPath%>/query' + ctx['EHRStudyContainer'] + '/executeQuery.view?schemaName=study&query.queryName=weightRelChange&query.viewName=10 Pct Drop In Last 30 Days'},

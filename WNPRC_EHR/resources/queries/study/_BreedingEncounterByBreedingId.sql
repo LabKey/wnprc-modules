@@ -13,3 +13,4 @@ WHERE be.lsid = (SELECT p.breedingencounterid
                        FROM pregnancies p
                        WHERE p.objectid = PARENT_RECORD_ID
                        LIMIT 1)
+ORDER BY be.date DESC

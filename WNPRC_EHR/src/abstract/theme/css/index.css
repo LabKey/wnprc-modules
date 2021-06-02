@@ -1,0 +1,22 @@
+.animal-info-table {
+    border: 1px solid #B4B4B4;
+    max-width: 750px;
+}
+
+.animal-info-table > thead {
+    background-color: #F2F2F2;
+}
+.animal-info-table > thead > tr > th {
+    text-align: center;
+    font-weight: bold;
+}
+
+.animal-info-table > tbody > tr > td {
+    width: 25%;
+}
+
+/*give the 3rd column a border*/
+.animal-info-table > tbody > tr>:nth-child(3) {
+    border-left: 1px solid #B4B4B4;
+}
+

@@ -67,6 +67,8 @@
     <dataset name="pregnancy_outcomes" id="1094" category="ColonyManagement"/>
     <dataset name="pregnancies" id="1095" category="ColonyManagement"/>
     <dataset name="ultrasounds" id="1096" category="ColonyManagement"/>
+    <dataset name="research_ultrasounds" id="6005" category="ColonyManagement"/>
+    <dataset name="NecropsyAbstract" id="6009" />
     <dataset name="breeding_encounters" id="1097" category="ColonyManagement"/>
   </datasets>
 </datasets>

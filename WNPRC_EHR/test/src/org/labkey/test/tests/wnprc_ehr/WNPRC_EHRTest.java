@@ -54,6 +54,7 @@ import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.FileBrowserHelper;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.PasswordUtil;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
@@ -128,7 +129,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
     private final File GROUP_CATEGORY_ASSOCIATIONS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/groupCategoryAssociations.tsv");
 
-    private final File GROUP_CATEGORY_ASSOCIATIONS_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/groupCategoryAssociations.tsv");
     private static final int GROUP_CATEGORY_ASSOCIATIONS_NUM_ROWS = 11;
 
     private final File TIER_RATES_TSV = TestFileUtils.getSampleData("wnprc_ehr/billing/tierRates.tsv");
@@ -460,8 +460,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     {
         fillAnInput("animalid_" + index.toString(), ANIMAL_SUBSET_EHR_TEST[index]);
         WebElement el2 = fillAnInput("weight_" + index.toString(), weightVal);
-        el2.sendKeys(Keys.TAB);
-        el2.sendKeys(Keys.TAB);
+
+        //commenting out since this tries to tab over the date and time and fails, since looks like it requires selecting the date and time value
+//        el2.sendKeys(Keys.TAB);
+//        el2.sendKeys(Keys.TAB);
+
         fillAnInput("remark_"+ index.toString(), "Entered from automated test");
         fillAnInput("restraint_" + index.toString(), "T");
     }
@@ -1154,6 +1157,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         _extHelper.waitForExtDialog("Finalize Form");
         click(Ext4Helper.Locators.ext4Button("Yes"));
         waitForTextToDisappear("Saving Changes", 5000);
+        sleep(5000);
     }
 
     private void submitForm()
@@ -1279,7 +1283,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("Test for Overlapping date error during data upload");
         String error1 = "ERROR: For charge Item Per diems: Charge item start date (2050-01-01) is after charge item end date (2049-12-31).";
         String error2 = "ERROR: For charge Item Medicine A per dose: Charge rate (2018-05-05 to 2019-12-31) overlaps a previous charge rate (2007-01-01 to 2045-12-31).";
-        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_ERROR_TSV);
+        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_ERROR_TSV, error1, error2);
 
         refresh();
 
@@ -1290,10 +1294,6 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
 
         refresh();
 
-        log("Test for Group-Category association during data upload");
-        String error1 = "ERROR: 'Scientific Protocol Implementation, Surgery' is not a valid group and category association. If this is a new association, then add this association to ehr_billing.groupCategoryAssociations table by going to 'GROUP CATEGORY ASSOCIATIONS' link on the main Finance page.";
-        String error2 = "ERROR: 'Clinical Pathology, Surgery' is not a valid group and category association. If this is a new association, then add this association to ehr_billing.groupCategoryAssociations table by going to 'GROUP CATEGORY ASSOCIATIONS' link on the main Finance page.";
-        attemptUploadWithBadData(CHARGEABLE_ITEMS_RATES_GROUP_CATEGORY_ERROR_TSV, error1, error2);
         uploadChargeRates(CHARGEABLE_ITEMS_RATES_UPDATE_TSV, CHARGE_RATES_NUM_UPDATE_ROWS, CHARGEABLE_ITEMS_NUM_UPDATE_ROWS);
 
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
@@ -1320,7 +1320,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitForText("Import Lookups by Alternate Key");
 
         setFormElement(Locator.xpath("//div[@id='uploadFileDiv2']/descendant::input[@name='file']"), file.getPath());
-        click(Locator.button("Submit"));
+        waitAndClick(Ext4Helper.Locators.ext4Button("Submit"));
 
         waitForText("ERROR");
         assertTextPresent(errors);
@@ -1591,14 +1591,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
         waitForElement(Locator.tagWithText("em", "No data to show."), WAIT_FOR_JAVASCRIPT);
-        _extHelper.clickExtTab("All Tasks");
+        clickBootstrapTab("All Tasks");
         waitForElement(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, ((Locator) Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a[.='Test weight task']")).findElements(getDriver()).size());
-        _extHelper.clickExtTab("Tasks By Room");
+        clickBootstrapTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         sleep(WAIT_FOR_JAVASCRIPT); //For the table to completely load - Teamcity error fix.
         assertEquals("Incorrect number of task rows.", 3, ((Locator) Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a[.='Test weight task']")).findElements(getDriver()).size());
-        _extHelper.clickExtTab("Tasks By Id");
+        clickBootstrapTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         sleep(WAIT_FOR_JAVASCRIPT); //For the table to completely load - Teamcity error fix.
         assertEquals("Incorrect number of task rows.", 3, ((Locator) Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "
@@ -1645,7 +1645,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         recallLocation();
         waitAndClickAndWait(Locator.linkWithText("Enter Data"));
         waitForElement(Locator.xpath("//div[contains(@class, 'my-tasks-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
-        _extHelper.clickExtTab("Review Required");
+        clickBootstrapTab("Tasks Requiring Review");
         waitForElement(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'review-requested-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']")));
         String href2 = getAttribute(Locator.linkWithText(TASK_TITLE), "href");
@@ -1697,14 +1697,14 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitAndClickAndWait(Locator.extButtonEnabled("Save & Close"));
 
         waitForElement(Locator.tagWithText("em", "No data to show."), WAIT_FOR_JAVASCRIPT);
-        _extHelper.clickExtTab("All Tasks");
+        clickBootstrapTab("All Tasks");
         //TODO: make these more
         waitForElement(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'all-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
-        _extHelper.clickExtTab("Tasks By Room");
+        clickBootstrapTab("Tasks By Room");
         waitForElement(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'room-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
-        _extHelper.clickExtTab("Tasks By Id");
+        clickBootstrapTab("Tasks By Id");
         waitForElement(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and "+Locator.NOT_HIDDEN+"]//table"), WAIT_FOR_JAVASCRIPT);
         assertEquals("Incorrect number of task rows.", 1, getElementCount(Locator.xpath("//div[contains(@class, 'id-tasks-marker') and " + Locator.NOT_HIDDEN + "]//tr[@class='labkey-alternate-row' or @class='labkey-row']//a").withText(MPR_TASK_TITLE)));
         stopImpersonating();
@@ -1824,6 +1824,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         log("returned to data entry page");
         sleep(1500);
         stopImpersonating();
+    }
+
+    private void clickBootstrapTab(String tab)
+    {
+        Locator loc = Locator.tagWithClass("ul", "nav-tabs").append(Locator.tagWithText("a", tab));
+        click(loc);
     }
 
     @Test
@@ -2124,8 +2130,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         String date = LocalDateTime.now().format(_dateTimeFormatter);
         String amount = "1028.95";
         navigateToFolder(PROJECT_NAME, PRIVATE_FOLDER);
-        waitForText("Invoice");
-        clickAndWait(Locator.bodyLinkContainingText("Invoice"));
+        Locator invoiceLink = Locator.bodyLinkContainingText("Invoice");
+        waitForElement(invoiceLink);
+        scrollIntoView(invoiceLink);
+        clickAndWait(invoiceLink);
         DataRegionTable invoice = new DataRegionTable("query", getDriver());
         invoice.clickEditRow(0);
         setFormElement(Locator.inputByNameContaining("invoiceSentOn"), date);
@@ -2190,8 +2198,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         waitUntilElementIsClickable("submit-all-btn");
         //shortWait().until(ExpectedConditions.elementToBeClickable(Locator.id("submit-all-btn")));
         clickNewButton("submit-all-btn");
-        clickNewButton("submit-final");
-        waitForText("Success");
+        clickAndWait(Locator.tagWithId("button","submit-final"));
+        assertTextPresent("Data Entry");
 
         SelectRowsResponse r = fetchWeightData();
         JSONObject wt = (JSONObject) r.getRows().get(0).get("weight");

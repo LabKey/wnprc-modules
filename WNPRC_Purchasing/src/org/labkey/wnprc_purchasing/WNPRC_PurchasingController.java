@@ -17,33 +17,73 @@
 package org.labkey.wnprc_purchasing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.admin.notification.NotificationService;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.Filter;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.ModuleHtmlView;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.RoleAssignment;
+import org.labkey.api.security.SecurityManager;
+import org.labkey.api.security.User;
+import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.MailHelper;
+import org.labkey.api.util.emailTemplate.EmailTemplateService;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.wnprc_purchasing.security.WNPRC_PurchasingDirectorRole;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class WNPRC_PurchasingController extends SpringActionController
 {
+    private static final Logger _log = LogManager.getLogger(WNPRC_PurchasingController.class);
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_PurchasingController.class);
     public static final String NAME = "wnprc_purchasing";
+    public static final Double ADDITIONAL_REVIEW_AMT = 5000.0; // additional review is required for requests >= $5000
 
     public WNPRC_PurchasingController()
     {
@@ -112,6 +152,30 @@ public class WNPRC_PurchasingController extends SpringActionController
         @Override
         public Object execute(RequestForm requestForm, BindException errors) throws Exception
         {
+            //get old line items to compare the difference with new incoming changes
+            List<LineItem> oldLineItems = null;
+            if (requestForm.getRowId() != null)
+            {
+                TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("lineItems", null);
+                Filter filter = new SimpleFilter(FieldKey.fromString("requestRowId"), requestForm.getRowId());
+                TableSelector tableSelector = new TableSelector(tableInfo, filter, new Sort("rowId"));
+                oldLineItems = tableSelector.getArrayList(LineItem.class);
+            }
+
+            //get old status to compare the difference with new status change
+            String oldStatusVal = "";
+            if (requestForm.getRowId() != null)
+            {
+                TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("purchasingRequests", null);
+                Filter filter = new SimpleFilter(FieldKey.fromString("rowId"), requestForm.getRowId());
+                Set<FieldKey> columns = new HashSet<>();
+                columns.add(FieldKey.fromString("rowId"));
+                columns.add(FieldKey.fromString("qcState/Label"));
+                final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(tableInfo, columns);
+                TableSelector tableSelector = new TableSelector(tableInfo, colMap.values(), filter, null);
+                oldStatusVal = String.valueOf(tableSelector.getMap().get(colMap.get(FieldKey.fromString("qcState/Label")).getAlias()));
+            }
+
             List<ValidationException> validationExceptions = WNPRC_PurchasingManager.get().submitRequestForm(getUser(), getContainer(), requestForm);
 
             if (validationExceptions.size() > 0)
@@ -119,11 +183,437 @@ public class WNPRC_PurchasingController extends SpringActionController
                 throw new BatchValidationException(validationExceptions, null);
             }
 
+            EmailTemplateForm emailTemplateForm = getValuesForEmailTemplate(requestForm);
+
+            //if its a new request
+            if (null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest())
+            {
+                sendNewRequestEmailNotification(emailTemplateForm);
+            }
+            else
+            {
+                sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
+            }
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
             response.put("requestId", requestForm.getRowId());
 
             return response;
+        }
+
+        private void sendRequestChangeEmailNotification(String oldStatus, EmailTemplateForm emailTemplateForm, RequestForm requestForm, @Nullable List<LineItem> oldLineItems) throws MessagingException, IOException, ValidationException
+        {
+            List<User> usersWithInsertPerm = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(InsertPermission.class));
+
+            //get the lab end user who originated the request
+            List <User> labEndUsers = usersWithInsertPerm.stream().filter(u -> u.getUserId() == emailTemplateForm.getRequester().getUserId()).collect(Collectors.toList());
+            User endUser = labEndUsers.size() == 1 ? labEndUsers.get(0) : null;
+
+            //request status change email notification
+            if ((StringUtils.isBlank(oldStatus) || !emailTemplateForm.getRequestStatus().equalsIgnoreCase(oldStatus))
+                    && (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
+                        emailTemplateForm.getRequestStatus().equalsIgnoreCase("Order Placed") ||
+                        emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved"))
+               )
+            {
+                RequestStatusChangeEmailTemplate requestEmailTemplate = EmailTemplateService.get().getEmailTemplate(RequestStatusChangeEmailTemplate.class);
+                requestEmailTemplate.setNotificationBean(emailTemplateForm);
+                String emailSubject = requestEmailTemplate.renderSubject(getContainer());
+                String emailBody = requestEmailTemplate.renderBody(getContainer());
+
+                //request over 5k is approved or rejected - send notif to purchase admins
+                if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(ADDITIONAL_REVIEW_AMT)) >= 0 &&
+                        (emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Rejected") ||
+                        emailTemplateForm.getRequestStatus().equalsIgnoreCase("Request Approved")))
+                {
+                    //get purchasing dir userId
+                    Map<Integer, String> purchasingDirUserIds = getPurchasingDirectorUserIds();
+
+                    //get folder admin users
+                    List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
+
+                    //send emails to admins minus purchasing director
+                    for (User user : adminUsers)
+                    {
+                        if (!purchasingDirUserIds.containsKey(user.getUserId()))
+                        {
+                            NotificationService.get().sendMessageForRecipient(
+                                    getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                    emailSubject, emailBody,
+                                    getDataEntryFormUrl(emailTemplateForm.getRowId(), new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                                    String.valueOf(emailTemplateForm.getRowId()), "Request approved or rejected status");
+                        }
+                    }
+                }
+                else
+                {
+                    //send email to the lab end user who originated the request
+                    if (endUser != null)
+                    {
+                        NotificationService.get().sendMessageForRecipient(
+                                getContainer(), UserManager.getUser(getUser().getUserId()), endUser,
+                                emailSubject, emailBody,
+                                getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.RequesterAction.class, getContainer())),
+                                String.valueOf(emailTemplateForm.getRowId()), "Request status change");
+                    }
+                }
+            }
+            //identify line item changes
+
+            //get updated line items from the db
+            TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("lineItems", null);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestRowId"), requestForm.getRowId());
+            TableSelector tableSelector = new TableSelector(tableInfo, filter, new Sort("rowId"));
+            List<LineItem> updatedLineItems = tableSelector.getArrayList(LineItem.class);
+
+            //deleted rows
+            List<LineItem> removed = oldLineItems.stream().filter(o1 -> updatedLineItems.stream().noneMatch(o2 -> o2.getRowId() == o1.getRowId())).collect(Collectors.toList());
+
+            List<LineItem> quantityChange = updatedLineItems.stream().filter(o1 -> oldLineItems.stream().noneMatch(o2 -> o1.getRowId() == o2.getRowId()
+                                                                                    && o2.getQuantity() == o1.getQuantity())).collect(Collectors.toList());
+
+            boolean fullQuantityReceived = updatedLineItems.stream().filter(o2 -> o2.getQuantityReceived() >= o2.getQuantity()).count() == updatedLineItems.size();
+
+            if (removed.size() > 0 || quantityChange.size() > 0 || fullQuantityReceived)
+            {
+                LineItemChangeEmailTemplate lineItemChangeEmailTemplate = EmailTemplateService.get().getEmailTemplate(LineItemChangeEmailTemplate.class);
+                lineItemChangeEmailTemplate.setUpdatedLineItemsList(updatedLineItems);
+                lineItemChangeEmailTemplate.setOldLineItemsList(oldLineItems);
+                lineItemChangeEmailTemplate.setDeletedLineItemFlag(removed.size() > 0);
+                lineItemChangeEmailTemplate.setFullQuantityReceivedFlag(fullQuantityReceived);
+                lineItemChangeEmailTemplate.setNotificationBean(emailTemplateForm);
+                String emailSubject = lineItemChangeEmailTemplate.renderSubject(getContainer());
+                String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer());
+
+                //send email to lab end user who originated the request
+                if (endUser != null)
+                {
+                        MailHelper.MultipartMessage message = MailHelper.createMultipartMessage();
+                        lineItemChangeEmailTemplate.renderSenderToMessage(message, getContainer());
+                        message.setEncodedHtmlContent(emailBody);
+                        message.setSubject(emailSubject);
+
+                        try
+                        {
+                            message.setRecipient(Message.RecipientType.TO, new InternetAddress(endUser.getEmail()));
+                            MailHelper.send(message, getUser(), getContainer());
+                        }
+                        catch (javax.mail.internet.AddressException e)
+                        {
+                            _log.error("Error sending line item update message to " + endUser.getEmail() , e);
+                        }
+                }
+            }
+        }
+
+        private Map<Integer, String> getPurchasingDirectorUserIds()
+        {
+            Map<Integer, String> purchasingDirUserIds = new HashMap<>();
+            for (RoleAssignment roleAssignment : getContainer().getPolicy().getAssignments())
+            {
+                if (roleAssignment.getRole().getName().equals(WNPRC_PurchasingDirectorRole.PURCHASING_DIRECTOR_ROLE_NAME))
+                {
+                    purchasingDirUserIds.put(roleAssignment.getUserId(), roleAssignment.getRole().getName());
+                }
+            }
+            return purchasingDirUserIds;
+        }
+
+        private void sendNewRequestEmailNotification(EmailTemplateForm emailTemplateForm) throws MessagingException, IOException, ValidationException
+        {
+            NewRequestEmailTemplate requestEmailTemplate = EmailTemplateService.get().getEmailTemplate(NewRequestEmailTemplate.class);
+            requestEmailTemplate.setNotificationBean(emailTemplateForm);
+            String emailSubject = requestEmailTemplate.renderSubject(getContainer());
+            String emailBody = requestEmailTemplate.renderBody(getContainer());
+
+            if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(ADDITIONAL_REVIEW_AMT)) >= 0)
+            {
+                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
+
+                for (User user : adminUsers)
+                {
+                    NotificationService.get().sendMessageForRecipient(
+                            getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                            emailSubject, emailBody,
+                            getDataEntryFormUrl(emailTemplateForm.getRowId(),  new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                            String.valueOf(emailTemplateForm.getRowId()), "New request over $5000");
+                }
+            }
+            else
+            {
+                //get purchasing dir userId
+                Map<Integer, String> purchasingDirUserIds = getPurchasingDirectorUserIds();
+
+                //get folder admin users
+                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
+
+                //send emails to ALL folder admins
+                for (User user : adminUsers)
+                {
+                    if (!purchasingDirUserIds.containsKey(user.getUserId()))
+                    {
+                        NotificationService.get().sendMessageForRecipient(
+                                getContainer(), UserManager.getUser(getUser().getUserId()), user,
+                                emailSubject, emailBody,
+                                getDataEntryFormUrl(emailTemplateForm.getRowId(), new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, getContainer())),
+                                String.valueOf(emailTemplateForm.getRowId()), "New request");
+                    }
+                }
+            }
+        }
+
+        private ActionURL getDataEntryFormUrl(Integer requestId, ActionURL returnUrl)
+        {
+            ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, getContainer());
+            linkUrl.addParameter("requestRowId", requestId);
+            linkUrl.addParameter("returnUrl", returnUrl.getPath());
+            return linkUrl;
+        }
+
+        private EmailTemplateForm getValuesForEmailTemplate(RequestForm requestForm)
+        {
+            TableInfo tableInfo = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr_purchasing").getTable("purchasingRequestsOverviewForEmailTemplate", null);
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("requestNum"), requestForm.getRowId());
+            TableSelector tableSelector = new TableSelector(tableInfo, filter, null);
+            EmailTemplateForm emailTemplateForm = new EmailTemplateForm();
+            Map<String, Object> map = tableSelector.getMap();
+            emailTemplateForm.setRowId((Integer) map.get("requestNum"));
+            emailTemplateForm.setVendor((String) map.get("vendor"));
+            emailTemplateForm.setRequester(UserManager.getUser((Integer) map.get("requester")));
+            emailTemplateForm.setRequestDate((Date) map.get("requestdate"));
+            emailTemplateForm.setTotalCost((BigDecimal)map.get("totalcost"));
+            emailTemplateForm.setRequestStatus((String)map.get("requeststatus"));
+            if (null != map.get("orderdate"))
+            {
+                emailTemplateForm.setOrderDate((Date) map.get("orderdate"));
+            }
+
+            return emailTemplateForm;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown=true)
+    public static class LineItem
+    {
+        @JsonProperty("rowId")
+        int _rowId;
+
+        @JsonProperty("requestRowId")
+        int _requestRowId;
+
+        @JsonProperty("item")
+        String _item;
+
+        @JsonProperty("itemUnit")
+        int _itemUnitId;
+
+        @JsonProperty("controlledSubstance")
+        boolean _controlledSubstance;
+
+        @JsonProperty("quantity")
+        int _quantity;
+
+        @JsonProperty("quantityReceived")
+        int _quantityReceived;
+
+        @JsonProperty("unitCost")
+        double _unitCost;
+
+        DecimalFormat _dollarFormat = new DecimalFormat("$#,##0.00");
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            LineItem that = (LineItem) o;
+            return  this.getRowId() == that.getRowId() &&
+                    this.getRequestRowId() == that.getRequestRowId() &&
+                    this.getItem().equals(that.getItem()) &&
+                    this.getItemUnitId() == that.getItemUnitId()&&
+                    this.getControlledSubstance() == that.getControlledSubstance() &&
+                    this.getQuantity() == that.getQuantity() &&
+                    this.getQuantityReceived() == that.getQuantityReceived() &&
+                    this.getUnitCost() == that.getUnitCost();
+        }
+
+        public int getRowId()
+        {
+            return _rowId;
+        }
+
+        public void setRowId(int rowId)
+        {
+            _rowId = rowId;
+        }
+
+        public int getRequestRowId()
+        {
+            return _requestRowId;
+        }
+
+        public void setRequestRowId(int requestRowId)
+        {
+            _requestRowId = requestRowId;
+        }
+
+        public String getItem()
+        {
+            return _item;
+        }
+
+        public void setItem(String item)
+        {
+            _item = item;
+        }
+
+        public int getItemUnitId()
+        {
+            return _itemUnitId;
+        }
+
+        public void setItemUnitId(int itemUnitId)
+        {
+            _itemUnitId = itemUnitId;
+        }
+
+        public boolean getControlledSubstance()
+        {
+            return _controlledSubstance;
+        }
+
+        public void setControlledSubstance(boolean controlledSubstance)
+        {
+            _controlledSubstance = controlledSubstance;
+        }
+
+        public int getQuantity()
+        {
+            return _quantity;
+        }
+
+        public void setQuantity(int quantity)
+        {
+            _quantity = quantity;
+        }
+
+        public int getQuantityReceived()
+        {
+            return _quantityReceived;
+        }
+
+        public void setQuantityReceived(int quantityReceived)
+        {
+            _quantityReceived = quantityReceived;
+        }
+
+        public double getUnitCost()
+        {
+            return _unitCost;
+        }
+
+        public String getFormattedUnitCost()
+        {
+            return _dollarFormat.format(getUnitCost());
+        }
+
+        public void setUnitCost(double unitCost)
+        {
+            _unitCost = unitCost;
+        }
+    }
+
+    public class EmailTemplateForm
+    {
+        Integer _rowId;
+        String _vendor;
+        String _requestStatus;
+        Date _requestDate;
+        Date _orderDate;
+        User _requester;
+        BigDecimal _totalCost;
+
+        DateFormat _dateFormat = new SimpleDateFormat(DateUtil.getDateFormatString(ContainerManager.getRoot()));
+        DecimalFormat _dollarFormat = new DecimalFormat("$#,##0.00");
+
+        public Integer getRowId()
+        {
+            return _rowId;
+        }
+
+        public void setRowId(Integer rowId)
+        {
+            this._rowId = rowId;
+        }
+
+        public String getVendor()
+        {
+            return _vendor;
+        }
+
+        public void setVendor(String vendor)
+        {
+            this._vendor = vendor;
+        }
+
+        public String getRequestStatus()
+        {
+            return _requestStatus;
+        }
+
+        public void setRequestStatus(String requestStatus)
+        {
+            this._requestStatus = requestStatus;
+        }
+
+        public String getRequestDate()
+        {
+            return _dateFormat.format(_requestDate);
+        }
+
+        public void setRequestDate(Date requestDate)
+        {
+            this._requestDate = requestDate;
+        }
+
+        public String getOrderDate()
+        {
+            return _dateFormat.format(_orderDate);
+        }
+
+        public void setOrderDate(Date orderDate)
+        {
+            this._orderDate = orderDate;
+        }
+
+        public String getRequesterFriendlyName()
+        {
+            return _requester.getFriendlyName();
+        }
+
+        public User getRequester()
+        {
+            return _requester;
+        }
+
+        public void setRequester(User requester)
+        {
+            this._requester = requester;
+        }
+
+        public BigDecimal getTotalCost()
+        {
+            return _totalCost;
+        }
+
+        public String getFormattedTotalCost()
+        {
+            return _dollarFormat.format(_totalCost);
+        }
+
+        public void setTotalCost(BigDecimal totalCost)
+        {
+            this._totalCost = totalCost;
         }
     }
 
@@ -139,7 +629,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         Integer _shippingDestination;
         String _shippingAttentionTo;
         String _comments;
-        String _qcState;
+        Integer _qcState;
         Integer _assignedTo;
         Integer _paymentOption;
         String _program;
@@ -159,6 +649,9 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _newVendorEmail;
         String _newVendorUrl;
         String _newVendorNotes;
+        BigDecimal _totalCost;
+        String _qcStateLabel;
+        Boolean _isNewRequest;
 
         public List<JSONObject> getLineItems()
         {
@@ -260,12 +753,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             _comments = comments;
         }
 
-        public String getQcState()
+        public Integer getQcState()
         {
             return _qcState;
         }
 
-        public void setQcState(String qcState)
+        public void setQcState(Integer qcState)
         {
             _qcState = qcState;
         }
@@ -459,70 +952,35 @@ public class WNPRC_PurchasingController extends SpringActionController
         {
             _newVendorNotes = newVendorNotes;
         }
-    }
 
-    @JsonIgnoreProperties(ignoreUnknown=true)
-    public static class LineItem
-    {
-        String _item;
-        Boolean _controlledSubstance;
-        String _itemUnit;
-        Number _quantity;
-        Number _unitCost;
-
-        public String getItem()
+        public BigDecimal getTotalCost()
         {
-            return _item;
+            return _totalCost;
         }
 
-        public void setItem(String item)
+        public void setTotalCost(BigDecimal totalCost)
         {
-            _item = item;
+            _totalCost = totalCost;
         }
 
-        public Boolean isControlledSubstance()
+        public String getQcStateLabel()
         {
-            return _controlledSubstance;
+            return _qcStateLabel;
         }
 
-        public void setControlledSubstance(Boolean controlledSubstance)
+        public void setQcStateLabel(String qcStateLabel)
         {
-            _controlledSubstance = controlledSubstance;
+            _qcStateLabel = qcStateLabel;
         }
 
-        public String getItemUnit()
+        public Boolean getIsNewRequest()
         {
-            return _itemUnit;
+            return _isNewRequest;
         }
 
-        public void setItemUnit(String itemUnit)
+        public void setIsNewRequest(Boolean newRequest)
         {
-            _itemUnit = itemUnit;
-        }
-
-        public Boolean getControlledSubstance()
-        {
-            return _controlledSubstance;
-        }
-
-        public Number getQuantity()
-        {
-            return _quantity;
-        }
-
-        public void setQuantity(Number quantity)
-        {
-            _quantity = quantity;
-        }
-
-        public Number getUnitCost()
-        {
-            return _unitCost;
-        }
-
-        public void setUnitCost(Number unitCost)
-        {
-            _unitCost = unitCost;
+            _isNewRequest = newRequest;
         }
     }
 

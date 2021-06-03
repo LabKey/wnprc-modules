@@ -63,7 +63,7 @@ UNION ALL
 FROM study.waterSchedule WS
 WHERE NOT EXISTS (SELECT 1
                     FROM study.waterAmount WAI
-                    WHERE WAI.id = WS.animalId AND CAST(WAI.date AS TIMESTAMP) = CAST(WS.origdate AS TIMESTAMP)
-                      AND WAI.frequency = WS.frequency
+                    WHERE WAI.id = WS.animalId AND CAST(WAI.date AS TIMESTAMP) = CAST(WS.date AS TIMESTAMP)
+                      --AND WAI.frequency = WS.frequency
                     )
 )

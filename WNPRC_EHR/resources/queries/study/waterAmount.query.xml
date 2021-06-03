@@ -12,8 +12,8 @@
 
                     </column>
                     <column columnName="date">
-                        <columntitle>Date Ordered</columntitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <columnTitle>Date Ordered</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
                     <column columnName="project"></column>
 

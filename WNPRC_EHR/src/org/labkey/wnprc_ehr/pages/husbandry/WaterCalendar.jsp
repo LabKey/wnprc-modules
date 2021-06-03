@@ -105,6 +105,11 @@
         husbandryAssignmentLookup.put(map.get("value"), waterInfo);
     }
 
+    Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
+    Group complianceGroup = GroupManager.getGroup(getContainer(), "compliance (LDAP)", GroupEnumType.SITE);
+    boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
+    boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().isInSiteAdminGroup();
+
     //List<JSONObject> husbandryFrequency = JsonUtils.getListFromJSONArray(queryFactory.selectRows("ehr_lookups", "husbandry_frequency"));
 
 %>
@@ -447,6 +452,7 @@
     let calendar = {};
     let calendarEvents = {};
     let hideEditPanel = true;
+    let allowProjects = "";
     (function() {
         let calendarEl = document.getElementById('calendar');
         calendarEl.addEventListener("click", function(clickEvent) {
@@ -479,19 +485,29 @@
         var $numberOfRenders = "<%= numberOfRenders %>";
 
         var userId = "<%= userid.toString() %>";
-        let isAdmin = "<%= isAdmin %>";
+        //This variable allows for specific groups to see all water orders and amounts in the system
+        let isSuperUser = false;
+
+        let isAdmin = <%=isAdmin%>;
+        let complianceStaff = <%=isCompliance%>;
+        let isVet = <%=isVet%>;
+        debugger;
+
+        if (isAdmin || complianceStaff || isVet){
+            isSuperUser = true;
+        }
 
         var waterAccessControlled = <%= userAccessWater.toString() %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
-        let $allowProjects;
+
         let firstEntry = true;
         jQuery.each(waterAccessControlled, function(key,value){
             if(key in WebUtils.VM.waterAccessControlled){
                 if (key == userId){
                     let jsonArray = value;
-                    $allowProjects = jsonArray.join(';');
+                    allowProjects = jsonArray.join(';');
 
-                    console.log ("allowed Project " + $allowProjects);
+                    console.log ("allowed Project " + allowProjects);
 
 
                 }
@@ -513,10 +529,9 @@
             eventSources:[
                     {
                         events: function (fetchInfo, successCallback, failureCallback) {
-
                             console.log(" startStr" + fetchInfo.startStr);
 
-                            console.log("inside eventSource " + $allowProjects);
+                            console.log("inside eventSource " + allowProjects);
                            // let events = [];
                            // events.push({title:'test event',start:'2021-04-21'});
 
@@ -530,11 +545,10 @@
                             // date.setDate(date.getDate() - 60);
                             if ($animalId == 'undefined' || $animalId == "null"){
                                 let queryConfig ={};
-                                queryConfig = queryConfigFunc(fetchInfo,isAdmin);
+                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser);
 
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data)
                                 {
-
                                    var events = data.rows;
 
                                     successCallback(
@@ -582,7 +596,7 @@
                             //Display panel in the animal history
                             else{
                                 let queryConfig ={};
-                                queryConfig = queryConfigFunc(fetchInfo,isAdmin, $animalId);
+                                queryConfig = queryConfigFunc(fetchInfo,isSuperUser, $animalId);
 
                                 WebUtils.API.selectRows("study", "waterScheduleWithWeight", queryConfig).then(function (data) {
                                     var events = data.rows;
@@ -699,8 +713,13 @@
                 }
             },
             eventClick: function (info){
-                debugger;
                 console.log(info.event.id)
+                $('#waterInfo').attr('disabled','disabled');
+                $('#enterWaterOrder').attr('disabled', 'disabled');
+                $('#waterInfo').text('Enter Single Day Water');
+                document.getElementById("modelServerResponse").innerHTML = "";
+                $('#waterInfoPanel').unblock();
+
                 //$('#multiple').bootstrapToggle('off');
 
                 let event;
@@ -1112,13 +1131,14 @@
                 var form = ko.mapping.toJS(WebUtils.VM.taskDetails);
                 var taskid = LABKEY.Utils.generateUUID();
                 //var date = form.date.format("Y-m-d H:i:s");
+                debugger;
 
                 var insertDate = new Date(form.date);
-                if (form.frequencyCoalesced == "1"){
+                if (form.frequencyMeaningCoalesced == "Daily - AM"){
                     insertDate.setHours(8);
                     insertDate.setMinutes(0);
                 }
-                if (form.frequencyCoalesced == "2"){
+                if (form.frequencyMeaningCoalesced == "Daily - PM"){
                     insertDate.setHours(14);
                     insertDate.setMinutes(0);
                 }
@@ -1131,7 +1151,7 @@
                     WebUtils.API.insertRows('study', 'waterAmount', [{
                         taskid:         taskid,
                         Id:             form.animalId,
-                        date:           insertDate.toDateString(),
+                        date:           insertDate.getTime(),
                         assignedTo:     form.assignedToCoalesced,
                         project:        form.projectCoalesced,
                         volume:         form.volume,
@@ -1190,8 +1210,10 @@
 
                 }
 
+                if (hideEditPanel){
+                    $('#waterExceptionPanel').collapse('hide')
+                }
 
-                $('#waterExceptionPanel').collapse('hide')
                 // Refresh the calendar view.
                 calendar.refetchEvents();
                 //Unblock
@@ -1215,52 +1237,28 @@
 
     })();
 
-    function queryConfigFunc (fetchInfo, isAdmin, animalId){
-        let configObject = {};
+    function queryConfigFunc (fetchInfo, isSuperUser, animalId){
         let date = new Date();
-        if (isAdmin){
+        let configObject = {
+            "date~gte": fetchInfo.start.format('Y-m-d'),
+            "date~lte": fetchInfo.end.format('Y-m-d'),
+            "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            "qcstate/label~eq": "Scheduled"
+        };
+
+
+        if (isSuperUser){
             if (animalId){
-                configObject = {
-                    "date~gte": fetchInfo.start.format('Y-m-d'),
-                    "date~lte": fetchInfo.end.format('Y-m-d'),
-                    "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                    "animalid~in": animalId,
-                    "qcstate/label~eq": "Scheduled"
-                }
-            }else{
-                configObject= {
-                    "date~gte": fetchInfo.start.format('Y-m-d'),
-                    "date~lte": fetchInfo.end.format('Y-m-d'),
-                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                    "qcstate/label~eq": "Scheduled"
-                }
+                configObject["animalid~in"]= animalId;
             }
         }
-
-
         else{
+            configObject["projectCoalesced~in"] = allowProjects;
             if (animalId){
-                configObject ={
-                    "date~gte": fetchInfo.start.format('Y-m-d'),
-                    "date~lte": fetchInfo.end.format('Y-m-d'),
-                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                    "qcstate/label~eq": "Scheduled",
-                    "animalid~in": animalId,
-                    "projectCoalesced~in": $allowProjects
-                }
-            }else{
-                configObject ={
-                    "date~gte": fetchInfo.start.format('Y-m-d'),
-                    "date~lte": fetchInfo.end.format('Y-m-d'),
-                    "parameters": {NumDays: 180, StartDate: date.format(LABKEY.extDefaultDateFormat)},
-                    "qcstate/label~eq": "Scheduled",
-                    "projectCoalesced~in": $allowProjects
-                }
-
+                configObject["animalid~in"] = animalId;
             }
         }
         return configObject;
-
     }
 
     function deleteWaterAmount(objectId){

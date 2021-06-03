@@ -228,6 +228,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                                         Ext4.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
                                             if (btn == 'yes'){
                                                 window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "manageWnprcTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
+
                                             }
                                             else {
                                                 dataRegion.refresh();

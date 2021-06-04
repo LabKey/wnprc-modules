@@ -1,4 +1,5 @@
 import org.labkey.gradle.util.BuildUtils
+import org.labkey.gradle.util.ExternalDependency
 
 dependencies {
 
@@ -10,7 +11,41 @@ dependencies {
     apiExternal "joda-time:joda-time:2.8.1"
     implementation "javax.servlet:jsp-api:2.0"
     implementation files(apiJar)
-    external "org.jooq:jooq:3.8.4"
-    external "org.apache.commons:commons-collections4:${commonsCollections4Version}"
-    external "joda-time:joda-time:2.8.1"
+    BuildUtils.addExternalDependency(
+            project,
+            new ExternalDependency(
+                    "org.jooq:jooq:3.8.4",
+                    "jOOQ",
+                    "jOOQ.org",
+                    "https://www.jooq.org/",
+                    ExternalDependency.APACHE_2_LICENSE_NAME,
+                    ExternalDependency.APACHE_2_LICENSE_URL,
+                    "Database-mapping for Java"
+            )
+    )
+    BuildUtils.addExternalDependency(
+            project,
+            new ExternalDependency(
+                    "joda-time:joda-time:2.8.1",
+                    "Joda-Time",
+                    "Joda.org",
+                    "http://www.joda.org/joda-time",
+                    ExternalDependency.APACHE_2_LICENSE_NAME,
+                    ExternalDependency.APACHE_2_LICENSE_URL,
+                    "Tools for dealing with dates/times in Java"
+            )
+    )
+    BuildUtils.addExternalDependency(
+            project,
+            new ExternalDependency(
+                    "org.apache.commons:commons-collections4:${commonsCollections4Version}",
+                    "Apache Commons Collections",
+                    "Apache",
+                    "https://commons.apache.org/proper/commons-collections/index.html",
+                    ExternalDependency.APACHE_2_LICENSE_NAME,
+                    ExternalDependency.APACHE_2_LICENSE_URL,
+                    "Tools for managing Java collections"
+            )
+    )
+
 }

@@ -23,6 +23,8 @@
     WA.project AS project,
     WA.frequency AS frequency,
     WA.frequency.meaning AS frequencyMeaning,
+    'PM' AS timeofday,
+    'PM' AS displaytimeofday,
     WA.waterSource AS waterSource,
     true AS actionRequired,
     WA.qcstate AS qcstate
@@ -55,6 +57,8 @@ UNION ALL
     WS.project AS project,
     WS.frequency AS frequency,
     WS.freqMeaning AS frequencyMeaning,
+    WS.timeOfDay AS timeofday,
+    WS.displaytimeofday AS displaytimeofday,
     WS.waterSource AS waterSource,
     (WS.waterSource = 'regulated' OR WS.startDate = WS.origDate) AS actionRequired,
     WS.waterStatus AS qcstate

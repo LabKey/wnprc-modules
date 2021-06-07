@@ -48,7 +48,7 @@
     List<JSONObject> assignedToList= JsonUtils.getSortedListFromJSONArray(assignedToOptions.getResults().getJSONArray("rows"),"title");
 
     SimpleQuery husbandryFrequency = queryFactory.makeQuery("ehr_lookups", "husbandry_frequency");
-    List<JSONObject> husbandryFrequencyList= JsonUtils.getSortedListFromJSONArray(husbandryFrequency.getResults().getJSONArray("rows"),"meaning");
+    List<JSONObject> husbandryFrequencyList= JsonUtils.getSortedListFromJSONArray(husbandryFrequency.getResults().getJSONArray("rows"),"altmeaning");
 
     SimpleQuery husbandryFruit = queryFactory.makeQuery("ehr_lookups", "husbandry_fruit");
     List<JSONObject> husbandryFruitList= JsonUtils.getSortedListFromJSONArray(husbandryFruit.getResults().getJSONArray("rows"),"title");
@@ -239,6 +239,7 @@
                         <dt>Project (Account):  </dt> <dd>{{projectCoalesced}}</dd>
                         <dt>Date:               </dt> <dd>{{displayDate}}</dd>
                         <dt>Frequency:          </dt> <dd>{{frequencyMeaningCoalesced}}</dd>
+                        <dt>Time of day:        </dt> <dd>{{displaytimeofday}}</dd>
                     </dl>
 
                     <button class="btn btn-default" data-bind="click: $root.requestTableClickAction" data-toggle="collapse" data-target="#waterExceptionPanel"
@@ -312,17 +313,25 @@
                                 <div class="col-xs-8">
                                    <p>
                                        <select data-bind="value: frequencyCoalesced" class="form-control">
-                                        <%--<option value="">{{frequencyMeaningCoalesced}}</option>--%>
+
                                         <%
+                                            String rowid = "";
+                                            String altmeaning = "";
                                             for(JSONObject frequency : husbandryFrequencyList) {
-                                                String rowid = frequency.getString("rowid");
-                                                String meaning = frequency.getString("meaning");
+                                                if ( frequency.getString("altmeaning") != null && !frequency.getString("altmeaning").trim().equals("")) {
+                                                     rowid= frequency.getString("rowid");
+                                                     altmeaning = frequency.getString("altmeaning");
                                         %>
-                                        <option value="<%=rowid%>"><%=h(meaning)%></option>
+                                                        <option value="<%=rowid%>" id ="<%=altmeaning%>"><%=h(altmeaning)%></option>
                                         <%
+                                                }
+
                                             }
                                         %>
+
                                         </select>
+
+
                                    </p>
 
                                 </div>
@@ -713,7 +722,13 @@
                 }
             },
             eventClick: function (info){
-                console.log(info.event.id)
+                console.log(info.event.id);
+                if (info.event.extendedProps.rawRowData.displaytimeofday == 'AM'){
+                    document.getElementById("AM").selected = true;
+                }
+                if (info.event.extendedProps.rawRowData.displaytimeofday == 'PM'){
+                    document.getElementById("PM").selected = true;
+                }
                 $('#waterInfo').attr('disabled','disabled');
                 $('#enterWaterOrder').attr('disabled', 'disabled');
                 $('#waterInfo').text('Enter Single Day Water');
@@ -809,6 +824,7 @@
                 assignedToTitleCoalesced:   ko.observable(),
                 frequencyCoalesced:         ko.observable(),
                 frequencyMeaningCoalesced:  ko.observable(),
+                displaytimeofday:           ko.observable(),
                 rawDate:                    ko.observable()
             },
             form: ko.mapping.fromJS({
@@ -1134,11 +1150,11 @@
                 debugger;
 
                 var insertDate = new Date(form.date);
-                if (form.frequencyMeaningCoalesced == "Daily - AM"){
+                if (form.displaytimeofday == "AM"){
                     insertDate.setHours(8);
                     insertDate.setMinutes(0);
                 }
-                if (form.frequencyMeaningCoalesced == "Daily - PM"){
+                else if (form.displaytimeofday == "PM"){
                     insertDate.setHours(14);
                     insertDate.setMinutes(0);
                 }

@@ -16,6 +16,8 @@ SELECT
     assignedToTitle AS assignedToTitleCoalesced,
     frequency AS frequencyCoalesced,
     frequencyMeaning AS frequencyMeaningCoalesced,
+    timeofday AS timeofday,
+    displaytimeofday AS displaytimeofday,
     qcstate AS qcstate,
 
     --(SELECT max(wg.qcstate) as label FROM study.waterGiven wg WHERE WCO.objectid = wg.treatmentid AND WCO.dateOrdered = wg.dateordered ) AS waterStatus,

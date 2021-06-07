@@ -59,6 +59,7 @@ JOIN (
           t1.enddateCoalescedFuture,    --column use to display future dates when the endDate is null
           t1.frequency AS frequency,
           t1.frequency.meaning AS freqMeaning,
+          ft.timedescription AS displaytimeofday,
           t1.provideFruit AS provideFruit,
           t1.provideFruit.title AS provideFruitTitle,
           t1.assignedTo,

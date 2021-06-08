@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>assignments</name>
+    <description>WNPRC Marmosets</description>
+    <transforms>
+        <transform type="RemoteQueryTransformStep" id="step1">
+            <description>Copy to target</description>
+            <source remoteSource="ProductionEHRServer" schemaName="study" queryName="assignment">
+                <sourceColumns>
+                    <column>id</column>
+                    <column>date</column>
+                    <column>enddate</column>
+                    <column>project</column>
+                    <column>project/title</column>
+                    <column>project/projectType</column>
+                    <column>project/investigatorName</column>
+
+                </sourceColumns>
+                <sourceFilters>
+                    <sourceFilter column="project/projectType" value="Marmoset U24" operator="eq"/>
+                </sourceFilters>
+            </source>
+            <destination schemaName="study" queryName="u24_assignments" targetOption="merge">
+                <columnTransforms>
+                    <column source ="project/title" target="title"/>
+                    <column source ="project/investigatorName" target="investigator"/>
+                    <column source="project/projectType" target="projectType"/>
+                </columnTransforms>
+
+            </destination>
+
+
+        </transform>
+
+    </transforms>
+    <schedule>
+        <poll interval="60m" />
+    </schedule>
+</etl>

@@ -38,16 +38,13 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
 
     private void addRequestLink(AbstractTableInfo ti)
     {
-        if (ti.hasPermission(Objects.requireNonNull(ti.getUserSchema()).getUser(), AdminPermission.class))
-        {
-            ActionURL returnUrl = new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, ti.getUserSchema().getContainer());
-            ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, ti.getUserSchema().getContainer());
-            detailsUrl.addParameter("requestRowId", "${rowId}");
-            detailsUrl.addParameter("returnUrl", returnUrl.getPath());
+        ActionURL returnUrl = new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, ti.getUserSchema().getContainer());
+        ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, ti.getUserSchema().getContainer());
+        detailsUrl.addParameter("requestRowId", "${rowId}");
+        detailsUrl.addParameter("returnUrl", returnUrl.getPath());
 
-            MutableColumnInfo rowId = (MutableColumnInfo) ti.getColumn("rowId");
-            rowId.setURL(DetailsURL.fromString(detailsUrl.toContainerRelativeURL()));
-        }
+        MutableColumnInfo rowId = (MutableColumnInfo) ti.getColumn("rowId");
+        rowId.setURL(DetailsURL.fromString(detailsUrl.toContainerRelativeURL()));
     }
 
     private void addRequestUpdateLinks(AbstractTableInfo ti)

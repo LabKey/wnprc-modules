@@ -16,7 +16,7 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import produce, { Draft } from 'immer';
 import { ActionURL, Filter, getServerContext } from '@labkey/api';
-import { Alert } from '@labkey/components';
+import { Alert, LoadingSpinner } from '@labkey/components';
 
 import { RequestOrderPanel } from '../components/RequestOrderPanel';
 import {
@@ -45,6 +45,7 @@ export const App: FC = memo(() => {
     );
     const [lineItemErrorMsg, setLineItemErrorMsg] = useState<string>();
     const [globalErrorMsg, setGlobalErrorMsg] = useState<string>();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
@@ -59,106 +60,107 @@ export const App: FC = memo(() => {
 
         (async () => {
             //get QCStates
-            getData('core', 'qcState', 'RowId, Label').then(vals => {
-                const states = vals.map(val => {
-                    if (val)
-                    {
-                        return QCStateModel.create({
-                            rowId: val.RowId,
-                            label: val.Label
-                        });
-                    }
-                });
-                setQCStates(states);
+            const qcStateVals = await getData('core', 'qcState', 'RowId, Label');
+            const states = qcStateVals.map(val => {
+                if (val)
+                {
+                    return QCStateModel.create({
+                        rowId: val.RowId,
+                        label: val.Label
+                    });
+                }
             });
+            setQCStates(states);
+
 
             if (reqRowId)
             {
                 // get ehr_purchasing.purchasingRequests data
                 const filter = [Filter.create('rowId', reqRowId)];
-                getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter).then(vals => {
-                    if (vals && vals.length > 0)
-                    {
+                const requestOrderVals = await getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter);
+                requestOrderVals.map(val => {
+                    if (val) {
                         setRequestOrderModel(
                             RequestOrderModel.create({
-                                rowId: vals[0].rowId,
-                                account: vals[0].otherAcctAndInves ? 'Other' : vals[0].account,
-                                otherAcctAndInves: vals[0].otherAcctAndInves || undefined,
-                                vendorId: vals[0].vendorId,
-                                justification: vals[0].justification,
-                                shippingInfoId: vals[0].shippingInfoId,
-                                shippingAttentionTo: vals[0].shippingAttentionTo,
-                                comments: vals[0].comments,
-                                otherAcctAndInvesWarning: vals[0].otherAcctAndInves
+                                rowId: requestOrderVals[0].rowId,
+                                account: requestOrderVals[0].otherAcctAndInves ? 'Other' : requestOrderVals[0].account,
+                                otherAcctAndInves: requestOrderVals[0].otherAcctAndInves || undefined,
+                                vendorId: requestOrderVals[0].vendorId,
+                                justification: requestOrderVals[0].justification,
+                                shippingInfoId: requestOrderVals[0].shippingInfoId,
+                                shippingAttentionTo: requestOrderVals[0].shippingAttentionTo,
+                                comments: requestOrderVals[0].comments,
+                                otherAcctAndInvesWarning: requestOrderVals[0].otherAcctAndInves
                                     ? "Warning: Please add 'Account & Principal Investigator' value '" +
-                                    vals[0].otherAcctAndInves +
+                                    requestOrderVals[0].otherAcctAndInves +
                                     "' into the system."
                                     : undefined,
                             })
                         );
+
                         setPurchaseAdminModel(
                             PurchaseAdminModel.create({
-                                assignedTo: vals[0].assignedTo,
-                                paymentOption: vals[0].paymentOptionId,
-                                qcState: vals[0].qcState,
-                                program: vals[0].program,
-                                confirmationNum: vals[0].confirmationNum,
-                                invoiceNum: vals[0].invoiceNum,
-                                orderDate: vals[0].orderDate ? new Date(vals[0].orderDate) : null,
-                                cardPostDate: vals[0].cardPostDate ? new Date(vals[0].cardPostDate) : null,
+                                assignedTo: requestOrderVals[0].assignedTo,
+                                paymentOption: requestOrderVals[0].paymentOptionId,
+                                qcState: requestOrderVals[0].qcState,
+                                program: requestOrderVals[0].program,
+                                confirmationNum: requestOrderVals[0].confirmationNum,
+                                invoiceNum: requestOrderVals[0].invoiceNum,
+                                orderDate: requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null,
+                                cardPostDate: requestOrderVals[0].cardPostDate ? new Date(requestOrderVals[0].cardPostDate) : null,
                             })
                         );
-                        setRequester(vals[0].createdBy);
                     }
-                });
+                    setRequester(requestOrderVals[0].createdBy);
+                })
 
                 // get ehr_purchasing.lineItems data
                 const requestRowIdFilter = [Filter.create('requestRowId', reqRowId)];
-                getData(
+                const lineItemVals = await getData(
                     'ehr_purchasing',
                     'lineItems',
                     'rowId, requestRowId, item, itemUnitId, controlledSubstance, quantity, quantityReceived, unitCost, itemStatusId',
                     undefined,
                     requestRowIdFilter
-                ).then(vals => {
-                    const li = vals.map(val => {
-                        if (val)
-                        {
-                            return LineItemModel.create({
-                                rowId: val.rowId,
-                                requestRowId: reqRowId,
-                                item: val.item,
-                                controlledSubstance: val.controlledSubstance,
-                                itemUnit: val.itemUnitId,
-                                quantity: val.quantity,
-                                quantityReceived: val.quantityReceived,
-                                unitCost: val.unitCost,
-                                status: val.itemStatusId,
-                            });
-                        }
-                    });
-                    setLineItems(li);
+                );
+
+                const li = lineItemVals.map(val => {
+                    if (val)
+                    {
+                        return LineItemModel.create({
+                            rowId: val.rowId,
+                            requestRowId: reqRowId,
+                            item: val.item,
+                            controlledSubstance: val.controlledSubstance,
+                            itemUnit: val.itemUnitId,
+                            quantity: val.quantity,
+                            quantityReceived: val.quantityReceived,
+                            unitCost: val.unitCost,
+                            status: val.itemStatusId,
+                        });
+                    }
                 });
+                setLineItems(li);
+                setIsLoading(false);
 
                 // get saved files
                 const dir = PURCHASING_REQUEST_ATTACHMENTS_DIR + '/' + reqRowId;
-                getSavedFiles(ActionURL.getContainer(), dir, false).then((files: SavedFileModel[]) => {
-                    if (files?.length > 0)
-                    {
-                        const updatedModel = produce(documentAttachmentModel, (draft: Draft<DocumentAttachmentModel>) => {
-                            draft['savedFiles'] = files;
-                        });
-                        setDocumentAttachmentModel(updatedModel);
-                    }
-                });
+                const files = await getSavedFiles(ActionURL.getContainer(), dir, false);
+                if (files?.length > 0)
+                {
+                    const updatedModel = produce(documentAttachmentModel, (draft: Draft<DocumentAttachmentModel>) => {
+                        draft['savedFiles'] = files;
+                    });
+                    setDocumentAttachmentModel(updatedModel);
+                }
             }
             else
             {
-                getData('core', 'qcState', 'RowId, Label').then(vals => {
-                    const idx = vals.findIndex(qcstate => qcstate['Label'] === 'Review Pending');
-                    setRequestOrderModel(RequestOrderModel.create({qcState: vals[idx].RowId}));
-                    setLineItems([LineItemModel.create({qcState: vals[idx].RowId})]);
-                });
+                const qcStateVals = await getData('core', 'qcState', 'RowId, Label');
+                const idx = qcStateVals.findIndex(qcstate => qcstate['Label'] === 'Review Pending');
+                setRequestOrderModel(RequestOrderModel.create({qcState: qcStateVals[idx].RowId}));
+                setLineItems([LineItemModel.create({qcState: qcStateVals[idx].RowId})]);
+                setIsLoading(false);
             }
         })();
     }, []);
@@ -403,87 +405,106 @@ export const App: FC = memo(() => {
         [requestOrderModel, lineItems, lineItemRowsToDelete, purchaseAdminModel, documentAttachmentModel, isSaving]
     );
 
-    return (
-        <>
-            { (requestId && (!hasPurchasingUpdatePermission && hasPurchasingInsertPermission && !hasPurchasingAdminPermission && getServerContext().user.id !== requester)) && (
-                    <Alert>You do not have sufficient permissions to update this request.</Alert>
-                )
-            }
-            {
-                // display ui for purchasing editors to update existing request or requesters to enter new request or requesters to see a read only view of the existing request
-                ((requestId && hasPurchasingUpdatePermission) || requestId === undefined || (requestId && hasPurchasingInsertPermission && getServerContext().user.id === requester)) && (
-                    <>
-                        <RequestOrderPanel
-                            onInputChange={requestOrderModelChange}
-                            model={requestOrderModel}
-                            hasRequestId={!!requestId}
-                            isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
-                            isAdmin={hasPurchasingAdminPermission}
-                            isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
-                        />
-                        {requestId && hasPurchasingAdminPermission && (
-                            <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
-                        )}
-                        <DocumentAttachmentPanel
-                            onInputChange={documentAttachmentChange}
-                            model={documentAttachmentModel}
-                        />
-                        <LineItemsPanel
-                            onChange={lineItemsChange}
-                            lineItems={lineItems}
-                            errorMsg={lineItemErrorMsg}
-                            hasRequestId={!!requestId}
-                            isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
-                            isAdmin={hasPurchasingAdminPermission}
-                            isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
-                        />
-                        <button
-                            disabled={isSaving}
-                            className="btn btn-default"
-                            id="cancel"
-                            name="cancel"
-                            onClick={onCancelBtnHandler}
-                        >
-                            Cancel
-                        </button>
-                        {!isSaving && (
-                            <>
-                                <button
-                                    disabled={requestId && !hasPurchasingUpdatePermission}
-                                    className="btn btn-primary pull-right"
-                                    id={requestId ? 'save' : 'submitForReview'}
-                                    name={requestId ? 'save' : 'submitForReview'}
-                                    onClick={onSaveBtnHandler}
-                                >
-                                    {requestId ? 'Submit' : 'Submit for Review'}
-                                </button>
-                            </>
-                        )}
-                        {isSaving && (
-                            <button disabled className="btn btn-primary pull-right">
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-                                Saving...
+    function getLayout()
+    {
+        if (isLoading || !getServerContext()) {
+            return <LoadingSpinner/>
+        }
+        else if (!isLoading && requestId && (!hasPurchasingUpdatePermission && hasPurchasingInsertPermission && !hasPurchasingAdminPermission && getServerContext().user.id !== requester))
+            return <Alert>You do not have sufficient permissions to update this request.</Alert>
+
+        // display ui for purchasing editors to update existing request or requesters to enter new request or requesters to see a read only view of the existing request
+        else if (!isLoading && (requestId && hasPurchasingUpdatePermission) || requestId === undefined || (requestId && hasPurchasingInsertPermission && getServerContext().user.id === requester))
+        {
+            return (
+                <>
+                <RequestOrderPanel
+                    onInputChange={requestOrderModelChange}
+                    model={requestOrderModel}
+                    hasRequestId={!!requestId}
+                    isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
+                    isAdmin={hasPurchasingAdminPermission}
+                    isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                />
+                {
+                    requestId && hasPurchasingAdminPermission && (
+                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel}/>
+                    )
+                }
+                <DocumentAttachmentPanel
+                    onInputChange={documentAttachmentChange}
+                    model={documentAttachmentModel}
+                />
+                <LineItemsPanel
+                    onChange={lineItemsChange}
+                    lineItems={lineItems}
+                    errorMsg={lineItemErrorMsg}
+                    hasRequestId={!!requestId}
+                    isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
+                    isAdmin={hasPurchasingAdminPermission}
+                    isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                />
+                <button
+                    disabled={isSaving}
+                    className="btn btn-default"
+                    id="cancel"
+                    name="cancel"
+                    onClick={onCancelBtnHandler}
+                >
+                    Cancel
+                </button>
+                {
+                    !isSaving && (
+                        <>
+                            <button
+                                disabled={requestId && !hasPurchasingUpdatePermission}
+                                className="btn btn-primary pull-right"
+                                id={requestId ? 'save' : 'submitForReview'}
+                                name={requestId ? 'save' : 'submitForReview'}
+                                onClick={onSaveBtnHandler}
+                            >
+                                {requestId ? 'Submit' : 'Submit for Review'}
                             </button>
-                        )}
-                        {requestOrderModel.otherAcctAndInvesWarning && (
-                            <div className="other-account-warning alert alert-warning">
-                                {requestOrderModel.otherAcctAndInvesWarning}
-                            </div>
-                        )}
-                        {!!requestOrderModel.errorMsg &&
-                            requestOrderModel?.errors?.map(error => {
-                                return <div className="alert alert-danger"> {error.errorMessage} </div>;
-                            })}
-                        {!!lineItemErrorMsg &&
-                            lineItems?.map(lineItem => {
-                                return lineItem?.errors?.map(error => {
-                                    return <div className="alert alert-danger"> {error.errorMessage} </div>;
-                                });
-                            })}
-                        {!!globalErrorMsg && <div className="alert alert-danger"> {globalErrorMsg} </div>}
-                    </>
-                )
-            }
-        </>
+                        </>
+                    )
+                }
+                {
+                    isSaving && (
+                        <button disabled className="btn btn-primary pull-right">
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+                            Saving...
+                        </button>
+                    )
+                }
+                {
+                    requestOrderModel.otherAcctAndInvesWarning && (
+                        <div className="other-account-warning alert alert-warning">
+                            {requestOrderModel.otherAcctAndInvesWarning}
+                        </div>
+                    )
+                }
+                {
+                    !!requestOrderModel.errorMsg &&
+                    requestOrderModel?.errors?.map(error => {
+                        return <div className="alert alert-danger"> {error.errorMessage} </div>;
+                    })
+                }
+                {
+                    !!lineItemErrorMsg &&
+                    lineItems?.map(lineItem => {
+                        return lineItem?.errors?.map(error => {
+                            return <div className="alert alert-danger"> {error.errorMessage} </div>;
+                        });
+                    })
+                }
+                {
+                    !!globalErrorMsg && <div className="alert alert-danger"> {globalErrorMsg} </div>
+                }
+            </>)
+        }
+    }
+
+    return (
+        getLayout()
     );
 });

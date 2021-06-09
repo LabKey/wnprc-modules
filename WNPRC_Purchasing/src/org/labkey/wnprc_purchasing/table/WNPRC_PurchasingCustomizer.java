@@ -9,8 +9,8 @@ import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.security.permissions.AdminPermission;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_purchasing.WNPRC_PurchasingController;
 
@@ -38,10 +38,22 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
 
     private void addRequestLink(AbstractTableInfo ti)
     {
-        ActionURL returnUrl = new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, ti.getUserSchema().getContainer());
+        ActionURL returnUrl = new ActionURL();
+        if (ti.hasPermission(Objects.requireNonNull(ti.getUserSchema()).getUser(), AdminPermission.class))
+        {
+            returnUrl = new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, ti.getUserSchema().getContainer());
+        }
+        else if (ti.hasPermission(Objects.requireNonNull(ti.getUserSchema()).getUser(), UpdatePermission.class))
+        {
+            returnUrl = new ActionURL(WNPRC_PurchasingController.PurchaseReceiverAction.class, ti.getUserSchema().getContainer());
+        }
+        else if (ti.hasPermission(Objects.requireNonNull(ti.getUserSchema()).getUser(), InsertPermission.class))
+        {
+            returnUrl = new ActionURL(WNPRC_PurchasingController.RequesterAction.class, ti.getUserSchema().getContainer());
+        }
         ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, ti.getUserSchema().getContainer());
         detailsUrl.addParameter("requestRowId", "${rowId}");
-        detailsUrl.addParameter("returnUrl", returnUrl.getPath());
+        detailsUrl.addParameter("returnUrl", returnUrl.toString());
 
         MutableColumnInfo rowId = (MutableColumnInfo) ti.getColumn("rowId");
         rowId.setURL(DetailsURL.fromString(detailsUrl.toContainerRelativeURL()));
@@ -52,7 +64,7 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
         ActionURL returnUrl = new ActionURL(WNPRC_PurchasingController.PurchaseReceiverAction.class, ti.getUserSchema().getContainer());
         ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, ti.getUserSchema().getContainer());
         detailsUrl.addParameter("requestRowId", "${requestRowId}");
-        detailsUrl.addParameter("returnUrl", returnUrl.getPath());
+        detailsUrl.addParameter("returnUrl", returnUrl.toString());
 
         MutableColumnInfo requestRowId = (MutableColumnInfo) ti.getColumn("requestRowId");
         requestRowId.setURL(DetailsURL.fromString(detailsUrl.toContainerRelativeURL()));

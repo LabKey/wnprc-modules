@@ -85,7 +85,7 @@
     border: 1px solid rgb(166,166,166);
 }
 
-.form-control-input {
+.form-control-input, .form-control-text, .form-control-number {
     height: 27px;
     border: 1px solid rgb(166,166,166);
 }

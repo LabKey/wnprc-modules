@@ -79,7 +79,6 @@
                     </column>
                     <column columnName="outcome_date">
                         <columnTitle>Outcome Date/Time</columnTitle>
-                        <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="outcome_remark">
                         <columnTitle>Outcome Remark</columnTitle>

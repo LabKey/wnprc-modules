@@ -4,11 +4,11 @@
         <column name="date" ></column>
         <column name="createdBy"/>
         <column name="principalinvestigator"></column>
+        <column name="project"></column>
         <column name="protocol"></column>
         <column name="speciesneeded"></column>
         <column name="originneeded"></column>
         <column name="numberofanimals"></column>
-        <column name="dateneeded"></column>
         <column name="QCState"></column>
 
     </columns>

@@ -94,7 +94,7 @@ fi
 
 echo -n 'value of dock '$dock
 if [[ -z $dock ]]; then
-  docker-compose down -v
+  docker-compose -f docker-compose.prod.yml -f docker-compose.yml down -v
   if [[ ! -e .env ]]; then
       cp default.env .env
   fi
@@ -144,7 +144,7 @@ fi
 #-------------------------------------------------------------------------------
 if [[ -z $filepath ]]; then
     filename="labkey_$(date +'%Y%m%d')_0100.pg"
-    scp ${username}ehr.primate.wisc.edu:/backups/labkey/labkey_backup/database/daily/${filename} $tmpdir || exit 1
+    scp ${username}ehr.primate.wisc.edu:/space/backups/labkey_backup/database/daily/${filename} $tmpdir || exit 1
     filepath="$tmpdir/$filename"
 fi
 
@@ -205,7 +205,6 @@ if [[ -z $prod ]]; then
         update prop.properties p set value = 0 where (select s.category from prop.propertysets s where s.set = p.set) = 'wnprc.ehr.etl.config' and p.name = 'runIntervalInMinutes';
         update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'UserPreferencesMap' and p.name = 'RReport.RExe';
         update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
-        update prop.properties p set value = 'ldap://ldap.primate.wisc.edu' where (select s.category from prop.propertysets s where s.set = p.set) = 'LDAPAuthentication' and p.name = 'Servers';
         update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ehr.geneticcalculations' and p.name = 'enabled';
         update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'ldk.ldapConfig' and p.name = 'enabled';
         update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';

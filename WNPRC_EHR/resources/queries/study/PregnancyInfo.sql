@@ -60,7 +60,7 @@ SELECT p.objectid
       ,to_char(p.date_due, 'yyyy-MM-dd') AS date_due
       ,timestampdiff('SQL_TSI_DAY', p.date_conception, coalesce(po.date, curdate())) AS gestation_day
       ,po.outcome
-      ,po.date outcome_date
+      ,CAST(po.date AS TIMESTAMP) AS outcome_date
       ,po.remark outcome_remark
       ,po.infantid
   FROM pregnancies p

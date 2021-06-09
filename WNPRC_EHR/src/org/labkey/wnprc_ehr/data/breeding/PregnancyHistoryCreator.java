@@ -124,7 +124,7 @@ public final class PregnancyHistoryCreator
                     DataIteratorContext context = getDataIteratorContext(errors, InsertOption.INSERT, configParameters);
                     DataIteratorBuilder builder = createImportDIB(user, container,
                             new DataIteratorBuilder.Wrapper(LoggingDataIterator.wrap(
-                                    (DataIterator)new ListofMapsDataIterator(rows.get(0).keySet(), rows))), context);
+                                    new ListofMapsDataIterator(rows.get(0).keySet(), rows))), context);
 
                     ArrayList<Map<String, Object>> output = new ArrayList<>();
                     int count = _pump(builder, output, context);

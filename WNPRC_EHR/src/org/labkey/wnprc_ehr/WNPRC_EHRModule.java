@@ -54,11 +54,13 @@ import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
 import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
 import org.labkey.wnprc_ehr.buttons.DuplicateTaskButton;
 import org.labkey.wnprc_ehr.buttons.MarkReviewedButton;
+import org.labkey.wnprc_ehr.buttons.WNPRCAddRecordsButton;
 import org.labkey.wnprc_ehr.buttons.WNPRCGoToTaskButton;
 import org.labkey.wnprc_ehr.dataentry.ProtocolDataEntry.ProtocolForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Arrival.ArrivalFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.Assignment.AssignmentForm;
 import org.labkey.wnprc_ehr.dataentry.forms.BehaviorAbstract.BehaviorAbstractForm;
+import org.labkey.wnprc_ehr.dataentry.forms.NecropsyAbstract.NecropsyAbstractForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Biopsy.BiopsyForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Birth.BirthFormType;
 import org.labkey.wnprc_ehr.dataentry.forms.BloodDrawRequest.BloodDrawRequestForm;
@@ -81,6 +83,9 @@ import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamNWM.PhysicalExamNWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.PhysicalExamOWM.PhysicalExamOWMForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProblemList.ProblemListForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ProcedureRequest.ProcedureRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsForm;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsReviewForm;
+import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsTaskForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
@@ -158,7 +163,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
      */
     private boolean loadOnStart = false;
 
-
     public String getName()
     {
         return NAME;
@@ -166,7 +170,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     public @Nullable Double getSchemaVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 20.000;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 21.000;
     }
 
     @Override
@@ -200,6 +204,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/datasetButtons.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalPortal.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");
@@ -230,11 +235,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         //buttons
         EHRService.get().registerMoreActionsButton(new WNPRCGoToTaskButton(this, "Assignment"), "study", "assignment");
-        EHRService.get().registerMoreActionsButton(new WNPRCGoToTaskButton(this, "Feeding"), "study", "feeding");
+        EHRService.get().registerMoreActionsButton(new WNPRCAddRecordsButton(this, "feeding"), "study", "feeding");
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "Tasks_DataEntry");
         EHRService.get().registerMoreActionsButton(new DuplicateTaskButton(this), "ehr", "my_tasks");
         EHRService.get().registerMoreActionsButton(new MarkCompletedButton(this, "study", "assignment", "End Assignments"), "study", "assignment");
-        EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "blood");
         EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "foodDeprives");
         EHRService.get().registerMoreActionsButton(new ChangeQCStateButton(this), "study", "clinPathRuns");
         EHRService.get().registerMoreActionsButton(new CreateTaskFromRecordsButton(this, "Create Task From Selected", "Food Deprives", FoodDeprivesStartForm.NAME), "study", "foodDeprives");
@@ -245,6 +249,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Blood Draws"), "study", "blood");
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Weight"), "study", "demographics");
         EHRService.get().registerMoreActionsButton(new ChangeBloodQCButton(this), "study", "blood");
+
+        //override pages
+        EHRService.get().registerActionOverride("dataEntry", this, "views/dataEntry.html");
 
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
@@ -259,7 +266,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         this.registerDataEntryForms();
 
         EHRService.get().registerLabworkType(new WNPRCUrinalysisLabworkType(this));
-
 
         BCReportRunner.schedule();
 
@@ -366,6 +372,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 InRoomsForm.class,
                 IrregularObservationsFormType.class,
                 MPRForm.class,
+                NecropsyAbstractForm.class,
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
                 PhysicalExamNWMForm.class,
@@ -383,7 +390,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 FoodDeprivesStartForm.class,
                 FoodDepriveCompleteForm.class,
                 FoodDeprivesRequestForm.class,
-                ProtocolForm.class
+                ProtocolForm.class,
+                ResearchUltrasoundsForm.class,
+                ResearchUltrasoundsTaskForm.class,
+                ResearchUltrasoundsReviewForm.class
         );
         for (Class<? extends DataEntryForm> form : forms)
         {
@@ -401,7 +411,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
     }
-
 
     public Set<Container> getWNPRCStudyContainers() {
         Set<Container> studyContainers = new HashSet<>();
@@ -452,11 +461,11 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     }
 
     @Override
-   public void afterUpdate(ModuleContext moduleContext)
-   {
+    public void afterUpdate(ModuleContext moduleContext)
+    {
        super.afterUpdate(moduleContext);
        ModuleUpdate.doAfterUpdate(moduleContext);
-   }
+    }
 
    @Override
    public void beforeUpdate(ModuleContext moduleContext)

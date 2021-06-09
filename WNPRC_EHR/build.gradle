@@ -9,8 +9,16 @@ dependencies {
     implementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     implementation project(path: "${project.parent.path}:GoogleDrive", configuration: "apiJarFile")
     external "joda-time:joda-time:2.8.1"
-    external "org.jsoup:jsoup:1.10.3"
+    external "org.jsoup:jsoup:1.13.1"
     external "org.reflections:reflections:0.9.10"
+
+    external 'com.google.api-client:google-api-client:1.30.5'
+    external 'com.google.apis:google-api-services-calendar:v3-rev20191117-1.30.3'
+    external 'com.google.http-client:google-http-client-gson:1.34.0'
+    external 'com.microsoft.ews-java-api:ews-java-api:2.0'
+    external 'com.google.auth:google-auth-library-oauth2-http:0.19.0'
+    external 'org.apache.commons:commons-text:1.9'
+
     jspImplementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")
     jspImplementation "joda-time:joda-time:2.8.1"

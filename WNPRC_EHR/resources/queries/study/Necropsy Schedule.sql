@@ -20,6 +20,7 @@ SELECT lsid
       ,location
       ,delivery_option.title           AS who_delivers
       ,shipping_comment                AS delivery_comment
+      ,animalid.Demographics.necropsyAbstractNotes.remark as remark
       ,CASE
        WHEN hasTissuesForAvrl IS NULL
          THEN FALSE

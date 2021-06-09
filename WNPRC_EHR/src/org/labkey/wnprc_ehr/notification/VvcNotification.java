@@ -18,8 +18,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.labkey.api.search.SearchService._log;
-//import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
-
 
 public class VvcNotification extends AbstractEHRNotification
 {
@@ -74,7 +72,6 @@ public class VvcNotification extends AbstractEHRNotification
     {
         Collection<UserPrincipal> recipients = getRecipients(container);
         sendMessage(getEmailSubject(container),getMessageBodyHTML(container,user),recipients,user,container);
-
     }
 
     public Collection<UserPrincipal> getRecipients(Container container)

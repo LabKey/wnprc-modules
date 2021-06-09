@@ -6,7 +6,7 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: 'published', depExtension: 'module')
 
-    apiImplementation "com.google.guava:guava:17.0"
+    apiImplementation "com.google.guava:guava:${guavaVersion}"
     implementation project( BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"))
     external "org.jooq:jooq:3.8.4"
     external "javax.xml.bind:jaxb-api:${jaxbVersion}"

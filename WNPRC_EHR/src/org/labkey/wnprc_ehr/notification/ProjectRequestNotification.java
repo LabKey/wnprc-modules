@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.labkey.api.search.SearchService._log;
-//import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
 
 public class ProjectRequestNotification extends AbstractEHRNotification
 {

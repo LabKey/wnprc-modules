@@ -23,7 +23,6 @@ public class ChargesFormSection extends SimpleFormSection
         _allowRowEditing = false;
 
         addClientDependency(ClientDependency.supplierFromPath("wnprc_billing/model/sources/MiscCharges.js"));
-
         setConfigSources(Collections.singletonList("Task"));
     }
 

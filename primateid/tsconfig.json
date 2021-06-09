@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "jsx": "react",
+    "sourceMap": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": [
+    "resources"
+  ],
+  "files": [
+    "src/ts/primateid.ts"
+  ]
+}

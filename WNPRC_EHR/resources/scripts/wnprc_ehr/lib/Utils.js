@@ -10,3 +10,59 @@ Utils.getJavaHelper = function() {
 Utils.lookupGender = function(gCode) {
     return Utils.getJavaHelper().lookupGender(gCode);
 };
+
+Utils.splitIds = function(subjectIds){
+    var subjectArray = [];
+    if (!subjectIds){
+        return subjectArray;
+    }
+
+    subjectIds = subjectIds.trim();
+    subjectIds = subjectIds.replace(/[\s,;]+/g, ';');
+    subjectIds = subjectIds.replace(/(^;|;$)/g, '');
+    subjectIds = subjectIds.toLowerCase();
+
+    if (subjectIds){
+        subjectArray = subjectIds.split(';');
+    }
+    else {
+        subjectArray = [];
+    }
+
+    return subjectArray;
+};
+
+Utils.contains = function(v,arr) {
+    for (var i = 0; i < arr.length; i++) {
+        if (arr[i] === v) {
+            return true;
+        }
+    }
+    return false;
+};
+
+//returns true or false if array is unique
+Utils.unique = function (chk) {
+    var arr = [];
+    var contain = false;
+    for (var i = 0; i < chk.length; i++) {
+        if (!Utils.contains(chk[i],arr)) {
+            arr.push(chk[i]);
+        }
+        else {
+            contain = true;
+        }
+    }
+    return !contain;
+}
+
+//returns array of unique items
+Utils.uniqueArray = function(fullArr) {
+    var arr = [];
+    for (var i = 0; i < fullArr.length; i++) {
+        if (!Utils.contains(fullArr[i],arr)) {
+            arr.push(fullArr[i]);
+        }
+    }
+    return arr;
+}

@@ -130,44 +130,4 @@
     </columns>
     <tableTitle>Weight</tableTitle>
   </table>
-
-  <table tableName="InVivoResults" tableDbType="TABLE">
-    <description>Contains one row of sample data data for each Animal Id/Date/DataType.</description>
-    <columns>
-      <column columnName="AnimalId">
-        <datatype>varchar</datatype>
-        <columnTitle>Animal Id</columnTitle>
-        <description>Subject identifier</description>
-        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
-        <nullable>false</nullable>
-        <importAliases>
-          <importAlias>ptid</importAlias>
-        </importAliases>
-        <scale>32</scale>
-      </column>
-      <column columnName="date">
-        <datatype>timestamp</datatype>
-        <columnTitle>Date</columnTitle>
-        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
-        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
-        <nullable>false</nullable>
-        <formatString>Date</formatString>
-      </column>
-      <column columnName="Aim">
-        <datatype>varchar</datatype>
-        <columnTitle>Aim</columnTitle>
-      </column>
-      <column columnName="DataType">
-        <datatype>varchar</datatype>
-        <columnTitle>Data Type</columnTitle>
-        <isKeyField>true</isKeyField>
-        <scale>32</scale>
-      </column>
-      <column columnName="Value">
-        <datatype>double</datatype>
-        <columnTitle>Value</columnTitle>
-      </column>
-    </columns>
-    <tableTitle>In Vivo Results</tableTitle>
-  </table>
 </tables>

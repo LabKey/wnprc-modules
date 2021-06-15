@@ -1,5 +1,0 @@
-{table}
-Filename|Component|Source|License|Purpose
-jooq-3.8.4.jar|jOOQ|{link:jOOQ.org|https://www.jooq.org/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|Database-mapping for Java
-pdfbox-2.0.23.jar|Apache PDFBox|{link:Apache|http://svn.apache.org/repos/asf/pdfbox/trunk/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|Generates and manipulates PDFs
-{table}

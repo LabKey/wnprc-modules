@@ -41,6 +41,6 @@
 
     </transforms>
     <schedule>
-        <poll interval="60m" />
+        <cron expression="0 30 1 * * ?" />
     </schedule>
 </etl>

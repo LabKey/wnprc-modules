@@ -13,17 +13,15 @@
                     <column>project</column>
                     <column>project/title</column>
                     <column>project/projectType</column>
-                    <column>project/investigatorName</column>
-
                 </sourceColumns>
                 <sourceFilters>
                     <sourceFilter column="project/projectType" value="Marmoset U24" operator="eq"/>
+                    <sourceFilter column="id/demographics/species/scientific_name" value="Callithrix jacchus" operator="eq"/>
                 </sourceFilters>
             </source>
             <destination schemaName="study" queryName="u24_assignments" targetOption="merge">
                 <columnTransforms>
                     <column source ="project/title" target="title"/>
-                    <column source ="project/investigatorName" target="investigator"/>
                     <column source="project/projectType" target="projectType"/>
                 </columnTransforms>
 
@@ -34,6 +32,6 @@
 
     </transforms>
     <schedule>
-        <poll interval="60m" />
+        <cron expression="0 30 1 * * ?" />
     </schedule>
 </etl>

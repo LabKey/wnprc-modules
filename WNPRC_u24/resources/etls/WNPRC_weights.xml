@@ -5,7 +5,7 @@
     <transforms>
         <transform id="step1" type="org.labkey.di.pipeline.TransformTask">
             <description>Copy to target</description>
-            <source schemaName="wnprc_r24" queryName="WeightStaging"/>
+            <source schemaName="wnprc_u24" queryName="WeightStaging"/>
             <destination schemaName="study" queryName="weight" targetOption="merge">
                 <columnTransforms>
                     <column source="animalId" target="id"/>
@@ -15,7 +15,7 @@
     </transforms>
 
     <incrementalFilter className="ModifiedSinceFilterStrategy" timestampColumnName="modified">
-        <deletedRowsSource schemaName="wnprc_r24" queryName="RowsToDelete" timestampColumnName="modified"
+        <deletedRowsSource schemaName="wnprc_u24" queryName="RowsToDelete" timestampColumnName="modified"
                            deletedSourceKeyColumnName="objectid" targetKeyColumnName="ObjectId"/>
     </incrementalFilter>
     <schedule>

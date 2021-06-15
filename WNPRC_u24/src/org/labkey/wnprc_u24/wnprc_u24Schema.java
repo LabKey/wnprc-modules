@@ -34,7 +34,7 @@ public class wnprc_u24Schema
     {
         // private constructor to prevent instantiation from
         // outside this class: this singleton should only be
-        // accessed via org.labkey.wnprc_r24.wnprc_r24Schema.getInstance()
+        // accessed via org.labkey.wnprc_u24.wnprc_u24Schema.getInstance()
     }
 
     public DbSchema getSchema()

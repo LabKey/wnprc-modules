@@ -12,7 +12,7 @@
                     <column>modified</column>
                 </sourceColumns>
             </source>
-            <destination schemaName="wnprc_r24" queryName="RowsToDelete" targetOption="merge"/>
+            <destination schemaName="wnprc_u24" queryName="RowsToDelete" targetOption="merge"/>
         </transform>
         <transform type="RemoteQueryTransformStep" id="step2">
 
@@ -28,12 +28,12 @@
                 </sourceColumns>
             </source>
 
-            <destination schemaName="wnprc_r24" queryName="WeightStaging" bulkLoad="true" batchSize="5000" targetOption="merge"/>
+            <destination schemaName="wnprc_u24" queryName="WeightStaging" bulkLoad="true" batchSize="5000" targetOption="merge"/>
         </transform>
         <transform id="step 3" type="TaskrefTransformStep">
             <taskref ref="org.labkey.di.steps.QueueJobTask">
                 <settings>
-                    <setting name="transformId" value="{wnprc_r24}/WNPRC_weights"/>
+                    <setting name="transformId" value="{wnprc_u24}/WNPRC_weights"/>
                 </settings>
             </taskref>
         </transform>

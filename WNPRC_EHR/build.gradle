@@ -21,6 +21,13 @@ dependencies {
         exclude group: "com.google.code.findbugs", module: "jsr305"
     }
     external "org.apache.commons:commons-text:1.9"
+    
+    //ms graph api libraries
+    external 'com.microsoft.azure:msal4j:1.6.+'
+    external 'com.microsoft.graph:microsoft-graph:2.6.+'
+    //external 'com.microsoft.azure:msal4j:1.9.+'
+    //external 'com.microsoft.graph:microsoft-graph:3.3.+'
+    external 'org.slf4j:slf4j-nop:1.8.0-beta4'
 
     jspImplementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")

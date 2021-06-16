@@ -26,14 +26,12 @@ import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
@@ -52,6 +50,7 @@ import org.labkey.dbutils.api.SimplerFilter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * User: bimber
@@ -85,6 +84,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizePregnanciesTable((AbstractTableInfo) table);
             } else if (table.getName().equalsIgnoreCase("housing") && table.getSchema().getName().equalsIgnoreCase("study")) {
                 customizeHousingTable((AbstractTableInfo) table);
+//            } else if (table.getName().equalsIgnoreCase("requests") && table.getSchema().getName().equalsIgnoreCase("ehr")) {
+//                customizeRequestsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "project")) {
                 customizeProjectTable((AbstractTableInfo) table);
             } else if (matches(table, "study", "feeding")) {
@@ -93,6 +94,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeDemographicsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "tasks")) {
                 customizeTasksTable((AbstractTableInfo) table);
+            } else if (matches(table, "study", "surgery_procedure")) {
+                customizeProcedureNameColumn((AbstractTableInfo) table);
             }
         }
     }
@@ -108,6 +111,54 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         customizeRoomCol(ti, "room");
         customizeRoomCol(ti, "room1");
         customizeRoomCol(ti, "room2");
+
+        ColumnInfo requestId = ti.getColumn("requestid");
+        if (requestId != null)
+        {
+            requestId.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
+                @Override
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                {
+                    ActionURL url = new ActionURL("ehr", "dataEntryFormDetails.view", ti.getUserSchema().getContainer());
+                    Integer rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "rowid"));
+                    String reqId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "requestid"));
+                    String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "formtype"));
+
+                    if (isExt4Form("request", formType))
+                    {
+                        String urlString = "";
+                        if (reqId != null)
+                        {
+                            url.replaceParameter("formType", formType);
+                            url.replaceParameter("requestid", reqId);
+                            urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+                            urlString += PageFlowUtil.filter(rowId);
+                            urlString += "</a>";
+                            out.write(urlString);
+                        }
+                    }
+                    else
+                    {
+                        super.renderGridCellContents(ctx, out);
+                    }
+                }
+
+                @Override
+                public void addQueryFieldKeys(Set<FieldKey> keys)
+                {
+                    super.addQueryFieldKeys(keys);
+                    keys.add(new FieldKey(getBoundColumn().getFieldKey(), "rowid"));
+                    keys.add(new FieldKey(getBoundColumn().getFieldKey(), "requestid"));
+                    keys.add(new FieldKey(getBoundColumn().getFieldKey(), "formtype"));
+                }
+
+                @Override
+                public Object getDisplayValue(RenderContext ctx)
+                {
+                    return ctx.get(new FieldKey(getBoundColumn().getFieldKey(), "rowid"));
+                }
+            });
+        }
     }
 
     private void customizeRoomCol(AbstractTableInfo ti, String columnName)
@@ -761,6 +812,60 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         customizeReasonForMoveColumn(ti);
     }
 
+//    private void customizeRequestsTable(AbstractTableInfo ti) {
+//        ColumnInfo requestId = ti.getColumn("rowId");
+//        if (requestId != null)
+//        {
+//            UserSchema us = getUserSchema(ti, "ehr");
+//            if (us != null)
+//            {
+//                requestId.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
+//                    @Override
+//                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+//                    {
+//                        ActionURL url = new ActionURL("ehr", "dataEntryFormDetails.view", us.getContainer());
+//                        int rowId = (Integer) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+//                        String reqId = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "requestid"));
+//                        String formType = (String) ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+//
+//                        if (isExt4Form("request", formType))
+//                        {
+//                            String urlString = "";
+//                            if (reqId != null)
+//                            {
+//                                url.replaceParameter("formType", formType);
+//                                url.replaceParameter("requestid", reqId);
+//                                urlString += "<a href=\"" + PageFlowUtil.filter(url) + "\">";
+//                                urlString += PageFlowUtil.filter(rowId);
+//                                urlString += "</a>";
+//                                out.write(urlString);
+//                            }
+//                        }
+//                        else
+//                        {
+//                            super.renderGridCellContents(ctx, out);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void addQueryFieldKeys(Set<FieldKey> keys)
+//                    {
+//                        super.addQueryFieldKeys(keys);
+//                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+//                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "requestid"));
+//                        keys.add(new FieldKey(getBoundColumn().getFieldKey().getParent(), "formtype"));
+//                    }
+//
+//                    @Override
+//                    public Object getDisplayValue(RenderContext ctx)
+//                    {
+//                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "rowid"));
+//                    }
+//                });
+//            }
+//        }
+//    }
+
     private void customizeSireIdColumn(AbstractTableInfo ti) {
         BaseColumnInfo sireid = (BaseColumnInfo) ti.getColumn("sireid");
         if (sireid != null)
@@ -860,6 +965,66 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     public Object getDisplayValue(RenderContext ctx)
                     {
                         return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "reason"));
+                    }
+                });
+            }
+        }
+    }
+
+    private void customizeProcedureNameColumn(AbstractTableInfo ti) {
+        ColumnInfo procedureName = ti.getColumn("procedureName");
+        if (procedureName != null)
+        {
+            UserSchema us = getUserSchema(ti, "study");
+            if (us != null)
+            {
+                procedureName.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
+
+                    @Override
+                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    {
+                        ActionURL url = new ActionURL("query", "detailsQueryRow.view", us.getContainer());
+                        String joinedProcedureNames = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "procedureName"));
+                        if (joinedProcedureNames != null)
+                        {
+                            String[] procedureNames = joinedProcedureNames.split(",");
+                            url.addParameter("schemaName", "wnprc");
+                            url.addParameter("query.queryName", "procedure_names");
+
+                            StringBuilder urlString = new StringBuilder();
+                            for (int i = 0; i < procedureNames.length; i++)
+                            {
+                                String procedureNameValue = procedureNames[i];
+                                SimplerFilter filter = new SimplerFilter("name", CompareType.EQUAL, procedureNameValue);
+                                DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+                                TableInfo ti = schema.getTable("procedure_names");
+                                TableSelector ts = new TableSelector(ti, filter, null);
+                                String procedureDisplayName;
+                                if (ts.getMap() != null && ts.getMap().get("displayname") != null)
+                                {
+                                    procedureDisplayName = (String) ts.getMap().get("displayname");
+                                    url.replaceParameter("name", procedureNameValue);
+                                    urlString.append("<a href=\"").append(PageFlowUtil.filter(url)).append("\">");
+                                    urlString.append(PageFlowUtil.filter(procedureDisplayName));
+                                    urlString.append("</a>");
+                                }
+                                else
+                                {
+                                    urlString.append(PageFlowUtil.filter("<" + procedureNameValue + ">"));
+                                }
+                                if (i + 1 < procedureNames.length)
+                                {
+                                    urlString.append(", ");
+                                }
+                            }
+                            out.write(urlString.toString());
+                        }
+                    }
+
+                    @Override
+                    public Object getDisplayValue(RenderContext ctx)
+                    {
+                        return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "procedureName"));
                     }
                 });
             }

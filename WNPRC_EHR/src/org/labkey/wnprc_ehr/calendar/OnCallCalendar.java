@@ -1,55 +1,60 @@
 package org.labkey.wnprc_ehr.calendar;
 
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.dbutils.api.SimplerFilter;
+import org.labkey.api.security.User;
+import org.labkey.api.util.PageFlowUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class OnCallCalendar extends GoogleCalendar
 {
-    /**
-     * Creates an authorized HttpRequestInitializer object.
-     * @return An authorized HttpRequestInitializer object.
-     * @throws IOException If the credentials.json file cannot be found.
-     */
-    @Override
-    protected HttpRequestInitializer getCredentials() throws Exception
-    {
-        // Load client secrets.
-        SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, "a3c471b4-6636-4b83-a65c-a33e2606a1ac");
-        DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
-        TableInfo ti = schema.getTable("service_accounts");
-        TableSelector ts = new TableSelector(ti, filter, null);
-        InputStream in = mapToInputStream(ts.getMap());
+    private static final String CALENDAR_UUID = "a3c471b4-6636-4b83-a65c-a33e2606a1ac";
+    private static final String DEFAULT_BG_COLOR = "#34abeb";
+    private Map<String, String> CALENDAR_IDS = null;
 
-        GoogleCredentials credentials = GoogleCredentials.fromStream(in).createScoped(SCOPES);
-        credentials.refreshIfExpired();
-
-        return new HttpCredentialsAdapter(credentials);
+    public OnCallCalendar(User user, Container container) {
+        super(user, container);
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
-    protected JSONArray getJsonEventList(Events events, String calendarId, String backgroundColor) {
+    protected String getCalendarUUID() {
+        return CALENDAR_UUID;
+    }
+
+    @Override
+    protected Map<String, String> getCalendarIds() {
+        if (CALENDAR_IDS == null) {
+            CALENDAR_IDS = new HashMap<>();
+            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("on_call_calendars");
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "display_name"), null, null);
+            Map<String, Object>[] calendars = ts.getMapArray();
+            for (Map<String, Object> calendar : calendars) {
+                CALENDAR_IDS.put((String) calendar.get("calendar_id"), (String) calendar.get("display_name"));
+            }
+        }
+        return CALENDAR_IDS;
+    }
+
+    @Override
+    protected JSONObject getJsonEventList(Events events, String calendarId) {
+        JSONObject eventSourceObject = new JSONObject();
         JSONArray jsonEvents = new JSONArray();
         String calendarName = events.getSummary();
         List<Event> items = events.getItems();
@@ -89,7 +94,10 @@ public class OnCallCalendar extends GoogleCalendar
                 }
             }
         }
+        eventSourceObject.put("events", jsonEvents);
+        eventSourceObject.put("backgroundColor", DEFAULT_BG_COLOR);
+        eventSourceObject.put("id", calendarId);
 
-        return jsonEvents;
+        return eventSourceObject;
     }
 }

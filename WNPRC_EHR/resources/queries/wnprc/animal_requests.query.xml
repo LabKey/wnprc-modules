@@ -2,7 +2,7 @@
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="animal_requests" tableDbType="TABLE" useColumnOrder="true">
-                <tableTitle>Animal Requestsss test</tableTitle>
+                <tableTitle>Animal Requests</tableTitle>
                 <javaCustomizer class="org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer"/>
                 <updateUrl />
 

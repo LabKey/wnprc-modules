@@ -1,11 +1,7 @@
 package org.labkey.wnprc_ehr.notification;
 
-import com.google.common.collect.MapDifference;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
@@ -26,7 +22,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static org.labkey.api.search.SearchService._log;
 import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
@@ -38,7 +33,6 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
     public String _hostName;
     public Map<String,Object> _row;
     public Map<String,Object> _oldrow;
-    public ArrayList<String> _ignoreTheseFields = new ArrayList<>();
 
 
     public AnimalRequestNotificationUpdate(Module owner)

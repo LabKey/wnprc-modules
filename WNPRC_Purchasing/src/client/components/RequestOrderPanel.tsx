@@ -22,10 +22,11 @@ interface Props {
     isRequester: boolean;
     isReceiver: boolean;
     hasRequestId?: boolean;
+    isReorder?: boolean;
 }
 
 export const RequestOrderPanel: FC<Props> = memo(props => {
-    const { model, onInputChange, isAdmin, isRequester, isReceiver, hasRequestId } = props;
+    const { model, onInputChange, isAdmin, isRequester, isReceiver, hasRequestId, isReorder } = props;
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
@@ -83,12 +84,14 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                 <Col xs={11} lg={6}>
                                     <AccountInput
                                         value={model.account}
-                                        isReadOnly={true}
+                                        isReadOnly={!isReorder}
+                                        isReorder={isReorder}
                                     />
                                     {(showOtherAcct || model.account === 'Other') && (
                                         <AccountOtherInput
                                             value={model.otherAcctAndInves}
                                             isReadOnly={true}
+                                            isReorder={isReorder}
                                         />
                                     )}
                                 </Col>
@@ -96,33 +99,33 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                             <Col xs={11} lg={6}>
                                 <ShippingDestinationInput
                                     value={model.shippingInfoId}
-                                    isReadOnly={true}
+                                    isReadOnly={!isReorder}
                                 />
                             </Col>
                             <Col xs={11} lg={6}>
                                 <VendorInput
                                     model={model}
-                                    isReadOnly={true}
+                                    isReadOnly={!isReorder}
                                 />
                             </Col>
                             <Col xs={11} lg={6}>
                                 <DeliveryAttentionInput
                                     value={model.shippingAttentionTo}
-                                    isReadOnly={true}
+                                    isReadOnly={!isReorder}
                                 />
                             </Col>
                             { isRequester && (
                                 <Col xs={11} lg={6}>
                                     <BusinessPurposeInput
                                         value={model.justification}
-                                        isReadOnly={true}
+                                        isReadOnly={!isReorder}
                                     />
                                 </Col>
                             )}
                             <Col xs={11} lg={6}>
                                 <SpecialInstructionInput
                                     value={model.comments}
-                                    isReadOnly={true}
+                                    isReadOnly={!isReorder}
                                 />
                             </Col>
                         </Row>
@@ -150,6 +153,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                     value={model.account}
                                     hasError={model.errors?.find(field => field.fieldName === 'account')}
                                     onChange={onValueChange}
+                                    isReorder={isReorder}
                                 />
                                 {(showOtherAcct || model.account === 'Other') && (
                                     <AccountOtherInput
@@ -157,6 +161,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                         hasError={model.errors?.find(field => field.fieldName === 'otherAcctAndInves')}
                                         hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
                                         onChange={onValueChange}
+                                        isReorder={isReorder}
                                     />
                                 )}
                             </Col>

@@ -19,10 +19,11 @@ import {
 interface Props {
     model: PurchaseAdminModel;
     onInputChange: (model: PurchaseAdminModel) => void;
+    isReorder?: boolean;
 }
 
 export const PurchaseAdminPanel: FC<Props> = memo(props => {
-    const { model, onInputChange } = props;
+    const { model, onInputChange, isReorder } = props;
     const onValueChange = useCallback(
         (colName, value) => {
             const updatedModel = produce(model, (draft: Draft<PurchaseAdminModel>) => {
@@ -47,34 +48,34 @@ export const PurchaseAdminPanel: FC<Props> = memo(props => {
             <Form className="form-margin">
                 <Row>
                     <Col xs={11} lg={6}>
-                        <AssignedToInput value={model.assignedTo} onChange={onValueChange} />
+                        <AssignedToInput value={model.assignedTo} onChange={onValueChange} isReorder={isReorder} />
                     </Col>
                     <Col xs={11} lg={6}>
-                        <ProgramInput value={model.program} onChange={onValueChange} />
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={11} lg={6}>
-                        <PaymentOptionInput value={model.paymentOption} onChange={onValueChange} />
-                    </Col>
-                    <Col xs={11} lg={6}>
-                        <ConfirmationInput value={model.confirmationNum} onChange={onValueChange} />
+                        <ProgramInput value={model.program} onChange={onValueChange} isReorder={isReorder} />
                     </Col>
                 </Row>
                 <Row>
                     <Col xs={11} lg={6}>
-                        <StatusInput value={model.qcState} onChange={onValueChange} />
+                        <PaymentOptionInput value={model.paymentOption} onChange={onValueChange} isReorder={isReorder} />
                     </Col>
                     <Col xs={11} lg={6}>
-                        <InvoiceInput value={model.invoiceNum} onChange={onValueChange} />
+                        <ConfirmationInput value={model.confirmationNum} onChange={onValueChange} isReorder={isReorder}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col xs={11} lg={6}>
-                        <OrderDateInput value={model.orderDate} onChange={onValueChange} />
+                        <StatusInput value={model.qcState} onChange={onValueChange} isReorder={isReorder} />
                     </Col>
                     <Col xs={11} lg={6}>
-                        <CardPostDateInput value={model.cardPostDate} onChange={onValueChange} />
+                        <InvoiceInput value={model.invoiceNum} onChange={onValueChange} isReorder={isReorder}/>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={11} lg={6}>
+                        <OrderDateInput value={model.orderDate} onChange={onValueChange} isReorder={isReorder} />
+                    </Col>
+                    <Col xs={11} lg={6}>
+                        <CardPostDateInput value={model.cardPostDate} onChange={onValueChange} isReorder={isReorder}/>
                     </Col>
                 </Row>
             </Form>

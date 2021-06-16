@@ -50,6 +50,7 @@ export const App: FC = memo(() => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
     const [requester, setRequester] = useState<number>();
+    const [isReorder, setIsReorder] = useState<boolean>(false);
     const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
@@ -57,6 +58,11 @@ export const App: FC = memo(() => {
         // is fired on component mount
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
+
+        setIsReorder(ActionURL.getParameter('isReorder'));
+        if (isReorder) {
+            setRequestId(null);
+        }
 
         (async () => {
             //get QCStates
@@ -237,6 +243,14 @@ export const App: FC = memo(() => {
 
         },
         [isDirty, requestId]
+    );
+
+    const onReorderBtnHandler = useCallback(
+        event => {
+            setIsReorder(true);
+            setRequestId(null);
+        },
+        [isReorder, requestId]
     );
 
     const onSaveBtnHandler = useCallback(
@@ -425,15 +439,17 @@ export const App: FC = memo(() => {
                     isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                     isAdmin={hasPurchasingAdminPermission}
                     isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                    isReorder={isReorder}
                 />
                 {
                     requestId && hasPurchasingAdminPermission && (
-                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel}/>
+                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} isReorder={isReorder}/>
                     )
                 }
                 <DocumentAttachmentPanel
                     onInputChange={documentAttachmentChange}
                     model={documentAttachmentModel}
+                    isReorder={isReorder}
                 />
                 <LineItemsPanel
                     onChange={lineItemsChange}
@@ -443,6 +459,7 @@ export const App: FC = memo(() => {
                     isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                     isAdmin={hasPurchasingAdminPermission}
                     isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                    isReorder={isReorder}
                 />
                 <button
                     disabled={isSaving}
@@ -453,21 +470,37 @@ export const App: FC = memo(() => {
                 >
                     Cancel
                 </button>
-                {
-                    !isSaving && (
+                    {
+                        !isSaving && (
+                            <>
+                                <button
+                                    disabled={requestId && !isReorder && !hasPurchasingUpdatePermission}
+                                    className="btn btn-primary pull-right"
+                                    id={requestId && !isReorder ? 'save' : 'submitForReview'}
+                                    name={requestId && !isReorder ? 'save' : 'submitForReview'}
+                                    onClick={onSaveBtnHandler}
+                                >
+                                    {requestId && !isReorder ? 'Submit' : 'Submit for Review'}
+                                </button>
+                            </>
+                        )
+                    }
+                    {
+                    (requestId && !isReorder) && (
                         <>
                             <button
-                                disabled={requestId && !hasPurchasingUpdatePermission}
                                 className="btn btn-primary pull-right"
-                                id={requestId ? 'save' : 'submitForReview'}
-                                name={requestId ? 'save' : 'submitForReview'}
-                                onClick={onSaveBtnHandler}
+                                style={{marginRight:'10px'}}
+                                id={'Reorder'}
+                                name={'Reorder'}
+                                onClick={onReorderBtnHandler}
                             >
-                                {requestId ? 'Submit' : 'Submit for Review'}
+                                {'Reorder'}
                             </button>
                         </>
                     )
                 }
+
                 {
                     isSaving && (
                         <button disabled className="btn btn-primary pull-right">

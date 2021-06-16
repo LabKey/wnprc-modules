@@ -18,10 +18,11 @@ interface Props {
     isAdmin: boolean;
     isRequester: boolean;
     isReceiver: boolean;
+    isReorder?: boolean;
 }
 
 export const LineItemsPanel: FC<Props> = memo(props => {
-    const { lineItems, onChange, errorMsg, hasRequestId, isAdmin, isRequester, isReceiver } = props;
+    const { lineItems, onChange, errorMsg, hasRequestId, isAdmin, isRequester, isReceiver, isReorder } = props;
 
     const lineItemRowChange = useCallback(
         (lineItem, updatedRowIndex) => {
@@ -86,7 +87,7 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                 <Col xs={1}>Unit Cost ($) *</Col>
                             }
                             <Col xs={1}>Quantity *</Col>
-                            { (hasRequestId) &&
+                            { (hasRequestId && !isReorder) &&
                                 <Col xs={1}>Quantity received</Col>
                             }
                             { (isAdmin || isRequester) &&
@@ -107,6 +108,7 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                 isRequester={isRequester}
                                 isReceiver={isReceiver}
                                 hasRequestId={hasRequestId}
+                                isReorder={isReorder}
                             />
                         );
                     })}
@@ -117,7 +119,7 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                 <div>
                                     <Row>
                                         <Col xs={6}></Col>
-                                        {hasRequestId &&
+                                        {(hasRequestId && !isReorder) &&
                                             <Col xs={1}></Col>
                                         }
                                         <Col xs={1}></Col>

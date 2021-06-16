@@ -21,7 +21,7 @@ interface InputProps {
 }
 
 export const AccountInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
@@ -47,6 +47,7 @@ export const AccountInput: FC<InputProps> = memo(props => {
                     value={value}
                     onChange={onValueChange}
                     placeholder="Please provide the purpose for this purchasing request (Required)"
+                    disabled={isReadOnly}
                 >
                     <option hidden value="">
                         Select
@@ -59,7 +60,7 @@ export const AccountInput: FC<InputProps> = memo(props => {
 });
 
 export const AccountOtherInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError, hasOtherAcctWarning } = props;
+    const { onChange, value, hasError, hasOtherAcctWarning, isReadOnly } = props;
 
     const onTextChange = useCallback(
         evt => {
@@ -80,7 +81,8 @@ export const AccountOtherInput: FC<InputProps> = memo(props => {
                     onChange={onTextChange}
                     id="account-and-pi-id"
                     placeholder="You selected 'Other' for 'Account to charge', please provide an account and principal investigator (Required)"
-                ></textarea>
+                    readOnly={isReadOnly}
+                />
             </PurchasingFormInput>
         </div>
     );
@@ -195,7 +197,7 @@ export const VendorInput: FC<VendorInputProps> = memo(props => {
 });
 
 export const BusinessPurposeInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
 
     const onTextChange = useCallback(
         evt => {
@@ -213,6 +215,7 @@ export const BusinessPurposeInput: FC<InputProps> = memo(props => {
                     onChange={onTextChange}
                     id="business-purpose-id"
                     placeholder="Please provide the purpose for this purchasing request (Required)"
+                    readOnly={isReadOnly}
                 />
             </PurchasingFormInput>
         </div>

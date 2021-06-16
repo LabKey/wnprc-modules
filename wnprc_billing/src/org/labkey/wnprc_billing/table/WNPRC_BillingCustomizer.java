@@ -82,14 +82,14 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
         {
             return;
         }
-      var chargeType = table.getMutableColumn("chargeGroup");
-      if (chargeType != null)
-      {
-          chargeType.setFk(QueryForeignKey.from(us, table.getContainerFilter())
-                  .container(us.getContainer())
-                  .table("chargeUnits")
-                  .key("groupName")
-                  .raw(true));
+        var chargeGroup = table.getMutableColumn("chargeGroup");
+        if (chargeGroup != null)
+        {
+            chargeGroup.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                    .container(us.getContainer())
+                    .table("chargeUnits")
+                    .key("groupName")
+                    .raw(true));
         }
 
         var debitedAcct = table.getMutableColumn("debitedAccount");
@@ -102,7 +102,7 @@ public class WNPRC_BillingCustomizer extends AbstractTableCustomizer
                     .raw(true));
         }
 
-        var chargeId= table.getMutableColumn("chargeId");
+        var chargeId = table.getMutableColumn("chargeId");
         if (chargeId != null)
         {
             chargeId.setFk(QueryForeignKey.from(us, table.getContainerFilter())

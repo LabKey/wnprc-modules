@@ -1,6 +1,7 @@
 package org.labkey.animalrequests;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.DefaultModule;
@@ -24,9 +25,15 @@ public class AnimalRequestsModule extends DefaultModule
     }
 
     @Override
+    public @Nullable Double getSchemaVersion()
+    {
+        return 17.21;
+    }
+
+    @Override
     public boolean hasScripts()
     {
-        return false;
+        return true;
     }
 
     @Override
@@ -70,6 +77,6 @@ public class AnimalRequestsModule extends DefaultModule
     @NotNull
     public Set<String> getSchemaNames()
     {
-        return Collections.emptySet();
+        return Collections.singleton(AnimalRequestsSchema.NAME);
     }
 }

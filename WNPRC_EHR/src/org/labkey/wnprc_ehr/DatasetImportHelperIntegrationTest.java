@@ -27,7 +27,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @TestWhen(TestWhen.When.DRT)
 public class DatasetImportHelperIntegrationTest extends Assert
@@ -72,7 +74,7 @@ public class DatasetImportHelperIntegrationTest extends Assert
 
         // ASSERT: make sure that the datasets we are expecting got created
         List<? extends Dataset> datasets = study.getDatasets();
-        Assert.assertArrayEquals(new String[]{"breeding_encounters", "pregnancies", "pregnancy_outcomes", "tissue_samples", "ultrasounds"},
-                datasets.stream().map(Dataset::getName).sorted().toArray());
+        Assert.assertEquals(Arrays.asList("breeding_encounters", "pregnancies", "pregnancy_outcomes", "ultrasounds"),
+                datasets.stream().map(Dataset::getName).sorted().collect(Collectors.toList()));
     }
 }

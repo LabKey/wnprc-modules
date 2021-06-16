@@ -8,6 +8,7 @@
         <script path="/wnprc_ehr/ext4/data/RequestStoreCollection.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/MasterSectionClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/NecropsyClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/SlaveSectionClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/TaskClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/TaskStoreCollection.js"/>

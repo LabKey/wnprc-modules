@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.labkey.api.search.SearchService._log;
-//import static org.labkey.ehr.pipeline.GeneticCalculationsJob.getContainer;
 
 public class ViralLoadQueueNotification extends AbstractEHRNotification
 {
@@ -45,20 +44,28 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public final String openResearchPortal = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
     public Map<String, Integer> emailsAndCount = new HashMap<>();
     public Integer experimentNumber;
+    public Integer positiveControl;
+    public String vlPositiveControl;
+    public String avgVLPositiveControl;
+    public Double efficiency;
 
     public ViralLoadQueueNotification(Module owner)
     {
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, String hostname, Integer number) throws SQLException
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailProps) throws SQLException
     {
         super(owner);
         rowIds = rowids;
         currentUser = currentuser;
-        hostName = hostname;
         container = c;
-        experimentNumber = number;
+        hostName = (String) emailProps.get("hostName");
+        experimentNumber = (Integer) emailProps.get("experimentNumber");
+        positiveControl = (Integer) emailProps.get("positive_control");
+        vlPositiveControl = (String) emailProps.get("vl_positive_control");
+        avgVLPositiveControl = (String) emailProps.get("avg_vl_positive_control");
+        efficiency = (Double) emailProps.get("efficiency");
         this.setUp();
     }
 
@@ -69,7 +76,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             Integer val = emailsAndCount.get(email);
             val++;
             emailsAndCount.replace(email,val);
-        }else {
+        } else {
             emailsAndCount.put(email,1);
         }
     }
@@ -183,8 +190,9 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 //but ideally instead of Integer as the key it would be a a string of:
                 //submitter email + notify email string(normalized = sorted in such a way there arent repeats).
 
-                //add the submitter email and also the rest in the "emails" column
+                //add the submitter email, the modified by email, and also the rest in the "emails" column
                 addEmail(createdByUserEmail);
+                addEmail(modifiedByEmail);
                 countEmailsAndPut(notifyEmails, createdByUserEmail);
             }
         }
@@ -233,8 +241,26 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 openResearchPortal +
                 "&Dataset.experiment_number~eq=" +
                 experimentNumber.toString() +
-                "\">link</a>. ");
-        msg.append("Please feel free to contact " +
+                "\">link</a>.</p>");
+        msg.append("<p>Below is a summary of the experiment:</p>");
+
+        msg.append("<p><table><tbody>" +
+                "<tr>" +
+                "<td>Experiment #:</td>" + "<td>" + experimentNumber.toString() + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td>Positive Control " + positiveControl.toString()  + ":</td>" + "<td>" + vlPositiveControl + " copies/ml</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td>AVG Positive Control " + positiveControl  + ":</td>" + "<td>" + avgVLPositiveControl + " copies/ml</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td>Efficiency:</td>" + "<td>" + efficiency.toString() + "</td>" +
+                "</tr>" +
+                "</tbody></table></p>"
+                );
+
+        msg.append("<p>Please feel free to contact " +
                 "<a href=\"mailto:" +
                 modifiedByEmail +
                 "\">" +

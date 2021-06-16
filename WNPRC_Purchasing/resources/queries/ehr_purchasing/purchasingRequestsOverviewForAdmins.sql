@@ -6,6 +6,7 @@ SELECT
        pr.qcState   AS requestStatus,
        pr.created   AS requestDate,
        pr.createdBy AS requester,
+       pr.orderDate,
        pr.totalCost,
        pr.assignedTo,
        pr.attachments

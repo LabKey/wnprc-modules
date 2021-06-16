@@ -12,6 +12,7 @@
         <column name="cage" />
         <column name="cond" />
         <column name="origin" />
+        <column name="ancestry" />
         <column name="conception" />
         <column name="type" />
         <column name="remark" />

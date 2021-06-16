@@ -1,9 +1,11 @@
-FROM openjdk:14.0.1-jdk-oraclelinux7
+FROM adoptopenjdk/openjdk15:x86_64-centos-jdk-15.0.2_7
+#FROM openjdk:15.0.2-jdk-oraclelinux7
 
 ENV LANG en_US.utf8
 
 # copy in some additional yum repositories
 #COPY public-yum-ol7.repo /etc/yum.repos.d
+RUN yum -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 RUN yum-config-manager --enable ol7_optional_latest
 RUN yum -y -q install \
     #for R
@@ -17,7 +19,7 @@ RUN yum -y -q install \
     # for creating the netrc file from the template (envsubst)
     gettext \
     # for installing R and the various additional packages
-    R-3.5.1 \
+    R-3.6.0 \
     make \
     libcurl-devel \
     libxml2-devel \
@@ -42,12 +44,15 @@ RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[
 RUN mkdir -p conf/Catalina/localhost
 COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
 
+# adding Tomcat custom login pattern
+COPY server8_5_32.xml conf/server.xml
+
 RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml
 
 # install the necessary R packages
 COPY install.r /tmp/install.r
-#RUN mkdir -p /usr/share/doc/R-3.5.1/html && Rscript /tmp/install.r
+RUN mkdir -p /usr/share/doc/R-3.6.0/html && Rscript /tmp/install.r
 
 # copy over the .netrc template file
 COPY netrc /root/netrc.template

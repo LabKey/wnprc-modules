@@ -4,7 +4,7 @@
     <Loader loaderClass="org.labkey.bootstrap.LabkeyServerBootstrapClassLoader" useSystemClassLoaderAsParent="false"/>
 
     <Parameter name="org.labkey.api.pipeline.config" value="/usr/local/labkey/config/config-server"/>
-    <Parameter name="MasterEncryptionKey" value="defaultKey"/>
+    <Parameter name="MasterEncryptionKey" value="${labkey.masterEncryptionKey}"/>
 
     <Resource name="jdbc/labkeyDataSource" auth="Container"
               type="javax.sql.DataSource"
@@ -15,6 +15,7 @@
               maxTotal="40"
               maxActive="40"
               maxIdle="10"
+              maxWaitMillis="120000"
               accessToUnderlyingConnectionAllowed="true"
               validationQuery="SELECT 1"
     />
@@ -29,7 +30,7 @@
               maxIdle="7"
               useInformationSchema="true"
               accessToUnderlyingConnectionAllowed="true"
-              validationQuery="/* ping */"              
+              validationQuery="/* ping */"
     />
     <Resource name="mail/Session" auth="Container"
               type="javax.mail.Session"

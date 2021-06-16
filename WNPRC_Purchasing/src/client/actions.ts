@@ -47,8 +47,9 @@ function getQCState(purchasingAdminModel: PurchaseAdminModel, requestOrder: Requ
         return qcState.label === 'Order Complete';
     });
 
-    // if 'order complete' state is set, return
-    if (completeState?.[0]?.rowId === qcState) {
+    // if 'order complete' state is set, return.
+    // Note: using double equals instead of triple to perform type coercion, qcState value is with "", and rowId value is without.
+    if (completeState?.[0]?.rowId == qcState) {
         return qcState;
     }
 
@@ -77,13 +78,15 @@ export async function submitRequest(
     qcStates: QCStateModel[],
     purchasingAdminModel?: PurchaseAdminModel,
     documentAttachmentModel?: DocumentAttachmentModel,
-    lineItemsToDelete?: number[]
+    lineItemsToDelete?: number[],
+    isNewRequest?: boolean
 ): Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
             url: ActionURL.buildURL('WNPRC_Purchasing', 'submitRequest.api'),
             method: 'POST',
             jsonData: {
+                isNewRequest: isNewRequest,
                 rowId: requestOrder.rowId,
                 account: requestOrder.account !== 'Other' ? requestOrder.account : -1,
                 accountOther: requestOrder.otherAcctAndInves,

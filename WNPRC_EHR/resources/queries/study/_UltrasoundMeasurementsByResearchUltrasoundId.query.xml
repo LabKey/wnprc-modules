@@ -1,0 +1,29 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="_UltrasoundMeasurementsByResearchUltrasoundId" tableDbType="NOT_IN_DB">
+                <columns>
+                    <column columnName="ultrasound_id">
+                        <columnTitle>Ultrasound Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>research_ultrasounds</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>objectid</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="date"/>
+                    <column columnName="measurement_label"/>
+                    <column columnName="measurement_value"/>
+                    <column columnName="measurement_unit"/>
+                    <column columnName="measurement_averages">
+                        <columnTitle>Average</columnTitle>
+                    </column>
+                    <column columnName="gestation_day">
+                        <columnTitle>Estimated Gestation</columnTitle>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

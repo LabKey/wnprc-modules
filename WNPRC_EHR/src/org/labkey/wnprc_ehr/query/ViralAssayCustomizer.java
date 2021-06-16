@@ -152,7 +152,7 @@ public class ViralAssayCustomizer implements TableCustomizer {
             statusFlags.setDimension(false);
         }
 
-        BaseColumnInfo batchedColumn = (BaseColumnInfo)ti.getColumn("batched");
+        BaseColumnInfo batchedColumn = (BaseColumnInfo) ti.getColumn("batched");
 
         if (batchedColumn != null) {
             batchedColumn.setDisplayColumnFactory(new DisplayColumnFactory() {
@@ -215,11 +215,5 @@ public class ViralAssayCustomizer implements TableCustomizer {
         public Object getDisplayValue(RenderContext ctx) {
             return getValue(ctx);
         }
-
-        @Override
-        public HtmlString getFormattedHtml(RenderContext ctx) {
-            return HtmlString.of(getValue(ctx));
-        }
     }
-
 }

@@ -26,6 +26,6 @@ public class WNPRC_BillingAnimalDetailsFormSection extends NonStoreFormSection
     public WNPRC_BillingAnimalDetailsFormSection()
     {
         super("AnimalDetails", "Animal Details", "ehr_billing-animaldetailspanel");
-        addClientDependency(ClientDependency.fromPath("ehr_billing/panel/EHR_BillingAnimalDetailsPanel.js"));
+        addClientDependency(ClientDependency.supplierFromPath("ehr_billing/panel/EHR_BillingAnimalDetailsPanel.js"));
     }
 }

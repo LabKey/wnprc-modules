@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Exported from WNPRC LabKey Server at https://ehr.primate.wisc.edu/project/WNPRC/EHR/begin.view by bimber on Thu Jul 14 20:43:22 CDT 2011-->
+<tables xmlns="http://labkey.org/data/xml">
+  <table tableName="newsnomed" tableDbType="TABLE">
+    <columns>
+      <column columnName="code">
+        <datatype>varchar</datatype>
+        <columnTitle>Code</columnTitle>
+        <nullable>false</nullable>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="meaning">
+        <datatype>varchar</datatype>
+        <columnTitle>Meaning</columnTitle>
+      </column>
+      <column columnName="objectid">
+        <datatype>varchar</datatype>
+        <columnTitle>Key</columnTitle>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+      </column>
+      <column columnName="ts">
+        <datatype>timestamp</datatype>
+        <columnTitle>Last Changed</columnTitle>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+      </column>
+    </columns>
+    <pkColumnName>code</pkColumnName>
+  </table>
+  <table tableName="snomed" tableDbType="TABLE">
+    <columns>
+      <column columnName="code">
+        <datatype>varchar</datatype>
+        <columnTitle>Code</columnTitle>
+        <nullable>false</nullable>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="meaning">
+        <datatype>varchar</datatype>
+        <columnTitle>Meaning</columnTitle>
+      </column>
+      <column columnName="objectid">
+        <datatype>varchar</datatype>
+        <columnTitle>Key</columnTitle>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+      </column>
+      <column columnName="ts">
+        <datatype>timestamp</datatype>
+        <columnTitle>Last Changed</columnTitle>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+      </column>
+    </columns>
+    <pkColumnName>code</pkColumnName>
+  </table>
+</tables>

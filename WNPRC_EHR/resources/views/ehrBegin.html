@@ -1,18 +1,11 @@
 <script type="text/javascript">
 
-LABKEY.requiresScript("/ehr/ext3/navMenu.js");
-LABKEY.requiresScript("/ehr/utils.js");
+    LABKEY.requiresScript("/ehr/utils.js");
 
 Ext.onReady(createNavMenu);
 
 function createNavMenu()
 {
-    if (!window.EHR || !window.EHR.ext || !window.EHR.ext.NavMenu)
-    {
-        createNavMenu.defer(10);
-        return;
-    }
-
     var webpart = <%=webpartContext%>;
     var ctx = EHR.Utils.getEHRContext(webpart.wrapperDivId);
     if(!ctx)
@@ -38,7 +31,7 @@ function createNavMenu()
         '</table>'
     );
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         width: 270,
         renderTo: 'ehrMenu1_'+webpart.wrapperDivId,
         sections: [
@@ -77,7 +70,7 @@ function createNavMenu()
     });
 
 
-    new EHR.ext.NavMenu({
+    Ext4.create('EHR.NavMenu', {
         width: 270,
         renderTo: 'ehrMenu2_'+webpart.wrapperDivId,
         sections: [
@@ -160,7 +153,7 @@ function createNavMenu()
 
     }
 
-    new EHR.ext.NavMenu(menuCfg);
+    Ext4.create('EHR.NavMenu', menuCfg);
 
 }
 

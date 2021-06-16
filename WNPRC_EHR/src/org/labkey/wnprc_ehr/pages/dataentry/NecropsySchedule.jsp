@@ -1,25 +1,29 @@
-<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
-<%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
-<%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.Map" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="org.labkey.api.security.GroupManager" %>
-<%@ page import="org.labkey.security.xml.GroupEnumType" %>
+<%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.security.Group" %>
+<%@ page import="org.labkey.api.security.GroupManager" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
+<%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
+<%@ page import="org.labkey.security.xml.GroupEnumType" %>
+<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.css' />
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.min.js'></script>
+<%--<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.js'></script>--%>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<%--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css">--%>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" integrity="sha512-HWlJyU4ut5HkEj0QsK/IxBCY55n5ZpskyjVlAoV9Z7XQwwkqXoYdCIC93/htL3Gu5H3R4an/S0h2NXfbZk3g7w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js" integrity="sha512-eYSzo+20ajZMRsjxB6L7eyqo5kuXuS2+wEbbOkpaur+sA2shQameiJiWEzCIDwJqaB0a4a6tCuEvCOBHUg3Skg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
 
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
@@ -55,7 +59,7 @@
     }
 
     Group pathologyGroup = GroupManager.getGroup(getContainer(), "pathology (LDAP)", GroupEnumType.SITE);
-    boolean isPathologist = getUser().isInGroup(pathologyGroup.getUserId()) || getUser().isSiteAdmin();
+    boolean isPathologist = getUser().isInGroup(pathologyGroup.getUserId()) || getUser().hasSiteAdminPermission();
 %>
 
 <style type="text/css">
@@ -227,7 +231,7 @@
                                     for(JSONObject necropsySuite : necropsySuites) {
                                         String suiteName = necropsySuite.getString("room");
                                 %>
-                                <option value="<%=suiteName%>"><%=h(suiteName)%></option>
+                                <option value="<%=h(suiteName)%>"><%=h(suiteName)%></option>
                                 <%
                                     }
                                 %>
@@ -245,7 +249,7 @@
                                         String userid = pathologist.getString("userid");
                                         String internaluserid = pathologist.getString("internaluserid");
                                 %>
-                                <option value="<%=internaluserid%>"><%=h(userid)%></option>
+                                <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
                                 <%
                                     }
                                 %>
@@ -263,7 +267,7 @@
                                         String userid = pathologist.getString("userid");
                                         String internaluserid = pathologist.getString("internaluserid");
                                 %>
-                                <option value="<%=internaluserid%>"><%=h(userid)%></option>
+                                <option value="<%=h(internaluserid)%>"><%=h(userid)%></option>
                                 <%
                                     }
                                 %>
@@ -296,7 +300,7 @@
 
 <script>
     (function() {
-        var necropsySuiteLookup = <%= necropsySuiteLookup.toString() %>;
+        var necropsySuiteLookup = <%=necropsySuiteLookup%>;
         WebUtils.VM.necropsySuiteLookup = necropsySuiteLookup;
 
         var $calendar = $('#calendar');
@@ -515,7 +519,7 @@
 
             return LABKEY.ActionURL.buildURL('ehr', 'dataEntryFormDetails', null, {
                 formType: 'NecropsyRequest',
-                returnURL: window.location,
+                returnUrl: window.location,
                 requestId: lsid
             });
         });
@@ -549,7 +553,7 @@
             viewCollectionListURL: ko.pureComputed(function() {
                 <% ActionURL collectionListURL = new ActionURL(WNPRC_EHRController.NecropsyCollectionListAction.class, getContainer()); %>
 
-                return LABKEY.ActionURL.buildURL('<%= collectionListURL.getController() %>', '<%= collectionListURL.getAction() %>', null, {
+                return LABKEY.ActionURL.buildURL(<%=q(collectionListURL.getController())%>, <%=q(collectionListURL.getAction())%>, null, {
                     reportMode: true,
                     taskid: WebUtils.VM.taskDetails.lsid()
                 });
@@ -557,7 +561,7 @@
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>
 
-                return LABKEY.ActionURL.buildURL('<%= necropsyReportURL.getController() %>', '<%= necropsyReportURL.getAction() %>', null, {
+                return LABKEY.ActionURL.buildURL(<%=q(necropsyReportURL.getController())%>, <%=q(necropsyReportURL.getAction())%>, null, {
                     reportMode: true,
                     taskid: WebUtils.VM.taskDetails.lsid()
                 });
@@ -695,8 +699,8 @@
             }
             else {
                 WebUtils.VM.enableForm();
-                WebUtils.VM.form.assignedTo('<%= defaultAssignedUserID %>');
-                $assignedToField.val('<%= defaultAssignedDisplayName %>');
+                WebUtils.VM.form.assignedTo(<%=q(defaultAssignedUserID)%>);
+                $assignedToField.val(<%=q(defaultAssignedDisplayName)%>);
             }
         })
     })();

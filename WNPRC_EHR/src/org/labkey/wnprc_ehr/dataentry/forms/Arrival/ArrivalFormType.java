@@ -27,6 +27,6 @@ public class ArrivalFormType extends TaskForm {
                 new VirologyResultsFormSection()
         ));
 
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/NewAnimal.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/NewAnimal.js"));
     }
 }

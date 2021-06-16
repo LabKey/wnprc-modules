@@ -9,7 +9,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.ContainerManager;
@@ -46,7 +47,7 @@ import java.util.UUID;
  * Created by jon on 1/13/17.
  */
 public class GoogleDriveServiceImpl extends GoogleDriveService {
-    private static Logger _log = Logger.getLogger(GoogleDriveService.class);
+    private static Logger _log = LogManager.getLogger(GoogleDriveService.class);
 
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
@@ -117,6 +118,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
      *
      * @return The id of the newly created service account.
      */
+    @Override
     public String registerServiceAccount(String displayName, ServiceAccountForm form, User user) throws  QueryUpdateServiceException, DuplicateKeyException, SQLException, InvalidKeyException, BatchValidationException {
         SimpleQueryUpdater queryUpdater = getQueryUpdater(user);
 
@@ -145,6 +147,7 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
         queryUpdater.upsert(row);
     }
 
+    @Override
     public void deleteAccount(String accountId, User user) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, InvalidKeyException, BatchValidationException {
         SimpleQueryUpdater queryUpdater = getQueryUpdater(user);
 

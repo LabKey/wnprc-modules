@@ -1,12 +1,13 @@
 package org.labkey.wnprc_ehr.schemas;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
@@ -46,7 +47,7 @@ import java.util.Set;
  * Created by jon on 2/24/16.
  */
 public class WNPRC_Schema extends SimpleUserSchema {
-    private static Logger _log = Logger.getLogger(WNPRC_Schema.class);
+    private static Logger _log = LogManager.getLogger(WNPRC_Schema.class);
     public static final String NAME = "wnprc";
     public static String DESCRIPTION = "Schema for WNPRC specific data.";
     public Container _container;
@@ -81,21 +82,21 @@ public class WNPRC_Schema extends SimpleUserSchema {
     }
 
     @Override
-    public TableInfo createTable(String name) {
+    public TableInfo createTable(String name, ContainerFilter cf) {
         Map<String, TableInfo> enumTables = getEnumTables();
 
         if (enumTables.containsKey(name)) {
             return enumTables.get(name);
         }
         if (name.equalsIgnoreCase("vvc")){
-            CustomPermissionsTable vvc = new CustomPermissionsTable(this,_dbSchema.getTable(name));
+            CustomPermissionsTable vvc = new CustomPermissionsTable(this,_dbSchema.getTable(name),cf);
             vvc.addPermissionMapping(UpdatePermission.class, EHRVeterinarianPermission.class);
             vvc.addPermissionMapping(InsertPermission.class, EHRRequestPermission.class);
 
             return vvc.init();
         }
         else {
-            return super.createTable(name);
+            return super.createTable(name, cf);
         }
     }
 
@@ -141,36 +142,5 @@ public class WNPRC_Schema extends SimpleUserSchema {
         rows.addAll(JsonUtils.getListFromJSONArray(results));
 
         return rows;
-    }
-
-    public static void ensureStudyShape(User user, Container container) throws ChangePropertyDescriptorException {
-        Study study = StudyService.get().getStudy(container);
-
-        Dataset tissueSamples = study.getDatasetByName(TissueSampleTable.TABLENAME);
-        Domain tissueSamplesDomain = tissueSamples.getDomain();
-
-        // Make sure the columns exist on the tissue samples table.
-        for (SystemProperty systemProperty : Arrays.asList(TissueSampleTable.COLLECT_BEFORE_DEATH, TissueSampleTable.COLLECTION_ORDER)) {
-            String propertyURI = systemProperty.getPropertyDescriptor().getPropertyURI();
-            DomainProperty domainProperty = tissueSamplesDomain.getPropertyByURI(propertyURI);
-            PropertyDescriptor pd = OntologyManager.getPropertyDescriptor(propertyURI, ContainerManager.getSharedContainer());
-            if (domainProperty == null) {
-                // The property doesn't exist, so we should create it
-                _log.log(Priority.INFO, String.format("The %s column doesn't exist on the %s table.  Creating it now.", systemProperty.getPropertyDescriptor().getName(), TissueSampleTable.TABLENAME));
-
-                domainProperty = tissueSamplesDomain.addProperty();
-                domainProperty.setPropertyURI(pd.getPropertyURI());
-                domainProperty.setRangeURI(pd.getRangeURI());
-                domainProperty.setName(pd.getName());
-            }
-            else {
-                _log.log(Priority.INFO, String.format("The %s column already exists on the %s table.", systemProperty.getPropertyDescriptor().getName(), TissueSampleTable.TABLENAME));
-            }
-        }
-
-        _log.info(String.format("Saving %s domain as %s and flushing caches", tissueSamples.getName(), user));
-        tissueSamplesDomain.save(user);
-        Introspector.flushCaches();
-        CacheManager.clearAllKnownCaches();
     }
 }

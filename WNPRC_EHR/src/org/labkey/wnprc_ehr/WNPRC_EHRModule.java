@@ -15,7 +15,10 @@
  */
 package org.labkey.wnprc_ehr;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -30,6 +33,8 @@ import org.labkey.api.ehr.security.EHRStartedAdminPermission;
 import org.labkey.api.ehr.security.EHRStartedDeletePermission;
 import org.labkey.api.ehr.security.EHRStartedInsertPermission;
 import org.labkey.api.ehr.security.EHRStartedUpdatePermission;
+import org.labkey.api.ehr.history.DefaultClinicalRemarksDataSource;
+import org.labkey.api.ehr.history.iStatLabworkType;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.ldk.ExtendedSimpleModule;
 import org.labkey.api.ldk.notification.Notification;
@@ -114,7 +119,6 @@ import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
-import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
@@ -125,12 +129,16 @@ import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.wnprc_ehr.updates.ModuleUpdate;
 import org.reflections.Reflections;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -145,81 +153,44 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
 
-    public static String BC_GOOGLE_DRIVE_PROPERTY_NAME = "BCGoogleDriveAccount";
+    /**
+     * Logger for logging the logs
+     */
+    private static final Logger LOG = LogManager.getLogger(WNPRC_EHRModule.class);
 
-    static public LinkedHashSet<ClientDependency> getDataEntryClientDependencies()
-    {
-        LinkedHashSet<ClientDependency> dataEntryClientDependencies = new LinkedHashSet<>();
+    /**
+     * Flag (from the JVM) to indicate we should force the module to re-run all updates
+     * regardless of the actual module version
+     */
+    private boolean forceUpdate = Boolean.getBoolean("labkey.module.forceupdate");
 
-        List<String> paths = Arrays.asList(
-                "/wnprc_ehr/wnprc_ext4",
-                "/wnprc_ehr/dataentry"
-        );
-
-        for (String path : paths)
-        {
-            dataEntryClientDependencies.add(ClientDependency.fromPath(path));
-        }
-
-        return dataEntryClientDependencies;
-    }
-
-    public static Set<Container> getAllContainers()
-    {
-        return new HashSet<>(getChildContainers(ContainerManager.getRoot()));
-    }
-
-    public static Set<Container> getChildContainers(Container parentContainer)
-    {
-        Set<Container> containers = new HashSet<>();
-
-        for (Container container : parentContainer.getChildren())
-        {
-            containers.add(container);
-            containers.addAll(getChildContainers(container));
-        }
-
-        return containers;
-    }
-
-    public static Container getDefaultContainer()
-    {
-        if (ContainerManager.getForPath("/WNPRC") == null)
-        {
-            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC");
-        }
-        Container wnprcContainer = ContainerManager.getForPath("/WNPRC");
-
-        Container ehrContainer = wnprcContainer.getChild("EHR");
-        if (ehrContainer == null)
-        {
-            ContainerManager.createContainer(wnprcContainer, "EHR");
-            ehrContainer = wnprcContainer.getChild("EHR");
-        }
-
-        return ehrContainer;
-    }
+    /**
+     * Flag indicating we should load the study metadata on module startup
+     */
+    private boolean loadOnStart = false;
 
     public String getName()
     {
         return NAME;
     }
 
-    public double getVersion()
-    {
-        return 18.38;
+    @Override
+    public @Nullable Double getSchemaVersion() {
+        return forceUpdate ? Double.POSITIVE_INFINITY : 21.000;
     }
 
-    public boolean hasScripts()
-    {
+    @Override
+    public boolean hasScripts() {
         return true;
     }
 
-    protected void init()
-    {
-        TissueSampleTable.registerProperties();
+    @Override
+    protected void init() {
         addController(CONTROLLER_NAME, WNPRC_EHRController.class);
         addController(TEST_CONTROLLER_NAME, WNPRC_EHRTestController.class);
+
+        registerRoles();
+        registerPermissions();
     }
 
     @Override
@@ -232,15 +203,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         Resource r = getModuleResource("/scripts/wnprc_ehr/wnprc_triggers.js");
         assert r != null;
         EHRService.get().registerTriggerScript(this, r);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("ehr/ehr_ext3_api"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcCoreUtils.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcOverRides.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcReports.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/datasetButtons.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/animalPortal.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
-        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/Inroom.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("ehr/ehr_ext3_api"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcCoreUtils.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcOverRides.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/wnprcReports.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/datasetButtons.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/animalPortal.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/Inroom.js"), this);
 
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "List Single-housed Animals", this, DetailsURL.fromString("/query/executeQuery.view?schemaName=study&query.queryName=Demographics&query.viewName=Single%20Housed"), "Commonly Used Queries");
         EHRService.get().registerReportLink(EHRService.REPORT_LINK_TYPE.housing, "View Roommate History for Animals", this, DetailsURL.fromString("/ehr/animalHistory.view#inputType:singleSubject&activeReport:roommateHistory"), "Commonly Used Queries");
@@ -292,6 +263,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultTBDataSource(this));
+        EHRService.get().registerHistoryDataSource(new DefaultClinicalRemarksDataSource(this));
+        EHRService.get().registerLabworkType(new iStatLabworkType(this));
 
         EHRService.get().addModuleRequiringLegacyExt3EditUI(this);
 
@@ -300,26 +273,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
         EHRService.get().registerLabworkType(new WNPRCUrinalysisLabworkType(this));
 
-        this.registerRoles();
-        this.registerPermissions();
-
         BCReportRunner.schedule();
-
-        for (Container studyContainer : getWNPRCStudyContainers())
-        {
-            User user = EHRService.get().getEHRUser(studyContainer);
-            try
-            {
-                WNPRC_Schema.ensureStudyShape(user, studyContainer);
-            }
-            catch (ChangePropertyDescriptorException e)
-            {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-
-        }
-
+        
         AdminConsole.addLink(AdminConsole.SettingsLinkType.Management, "azure auth settings", DetailsURL.fromString("/WNPRC_EHR/azureAuthenticationSettings.view").getActionURL(), AdminOperationsPermission.class);
 
         //Schedule jobs to refresh the access tokens for all Microsoft Azure accounts
@@ -328,10 +283,12 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
             refreshThread.setDaemon(true);
             refreshThread.start();
         }
+
+        EHRService es = EHRService.get();
+        if (loadOnStart) loadLatestDatasetMetadata(es);
     }
 
-    private void registerPermissions()
-    {
+    private void registerPermissions() {
         RoleManager.registerPermission(new BehaviorAssignmentsPermission());
         RoleManager.registerPermission(new EHRStartedAdminPermission());
         RoleManager.registerPermission(new EHRStartedUpdatePermission());
@@ -341,34 +298,45 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     @NotNull
-    public Set<String> getSchemaNames()
-    {
+    public Set<String> getSchemaNames() {
         return Collections.singleton(WNPRC_Schema.NAME);
     }
 
+    static public List<Supplier<ClientDependency>> getDataEntryClientDependencies() {
+        List<Supplier<ClientDependency>> dataEntryClientDependencies = new ArrayList<>();
+
+        List<String> paths = Arrays.asList(
+                "/wnprc_ehr/wnprc_ext4",
+                "/wnprc_ehr/dataentry"
+        );
+
+        for(String path : paths) {
+            dataEntryClientDependencies.add(ClientDependency.supplierFromPath(path));
+        }
+
+        return dataEntryClientDependencies;
+    }
+
     @Override
-    public void registerSchemas()
-    {
-        DefaultSchema.registerProvider(WNPRC_Schema.NAME, new DefaultSchema.SchemaProvider(this)
-        {
-            public QuerySchema createSchema(final DefaultSchema schema, Module module)
-            {
+    public void registerSchemas() {
+        DefaultSchema.registerProvider(WNPRC_Schema.NAME, new DefaultSchema.SchemaProvider(this) {
+            @Override
+            public QuerySchema createSchema(final DefaultSchema schema, Module module) {
                 return new WNPRC_Schema(schema.getUser(), schema.getContainer());
             }
         });
     }
 
-    public String getGoogleDriveAccountId(Container container)
-    {
+    public static String BC_GOOGLE_DRIVE_PROPERTY_NAME = "BCGoogleDriveAccount";
+    public String getGoogleDriveAccountId(Container container) {
         return this.getModuleProperties().get(BC_GOOGLE_DRIVE_PROPERTY_NAME).getEffectiveValue(container);
     }
 
     @Override
     public @NotNull
-    LinkedHashSet<ClientDependency> getClientDependencies(Container c)
-    {
+    List<Supplier<ClientDependency>> getClientDependencies(Container c) {
         // allow other modules to register with EHR service, and include them when the module is turned on
-        LinkedHashSet<ClientDependency> ret = new LinkedHashSet<>();
+        List<Supplier<ClientDependency>> ret = new LinkedList<>();
         ret.addAll(super.getClientDependencies(c));
         ret.addAll(EHRService.get().getRegisteredClientDependencies(c));
 
@@ -377,8 +345,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         return ret;
     }
 
-    public void registerNotifications()
-    {
+    public void registerNotifications() {
         List<Notification> notifications = Arrays.asList(
                 new BehaviorNotification(this),
                 new DeathNotification(),
@@ -402,8 +369,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         }
     }
 
-    public void registerDataEntryForms()
-    {
+    public void registerDataEntryForms() {
         // Register all of the data entry forms.
         List<Class<? extends DataEntryForm>> forms = Arrays.asList(
                 ArrivalFormType.class,
@@ -456,48 +422,81 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         Breeding.registerSingleFormOverrides(EHRService.get(), this);
     }
 
-    public void registerRoles()
-    {
+    public void registerRoles() {
         RoleManager.registerRole(new WNPRCFullSubmitterWithReviewerRole());
         RoleManager.registerRole(new BehaviorServiceWorker());
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
     }
 
-    public Set<Container> getWNPRCStudyContainers()
-    {
+    public Set<Container> getWNPRCStudyContainers() {
         Set<Container> studyContainers = new HashSet<>();
         WNPRC_EHRModule module = ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class);
 
-        for (Container container : getAllContainers())
-        {
-            if (container.getActiveModules().contains(module))
-            {
+        for (Container container : getAllContainers()) {
+            if (container.getActiveModules().contains(module)) {
                 Container studyContainer = EHRService.get().getEHRStudyContainer(container);
-                studyContainers.add(studyContainer);
+                if (studyContainer != null) {
+                    studyContainers.add(studyContainer);
+                }
             }
         }
 
         return studyContainers;
     }
 
-    @Override
-    public void afterUpdate(ModuleContext moduleContext)
-    {
-        super.afterUpdate(moduleContext);
-        ModuleUpdate.doAfterUpdate(moduleContext);
+    public static Set<Container> getAllContainers() {
+
+        Container root = ContainerManager.getRoot();
+        return new HashSet<>(getChildContainers(root));
+    }
+
+    public static Set<Container> getChildContainers(Container parentContainer) {
+        Set<Container> containers = new HashSet<>();
+
+        for (Container container : parentContainer.getChildren()) {
+            containers.add(container);
+            containers.addAll(getChildContainers(container));
+        }
+
+        return containers;
+    }
+
+    public static Container getDefaultContainer() {
+        if (ContainerManager.getForPath("/WNPRC") == null) {
+            ContainerManager.createContainer(ContainerManager.getRoot(), "WNPRC");
+        }
+        Container wnprcContainer = ContainerManager.getForPath("/WNPRC");
+
+        Container ehrContainer = wnprcContainer.getChild("EHR");
+        if (ehrContainer == null) {
+            ContainerManager.createContainer(wnprcContainer, "EHR");
+            ehrContainer = wnprcContainer.getChild("EHR");
+        }
+
+        return ehrContainer;
     }
 
     @Override
-    public void beforeUpdate(ModuleContext moduleContext)
+    public void afterUpdate(ModuleContext moduleContext)
     {
-        super.beforeUpdate(moduleContext);
-        ModuleUpdate.doBeforeUpdate(moduleContext);
+       super.afterUpdate(moduleContext);
+       ModuleUpdate.doAfterUpdate(moduleContext);
     }
+
+   @Override
+   public void beforeUpdate(ModuleContext moduleContext)
+   {
+       super.beforeUpdate(moduleContext);
+       ModuleUpdate.doBeforeUpdate(moduleContext);
+   }
 
     @Override
     public void versionUpdate(ModuleContext moduleContext) throws Exception
     {
+        LOG.debug("deferring import of study metadata until module startup (after Spring config)");
+        forceUpdate = false; // let the version report correctly from now on
+        loadOnStart = true;  // indicate that we should load the study metadata on startup
         super.versionUpdate(moduleContext);
         ModuleUpdate.doVersionUpdate(moduleContext);
     }
@@ -518,5 +517,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         return new Reflections("org.labkey.wnprc_ehr").getSubTypesOf(Assert.class).stream()
                 .filter(c -> c.getSimpleName().endsWith("UnitTest"))
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Executes the import of the dataset metadata into every container that has the module enabled
+     */
+    private void loadLatestDatasetMetadata(EHRService es)
+    {
+        LOG.debug("importing study metadata from reference study to all study containers");
+        File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "pregnancySubsetReferenceStudy", "study").toFile(), "study.xml");
+        getWNPRCStudyContainers().forEach(c -> DatasetImportHelper.safeImportDatasetMetadata(es.getEHRUser(c), c, file));
     }
 }

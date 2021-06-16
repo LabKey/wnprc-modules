@@ -1,0 +1,6 @@
+<webpart xmlns="http://labkey.org/data/xml/webpart" title="WNPRC Purchasing Landing Page">
+    <view name="purchasingLanding"/>
+    <locations>
+        <location name="body"/>
+    </locations>
+</webpart>

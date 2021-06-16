@@ -49,7 +49,7 @@ LEFT JOIN (
   GROUP BY p_m_map.person_id
 ) measlesResults
 
-ON measlesResults.person_id = persons.personid;
+ON measlesResults.person_id = persons.personid
 
 --Adding employee_number from card_info table. Need to select the latest uploaded record to the card_info table
 --Use person_to_cards table to link the personid to the card_id.

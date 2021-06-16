@@ -1,7 +1,7 @@
-<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="java.util.List" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -49,7 +49,7 @@
     for(int i = 0; i < contentParts.length(); i++) {
 %>
 <pre>
-    <%= contentParts.getJSONObject(i).getString("content") %>
+    <%=h(contentParts.getJSONObject(i).getString("content"))%>
 </pre>
 <%
     }

@@ -1,3 +1,5 @@
+import org.labkey.gradle.util.BuildUtils
+
 /***********************************************************************************************************************
  * wnprc-modules "main" build file
  *
@@ -58,7 +60,7 @@
  **********************************************************************************************************************/
 
 // using this to manage our node_modules and package.json in the base directory rather than module by module
-apply plugin: 'com.moowork.node'
+apply plugin: 'org.labkey.npmRun'
 
 // using this to ignore the node_modules and other "base" folders in IntelliJ IDEA
 apply plugin: 'idea'
@@ -79,10 +81,10 @@ def modules  = [
     project('DBUtils'),
     project('DeviceProxy'),
     project('GoogleDrive'),
-    project('Gringotts'),
     project('primateid'),
     project('wnprc_billing'),
     project('wnprc_billingpublic'),
+    project('WNPRC_Purchasing'),
     project('WebUtils'),
     project('WNPRC_Compliance'),
     project('WNPRC_EHR')]

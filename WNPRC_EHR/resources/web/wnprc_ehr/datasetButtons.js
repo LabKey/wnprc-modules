@@ -227,7 +227,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                                         //Ext4.Msg.hide();
                                         Ext4.Msg.confirm('View Task Now?', 'Do you want to view the task now?', function(btn){
                                             if (btn == 'yes'){
-                                                window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "manageTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
+                                                window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "manageWnprcTask", null, {taskid: config.taskId, formtype: config.taskRecord.formType});
                                             }
                                             else {
                                                 dataRegion.refresh();
@@ -394,11 +394,8 @@ WNPRC_EHR.DatasetButtons = new function(){
          * @param [config.formType]
          */
         addCreateTaskFromIdsBtn: function(dataRegionName, menu, config){
-            menu.add({
-                text: 'Schedule '+config.formType,
-                dataRegionName: dataRegionName,
-                handler: function(){
-                    var dataRegion = LABKEY.DataRegions[this.dataRegionName];
+            this.addMenuItem(menu, 'Schedule ' + config.formType, function() {
+                    var dataRegion = LABKEY.DataRegions[dataRegionName];
                     var checked = dataRegion.getChecked();
                     if(!checked || !checked.length){
                         alert('No records selected');
@@ -539,8 +536,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                         Ext.Msg.hide();
 
                     }
-                }
-            });
+                });
         },
 
         /**
@@ -861,6 +857,7 @@ WNPRC_EHR.DatasetButtons = new function(){
                     window.location = LABKEY.ActionURL.buildURL("wnprc_ehr", "feeding", null, {formtype: 'Feeding'});
                 }
             });
+
         },
 
 

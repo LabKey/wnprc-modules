@@ -34,7 +34,7 @@ public class MPRForm extends TaskForm {
             section.addConfigSource("MPR");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Encounter.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/MPR.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Encounter.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/MPR.js"));
     }
 }

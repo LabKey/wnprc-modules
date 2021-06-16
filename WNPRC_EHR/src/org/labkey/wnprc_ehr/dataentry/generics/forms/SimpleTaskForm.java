@@ -9,6 +9,7 @@ import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Created by jon on 3/1/16.
@@ -20,7 +21,7 @@ public class SimpleTaskForm extends TaskForm {
         setJavascriptClass("WNPRC.ext.panel.TaskDataEntryPanel");
         setStoreCollectionClass("WNPRC.ext.data.TaskStoreCollection");
 
-        for(ClientDependency dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
+        for(Supplier<ClientDependency> dependency : WNPRC_EHRModule.getDataEntryClientDependencies()) {
             this.addClientDependency(dependency);
         }
     }

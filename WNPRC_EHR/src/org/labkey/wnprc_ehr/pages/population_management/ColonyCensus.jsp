@@ -1,8 +1,8 @@
+<%@ page import="org.joda.time.LocalDate" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus" %>
 <%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.PopulationInstant" %>
-<%@ page import="org.joda.time.LocalDate" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.json.JSONObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -197,7 +197,7 @@
 
 <script>
     (function(){
-        var populations = <%= (new JSONObject(populations)).toString() %>;
+        var populations = <%=new JSONObject(populations)%>;
 
         var getPopulationObject = function(species) {
             var data = populations[species];

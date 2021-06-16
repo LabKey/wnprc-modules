@@ -17,7 +17,7 @@ package org.labkey.wnprc_ehr.table;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
@@ -45,10 +45,11 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
-import org.labkey.ehr.EHRSchema;
+//import org.labkey.ehr.EHRSchema;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -64,6 +65,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     }
 
+    @Override
     public void customize(TableInfo table)
     {
         if (table instanceof AbstractTableInfo)
@@ -100,7 +102,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeColumns(AbstractTableInfo ti)
     {
-        ColumnInfo project = ti.getColumn("project");
+        var project = ti.getMutableColumn("project");
         if (project != null)
         {
             project.setFormat("00000000");
@@ -161,7 +163,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeRoomCol(AbstractTableInfo ti, String columnName)
     {
-        ColumnInfo room = ti.getColumn(columnName);
+        var room = ti.getMutableColumn(columnName);
         if (room != null)
         {
             if (!ti.getName().equalsIgnoreCase("rooms"))
@@ -174,7 +176,12 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     UserSchema us = getUserSchema(ti, "ehr_lookups", ehrContainer);
                     if (us != null)
                     {
-                        room.setFk(new QueryForeignKey(us, ehrContainer, "rooms", "room", "room", true));
+                        room.setFk(QueryForeignKey.from(us, ti.getContainerFilter())
+                                .container(ehrContainer)
+                                .table("rooms")
+                                .key("room")
+                                .display("room")
+                                .raw(true));
                     }
                 }
             }
@@ -183,16 +190,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeTasksTable(AbstractTableInfo ti)
     {
-//        DetailsURL detailsURL = DetailsURL.fromString("/ehr/dataEntryFormDetails.view?formType=${formtype}&taskid=${taskid}");
-//        ti.setDetailsURL(detailsURL);
-//
-//        if (rowIdCol != null)
-//        {
-//            rowIdCol.setURL(detailsURL);
-//        }
         UserSchema us = ti.getUserSchema();
 
-        ColumnInfo rowIdCol = ti.getColumn("rowid");
+        BaseColumnInfo rowIdCol = (BaseColumnInfo) ti.getColumn("rowid");
         if (rowIdCol != null && us != null)
         {
             rowIdCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
@@ -230,7 +230,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 }
             });
 
-            ColumnInfo updateTitleCol = ti.getColumn("updateTitle");
+            BaseColumnInfo updateTitleCol = (BaseColumnInfo) ti.getColumn("updateTitle");
             if (updateTitleCol != null && us != null)
             {
                 updateTitleCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
@@ -336,14 +336,17 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeBirthTable(AbstractTableInfo ti)
     {
-        ColumnInfo cond = ti.getColumn("cond");
+        var cond = ti.getMutableColumn("cond");
         if (cond != null)
         {
             cond.setLabel("Housing Condition");
             UserSchema us = getUserSchema(ti, "ehr_lookups");
             if (us != null)
             {
-                cond.setFk(new QueryForeignKey(us, null, "housing_condition_codes", "value", "title"));
+                cond.setFk(QueryForeignKey.from(us, ti.getContainerFilter())
+                        .table("housing_condition_codes")
+                        .key("value")
+                        .display("title"));
             }
         }
 
@@ -361,72 +364,72 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (ds.getColumn("demographicsMHC") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, ds, "MHCtyping", "demographicsMHC");
+            BaseColumnInfo col = getWrappedIdCol(us, ds, "MHCtyping", "demographicsMHC");
             col.setLabel("MHC SSP Typing");
             col.setDescription("Summarizes MHC SSP typing results for the common alleles");
             ds.addColumn(col);
 
-            ColumnInfo col2 = getWrappedIdCol(us, ds, "ViralLoad", "demographicsVL");
+            BaseColumnInfo col2 = getWrappedIdCol(us, ds, "ViralLoad", "demographicsVL");
             col2.setLabel("Viral Loads");
             col2.setDescription("This field calculates the most recent viral load for this animal");
             ds.addColumn(col2);
 
-            ColumnInfo col3 = getWrappedIdCol(us, ds, "ViralStatus", "demographicsViralStatus");
+            BaseColumnInfo col3 = getWrappedIdCol(us, ds, "ViralStatus", "demographicsViralStatus");
             col3.setLabel("Viral Status");
             col3.setDescription("This calculates the viral status of the animal based on tracking project assignments");
             ds.addColumn(col3);
 
-            ColumnInfo col18 = getWrappedIdCol(us, ds, "Virology", "demographicsVirology");
+            BaseColumnInfo col18 = getWrappedIdCol(us, ds, "Virology", "demographicsVirology");
             col18.setLabel("Virology");
             col18.setDescription("This calculates the distinct pathogens listed as positive for this animal from the virology table");
             ds.addColumn(col18);
 
-            ColumnInfo col4 = getWrappedIdCol(us, ds, "IrregularObs", "demographicsObs");
+            BaseColumnInfo col4 = getWrappedIdCol(us, ds, "IrregularObs", "demographicsObs");
             col4.setLabel("Irregular Obs");
             col4.setDescription("Shows any irregular observations from each animal today or yesterday.");
             ds.addColumn(col4);
 
-            ColumnInfo col7 = getWrappedIdCol(us, ds, "activeAssignments", "demographicsAssignments");
+            BaseColumnInfo col7 = getWrappedIdCol(us, ds, "activeAssignments", "demographicsAssignments");
             col7.setLabel("Assignments - Active");
             col7.setDescription("Contains summaries of the assignments for each animal, including the project numbers, availability codes and a count");
             ds.addColumn(col7);
 
-            ColumnInfo col6 = getWrappedIdCol(us, ds, "totalAssignments", "demographicsAssignmentHistory");
+            BaseColumnInfo col6 = getWrappedIdCol(us, ds, "totalAssignments", "demographicsAssignmentHistory");
             col6.setLabel("Assignments - Total");
             col6.setDescription("Contains summaries of the total assignments this animal has ever had, including the project numbers and a count");
             ds.addColumn(col6);
 
-            ColumnInfo col5 = getWrappedIdCol(us, ds, "assignmentSummary", "demographicsAssignmentSummary");
+            BaseColumnInfo col5 = getWrappedIdCol(us, ds, "assignmentSummary", "demographicsAssignmentSummary");
             col5.setLabel("Assignments - Detailed");
             col5.setDescription("Contains more detailed summaries of the active assignments for each animal, including a breakdown between research, breeding, training, etc.");
             ds.addColumn(col5);
 
-            ColumnInfo col10 = getWrappedIdCol(us, ds, "DaysAlone", "demographicsDaysAlone");
+            BaseColumnInfo col10 = getWrappedIdCol(us, ds, "DaysAlone", "demographicsDaysAlone");
             col10.setLabel("Days Alone");
             col10.setDescription("Calculates the total number of days each animal has been single housed, if applicable.");
             ds.addColumn(col10);
 
-            ColumnInfo bloodCol = getWrappedIdCol(us, ds, "AvailBlood", "demographicsBloodSummary");
+            BaseColumnInfo bloodCol = getWrappedIdCol(us, ds, "AvailBlood", "demographicsBloodSummary");
             bloodCol.setLabel("Blood Remaining");
             bloodCol.setDescription("Calculates the total blood draw and remaining, which is determine by weight and blood drawn in the past 30 days.");
             ds.addColumn(bloodCol);
 
-            ColumnInfo col17 = getWrappedIdCol(us, ds, "MostRecentTB", "demographicsMostRecentTBDate");
+            BaseColumnInfo col17 = getWrappedIdCol(us, ds, "MostRecentTB", "demographicsMostRecentTBDate");
             col17.setLabel("TB Tests");
             col17.setDescription("Calculates the most recent TB date for this animal, time since TB and the last eye TB tested");
             ds.addColumn(col17);
 
-            ColumnInfo col16 = getWrappedIdCol(us, ds, "Surgery", "demographicsSurgery");
+            BaseColumnInfo col16 = getWrappedIdCol(us, ds, "Surgery", "demographicsSurgery");
             col16.setLabel("Surgical History");
             col16.setDescription("Calculates whether this animal has ever had any surgery or a surgery flagged as major");
             ds.addColumn(col16);
 
-            ColumnInfo col19 = getWrappedIdCol(us, ds, "CurrentBehavior", "CurrentBehaviorNotes");
+            BaseColumnInfo col19 = getWrappedIdCol(us, ds, "CurrentBehavior", "CurrentBehaviorNotes");
             col19.setLabel("Behavior - Current");
             col19.setDescription("This calculates the current behavior(s) for the animal, based on the behavior abstract table");
             ds.addColumn(col19);
 
-            ColumnInfo col20 = getWrappedIdCol(us, ds, "PrimateId", "demographicsPrimateId");
+            BaseColumnInfo col20 = getWrappedIdCol(us, ds, "PrimateId", "demographicsPrimateId");
             col20.setLabel("PrimateId");
             col20.setDescription("Unique PrimateID column to be shared across all datasets");
             ds.addColumn(col20);
@@ -434,7 +437,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (ds.getColumn("totalOffspring") == null)
         {
-            ColumnInfo col15 = getWrappedIdCol(us, ds, "totalOffspring", "demographicsTotalOffspring");
+            BaseColumnInfo col15 = getWrappedIdCol(us, ds, "totalOffspring", "demographicsTotalOffspring");
             col15.setLabel("Number of Offspring");
             col15.setDescription("Shows the total offspring of each animal");
             ds.addColumn(col15);
@@ -450,7 +453,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         if (table.getColumn("Feeding") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+            BaseColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
             col.setLabel("Feeding");
             col.setDescription("Shows most recent feeding type and chow conversion.");
             table.addColumn(col);
@@ -499,7 +502,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
         if (table.getColumn("necropsyAbstractNotes") == null)
         {
-            ColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
+            BaseColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
             col.setLabel("Necropsy Abstract Notes");
             col.setDescription("Returns the participant's necropsy abstract remarks and projects");
             table.addColumn(col);
@@ -734,10 +737,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeProtocolTable(AbstractTableInfo table)
     {
-        ColumnInfo protocolCol = table.getColumn("protocol");
+        BaseColumnInfo protocolCol = (BaseColumnInfo) table.getColumn("protocol");
         if (protocolCol != null && table.getColumn("pdf") == null)
         {
-            ColumnInfo col = table.addColumn(new WrappedColumn(protocolCol, "pdf"));
+            var col = table.addColumn(new WrappedColumn(protocolCol, "pdf"));
             col.setLabel("PDF");
             col.setURL(StringExpressionFactory.create("/query/WNPRC/WNPRC_Units/Animal_Services/Compliance_Training/Private/Protocol_PDFs/executeQuery.view?schemaName=lists&query.queryName=ProtocolPDFs&query.protocol~eq=${pdf}", true));
         }
@@ -747,11 +750,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "totalProjects"));
+                var col2 = table.addColumn(new WrappedColumn(protocolCol, "totalProjects"));
                 col2.setLabel("Total Projects");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
-                col2.setFk(new QueryForeignKey(us, null, "protocolTotalProjects", "protocol", "protocol"));
+                col2.setFk(QueryForeignKey.from(us, table.getContainerFilter())
+                        .table("protocolTotalProjects")
+                        .key("protocol")
+                        .display("protocol"));
             }
         }
                 //TODO: Make this work with an Ext UI that  does not over write the values
@@ -769,7 +775,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
+                BaseColumnInfo col2 = (BaseColumnInfo) table.addColumn(new WrappedColumn(protocolCol, "expirationDate"));
                 col2.setLabel("Expiration Date");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
@@ -782,7 +788,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             UserSchema us = getUserSchema(table, "ehr");
             if (us != null)
             {
-                ColumnInfo col2 = table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
+                BaseColumnInfo col2 = (BaseColumnInfo) table.addColumn(new WrappedColumn(protocolCol, "countsBySpecies"));
                 col2.setLabel("Max Animals Per Species");
                 col2.setUserEditable(false);
                 col2.setIsUnselectable(true);
@@ -861,7 +867,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 //    }
 
     private void customizeSireIdColumn(AbstractTableInfo ti) {
-        ColumnInfo sireid = ti.getColumn("sireid");
+        BaseColumnInfo sireid = (BaseColumnInfo) ti.getColumn("sireid");
         if (sireid != null)
         {
             UserSchema us = getUserSchema(ti, "study");
@@ -905,7 +911,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     private void customizeReasonForMoveColumn(AbstractTableInfo ti) {
-        ColumnInfo reason = ti.getColumn("reason");
+        BaseColumnInfo reason = (BaseColumnInfo)ti.getColumn("reason");
         if (reason != null)
         {
             UserSchema us = getUserSchema(ti, "study");
@@ -1025,14 +1031,17 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
     }
 
-    private ColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
+    private BaseColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
     {
         String ID_COL = "Id";
         WrappedColumn col = new WrappedColumn(ds.getColumn(ID_COL), name);
         col.setReadOnly(true);
         col.setIsUnselectable(true);
         col.setUserEditable(false);
-        col.setFk(new QueryForeignKey(us, null, queryName, ID_COL, ID_COL));
+        col.setFk(QueryForeignKey.from(us, ds.getContainerFilter())
+                .table(queryName)
+                .key(ID_COL)
+                .display(ID_COL));
 
         return col;
     }
@@ -1042,6 +1051,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         return getUserSchema(ds, "study");
     }
 
+    @Override
     public UserSchema getUserSchema(AbstractTableInfo ds, String name)
     {
         UserSchema us = ds.getUserSchema();
@@ -1119,16 +1129,16 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
    {
        boolean isExt4Form = false;
 
-       if (schemaName != null && queryName != null) {
-           SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, queryName);
-           TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
-           TableSelector ts = new TableSelector(ti, filter, null);
-           String framework;
-           if (ts.getMap() != null && ts.getMap().get("framework") != null) {
-               framework = (String) ts.getMap().get("framework");
-               if ("extjs4".equalsIgnoreCase(framework)) {
-                   isExt4Form = true;
-               }
+       SimplerFilter filter = new SimplerFilter("schemaname", CompareType.EQUAL, schemaName).addCondition("queryname", CompareType.EQUAL, queryName);
+       //TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable(EHRSchema.TABLE_FORM_FRAMEWORK_TYPES);
+       TableInfo ti = DbSchema.get("ehr", DbSchemaType.Module).getTable("form_framework_types");
+       TableSelector ts = new TableSelector(ti, filter, null);
+       String framework;
+       if (ts.getMap() != null && ts.getMap().get("framework") != null)
+       {
+           framework = (String) ts.getMap().get("framework");
+           if ("extjs4".equalsIgnoreCase(framework)) {
+               isExt4Form = true;
            }
        }
 

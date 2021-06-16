@@ -1,7 +1,10 @@
 package org.labkey.dbutils.jooq;
 
-import org.jooq.*;
+import org.jooq.ExecuteType;
+import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.RecordContext;
+import org.jooq.TableRecord;
 import org.jooq.impl.DefaultRecordListener;
 import org.json.JSONObject;
 import org.labkey.api.audit.AbstractAuditTypeProvider;

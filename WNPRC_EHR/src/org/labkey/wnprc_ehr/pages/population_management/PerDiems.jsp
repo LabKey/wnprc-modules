@@ -1,6 +1,6 @@
 <%@ page import="org.joda.time.LocalDate" %>
-<%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -64,7 +64,7 @@
 
                 <!-- ko if: loading -->
                 <div style="text-align: center">
-                    <img src="<%= getContextPath().toString() %>/webutils/icons/loading.svg">
+                    <img src="<%=getContextPath()%>/webutils/icons/loading.svg">
                     <p style="font-size: medium; color: #46A9DC;">Loading...</p>
                 </div>
                 <!-- /ko -->
@@ -92,7 +92,7 @@
 
                 <!-- ko if: loading -->
                 <div style="text-align: center">
-                    <img src="<%= getContextPath().toString() %>/webutils/icons/loading.svg">
+                    <img src="<%=getContextPath()%>/webutils/icons/loading.svg">
                     <p style="font-size: medium; color: #46A9DC;">Loading...</p>
                 </div>
                 <!-- /ko -->
@@ -122,7 +122,7 @@
             }
         };
 
-        var billableData = <%= billableInfo.toString() %>;
+        var billableData = <%=billableInfo%>;
 
 
         _.extend(WebUtils.VM, {

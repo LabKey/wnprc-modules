@@ -1,0 +1,9 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="purchasingRequestsOverviewForAdmins" tableDbType="NOT_IN_DB" useColumnOrder="true">
+                <tableTitle>Purchase Requests</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

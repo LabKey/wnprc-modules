@@ -14,10 +14,12 @@ public class MostRecentObsDemographicsProvider extends AbstractDemographicsProvi
         _supportsQCState = false;
     }
 
+    @Override
     public String getName() {
         return "Most Recent Observation";
     }
 
+    @Override
     protected Set<FieldKey> getFieldKeys() {
         Set<FieldKey> keys = new HashSet<>();
 

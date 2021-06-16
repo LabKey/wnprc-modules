@@ -43,8 +43,8 @@ public class NecropsyRequestForm extends SimpleRequestForm {
             section.addConfigSource("NecropsyRequest");
         }
 
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/NecropsyRequest.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Pathology.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/NecropsyRequest.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Pathology.js"));
     }
 
     @Override

@@ -1245,47 +1245,6 @@ EHR.reports['abstract'] = function(panel, tab){
 
     EHR.reports.weightGraph(panel, tab);
 };
-EHR.reports['assignmentsReport'] = function(panel, tab){
-    var filterArray = panel.getFilterArray(tab);
-    var title = panel.getTitleSuffix();
-
-    var animalId = panel.activeFilterType.getTitle(tab);
-    //var animalList = animalId.split(/[^A-Za-z0-9]+/g);
-    var animalList = filterArray.subjects;
-    debugger
-    var getErrorHTML = function(message) {
-        return '<p style="color: red"><strong>' + message + '</strong></p>';
-    };
-
-
-        var config = {
-            xtype: 'ldk-webpartpanel',
-            title: "" + animalList.join(", "),
-            align: 'stretch',
-            frame: true,
-            html: getErrorHTML("Error loading abstract."),
-            style: 'margin-bottom: 20px'
-        };
-        var elementHTML = '';
-        // here we generate a random number to force the react component to refresh,
-        // since it became a problem when jumping between the same report in Clinical and General
-        // Animal History tabs with the same animal id
-        var randNum = Math.random().toString();
-        elementHTML += '<div id="assignments-section' + animalId + randNum +'"></div>'
-        Ext4.apply(config, {
-            html: elementHTML,
-            listeners: {
-                afterrender: {
-                    fn: function () {
-                        LABKEY.requiresScript("/wnprc_ehr/gen/assignments.js",true, function() {
-                            Assignments.renderReport(animalId, randNum)
-                        });
-                    }
-                }
-            }
-        });
-        tab.add(config);
-};
 
 (function() {
     var abstractReport = EHR.reports['abstract'];

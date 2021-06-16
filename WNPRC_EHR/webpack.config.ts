@@ -196,42 +196,7 @@ var weightConfig = function wp(env: { BUILD_DIR: string }) {
     };
 };
 
-var assignmentsConfig = function wp(env: { BUILD_DIR: string }) {
-
-    return {
-        mode: process.env.NODE_ENV,
-        devtool: 'source-map',
-        entry: './src/assignments/app.tsx',
-        externals: {
-            jquery: 'jQuery',
-            urijs: 'URI',
-            LABKEY: 'LABKEY'
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    loader: "ts-loader"
-                },
-                {
-                    test: /\.css$/i,
-                    use: ['style-loader', 'css-loader']
-                }
-            ],
-        },
-        output: {
-            filename: 'assignments.js',
-            library: 'Assignments',
-            libraryTarget: 'umd',
-            path: path.resolve(__dirname, 'resources/web/wnprc_ehr/gen')
-        },
-        resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
-        },
-    };
-};
 declare const module: any;
 module.exports = [
-    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig, assignmentsConfig
+    breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig
 ];
-

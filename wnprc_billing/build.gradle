@@ -1,10 +1,46 @@
 import org.labkey.gradle.util.BuildUtils
+import org.labkey.gradle.util.ExternalDependency
 
 dependencies {
     implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
-    external "com.koadweb.javafpdf:java-fpdf:${javafpdfVersion}"
-    external("org.apache.sanselan:sanselan:${sanselanVersion}")
-    external "commons-net:commons-net:${commonsNetVersion}"
+    BuildUtils.addExternalDependency(
+            project,
+            new ExternalDependency(
+                    "com.koadweb.javafpdf:java-fpdf:${javafpdfVersion}",
+                    "Java-FPDF PDF generation library",
+                    "Java-FPDF",
+                    "https://github.com/nkiraly/Java-FPDF",
+                    ExternalDependency.BSD_2_LICENSE_NAME,
+                    ExternalDependency.BSD_2_LICENSE_URL,
+                    "Used to generate PDF invoices"
+            )
+    )
+
+    BuildUtils.addExternalDependency(
+            project,
+            new ExternalDependency(
+                    "org.apache.sanselan:sanselan:${sanselanVersion}",
+                    "Apache Commons Imaging",
+                    "Sanselan",
+                    "https://commons.apache.org/proper/commons-imaging/",
+                    ExternalDependency.APACHE_2_LICENSE_NAME,
+                    ExternalDependency.APACHE_2_LICENSE_URL,
+                    "Required by Java-FPDF"
+            )
+    )
+
+    BuildUtils.addExternalDependency(
+            project,
+            new ExternalDependency(
+                    "commons-net:commons-net:${commonsNetVersion}",
+                    "Commons Net",
+                    "Apache",
+                    "http://jakarta.apache.org/commons/net/",
+                    ExternalDependency.APACHE_2_LICENSE_NAME,
+                    ExternalDependency.APACHE_2_LICENSE_URL,
+                    "FTPClient used to retrieve resources from other servers (e.g., GO annotations)"
+            )
+    )
 
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:ehr_billing", depProjectConfig: "apiJarFile")
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: "apiJarFile")

@@ -70,12 +70,7 @@ CREATE TABLE wnprc_u24.lookups(
 
 CREATE UNIQUE INDEX idx_wnprc_u24_lookups_setname ON wnprc_u24.lookups ( SetName , VALUE );
 
-
 ALTER TABLE wnprc_u24.Lookups ALTER ObjectId SET DEFAULT (ehr.uuid());
-
-
-ALTER TABLE wnprc_u24.SampleInventory ADD SampleWeight NUMERIC(7,2) NULL;
-ALTER TABLE wnprc_u24.SampleInventory ADD SampleAmount NUMERIC(7,2) NULL;
 
 CREATE TABLE wnprc_u24.RowsToDelete(
                                        ObjectId EntityId NOT NULL,

@@ -39,9 +39,9 @@ public class SurgeryProcedureRequestForm extends SimpleRequestForm
         }
 
         setStoreCollectionClass("WNPRC.ext.data.SurgeryProcedureStoreCollection");
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/SurgeryProcedureServerStore.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/SurgeryProcedureStoreCollection.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/SurgeryProcedureRequest.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/SurgeryProcedureServerStore.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/SurgeryProcedureStoreCollection.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/SurgeryProcedureRequest.js"));
     }
 
     @Override

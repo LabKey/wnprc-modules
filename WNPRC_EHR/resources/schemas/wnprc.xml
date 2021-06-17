@@ -222,5 +222,23 @@
             <column columnName="modified"/>
         </columns>
     </table>
+    <table tableName="on_call_calendars" tableDbType="TABLE">
+        <columns>
+            <column columnName="calendar_id"/>
+            <column columnName="calendar_type"/>
+            <column columnName="display_name"/>
+            <column columnName="api_action"/>
+            <column columnName="folder_id"/>
+            <column columnName="show_by_default"/>
+            <column columnName="requires_authorization"/>
+            <column columnName="default_bg_color"/>
+            <column columnName="authorized_groups"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
 
 </tables>

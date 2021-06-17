@@ -182,6 +182,12 @@
             <column columnName="created"/>
             <column columnName="modifiedby"/>
             <column columnName="modified"/>
+            <column columnName="executivecommitteeapproval"/>
+            <column columnName="anticipatedstartdate"/>
+            <column columnName="anticipatedenddate"/>
+            <column columnName="pregnantanimalsrequired"/>
+            <column columnName="animalidstooffer"/>
+            <column columnName="optionalproject"/>
         </columns>
     </table>
     <table tableName="gestational_days" tableDbType="TABLE">
@@ -195,4 +201,26 @@
             <column columnName="femur_length_mm"/>
         </columns>
     </table>
+    <table tableName="session_log" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="start_time"/>
+            <column columnName="end_time"/>
+            <column columnName="schema_name"/>
+            <column columnName="query_name"/>
+            <column columnName="task_id"/>
+            <column columnName="number_of_records"/>
+            <column columnName="batch_add_used"/>
+            <column columnName="bulk_edit_used"/>
+            <column columnName="user_agent"/>
+            <column columnName="errors_occurred"/>
+            <column columnName="form_framework_type"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+
 </tables>

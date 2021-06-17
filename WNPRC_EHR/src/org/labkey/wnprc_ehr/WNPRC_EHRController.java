@@ -16,6 +16,7 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import com.microsoft.graph.models.extensions.Event;
 import org.apache.commons.text.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -29,15 +30,14 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
-import org.labkey.api.action.Marshal;
-import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
@@ -48,9 +48,14 @@ import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.Resource;
@@ -63,16 +68,17 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
+import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.dbutils.api.SimpleQuery;
 import org.labkey.dbutils.api.SimpleQueryFactory;
+import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
@@ -81,11 +87,17 @@ import org.labkey.security.xml.GroupEnumType;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshRunner;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
+import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator.AzureTokenStatus;
 import org.labkey.wnprc_ehr.calendar.Calendar;
+import org.labkey.wnprc_ehr.calendar.Graph;
+import org.labkey.wnprc_ehr.calendar.Office365Calendar;
 import org.labkey.wnprc_ehr.calendar.OnCallCalendar;
+import org.labkey.wnprc_ehr.calendar.SurgeryCalendarGoogle;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -98,10 +110,9 @@ import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectExcepti
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
-import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
+import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -111,13 +122,15 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -125,6 +138,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -1074,7 +1088,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("saveAzureAuthenticationSettings")
     @RequiresPermission(AdminOperationsPermission.class)
-    public class SaveAzureAuthenticationSettingsAction extends ApiAction<AzureAccessTokenEvent>
+    public class SaveAzureAuthenticationSettingsAction extends MutatingApiAction<AzureAccessTokenEvent>
     {
         public ApiResponse execute(AzureAccessTokenEvent event, BindException errors) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
         {
@@ -1104,7 +1118,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("refreshAzureAccessToken")
     @RequiresPermission(AdminOperationsPermission.class)
-    public class RefreshAzureAccessTokenAction extends ApiAction<AzureAccessTokenEvent>
+    public class RefreshAzureAccessTokenAction extends MutatingApiAction<AzureAccessTokenEvent>
     {
         public ApiResponse execute(AzureAccessTokenEvent event, BindException errors)
         {
@@ -1593,7 +1607,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("UpdateUnmanagedEvent")
     @RequiresLogin
-    public class UpdateUnmanagedEventAction extends ApiAction<SurgeryProcedureUpdateEvent>
+    public class UpdateUnmanagedEventAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
     {
         @Override
         public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception {
@@ -1621,7 +1635,7 @@ public class WNPRC_EHRController extends SpringActionController
 
     @ActionNames("UpdateSurgeryProcedure")
     @RequiresLogin()
-    public class UpdateSurgeryProcedureAction extends ApiAction<SurgeryProcedureUpdateEvent>
+    public class UpdateSurgeryProcedureAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
     {
         @Override
         public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception
@@ -1713,7 +1727,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("ScheduleSurgeryProcedure")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
-    public class ScheduleSurgeryProcedureAction extends ApiAction<SurgeryProcedureEvent>
+    public class ScheduleSurgeryProcedureAction extends MutatingApiAction<SurgeryProcedureEvent>
     {
         @Override
         public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
@@ -1858,7 +1872,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("SurgeryProcedureChangeStatus")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
-    public class SurgeryProcedureChangeStatusAction extends ApiAction<SurgeryProcedureChangeStatusEvent>
+    public class SurgeryProcedureChangeStatusAction extends MutatingApiAction<SurgeryProcedureChangeStatusEvent>
     {
         @Override
         public Object execute(SurgeryProcedureChangeStatusEvent event, BindException errors) throws Exception
@@ -2081,7 +2095,7 @@ public class WNPRC_EHRController extends SpringActionController
     @ActionNames("FetchSurgeryProcedureEvents")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
-    public class FetchSurgeryProcedureEventsAction extends ApiAction<FetchCalendarEvent>
+    public class FetchSurgeryProcedureEventsAction extends ReadOnlyApiAction<FetchCalendarEvent>
     {
         @Override
         public Object execute(FetchCalendarEvent event, BindException errors)

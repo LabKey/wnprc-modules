@@ -112,7 +112,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         customizeRoomCol(ti, "room1");
         customizeRoomCol(ti, "room2");
 
-        ColumnInfo requestId = ti.getColumn("requestid");
+        BaseColumnInfo requestId = (BaseColumnInfo) ti.getColumn("requestid");
         if (requestId != null)
         {
             requestId.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
@@ -972,7 +972,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     }
 
     private void customizeProcedureNameColumn(AbstractTableInfo ti) {
-        ColumnInfo procedureName = ti.getColumn("procedureName");
+        BaseColumnInfo procedureName = (BaseColumnInfo) ti.getColumn("procedureName");
         if (procedureName != null)
         {
             UserSchema us = getUserSchema(ti, "study");

@@ -10,11 +10,10 @@ interface InputProps {
     value: any;
     onChange: (colName, value) => void;
     hasError?: boolean;
-    isReorder?: boolean;
 }
 
 export const AssignedToInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError, isReorder } = props;
+    const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
@@ -37,7 +36,7 @@ export const AssignedToInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Assigned to">
                 <select
                     className={'assigned-to-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                    value={isReorder ? "" : value}
+                    value={value}
                     onChange={onValueChange}
                 >
                     <option hidden value="">
@@ -51,7 +50,7 @@ export const AssignedToInput: FC<InputProps> = memo(props => {
 });
 
 export const PaymentOptionInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError, isReorder } = props;
+    const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
@@ -74,7 +73,7 @@ export const PaymentOptionInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Purchase option">
                 <select
                     className={'payment-option-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                    value={isReorder ? "" : value}
+                    value={value}
                     onChange={onValueChange}
                 >
                     <option hidden value="">
@@ -88,7 +87,7 @@ export const PaymentOptionInput: FC<InputProps> = memo(props => {
 });
 
 export const StatusInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError, isReorder } = props;
+    const { onChange, value, hasError } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
@@ -111,7 +110,7 @@ export const StatusInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Status">
                 <select
                     className={'status-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                    value={isReorder ? "" : value}
+                    value={value}
                     onChange={onValueChange}
                 >
                     <option hidden value="">
@@ -125,7 +124,7 @@ export const StatusInput: FC<InputProps> = memo(props => {
 });
 
 export const ProgramInput: FC<InputProps> = memo(props => {
-    const { onChange, value, isReorder } = props;
+    const { onChange, value } = props;
     const onTextChange = useCallback(
         evt => {
             onChange('program', evt.target.value);
@@ -138,7 +137,7 @@ export const ProgramInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Program">
                 <textarea
                     className="program-input form-control"
-                    value={isReorder ? "4" : value}
+                    value={value}
                     onChange={onTextChange}
                     id="program-input-id"
                 />
@@ -148,7 +147,7 @@ export const ProgramInput: FC<InputProps> = memo(props => {
 });
 
 export const ConfirmationInput: FC<InputProps> = memo(props => {
-    const { onChange, value, isReorder } = props;
+    const { onChange, value } = props;
     const onTextChange = useCallback(
         evt => {
             onChange('confirmationNum', evt.target.value);
@@ -161,7 +160,7 @@ export const ConfirmationInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Confirmation no.">
                 <textarea
                     className="confirmation-input form-control"
-                    value={isReorder ? null : value}
+                    value={value}
                     onChange={onTextChange}
                     id="confirmation-input-id"
                 />
@@ -171,7 +170,7 @@ export const ConfirmationInput: FC<InputProps> = memo(props => {
 });
 
 export const InvoiceInput: FC<InputProps> = memo(props => {
-    const { onChange, value, isReorder } = props;
+    const { onChange, value } = props;
     const onTextChange = useCallback(
         evt => {
             onChange('invoiceNum', evt.target.value);
@@ -184,7 +183,7 @@ export const InvoiceInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Invoice no.">
                 <textarea
                     className="invoice-input form-control"
-                    value={isReorder ? null : value}
+                    value={value}
                     onChange={onTextChange}
                     id="invoice-input-id"
                 />
@@ -194,7 +193,7 @@ export const InvoiceInput: FC<InputProps> = memo(props => {
 });
 
 export const OrderDateInput: FC<InputProps> = memo(props => {
-    const { onChange, value, isReorder } = props;
+    const { onChange, value } = props;
     const onValueChange = useCallback(
         date => {
             onChange('orderDate', date);
@@ -207,7 +206,7 @@ export const OrderDateInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Order date">
                 <DatePicker
                     dateFormat="yyyy-MM-dd"
-                    selected={value && !isReorder ? new Date(value) : null}
+                    selected={value ? new Date(value) : null}
                     onChange={onValueChange}
                     id="order-date-id"
                 />
@@ -217,7 +216,7 @@ export const OrderDateInput: FC<InputProps> = memo(props => {
 });
 
 export const CardPostDateInput: FC<InputProps> = memo(props => {
-    const { onChange, value, isReorder } = props;
+    const { onChange, value } = props;
     const onValueChange = useCallback(
         date => {
             onChange('cardPostDate', date);
@@ -230,7 +229,7 @@ export const CardPostDateInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Card post date">
                 <DatePicker
                     dateFormat="yyyy-MM-dd"
-                    selected={value && !isReorder ? new Date(value) : null}
+                    selected={value ? new Date(value) : null}
                     onChange={onValueChange}
                     id="card-post-date-id"
                 />

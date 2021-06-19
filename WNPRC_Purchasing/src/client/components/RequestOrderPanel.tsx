@@ -66,8 +66,8 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
 
     return (
         <>
-        {/* Read only - for the Requesters and Receivers */}
-        { (hasRequestId && (isReceiver || isRequester)) && (
+            {/* Read only - for the Requesters and Receivers */}
+            { (hasRequestId && (isReceiver || (!isReorder && isRequester))) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}
@@ -84,14 +84,12 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                 <Col xs={11} lg={6}>
                                     <AccountInput
                                         value={model.account}
-                                        isReadOnly={!isReorder}
-                                        isReorder={isReorder}
+                                        isReadOnly={true}
                                     />
                                     {(showOtherAcct || model.account === 'Other') && (
                                         <AccountOtherInput
                                             value={model.otherAcctAndInves}
                                             isReadOnly={true}
-                                            isReorder={isReorder}
                                         />
                                     )}
                                 </Col>
@@ -99,43 +97,43 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                             <Col xs={11} lg={6}>
                                 <ShippingDestinationInput
                                     value={model.shippingInfoId}
-                                    isReadOnly={!isReorder}
+                                    isReadOnly={true}
                                 />
                             </Col>
                             <Col xs={11} lg={6}>
                                 <VendorInput
                                     model={model}
-                                    isReadOnly={!isReorder}
+                                    isReadOnly={true}
                                 />
                             </Col>
                             <Col xs={11} lg={6}>
                                 <DeliveryAttentionInput
                                     value={model.shippingAttentionTo}
-                                    isReadOnly={!isReorder}
+                                    isReadOnly={true}
                                 />
                             </Col>
                             { isRequester && (
                                 <Col xs={11} lg={6}>
                                     <BusinessPurposeInput
                                         value={model.justification}
-                                        isReadOnly={!isReorder}
+                                        isReadOnly={true}
                                     />
                                 </Col>
                             )}
                             <Col xs={11} lg={6}>
                                 <SpecialInstructionInput
                                     value={model.comments}
-                                    isReadOnly={!isReorder}
+                                    isReadOnly={true}
                                 />
                             </Col>
                         </Row>
                     </Form>
                 </Panel>
             )
-        }
+            }
 
-        {/* For the Admins for new and old requests; and for the Requesters for new requests */}
-        { (isAdmin || (!hasRequestId && isRequester)) && (
+            {/* For the Admins for new and old requests; and for the Requesters for new requests */}
+            { (isAdmin || (!hasRequestId && isRequester) || (hasRequestId && isReorder && isRequester)) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}
@@ -153,7 +151,6 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                     value={model.account}
                                     hasError={model.errors?.find(field => field.fieldName === 'account')}
                                     onChange={onValueChange}
-                                    isReorder={isReorder}
                                 />
                                 {(showOtherAcct || model.account === 'Other') && (
                                     <AccountOtherInput
@@ -161,7 +158,6 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                                         hasError={model.errors?.find(field => field.fieldName === 'otherAcctAndInves')}
                                         hasOtherAcctWarning={!!model.otherAcctAndInvesWarning}
                                         onChange={onValueChange}
-                                        isReorder={isReorder}
                                     />
                                 )}
                             </Col>
@@ -206,7 +202,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                     {model.errorMsg && <div className="alert alert-danger">{model.errorMsg}</div>}
                 </Panel>
             )
-        }
+            }
         </>
     );
 });

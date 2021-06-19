@@ -59,10 +59,8 @@ export const App: FC = memo(() => {
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
 
-        setIsReorder(ActionURL.getParameter('isReorder'));
-        if (isReorder) {
-            setRequestId(null);
-        }
+        const isReorderFlag = ActionURL.getParameter('isReorder');
+        setIsReorder(isReorderFlag);
 
         (async () => {
             //get QCStates
@@ -86,11 +84,21 @@ export const App: FC = memo(() => {
                 const requestOrderVals = await getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter);
                 requestOrderVals.map(val => {
                     if (val) {
+                        let acctVal = requestOrderVals[0].otherAcctAndInves ? 'Other' : requestOrderVals[0].account;
+                        if (isReorderFlag) {
+                            acctVal = "";
+                        }
+
+                        let otherAcctVal = requestOrderVals[0].otherAcctAndInves || undefined;
+                        if (isReorderFlag) {
+                            otherAcctVal = undefined;
+                        }
+
                         setRequestOrderModel(
                             RequestOrderModel.create({
                                 rowId: requestOrderVals[0].rowId,
-                                account: requestOrderVals[0].otherAcctAndInves ? 'Other' : requestOrderVals[0].account,
-                                otherAcctAndInves: requestOrderVals[0].otherAcctAndInves || undefined,
+                                account: acctVal,
+                                otherAcctAndInves: otherAcctVal,
                                 vendorId: requestOrderVals[0].vendorId,
                                 justification: requestOrderVals[0].justification,
                                 shippingInfoId: requestOrderVals[0].shippingInfoId,
@@ -106,14 +114,14 @@ export const App: FC = memo(() => {
 
                         setPurchaseAdminModel(
                             PurchaseAdminModel.create({
-                                assignedTo: requestOrderVals[0].assignedTo,
-                                paymentOption: requestOrderVals[0].paymentOptionId,
-                                qcState: requestOrderVals[0].qcState,
-                                program: requestOrderVals[0].program,
-                                confirmationNum: requestOrderVals[0].confirmationNum,
-                                invoiceNum: requestOrderVals[0].invoiceNum,
-                                orderDate: requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null,
-                                cardPostDate: requestOrderVals[0].cardPostDate ? new Date(requestOrderVals[0].cardPostDate) : null,
+                                assignedTo: isReorderFlag ? "" : requestOrderVals[0].assignedTo,
+                                paymentOption: isReorderFlag ? "" : requestOrderVals[0].paymentOptionId,
+                                qcState: isReorderFlag ? "" : requestOrderVals[0].qcState,
+                                program: isReorderFlag ? "4" : requestOrderVals[0].program,
+                                confirmationNum: isReorderFlag ? "" : requestOrderVals[0].confirmationNum,
+                                invoiceNum: isReorderFlag ? "" : requestOrderVals[0].invoiceNum,
+                                orderDate: isReorderFlag ? "" : (requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null),
+                                cardPostDate: isReorderFlag ? "" : (requestOrderVals[0].cardPostDate ? new Date(requestOrderVals[0].cardPostDate) : null),
                             })
                         );
                     }
@@ -443,7 +451,7 @@ export const App: FC = memo(() => {
                 />
                 {
                     requestId && hasPurchasingAdminPermission && (
-                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} isReorder={isReorder}/>
+                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
                     )
                 }
                 <DocumentAttachmentPanel

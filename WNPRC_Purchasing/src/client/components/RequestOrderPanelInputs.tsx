@@ -18,11 +18,10 @@ interface InputProps {
     hasError?: boolean;
     hasOtherAcctWarning?: boolean;
     isReadOnly?: boolean;
-    isReorder?: boolean;
 }
 
 export const AccountInput: FC<InputProps> = memo(props => {
-    const { onChange, value, hasError, isReadOnly, isReorder } = props;
+    const { onChange, value, hasError, isReadOnly } = props;
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
@@ -45,10 +44,10 @@ export const AccountInput: FC<InputProps> = memo(props => {
             <PurchasingFormInput label="Account to charge *">
                 <select
                     className={'account-input form-control ' + (hasError ? 'field-validation-error' : '')}
-                    value={isReorder ? "" : value}
+                    value={value}
                     onChange={onValueChange}
                     placeholder="Please provide the purpose for this purchasing request (Required)"
-                    disabled={!isReorder && isReadOnly}
+                    disabled={isReadOnly}
                 >
                     <option hidden value="">
                         Select

@@ -50,7 +50,7 @@ export const App: FC = memo(() => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
     const [requester, setRequester] = useState<number>();
-    const [isReorder, setIsReorder] = useState<boolean>(false);
+    const [isReorder, setIsReorder] = useState<boolean>(ActionURL.getParameter('isReorder') || false);
     const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
@@ -58,9 +58,6 @@ export const App: FC = memo(() => {
         // is fired on component mount
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
-
-        const isReorderFlag = ActionURL.getParameter('isReorder');
-        setIsReorder(isReorderFlag);
 
         (async () => {
             //get QCStates
@@ -85,13 +82,20 @@ export const App: FC = memo(() => {
                 requestOrderVals.map(val => {
                     if (val) {
                         let acctVal = requestOrderVals[0].otherAcctAndInves ? 'Other' : requestOrderVals[0].account;
-                        if (isReorderFlag) {
+                        if (isReorder) {
                             acctVal = "";
                         }
 
                         let otherAcctVal = requestOrderVals[0].otherAcctAndInves || undefined;
-                        if (isReorderFlag) {
+                        if (isReorder) {
                             otherAcctVal = undefined;
+                        }
+
+                        let pendingState = undefined;
+                        if (isReorder) {
+                            pendingState = states.filter((qcState) => {
+                                return qcState.label === 'Review Pending';
+                            })[0].rowId;
                         }
 
                         setRequestOrderModel(
@@ -114,14 +118,14 @@ export const App: FC = memo(() => {
 
                         setPurchaseAdminModel(
                             PurchaseAdminModel.create({
-                                assignedTo: isReorderFlag ? "" : requestOrderVals[0].assignedTo,
-                                paymentOption: isReorderFlag ? "" : requestOrderVals[0].paymentOptionId,
-                                qcState: isReorderFlag ? "" : requestOrderVals[0].qcState,
-                                program: isReorderFlag ? "4" : requestOrderVals[0].program,
-                                confirmationNum: isReorderFlag ? "" : requestOrderVals[0].confirmationNum,
-                                invoiceNum: isReorderFlag ? "" : requestOrderVals[0].invoiceNum,
-                                orderDate: isReorderFlag ? "" : (requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null),
-                                cardPostDate: isReorderFlag ? "" : (requestOrderVals[0].cardPostDate ? new Date(requestOrderVals[0].cardPostDate) : null),
+                                assignedTo: isReorder ? "" : requestOrderVals[0].assignedTo,
+                                paymentOption: isReorder ? "" : requestOrderVals[0].paymentOptionId,
+                                qcState: isReorder ? pendingState : requestOrderVals[0].qcState,
+                                program: isReorder ? "4" : requestOrderVals[0].program,
+                                confirmationNum: isReorder ? "" : requestOrderVals[0].confirmationNum,
+                                invoiceNum: isReorder ? "" : requestOrderVals[0].invoiceNum,
+                                orderDate: isReorder ? "" : (requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null),
+                                cardPostDate: isReorder ? "" : (requestOrderVals[0].cardPostDate ? new Date(requestOrderVals[0].cardPostDate) : null),
                             })
                         );
                     }
@@ -177,7 +181,7 @@ export const App: FC = memo(() => {
                 setIsLoading(false);
             }
         })();
-    }, []);
+    }, [setIsReorder, isReorder]);
 
     const handleWindowBeforeUnload = useCallback(
         event => {
@@ -256,9 +260,8 @@ export const App: FC = memo(() => {
     const onReorderBtnHandler = useCallback(
         event => {
             setIsReorder(true);
-            setRequestId(null);
         },
-        [isReorder, requestId]
+        [isReorder]
     );
 
     const onSaveBtnHandler = useCallback(
@@ -276,7 +279,8 @@ export const App: FC = memo(() => {
                     ? documentAttachmentModel
                     : undefined,
                 lineItemRowsToDelete,
-                ActionURL.getParameter('isNewRequest')
+                ActionURL.getParameter('isNewRequest'),
+                isReorder
             )
                 .then(r => {
                     if (r.success) {

@@ -131,7 +131,7 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                     </Row>
                                 </div>
                                 {/* Allow adding line items for Admins or new requests for Requesters */}
-                                {(isAdmin || (!hasRequestId && isRequester)) && (
+                                {(isAdmin || (!hasRequestId && isRequester) || (hasRequestId && isRequester && isReorder)) && (
                                     <>
                                     <div className="add-item">
                                         <span id="add-line-item-row" title="Add item" className="add-item-icon"

@@ -117,7 +117,7 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                     { (!hasRequestId || isReorder) &&
                         <Col xs={2}/>
                     }
-                    {(isAdmin || (!hasRequestId && isRequester)) &&
+                    {(isAdmin || (!hasRequestId && isRequester) || (hasRequestId && isRequester && isReorder)) &&
                         <Col xs={1}>
                                 <span
                                         id={'delete-line-item-row-' + rowIndex}

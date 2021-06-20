@@ -114,14 +114,15 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
 
     private void addReorderLink(AbstractTableInfo ti, String requestIdColName, ActionURL returnUrl)
     {
-        String colName = "reorderAction";
+        String colName = "Reorder";
         ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, ti.getUserSchema().getContainer());
 
         if (ti.getColumn(colName) == null)
         {
-            BaseColumnInfo reorderCol = new BaseColumnInfo(colName, JdbcType.VARCHAR);
+            var reorderCol = new BaseColumnInfo(colName, JdbcType.VARCHAR);
             reorderCol.setHidden(false);
-            reorderCol.setLabel("Reorder Action");
+            reorderCol.setRequired(false);
+            reorderCol.setCalculated(true);
 
             reorderCol.setDisplayColumnFactory(colInfo -> {
                 ActionURL url = detailsUrl;

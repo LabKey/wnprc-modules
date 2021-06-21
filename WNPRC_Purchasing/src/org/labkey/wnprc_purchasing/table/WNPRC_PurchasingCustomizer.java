@@ -121,7 +121,6 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
         {
             var reorderCol = new BaseColumnInfo(colName, JdbcType.VARCHAR);
             reorderCol.setHidden(false);
-            reorderCol.setRequired(false);
             reorderCol.setCalculated(true);
 
             reorderCol.setDisplayColumnFactory(colInfo -> {

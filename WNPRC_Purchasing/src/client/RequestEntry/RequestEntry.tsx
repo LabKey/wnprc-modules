@@ -24,14 +24,13 @@ import {
     RequestOrderModel,
     PurchaseAdminModel,
     DocumentAttachmentModel,
-    SavedFileModel,
     QCStateModel,
 } from '../model';
 import { LineItemsPanel } from '../components/LineItemsPanel';
 import { getData, getSavedFiles, submitRequest } from '../actions';
 import { PurchaseAdminPanel } from '../components/PurchaseAdminPanel';
 import { DocumentAttachmentPanel } from '../components/DocumentAttachmentPanel';
-import { PURCHASING_REQUEST_ATTACHMENTS_DIR } from '../constants';
+import { PURCHASING_REQUEST_ATTACHMENTS_DIR, PROGRAM_DEFAULT_VAL } from '../constants';
 import './RequestEntry.scss';
 
 export const App: FC = memo(() => {
@@ -121,7 +120,7 @@ export const App: FC = memo(() => {
                                 assignedTo: isReorder ? "" : requestOrderVals[0].assignedTo,
                                 paymentOption: isReorder ? "" : requestOrderVals[0].paymentOptionId,
                                 qcState: isReorder ? pendingState : requestOrderVals[0].qcState,
-                                program: isReorder ? "4" : requestOrderVals[0].program,
+                                program: isReorder ? PROGRAM_DEFAULT_VAL : requestOrderVals[0].program,
                                 confirmationNum: isReorder ? "" : requestOrderVals[0].confirmationNum,
                                 invoiceNum: isReorder ? "" : requestOrderVals[0].invoiceNum,
                                 orderDate: isReorder ? "" : (requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null),

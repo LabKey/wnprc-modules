@@ -160,7 +160,7 @@
     }
 
     .toggle-check-text:before {
-        content: 'No';
+        content: 'Yes';
     }
 
     .toggle-check-input:checked ~ .toggle-check-text {
@@ -170,7 +170,7 @@
     }
 
     .toggle-check-input:checked ~ .toggle-check-text:before {
-        content: 'Yes';
+        content: 'No';
     }
 
     .toggle-check-input:checked ~ .toggle-check-text:after {
@@ -283,74 +283,55 @@
         <div class="row">
             <div class="collapse" id="waterExceptionPanel">
 
-                <div class="panel panel-primary" data-bind="with: taskDetails">
-                    <!-- ko if: dataSource() == 'waterAmount' -->
+                <div class="panel panel-primary" data-bind="with: form">
+                    <!-- ko if: dataSourceForm() == 'waterAmount' -->
                     <div class="panel-heading"><span>Edit Single Day Water</span></div>
                     <!-- /ko -->
-                    <!-- ko if: dataSource() == 'waterOrders' -->
+                    <!-- ko if: dataSourceForm() == 'waterOrders' -->
                     <div class="panel-heading"><span>Enter Single Day Water</span></div>
                     <!-- /ko -->
                     <div class="panel-body" id="waterException" >
 
                         <form class="form-horizontal scheduleForm">
-                            <!-- ko if: lsid() != '' -->
+                            <!-- ko if: lsidForm() != '' -->
                             <div class="form-group">
                                 <label class="col-xs-4 control-label">Animal ID:</label>
                                 <div class="col-xs-8">
-                                    <p class="form-control-static">{{animalId}}</p>
+                                    <p class="form-control-static">{{animalIdForm}}</p>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="col-xs-4 control-label">Date:</label>
                                 <div class="col-xs-8">
-                                    <p class="form-control-static" type="date"> {{date}} </p>
+                                    <p class="form-control-static" type="date"> {{dateForm}} </p>
 
                                 </div>
                             </div>
-                            <div class="from-group">
-                                <label class="col-xs-4 control-label">Frequency:</label>
-                                <div class="col-xs-8">
-                                   <p>
-                                       <select data-bind="value: frequencyCoalesced" class="form-control">
-
-                                        <%
-                                            String rowid = "";
-                                            String altmeaning = "";
-                                            for(JSONObject frequency : husbandryFrequencyList) {
-                                                if ( frequency.getString("altmeaning") != null && !frequency.getString("altmeaning").trim().equals("")) {
-                                                     rowid= frequency.getString("rowid");
-                                                     altmeaning = frequency.getString("altmeaning");
-                                        %>
-                                                        <option value="<%=rowid%>" id ="<%=altmeaning%>"><%=h(altmeaning)%></option>
-                                        <%
-                                                }
-
-                                            }
-                                        %>
-
-                                        </select>
-
-
-                                   </p>
-
-                                </div>
-                            </div>
-
                             <div class="form-group">
-                                <label class="col-xs-4 control-label">Volume:</label>
+                                <label class="col-xs-4 control-label">Project:</label>
+                                <div class="col-xs-8">
+                                    <p class="form-control-static">{{projectForm}}</p>
+
+                                </div>
+                            </div>
+
+                            <div class="form-group" data-bind="volumeForm">
+                                <label class="col-xs-4 control-label">{{volumeForm.id}}</label>
                                 <div class="col-xs-8">
                                     <%--<input type="hidden" class="hidden-assignedTo-field" data-bind="value: {{volumeCoalesced}}">--%>
-                                    <input type="text" class="form-control" data-bind="value: volume"/>
+                                    <input type="number" class="form-control" data-bind="value: volumeForm.value"/>
                                     <%--<p class="form-control-static">{{volumeCoalesced}}</p>--%>
                                 </div>
 
                             </div>
+
+
                             <div class="from-group">
-                                <label class="col-xs-4 control-label">Provide Fruit:</label>
+                                <label class="col-xs-4 control-label">{{provideFruitForm.id}}</label>
                                 <div class="col-xs-8">
                                     <p>
-                                        <select data-bind="value: provideFruit" class="form-control">
+                                        <select data-bind="value: provideFruitForm.value" class="form-control">
                                             <%--<option value="">{{frequencyMeaningCoalesced}}</option>--%>
                                             <%
                                                 for(JSONObject frequency : husbandryFruitList) {
@@ -368,20 +349,14 @@
                             </div>
                             <!-- /ko -->
 
-                            <div class="form-group">
-                                <label class="col-xs-4 control-label">Project:</label>
-                                <div class="col-xs-8">
-                                    <p class="form-control-static">{{projectCoalesced}}</p>
 
-                                </div>
-                            </div>
 
 
                             <div class="form-group">
-                                <label class="col-xs-4 control-label">Assigned To:</label>
+                                <label class="col-xs-4 control-label">{{assignedToForm.id}}</label>
                                 <div class="col-xs-8">
                                     <p>
-                                        <select data-bind="value: assignedToCoalesced" class="form-control">
+                                        <select data-bind="value: assignedToForm.value" class="form-control">
                                         <%--<option value="">{{assignedToCoalesced}}</option>--%>
                                             <%
                                                 for(JSONObject assignedTo : assignedToList) {
@@ -399,8 +374,32 @@
                                 </div>
                             </div>
 
+                            <div class="from-group">
+                                <label class="col-xs-4 control-label">{{frequencyForm.id}}</label>
+                                <div class="col-xs-8">
+                                   <p>
+                                       <select data-bind="value: frequencyForm.value" class="form-control">
+                                        <%
+                                            String rowid = "";
+                                            String altmeaning = "";
+                                            for(JSONObject frequency : husbandryFrequencyList) {
+                                                if ( frequency.getString("altmeaning") != null && !frequency.getString("altmeaning").trim().equals("")) {
+                                                     rowid= frequency.getString("rowid");
+                                                     altmeaning = frequency.getString("altmeaning");
+                                        %>
+                                                        <option value="<%=rowid%>" id ="<%=altmeaning%>"><%=h(altmeaning)%></option>
+                                        <%
+                                                }
+                                            }
+                                        %>
+
+                                        </select>
+                                   </p>
+                                </div>
+                            </div>
+
                             <div class="form-group">
-                                <div class="col-xs-4 control-label">Edit Multiple:</div>
+                                <label class="col-xs-4 control-label">Hide Edit Panel:</label>
                                 <div class="col-xs-2 control-label">
                                     <label class="toggle-check">
                                         <input id="multiple" type="checkbox" class="toggle-check-input" data-bind="checked: $root.editMultiple()"  />
@@ -409,14 +408,17 @@
                                 </div>
                             </div>
 
+                            <h3>Just Dirty Items</h3>
+                            <div data-bind="text: ko.toJSON(dirtyItems)"></div>
+
                             <div style="text-align: right;">
                                 <button class="btn btn-default" data-bind="click: $root.collapseSingleWater" data-toggle="collapse" >Cancel</button>
                                 <%--<button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>--%>
-                                <!-- ko if: dataSource() == 'waterAmount' -->
-                                <button class="btn btn-primary" data-bind="click: $root.submitForm">Update Single Day Water</button>
+                                <!-- ko if: dataSourceForm() == 'waterAmount' -->
+                                <button class="btn btn-primary" data-bind="click: $root.submitForm, enable: WebUtils.VM.form.isDirty">Update Single Day Water</button>
                                 <!-- /ko -->
-                                <!-- ko if: dataSource() == 'waterOrders' -->
-                                <button class="btn btn-primary" data-bind="click: $root.submitForm">Insert Single Day Water</button>
+                                <!-- ko if: dataSourceForm() == 'waterOrders' -->
+                                <button id ="submitNewWater" class="btn btn-primary" data-bind="click: $root.submitForm, enable: WebUtils.VM.form.isDirty">Insert Single Day Water</button>
 
                                 <!-- /ko -->
 
@@ -432,7 +434,7 @@
     </div>
 
     <div class="col-xs-6 col-md-8">
-        <div class="panel panel-primary">
+        <div id= "water-calendar" class="panel panel-primary">
             <div class="panel-heading"><span>Calendar</span></div>
             <div class="panel-body">
                 <div id="calendar"></div>
@@ -462,6 +464,33 @@
     let calendarEvents = {};
     let hideEditPanel = true;
     let allowProjects = "";
+
+    var changeableItems = ko.observableArray();
+
+    ko.dirtyFlag = function(root, isInitiallyDirty) {
+        var result = function() {},
+                _initialState = ko.observable(ko.toJSON(root)),
+                _isInitiallyDirty = ko.observable(isInitiallyDirty);
+
+        result.isDirty = ko.computed(function() {
+            return _isInitiallyDirty() || _initialState() !== ko.toJSON(root);
+        });
+
+        result.reset = function() {
+            _initialState(ko.toJSON(root));
+            _isInitiallyDirty(false);
+        };
+
+        return result;
+    };
+
+    function Item(id, value) {
+        this.id = ko.observable(id);
+        this.value = ko.observable(value);
+        debugger;
+        this.dirtyFlag = new ko.dirtyFlag(this);
+    }
+
     (function() {
         let calendarEl = document.getElementById('calendar');
         calendarEl.addEventListener("click", function(clickEvent) {
@@ -500,7 +529,6 @@
         let isAdmin = <%=isAdmin%>;
         let complianceStaff = <%=isCompliance%>;
         let isVet = <%=isVet%>;
-        debugger;
 
         if (isAdmin || complianceStaff || isVet){
             isSuperUser = true;
@@ -723,19 +751,27 @@
             },
             eventClick: function (info){
                 console.log(info.event.id);
-                if (info.event.extendedProps.rawRowData.displaytimeofday == 'AM'){
-                    document.getElementById("AM").selected = true;
-                }
-                if (info.event.extendedProps.rawRowData.displaytimeofday == 'PM'){
-                    document.getElementById("PM").selected = true;
-                }
+                //TODO: add the other fileds thaat need to be tracked for changes
+                WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
+                WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+
+                WebUtils.VM.form.provideFruitForm.value(info.event.extendedProps.rawRowData.provideFruit);
+                WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+
+                WebUtils.VM.form.assignedToForm.value(info.event.extendedProps.rawRowData.assignedToCoalesced);
+                WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+
+                WebUtils.VM.form.frequencyForm.value(info.event.extendedProps.rawRowData.frequencyCoalesced);
+                WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
+
+
+
                 $('#waterInfo').attr('disabled','disabled');
                 $('#enterWaterOrder').attr('disabled', 'disabled');
                 $('#waterInfo').text('Enter Single Day Water');
                 document.getElementById("modelServerResponse").innerHTML = "";
                 $('#waterInfoPanel').unblock();
 
-                //$('#multiple').bootstrapToggle('off');
 
                 let event;
                 if (selectedEvent.id){
@@ -827,17 +863,22 @@
                 displaytimeofday:           ko.observable(),
                 rawDate:                    ko.observable()
             },
-            form: ko.mapping.fromJS({
-                lsid:           '',
-                animalId:       '',
-                date:           new Date(),
-                volume:         '',
-                dataSource:     '',
-                object:         '',
-                assignedTo:     '',
-                frequency:      ''
+            form: {
+                lsidForm:                   ko.observable(),
+                taskidForm:                 ko.observable(),
+                objectIdForm:               ko.observable(),
+                dataSourceForm:             ko.observable(),
+                animalIdForm:               ko.pureComputed(function (){return ''}),
+                dateForm:                   ko.observable(),
+                projectForm:                ko.observable(),
+                dataSourceForm:             ko.observable(),
+                objectIdForm:               ko.observable(),
+                frequencyForm:              new Item("Time of Day:","PM"),
+                volumeForm:                 new Item("Volume:", ""),
+                provideFruitForm:           new Item("Provide Fruit:","none"),
+                assignedToForm:             new Item("Assigned To:","researchstaff")
 
-            }),
+            },
 
 
             requestTableClickAction: function(row) {
@@ -1103,6 +1144,66 @@
             }
         });
 
+        //Updating all the records of the form with data coming from the taskDeatils panel
+        //These records are not supposed to be change by the end users when adding or updating
+        //a waterAmount record.
+        WebUtils.VM.form.animalIdForm = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.animalId();
+        });
+
+        WebUtils.VM.form.dataSourceForm = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.dataSource();
+        });
+
+        WebUtils.VM.form.dateForm = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.date();
+        });
+
+        WebUtils.VM.form.projectForm = ko.pureComputed(function (){
+                return WebUtils.VM.taskDetails.projectCoalesced();
+        });
+
+        WebUtils.VM.form.dataSourceForm = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.dataSource();
+        });
+
+        WebUtils.VM.form.objectIdForm = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.objectIdCoalesced();
+        });
+
+        WebUtils.VM.form.taskidForm = ko.pureComputed(function(){
+            return WebUtils.VM.taskDetails.taskid();
+        });
+
+
+        jQuery.each(WebUtils.VM.form, function (key, observable){
+            //this.dirtyFlag = new ko.dirtyFlag(observable);
+            if (key === "volumeForm"){
+                changeableItems.push(observable);
+            }if (key === "provideFruitForm"){
+                changeableItems.push(observable);
+            }if (key === "assignedToForm"){
+                changeableItems.push(observable);
+            }if (key === "frequencyForm"){
+                changeableItems.push(observable);
+            }
+
+
+        });
+
+
+
+        WebUtils.VM.form.dirtyItems = ko.computed(function() {
+            console.log('change data '+ JSON.stringify(changeableItems()));
+            return ko.utils.arrayFilter(changeableItems(), function(item) {
+                return item.dirtyFlag.isDirty();
+            });
+        },WebUtils.VM.form);
+
+        WebUtils.VM.form.isDirty = ko.computed(function() {
+            return WebUtils.VM.form.dirtyItems().length > 0;
+        },WebUtils.VM.form);
+
         _.extend(WebUtils.VM, {
             clearForm: function() {
                 jQuery.each(WebUtils.VM.form, function(key, observable) {
@@ -1131,7 +1232,7 @@
             },*/
             submitForm: function(){
 
-                $('#calendar').block({
+                $('#water-calendar').block({
                     message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Updating Calendar...',
                     css: {
                         border: 'none',
@@ -1144,17 +1245,17 @@
                     }
                 });
 
-                var form = ko.mapping.toJS(WebUtils.VM.taskDetails);
+                var form = ko.mapping.toJS(WebUtils.VM.form);
                 var taskid = LABKEY.Utils.generateUUID();
                 //var date = form.date.format("Y-m-d H:i:s");
                 debugger;
 
-                var insertDate = new Date(form.date);
-                if (form.displaytimeofday == "AM"){
+                var insertDate = new Date(form.dateForm);
+                if (form.frequencyForm.value === "AM"){
                     insertDate.setHours(8);
                     insertDate.setMinutes(0);
                 }
-                else if (form.displaytimeofday == "PM"){
+                else if (form.frequencyForm.value === "PM"){
                     insertDate.setHours(14);
                     insertDate.setMinutes(0);
                 }
@@ -1163,16 +1264,16 @@
                     insertDate.setMinutes(0);
                 }
 
-                if (form.dataSource == "waterOrders"){
+                if (form.dataSourceForm === "waterOrders"){
                     WebUtils.API.insertRows('study', 'waterAmount', [{
                         taskid:         taskid,
-                        Id:             form.animalId,
+                        Id:             form.animalIdForm,
                         date:           insertDate.getTime(),
-                        assignedTo:     form.assignedToCoalesced,
-                        project:        form.projectCoalesced,
-                        volume:         form.volume,
-                        provideFruit:   form.provideFruit,
-                        frequency:      form.frequencyCoalesced,
+                        project:        form.projectForm,
+                        volume:         form.volumeForm.value,
+                        provideFruit:   form.provideFruitForm.value,
+                        assignedTo:     form.assignedToForm.value,
+                        frequency:      form.frequencyForm.value,
                         recordSource:   "WaterCalendar",
                         waterSource:    "regulated",
                         qcstate:        10 //Schedule
@@ -1187,20 +1288,20 @@
                     }])
 
 
-                } else if (form.dataSource == "waterAmount"){
+                } else if (form.dataSourceForm === "waterAmount"){
 
                     LABKEY.Ajax.request({
                         url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateWaterAmount", null, {
-                            lsid:               form.lsid,
-                            taskId:             form.taskid,
-                            objectId:           form.objectIdCoalesced,
-                            dateInMillis:         insertDate.getTime(),
-                            frequency:          form.frequencyCoalesced,
-                            animalId:           form.animalId,
-                            assignedTo:         form.assignedToCoalesced,
-                            volume:             form.volume,
-                            provideFruit:       form.provideFruit,
-                            dataSource:         form.dataSource,
+                            lsid:               form.lsidForm,
+                            taskId:             form.taskidForm,
+                            objectId:           form.objectIdForm,
+                            animalId:           form.animalIdForm,
+                            dateInMillis:       insertDate.getTime(),
+                            frequency:          form.frequencyForm.value,
+                            assignedTo:         form.assignedToForm.value,
+                            volume:             form.volumeForm.value,
+                            provideFruit:       form.provideFruitForm.value,
+                            dataSource:         form.dataSourceForm,
                             waterSource:        "regulated",
                             action:             "update"
 
@@ -1231,9 +1332,10 @@
                 }
 
                 // Refresh the calendar view.
+                debugger;
                 calendar.refetchEvents();
                 //Unblock
-                $('#calendar').unblock();
+                $('#water-calendar').unblock();
 
             },
             editMultiple: function (){
@@ -1249,9 +1351,19 @@
             },
 
         });
+     /*   document.getElementById('frequencySelect').addEventListener('change', function() {
+            document.getElementById('submitNewWater').disabled = true;
+
+        });*/
+
+
 
 
     })();
+
+
+
+
 
     function queryConfigFunc (fetchInfo, isSuperUser, animalId){
         let date = new Date();

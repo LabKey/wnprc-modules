@@ -7,7 +7,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.WNPRCConstants;
 import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterOrderFormSection;
-import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterSingleDaySlaveSection;
 import org.labkey.wnprc_ehr.dataentry.generics.forms.SimpleTaskForm;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.TaskFormSection;
 

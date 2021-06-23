@@ -5,6 +5,8 @@ import { getData } from '../actions';
 
 import { createOptions } from './Utils';
 import { PurchasingFormInput } from './PurchasingFormInput';
+import {PermissionTypes, Security} from "@labkey/api";
+import {naturalSortByProperty} from "@labkey/components";
 
 interface InputProps {
     value: any;
@@ -17,12 +19,18 @@ export const AssignedToInput: FC<InputProps> = memo(props => {
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
-        getData('core', 'Users', 'UserId, DisplayName, Groups', 'DisplayName').then(vals => {
-            setDropDownVals(vals);
-        });
+        Security.getUsersWithPermissions({
+                permissions: PermissionTypes.Admin,
+                success: ({ users }) => {
+                    setDropDownVals(users.sort(naturalSortByProperty('displayName')));
+                },
+                failure: response => {
+                console.error('There was a problem retrieving users with permissions ', PermissionTypes.Admin, response);
+            },
+            });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'UserId', 'DisplayName'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'userId', 'displayName'), [dropDownVals]);
 
     const onValueChange = useCallback(
         evt => {

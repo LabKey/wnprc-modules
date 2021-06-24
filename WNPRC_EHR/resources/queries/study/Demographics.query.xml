@@ -45,7 +45,7 @@
                             <fkColumnName>Code</fkColumnName>
                         </fk>
                     </column>
-                    <!--NOTE: being depreciated-->
+                    <!--NOTE: being deprecated-->
                     <column columnName="avail">
                         <isHidden>true</isHidden>
                         <columnTitle>Availability</columnTitle>
@@ -167,7 +167,7 @@
                             query.id~eq=${id}
                         </url>
                     </column>
-                    <!--NOTE: being depreciated-->
+                    <!--NOTE: being deprecated-->
                     <column columnName="wdate">
                         <shownInInsertView>false</shownInInsertView>
                         <isHidden>true</isHidden>

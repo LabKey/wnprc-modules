@@ -1,12 +1,10 @@
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
-import { getData } from '../actions';
+import {getData, getFolderAdmins} from '../actions';
 
 import { createOptions } from './Utils';
 import { PurchasingFormInput } from './PurchasingFormInput';
-import {PermissionTypes, Security} from "@labkey/api";
-import {naturalSortByProperty} from "@labkey/components";
 
 interface InputProps {
     value: any;
@@ -19,15 +17,9 @@ export const AssignedToInput: FC<InputProps> = memo(props => {
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
-        Security.getUsersWithPermissions({
-                permissions: PermissionTypes.Admin,
-                success: ({ users }) => {
-                    setDropDownVals(users.sort(naturalSortByProperty('displayName')));
-                },
-                failure: response => {
-                console.error('There was a problem retrieving users with permissions ', PermissionTypes.Admin, response);
-            },
-            });
+        getFolderAdmins().then(vals => {
+            setDropDownVals(vals);
+        });
     }, []);
 
     const options = useMemo(() => createOptions(dropDownVals, 'userId', 'displayName'), [dropDownVals]);

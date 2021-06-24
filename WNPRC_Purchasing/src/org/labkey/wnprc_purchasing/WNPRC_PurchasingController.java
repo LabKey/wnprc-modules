@@ -21,10 +21,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.notification.NotificationService;
@@ -49,8 +52,10 @@ import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.SiteAdminPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.ActionURL;
@@ -88,6 +93,16 @@ public class WNPRC_PurchasingController extends SpringActionController
     public WNPRC_PurchasingController()
     {
         setActionResolver(_actionResolver);
+    }
+
+    @NotNull
+    private List<User> getFolderAdmins()
+    {
+        //get only true folder admins, i.e. don't include site admins
+        List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
+        List<User> siteAdminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(SiteAdminPermission.class));
+        List<User> folderAdmins = adminUsers.stream().filter(o1 -> siteAdminUsers.stream().noneMatch(o2 -> o2.getUserId() == o1.getUserId())).collect(Collectors.toList());
+        return folderAdmins;
     }
 
     @RequiresPermission(InsertPermission.class)
@@ -144,6 +159,39 @@ public class WNPRC_PurchasingController extends SpringActionController
         }
 
         public void addNavTrail(NavTree root) { }
+    }
+
+    @RequiresPermission(InsertPermission.class)
+    public class GetFolderAdminsAction extends ReadOnlyApiAction
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            Map<String, Object> resultProperties = new HashMap<>();
+            try
+            {
+                List<User> folderAdmins = getFolderAdmins(); //this doesn't include site admins
+                JSONArray results = new JSONArray();
+
+                for (User user : folderAdmins)
+                {
+                    JSONObject json = new JSONObject();
+                    json.put("userId", user.getUserId());
+                    json.put("displayName", user.getDisplayName(getUser()));
+                    results.put(json);
+                }
+
+                resultProperties.put("success", true);
+                resultProperties.put("results", results);
+                return new ApiSimpleResponse(resultProperties);
+            }
+            catch (IllegalArgumentException e)
+            {
+                resultProperties.put("success", false);
+                resultProperties.put("error", e.getMessage());
+                return null;
+            }
+        }
     }
 
     @RequiresPermission(InsertPermission.class)
@@ -326,11 +374,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
 
+            List<User> folderAdmins = getFolderAdmins();
+
+            //send emails to all folder admins incl. purchasing director
             if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(ADDITIONAL_REVIEW_AMT)) >= 0)
             {
-                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
-
-                for (User user : adminUsers)
+                for (User user : folderAdmins)
                 {
                     NotificationService.get().sendMessageForRecipient(
                             getContainer(), UserManager.getUser(getUser().getUserId()), user,
@@ -339,16 +388,13 @@ public class WNPRC_PurchasingController extends SpringActionController
                             String.valueOf(emailTemplateForm.getRowId()), "New request over $5000");
                 }
             }
+            //send emails to all folder admins minus the purchasing director
             else
             {
                 //get purchasing dir userId
                 Map<Integer, String> purchasingDirUserIds = getPurchasingDirectorUserIds();
 
-                //get folder admin users
-                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
-
-                //send emails to ALL folder admins
-                for (User user : adminUsers)
+                for (User user : folderAdmins)
                 {
                     if (!purchasingDirUserIds.containsKey(user.getUserId()))
                     {

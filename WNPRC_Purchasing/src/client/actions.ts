@@ -38,6 +38,26 @@ export async function getData(
     });
 }
 
+export async function getFolderAdmins(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+        return Ajax.request({
+            url: ActionURL.buildURL('WNPRC_Purchasing', 'getFolderAdmins.api'),
+            method: 'POST',
+            success: Utils.getCallbackWrapper(response => {
+               resolve(response.results);
+            }),
+            failure: Utils.getCallbackWrapper(
+                error => {
+                    console.error('Error getting folder admins.', error);
+                    reject(error);
+                },
+                undefined,
+                true
+            ),
+        });
+    });
+}
+
 function getQCState(purchasingAdminModel: PurchaseAdminModel, requestOrder: RequestOrderModel, lineItems: LineItemModel[], qcStates: QCStateModel[])
 {
     let qcState = purchasingAdminModel?.qcState || requestOrder.qcState;
@@ -61,10 +81,10 @@ function getQCState(purchasingAdminModel: PurchaseAdminModel, requestOrder: Requ
         }
     });
 
-    // if all the line items are received, set state to 'order delivered'
+    // if all the line items are received, set state to 'order received'
     if (receivedCount === lineItems.length) {
         let deliveredState = qcStates.filter((qcState) => {
-            return qcState.label === 'Order Delivered';
+            return qcState.label === 'Order Received';
         });
         qcState = deliveredState?.[0]?.rowId;
     }

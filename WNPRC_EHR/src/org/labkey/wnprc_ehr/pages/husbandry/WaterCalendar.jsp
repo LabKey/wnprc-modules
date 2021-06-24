@@ -387,7 +387,7 @@
                                                      rowid= frequency.getString("rowid");
                                                      altmeaning = frequency.getString("altmeaning");
                                         %>
-                                                        <option value="<%=rowid%>" id ="<%=altmeaning%>"><%=h(altmeaning)%></option>
+                                           <option value="<%=rowid%>"><%=h(altmeaning)%></option>
                                         <%
                                                 }
                                             }
@@ -552,6 +552,7 @@
             }
         });
         $(document).ready(function(){
+
             calendar = new FullCalendar.Calendar(calendarEl, {
 
                 themeSystem: 'bootstrap',
@@ -742,6 +743,25 @@
                     eventTextColor: 'red'
                 }
             ],
+            loading: function (isLoading){
+                if (isLoading){
+                    $('#water-calendar').block({
+                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Updating Calendar...',
+                        css: {
+                            border: 'none',
+                            padding: '15px',
+                            backgroundColor: '#000',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .5,
+                            color: '#fff'
+                        }
+                    });
+
+                }else{
+                    $('#water-calendar').unblock();
+                }
+            },
             eventClassNames: function(arg) {
                 if (arg.event.extendedProps.selected) {
                     return ["event-selected"];
@@ -751,7 +771,11 @@
             },
             eventClick: function (info){
                 console.log(info.event.id);
-                //TODO: add the other fileds thaat need to be tracked for changes
+
+                //This updates all the fields that can be change in this form
+                //We also have to reset the dirty flag to track any change after the event is loaded into
+                //the form to be able to change.
+
                 WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
                 WebUtils.VM.form.volumeForm.dirtyFlag.reset();
 
@@ -761,7 +785,47 @@
                 WebUtils.VM.form.assignedToForm.value(info.event.extendedProps.rawRowData.assignedToCoalesced);
                 WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
 
-                WebUtils.VM.form.frequencyForm.value(info.event.extendedProps.rawRowData.frequencyCoalesced);
+                let timeOfDay = '';
+                if (info.event.extendedProps.rawRowData.frequencyCoalesced){
+                    switch (info.event.extendedProps.rawRowData.frequencyCoalesced){
+                        case 1:
+                            timeOfDay = 1;
+                            break;
+                        case 2:
+                            timeOfDay = 2;
+                            break;
+                        case 3:
+                            timeOfDay = 2;
+                            break;
+                        case 4:
+                            timeOfDay = 4;
+                            break;
+                        case 5:
+                            timeOfDay = 2;
+                            break;
+                        case 6:
+                            timeOfDay = 2;
+                            break;
+                        case 7:
+                            timeOfDay = 2;
+                            break;
+                        case 8:
+                            timeOfDay = 2;
+                            break;
+                        case 9:
+                            timeOfDay = 2;
+                            break;
+                        case 10:
+                            timeOfDay = 2;
+                            break;
+                        case 11:
+                            timeOfDay = 2;
+                            break;
+                        default:
+                            timeOfDay = 2;
+                    }
+                }
+                WebUtils.VM.form.frequencyForm.value(timeOfDay);
                 WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
 
 
@@ -826,8 +890,6 @@
 
         },);
         calendar.render();
-
-
         });
 
 
@@ -1232,7 +1294,7 @@
             },*/
             submitForm: function(){
 
-                $('#water-calendar').block({
+                $('#waterExceptionPanel').block({
                     message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Updating Calendar...',
                     css: {
                         border: 'none',
@@ -1286,6 +1348,12 @@
                         formType:   "Enter Water Daily Amount"
                        // assignedTo:
                     }])
+                    WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+                    WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+                    WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+                    WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
+                    $('#waterExceptionPanel').unblock();
+                    calendar.refetchEvents();
 
 
                 } else if (form.dataSourceForm === "waterAmount"){
@@ -1312,6 +1380,11 @@
 
                                 // Refresh the calendar view.
                                 calendar.refetchEvents();
+                                //Resetting dirty flags
+                                WebUtils.VM.form.volumeForm.dirtyFlag.reset();
+                                WebUtils.VM.form.provideFruitForm.dirtyFlag.reset();
+                                WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
+                                WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
 
                                 //$('#waterInfoPanel').unblock();
 
@@ -1334,7 +1407,7 @@
                 // Refresh the calendar view.
                 debugger;
                 calendar.refetchEvents();
-                //Unblock
+                //Unblock calendar
                 $('#water-calendar').unblock();
 
             },

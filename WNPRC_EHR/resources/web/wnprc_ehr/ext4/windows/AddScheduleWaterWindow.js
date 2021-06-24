@@ -67,7 +67,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 xtype: 'checkcombo',
                 itemId: 'frequency',
                 fieldLabel: 'Frequency',
-                displayField: 'meaning',
+                displayField: 'altmeaning',
                 valueField: 'meaning',
                 store: {
                     type: 'labkey-store',

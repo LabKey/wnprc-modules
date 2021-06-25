@@ -55,7 +55,6 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.SiteAdminPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.DateUtil;
-import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.emailTemplate.EmailTemplateService;
 import org.labkey.api.view.ActionURL;
@@ -231,17 +230,26 @@ public class WNPRC_PurchasingController extends SpringActionController
                 throw new BatchValidationException(validationExceptions, null);
             }
 
+            //email notification
             EmailTemplateForm emailTemplateForm = getValuesForEmailTemplate(requestForm);
 
-            //if its a new request
-            if (null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest())
+            try
             {
-                sendNewRequestEmailNotification(emailTemplateForm);
+                //if its a new request
+                if (null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest())
+                {
+                    sendNewRequestEmailNotification(emailTemplateForm);
+                }
+                else
+                {
+                    sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
+                }
             }
-            else
+            catch (MessagingException | IOException | ValidationException e)
             {
-                sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
+                _log.error("Error sending purchasing email notification for request num " + requestForm.getRowId(), e.getMessage());
             }
+
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
             response.put("requestId", requestForm.getRowId());
@@ -349,6 +357,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                         catch (javax.mail.internet.AddressException e)
                         {
                             _log.error("Error sending line item update message to " + endUser.getEmail() , e);
+                            throw new MessagingException(e.getMessage());
                         }
                 }
             }
@@ -376,7 +385,7 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             List<User> folderAdmins = getFolderAdmins();
 
-            //send emails to all folder admins incl. purchasing director
+            //send emails to all folder admins, which includes purchasing director for purchases >= $5000
             if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(ADDITIONAL_REVIEW_AMT)) >= 0)
             {
                 for (User user : folderAdmins)
@@ -388,7 +397,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                             String.valueOf(emailTemplateForm.getRowId()), "New request over $5000");
                 }
             }
-            //send emails to all folder admins minus the purchasing director
+            //send emails to all folder admins minus the purchasing director for purchases < $5000
             else
             {
                 //get purchasing dir userId

@@ -252,11 +252,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         GUID ehrEntityId = ehrContainer.getEntityId();
         ehrEntityId.toString();
         SQLFragment sql = new SQLFragment("(SELECT " +
-               " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+               " (CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*" + invconv.toString() + ") || ' log')" +
                 "ELSE " +
                     " 'bad data'" +
@@ -268,11 +268,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         String chowLookup = "chowLookup";
         SQLFragment sql2 = new SQLFragment("(SELECT " +
-                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+                " (CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
                 "THEN (CAST (amount as text) || ' log')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
                 "THEN (CAST (amount as text) || ' log (gluten-free)')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
                 "THEN (CAST (amount as text) || ' flower')" +
                 "ELSE " +
                 " 'bad data'" +

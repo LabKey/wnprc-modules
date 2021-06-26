@@ -245,9 +245,9 @@ public class WNPRC_PurchasingController extends SpringActionController
                     sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
                 }
             }
-            catch (MessagingException | IOException | ValidationException e)
+            catch (RuntimeException | MessagingException | IOException | ValidationException e)
             {
-                _log.error("Error sending purchasing email notification for request num " + requestForm.getRowId(), e.getMessage());
+                _log.error("Error sending purchasing email notification for request # " + requestForm.getRowId(), e.getMessage());
             }
 
             ApiSimpleResponse response = new ApiSimpleResponse();

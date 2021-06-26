@@ -33,6 +33,23 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
             {
                 addRequestUpdateLinks((AbstractTableInfo) tableInfo);
             }
+            else if (matches(tableInfo, "ehr_billing", "aliases"))
+            {
+                addDisplayName((AbstractTableInfo) tableInfo);
+            }
+        }
+    }
+
+    private void addDisplayName(AbstractTableInfo aliasesTable)
+    {
+        String name = "displayName";
+        if (aliasesTable.getColumn(name) == null)
+        {
+            SQLFragment sql = new SQLFragment("(alias ||' - '|| groupName)");
+            ExprColumn col = new ExprColumn(aliasesTable, name, sql, JdbcType.VARCHAR, aliasesTable.getColumn("alias"), aliasesTable.getColumn("groupName"));
+            col.setLabel("Display Name");
+            col.setUserEditable(false);
+            aliasesTable.addColumn(col);
         }
     }
 

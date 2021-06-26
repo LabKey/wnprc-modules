@@ -22,6 +22,7 @@
                             <fkDbSchema>ehr_billingLinked</fkDbSchema>
                             <fkTable>aliases</fkTable>
                             <fkColumnName>alias</fkColumnName>
+                            <fkDisplayColumnName>displayName</fkDisplayColumnName>
                         </fk>
                     </column>
                 </columns>

@@ -3,7 +3,7 @@ FROM (
 
 --    associate all accounts to the user if accessToAllAccounts flag is set to true
          SELECT a.rowid AS rowid,
-                a.alias AS account,
+                a.displayName AS account,
                 u.userId
          FROM ehr_billingLinked.aliases a,
               (SELECT ua.userId,
@@ -16,7 +16,7 @@ FROM (
 
 -- get accounts associated with user
          SELECT a.rowid    AS rowid,
-                ua.account AS account,
+                a.displayName AS account,
                 ua.userId
          FROM ehr_purchasing.userAccountAssociations ua
                   LEFT JOIN ehr_billingLinked.aliases a ON ua.account = a.alias

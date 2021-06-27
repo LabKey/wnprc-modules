@@ -133,6 +133,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Populate ehr_billing.aliases");
         goToProjectHome(BILLING_FOLDER);
+        addExtensibleColumn("groupName");
         uploadData(ALIASES_TSV, "ehr_billing", "aliases", BILLING_FOLDER);
 
         goToHome();
@@ -162,6 +163,18 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         createUserAccountAssociations();
 
         goToHome();
+    }
+
+    private void addExtensibleColumn(String extensibleCol)
+    {
+        goToSchemaBrowser();
+        selectQuery("ehr_billing", "aliases");
+        clickAndWait(Locator.linkWithText("create definition"), 5000);
+
+        Locator.XPathLocator manuallyDefineFieldsLoc = Locator.tagWithClass("div", "domain-form-manual-btn");
+        click(manuallyDefineFieldsLoc);
+        setFormElement(Locator.inputByNameContaining("domainpropertiesrow-name"), extensibleCol);
+        clickButton("Save");
     }
 
     private void createUsersAndGroups()
@@ -396,7 +409,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickButton("Create Request");
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
-        requestPage.setAccountsToCharge("acct100")
+        requestPage.setAccountsToCharge("acct100 - Assay Services")
                 .setVendor("Real Santa Claus")
                 .setBusinessPurpose("Holiday Party")
                 .setSpecialInstructions("Ho Ho Ho")
@@ -433,7 +446,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickAndWait(Locator.linkWithText(requestID));
 
         requestPage = new CreateRequestPage(getDriver());
-        checker().verifyEquals("Invalid value for Accounts to charge ", "acct100", requestPage.getAccountsToCharge());
+        checker().verifyEquals("Invalid value for Accounts to charge ", "acct100 - Assay Services", requestPage.getAccountsToCharge());
         checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage.getVendor());
         checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage.getBusinessPurpose());
         checker().verifyEquals("Invalid value for Special Instructions ", "Ho Ho Ho", requestPage.getSpecialInstructions());
@@ -507,7 +520,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToRequesterPage();
         clickAndWait(Locator.linkWithText("Create Request"));
         Map<String, String> requesterRequest = new HashMap<>();
-        requesterRequest.put("Account to charge", "acct100");
+        requesterRequest.put("Account to charge", "acct100 - Assay Services");
         requesterRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
         requesterRequest.put("Vendor", "Dunder Mifflin");
         requesterRequest.put("Delivery attention to", "testing the workflow");
@@ -615,7 +628,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Creating the second request as" + REQUESTER_USER_1);
         requestInputs = new HashMap<>();
-        requestInputs.put("Account to charge", "acct100");
+        requestInputs.put("Account to charge", "acct100 - Assay Services");
         requestInputs.put("Shipping destination", "456 Thompson lane (Math bldg)");
         requestInputs.put("Vendor", "Real Santa Claus");
         requestInputs.put("Delivery attention to", "testing the workflow - receiver");
@@ -681,7 +694,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         impersonate(REQUESTER_USER_2);
         goToRequesterPage();
         Map<String, String> emailApprovalRequest = new HashMap<>();
-        emailApprovalRequest.put("Account to charge", "acct100");
+        emailApprovalRequest.put("Account to charge", "acct100 - Assay Services");
         emailApprovalRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
         emailApprovalRequest.put("Vendor", "Stuff, Inc");
         emailApprovalRequest.put("Delivery attention to", "Testing the email notification approval workflow");
@@ -733,7 +746,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         impersonate(REQUESTER_USER_1);
         goToRequesterPage();
         Map<String, String> emailApprovalRequest = new HashMap<>();
-        emailApprovalRequest.put("Account to charge", "acct100");
+        emailApprovalRequest.put("Account to charge", "acct100 - Assay Services");
         emailApprovalRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
         emailApprovalRequest.put("Vendor", "Stuff, Inc");
         emailApprovalRequest.put("Delivery attention to", "Testing the email notification approval workflow");
@@ -782,7 +795,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         impersonate(REQUESTER_USER_1);
         goToRequesterPage();
         Map<String, String> emailApprovalRequest = new HashMap<>();
-        emailApprovalRequest.put("Account to charge", "acct100");
+        emailApprovalRequest.put("Account to charge", "acct100 - Assay Services");
         emailApprovalRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
         emailApprovalRequest.put("Vendor", "Stuff, Inc");
         emailApprovalRequest.put("Delivery attention to", "Testing the email notification approval workflow");

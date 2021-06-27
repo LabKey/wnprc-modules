@@ -321,7 +321,7 @@ if(@{$results->{rows}}){
     $email_html .= "<hr>";
 }
 
-#NOTE: depreciated
+#NOTE: deprecated
 ##then we find all records with problems in the calculated_status field
 #$results = LabKey::Query::selectRows(
 #    -baseUrl => $baseUrl,

@@ -304,7 +304,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid error message", "Unable to submit request, missing required fields.", requestPage.getAlertMessage());
 
         log("Creating a request order");
-        requestPage.setAccountsToCharge("acct100")
+        requestPage.setAccountsToCharge("acct100 - Assay Services")
                 .setVendor("Real Santa Claus")
                 .setBusinessPurpose("Holiday Party")
                 .setSpecialInstructions("Ho Ho Ho")
@@ -330,7 +330,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         EmailRecordTable mailTable = new EmailRecordTable(this);
         String subject = "A new purchase request for $250.00 is submitted";
 
-        List<String> sortedExpected = Arrays.asList(getCurrentUser(), "purchaseadmin@test.com");
+        List<String> sortedExpected = Arrays.asList("purchaseadmin@test.com");
         sortedExpected.sort(String.CASE_INSENSITIVE_ORDER);
 
         List<String> sortedActual = mailTable.getColumnDataAsText("To");
@@ -372,7 +372,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 .save();
 
         requestPage = new CreateRequestPage(getDriver());
-        requestPage.setAccountsToCharge("acct101")
+        requestPage.setAccountsToCharge("acct101 - Business Office")
                 .setBusinessPurpose("New vendor")
                 .setSpecialInstructions("Welcome Party")
                 .setShippingDestination("89 meow ave (Chemistry Bldg)")
@@ -537,7 +537,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         impersonate(ADMIN_USER);
         goToPurchaseAdminPage();
         Map<String, String> adminRequest = new HashMap<>();
-        adminRequest.put("Account to charge", "acct101");
+        adminRequest.put("Account to charge", "acct101 - Business Office");
         adminRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");
         adminRequest.put("Vendor", "Real Santa Claus");
         adminRequest.put("Delivery attention to", "testing the workflow - Admin");
@@ -615,7 +615,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Creating the first request as" + REQUESTER_USER_1);
         waitAndClickAndWait(Locator.linkWithText("Create Request"));
         Map<String, String> requestInputs = new HashMap<>();
-        requestInputs.put("Account to charge", "acct101");
+        requestInputs.put("Account to charge", "acct101 - Business Office");
         requestInputs.put("Shipping destination", "456 Thompson lane (Math bldg)");
         requestInputs.put("Vendor", "Dunder Mifflin");
         requestInputs.put("Delivery attention to", "testing the workflow - receiver");

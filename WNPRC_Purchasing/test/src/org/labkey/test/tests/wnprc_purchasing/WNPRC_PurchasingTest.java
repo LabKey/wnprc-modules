@@ -681,7 +681,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         table = new DataRegionTable("query", getDriver());
         table.setFilter("requestNum", "Equals One Of (example usage: a;b;c)", requestId1 + ";" + requestId2);
-        checker().verifyEquals("Incorrect order status", Arrays.asList("Order Delivered", "Order Delivered"), table.getColumnDataAsText("requestStatus"));
+        checker().verifyEquals("Incorrect order status", Arrays.asList("Order Received", "Order Received"), table.getColumnDataAsText("requestStatus"));
     }
 
     @Test
@@ -712,7 +712,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         EmailRecordTable mailTable = new EmailRecordTable(this);
         String subject = "A new purchase request for $5,000.00 is submitted";
         checker().verifyEquals("Incorrect To for the emails sent",
-                Arrays.asList(getCurrentUser(), "purchasedirector@test.com", "purchaseadmin@test.com"),
+                Arrays.asList("purchasedirector@test.com", "purchaseadmin@test.com"),
                 mailTable.getColumnDataAsText("To"));
         mailTable.clickSubjectAtIndex(subject, 0);
         log("Email body " + mailTable.getMessage(subject).getBody());

@@ -1288,6 +1288,7 @@ public class TriggerScriptHelper {
 
         boolean existingOrder = false;
 
+        Map<String, JSONObject> majorErrorMap = new HashMap<>();
         Map<String, JSONObject> errorMap = new HashMap<>();
 
         //TODO: Check is the animal is at least one time in the WaterSchedule Table
@@ -1296,278 +1297,285 @@ public class TriggerScriptHelper {
             returnErrors.put("field", "Id");
             returnErrors.put("severity","ERROR");
             returnErrors.put("message","Animal not in waterScheduledAnimals table, contact compliance staff to enter new animals into the water monitoring system");
-            errorMap.put(objectId, returnErrors);
-
-            //returnMessage = "Error animal not in WaterScheduleAnimal table or is already in "+waterSource +" condition";
+            majorErrorMap.put(objectId, returnErrors);
 
         }
 
-        //Setting interval to start the water schedule, the system generates the calendar thirty days before
-        Calendar startInterval = Calendar.getInstance();
-        startInterval.setTime(clientStartDate);
-        startInterval.add(Calendar.DATE, -30);
-        startInterval = DateUtils.truncate(startInterval, Calendar.DATE);
+        if (!majorErrorMap.isEmpty()){
+            //Setting interval to start the water schedule, the system generates the calendar thirty days before
+            Calendar startInterval = Calendar.getInstance();
+            startInterval.setTime(clientStartDate);
+            startInterval.add(Calendar.DATE, -30);
+            startInterval = DateUtils.truncate(startInterval, Calendar.DATE);
 
-        final String intervalLength = "180";
-        final String shortInterval = "15";
+            final String intervalLength = "180";
+            final String shortInterval = "15";
 
-        //Sending parameters to the query that generates the water schedule from water orders and water amounts
-        Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
-        parameters.put("NumDays",intervalLength);
-        parameters.put("StartDate", startInterval.getTime());
+            //Sending parameters to the query that generates the water schedule from water orders and water amounts
+            Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
+            parameters.put("NumDays",intervalLength);
+            parameters.put("StartDate", startInterval.getTime());
 
-        List<WaterDataBaseRecord> waterRecords = new ArrayList<>();
+            List<WaterDataBaseRecord> waterRecords = new ArrayList<>();
 
-        Calendar startDate = Calendar.getInstance();
-        startDate.setTime(clientStartDate);
+            Calendar startDate = Calendar.getInstance();
+            startDate.setTime(clientStartDate);
 
-        //Look for any orders that overlap in the waterScheduleCoalesced table
-        TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
-        filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
-        filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
-        //filter.addCondition(FieldKey.fromString("frequency"), frequency);
+            //Look for any orders that overlap in the waterScheduleCoalesced table
+            TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
+            filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
+            filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
+            //filter.addCondition(FieldKey.fromString("frequency"), frequency);
 
-        //Adding all the water records from database to a list of waterRecord objects that can be compared
-        TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume"), filter, null);
-        waterOrdersFromDatabase.setNamedParameters(parameters);
-        waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
+            //Adding all the water records from database to a list of waterRecord objects that can be compared
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume"), filter, null);
+            waterOrdersFromDatabase.setNamedParameters(parameters);
+            waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
-        JSONObject returnErrors = new JSONObject();
+            JSONObject returnErrors = new JSONObject();
 
 
-        for (WaterDataBaseRecord waterRecord : waterRecords)
-        {
-            //If the record is updated it should allow to enter new information.
-            if (waterRecord.getObjectId().compareTo(objectId) != 0){
+            for (WaterDataBaseRecord waterRecord : waterRecords)
+            {
+                //If the record is updated it should allow to enter new information.
+                if (waterRecord.getObjectId().compareTo(objectId) != 0){
 
-                //Checking id the animal already has a water order, if so the function will not add an
-                //entry to the waterScheduledAnimals
-                if (waterRecord.getDataSource().equals("waterOrders"))
-                {
-                    existingOrder = true;
-                }
+                    //Checking id the animal already has a water order, if so the function will not add an
+                    //entry to the waterScheduledAnimals
+                    if (waterRecord.getDataSource().equals("waterOrders"))
+                    {
+                        existingOrder = true;
+                    }
 
-                LocalDate startLoop = convertToLocalDateViaSqlDate(clientStartDate);
-                LocalDate endOfLoop;
+                    LocalDate startLoop = convertToLocalDateViaSqlDate(clientStartDate);
+                    LocalDate endOfLoop;
 
-                //Open water orders do not  have and end date but to compared we need to add a date to the loop
-                //we used the same date for generating the waterScheduleCoalesced
-                if (clientEndDate ==  null){
-                    endOfLoop = convertToLocalDateViaSqlDate(clientStartDate).plusDays(Integer.parseInt(intervalLength));
+                    //Open water orders do not  have and end date but to compared we need to add a date to the loop
+                    //we used the same date for generating the waterScheduleCoalesced
+                    if (clientEndDate ==  null){
+                        endOfLoop = convertToLocalDateViaSqlDate(clientStartDate).plusDays(Integer.parseInt(intervalLength));
 
-                }else{
+                    }else{
 
-                    endOfLoop = convertToLocalDateViaSqlDate(clientEndDate);
-                }
+                        endOfLoop = convertToLocalDateViaSqlDate(clientEndDate);
+                    }
 
-                //For loop to compare the new interval for the waterOrder with every record in database
-                for (LocalDate loopDate = startLoop ; !loopDate.isAfter(endOfLoop); loopDate = loopDate.plusDays(1)){
+                    //For loop to compare the new interval for the waterOrder with every record in database
+                    for (LocalDate loopDate = startLoop ; !loopDate.isAfter(endOfLoop); loopDate = loopDate.plusDays(1)){
 
-                    if (loopDate.compareTo(convertToLocalDateViaSqlDate(waterRecord.getDate()))==0){
+                        if (loopDate.compareTo(convertToLocalDateViaSqlDate(waterRecord.getDate()))==0){
 
-                        String serverMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency" );
+                            String serverMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency" );
 
-                        //Check frequency compatibility with water orders in the server
-                        if (!checkFrequencyCompatibility(serverMeaning, meaningFrequency))
-                        {
-
-                            //Formatting the dates to return a legible date for error message
-                            DateTimeFormatter dateFormatted = DateTimeFormatter.ISO_LOCAL_DATE;
-                            String startFormatDate = dateFormatted.format(convertToLocalDateViaSqlDate(waterRecord.getStartDateCoalesced()));
-                            String endFormattedDate;
-
-                            LocalDate endDateFromServer = convertToLocalDateViaSqlDate(waterRecord.getEndDateCoalescedFuture());
-
-                            //If the  date in the server is after the endOfLoop date, we return "Future" as the date
-                            if (endDateFromServer.isAfter(endOfLoop))
+                            //Check frequency compatibility with water orders in the server
+                            if (!checkFrequencyCompatibility(serverMeaning, meaningFrequency))
                             {
-                                endFormattedDate = "Future";
-                            }
-                            else
-                            {
-                                endFormattedDate = dateFormatted.format(endDateFromServer);
-                            }
 
-                            //Creating the link to allow users to edit the error returned by this function.
-                            ActionURL editURL = new ActionURL("EHR", "manageRecord", container);
+                                //Formatting the dates to return a legible date for error message
+                                DateTimeFormatter dateFormatted = DateTimeFormatter.ISO_LOCAL_DATE;
+                                String startFormatDate = dateFormatted.format(convertToLocalDateViaSqlDate(waterRecord.getStartDateCoalesced()));
+                                String endFormattedDate;
 
-                            editURL.addParameter("schemaName", "study");
-                            editURL.addParameter("queryName", waterRecord.getDataSource());
-                            editURL.addParameter("keyField", "lsid");
-                            editURL.addParameter("key", waterRecord.getLsid());
+                                LocalDate endDateFromServer = convertToLocalDateViaSqlDate(waterRecord.getEndDateCoalescedFuture());
 
-                            //Check overlapping waters since they have startDate and endDate
-                            //TODO: add error to extraContext to handle water order within the calendar UI
-                            if (waterRecord.getDataSource().equals("waterOrders"))
-                            {
-                                //show error when the clientStartDate is greater than an order already in the system, the overlap is
-                                //at the beginning of the new order
-                                if (clientStartDate.getTime() > waterRecord.getStartDateCoalesced().getTime())
+                                //If the  date in the server is after the endOfLoop date, we return "Future" as the date
+                                if (endDateFromServer.isAfter(endOfLoop))
                                 {
-                                    returnErrors.put("field", "date");
-                                    //return error if the clientEndDate is greater than the startDate from the order in the server
-                                    //
-                                }
-                                //Check if record from database startDate is smaller than the clientEndDate
-                                //New water order overlaps with an existing water order on the system starting earlier than the new order's endDate
-                                else if (Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime() > waterRecord.getStartDateCoalesced().getTime())
-                                {
-                                    returnErrors.put("field", "enddate");
+                                    endFormattedDate = "Future";
                                 }
                                 else
                                 {
-                                    returnErrors.put("field", "frequency");
+                                    endFormattedDate = dateFormatted.format(endDateFromServer);
                                 }
-                                //Adding dataSource, objetcId, severity and message to the exception in case of error
-                                returnErrors.put("dataSource", waterRecord.getDataSource());
-                                returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
-                                        " End Date: " + endFormattedDate +" Frequency: "+waterRecord.getFrequency() +" Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "'><b> EDIT</b></a>");
-                                returnErrors.put("objectId", waterRecord.getObjectId());
-                                returnErrors.put("severity", "ERROR");
 
-                            }
-                            //Performed similar validation with waterAmounts saved in the system
-                            //Any existing waterAmount inside the interval should be left as is
-                            //WaterAmounts outside the modify water order should return an error to the client
-                            if (waterRecord.getDataSource().equals("waterAmount")){
+                                //Creating the link to allow users to edit the error returned by this function.
+                                ActionURL editURL = new ActionURL("EHR", "manageRecord", container);
 
-                                //check if waterAmounts are outside the new order interval add warnings to users
-                                //In waterAmount StartDate and EndDate are the same
-                                if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
-                                    returnErrors.put("field", "enddate");
+                                editURL.addParameter("schemaName", "study");
+                                editURL.addParameter("queryName", waterRecord.getDataSource());
+                                editURL.addParameter("keyField", "lsid");
+                                editURL.addParameter("key", waterRecord.getLsid());
+
+                                //Check overlapping waters since they have startDate and endDate
+                                //TODO: add error to extraContext to handle water order within the calendar UI
+                                if (waterRecord.getDataSource().equals("waterOrders"))
+                                {
+                                    //show error when the clientStartDate is greater than an order already in the system, the overlap is
+                                    //at the beginning of the new order
+                                    if (clientStartDate.getTime() > waterRecord.getStartDateCoalesced().getTime())
+                                    {
+                                        returnErrors.put("field", "date");
+                                        //return error if the clientEndDate is greater than the startDate from the order in the server
+                                        //
+                                    }
+                                    //Check if record from database startDate is smaller than the clientEndDate
+                                    //New water order overlaps with an existing water order on the system starting earlier than the new order's endDate
+                                    else if (Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime() > waterRecord.getStartDateCoalesced().getTime())
+                                    {
+                                        returnErrors.put("field", "enddate");
+                                    }
+                                    else
+                                    {
+                                        returnErrors.put("field", "frequency");
+                                    }
+                                    //Adding dataSource, objetcId, severity and message to the exception in case of error
+                                    returnErrors.put("dataSource", waterRecord.getDataSource());
+                                    returnErrors.put("message", "Overlapping Water Order already in the system. Start date: " + startFormatDate +
+                                            " End Date: " + endFormattedDate +" Frequency: "+waterRecord.getFrequency() +" Source: " + waterRecord.getDataSource() + " <a href='" + editURL.toString() + "' target=\"_blank\" rel=\"noopener noreferrer\"><b> EDIT</b></a>");
+                                    returnErrors.put("objectId", waterRecord.getObjectId());
                                     returnErrors.put("severity", "ERROR");
-                                    returnErrors.put("message", "There are one or more waterAmounts that are outside the new range for the updated water order");
+
+                                }
+                                //Performed similar validation with waterAmounts saved in the system
+                                //Any existing waterAmount inside the interval should be left as is
+                                //WaterAmounts outside the modify water order should return an error to the client
+                                if (waterRecord.getDataSource().equals("waterAmount")){
+
+                                    //check if waterAmounts are outside the new order interval add warnings to users
+                                    //In waterAmount StartDate and EndDate are the same
+                                    if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
+                                        returnErrors.put("field", "enddate");
+                                        returnErrors.put("severity", "ERROR");
+                                        returnErrors.put("message", "There are one or more waterAmounts that are outside the new range for the updated water order");
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                //Additional check to informed of any water amounts in the future that wold stay in the system after the water order is modified
-                //This validation is outside the previous loop because this waterAmounts will be outside the new date range.
+                    //Additional check to informed of any water amounts in the future that wold stay in the system after the water order is modified
+                    //This validation is outside the previous loop because this waterAmounts will be outside the new date range.
 
-                if (waterRecord.getDataSource().equals("waterAmount")){
-                    //JSONObject returnErrors = new JSONObject();
-                    JSONObject extraContextObject = new JSONObject();
+                    if (waterRecord.getDataSource().equals("waterAmount")){
+                        //JSONObject returnErrors = new JSONObject();
+                        JSONObject extraContextObject = new JSONObject();
 
-                    //check if waterAmounts are outside the new order interval add warnings to users
-                    //In waterAmount StartDate and EndDate are the same
-                    if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
+                        //check if waterAmounts are outside the new order interval add warnings to users
+                        //In waterAmount StartDate and EndDate are the same
+                        if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
 
-                        // Building link for allow user to edit waterAmounts in future
-                        ActionURL editAmountURL = new ActionURL("EHR", "manageRecord", container);
-                        editAmountURL.addParameter("schemaName", "study");
-                        editAmountURL.addParameter("queryName", waterRecord.getDataSource());
-                        editAmountURL.addParameter("keyField", "lsid");
-                        editAmountURL.addParameter("key", waterRecord.getLsid());
+                            // Building link for allow user to edit waterAmounts in future
+                            ActionURL editAmountURL = new ActionURL("EHR", "manageRecord", container);
+                            editAmountURL.addParameter("schemaName", "study");
+                            editAmountURL.addParameter("queryName", waterRecord.getDataSource());
+                            editAmountURL.addParameter("keyField", "lsid");
+                            editAmountURL.addParameter("key", waterRecord.getLsid());
 
-                        //Format date to printed better version of date for returning it to the client
-                        String pattern = "yyyy-MM-dd";
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-                        String htmlDate = simpleDateFormat.format(waterRecord.getDate());
-
-
-                        returnErrors.put("field", "animalId");
-                        returnErrors.put("severity", "ERROR");
-                        //returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
-                        returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
-
-                        extraContextObject.put("date", htmlDate);
-                        extraContextObject.put("objectId",waterRecord.getObjectId());
-                        extraContextObject.put("volume", waterRecord.getVolume());
-
-                        extraContextArray.put(extraContextObject);
+                            //Format date to printed better version of date for returning it to the client
+                            String pattern = "yyyy-MM-dd";
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+                            String htmlDate = simpleDateFormat.format(waterRecord.getDate());
 
 
-                        //extraContext.put("objectId",waterRecord.getObjectId());
+                            returnErrors.put("field", "animalId");
+                            returnErrors.put("severity", "ERROR");
+                            //returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
+                            returnErrors.put("message", "The waterAmount on "+ htmlDate +" for the "+ waterRecord.getVolume() +"ml is outside the new range for the updated water order " + " <a href='" + editAmountURL.toString() + "'><b> EDIT</b></a>");
+
+                            extraContextObject.put("date", htmlDate);
+                            extraContextObject.put("objectId",waterRecord.getObjectId());
+                            extraContextObject.put("volume", waterRecord.getVolume());
+
+                            extraContextArray.put(extraContextObject);
+
+
+                            //extraContext.put("objectId",waterRecord.getObjectId());
+                        }
+                    }
+                    if (!returnErrors.isEmpty() && checkIfAnimalInCondition(animalId,clientStartDate).size()>0){
+                        errorMap.put(waterRecord.getObjectId(), returnErrors);
+                        extraContext.put("extraContextArray", extraContextArray);
                     }
                 }
-                if (!returnErrors.isEmpty() && checkIfAnimalInCondition(animalId,clientStartDate).size()>0){
-                    errorMap.put(waterRecord.getObjectId(), returnErrors);
-                    extraContext.put("extraContextArray", extraContextArray);
-                }
-            }
-        }
-
-        //JSONObject returnErrors = new JSONObject();
-        if (returnErrors.isEmpty() && !existingOrder)
-        {
-            //Closing existing lixit order in the system and adding a record in the waterScheduleAnimals table
-            TableInfo waterOrders = getTableInfo("study","waterOrders");
-            SimpleFilter filterOrders = new SimpleFilter (FieldKey.fromString("Id"), animalId);
-            filterOrders.addCondition(FieldKey.fromString("waterSource"),"lixit", CompareType.EQUAL);
-            filterOrders.addCondition(FieldKey.fromString("enddateCoalesced"),clientStartDate,CompareType.DATE_GTE);
-
-            TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "id", "date","frequency","enddateCoalesced"),filterOrders,null);
-            Map <String,Object>[] waterOrderObject = waterOrderRecords.getMapArray();
-            List<Map<String, Object>> toUpdate = new ArrayList<>();
-            List<Map<String, Object>> oldKeys = new ArrayList<>();
-
-            if (waterOrderObject.length > 0){
-               // JSONObject returnErrors = new JSONObject();
-
-                for (Map<String,Object> waterOrderMap : waterOrderObject){
-
-                    String lsid = ConvertHelper.convert(waterOrderMap.get("lsid"), String.class);
-
-                    Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
-                    updateWaterOrder.put("lsid", lsid);
-                    updateWaterOrder.put("enddate",clientStartDate);
-                    updateWaterOrder.put("skipWaterRegulationCheck", true);
-                    toUpdate.add(updateWaterOrder);
-
-                    Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
-                    keyMap.put("lsid", lsid);
-                    oldKeys.add(keyMap);
-                }
-                
             }
 
-            //TODO: only change water schedule animals if they are not in Lixit
-           Map animalCondition = checkIfAnimalInCondition(animalId,clientStartDate);
-            if ("lixit".equals(animalCondition.get(animalId).toString())){
-                List<Map<String, Object>> rowToAdd = null;
+            //JSONObject returnErrors = new JSONObject();
+            if (returnErrors.isEmpty() && !existingOrder)
+            {
+                //Closing existing lixit order in the system and adding a record in the waterScheduleAnimals table
+                TableInfo waterOrders = getTableInfo("study","waterOrders");
+                SimpleFilter filterOrders = new SimpleFilter (FieldKey.fromString("Id"), animalId);
+                filterOrders.addCondition(FieldKey.fromString("waterSource"),"lixit", CompareType.EQUAL);
+                filterOrders.addCondition(FieldKey.fromString("enddateCoalesced"),clientStartDate,CompareType.DATE_GTE);
 
-                JSONObject scheduledAnimalRecord = new JSONObject();
-                scheduledAnimalRecord.put("date", clientStartDate);
-                scheduledAnimalRecord.put("id", animalId);
-                scheduledAnimalRecord.put("condition", waterSource);
-                scheduledAnimalRecord.put("project", project);
-                scheduledAnimalRecord.put("mlsperKg",animalCondition.get("mlsPerKg"));
+                TableSelector waterOrderRecords = new TableSelector(waterOrders, PageFlowUtil.set("lsid", "id", "date","frequency","enddateCoalesced"),filterOrders,null);
+                Map <String,Object>[] waterOrderObject = waterOrderRecords.getMapArray();
+                List<Map<String, Object>> toUpdate = new ArrayList<>();
+                List<Map<String, Object>> oldKeys = new ArrayList<>();
 
-                rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+                if (waterOrderObject.length > 0){
+                    // JSONObject returnErrors = new JSONObject();
 
-                try
-                {
-                    if(!toUpdate.isEmpty()){
-                        Container container = getContainer();
-                        User user = getUser();
-                        List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, null, null);
-                        if (updateRows.isEmpty()){
-                            returnErrors.put("field", "Id");
-                            returnErrors.put("severity", "ERROR");
-                            returnErrors.put("message", "Error closing Lixit/Ad Lib orders.");
+                    for (Map<String,Object> waterOrderMap : waterOrderObject){
+
+                        String lsid = ConvertHelper.convert(waterOrderMap.get("lsid"), String.class);
+
+                        Map<String, Object> updateWaterOrder = new CaseInsensitiveHashMap<>();
+                        updateWaterOrder.put("lsid", lsid);
+                        updateWaterOrder.put("enddate",clientStartDate);
+                        updateWaterOrder.put("skipWaterRegulationCheck", true);
+                        toUpdate.add(updateWaterOrder);
+
+                        Map<String, Object> keyMap = new CaseInsensitiveHashMap<>();
+                        keyMap.put("lsid", lsid);
+                        oldKeys.add(keyMap);
+                    }
+
+                }
+
+                //TODO: only change water schedule animals if they are not in Lixit
+                Map animalCondition = checkIfAnimalInCondition(animalId,clientStartDate);
+                if ("lixit".equals(animalCondition.get(animalId).toString())){
+                    List<Map<String, Object>> rowToAdd = null;
+
+                    JSONObject scheduledAnimalRecord = new JSONObject();
+                    scheduledAnimalRecord.put("date", clientStartDate);
+                    scheduledAnimalRecord.put("id", animalId);
+                    scheduledAnimalRecord.put("condition", waterSource);
+                    scheduledAnimalRecord.put("project", project);
+                    scheduledAnimalRecord.put("mlsperKg",animalCondition.get("mlsPerKg"));
+
+                    rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
+
+                    try
+                    {
+                        if(!toUpdate.isEmpty()){
+                            Container container = getContainer();
+                            User user = getUser();
+                            List<Map<String, Object>> updateRows = waterOrders.getUpdateService().updateRows(user,container,toUpdate,oldKeys, null, null);
+                            if (updateRows.isEmpty()){
+                                returnErrors.put("field", "Id");
+                                returnErrors.put("severity", "ERROR");
+                                returnErrors.put("message", "Error closing Lixit/Ad Lib orders.");
+
+                            }
 
                         }
-
+                        insertRows(rowToAdd, "study", "waterScheduledAnimals");
                     }
-                    insertRows(rowToAdd, "study", "waterScheduledAnimals");
-                }
-                catch (Exception e)
-                {
-                    returnErrors.put("field", "project");
-                    returnErrors.put("severity", "ERROR");
-                    returnErrors.put("message", "Error changing condition.");
+                    catch (Exception e)
+                    {
+                        returnErrors.put("field", "project");
+                        returnErrors.put("severity", "ERROR");
+                        returnErrors.put("message", "Error changing condition.");
 
-                    errorMap.put(objectId, returnErrors);
+                        errorMap.put(objectId, returnErrors);
+                    }
+
                 }
 
             }
 
+            errorMap.forEach((objectIdString, JSONObject)->{
+                arrayOfErrors.put(JSONObject);
+            });
+
         }
 
-        errorMap.forEach((objectIdString, JSONObject)->{
+
+
+        majorErrorMap.forEach((objectIdString, JSONObject)->{
             arrayOfErrors.put(JSONObject);
         });
 

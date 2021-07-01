@@ -88,7 +88,7 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
             },
             frequency:{
                 allowBlank: false,
-                defaultValue: 'Daily - PM',
+                defaultValue: 2,
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',

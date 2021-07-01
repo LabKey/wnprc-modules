@@ -128,7 +128,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     defaultMinutes: 0,
                     dateConfig: {
                         maxValue: new Date(),
-                        minValue: new Date(),
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3),
                     }
                 },
             },
@@ -274,7 +274,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 editorConfig : {
                     id : 'chairingStartTime',
                     dateFormat: 'Y-m-d',
-                    timeFormat:'H:i'
+                    timeFormat:'H:i',
+                    defaultHour: 10,
+                    defaultMinutes: 0,
+                    dateConfig: {
+                        maxValue: new Date(),
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3),
+                    }
 
                 }
 
@@ -290,7 +296,13 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 editorConfig : {
                     id : 'chairingEndTime',
                     dateFormat: 'Y-m-d',
-                    timeFormat:'H:i'
+                    timeFormat:'H:i',
+                    defaultHour: 10,
+                    defaultMinutes: 0,
+                    dateConfig: {
+                        maxValue: new Date(),
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3),
+                    }
 
                 }
 
@@ -444,6 +456,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 shownInGrid: true,
                 editable: false,
                 defaultValue: 'Implant Maintenance'
+            },
+            areaCleaned:{
+                allowBlank: false
             },
             remark:{
                 shownInGrid: true
@@ -692,7 +707,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             frequency:{
                 //allowBlank: false,
-                defaultValue: 'Daily - PM',
+                defaultValue: 2,
                 lookup:{
                     schemaName: 'ehr_lookups',
                     queryName: 'husbandry_frequency',

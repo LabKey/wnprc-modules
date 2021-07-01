@@ -82,7 +82,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     }*/
 
     if (row.QCStateLabel == 'Scheduled'){
-        console.log ("value of date "+ row.date);
+        console.log ("value of date given "+ row.date);
         EHR.Server.Validation.verifyDate(row, scriptErrors, helper);
 
         /*if(row.QCStateLabel == 'Scheduled'){

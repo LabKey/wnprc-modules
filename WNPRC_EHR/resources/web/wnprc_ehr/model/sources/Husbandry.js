@@ -555,6 +555,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     width:110
                 },
                 editorConfig: {
+                    id : 'waterAmountDate',
                     maxValue: new Date(),
                     minValue: new Date(),
 
@@ -571,7 +572,19 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 allowBlank:false,
                 columnConfig: {
                     width:140
-                }
+                },
+                /*editorConfig : {
+                    id : 'waterAmountVolume',
+                    listeners:{
+                        change: function (field, val){
+                            var waterAmountDate = Ext4.getCmp('waterAmountDate');
+                            var fixedDate = new Date(waterAmountDate.getValue());
+                            fixedDate.setHours(14);
+                            fixedDate.setMinutes(1);
+                            waterAmountDate.setValue(fixedDate);
+                        }
+                    }
+                }*/
             },
             project:{
                 hidden: true,

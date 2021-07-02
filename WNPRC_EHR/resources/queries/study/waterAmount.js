@@ -19,6 +19,12 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         }*/
         //row.date = rowDate;
         console.log("value of qcstate waterAmount " + row.qcstate);
+        console.log("value of date " + row.date);
+        var fixdate = new Date(row.date);
+        fixdate.setHours(14);
+        fixdate.setMinutes(1);
+        row.date = fixdate;
+        console.log("value of fixdate " + row.date);
         if (!row.skipWaterRegulationCheck){
             row.qcstate = 10;
             row.QCStateLabel = 'Scheduled'

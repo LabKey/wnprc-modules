@@ -144,7 +144,12 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
         filtersArray.push(LABKEY.Filter.create('date', curDate.format('Y-m-d'), LABKEY.Filter.Types.DATE_EQUAL));
         filtersArray.push(LABKEY.Filter.create('assignedToTitle', assignedTo.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
         filtersArray.push(LABKEY.Filter.create('frequencyMeaning', frequency.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
-        filtersArray.push(LABKEY.Filter.create('dateOrdered', dateOrdered.join(';'), LABKEY.Filter.Types.EQUALS_ONE_OF));
+        if (frequency[0] === 'Daily - AM'){
+            filtersArray.push(LABKEY.Filter.create('dateOrdered', dateOrdered[0], LABKEY.Filter.Types.EQUALS_ONE_OF));
+        } else if (frequency[0] === 'Daily - PM'){
+            filtersArray.push(LABKEY.Filter.create('dateOrdered', dateOrdered[0], LABKEY.Filter.Types.DATE_GREATER_THAN_OR_EQUAL));
+        }
+
         filtersArray.push(LABKEY.Filter.create('actionRequired',true, LABKEY.Filter.Types.EQUAL));
         filtersArray.push(LABKEY.Filter.create('qcstate','10', LABKEY.Filter.Types.EQUAL));
 

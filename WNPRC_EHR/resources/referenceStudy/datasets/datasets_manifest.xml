@@ -51,7 +51,7 @@
     <dataset name="menses" id="1060" showByDefault="false" category="ColonyManagement"/>
     <dataset name="notes" id="1068" showByDefault="false" category="ColonyManagement"/>
     <dataset name="pairtest" id="1079" showByDefault="false" category="ColonyManagement"/>
-    <dataset name="Pregnancies" id="5007" showByDefault="false" category="ColonyManagement"/>
+    <dataset name="pregnancies" id="6001" showByDefault="false" category="ColonyManagement"/>
     <dataset name="prenatal" id="1029" category="Pathology" demographicData="true"/>
     <dataset name="biopsy" id="1006" category="Pathology"/>
     <dataset name="morphologicDiagnosis" id="1005" category="Pathology"/>
@@ -64,9 +64,10 @@
     <dataset name="restraints" id="1091" category="ColonyManagement"/>
     <dataset name="foodDeprives" id="1092" category="ColonyManagement"/>
     <dataset name="Behavior Abstract" id="1093" category="ColonyManagement"/>
-    <dataset name="pregnancy_outcomes" id="1094" category="ColonyManagement"/>
-    <dataset name="pregnancies" id="1095" category="ColonyManagement"/>
-    <dataset name="ultrasounds" id="1096" category="ColonyManagement"/>
-    <dataset name="breeding_encounters" id="1097" category="ColonyManagement"/>
+    <dataset name="pregnancy_outcomes" id="6002" category="ColonyManagement"/>
+    <dataset name="ultrasounds" id="6003" category="ColonyManagement"/>
+    <dataset name="research_ultrasounds" id="6005" category="ColonyManagement"/>
+    <dataset name="NecropsyAbstract" id="6009" />
+    <dataset name="breeding_encounters" id="6000" category="ColonyManagement"/>
   </datasets>
 </datasets>

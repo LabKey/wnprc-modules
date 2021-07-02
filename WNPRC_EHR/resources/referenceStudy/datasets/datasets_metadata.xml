@@ -4433,6 +4433,9 @@
         <datatype>varchar</datatype>
         <columnTitle>Ancestry</columnTitle>
       </column>
+      <column columnName="vendor_id">
+        <datatype>varchar</datatype>
+      </column>
     </columns>
     <tableTitle>Arrival</tableTitle>
   </table>
@@ -7476,18 +7479,87 @@
     </columns>
   </table>
   <table tableName="foodDeprives" tableDbType="TABLE">
-    <description>Restraints</description>
+    <description>Food Deprives</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
   </table>
   <table tableName="Behavior Abstract" tableDbType="TABLE">
-    <description>Restraints</description>
+    <description>Behavior Abstract</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
   </table>
   <table tableName="pregnancy_outcomes" tableDbType="TABLE">
-    <description>Restraints</description>
+    <description>Pregnancy Outcomes</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
+
   </table>
   <table tableName="ultrasounds" tableDbType="TABLE">
-    <description>Restraints</description>
+    <description>Ultrasounds</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
   </table>
   <table tableName="breeding_encounters" tableDbType="TABLE">
     <description>Restraints</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
+  </table>
+  <table tableName="research_ultrasounds" tableDbType="TABLE">
+    <description>Research Ultrasounds</description>
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
+  </table>
+  <table tableName="NecropsyAbstract" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+    </columns>
   </table>
 </tables>

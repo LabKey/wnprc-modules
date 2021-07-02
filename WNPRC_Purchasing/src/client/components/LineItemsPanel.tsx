@@ -16,12 +16,12 @@ interface Props {
     errorMsg?: string;
     hasRequestId?: boolean;
     isAdmin: boolean;
-    canUpdate: boolean;
-    canInsert: boolean;
+    isRequester: boolean;
+    isReceiver: boolean;
 }
 
 export const LineItemsPanel: FC<Props> = memo(props => {
-    const { lineItems, onChange, errorMsg, hasRequestId, isAdmin, canUpdate, canInsert } = props;
+    const { lineItems, onChange, errorMsg, hasRequestId, isAdmin, isRequester, isReceiver } = props;
 
     const lineItemRowChange = useCallback(
         (lineItem, updatedRowIndex) => {
@@ -82,14 +82,14 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                             <Col xs={4}>Part no./Item description *</Col>
                             <Col xs={1}>Controlled substance</Col>
                             <Col xs={1}>Unit *</Col>
-                            { (isAdmin || !canUpdate) &&
+                            { (isAdmin || isRequester) &&
                                 <Col xs={1}>Unit Cost ($) *</Col>
                             }
                             <Col xs={1}>Quantity *</Col>
-                            { hasRequestId && (isAdmin || canUpdate) &&
+                            { (hasRequestId) &&
                                 <Col xs={1}>Quantity received</Col>
                             }
-                            { (isAdmin || !canUpdate) &&
+                            { (isAdmin || isRequester) &&
                                 <Col xs={1}>Subtotal ($)</Col>
                             }
                         </Row>
@@ -104,20 +104,20 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                 onInputChange={lineItemRowChange}
                                 onDelete={onDeleteRow}
                                 isAdmin={isAdmin}
-                                canUpdate={canUpdate}
-                                canInsert={canInsert}
+                                isRequester={isRequester}
+                                isReceiver={isReceiver}
                                 hasRequestId={hasRequestId}
                             />
                         );
                     })}
                 </div>
                 <div>
-                    { (isAdmin || !canUpdate) && (
+                    { (isAdmin || isRequester) && (
                             <>
                                 <div>
                                     <Row>
                                         <Col xs={6}></Col>
-                                        {hasRequestId && (isAdmin || canUpdate) &&
+                                        {hasRequestId &&
                                             <Col xs={1}></Col>
                                         }
                                         <Col xs={1}></Col>
@@ -128,13 +128,18 @@ export const LineItemsPanel: FC<Props> = memo(props => {
                                         </Col>
                                     </Row>
                                 </div>
-                                <div className="add-item">
-                                    <span id="add-line-item-row" title="Add item" className="add-item-icon"
-                                          onClick={onClickAddRow}>
-                                    <FontAwesomeIcon className="fa-faPlusCircle" icon={faPlusCircle} color="green"/> Add item
-                                    </span>
-                                </div>
-                                {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+                                {/* Allow adding line items for Admins or new requests for Requesters */}
+                                {(isAdmin || (!hasRequestId && isRequester)) && (
+                                    <>
+                                    <div className="add-item">
+                                        <span id="add-line-item-row" title="Add item" className="add-item-icon"
+                                              onClick={onClickAddRow}>
+                                        <FontAwesomeIcon className="fa-faPlusCircle" icon={faPlusCircle} color="green"/> Add item
+                                        </span>
+                                    </div>
+                                    {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
+                                    </>
+                                )}
                             </>
                         )
                     }

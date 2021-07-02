@@ -14,9 +14,15 @@
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.css' />
 <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.min.js'></script>
+<%--<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.0/fullcalendar.js'></script>--%>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<%--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css">--%>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" integrity="sha512-HWlJyU4ut5HkEj0QsK/IxBCY55n5ZpskyjVlAoV9Z7XQwwkqXoYdCIC93/htL3Gu5H3R4an/S0h2NXfbZk3g7w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js" integrity="sha512-eYSzo+20ajZMRsjxB6L7eyqo5kuXuS2+wEbbOkpaur+sA2shQameiJiWEzCIDwJqaB0a4a6tCuEvCOBHUg3Skg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
 
 <%
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
@@ -207,10 +213,7 @@
                         <label class="col-xs-4 control-label">Date</label>
                         <div class="col-xs-8">
                             <div class='input-group date' id='datetimepicker1'>
-                                <input type='text' class="form-control" data-bind="dateTimePicker: date"/>
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
+                                <input id="request-date" type='datetime-local' class="form-control" value=""/>
                             </div>
                         </div>
                     </div>
@@ -480,6 +483,7 @@
             requestTableClickAction: function(row) {
                 WebUtils.VM.requestRowInForm = row;
                 WebUtils.VM.updateForm(row.otherData.lsid);
+                document.getElementById("request-date").value = moment(new Date(row.otherData.date)).format("YYYY-MM-DDTHH:mm");
             }
         });
 
@@ -587,7 +591,7 @@
 
                 var taskid = LABKEY.Utils.generateUUID();
                 var form = ko.mapping.toJS(WebUtils.VM.form);
-                var date = form.date.format("Y-m-d H:i:s");
+                var date = document.getElementById("request-date").value;
                 var taskInsertSuccess = false;
 
                 var filterConfig = {

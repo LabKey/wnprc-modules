@@ -8,6 +8,8 @@ requestRowId.invoiceNum,
 quantity,
 quantityReceived,
 itemUnitId.itemUnit,
-controlledSubstance
+controlledSubstance,
+createdBy AS requester,
+created AS requestDate
 FROM ehr_purchasing.lineItems
 WHERE requestRowId.qcState.Label = 'Order Placed'

@@ -407,10 +407,6 @@
                                     </label>
                                 </div>
                             </div>
-
-                            <h3>Just Dirty Items</h3>
-                            <div data-bind="text: ko.toJSON(dirtyItems)"></div>
-
                             <div style="text-align: right;">
                                 <button class="btn btn-default" data-bind="click: $root.collapseSingleWater" data-toggle="collapse" >Cancel</button>
                                 <%--<button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>--%>

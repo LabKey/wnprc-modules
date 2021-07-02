@@ -487,7 +487,6 @@
     function Item(id, value) {
         this.id = ko.observable(id);
         this.value = ko.observable(value);
-        debugger;
         this.dirtyFlag = new ko.dirtyFlag(this);
     }
 
@@ -570,17 +569,7 @@
                             console.log(" startStr" + fetchInfo.startStr);
 
                             console.log("inside eventSource " + allowProjects);
-                           // let events = [];
-                           // events.push({title:'test event',start:'2021-04-21'});
 
-                            <%--successCallback(events.map(function(row){
-                                return {title:row.title,start:row.start}
-                            }));
-                            failureCallback(function(){
-                                console.log ('error');
-                            });--%>
-
-                            // date.setDate(date.getDate() - 60);
                             if ($animalId == 'undefined' || $animalId == "null"){
                                 let queryConfig ={};
                                 queryConfig = queryConfigFunc(fetchInfo,isSuperUser);
@@ -622,11 +611,9 @@
                                         return eventObj;
                                         })
                                     );
-
-
-                                        failureCallback((function(data){
-                                            console.log ("error!!");
-                                        }));
+                                    failureCallback((function(data){
+                                        console.log ("error!!");
+                                    }));
                                 })
 
                             }
@@ -653,7 +640,7 @@
                                             title: row.animalId + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
-                                            textColor: '#ff0000',
+                                            textColor: '#000000',
                                             // vol: row.volume,
                                             rawRowData: row,
                                             //editable: true,
@@ -683,22 +670,27 @@
                         }).then(function (data) {
                             var events = data.rows;
 
-                            successCallback(events.map(function (row) {
-                                var eventObj = {
-                                    id : LABKEY.Utils.generateUUID(),
-                                    title: row.animalId + " Total: " + row.TotalWater,
-                                    start: row.Date,
-                                    allDay: true,
-                                    textColor: '#ff0000',
-                                    rawRowData: row
-                                };
+                            successCallback(
+                                    events.map(function (row) {
+                                        var eventObj = {
+                                            id : LABKEY.Utils.generateUUID(),
+                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            start: new Date(row.Date),
+                                            allDay: true,
+                                            textColor: '#000000',
+                                            rawRowData: row
+                                        };
 
-                                if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                    eventObj.color = '#000CFF';
-                                }else{
-                                    eventObj.color = '#EE2020'
-                                }
-                                return eventObj;
+                                        if (row.mlsPerKg >= row.InnerMlsPerKg){
+                                            eventObj.color = '#000CFF';
+                                        }else{
+                                            eventObj.color = '#EE2020'
+                                        }
+                                        return eventObj;
+                                    })
+                            );
+                            failureCallback((function (data){
+                                console.log("error from waterPrePivot general");
                             }))
 
                         })
@@ -716,7 +708,8 @@
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
                                             title: row.animalId + " Total: " + row.TotalWater,
-                                            start: row.Date,
+                                            start: new Date(row.Date),
+                                            textColor: '#000000',
                                             allDay: true,
                                             rawRowData: row
                                         };
@@ -726,11 +719,14 @@
                                             eventObj.color = '#EE2020'
                                         }
                                             return eventObj;
-                                    }))
+                                    }));
+                                failureCallback((function (data){
+                                    console.log("error from waterPrePivot");
+                                }))
                                 })
                             }
                         }
-                },
+                }/*,
                 {
                     events:[
                         {
@@ -741,7 +737,7 @@
                     ],
                     color: 'yellow',
                     eventTextColor: 'red'
-                }
+                }*/
             ],
             loading: function (isLoading){
                 if (isLoading){

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <etl xmlns="http://labkey.org/etl/xml">
-    <name>arrivals</name>
+    <name>departure</name>
     <description>WNPRC Marmoset Departures</description>
     <transforms>
         <transform type="RemoteQueryTransformStep" id="step1">

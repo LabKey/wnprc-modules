@@ -1301,7 +1301,7 @@ public class TriggerScriptHelper {
 
         }
 
-        if (!majorErrorMap.isEmpty()){
+        if (majorErrorMap.isEmpty()){
             //Setting interval to start the water schedule, the system generates the calendar thirty days before
             Calendar startInterval = Calendar.getInstance();
             startInterval.setTime(clientStartDate);

@@ -12,7 +12,7 @@
                     <column>destination</column>
                 </sourceColumns>
                 <sourceFilters>
-                    <sourceFilter column="species/scientific_name" value="Callithrix jacchus" operator="eq"/>
+                    <sourceFilter column="id/demographics/species/scientific_name" value="Callithrix jacchus" operator="eq"/>
                 </sourceFilters>
             </source>
             <destination schemaName="study" queryName="departure" targetOption="merge"/>

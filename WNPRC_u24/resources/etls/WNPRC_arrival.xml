@@ -16,7 +16,7 @@
                     <sourceFilter column="species/scientific_name" value="Callithrix jacchus" operator="eq"/>
                 </sourceFilters>
             </source>
-            <destination schemaName="study" queryName="arrival" targetOption="merge" />
+            <destination schemaName="study" queryName="arrival" targetOption="merge"/>
         </transform>
     </transforms>
     <schedule>

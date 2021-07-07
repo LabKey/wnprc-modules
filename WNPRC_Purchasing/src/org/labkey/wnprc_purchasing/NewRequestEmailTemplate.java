@@ -19,8 +19,7 @@ public class NewRequestEmailTemplate  extends EmailTemplate
 
     public NewRequestEmailTemplate()
     {
-        super(NAME, DEFAULT_SUBJECT, DEFAULT_BODY, DEFAULT_DESCRIPTION);
-        setEditableScopes(EmailTemplate.Scope.SiteOrFolder);
+        super(NAME, DEFAULT_DESCRIPTION, DEFAULT_SUBJECT, DEFAULT_BODY, ContentType.Plain, Scope.SiteOrFolder);
 
         _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number")
         {

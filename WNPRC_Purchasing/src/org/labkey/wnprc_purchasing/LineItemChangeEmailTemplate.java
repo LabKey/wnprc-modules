@@ -28,8 +28,7 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
 
     public LineItemChangeEmailTemplate()
     {
-        super(NAME, DEFAULT_SUBJECT, loadBody(), DEFAULT_DESCRIPTION, ContentType.HTML);
-        setEditableScopes(Scope.SiteOrFolder);
+        super(NAME, DEFAULT_DESCRIPTION, DEFAULT_SUBJECT, loadBody(), ContentType.HTML, Scope.SiteOrFolder);
 
         _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number", ContentType.Plain)
         {

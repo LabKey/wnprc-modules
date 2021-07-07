@@ -20,8 +20,7 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
 
     public RequestStatusChangeEmailTemplate()
     {
-        super(NAME, DEFAULT_SUBJECT, DEFAULT_BODY, DEFAULT_DESCRIPTION);
-        setEditableScopes(Scope.SiteOrFolder);
+        super(NAME, DEFAULT_DESCRIPTION, DEFAULT_SUBJECT, DEFAULT_BODY, ContentType.Plain, Scope.SiteOrFolder);
 
         _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number")
         {
@@ -102,5 +101,4 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     {
         return _replacements;
     }
-
 }

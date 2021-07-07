@@ -244,20 +244,19 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
     private void customizeFeedingTable(AbstractTableInfo ti)
     {
         // this number is representative of 12/17 ratio
-        Double d = new Double(.705882);
-        Double conv = d;
-        Double invconv = 1/d;
+        double d = .705882;
+        double conv = d;
+        double invconv = 1/d;
         String chowConversion = "chowConversion";
         Container ehrContainer = EHRService.get().getEHRStudyContainer(ti.getUserSchema().getContainer());
         GUID ehrEntityId = ehrContainer.getEntityId();
-        ehrEntityId.toString();
         SQLFragment sql = new SQLFragment("(SELECT " +
                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
-                    "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
+                    "THEN (ROUND(amount*"+ conv + ") || ' flower')" +
                 "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
-                    "THEN (ROUND(amount*"+ conv.toString() + ") || ' flower')" +
+                    "THEN (ROUND(amount*"+ conv + ") || ' flower')" +
                 "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
-                    "THEN (ROUND(amount*" + invconv.toString() + ") || ' log')" +
+                    "THEN (ROUND(amount*" + invconv + ") || ' log')" +
                 "ELSE " +
                     " 'bad data'" +
                 "END) as ChowConversion)");

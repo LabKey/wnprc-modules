@@ -23,6 +23,11 @@
                             <fkTable>aliases</fkTable>
                             <fkColumnName>alias</fkColumnName>
                             <fkDisplayColumnName>displayName</fkDisplayColumnName>
+                            <filters>
+                                <filterGroup>
+                                    <filter column="isAcceptingCharges" operator="eq" value="true"/>
+                                </filterGroup>
+                            </filters>
                         </fk>
                     </column>
                 </columns>

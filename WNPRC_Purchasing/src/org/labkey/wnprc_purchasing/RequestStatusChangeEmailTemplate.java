@@ -4,8 +4,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.util.emailTemplate.EmailTemplate;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RequestStatusChangeEmailTemplate extends EmailTemplate
 {
@@ -15,26 +13,40 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     protected static final String DEFAULT_BODY = "Purchase request # ^requestNum^ from vendor ^vendor^" +
             " submitted on ^created^ for the total of ^total^ has been ^status^ by the ^role^.\n";
 
-    private final List<ReplacementParam> _replacements = new ArrayList<>();
     private WNPRC_PurchasingController.EmailTemplateForm _notificationBean;
 
     public RequestStatusChangeEmailTemplate()
     {
         super(NAME, DEFAULT_DESCRIPTION, DEFAULT_SUBJECT, DEFAULT_BODY, ContentType.Plain, Scope.SiteOrFolder);
+    }
 
-        _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number")
+    public void setNotificationBean(WNPRC_PurchasingController.EmailTemplateForm notificationBean)
+    {
+        _notificationBean = notificationBean;
+    }
+
+    @Override
+    protected void addCustomReplacements(Replacements replacements)
+    {
+        replacements.add(new ReplacementParam<>("requestNum", Integer.class, "Request number")
         {
             @Override
-            public Integer getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getRowId();}
+            public Integer getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getRowId();
+            }
         });
 
-        _replacements.add(new ReplacementParam<String>("vendor", String.class, "Vendor name")
+        replacements.add(new ReplacementParam<>("vendor", String.class, "Vendor name")
         {
             @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getVendor();}
+            public String getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getVendor();
+            }
         });
 
-        _replacements.add(new ReplacementParam<String>("status", String.class, "Request status")
+        replacements.add(new ReplacementParam<>("status", String.class, "Request status")
         {
             @Override
             public String getValue(Container c)
@@ -51,25 +63,34 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             }
         });
 
-        _replacements.add(new ReplacementParam<String>("created", String.class, "Date of request submission")
+        replacements.add(new ReplacementParam<>("created", String.class, "Date of request submission")
         {
             @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getRequestDate();}
+            public String getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getRequestDate();
+            }
         });
 
-        _replacements.add(new ReplacementParam<String>("orderDate", String.class, "Order placed date")
+        replacements.add(new ReplacementParam<>("orderDate", String.class, "Order placed date")
         {
             @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getOrderDate();}
+            public String getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getOrderDate();
+            }
         });
 
-        _replacements.add(new ReplacementParam<String>("total", String.class, "Total cost")
+        replacements.add(new ReplacementParam<>("total", String.class, "Total cost")
         {
             @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();}
+            public String getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
+            }
         });
 
-        _replacements.add(new ReplacementParam<String>("role", String.class, "Purchasing dept or purchasing director")
+        replacements.add(new ReplacementParam<>("role", String.class, "Purchasing dept or purchasing director")
         {
             @Override
             public String getValue(Container c)
@@ -87,18 +108,5 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
                 return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
             }
         });
-
-        _replacements.addAll(super.getValidReplacements());
-    }
-
-    public void setNotificationBean(WNPRC_PurchasingController.EmailTemplateForm notificationBean)
-    {
-        _notificationBean = notificationBean;
-    }
-
-    @Override
-    public List<ReplacementParam> getValidReplacements()
-    {
-        return _replacements;
     }
 }

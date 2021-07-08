@@ -9,7 +9,6 @@ import org.labkey.api.view.ActionURL;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class LineItemChangeEmailTemplate extends EmailTemplate
@@ -18,7 +17,6 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
     protected static final String DEFAULT_DESCRIPTION = "Line item update notification";
     protected static final String NAME = "WNPRC Purchasing - Line item update notification";
 
-    private final List<ReplacementParam> _replacements = new ArrayList<>();
     private WNPRC_PurchasingController.EmailTemplateForm _notificationBean;
 
     private List<WNPRC_PurchasingController.LineItem> _updatedLineItemsList;
@@ -29,123 +27,6 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
     public LineItemChangeEmailTemplate()
     {
         super(NAME, DEFAULT_DESCRIPTION, DEFAULT_SUBJECT, loadBody(), ContentType.HTML, Scope.SiteOrFolder);
-
-        _replacements.add(new ReplacementParam<Integer>("requestNum", Integer.class, "Request number", ContentType.Plain)
-        {
-            @Override
-            public Integer getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getRowId();}
-        });
-
-        _replacements.add(new ReplacementParam<String>("vendor", String.class, "Vendor name", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getVendor();}
-        });
-
-        _replacements.add(new ReplacementParam<String>("status", String.class, "Request status", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean == null)
-                    return null;
-                if (_notificationBean.getRequestStatus().equalsIgnoreCase("order placed"))
-                    return "ordered";
-                return _notificationBean.getRequestStatus();
-            }
-        });
-
-        _replacements.add(new ReplacementParam<String>("created", String.class, "Date of request submission", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getRequestDate();}
-        });
-
-        _replacements.add(new ReplacementParam<String>("total", String.class, "Total cost", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();}
-        });
-
-        _replacements.add(new ReplacementParam<String>("hasDeletedLineItems", String.class, "For deleted line items", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean != null && _hasDeletedLineItems)
-                    return "Note: There are deleted line items.";
-                return null;
-            }
-        });
-
-        _replacements.add(new ReplacementParam<String>("hasFullQuantityReceived", String.class, "For change in quantity received", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean != null && _hasFullQuantityReceived)
-                    return "All line items are received.";
-                return null;
-            }
-        });
-
-        _replacements.add(new ReplacementParam<String>("requestDataEntryUrl", String.class, "Request entry url", ContentType.HTML)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean != null)
-                {
-                    ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, c);
-                    linkUrl.addParameter("requestRowId", _notificationBean.getRowId());
-                    linkUrl.addParameter("returnUrl", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, c).getPath());
-                    return linkUrl.getURIString();
-                }
-                return null;
-            }
-        });
-
-        _replacements.add(new ReplacementParam<String>("updatedLineItems", String.class, "Modified or newly added or removed line items", ContentType.HTML)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (getUpdatedLineItemsList() != null)
-                {
-                    StringBuilder builder = new StringBuilder();
-
-                    for (WNPRC_PurchasingController.LineItem _item : getUpdatedLineItemsList())
-                    {
-                        builder.append(getHtmlString(_item));
-                    }
-
-                    return builder.toString();
-                }
-                return null;
-            }
-        });
-
-        _replacements.add(new ReplacementParam<String>("oldLineItems", String.class, "Previously saved line items", ContentType.HTML)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (getOldLineItemsList() != null)
-                {
-                    StringBuilder builder = new StringBuilder();
-
-                    for (WNPRC_PurchasingController.LineItem _item : getOldLineItemsList())
-                    {
-                        builder.append(getHtmlString(_item));
-                    }
-
-                    return builder.toString();
-                }
-                return null;
-            }
-        });
-
-        _replacements.addAll(super.getValidReplacements());
     }
 
     private static String loadBody()
@@ -203,9 +84,134 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
     }
 
     @Override
-    public List<ReplacementParam> getValidReplacements()
+    protected void addCustomReplacements(Replacements replacements)
     {
-        return _replacements;
+        replacements.add(new ReplacementParam<>("requestNum", Integer.class, "Request number", ContentType.Plain)
+        {
+            @Override
+            public Integer getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getRowId();
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("vendor", String.class, "Vendor name", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getVendor();
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("status", String.class, "Request status", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean == null)
+                    return null;
+                if (_notificationBean.getRequestStatus().equalsIgnoreCase("order placed"))
+                    return "ordered";
+                return _notificationBean.getRequestStatus();
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("created", String.class, "Date of request submission", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getRequestDate();
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("total", String.class, "Total cost", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("hasDeletedLineItems", String.class, "For deleted line items", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null && _hasDeletedLineItems)
+                    return "Note: There are deleted line items.";
+                return null;
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("hasFullQuantityReceived", String.class, "For change in quantity received", ContentType.Plain)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null && _hasFullQuantityReceived)
+                    return "All line items are received.";
+                return null;
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("requestDataEntryUrl", String.class, "Request entry url", ContentType.HTML)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null)
+                {
+                    ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, c);
+                    linkUrl.addParameter("requestRowId", _notificationBean.getRowId());
+                    linkUrl.addParameter("returnUrl", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, c).getPath());
+                    return linkUrl.getURIString();
+                }
+                return null;
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("updatedLineItems", String.class, "Modified or newly added or removed line items", ContentType.HTML)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (getUpdatedLineItemsList() != null)
+                {
+                    StringBuilder builder = new StringBuilder();
+
+                    for (WNPRC_PurchasingController.LineItem _item : getUpdatedLineItemsList())
+                    {
+                        builder.append(getHtmlString(_item));
+                    }
+
+                    return builder.toString();
+                }
+                return null;
+            }
+        });
+
+        replacements.add(new ReplacementParam<>("oldLineItems", String.class, "Previously saved line items", ContentType.HTML)
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (getOldLineItemsList() != null)
+                {
+                    StringBuilder builder = new StringBuilder();
+
+                    for (WNPRC_PurchasingController.LineItem _item : getOldLineItemsList())
+                    {
+                        builder.append(getHtmlString(_item));
+                    }
+
+                    return builder.toString();
+                }
+                return null;
+            }
+        });
     }
 
     public void setDeletedLineItemFlag(boolean isDeleted)

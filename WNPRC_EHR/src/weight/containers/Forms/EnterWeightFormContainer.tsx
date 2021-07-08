@@ -87,16 +87,16 @@ const EnterWeightFormContainer: React.FunctionComponent<any> = props => {
 
     copyformdata.forEach(item => {
       if (vals["weight"]["value"]){
-        item["weight"] = Object.assign({}, vals["weight"]);
+        item["weight"]["value"] = vals["weight"]["value"];
       }
       if (vals["date"]["value"]){
-        item["date"] = Object.assign({}, vals["date"]);
+        item["date"]["value"] = vals["date"]["value"];
       }
       if (vals["restraint"]["value"]){
-        item["restraint"] = Object.assign({}, vals["restraint"]);
+        item["restraint"]["value"] = vals["restraint"]["value"];
       }
       if (vals["remark"]["value"]){
-        item["remark"] = Object.assign({}, vals["remark"]);
+        item["remark"]["value"] = vals["remark"]["value"];
       }
     });
 

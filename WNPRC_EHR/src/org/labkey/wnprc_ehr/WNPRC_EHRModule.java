@@ -105,6 +105,7 @@ import org.labkey.wnprc_ehr.history.DefaultAlopeciaDataSource;
 import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
 import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
@@ -122,6 +123,7 @@ import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
+import org.labkey.wnprc_ehr.security.roles.WNPRCAnimalRequestsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
@@ -358,6 +360,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new FoodNotCompletedNotification(this),
                 new FoodCompletedProblemsNotification(this),
                 new AnimalRequestNotification(this),
+                new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
                 new ViralLoadQueueNotification(this)
@@ -427,6 +430,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerRole(new BehaviorServiceWorker());
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
+        RoleManager.registerRole(new WNPRCAnimalRequestsRole());
     }
 
     public Set<Container> getWNPRCStudyContainers() {

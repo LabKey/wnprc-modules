@@ -107,6 +107,7 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
+import org.labkey.wnprc_ehr.email.EmailMessageUtils;
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
@@ -390,7 +391,7 @@ public class WNPRC_EHRController extends SpringActionController
 
         public Date getSentDate()
         {
-            DateFormat df = new SimpleDateFormat("yyyy/MM/dd kk:mm:ss", Locale.ENGLISH);
+            DateFormat df = new SimpleDateFormat(EmailMessageUtils.VIROLOGY_DATE_FORMAT, Locale.ENGLISH);
             Date result;
             try
             {

@@ -1544,7 +1544,7 @@
             },
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>
-                return LABKEY.ActionURL.buildURL('<%= necropsyReportURL.getController() %>', '<%= necropsyReportURL.getAction() %>', null, {
+                return LABKEY.ActionURL.buildURL(<%= q(necropsyReportURL.getController()) %>, <%= q(necropsyReportURL.getAction()) %>, null, {
                     reportMode: true,
                     taskid: WebUtils.VM.taskDetails.lsid()
                 });

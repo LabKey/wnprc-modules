@@ -22,6 +22,7 @@
 <%--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css">--%>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" integrity="sha512-HWlJyU4ut5HkEj0QsK/IxBCY55n5ZpskyjVlAoV9Z7XQwwkqXoYdCIC93/htL3Gu5H3R4an/S0h2NXfbZk3g7w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js" integrity="sha512-eYSzo+20ajZMRsjxB6L7eyqo5kuXuS2+wEbbOkpaur+sA2shQameiJiWEzCIDwJqaB0a4a6tCuEvCOBHUg3Skg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
 
 <%
@@ -213,7 +214,10 @@
                         <label class="col-xs-4 control-label">Date</label>
                         <div class="col-xs-8">
                             <div class='input-group date' id='datetimepicker1'>
-                                <input id="request-date" type='datetime-local' class="form-control" value=""/>
+                                <input id="request-date" type='text' class="form-control" data-bind="dateTimePicker: date"/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -483,7 +487,7 @@
             requestTableClickAction: function(row) {
                 WebUtils.VM.requestRowInForm = row;
                 WebUtils.VM.updateForm(row.otherData.lsid);
-                document.getElementById("request-date").value = moment(new Date(row.otherData.date)).format("YYYY-MM-DDTHH:mm");
+                document.getElementById("request-date").value = moment(new Date(row.otherData.date)).format("MM/DD/YYYY h:mm A");
             }
         });
 

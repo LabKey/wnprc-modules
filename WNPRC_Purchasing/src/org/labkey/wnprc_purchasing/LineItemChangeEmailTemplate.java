@@ -1,6 +1,5 @@
 package org.labkey.wnprc_purchasing;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
@@ -86,131 +85,64 @@ public class LineItemChangeEmailTemplate extends EmailTemplate
     @Override
     protected void addCustomReplacements(Replacements replacements)
     {
-        replacements.add(new ReplacementParam<>("requestNum", Integer.class, "Request number", ContentType.Plain)
-        {
-            @Override
-            public Integer getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getRowId();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("vendor", String.class, "Vendor name", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getVendor();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("status", String.class, "Request status", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean == null)
-                    return null;
-                if (_notificationBean.getRequestStatus().equalsIgnoreCase("order placed"))
-                    return "ordered";
-                return _notificationBean.getRequestStatus();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("created", String.class, "Date of request submission", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getRequestDate();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("total", String.class, "Total cost", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("hasDeletedLineItems", String.class, "For deleted line items", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean != null && _hasDeletedLineItems)
-                    return "Note: There are deleted line items.";
+        replacements.add("requestNum", Integer.class, "Request number", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRowId());
+        replacements.add("vendor", String.class, "Vendor name", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getVendor());
+        replacements.add("status", String.class, "Request status", ContentType.Plain, c -> {
+            if (_notificationBean == null)
                 return null;
-            }
+            if (_notificationBean.getRequestStatus().equalsIgnoreCase("order placed"))
+                return "ordered";
+            return _notificationBean.getRequestStatus();
         });
-
-        replacements.add(new ReplacementParam<>("hasFullQuantityReceived", String.class, "For change in quantity received", ContentType.Plain)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean != null && _hasFullQuantityReceived)
-                    return "All line items are received.";
-                return null;
-            }
+        replacements.add("created", String.class, "Date of request submission", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRequestDate());
+        replacements.add("total", String.class, "Total cost", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getFormattedTotalCost());
+        replacements.add("hasDeletedLineItems", String.class, "For deleted line items", ContentType.Plain, c -> {
+            if (_notificationBean != null && _hasDeletedLineItems)
+                return "Note: There are deleted line items.";
+            return null;
         });
-
-        replacements.add(new ReplacementParam<>("requestDataEntryUrl", String.class, "Request entry url", ContentType.HTML)
-        {
-            @Override
-            public String getValue(Container c)
+        replacements.add("hasFullQuantityReceived", String.class, "For change in quantity received", ContentType.Plain, c -> {
+            if (_notificationBean != null && _hasFullQuantityReceived)
+                return "All line items are received.";
+            return null;
+        });
+        replacements.add("requestDataEntryUrl", String.class, "Request entry url", ContentType.HTML, c -> {
+            if (_notificationBean != null)
             {
-                if (_notificationBean != null)
+                ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, c);
+                linkUrl.addParameter("requestRowId", _notificationBean.getRowId());
+                linkUrl.addParameter("returnUrl", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, c).getPath());
+                return linkUrl.getURIString();
+            }
+            return null;
+        });
+        replacements.add("updatedLineItems", String.class, "Modified or newly added or removed line items", ContentType.HTML, c -> {
+            if (getUpdatedLineItemsList() != null)
+            {
+                StringBuilder builder = new StringBuilder();
+
+                for (WNPRC_PurchasingController.LineItem _item : getUpdatedLineItemsList())
                 {
-                    ActionURL linkUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, c);
-                    linkUrl.addParameter("requestRowId", _notificationBean.getRowId());
-                    linkUrl.addParameter("returnUrl", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, c).getPath());
-                    return linkUrl.getURIString();
+                    builder.append(getHtmlString(_item));
                 }
-                return null;
+
+                return builder.toString();
             }
+            return null;
         });
-
-        replacements.add(new ReplacementParam<>("updatedLineItems", String.class, "Modified or newly added or removed line items", ContentType.HTML)
-        {
-            @Override
-            public String getValue(Container c)
+        replacements.add("oldLineItems", String.class, "Previously saved line items", ContentType.HTML, c -> {
+            if (getOldLineItemsList() != null)
             {
-                if (getUpdatedLineItemsList() != null)
+                StringBuilder builder = new StringBuilder();
+
+                for (WNPRC_PurchasingController.LineItem _item : getOldLineItemsList())
                 {
-                    StringBuilder builder = new StringBuilder();
-
-                    for (WNPRC_PurchasingController.LineItem _item : getUpdatedLineItemsList())
-                    {
-                        builder.append(getHtmlString(_item));
-                    }
-
-                    return builder.toString();
+                    builder.append(getHtmlString(_item));
                 }
-                return null;
+
+                return builder.toString();
             }
-        });
-
-        replacements.add(new ReplacementParam<>("oldLineItems", String.class, "Previously saved line items", ContentType.HTML)
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (getOldLineItemsList() != null)
-                {
-                    StringBuilder builder = new StringBuilder();
-
-                    for (WNPRC_PurchasingController.LineItem _item : getOldLineItemsList())
-                    {
-                        builder.append(getHtmlString(_item));
-                    }
-
-                    return builder.toString();
-                }
-                return null;
-            }
+            return null;
         });
     }
 

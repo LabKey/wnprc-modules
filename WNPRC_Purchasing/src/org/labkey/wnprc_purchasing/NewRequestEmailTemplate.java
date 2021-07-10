@@ -1,6 +1,5 @@
 package org.labkey.wnprc_purchasing;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.util.emailTemplate.EmailTemplate;
 
 public class NewRequestEmailTemplate  extends EmailTemplate
@@ -26,49 +25,10 @@ public class NewRequestEmailTemplate  extends EmailTemplate
     @Override
     protected void addCustomReplacements(Replacements replacements)
     {
-        replacements.add(new ReplacementParam<>("requestNum", Integer.class, "Request number")
-        {
-            @Override
-            public Integer getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getRowId();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("vendor", String.class, "Vendor name")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getVendor();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("requester", String.class, "Requester name")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getRequesterFriendlyName();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("created", String.class, "Date of request submission")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getRequestDate();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("total", String.class, "Total cost")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
-            }
-        });
+        replacements.add("requestNum", Integer.class, "Request number", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRowId());
+        replacements.add("vendor", String.class, "Vendor name", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getVendor());
+        replacements.add("requester", String.class, "Requester name", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRequesterFriendlyName());
+        replacements.add("created", String.class, "Date of request submission", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRequestDate());
+        replacements.add("total", String.class, "Total cost", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getFormattedTotalCost());
     }
 }

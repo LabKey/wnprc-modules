@@ -1,6 +1,5 @@
 package org.labkey.wnprc_purchasing;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.util.emailTemplate.EmailTemplate;
 
 import java.math.BigDecimal;
@@ -28,85 +27,34 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     @Override
     protected void addCustomReplacements(Replacements replacements)
     {
-        replacements.add(new ReplacementParam<>("requestNum", Integer.class, "Request number")
-        {
-            @Override
-            public Integer getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getRowId();
-            }
+        replacements.add("requestNum", Integer.class, "Request number", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRowId());
+        replacements.add("vendor", String.class, "Vendor name", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getVendor());
+        replacements.add("status", String.class, "Request status", ContentType.Plain, c -> {
+            if (_notificationBean == null)
+                return null;
+            if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))
+                return "rejected";
+            if (_notificationBean.getRequestStatus().equalsIgnoreCase("Order Placed"))
+                return "ordered";
+            if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved"))
+                return "approved";
+            return _notificationBean.getRequestStatus();
         });
-
-        replacements.add(new ReplacementParam<>("vendor", String.class, "Vendor name")
-        {
-            @Override
-            public String getValue(Container c)
+        replacements.add("created", String.class, "Date of request submission", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRequestDate());
+        replacements.add("orderDate", String.class, "Order placed date", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getOrderDate());
+        replacements.add("total", String.class, "Total cost", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getFormattedTotalCost());
+        replacements.add("role", String.class, "Purchasing dept or purchasing director", ContentType.Plain, c -> {
+            if (_notificationBean != null)
             {
-                return _notificationBean == null ? null : _notificationBean.getVendor();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("status", String.class, "Request status")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean == null)
-                    return null;
-                if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))
-                    return "rejected";
-                if (_notificationBean.getRequestStatus().equalsIgnoreCase("Order Placed"))
-                    return "ordered";
-                if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved"))
-                    return "approved";
-                return _notificationBean.getRequestStatus();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("created", String.class, "Date of request submission")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getRequestDate();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("orderDate", String.class, "Order placed date")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getOrderDate();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("total", String.class, "Total cost")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
-            }
-        });
-
-        replacements.add(new ReplacementParam<>("role", String.class, "Purchasing dept or purchasing director")
-        {
-            @Override
-            public String getValue(Container c)
-            {
-                if (_notificationBean != null)
+                if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.ADDITIONAL_REVIEW_AMT)) >= 0
+                        && (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
+                        || _notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected")))
                 {
-                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.ADDITIONAL_REVIEW_AMT)) >= 0
-                            && (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
-                            || _notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected")))
-                    {
-                        return "purchasing director";
-                    }
-                    return "purchasing department";
+                    return "purchasing director";
                 }
-                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
+                return "purchasing department";
             }
+            return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost(); // TODO: This looks wrong -- should probably just return null here
         });
     }
 }

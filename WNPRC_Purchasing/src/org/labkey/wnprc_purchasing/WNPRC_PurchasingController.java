@@ -52,7 +52,6 @@ import org.labkey.api.security.UserManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.security.permissions.SiteAdminPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.MailHelper;
@@ -73,6 +72,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -88,6 +88,7 @@ public class WNPRC_PurchasingController extends SpringActionController
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_PurchasingController.class);
     public static final String NAME = "wnprc_purchasing";
     public static final Double ADDITIONAL_REVIEW_AMT = 5000.0; // additional review is required for requests >= $5000
+    private static final String FOLDER_ADMIN_ROLE = "Folder Administrator";
 
     public WNPRC_PurchasingController()
     {
@@ -97,11 +98,24 @@ public class WNPRC_PurchasingController extends SpringActionController
     @NotNull
     private List<User> getFolderAdmins()
     {
-        //get only true folder admins, i.e. don't include site admins
         List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
-        List<User> siteAdminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(SiteAdminPermission.class));
-        List<User> folderAdmins = adminUsers.stream().filter(o1 -> siteAdminUsers.stream().noneMatch(o2 -> o2.getUserId() == o1.getUserId())).collect(Collectors.toList());
+        List<RoleAssignment> folderAdminGroups = getContainer().getPolicy().getAssignments().stream().filter(roleAssignment -> roleAssignment.getRole().getName().equals(FOLDER_ADMIN_ROLE)).collect(Collectors.toList());
+        int folderAdminUserId = folderAdminGroups.get(0).getUserId();
+
+        List<User> folderAdmins = new ArrayList<>();
+        for (User adminUser : adminUsers)
+        {
+            for (int grpId : adminUser.getGroups())
+            {
+                if (folderAdminUserId == grpId)
+                {
+                    folderAdmins.add(adminUser);
+                }
+            }
+        }
+
         return folderAdmins;
+
     }
 
     @RequiresPermission(InsertPermission.class)
@@ -357,7 +371,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                         catch (javax.mail.internet.AddressException e)
                         {
                             _log.error("Error sending line item update message to " + endUser.getEmail() , e);
-                            throw new MessagingException(e.getMessage());
+                            throw new MessagingException(e.getMessage(), e);
                         }
                 }
             }

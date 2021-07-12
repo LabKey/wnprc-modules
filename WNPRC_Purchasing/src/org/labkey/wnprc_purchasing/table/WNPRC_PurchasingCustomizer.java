@@ -45,7 +45,7 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
         String name = "displayName";
         if (aliasesTable.getColumn(name) == null)
         {
-            SQLFragment sql = new SQLFragment("(alias ||' - '|| groupName)");
+            SQLFragment sql = new SQLFragment("CASE WHEN groupName IS NULL THEN alias ELSE (alias ||' - '|| groupName) END");
             ExprColumn col = new ExprColumn(aliasesTable, name, sql, JdbcType.VARCHAR, aliasesTable.getColumn("alias"), aliasesTable.getColumn("groupName"));
             col.setLabel("Display Name");
             col.setUserEditable(false);

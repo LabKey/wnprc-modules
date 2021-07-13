@@ -19,7 +19,6 @@ SELECT a.lsid
      , a.enddate
      , (SELECT GROUP_CONCAT(b.displayname, ', ') FROM wnprc.procedure_names b
         WHERE b.name IN (SELECT UNNEST(STRING_TO_ARRAY(a.procedurename, ',')))) AS procedurename
-     --, a.procedurename AS procedurename
      , a.procedureunit.unit_display_name AS procedureunitdisplay
      , a.procedureunit             AS procedureunit
      , a.created

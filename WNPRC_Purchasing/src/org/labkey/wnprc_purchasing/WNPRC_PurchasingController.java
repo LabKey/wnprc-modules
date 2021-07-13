@@ -44,6 +44,7 @@ import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.MemberType;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RoleAssignment;
 import org.labkey.api.security.SecurityManager;
@@ -98,24 +99,26 @@ public class WNPRC_PurchasingController extends SpringActionController
     @NotNull
     private List<User> getFolderAdmins()
     {
-        List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
         List<RoleAssignment> folderAdminGroups = getContainer().getPolicy().getAssignments().stream().filter(roleAssignment -> roleAssignment.getRole().getName().equals(FOLDER_ADMIN_ROLE)).collect(Collectors.toList());
-        int folderAdminUserId = folderAdminGroups.get(0).getUserId();
-
         List<User> folderAdmins = new ArrayList<>();
-        for (User adminUser : adminUsers)
+        for (RoleAssignment folderAdmin : folderAdminGroups)
         {
-            for (int grpId : adminUser.getGroups())
+            int userId = folderAdmin.getUserId();
+            //handle individual users assigned to folder admin role
+            if (null == SecurityManager.getGroup(userId))
             {
-                if (folderAdminUserId == grpId)
-                {
-                    folderAdmins.add(adminUser);
-                }
+                folderAdmins.add(UserManager.getUser(userId));
             }
+            //handle groups assigned to folder admin role
+            else
+            {
+                Set<User> activeUsers = SecurityManager.getAllGroupMembers(SecurityManager.getGroup(userId), MemberType.ACTIVE_USERS);
+                folderAdmins.addAll(activeUsers);
+            }
+
         }
 
         return folderAdmins;
-
     }
 
     @RequiresPermission(InsertPermission.class)
@@ -181,29 +184,20 @@ public class WNPRC_PurchasingController extends SpringActionController
         public Object execute(Object o, BindException errors) throws Exception
         {
             Map<String, Object> resultProperties = new HashMap<>();
-            try
-            {
-                List<User> folderAdmins = getFolderAdmins(); //this doesn't include site admins
-                JSONArray results = new JSONArray();
+            List<User> folderAdmins = getFolderAdmins(); //this doesn't include site admins
+            JSONArray results = new JSONArray();
 
-                for (User user : folderAdmins)
-                {
-                    JSONObject json = new JSONObject();
-                    json.put("userId", user.getUserId());
-                    json.put("displayName", user.getDisplayName(getUser()));
-                    results.put(json);
-                }
-
-                resultProperties.put("success", true);
-                resultProperties.put("results", results);
-                return new ApiSimpleResponse(resultProperties);
-            }
-            catch (IllegalArgumentException e)
+            for (User user : folderAdmins)
             {
-                resultProperties.put("success", false);
-                resultProperties.put("error", e.getMessage());
-                return null;
+                JSONObject json = new JSONObject();
+                json.put("userId", user.getUserId());
+                json.put("displayName", user.getDisplayName(getUser()));
+                results.put(json);
             }
+
+            resultProperties.put("success", true);
+            resultProperties.put("results", results);
+            return new ApiSimpleResponse(resultProperties);
         }
     }
 

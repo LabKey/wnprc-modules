@@ -32,11 +32,11 @@
                         <columnTitle># of Animals</columnTitle>
                     </column>
                     <column columnName="speciesneeded">
-                        <columnTitle>Species</columnTitle>
+                        <columnTitle>Species Needed</columnTitle>
                         <fk>
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>animal_requests_species</fkTable>
-                            <fkColumnName>value</fkColumnName>
+                            <fkColumnName>common</fkColumnName>
                             <fkDisplayColumnName>Species</fkDisplayColumnName>
                         </fk>
                     </column>

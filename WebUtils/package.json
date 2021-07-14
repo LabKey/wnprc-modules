@@ -7,7 +7,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "npm run build-prod",
         "build-prod": "npm run copy-distributions",
-        "clean": "rimraf resources/web/fullcalendar",
+        "clean": "rimraf resources/web/webutils/lib/fullcalendar",
         "copy-distributions": "npm run clean && node copy-distributions.js",
         "setup": "npm ci"
     },

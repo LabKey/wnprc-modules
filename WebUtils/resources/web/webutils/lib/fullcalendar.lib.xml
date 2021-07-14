@@ -1,9 +1,9 @@
 <libraries xmlns="http://labkey.org/clientLibrary/xml/">
     <dependencies>
-        <dependency path="fullcalendar/main.css" mode="dev"/>
-        <dependency path="fullcalendar/main.min.css" mode="production"/>
+        <dependency path="webutils/lib/fullcalendar/main.css" mode="dev"/>
+        <dependency path="webutils/lib/fullcalendar/main.min.css" mode="production"/>
 
-        <dependency path="fullcalendar/main.js" mode="dev"/>
-        <dependency path="fullcalendar/main.min.js" mode="production"/>
+        <dependency path="webutils/lib/fullcalendar/main.js" mode="dev"/>
+        <dependency path="webutils/lib/fullcalendar/main.min.js" mode="production"/>
     </dependencies>
 </libraries>

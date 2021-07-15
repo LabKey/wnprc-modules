@@ -369,6 +369,7 @@
         let requestId = requestObj.requestId;
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("wnprc_ehr", apiAction, null, requestObj),
+            method: "POST",
             success: LABKEY.Utils.getCallbackWrapper(function (response)
             {
                 if (response.success) {
@@ -471,6 +472,7 @@
         if (isEHRManaged) {
             LABKEY.Ajax.request({
                 url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateSurgeryProcedure", null, requestObj),
+                method: "POST",
                 success: LABKEY.Utils.getCallbackWrapper(function (response) {
                     if (response.success) {
                         updateFoodDeprive(requestObj.requestId);
@@ -506,6 +508,7 @@
         } else {
             LABKEY.Ajax.request({
                 url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateUnmanagedEvent", null, requestObj),
+                method: "POST",
                 success: LABKEY.Utils.getCallbackWrapper(function (response) {
                     if (response.success) {
                         //First remove the 'old' event from the calendarEvents object as well as on fullcalendar
@@ -903,6 +906,7 @@
 
             LABKEY.Ajax.request({
                 url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureCalendarsAndRooms", null, null),
+                method: "GET",
                 success: LABKEY.Utils.getCallbackWrapper(function (response) {
                     if (response.success) {
                         let data = response.data;
@@ -1084,6 +1088,7 @@
                         if (data.rows && data.rows.length > 0) {
                             LABKEY.Ajax.request({
                                 url: LABKEY.ActionURL.buildURL("wnprc_ehr", "FetchSurgeryProcedureEvents", null, null),
+                                method: "GET",
                                 success: LABKEY.Utils.getCallbackWrapper(function (response) {
                                     if (response.success) {
                                         for (let cal in response.events) {
@@ -1396,6 +1401,7 @@
                             requestId: WebUtils.VM.taskDetails.requestid(),
                             QCStateLabel: 'Request: Pending'
                         }),
+                        method: "POST",
                         success: LABKEY.Utils.getCallbackWrapper(function (response) {
                             if (response.success) {
                                 let eventRooms = response.roomList;

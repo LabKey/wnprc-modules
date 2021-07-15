@@ -13,7 +13,7 @@ function copyFullCalendarFiles() {
     // You could choose to be more explicit here and copy just individual assets.
     // For ease of understanding I've just copied the entire package's contents.
     const apiDistDir = __dirname + '/node_modules/fullcalendar/';
-    const targetDir = __dirname + '/resources/web/webutils/lib/fullcalendar/';
+    const targetDir = __dirname + '/resources/web/gen/lib/fullcalendar/';
 
     fs.copy(apiDistDir, targetDir);
 

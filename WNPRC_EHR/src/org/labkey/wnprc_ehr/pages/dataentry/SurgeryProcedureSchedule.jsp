@@ -20,8 +20,7 @@
 <%!
     @Override
     public void addClientDependencies(ClientDependencies dependencies) {
-        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.css");
-        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.js");
+        dependencies.add("/webutils/lib/fullcalendar");
     }
 %>
 

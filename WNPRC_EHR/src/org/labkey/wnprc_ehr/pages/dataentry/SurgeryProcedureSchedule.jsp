@@ -20,7 +20,7 @@
 <%!
     @Override
     public void addClientDependencies(ClientDependencies dependencies) {
-        dependencies.add("/webutils/lib/fullcalendar");
+        dependencies.add("fullcalendar");
     }
 %>
 

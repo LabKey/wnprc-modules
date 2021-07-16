@@ -66,6 +66,7 @@
                             <fkColumnName>UserId</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="Reorder"/>
                 </columns>
             </table>
         </tables>

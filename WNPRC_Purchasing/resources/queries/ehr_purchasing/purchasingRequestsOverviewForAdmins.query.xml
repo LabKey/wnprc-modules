@@ -4,6 +4,9 @@
             <table tableName="purchasingRequestsOverviewForAdmins" tableDbType="NOT_IN_DB" useColumnOrder="true">
                 <javaCustomizer class="org.labkey.wnprc_purchasing.table.WNPRC_PurchasingCustomizer"/>
                 <tableTitle>Purchase Requests</tableTitle>
+                <columns>
+                    <column columnName="Reorder"/>
+                </columns>
             </table>
         </tables>
     </metadata>

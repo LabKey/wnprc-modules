@@ -10,6 +10,7 @@
         <column name="requester"/>
         <column name="assignedTo"/>
         <column name="attachments"/>
+        <column name="Reorder"/>
     </columns>
     <filters>
         <filter column="requestStatus/Label" operator="in" value="Review Pending; Request Approved" />

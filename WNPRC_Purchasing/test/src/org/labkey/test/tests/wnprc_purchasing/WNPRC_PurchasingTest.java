@@ -304,7 +304,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 .submitForReview();
 
         log("Verifying the request created");
-        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"), 20000);
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
@@ -371,7 +371,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 .submitForReview();
 
         log("Verifying the request created");
-        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"), 20000);
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());
         checker().verifyEquals("Invalid request status ", "Review Pending",
@@ -412,7 +412,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 .submitForReview();
 
         log("Verify " + REQUESTER_USER_1 + " can view the request submitted");
-        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"));
+        waitForElement(Locator.tagWithAttribute("h3", "title", "Purchase Requests"), 20000);
         DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
         String requestID = table.getDataAsText(0, "rowId");
         checker().verifyEquals("Invalid number of requests ", 1, table.getDataRowCount());

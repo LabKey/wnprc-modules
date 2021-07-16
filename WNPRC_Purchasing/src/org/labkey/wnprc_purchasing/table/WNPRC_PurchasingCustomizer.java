@@ -5,8 +5,9 @@ import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.UrlColumn;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
@@ -115,8 +116,9 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
     private void addReorderLink(AbstractTableInfo ti, String requestIdColName, ActionURL returnUrl)
     {
         String colName = "Reorder";
+        TableSelector ts = new TableSelector(ti);
 
-        if (ti.getColumn(colName) == null)
+        if (ti.getColumn(colName) == null && ts.getRowCount() > 0)
         {
             BaseColumnInfo reorderCol = new BaseColumnInfo(colName, JdbcType.VARCHAR);
             reorderCol.setHidden(false);
@@ -124,13 +126,18 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
             reorderCol.setLabel(colName);
 
             reorderCol.setDisplayColumnFactory(colInfo -> {
-                ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, ti.getUserSchema().getContainer());
+                SimpleDisplayColumn simpleDisplayColumn = new SimpleDisplayColumn();
+                simpleDisplayColumn.setName(colName);
+                simpleDisplayColumn.setDisplayHtml(colName);
+
+                ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class,
+                        Objects.requireNonNull(ti.getUserSchema(), "ehr_purchasing user schema not found").getContainer());
                 detailsUrl.addParameter("requestRowId", "${"+requestIdColName+"}");
                 detailsUrl.addParameter("isReorder", "true");
                 detailsUrl.addParameter("returnUrl", returnUrl.toString());
-                UrlColumn urlColumn = new UrlColumn(detailsUrl.toString(), "Reorder");
-                urlColumn.setName(colName);
-                return urlColumn;
+
+                simpleDisplayColumn.setURL(detailsUrl.toString());
+                return simpleDisplayColumn;
             });
 
             ti.addColumn(reorderCol);

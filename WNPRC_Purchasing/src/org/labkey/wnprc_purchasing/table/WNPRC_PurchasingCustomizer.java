@@ -6,6 +6,7 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.DetailsURL;
@@ -115,9 +116,10 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
     private void addReorderLink(AbstractTableInfo ti, String requestIdColName, ActionURL returnUrl)
     {
         String colName = "Reorder";
+        TableSelector ts = new TableSelector(ti);
         ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class, ti.getUserSchema().getContainer());
 
-        if (ti.getColumn(colName) == null)
+        if (ti.getColumn(colName) == null && ts.getRowCount() > 0)
         {
             var reorderCol = new BaseColumnInfo(colName, JdbcType.VARCHAR);
             reorderCol.setHidden(false);

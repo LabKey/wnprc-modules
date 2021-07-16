@@ -5,6 +5,19 @@
                 <javaCustomizer class="org.labkey.wnprc_purchasing.table.WNPRC_PurchasingCustomizer"/>
                 <tableTitle>Purchase Requests</tableTitle>
                 <columns>
+                    <column columnName="requestNum"/>
+                    <column columnName="vendorId">
+                        <columnTitle>Vendor</columnTitle>
+                    </column>
+                    <column columnName="account"/>
+                    <column columnName="otherAcctAndInves"/>
+                    <column columnName="requestStatus"/>
+                    <column columnName="requestDate"/>
+                    <column columnName="requester"/>
+                    <column columnName="orderDate"/>
+                    <column columnName="totalCost"/>
+                    <column columnName="assignedTo"/>
+                    <column columnName="attachments"/>
                     <column columnName="Reorder"/>
                 </columns>
             </table>

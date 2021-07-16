@@ -36,9 +36,7 @@
                     <column columnName="OtherAcctAndInves"/>
                     <column columnName="requester"/>
                     <column columnName="orderDate"/>
-                    <column columnName="reorderAction">
-                        <required>false</required>
-                    </column>
+                    <column columnName="Reorder"/>
                 </columns>
             </table>
         </tables>

@@ -31,7 +31,7 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
                 addAttachmentsCol((AbstractTableInfo) tableInfo);
                 addRequestLink((AbstractTableInfo) tableInfo);
                 addTotalCostColumn((AbstractTableInfo) tableInfo);
-                addReorderLink((AbstractTableInfo) tableInfo, "rowId", new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, tableInfo.getUserSchema().getContainer()));
+//                addReorderLink((AbstractTableInfo) tableInfo, "rowId", new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, tableInfo.getUserSchema().getContainer()));
             }
             else if (matches(tableInfo, "ehr_purchasing", "purchasingReceiverOverview"))
             {
@@ -39,11 +39,11 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
             }
             else if (matches(tableInfo, "ehr_purchasing", "purchasingRequestsOverview"))
             {
-                addReorderLink((AbstractTableInfo) tableInfo, "rowId", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, tableInfo.getUserSchema().getContainer()));
+//                addReorderLink((AbstractTableInfo) tableInfo, "rowId", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, tableInfo.getUserSchema().getContainer()));
             }
             else if (matches(tableInfo, "ehr_purchasing", "purchasingRequestsOverviewForAdmins"))
             {
-                addReorderLink((AbstractTableInfo) tableInfo, "requestNum", new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, tableInfo.getUserSchema().getContainer()));
+//                addReorderLink((AbstractTableInfo) tableInfo, "requestNum", new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, tableInfo.getUserSchema().getContainer()));
             }
         }
     }

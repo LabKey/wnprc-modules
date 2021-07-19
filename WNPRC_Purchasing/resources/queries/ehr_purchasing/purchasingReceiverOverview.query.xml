@@ -8,7 +8,6 @@
                     <column columnName="controlledSubstance">
                         <formatString>Yes;No;</formatString>
                     </column>
-                    <column columnName="Reorder"/>
                 </columns>
             </table>
         </tables>

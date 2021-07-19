@@ -18,7 +18,6 @@
                     <column columnName="totalCost"/>
                     <column columnName="assignedTo"/>
                     <column columnName="attachments"/>
-                    <column columnName="Reorder"/>
                 </columns>
             </table>
         </tables>

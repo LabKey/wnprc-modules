@@ -693,6 +693,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _shippingAttentionTo;
         String _comments;
         Integer _qcState;
+        String _rejectReason;
         Integer _assignedTo;
         Integer _paymentOption;
         String _program;
@@ -824,6 +825,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setQcState(Integer qcState)
         {
             _qcState = qcState;
+        }
+
+        public String getRejectReason()
+        {
+            return _rejectReason;
+        }
+
+        public void setRejectReason(String rejectReason)
+        {
+            _rejectReason = rejectReason;
         }
 
         public Integer getAssignedTo()

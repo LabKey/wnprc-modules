@@ -86,6 +86,7 @@ export class PurchaseAdminModel {
     readonly assignedTo: number;
     readonly paymentOption: number;
     readonly qcState: number;
+    readonly rejectReason?: string;
     readonly program: string = '4';
     readonly confirmationNum?: string;
     readonly invoiceNum?: string;

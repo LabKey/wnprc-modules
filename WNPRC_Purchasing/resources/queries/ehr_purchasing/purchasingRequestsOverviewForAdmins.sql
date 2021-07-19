@@ -4,6 +4,7 @@ SELECT
        pr.account,
        pr.otherAcctAndInves,
        pr.qcState   AS requestStatus,
+       pr.rejectReason,
        pr.created   AS requestDate,
        pr.createdBy AS requester,
        pr.orderDate,

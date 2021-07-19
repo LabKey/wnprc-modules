@@ -6,6 +6,7 @@
         <column name="account"/>
         <column name="totalCost"/>
         <column name="requestStatus"/>
+        <column name="rejectReason"/>
         <column name="otherAccountAndInves"/>
         <column name="requester"/>
         <column name="assignedTo"/>

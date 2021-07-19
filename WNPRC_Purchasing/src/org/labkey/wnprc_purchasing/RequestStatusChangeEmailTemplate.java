@@ -1,5 +1,6 @@
 package org.labkey.wnprc_purchasing;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.emailTemplate.EmailTemplate;
 
@@ -99,7 +100,7 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
                 {
                     if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))
                     {
-                        return "Reason for rejection:\n" +  _notificationBean.getRejectReason();
+                        return "Reason for rejection:\n" + (StringUtils.isBlank(_notificationBean.getRejectReason()) ? "Reason not provided." : _notificationBean.getRejectReason());
                     }
                 }
                 return null;

@@ -117,7 +117,7 @@ export async function submitRequest(
                 shippingAttentionTo: requestOrder.shippingAttentionTo,
                 comments: requestOrder.comments,
                 qcState: getQCState(purchasingAdminModel, requestOrder, lineItems, qcStates),
-                rejectReason: requestRejectId == purchasingAdminModel.qcState ? purchasingAdminModel?.rejectReason : '',
+                rejectReason: requestRejectId == purchasingAdminModel?.qcState ? purchasingAdminModel?.rejectReason : '',
                 assignedTo: purchasingAdminModel?.assignedTo,
                 paymentOption: purchasingAdminModel?.paymentOption,
                 program: purchasingAdminModel?.program ? purchasingAdminModel.program : '4',

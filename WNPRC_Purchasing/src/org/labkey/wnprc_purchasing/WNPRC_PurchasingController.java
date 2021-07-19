@@ -446,6 +446,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             emailTemplateForm.setRequestDate((Date) map.get("requestdate"));
             emailTemplateForm.setTotalCost((BigDecimal)map.get("totalcost"));
             emailTemplateForm.setRequestStatus((String)map.get("requeststatus"));
+            emailTemplateForm.setRejectReason((String)map.get("rejectReason"));
             if (null != map.get("orderdate"))
             {
                 emailTemplateForm.setOrderDate((Date) map.get("orderdate"));
@@ -591,6 +592,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         Integer _rowId;
         String _vendor;
         String _requestStatus;
+        String _rejectReason;
         Date _requestDate;
         Date _orderDate;
         User _requester;
@@ -627,6 +629,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setRequestStatus(String requestStatus)
         {
             this._requestStatus = requestStatus;
+        }
+
+        public String getRejectReason()
+        {
+            return _rejectReason;
+        }
+
+        public void setRejectReason(String rejectReason)
+        {
+            _rejectReason = rejectReason;
         }
 
         public String getRequestDate()

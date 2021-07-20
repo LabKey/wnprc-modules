@@ -742,6 +742,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     @Test
     public void testEmailNotificationRejectWorkflow()
     {
+        String rejectReasonMsg = "Rejected due to budgetary constraints, please contact your PI for more details.";
         goToProjectHome(PURCHASING_FOLDER);
         impersonate(REQUESTER_USER_1);
         goToRequesterPage();
@@ -768,7 +769,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickAndWait(Locator.linkWithText("All Requests"));
         clickAndWait(Locator.linkWithText(requestId));
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
-        requestPage.setStatus("Request Rejected").submit();
+        requestPage.setStatus("Request Rejected");
+        requestPage.setRejectReason(rejectReasonMsg);
+        requestPage.submit();
         stopImpersonating();
 
         goToModule("Dumbster");
@@ -780,6 +783,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " for the total of $10,000.00 has been rejected by the purchasing director."));
+        checker().verifyTrue("Reason for rejection not found in the email body",
+                mailTable.getMessage(subject).getBody().contains(rejectReasonMsg));
     }
 
     @Test

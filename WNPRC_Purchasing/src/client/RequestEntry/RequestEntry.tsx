@@ -50,6 +50,7 @@ export const App: FC = memo(() => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
     const [requester, setRequester] = useState<number>();
+    const [rejectQCStateId, setRejectQCStateId] = useState<number>();
     const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
@@ -71,7 +72,11 @@ export const App: FC = memo(() => {
                 }
             });
             setQCStates(states);
+            const rejectQCState = qcStateVals.filter((qcState) => {
+                return qcState.Label === 'Request Rejected';
+            })[0]?.RowId;
 
+            setRejectQCStateId(rejectQCState);
 
             if (reqRowId)
             {
@@ -103,6 +108,7 @@ export const App: FC = memo(() => {
                                 assignedTo: requestOrderVals[0].assignedTo,
                                 paymentOption: requestOrderVals[0].paymentOptionId,
                                 qcState: requestOrderVals[0].qcState,
+                                rejectReason: requestOrderVals[0].rejectReason,
                                 program: requestOrderVals[0].program,
                                 confirmationNum: requestOrderVals[0].confirmationNum,
                                 invoiceNum: requestOrderVals[0].invoiceNum,
@@ -249,12 +255,13 @@ export const App: FC = memo(() => {
                 requestOrderModel,
                 lineItems,
                 qcStates,
+                rejectQCStateId,
                 requestId ? purchaseAdminModel : undefined,
                 documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0
                     ? documentAttachmentModel
                     : undefined,
                 lineItemRowsToDelete,
-                ActionURL.getParameter('isNewRequest')
+                ActionURL.getParameter('isNewRequest'),
             )
                 .then(r => {
                     if (r.success) {
@@ -428,7 +435,11 @@ export const App: FC = memo(() => {
                 />
                 {
                     requestId && hasPurchasingAdminPermission && (
-                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel}/>
+                        <PurchaseAdminPanel
+                            onInputChange={purchaseAdminModelChange}
+                            model={purchaseAdminModel}
+                            rejectQCStateId={rejectQCStateId}
+                        />
                     )
                 }
                 <DocumentAttachmentPanel

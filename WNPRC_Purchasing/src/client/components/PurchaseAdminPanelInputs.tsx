@@ -123,6 +123,31 @@ export const StatusInput: FC<InputProps> = memo(props => {
     );
 });
 
+export const RejectReasonInput: FC<InputProps> = memo(props => {
+    const { onChange, value } = props;
+
+    const onTextChange = useCallback(
+        evt => {
+            onChange('rejectReason', evt.target.value);
+        },
+        [onChange]
+    );
+
+    return (
+        <div>
+            <PurchasingFormInput label="Reason for rejection">
+                <textarea
+                    className={ 'reason-for-rejection-input form-control'}
+                    value={value}
+                    onChange={onTextChange}
+                    id="reason-for-rejection-id"
+                    placeholder="Please provide a reason for rejection"
+                />
+            </PurchasingFormInput>
+        </div>
+    );
+});
+
 export const ProgramInput: FC<InputProps> = memo(props => {
     const { onChange, value } = props;
     const onTextChange = useCallback(

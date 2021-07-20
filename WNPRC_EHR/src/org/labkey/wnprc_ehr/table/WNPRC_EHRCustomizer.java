@@ -660,6 +660,39 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             newCol.setDescription("Returns the animal's original vendor id.");
             table.addColumn(newCol);
         }
+
+        if (table.getColumn("sire") == null)
+        {
+            String sire_new = "sire";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+
+            // Here we want a union of the birth and arrival tables to get the ancestry of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                    "CASE WHEN a.vendor_id = b.sire and a.vendor_id != a.participantid THEN" +
+                        " a.participantid "+
+                    " WHEN a.vendor_id != b.sire or a.vendor_id = a.participantid THEN " +
+                        " ( select c.sire from studydataset." + arrival.getName() + " c where c.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1 ) " +
+                    " ELSE " +
+                    "( select d.sire from studydataset." + birth.getName() + " d where d.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1 ) " +
+                    " END AS sire" +
+                    " FROM " +
+
+                    "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+
+                    "WHERE a.vendor_id is not null  " +
+
+                    " and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    " LIMIT 1)";
+
+            SQLFragment sql = new SQLFragment(arrivalAndBirthUnion);
+            ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Sire NEW");
+            newCol.setDescription("Returns the animal's updated sire id");
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)

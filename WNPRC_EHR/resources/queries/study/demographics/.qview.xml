@@ -15,6 +15,7 @@
         </column>
         <column name="hold"/>
         <column name="dam"/>
+        <column name="sire_old"/>
         <column name="sire"/>
         <column name="origin"/>
         <column name="vendor_id"/>

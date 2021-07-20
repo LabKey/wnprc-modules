@@ -669,23 +669,19 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
             // Here we want a union of the birth and arrival tables to get the ancestry of the animal
             String arrivalAndBirthUnion = "( " +
-                    "SELECT " +
-                    "CASE WHEN a.vendor_id = b.sire and a.vendor_id != a.participantid THEN" +
-                        " a.participantid "+
-                    " WHEN a.vendor_id != b.sire or a.vendor_id = a.participantid THEN " +
-                        " ( select c.sire from studydataset." + arrival.getName() + " c where c.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1 ) " +
-                    " ELSE " +
-                    "( select d.sire from studydataset." + birth.getName() + " d where d.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1 ) " +
-                    " END AS sire" +
+                    "with arrival_results as ( " +
+                    " (SELECT " +
+                        " a.participantid as sire" +
                     " FROM " +
-
-                    "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
-
-                    "WHERE a.vendor_id is not null  " +
-
-                    " and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-
-                    " LIMIT 1)";
+                        " studydataset." +arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                    "  WHERE " +
+                        " a.vendor_id = b.sire and a.vendor_id != a.participantid and b.participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    " LIMIT 1 ) " +
+                    " ) " +
+                    " select sire from arrival_results " +
+                    " union " +
+                    "  select c.sire from studydataset." + birth.getName() + " c" +
+                    " where (select count(*) from arrival_results)=0 and participantid=" + ExprColumn.STR_TABLE_ALIAS +".participantid)";
 
             SQLFragment sql = new SQLFragment(arrivalAndBirthUnion);
             ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);

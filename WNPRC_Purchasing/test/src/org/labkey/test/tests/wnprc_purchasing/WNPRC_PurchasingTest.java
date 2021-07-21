@@ -281,9 +281,10 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     }
 
     @Before
-    public void preTest()
+    public void preTest() throws IOException, CommandException
     {
         goToProjectHome();
+        clearAllRequest();
     }
 
     @Test
@@ -293,7 +294,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         enableEmailRecorder();
         goToModule("Dumbster");
 
-        clearAllRequest();
         goToRequesterPage();
         impersonate(REQUESTER_USER_1);
         clickButton("Create Request");
@@ -348,7 +348,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     @Test
     public void testOtherVendorRequest() throws IOException, CommandException
     {
-        clearAllRequest();
         goToRequesterPage();
         impersonate(REQUESTER_USER_1);
         clickButton("Create Request");
@@ -397,8 +396,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     public void testPurchaseAdminWorkflow() throws IOException, CommandException
     {
         File jpgFile = new File(TestFileUtils.getSampleData("fileTypes"), "jpg_sample.jpg");
-
-        clearAllRequest();
 
         log("-----Create request as lab end user-----");
         log("Impersonate as " + REQUESTER_USER_1);
@@ -503,7 +500,6 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
     @Test
     public void testAdminPage() throws IOException, CommandException
     {
-        clearAllRequest();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime date = LocalDateTime.now();
 
@@ -840,7 +836,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         mailTable.clickSubject(subject);
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
-                mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on "+ _dateTimeFormatter.format(today) + " for the total of $7,500.00 has been ordered by the purchasing department."));
+                mailTable.getMessage(subject).getBody().contains("Purchase request # " + requestId + " from vendor Stuff, Inc submitted on " + _dateTimeFormatter.format(today) + " for the total of $7,500.00 has been ordered by the purchasing department."));
 
 
         log("Delete emails from dumbster");
@@ -865,6 +861,56 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
                 mailTable.getMessage(subject).getBody().contains("All line items are received."));
 
     }
+
+    @Test
+    public void testReorderRequest()
+    {
+        File jpgFile = new File(TestFileUtils.getSampleData("fileTypes"), "jpg_sample.jpg");
+        goToProjectHome();
+        impersonate(REQUESTER_USER_1);
+        goToRequesterPage();
+        log("Creating the first request as" + REQUESTER_USER_1);
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
+        Map<String, String> requestInputs = new HashMap<>();
+        requestInputs.put("Account to charge", "acct101");
+        requestInputs.put("Shipping destination", "456 Thompson lane (Math bldg)");
+        requestInputs.put("Vendor", "Dunder Mifflin");
+        requestInputs.put("Delivery attention to", "testing the reorder");
+        requestInputs.put("Business purpose", "regression test -reorder");
+        requestInputs.put("Item description", "Item1");
+        requestInputs.put("Unit", "Term");
+        requestInputs.put("Unit Cost", "20");
+        requestInputs.put("Quantity", "3");
+        String requestId = createRequest(requestInputs, null);
+
+        log("Verifying reorder by link");
+        clickAndWait(Locator.linkWithText("Reorder"));
+        CreateRequestPage requestPage = new CreateRequestPage(getDriver());
+        requestPage.setAccountsToCharge("acct100");
+        requestPage.addAttachment(jpgFile);
+        requestPage.submitForReview();
+
+        DataRegionTable table = DataRegionTable.DataRegion(getDriver()).find();
+        checker().verifyEquals("No new request created for reorder link", 2, table.getDataRowCount());
+        stopImpersonating();
+
+        log("verifying reorder by button");
+        impersonate(ADMIN_USER);
+        goToPurchaseAdminPage();
+        clickAndWait(Locator.linkWithText("All Requests"));
+        clickAndWait(Locator.linkWithText(requestId));
+        requestPage = new CreateRequestPage(getDriver());
+        requestPage.reorderButton();
+        requestPage.setAccountsToCharge("acct100");
+        requestPage.addAttachment(jpgFile);
+        requestPage.submitForReview();
+
+        table = new DataRegionTable("query", getDriver());
+        clickAndWait(Locator.linkWithText("All Requests"));
+        checker().verifyEquals("No new request created from reorder button", 3, table.getDataRowCount());
+
+    }
+
 
     private String getQueryName(String linkName)
     {

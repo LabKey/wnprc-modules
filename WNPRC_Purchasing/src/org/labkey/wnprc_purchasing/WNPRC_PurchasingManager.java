@@ -150,7 +150,7 @@ public class WNPRC_PurchasingManager
         List<Map<String, Object>> purchasingRequestsData = new ArrayList<>();
 
         row = new CaseInsensitiveHashMap<>();
-        if (null != requestForm.getRowId())
+        if (!requestForm.getIsReorder() && null != requestForm.getRowId())
             row.put("rowId", requestForm.getRowId());
 
         //handle validation
@@ -232,7 +232,7 @@ public class WNPRC_PurchasingManager
             {
                 qus = purchasingRequestsTable.getUpdateService();
                 assert qus != null;
-                if (isNewRequest)
+                if (isNewRequest || requestForm.getIsReorder())
                     insertedPurchasingReq = qus.insertRows(user, container, purchasingRequestsData, errors, null, null);
                 else
                     insertedPurchasingReq = qus.updateRows(user, container, purchasingRequestsData, null, null, null);
@@ -293,7 +293,7 @@ public class WNPRC_PurchasingManager
 
                 row.put("controlledSubstance", lineItem.get("controlledSubstance"));
 
-                if(null != lineItem.get("rowId"))
+                if(!requestForm.getIsReorder() && null != lineItem.get("rowId"))
                 {
                     row.put("rowId", lineItem.get("rowId"));
                     updatedLineItemsData.add(row);

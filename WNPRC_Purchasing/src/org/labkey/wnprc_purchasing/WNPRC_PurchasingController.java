@@ -728,6 +728,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         BigDecimal _totalCost;
         String _qcStateLabel;
         Boolean _isNewRequest;
+        Boolean _isReorder;
 
         public List<JSONObject> getLineItems()
         {
@@ -1067,6 +1068,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setIsNewRequest(Boolean newRequest)
         {
             _isNewRequest = newRequest;
+        }
+
+        public Boolean getIsReorder()
+        {
+            return _isReorder;
+        }
+
+        public void setIsReorder(Boolean reorder)
+        {
+            _isReorder = reorder;
         }
     }
 

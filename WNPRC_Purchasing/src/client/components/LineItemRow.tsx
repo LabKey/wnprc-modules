@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback } from 'react';
+import React, {FC, memo, useCallback, useEffect, useMemo, useState} from 'react';
 import { Col, Row } from 'react-bootstrap';
 import produce, { Draft } from 'immer';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
@@ -15,6 +15,7 @@ import {
     UnitQuantityInput,
     QuantityReceivedInput,
 } from './LineItemsPanelInputs';
+import {createOptions} from "./Utils";
 
 interface LineItemProps {
     model: LineItemModel;
@@ -25,10 +26,14 @@ interface LineItemProps {
     isRequester: boolean;
     isReceiver: boolean;
     hasRequestId?: boolean;
+    isReorder?: boolean;
 }
 
 export const LineItemRow: FC<LineItemProps> = memo(props => {
-    const { model, onInputChange, onDelete, rowIndex, isAdmin, isRequester, isReceiver, hasRequestId } = props;
+    const { model, onInputChange, onDelete, rowIndex, isAdmin, isRequester, isReceiver, hasRequestId, isReorder } = props;
+    const isReadOnly = hasRequestId && ((isRequester && !isReorder) || isReceiver);
+    const canDelete = isAdmin || (!hasRequestId && isRequester) || (hasRequestId && isRequester && isReorder);
+    const canViewPricingInfo = isAdmin || isRequester;
 
     const onValueChange = useCallback(
         (colName, value) => {
@@ -59,14 +64,14 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             value={model.item}
                             hasError={model.errors?.find(field => field.fieldName === 'item')}
                             onChange={onValueChange}
-                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
+                            isReadOnly={isReadOnly}
                         />
                     </Col>
                     <Col xs={1}>
                         <ControlledSubstance
                             value={model.controlledSubstance}
                             onChange={onValueChange}
-                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
+                            isReadOnly={isReadOnly}
                         />
                     </Col>
                     <Col xs={1}>
@@ -74,16 +79,16 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             value={model.itemUnit}
                             hasError={model.errors?.find(field => field.fieldName === 'itemUnit')}
                             onChange={onValueChange}
-                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
+                            isReadOnly={isReadOnly}
                         />
                     </Col>
-                    { (isAdmin || isRequester) &&
+                    { canViewPricingInfo &&
                         <Col xs={1}>
                             <UnitCostInput
                                     value={model.unitCost}
                                     hasError={model.errors?.find(field => field.fieldName === 'unitCost')}
                                     onChange={onValueChange}
-                                    isReadOnly={hasRequestId && isRequester}
+                                    isReadOnly={hasRequestId && isRequester && !isReorder}
                             />
                         </Col>
                     }
@@ -92,10 +97,10 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                             value={model.quantity}
                             hasError={model.errors?.find(field => field.fieldName === 'quantity')}
                             onChange={onValueChange}
-                            isReadOnly={hasRequestId && (isRequester || isReceiver)}
+                            isReadOnly={isReadOnly}
                         />
                     </Col>
-                    { (hasRequestId) &&
+                    { (hasRequestId && !isReorder) &&
                     <Col xs={1}>
                         <QuantityReceivedInput
                                 value={model.quantityReceived}
@@ -105,7 +110,7 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                         />
                     </Col>
                     }
-                    { (isAdmin || isRequester) &&
+                    { canViewPricingInfo &&
                         <Col xs={1}>
                             <SubtotalInput unitCost={model.unitCost} quantity={model.quantity} />
                         </Col>
@@ -113,10 +118,10 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
 
                     <Col xs={2}/>
                     <Col xs={1}/>
-                    { !hasRequestId &&
+                    { (!hasRequestId || isReorder) &&
                         <Col xs={2}/>
                     }
-                    {(isAdmin || (!hasRequestId && isRequester)) &&
+                    { canDelete &&
                         <Col xs={1}>
                                 <span
                                         id={'delete-line-item-row-' + rowIndex}

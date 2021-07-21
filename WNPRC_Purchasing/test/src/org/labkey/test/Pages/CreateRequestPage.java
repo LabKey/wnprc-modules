@@ -134,6 +134,12 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         return this;
     }
 
+    public CreateRequestPage reorderButton()
+    {
+        elementCache().reorder.click();
+        return this;
+    }
+
     public CreateRequestPage submitForReview()
     {
         clickAndWait(elementCache().submitForReview);
@@ -299,6 +305,7 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         final WebElement attachment = Locator.id("fileUpload").findWhenNeeded(this).withTimeout(200);
 
         final WebElement submitForReview = Locator.button("Submit for Review").findWhenNeeded(this);
+        final WebElement reorder = Locator.button("Reorder").findWhenNeeded(this);
         final WebElement submit = Locator.button("Submit").findWhenNeeded(this);
         final WebElement cancel = Locator.button("Cancel").findWhenNeeded(this);
         final WebElement alertMessage = Locator.byClass("alert alert-danger").findWhenNeeded(this);

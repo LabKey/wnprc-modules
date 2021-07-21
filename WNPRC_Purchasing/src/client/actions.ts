@@ -100,7 +100,8 @@ export async function submitRequest(
     purchasingAdminModel?: PurchaseAdminModel,
     documentAttachmentModel?: DocumentAttachmentModel,
     lineItemsToDelete?: number[],
-    isNewRequest?: boolean
+    isNewRequest?: boolean,
+    isReorder?: boolean
 ): Promise<any> {
     return new Promise<any>((resolve, reject) => {
         return Ajax.request({
@@ -108,6 +109,7 @@ export async function submitRequest(
             method: 'POST',
             jsonData: {
                 isNewRequest: isNewRequest,
+                isReorder: isReorder,
                 rowId: requestOrder.rowId,
                 account: requestOrder.account !== 'Other' ? requestOrder.account : -1,
                 accountOther: requestOrder.otherAcctAndInves,

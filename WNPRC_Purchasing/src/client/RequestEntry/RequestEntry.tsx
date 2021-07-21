@@ -24,14 +24,13 @@ import {
     RequestOrderModel,
     PurchaseAdminModel,
     DocumentAttachmentModel,
-    SavedFileModel,
     QCStateModel,
 } from '../model';
 import { LineItemsPanel } from '../components/LineItemsPanel';
 import { getData, getSavedFiles, submitRequest } from '../actions';
 import { PurchaseAdminPanel } from '../components/PurchaseAdminPanel';
 import { DocumentAttachmentPanel } from '../components/DocumentAttachmentPanel';
-import { PURCHASING_REQUEST_ATTACHMENTS_DIR } from '../constants';
+import { PURCHASING_REQUEST_ATTACHMENTS_DIR, PROGRAM_DEFAULT_VAL } from '../constants';
 import './RequestEntry.scss';
 
 export const App: FC = memo(() => {
@@ -50,6 +49,7 @@ export const App: FC = memo(() => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
     const [requester, setRequester] = useState<number>();
+    const [isReorder, setIsReorder] = useState<boolean>(ActionURL.getParameter('isReorder') || false);
     const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
@@ -80,11 +80,28 @@ export const App: FC = memo(() => {
                 const requestOrderVals = await getData('ehr_purchasing', 'purchasingRequests', '*', undefined, filter);
                 requestOrderVals.map(val => {
                     if (val) {
+                        let acctVal = requestOrderVals[0].otherAcctAndInves ? 'Other' : requestOrderVals[0].account;
+                        if (isReorder) {
+                            acctVal = "";
+                        }
+
+                        let otherAcctVal = requestOrderVals[0].otherAcctAndInves || undefined;
+                        if (isReorder) {
+                            otherAcctVal = undefined;
+                        }
+
+                        let pendingState = undefined;
+                        if (isReorder) {
+                            pendingState = states.filter((qcState) => {
+                                return qcState.label === 'Review Pending';
+                            })[0].rowId;
+                        }
+
                         setRequestOrderModel(
                             RequestOrderModel.create({
                                 rowId: requestOrderVals[0].rowId,
-                                account: requestOrderVals[0].otherAcctAndInves ? 'Other' : requestOrderVals[0].account,
-                                otherAcctAndInves: requestOrderVals[0].otherAcctAndInves || undefined,
+                                account: acctVal,
+                                otherAcctAndInves: otherAcctVal,
                                 vendorId: requestOrderVals[0].vendorId,
                                 justification: requestOrderVals[0].justification,
                                 shippingInfoId: requestOrderVals[0].shippingInfoId,
@@ -100,14 +117,14 @@ export const App: FC = memo(() => {
 
                         setPurchaseAdminModel(
                             PurchaseAdminModel.create({
-                                assignedTo: requestOrderVals[0].assignedTo,
-                                paymentOption: requestOrderVals[0].paymentOptionId,
-                                qcState: requestOrderVals[0].qcState,
-                                program: requestOrderVals[0].program,
-                                confirmationNum: requestOrderVals[0].confirmationNum,
-                                invoiceNum: requestOrderVals[0].invoiceNum,
-                                orderDate: requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null,
-                                cardPostDate: requestOrderVals[0].cardPostDate ? new Date(requestOrderVals[0].cardPostDate) : null,
+                                assignedTo: isReorder ? "" : requestOrderVals[0].assignedTo,
+                                paymentOption: isReorder ? "" : requestOrderVals[0].paymentOptionId,
+                                qcState: isReorder ? pendingState : requestOrderVals[0].qcState,
+                                program: isReorder ? PROGRAM_DEFAULT_VAL : requestOrderVals[0].program,
+                                confirmationNum: isReorder ? "" : requestOrderVals[0].confirmationNum,
+                                invoiceNum: isReorder ? "" : requestOrderVals[0].invoiceNum,
+                                orderDate: isReorder ? "" : (requestOrderVals[0].orderDate ? new Date(requestOrderVals[0].orderDate) : null),
+                                cardPostDate: isReorder ? "" : (requestOrderVals[0].cardPostDate ? new Date(requestOrderVals[0].cardPostDate) : null),
                             })
                         );
                     }
@@ -163,7 +180,7 @@ export const App: FC = memo(() => {
                 setIsLoading(false);
             }
         })();
-    }, []);
+    }, [setIsReorder, isReorder]);
 
     const handleWindowBeforeUnload = useCallback(
         event => {
@@ -239,6 +256,13 @@ export const App: FC = memo(() => {
         [isDirty, requestId]
     );
 
+    const onReorderBtnHandler = useCallback(
+        event => {
+            setIsReorder(true);
+        },
+        [isReorder]
+    );
+
     const onSaveBtnHandler = useCallback(
         event => {
             setIsDirty(false);
@@ -254,7 +278,8 @@ export const App: FC = memo(() => {
                     ? documentAttachmentModel
                     : undefined,
                 lineItemRowsToDelete,
-                ActionURL.getParameter('isNewRequest')
+                ActionURL.getParameter('isNewRequest'),
+                isReorder
             )
                 .then(r => {
                     if (r.success) {
@@ -425,15 +450,17 @@ export const App: FC = memo(() => {
                     isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                     isAdmin={hasPurchasingAdminPermission}
                     isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                    isReorder={isReorder}
                 />
                 {
                     requestId && hasPurchasingAdminPermission && (
-                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel}/>
+                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
                     )
                 }
                 <DocumentAttachmentPanel
                     onInputChange={documentAttachmentChange}
                     model={documentAttachmentModel}
+                    isReorder={isReorder}
                 />
                 <LineItemsPanel
                     onChange={lineItemsChange}
@@ -443,6 +470,7 @@ export const App: FC = memo(() => {
                     isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
                     isAdmin={hasPurchasingAdminPermission}
                     isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                    isReorder={isReorder}
                 />
                 <button
                     disabled={isSaving}
@@ -453,21 +481,37 @@ export const App: FC = memo(() => {
                 >
                     Cancel
                 </button>
-                {
-                    !isSaving && (
+                    {
+                        !isSaving && (
+                            <>
+                                <button
+                                    disabled={requestId && !isReorder && !hasPurchasingUpdatePermission}
+                                    className="btn btn-primary pull-right"
+                                    id={requestId && !isReorder ? 'save' : 'submitForReview'}
+                                    name={requestId && !isReorder ? 'save' : 'submitForReview'}
+                                    onClick={onSaveBtnHandler}
+                                >
+                                    {requestId && !isReorder ? 'Submit' : 'Submit for Review'}
+                                </button>
+                            </>
+                        )
+                    }
+                    {
+                    (requestId && !isReorder) && (
                         <>
                             <button
-                                disabled={requestId && !hasPurchasingUpdatePermission}
                                 className="btn btn-primary pull-right"
-                                id={requestId ? 'save' : 'submitForReview'}
-                                name={requestId ? 'save' : 'submitForReview'}
-                                onClick={onSaveBtnHandler}
+                                style={{marginRight:'10px'}}
+                                id={'Reorder'}
+                                name={'Reorder'}
+                                onClick={onReorderBtnHandler}
                             >
-                                {requestId ? 'Submit' : 'Submit for Review'}
+                                {'Reorder'}
                             </button>
                         </>
                     )
                 }
+
                 {
                     isSaving && (
                         <button disabled className="btn btn-primary pull-right">

@@ -10,10 +10,11 @@ import { DocumentAttachmentModel } from '../model';
 interface Props {
     model: DocumentAttachmentModel;
     onInputChange: (model: DocumentAttachmentModel) => void;
+    isReorder?: boolean;
 }
 
 export const DocumentAttachmentPanel: FC<Props> = memo(props => {
-    const { model, onInputChange } = props;
+    const { model, onInputChange, isReorder } = props;
 
     const onFileChange = useCallback(
         (files: Map<string, File>) => {
@@ -55,7 +56,7 @@ export const DocumentAttachmentPanel: FC<Props> = memo(props => {
                         acceptedFormats=".pdf, .PDF, .jpg, .JPG"
                         onFileChange={onFileChange}
                     />
-                    {model.savedFiles?.length > 0 && (
+                    {(model.savedFiles?.length > 0 && !isReorder) && (
                         <>
                             <br />
                             <div className="saved-attachment-label">

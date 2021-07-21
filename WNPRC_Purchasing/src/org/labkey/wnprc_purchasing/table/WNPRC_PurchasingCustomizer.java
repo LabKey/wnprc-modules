@@ -5,6 +5,8 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.UrlColumn;
+import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
@@ -28,10 +30,19 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
                 addAttachmentsCol((AbstractTableInfo) tableInfo);
                 addRequestLink((AbstractTableInfo) tableInfo);
                 addTotalCostColumn((AbstractTableInfo) tableInfo);
+                addReorderLink((AbstractTableInfo) tableInfo, "rowId", new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, tableInfo.getUserSchema().getContainer()));
             }
             else if (matches(tableInfo, "ehr_purchasing", "purchasingReceiverOverview"))
             {
                 addRequestUpdateLinks((AbstractTableInfo) tableInfo);
+            }
+            else if (matches(tableInfo, "ehr_purchasing", "purchasingRequestsOverview"))
+            {
+                addReorderLink((AbstractTableInfo) tableInfo, "rowId", new ActionURL(WNPRC_PurchasingController.RequesterAction.class, tableInfo.getUserSchema().getContainer()));
+            }
+            else if (matches(tableInfo, "ehr_purchasing", "purchasingRequestsOverviewForAdmins"))
+            {
+                addReorderLink((AbstractTableInfo) tableInfo, "requestNum", new ActionURL(WNPRC_PurchasingController.PurchaseAdminAction.class, tableInfo.getUserSchema().getContainer()));
             }
         }
     }
@@ -98,6 +109,32 @@ public class WNPRC_PurchasingCustomizer extends AbstractTableCustomizer
             col.setLabel("Total Cost");
             col.setUserEditable(false);
             purchasingRequestsTable.addColumn(col);
+        }
+    }
+
+    private void addReorderLink(AbstractTableInfo ti, String requestIdColName, ActionURL returnUrl)
+    {
+        String colName = "reorder";
+        String label = "Reorder Request";
+
+        if (ti.getColumn(colName) == null)
+        {
+            WrappedColumn reorderCol = new WrappedColumn(ti.getColumn(requestIdColName), colName);
+            reorderCol.setHidden(false);
+            reorderCol.setLabel(label);
+
+            reorderCol.setDisplayColumnFactory(colInfo -> {
+                ActionURL detailsUrl = new ActionURL(WNPRC_PurchasingController.PurchasingRequestAction.class,
+                        Objects.requireNonNull(ti.getUserSchema(), "ehr_purchasing user schema not found").getContainer());
+                detailsUrl.addParameter("requestRowId", "${"+requestIdColName+"}");
+                detailsUrl.addParameter("isReorder", "true");
+                detailsUrl.addParameter("returnUrl", returnUrl.toString());
+                UrlColumn urlColumn = new UrlColumn(detailsUrl.toString(), "Reorder");
+                urlColumn.setName(colName);
+                return urlColumn;
+            });
+
+            ti.addColumn(reorderCol);
         }
     }
 }

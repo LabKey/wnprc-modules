@@ -54,6 +54,7 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.emailTemplate.EmailTemplateService;
@@ -254,7 +255,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                     sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
                 }
             }
-            catch (MessagingException | IOException | ValidationException e)
+            catch (ConfigurationException | MessagingException | IOException | ValidationException e)
             {
                 _log.error("Error sending purchasing email notification for request # " + requestForm.getRowId(), e);
             }

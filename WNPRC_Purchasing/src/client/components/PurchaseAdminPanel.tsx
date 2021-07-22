@@ -20,23 +20,17 @@ import {
 interface Props {
     model: PurchaseAdminModel;
     onInputChange: (model: PurchaseAdminModel) => void;
-    rejectQCStateId: number;
+    requestRejected?: boolean;
 }
 
 export const PurchaseAdminPanel: FC<Props> = memo(props => {
-    const { model, onInputChange, rejectQCStateId } = props;
-    const [requestRejected, setRequestRejected] = useState<boolean>(rejectQCStateId == model.qcState ? true : false);
+    const { model, onInputChange, requestRejected } = props;
 
     const onValueChange = useCallback(
         (colName, value) => {
             const updatedModel = produce(model, (draft: Draft<PurchaseAdminModel>) => {
                 draft[colName] = value;
             });
-            if (updatedModel.qcState == rejectQCStateId) {
-                setRequestRejected(true);
-            } else {
-                setRequestRejected(false);
-            }
             onInputChange(updatedModel);
         },
         [model, onInputChange]

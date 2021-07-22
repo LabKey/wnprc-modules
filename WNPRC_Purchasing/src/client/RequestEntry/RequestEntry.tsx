@@ -464,7 +464,7 @@ export const App: FC = memo(() => {
                         <PurchaseAdminPanel
                             onInputChange={purchaseAdminModelChange}
                             model={purchaseAdminModel}
-                            rejectQCStateId={rejectQCStateId}
+                            requestRejected={rejectQCStateId == purchaseAdminModel.qcState}
                         />
                     )
                 }

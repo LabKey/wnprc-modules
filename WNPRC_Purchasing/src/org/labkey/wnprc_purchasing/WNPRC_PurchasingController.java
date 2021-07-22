@@ -243,8 +243,9 @@ public class WNPRC_PurchasingController extends SpringActionController
 
             try
             {
-                //if its a new request
-                if (null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest())
+                //if its a new request or a reorder
+                if ((null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest()) ||
+                        (null != requestForm.getIsReorder() && requestForm.getIsReorder()))
                 {
                     sendNewRequestEmailNotification(emailTemplateForm);
                 }

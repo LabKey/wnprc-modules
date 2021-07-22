@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback } from 'react';
+import React, { FC, memo, useCallback, useState } from 'react';
 import { Form, Panel, Row, Col } from 'react-bootstrap';
 
 import produce, { Draft } from 'immer';
@@ -14,15 +14,18 @@ import {
     StatusInput,
     OrderDateInput,
     CardPostDateInput,
+    RejectReasonInput,
 } from './PurchaseAdminPanelInputs';
 
 interface Props {
     model: PurchaseAdminModel;
     onInputChange: (model: PurchaseAdminModel) => void;
+    requestRejected?: boolean;
 }
 
 export const PurchaseAdminPanel: FC<Props> = memo(props => {
-    const { model, onInputChange } = props;
+    const { model, onInputChange, requestRejected } = props;
+
     const onValueChange = useCallback(
         (colName, value) => {
             const updatedModel = produce(model, (draft: Draft<PurchaseAdminModel>) => {
@@ -64,6 +67,9 @@ export const PurchaseAdminPanel: FC<Props> = memo(props => {
                 <Row>
                     <Col xs={11} lg={6}>
                         <StatusInput value={model.qcState} onChange={onValueChange} />
+                        {requestRejected && (
+                            <RejectReasonInput value={model.rejectReason} onChange={onValueChange} />
+                        )}
                     </Col>
                     <Col xs={11} lg={6}>
                         <InvoiceInput value={model.invoiceNum} onChange={onValueChange} />

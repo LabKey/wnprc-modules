@@ -15,6 +15,9 @@
                             <fkColumnName>RowId</fkColumnName>
                         </fk>
                     </column>
+                    <column columnName="rejectReason">
+                        <columnTitle>Reason for Rejection</columnTitle>
+                    </column>
                     <column columnName="account">
                         <fk>
                             <fkDbSchema>ehr_billingLinked</fkDbSchema>

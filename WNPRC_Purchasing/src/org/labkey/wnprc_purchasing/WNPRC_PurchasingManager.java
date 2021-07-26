@@ -197,6 +197,7 @@ public class WNPRC_PurchasingManager
         row.put("comments", requestForm.getComments());
         row.put("assignedTo", requestForm.getAssignedTo());
         row.put("qcState", requestForm.getQcState());
+        row.put("rejectReason", requestForm.getRejectReason());
         row.put("paymentOptionId", requestForm.getPaymentOption());
         row.put("program", requestForm.getProgram());
         row.put("confirmationNum", requestForm.getConfirmNum());
@@ -387,6 +388,11 @@ public class WNPRC_PurchasingManager
         cardPostDate.setName("cardPostDate");
         cardPostDate.setRangeURI("dateTime");
         extensibleCols.add(cardPostDate);
+
+        GWTPropertyDescriptor rejectReason = new GWTPropertyDescriptor();
+        rejectReason.setName("rejectReason");
+        rejectReason.setRangeURI("string");
+        extensibleCols.add(rejectReason);
 
         domain.setFields(extensibleCols);
 

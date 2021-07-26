@@ -49,6 +49,7 @@ export const App: FC = memo(() => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [requestId, setRequestId] = useState<string>();
     const [requester, setRequester] = useState<number>();
+    const [rejectQCStateId, setRejectQCStateId] = useState<number>();
     const [isReorder, setIsReorder] = useState<boolean>(ActionURL.getParameter('isReorder') || false);
     const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
 
@@ -71,7 +72,11 @@ export const App: FC = memo(() => {
                 }
             });
             setQCStates(states);
+            const rejectQCState = qcStateVals.filter((qcState) => {
+                return qcState.Label === 'Request Rejected';
+            })[0]?.RowId;
 
+            setRejectQCStateId(rejectQCState);
 
             if (reqRowId)
             {
@@ -120,6 +125,7 @@ export const App: FC = memo(() => {
                                 assignedTo: isReorder ? "" : requestOrderVals[0].assignedTo,
                                 paymentOption: isReorder ? "" : requestOrderVals[0].paymentOptionId,
                                 qcState: isReorder ? pendingState : requestOrderVals[0].qcState,
+                                rejectReason: isReorder ? "" : requestOrderVals[0].rejectReason,
                                 program: isReorder ? PROGRAM_DEFAULT_VAL : requestOrderVals[0].program,
                                 confirmationNum: isReorder ? "" : requestOrderVals[0].confirmationNum,
                                 invoiceNum: isReorder ? "" : requestOrderVals[0].invoiceNum,
@@ -273,13 +279,14 @@ export const App: FC = memo(() => {
                 requestOrderModel,
                 lineItems,
                 qcStates,
+                rejectQCStateId,
                 requestId ? purchaseAdminModel : undefined,
                 documentAttachmentModel.filesToUpload?.size > 0 || documentAttachmentModel.savedFiles?.length > 0
                     ? documentAttachmentModel
                     : undefined,
                 lineItemRowsToDelete,
                 ActionURL.getParameter('isNewRequest'),
-                isReorder
+                isReorder,
             )
                 .then(r => {
                     if (r.success) {
@@ -454,7 +461,11 @@ export const App: FC = memo(() => {
                 />
                 {
                     requestId && hasPurchasingAdminPermission && (
-                        <PurchaseAdminPanel onInputChange={purchaseAdminModelChange} model={purchaseAdminModel} />
+                        <PurchaseAdminPanel
+                            onInputChange={purchaseAdminModelChange}
+                            model={purchaseAdminModel}
+                            requestRejected={rejectQCStateId == purchaseAdminModel.qcState}
+                        />
                     )
                 }
                 <DocumentAttachmentPanel
@@ -511,7 +522,6 @@ export const App: FC = memo(() => {
                         </>
                     )
                 }
-
                 {
                     isSaving && (
                         <button disabled className="btn btn-primary pull-right">

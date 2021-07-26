@@ -209,6 +209,12 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         return this;
     }
 
+    public CreateRequestPage setRejectReason(String rejectReason)
+    {
+        elementCache().rejectReason.sendKeys(rejectReason);
+        return this;
+    }
+
     public CreateRequestPage setAssignedTo(String value)
     {
         SelectWrapper.Select(Locator.byClass("assigned-to-input form-control"))
@@ -308,6 +314,8 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         final Select vendor = SelectWrapper.Select(Locator.byClass("vendor-input form-control "))
                 .findWhenNeeded(this);
         final Select shippingDest = SelectWrapper.Select(Locator.byClass("shipping-dest-input form-control "))
+                .findWhenNeeded(this);
+        final WebElement rejectReason = Locator.tagWithId("textarea", "reason-for-rejection-id")
                 .findWhenNeeded(this);
 
     }

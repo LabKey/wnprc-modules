@@ -38,6 +38,26 @@ export async function getData(
     });
 }
 
+export async function getFolderAdmins(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+        return Ajax.request({
+            url: ActionURL.buildURL('WNPRC_Purchasing', 'getFolderAdmins.api'),
+            method: 'POST',
+            success: Utils.getCallbackWrapper(response => {
+               resolve(response.results);
+            }),
+            failure: Utils.getCallbackWrapper(
+                error => {
+                    console.error('Error getting folder admins.', error);
+                    reject(error);
+                },
+                undefined,
+                true
+            ),
+        });
+    });
+}
+
 function getQCState(purchasingAdminModel: PurchaseAdminModel, requestOrder: RequestOrderModel, lineItems: LineItemModel[], qcStates: QCStateModel[])
 {
     let qcState = purchasingAdminModel?.qcState || requestOrder.qcState;
@@ -61,10 +81,10 @@ function getQCState(purchasingAdminModel: PurchaseAdminModel, requestOrder: Requ
         }
     });
 
-    // if all the line items are received, set state to 'order delivered'
+    // if all the line items are received, set state to 'order received'
     if (receivedCount === lineItems.length) {
         let deliveredState = qcStates.filter((qcState) => {
-            return qcState.label === 'Order Delivered';
+            return qcState.label === 'Order Received';
         });
         qcState = deliveredState?.[0]?.rowId;
     }
@@ -76,6 +96,7 @@ export async function submitRequest(
     requestOrder: RequestOrderModel,
     lineItems: LineItemModel[],
     qcStates: QCStateModel[],
+    requestRejectId: number,
     purchasingAdminModel?: PurchaseAdminModel,
     documentAttachmentModel?: DocumentAttachmentModel,
     lineItemsToDelete?: number[],
@@ -98,6 +119,7 @@ export async function submitRequest(
                 shippingAttentionTo: requestOrder.shippingAttentionTo,
                 comments: requestOrder.comments,
                 qcState: getQCState(purchasingAdminModel, requestOrder, lineItems, qcStates),
+                rejectReason: requestRejectId == purchasingAdminModel?.qcState ? purchasingAdminModel?.rejectReason : '',
                 assignedTo: purchasingAdminModel?.assignedTo,
                 paymentOption: purchasingAdminModel?.paymentOption,
                 program: purchasingAdminModel?.program ? purchasingAdminModel.program : '4',

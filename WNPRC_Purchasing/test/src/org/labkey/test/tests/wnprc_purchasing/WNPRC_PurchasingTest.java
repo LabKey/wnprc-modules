@@ -872,7 +872,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Creating the first request as" + REQUESTER_USER_1);
         waitAndClickAndWait(Locator.linkWithText("Create Request"));
         Map<String, String> requestInputs = new HashMap<>();
-        requestInputs.put("Account to charge", "acct101");
+        requestInputs.put("Account to charge", "acct101 - Business Office");
         requestInputs.put("Shipping destination", "456 Thompson lane (Math bldg)");
         requestInputs.put("Vendor", "Dunder Mifflin");
         requestInputs.put("Delivery attention to", "testing the reorder");
@@ -886,7 +886,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Verifying reorder by link");
         clickAndWait(Locator.linkWithText("Reorder"));
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
-        requestPage.setAccountsToCharge("acct100");
+        requestPage.setAccountsToCharge("acct100 - Assay Services");
         requestPage.addAttachment(jpgFile);
         requestPage.submitForReview();
 
@@ -901,7 +901,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickAndWait(Locator.linkWithText(requestId));
         requestPage = new CreateRequestPage(getDriver());
         requestPage.reorderButton();
-        requestPage.setAccountsToCharge("acct100");
+        requestPage.setAccountsToCharge("acct100 - Assay Services");
         requestPage.addAttachment(jpgFile);
         requestPage.submitForReview();
 

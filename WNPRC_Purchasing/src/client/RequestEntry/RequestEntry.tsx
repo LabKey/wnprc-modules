@@ -504,30 +504,42 @@ export const App: FC = memo(() => {
                                 >
                                     {requestId && !isReorder ? 'Submit' : 'Submit for Review'}
                                 </button>
+                                {
+                                    (requestId && !isReorder) && (
+                                    <button
+                                        className="btn btn-primary pull-right"
+                                        style={{marginRight:'10px'}}
+                                        id={'Reorder'}
+                                        name={'Reorder'}
+                                        onClick={onReorderBtnHandler}
+                                    >
+                                        {'Reorder'}
+                                    </button>
+                                    )
+                                }
                             </>
                         )
                     }
-                    {
-                    (requestId && !isReorder) && (
-                        <>
-                            <button
-                                className="btn btn-primary pull-right"
-                                style={{marginRight:'10px'}}
-                                id={'Reorder'}
-                                name={'Reorder'}
-                                onClick={onReorderBtnHandler}
-                            >
-                                {'Reorder'}
-                            </button>
-                        </>
-                    )
-                }
                 {
                     isSaving && (
-                        <button disabled className="btn btn-primary pull-right">
-                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
-                            Saving...
-                        </button>
+                        <>
+                            <button disabled className="btn btn-primary pull-right">
+                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+                                Saving...
+                            </button>
+                            {
+                                (requestId && !isReorder) &&
+                                <button
+                                        className="btn btn-primary pull-right"
+                                        style={{marginRight: '10px'}}
+                                        disabled={true}
+                                >
+                                    {'Reorder'}
+                                </button>
+                            }
+                        </>
+
+
                     )
                 }
                 {

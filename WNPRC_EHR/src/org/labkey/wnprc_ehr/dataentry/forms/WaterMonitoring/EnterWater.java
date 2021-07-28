@@ -4,8 +4,7 @@ import org.labkey.api.ehr.dataentry.AnimalDetailsFormSection;
 import org.labkey.api.ehr.dataentry.DataEntryFormContext;
 import org.labkey.api.ehr.dataentry.FormSection;
 import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterDrugAdministrationSection;
-import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterOrderFormSection;
-import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterSingleDaySlaveSection;
+import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.FormSections.WaterSingleDayApprenticeSection;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.SingleEncounterSection;
 import org.labkey.wnprc_ehr.dataentry.generics.sections.TaskFormSection;
 import org.labkey.api.module.Module;
@@ -35,7 +34,7 @@ public class EnterWater extends SimpleTaskForm
                 new restraintFormSection(),
                 new WaterDrugAdministrationSection(),
                 new WaterFormSections(),
-                new WaterSingleDaySlaveSection()
+                new WaterSingleDayApprenticeSection()
         ));
         setStoreCollectionClass("WNPRC.ext.data.WaterStoreCollection");
         this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Husbandry.js"));

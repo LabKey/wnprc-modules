@@ -17,6 +17,7 @@ public class WaterFormSections extends SlaveFormSection
     public WaterFormSections ()
     {
         super ("study", "waterGiven", "Water Given");
+        setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterApprenticeSectionClientStore");
 
         
 

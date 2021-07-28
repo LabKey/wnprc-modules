@@ -4,7 +4,10 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 //EHR.Server.Utils = require("ehr/utils").EHR.Server.Utils;
 
 function onInit(event, helper){
+    //This extracontext is used in the Water Orders form
     helper.decodeExtraContextProperty('waterInTransaction');
+    //This extracontext  is used in the Lab Water form
+    helper.decodeExtraContextProperty('waterInForm');
 
     helper.setScriptOptions({
         allowDeadIds: true,
@@ -29,11 +32,9 @@ function onInit(event, helper){
         waterInTransaction = waterInTransaction || [];
         waterInTransaction[row.Id] = waterInTransaction[row.Id] || [];
 
-        console.log ('size of water in Transaction '+ waterInTransaction.length);
-        //waterInTransaction[] = waterInTransaction[] || [];
-        console.log ('water in Transaction '+ waterInTransaction[0]);
-
-        console.log ("registering rows "+ row.Id );
+        var waterInForm = helper.getProperty('waterInForm');
+        waterInForm = waterInForm || {};
+        waterInForm[row.Id] = waterInForm[row.Id] || [];
 
         if (row.objectid)
         {
@@ -48,10 +49,21 @@ function onInit(event, helper){
                         return;
                     }
                 }
-               // i++
 
             }, this);
+
+            LABKEY.ExtAdapter.each(waterInForm[row.Id], function(r){
+                if (r.objectid == row.objectid){
+                    if(r.volume != row.volume){
+                        r.volume = row.volume;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+            }, this)
         }
+
         if (shouldAdd){
             waterInTransaction[row.Id].push({
                 objectid: row.objectid,
@@ -64,13 +76,9 @@ function onInit(event, helper){
                 lsid: row.lsid
 
             });
-            //console.log (i+' inside loop water in Transaction '+ waterInTransaction[i].date+ ' '+ waterInTransaction[i].Id +' '+ waterInTransaction[i].assignto);
-            //console.log (waterInTransaction[i].objectid+ ' '+waterInTransaction[i].volume);
         }
 
-
-
-
+        helper.setProperty('waterInForm',waterInForm);
         helper.setProperty('waterInTransaction', waterInTransaction);
     });
 }
@@ -152,6 +160,26 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                     }
 
                 }
+            console.log ("value of treatmentId "+ row.treatmentId + (row.treatmentId == null));
+
+            //This validation should only be called when using the Lab Water from, when entering
+
+            if (row.volume && !row.treatmentId && !row.skipWaterRegulationCheck){
+                var map = helper.getProperty('waterInForm');
+                var waterInForm = [];
+                if (map && map[row.Id]){
+                    waterInForm = map[row.Id];
+                }
+                let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterSchedule(row.Id,row.date,row.objectid,row.volume,waterInForm);
+                if (jsonArray != null){
+                    for (var i = 0; i < jsonArray.length; i++ ){
+                        let errorObject = JSON.parse(jsonArray[i]);
+                        EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message,errorObject.severity);
+
+                    }
+                }
+
+            }
 
 
         }

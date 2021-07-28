@@ -58,6 +58,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -864,6 +865,38 @@ public class TriggerScriptHelper {
 
         return errorMessage;
     }
+    public String checkEncounterTime (String animalId, Date clientDate, List<Map<String,Object>> mainEncounterDates, String dataSet){
+        Date internalDate = new Date();
+        if (mainEncounterDates!=null){
+            for (Map<String,Object> origMap : mainEncounterDates){
+
+                Map <String,Object> map = new CaseInsensitiveHashMap<>(origMap);
+                try{
+                    internalDate = ConvertHelper.convert(map.get("mainEncounterDate"),Date.class);
+
+                }catch(ConversionException e){
+                    _log.error("TriggerScriptHelper.checkEncounterTime",e);
+
+                }
+            }
+
+        }
+        String errorMessage = null;
+
+        Calendar waterClientDate = Calendar.getInstance();
+        waterClientDate.setTime(clientDate);
+
+        Calendar encounterDateTime = Calendar.getInstance();
+        encounterDateTime.setTime(internalDate);
+
+        final long MILLI_TO_HOUR = 1000 * 60 * 60;
+
+        if (Math.abs(encounterDateTime.toInstant().minus(waterClientDate.getTimeInMillis(),ChronoUnit.MILLIS).toEpochMilli()/MILLI_TO_HOUR)>24){
+            errorMessage = "Encounter time cannot be more than 24 hours before or after any of the other records in this form.";
+        }
+
+        return errorMessage;
+    }
 
     public String changeWaterAmountQC(String treatmentId, List<Map<String, Object>> recordsInTransaction){
         StringBuilder errorMessage = new StringBuilder();
@@ -1584,11 +1617,29 @@ public class TriggerScriptHelper {
 
         return arrayOfErrors;
     }
-    public JSONArray checkWaterSchedule(String  animalId, Date clientDate, String objectId, Double clientVolume){
+    public JSONArray checkWaterSchedule(String  animalId, Date clientDate, String objectId, Double clientVolume, List<Map<String,Object>> waterInForm){
+        Double waterInTransaction = 0.0;
+        if (waterInForm != null){
+            for (Map<String,Object> origMap : waterInForm){
+
+                Map <String,Object> map = new CaseInsensitiveHashMap<>(origMap);
+
+                try {
+                    Double volume = ConvertHelper.convert(map.get("volume"),Double.class);
+                    if (!objectId.equals(ConvertHelper.convert(map.get("objectid"),String.class)))
+                    {
+                        waterInTransaction += volume;
+                    }
+                }catch (ConversionException e){
+                    _log.error("TriggerScriptHelper.checkWaterSchedule", e);
+                }
+            }
+        }
         JSONArray arrayOfErrors = new JSONArray();
 
 
         Map<String, JSONObject> errorMap = new HashMap<>();
+        boolean proceedValidation = true;
 
         if(checkIfAnimalInCondition(animalId,clientDate).size()==0){
             JSONObject returnErrors = new JSONObject();
@@ -1597,51 +1648,90 @@ public class TriggerScriptHelper {
             returnErrors.put("severity","ERROR");
             returnErrors.put("message","Animal not in waterScheduledAnimals table, contact compliance staff to enter new animals into the water monitoring system");
             errorMap.put(objectId, returnErrors);
+            proceedValidation = false;
 
         }
+        if (proceedValidation)
 
-        //Setting interval to start the water schedule, the system generates the calendar thirty days before
-        Calendar startInterval = Calendar.getInstance();
-        startInterval.setTime(clientDate);
-        startInterval.add(Calendar.DATE, -5);
-        startInterval = DateUtils.truncate(startInterval, Calendar.DATE);
+        {
+            Calendar startDate = Calendar.getInstance();
+            startDate.setTime(clientDate);
 
-        final String intervalLength = "10";
+            List<WaterDataBaseRecord> waterGivenRecords = new ArrayList<>();
 
-        //Sending parameters to the query that generates the water schedule from water orders and water amounts
-        Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
-        parameters.put("NumDays",intervalLength);
-        parameters.put("StartDate", startInterval.getTime());
+            //Look for any completed water vol in  waterGiven for the date of the clientDate
+            TableInfo waterGiven = getTableInfo("study", "waterGiven");
+            SimpleFilter filterWaterGiven = new SimpleFilter(FieldKey.fromString("Id"), animalId);
+            filterWaterGiven.addCondition(FieldKey.fromString("date"), startDate.getTime(), CompareType.DATE_EQUAL);
+            filterWaterGiven.addCondition(FieldKey.fromString("QCState/label"), "Completed", CompareType.EQUAL);
 
-        List<WaterDataBaseRecord> waterRecords = new ArrayList<>();
 
-        Calendar startDate = Calendar.getInstance();
-        startDate.setTime(clientDate);
+            //Adding all the water records from database to a list of waterRecord objects that can be compared
+            TableSelector waterGivenFromDatabase = new TableSelector(waterGiven, PageFlowUtil.set("taskId", "objectid", "lsid", "animalId", "date", "project", "assignedTo", "volume"), filterWaterGiven, null);
 
-        //Look for any orders that overlap in the waterScheduleCoalesced table
-        TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
-        filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_EQUAL);
-        filter.addCondition(FieldKey.fromString("QCState/label"),"Scheduled", CompareType.EQUAL);
-        filter.addCondition(FieldKey.fromString("waterSource"),"regulated");
+            waterGivenRecords.addAll(waterGivenFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
-        //Adding all the water records from database to a list of waterRecord objects that can be compared
-        TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume"), filter, null);
-        waterOrdersFromDatabase.setNamedParameters(parameters);
-        waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
-
-        for (WaterDataBaseRecord waterRecord : waterRecords){
-            if (waterRecord.getVolume() != null && !objectId.equals(waterRecord.getObjectId())){
-                Double totalScheduleWater =   waterRecord.getVolume()+clientVolume;
-
-                JSONObject returnErrors = new JSONObject();
-                returnErrors.put("field", "volume");
-                returnErrors.put("severity", "INFO");
-                returnErrors.put("message", "Animal already has a scheduled water order for "+ waterRecord.getVolume() +
-                        " mL, assigned to "+waterRecord.getAssignedTo()+ ". Making a total water volume of "+ totalScheduleWater);
-                errorMap.put(waterRecord.getObjectId(), returnErrors);
+            Double waterCompleted = 0.0;
+            for (WaterDataBaseRecord waterRecord : waterGivenRecords)
+            {
+                if (waterRecord.getVolume() != null && !objectId.equals(waterRecord.getObjectId()))
+                {
+                    waterCompleted += waterRecord.getVolume();
+                }
             }
-            
+
+
+            //Setting interval to start the water schedule, the system generates the calendar thirty days before
+            Calendar startInterval = Calendar.getInstance();
+            startInterval.setTime(clientDate);
+            startInterval.add(Calendar.DATE, -5);
+            startInterval = DateUtils.truncate(startInterval, Calendar.DATE);
+
+            final String intervalLength = "10";
+
+            //Sending parameters to the query that generates the water schedule from water orders and water amounts
+            Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
+            parameters.put("NumDays", intervalLength);
+            parameters.put("StartDate", startInterval.getTime());
+
+            List<WaterDataBaseRecord> waterRecords = new ArrayList<>();
+
+            //Look for any orders that overlap in the waterScheduleCoalesced table
+            TableInfo waterSchedule = getTableInfo("study", "waterScheduleCoalesced");
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
+            filter.addCondition(FieldKey.fromString("date"), startDate.getTime(), CompareType.DATE_EQUAL);
+            filter.addCondition(FieldKey.fromString("QCState/label"), "Scheduled", CompareType.EQUAL);
+            filter.addCondition(FieldKey.fromString("waterSource"), "regulated");
+
+            //Adding all the water records from database to a list of waterRecord objects that can be compared
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set("taskId", "objectid", "lsid", "animalId", "date", "startDateCoalesced", "endDateCoalescedFuture", "dataSource", "project", "frequency", "assignedTo", "volume"), filter, null);
+            waterOrdersFromDatabase.setNamedParameters(parameters);
+            waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
+
+            Double waterScheduledFromServer = 0.0;
+
+            for (WaterDataBaseRecord waterRecord : waterRecords)
+            {
+                if (waterRecord.getVolume() != null && !objectId.equals(waterRecord.getObjectId()))
+                {
+
+                    if (waterRecord.getAnimalId().equals(animalId))
+                    {
+                        waterScheduledFromServer += waterRecord.getVolume();
+                    }
+                    Double totalScheduleWater = waterCompleted + waterScheduledFromServer + clientVolume + waterInTransaction;
+
+                    JSONObject returnErrors = new JSONObject();
+                    returnErrors.put("field", "volume");
+                    returnErrors.put("severity", "INFO");
+                    returnErrors.put("message", "Animal was given "+ waterCompleted + " mL and has scheduled water orders for " + waterScheduledFromServer +
+                            " mL, assigned to " + waterRecord.getAssignedTo() + ". Adding " + clientVolume + " mL and other records in this form makes a total of " + totalScheduleWater + " mL.");
+                    //Always attaches the error to the row in client and overwrites if there is more than one record
+                    errorMap.put(objectId, returnErrors);
+
+                }
+
+            }
         }
         errorMap.forEach((objectIdString, JSONObject)->{
             arrayOfErrors.put(JSONObject);

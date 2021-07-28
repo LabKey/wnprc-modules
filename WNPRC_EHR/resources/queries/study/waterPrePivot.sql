@@ -1,6 +1,6 @@
 SELECT DISTINCT
 voGi.id as animalId,
-CAST (voGi.date AS DATE) AS Date,
+CAST (voGi.date AS DATE) AS date,
 voGi.projectConcat AS projectConcat,
 voGi.performedConcat AS performedConcat,
 CAST (voGi.qcstateConcat AS INTEGER) AS qcstate,

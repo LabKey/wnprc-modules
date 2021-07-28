@@ -1,10 +1,66 @@
 require("ehr/triggers").initScript(this);
+var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 require ("labkey");
 
 function onInit(event, helper){
+    helper.decodeExtraContextProperty('clientEncounterDate');
 
+    helper.registerRowProcessor(function(helper,row) {
+        if (!row)
+            return;
+        if(!row.Id || !row.date){
+            return;
+        }
+        var clientEncounterDate = helper.getProperty('clientEncounterDate');
+        clientEncounterDate = clientEncounterDate || {};
+        clientEncounterDate[row.Id] = clientEncounterDate [row.Id] || [];
+
+        if (row.objectid) {
+            LABKEY.ExtAdapter.each(clientEncounterDate[row.Id], function (r) {
+                if (r.objectid == row.objectid) {
+                    if (r.date != row.date) {
+                        r.date = row.date;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }, this)
+        }
+        helper.setProperty('clientEncounterDate', clientEncounterDate);
+    });
 }
 function onUpsert(helper, scriptErrors, row, oldRow){
+
+    if (row.chairingStartTime){
+        var map = helper.getProperty('clientEncounterDate');
+        var clientEncounterDate = [];
+        if (map && map[row.Id]){
+            console.log(map[row.Id]);
+            clientEncounterDate = map[row.Id];
+
+        }
+        let errorMessage = WNPRC.Utils.getJavaHelper().checkEncounterTime(row.Id,row.chairingStartTime,clientEncounterDate, 'chairing');
+        if (errorMessage != null){
+            EHR.Server.Utils.addError(scriptErrors,'chairingStartTime',errorMessage,'ERROR');
+        }
+
+    }
+
+    if (row.chairingEndTime){
+        var map = helper.getProperty('clientEncounterDate');
+        var clientEncounterDate = [];
+        if (map && map[row.Id]){
+            console.log(map[row.Id]);
+            clientEncounterDate = map[row.Id];
+
+        }
+        let errorMessage = WNPRC.Utils.getJavaHelper().checkEncounterTime(row.Id,row.chairingEndTime,clientEncounterDate, 'chairing');
+        if (errorMessage != null){
+            EHR.Server.Utils.addError(scriptErrors,'chairingEndTime',errorMessage,'ERROR');
+        }
+
+    }
 
     var startChairing = new Date (row.chairingStartTime.toGMTString());
     var endChairing = new Date (row.chairingEndTime.toGMTString());

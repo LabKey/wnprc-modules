@@ -42,9 +42,8 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
 
                     let qcState = r.get('qcstate');
                     let qcStateLabel = EHR.Security.getQCStateByRowId(qcState).Label;
-                    console.log('waterAmount qcStatus ' + qcState + ' value of ' + r);
+
                     if (qcStateLabel == 'In Progress' || qcStateLabel == 'Completed' ) {
-                        console.log('waterAmount qcStatus ' + qcState);
                         let scheduleQC = EHR.Security.getQCStateByLabel('Scheduled');
                         r.set('qcstate', scheduleQC.RowId);
                         r.phantom  = true;
@@ -54,8 +53,6 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
 
 
                 if (r.phantom ) {
-                    console.log ('waterSeverStore dataset '+ r.store.queryName);
-                    console.log ('value of r '+ r);
 
                     // Validate null values for not entering empty records to DB
                     // Excluding validation of weight because we are allowing null weights
@@ -91,9 +88,8 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
                         case 'waterAmount':
                             let qcState = r.get('qcstate');
                             let qcStateLabel = EHR.Security.getQCStateByRowId(qcState).Label;
-                            console.log('waterAmount qcStatus ' + qcState + ' value of ' + r);
                             if (qcStateLabel == 'In Progress' || qcStateLabel == 'Completed' ) {
-                                console.log('waterAmount qcStatus ' + qcState);
+
                                 let scheduleQC = EHR.Security.getQCStateByLabel('Scheduled');
                                 r.set('qcstate', scheduleQC.RowId);
                                // r.phantom  = true;
@@ -145,7 +141,6 @@ Ext4.define('WNPRC.ext.data.WaterServerStore', {
             LDK.Assert.assertNotEmpty('Unable to find key field for: ' + this.storeId, key);
             var toRemove = [];
             Ext4.Array.forEach(recMap.update, function(r){
-                LDK.Assert.assertNotEmpty('Record passed as update which lacks keyfield for store: ' + this.storeId + '/' + key, r.get(key));
                 if (!r.get(key)){
                     r.phantom = true;
                     recMap.create.push(r);

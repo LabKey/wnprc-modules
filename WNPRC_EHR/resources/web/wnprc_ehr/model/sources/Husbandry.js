@@ -128,7 +128,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     defaultMinutes: 0,
                     dateConfig: {
                         maxValue: new Date(),
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3),
+                        //minValue: new Date(),
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3)
                     }
                 },
             },
@@ -279,7 +280,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     defaultMinutes: 0,
                     dateConfig: {
                         maxValue: new Date(),
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3),
+                        //minValue: new Date()
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3)
                     }
 
                 }
@@ -301,7 +303,8 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     defaultMinutes: 0,
                     dateConfig: {
                         maxValue: new Date(),
-                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3),
+                        //minValue: new Date()
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3)
                     }
 
                 }
@@ -434,7 +437,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 //editable: false,
                 editorConfig: {
                     dateConfig: {
-                        minValue: new Date(),
+                        minValue: Ext4.Date.add(new Date(), Ext4.Date.DAY, -3),
+                        //minValue: new Date(),
+                        maxValue: new Date(),
                     }
                 },
             },
@@ -462,6 +467,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             remark:{
                 shownInGrid: true
+            },
+            objectid:{
+                setInitialValue: function(v, rec) {
+                    return v || LABKEY.Utils.generateUUID();
+                }
             }
 
         },
@@ -487,7 +497,10 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 xtype: 'numberfield',
                 compositeField: 'Volume (mL)',
                 header: 'Volume (ml)',
-                allowBlank: false
+                allowBlank: false,
+                editorConfig: {
+                    id: 'waterGivenVolume'
+                }
             },
             waterSource: {
                 defaultValue: 'regulated',
@@ -573,18 +586,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 columnConfig: {
                     width:140
                 },
-                /*editorConfig : {
+                editorConfig : {
                     id : 'waterAmountVolume',
-                    listeners:{
-                        change: function (field, val){
-                            var waterAmountDate = Ext4.getCmp('waterAmountDate');
-                            var fixedDate = new Date(waterAmountDate.getValue());
-                            fixedDate.setHours(14);
-                            fixedDate.setMinutes(1);
-                            waterAmountDate.setValue(fixedDate);
-                        }
-                    }
-                }*/
+                }
             },
             project:{
                 hidden: true,

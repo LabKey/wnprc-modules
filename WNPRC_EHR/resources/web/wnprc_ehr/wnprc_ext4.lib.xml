@@ -12,6 +12,7 @@
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/WaterClientStore.js"/>
         <script path="/wnprc_ehr/data/HusbandryServerStore.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/SlaveSectionClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/SingleAnimal/WaterApprenticeSectionClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/TaskClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/TaskStoreCollection.js"/>
         <script path="/wnprc_ehr/ext4/panel/AnimalDetailsPanel.js"/>

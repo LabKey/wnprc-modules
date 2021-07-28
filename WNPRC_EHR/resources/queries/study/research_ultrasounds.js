@@ -66,6 +66,9 @@ function onInsert(helper, scriptErrors, row, oldRow) {
                 console.log("Insert rows error for ehr.tasks: " + JSON.stringify(error));
             }
         });
+
+        row.findings = row.ultrasoundFindings;
+        row.remark = row.ultrasoundRemarks;
     }
 
     //if there are any data for an ultrasound review, then add that record as well
@@ -74,11 +77,7 @@ function onInsert(helper, scriptErrors, row, oldRow) {
 
         let validationFailed = false;
 
-        if (!row.restraintType) {
-            validationFailed = true;
-            EHR.Server.Utils.addError(scriptErrors, "restraintType", "Restraint Type is a required field", "ERROR");
-        }
-        else {
+        if (!!row.restraintType) {
             LABKEY.Query.selectRows({
                 schemaName: 'ehr_lookups',
                 queryName: 'restraint_type',
@@ -225,7 +224,11 @@ function onUpdate(helper, scriptErrors, row, oldRow) {
     for (let measurementName in validMeasurements) {
         if (validMeasurements.hasOwnProperty(measurementName)) {
             if (row[measurementName] != oldRow[measurementName]) {
-                row[measurementName] = formatMeasurements(row[measurementName]);
+                if (row[measurementName] != null && row[measurementName].length > 0) {
+                    row[measurementName] = formatMeasurements(row[measurementName]);
+                } else {
+                    row[measurementName] = "";
+                }
                 updateRows.push({
                     Id: row.Id,
                     date: row.date,
@@ -271,6 +274,7 @@ function setDescription(row, helper){
 }
 
 function formatMeasurements(measurements) {
+    console.log('measurements: ' + measurements);
     let measurementArray = measurements.replace(/[\s,;]+/g, ' ').trim().replace(/[\s]+/g, ';').split(';');
     measurementArray.sort(function(a, b){return a - b});
     let formattedMeasurements = '';
@@ -415,5 +419,5 @@ function getValidMeasurements() {
 }
 
 function getTruthiness(value) {
-    return (value === true || value == 1 || (!!value && (typeof value === 'string' || value instanceof String) && (value.toUpperCase() === "TRUE" || value.toUpperCase() === "YES")));
+    return (value === true || value == 1 || (!!value && (typeof value === 'string' || value instanceof String) && (value.toUpperCase().trim() === "TRUE" || value.toUpperCase().trim() === "YES")));
 }

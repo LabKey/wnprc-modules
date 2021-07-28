@@ -8,7 +8,7 @@
                 <property name="columnTitle" value="Status"/>
             </properties>
         </column>
-        <column name="activeAssignments/Availability">
+        <column name="Id/activeAssignments/Availability">
             <properties>
                 <property name="columnTitle" value="Avail"/>
             </properties>
@@ -17,6 +17,14 @@
         <column name="dam"/>
         <column name="sire"/>
         <column name="origin"/>
+        <column name="vendor_id"/>
+        <column name="geographic_origin"/>
+        <column name="ancestry"/>
+        <column name="Id/age/AgeFriendly">
+            <properties>
+                <property name="columnTitle" value="Age"/>
+            </properties>
+        </column>
         <column name="birth"/>
         <column name="death"/>
         <!--<column name="Id/MostRecentArrival/MostRecentArrival">-->

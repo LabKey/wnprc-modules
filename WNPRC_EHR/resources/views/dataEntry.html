@@ -428,7 +428,7 @@
                             queries: ['Treatment Orders']
                         },
                         {
-                            url: makeTaskDataEntryURL("Weight"),
+                            url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'weight', ctx['EHRStudyContainer']),
                             title: 'Enter Weights',
                             queries: ['Weight']
                         },
@@ -628,6 +628,11 @@
                             queries: ['Necropsies']
                         },
                         {
+                            url:     makeExt4DataEntryURL("Necropsy Abstract"),
+                            title: 'Enter Necropsy Abstract',
+                            queries: ['NecropsyAbstract']
+                        },
+                        {
                             url:     makeURL("manageRecord", { schemaName: 'study', queryName: 'Prenatal Deaths', keyField: 'lsid' }),
                             title:   'Enter Prenatal Death',
                             queries: ['Prenatal Deaths']
@@ -682,6 +687,11 @@
                             url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'feeding', ctx['EHRStudyContainer']),
                             title:   'Enter Feeding Orders',
                             queries:['feeding']
+                        },
+                        {
+                            url:     LABKEY.ActionURL.buildURL('wnprc_ehr', 'weight', ctx['EHRStudyContainer']),
+                            title:   'Enter Weights',
+                            queries:['weight']
                         },
 
                     ]

@@ -7,8 +7,8 @@
   position: relative;
   z-index: 2;
   cursor: pointer;
-  top: 5px;
-  left: 2px;
+  top: 8px;
+  left: 5px;
 }
 
 /* Hide the tooltip content by default */

@@ -34,3 +34,23 @@ The `name` prop in the `DropdownOptions` component is the name of the variable t
 The `rowkey` prop is the key of the data row returned by LabKey server.
 
 More information about how the entire form works can be found in the documentation linked above. Also, another nice resource provided by react-final-form is its extensive [interactive examples](https://github.com/final-form/react-final-form#examples).
+
+## Release Notes
+### 1.1.0
+(2020-11-23)
+
+#### Bug Fixes
+* Removed validation for editing `date` 60 days in the past or more
+
+#### Features
+* Added new fields:
+  * Pregnant animals required
+  * Anticipated Start Date
+    * added validation to check that this comes after 'date needed' field.
+    * also made sure the end date comes after the start date
+  * Anticipated End date
+  * Executive Committee Approval
+  * Animal Ids to Offer (for the project)
+    * added validation (split ids, duplicates, alive animals)
+* Updated to webpack 4, ts-loader 6
+* Autopopulate account field when a project is selected

@@ -1,7 +1,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="animal_requests" tableDbType="TABLE">
+            <table tableName="animal_requests" tableDbType="TABLE" useColumnOrder="true">
                 <tableTitle>Animal Requests</tableTitle>
                 <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
                 <columns>
@@ -21,14 +21,8 @@
                             <fkDisplayColumnName>inves</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="protocol"></column>
-                    <column columnName="originneeded">
-                        <columnTitle>Origin</columnTitle>
-                        <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>geographic_origins</fkTable>
-                            <fkColumnName>meaning</fkColumnName>
-                            <fkDisplayColumnName>Origin</fkDisplayColumnName>
-                        </fk>
+                    <column columnName="numberofanimals">
+                        <columnTitle># of Animals</columnTitle>
                     </column>
                     <column columnName="speciesneeded">
                         <columnTitle>Species</columnTitle>
@@ -39,11 +33,80 @@
                             <fkDisplayColumnName>Species</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="numberofanimals">
-                        <columnTitle># of Animals</columnTitle>
+                    <column columnName="originneeded">
+                        <columnTitle>Origin</columnTitle>
+                        <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>geographic_origins</fkTable>
+                            <fkColumnName>meaning</fkColumnName>
+                            <fkDisplayColumnName>Origin</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="sex">
+                        <columnTitle>Sex</columnTitle>
+                    </column>
+                    <column columnName="age">
+                        <columnTitle>Age</columnTitle>
+                    </column>
+                    <column columnName="weight">
+                        <columnTitle>Weight</columnTitle>
+                    </column>
+                    <column columnName="mhctype">
+                        <columnTitle>MHC type</columnTitle>
+                    </column>
+                    <column columnName="viralstatus">
+                        <columnTitle>Viral Status</columnTitle>
+                    </column>
+                    <column columnName="infectiousdisease">
+                        <columnTitle>Infectious Disease</columnTitle>
+                    </column>
+                    <column columnName="pregnantanimalsrequired">
+                        <columnTitle>Pregnant Animals Required?</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>animal_requests_yes_no</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="disposition">
+                        <columnTitle>Disposition</columnTitle>
+                        <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>animal_requests_disposition</fkTable>
+                            <fkColumnName>meaning</fkColumnName>
+                            <fkDisplayColumnName>Origin</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="executivecommitteeapproval">
+                        <columnTitle>Executive Committee Approval?</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>animal_requests_yes_no</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
                     </column>
                     <column columnName="dateneeded">
                         <columnTitle>Date Needed</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="optionalproject">
+                        <columnTitle>Project</columnTitle>
+                    </column>
+                    <column columnName="project">
+                        <shownInUpdateView>false</shownInUpdateView>
+                        <columnTitle>Project</columnTitle>
+                    </column>
+                    <column columnName="account">
+                        <columnTitle>Account</columnTitle>
+                    </column>
+                    <column columnName="protocol"></column>
+                    <column columnName="comments">
+                        <columnTitle>Comments</columnTitle>
+                    </column>
+                    <column columnName="anticipatedstartdate">
+                        <columnTitle>Anticipated Start Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="anticipatedenddate">
+                        <columnTitle>Anticipated End Date</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="QCState">
@@ -54,12 +117,6 @@
                             <fkColumnName>rowid</fkColumnName>
                         </fk>
                     </column>
-                    <column columnName="infectiousdisease">
-                        <columnTitle>Infectious Disease</columnTitle>
-                    </column>
-                    <column columnName="viralstatus">
-                        <columnTitle>Viral Status</columnTitle>
-                    </column>
                     <column columnName="dateapprovedordenied">
                         <columnTitle>Date Approved / Denied</columnTitle>
                     </column>
@@ -68,6 +125,9 @@
                     </column>
                     <column columnName="datearrival">
                         <columnTitle>Date Arrival</columnTitle>
+                    </column>
+                    <column columnName="animalidstooffer">
+                        <columnTitle>Animal Ids to Offer</columnTitle>
                     </column>
                     <column columnName="animalsorigin">
                         <columnTitle>Animal Origin</columnTitle>

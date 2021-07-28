@@ -224,7 +224,11 @@ public class TriggerScriptHelper {
 
             for (Map<String, Object> updatedRow : updatedRows) {
                 Pattern separator = Pattern.compile(";");
-                List<Double> newMeasurements = separator.splitAsStream((String) updatedRow.get("measurements_string")).map(Double::parseDouble).collect(Collectors.toList());
+                List<Double> newMeasurements = separator
+                        .splitAsStream((String) updatedRow.get("measurements_string"))
+                        .filter(x -> (x != null && x.length() > 0))
+                        .map(Double::parseDouble)
+                        .collect(Collectors.toList());
                 List<JSONObject> existingMeasurements = getMeasurements(ultrasoundId, (String) updatedRow.get("measurement_name"));
 
                 for (int i = 0; i < existingMeasurements.size(); i++) {
@@ -2316,6 +2320,30 @@ public class TriggerScriptHelper {
             Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
             notification.sendManually(ehrContainer);
         }
+    }
+
+    // Returns a list of vendor ids if they do not match the current enteredVendorId
+    public List<String> checkOldVendorIds(String objectid, String animalId, String enteredVendorId) throws SQLException
+    {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("Id", CompareType.EQUAL, animalId);
+        filter.addCondition("objectid", CompareType.DOES_NOT_CONTAIN, objectid);
+
+        JSONArray arrivals = queryFactory.selectRows("study", "arrival", filter);
+        List<String> l = new ArrayList<>();
+        for (int i = 0; i < arrivals.length(); i++)
+        {
+            String vendorId = (String) arrivals.getJSONObject(i).get("vendor_id");
+            if (vendorId != null)
+            {
+                if (!enteredVendorId.equals(vendorId))
+                {
+                    l.add(vendorId);
+                    return l;
+                }
+            }
+        }
+        return l;
     }
 
 }

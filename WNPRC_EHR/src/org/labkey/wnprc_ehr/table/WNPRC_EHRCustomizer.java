@@ -15,6 +15,7 @@
  */
 package org.labkey.wnprc_ehr.table;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -30,6 +31,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
@@ -38,6 +40,9 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.Study;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
@@ -57,6 +62,7 @@ import java.util.Collections;
  */
 public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 {
+    protected static final Logger _log = Logger.getLogger(WNPRC_EHRCustomizer.class);
     public WNPRC_EHRCustomizer()
     {
 
@@ -392,18 +398,293 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     private void customizeDemographicsTable(AbstractTableInfo table)
     {
-        if (table.getColumn("Feeding") != null)
-            return;
-
         UserSchema us = getStudyUserSchema(table);
         if (us == null){
             return;
         }
 
-        ColumnInfo col21 = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
-        col21.setLabel("Feeding");
-        col21.setDescription("Shows most recent feeding type and chow conversion.");
-        table.addColumn(col21);
+        if (table.getColumn("Feeding") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "Feeding", "demographicsMostRecentFeeding");
+            col.setLabel("Feeding");
+            col.setDescription("Shows most recent feeding type and chow conversion.");
+            table.addColumn(col);
+        }
+
+        if (table.getColumn("mostRecentAlopeciaScore") == null)
+        {
+            String mostRecentAlopeciaScore = "mostRecentAlopeciaScore";
+            TableInfo alopecia = getRealTableForDataset(table, "alopecia");
+
+            String theQuery  = "( " +
+                    "(SELECT " +
+                        "a.score as score " +
+                    "FROM studydataset." +alopecia.getName() + " a " +
+                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Alopecia Score");
+            newCol.setDescription("Calculates the most recent alopecia score for each animal");
+            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
+            table.addColumn(newCol);
+        }
+
+        if (table.getColumn("mostRecentBodyConditionScore") == null)
+        {
+            String mostRecentBodyConditionScore = "mostRecentBodyConditionScore";
+            TableInfo bcs = getRealTableForDataset(table, "bcs");
+
+            String theQuery  = "( " +
+                    "(SELECT " +
+                    "a.score as score " +
+                    "FROM studydataset." +bcs.getName() + " a " +
+                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mostRecentBodyConditionScore, sql, JdbcType.VARCHAR);
+            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=body_condition_scores"));
+            newCol.setLabel("Most Recent BCS");
+            newCol.setDescription("Returns the participant's most recent body condition score");
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("necropsyAbstractNotes") == null)
+        {
+            ColumnInfo col = getWrappedIdCol(us, table, "necropsyAbstractNotes", "demographicsNecropsyAbstractNotes");
+            col.setLabel("Necropsy Abstract Notes");
+            col.setDescription("Returns the participant's necropsy abstract remarks and projects");
+            table.addColumn(col);
+        }
+        if (table.getColumn("origin") == null)
+        {
+            String origin = "origin";
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            // Here we want a union of the birth and arrival tables to get the origin of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.source as source, " +
+                        "a.date as date," +
+                        "a.participantid as participantid " +
+                    "FROM studydataset." +arrival.getName() + " a " +
+
+                    "WHERE a.source is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.origin as source," +
+                        "b.date as date," +
+                        "b.participantid as participantid " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date DESC LIMIT 1" +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, origin, sql, JdbcType.VARCHAR);
+            //String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}";
+
+            //newCol.setURL(StringExpressionFactory.createURL(url));
+            newCol.setLabel("Source/Vendor");
+            newCol.setDescription("Returns the animal's original source from an arrival or birth record.");
+            UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
+            newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "source", "code", "meaning"));
+            newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}"));
+            table.addColumn(newCol);
+        }
+        // Here we want a custom query since the getWrappedIdCol model did not work for us for the following requirements:
+        // 1. Show the geographic origin if the query is able to calculate it.
+        // 2. Show blank (and not the broken lookup with the id inside of <angle brackets>) if we don't have the info.
+        // 3. Have the text be a link when we have a value to show.
+        if (table.getColumn("geographic_origin") == null)
+        {
+            String geographicOrigin = "geographic_origin";
+
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.geographic_origin as origin, " +
+                        "a.date as date," +
+                        "a.participantid as participantid " +
+                    "FROM studydataset." +arrival.getName() + " a " +
+
+                    "WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.origin as origin," +
+                        "b.date as date," +
+                        "b.participantid as participantid " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT " +
+                        "CASE WHEN origin = 'cen'" +
+                        "THEN 'domestic' " +
+                        "ELSE origin " +
+                        "END AS geographic_origin " +
+                    "FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, geographicOrigin, sql, JdbcType.VARCHAR);
+            String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=geographic_origins&meaning=${geographic_origin}";
+            newCol.setURL(StringExpressionFactory.createURL(url));
+            newCol.setLabel("Geographic Origin");
+            newCol.setDescription("This column is the geographic origin");
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("ancestry") == null)
+        {
+            String ancestry = "ancestry";
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            // Here we want a union of the birth and arrival tables to get the ancestry of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.ancestry as ancestry, " +
+                        "a.date as date," +
+                        "a.participantid as participantid " +
+                    "FROM studydataset." + arrival.getName() + " a " +
+
+                    "WHERE a.ancestry is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.ancestry as ancestry," +
+                        "b.date as date," +
+                        "b.participantid as participantid " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.ancestry is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT ancestry FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, ancestry, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Ancestry");
+            newCol.setDescription("Returns the animal's ancestry.");
+            UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
+            newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "ancestry", "rowid", "value"));
+            newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${ancestry}"));
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("birth") == null)
+        {
+            String birthColumn = "birth";
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            // Here we want a union of the birth and arrival tables to get the ancestry of the animal
+            String arrivalAndBirthUnion = "( " +
+                    "SELECT " +
+                        "a.birth as birth, " +
+                        "a.participantid as participantid, " +
+                        "a.modified as modified " +
+                    "FROM studydataset." + arrival.getName() + " a " +
+
+                    "WHERE a.birth is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+
+                    "UNION ALL " +
+
+                    "SELECT " +
+                        "b.date as birth," +
+                        "b.participantid as participantid, " +
+                        "b.modified as modified " +
+                    "FROM studydataset." + birth.getName() + " b " +
+
+                    "WHERE b.date is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                    ")";
+
+            String theQuery = "(" +
+                    "SELECT birth FROM " + arrivalAndBirthUnion + " w ORDER BY w.modified DESC LIMIT 1" +
+                    ")";
+
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, birthColumn, sql, JdbcType.DATE);
+            newCol.setLabel("Birth");
+            newCol.setDescription("Returns the animal's birth date.");
+            //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=study&query.queryName=Birth&query.Id~eq={id}"));
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("vendor_id") == null)
+        {
+            String vendorIdColumn = "vendor_id";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+
+            String theQuery = "(" +
+                    "SELECT vendor_id FROM studydataset." + arrival.getName() + " w where w.participantid="
+                      + ExprColumn.STR_TABLE_ALIAS + ".participantid and w.vendor_id is not null LIMIT 1" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, vendorIdColumn, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Vendor ID");
+            newCol.setDescription("Returns the animal's original vendor id.");
+            table.addColumn(newCol);
+        }
+    }
+
+    private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)
+    {
+        Container ehrContainer = EHRService.get().getEHRStudyContainer(ti.getUserSchema().getContainer());
+        if (ehrContainer == null)
+            return null;
+
+        Dataset ds;
+        Study s = StudyService.get().getStudy(ehrContainer);
+        if (s == null)
+            return null;
+
+        ds = s.getDatasetByName(name);
+        if (ds == null)
+        {
+            // NOTE: this seems to happen during study import on TeamCity.  It does not seem to happen during normal operation
+            _log.info("A dataset was requested that does not exist: " + name + " in container: " + ehrContainer.getPath());
+            StringBuilder sb = new StringBuilder();
+            for (Dataset d : s.getDatasets())
+            {
+                sb.append(d.getName() + ", ");
+            }
+            _log.info("datasets present: " + sb.toString());
+
+            return null;
+        }
+        else
+        {
+            return StorageProvisioner.createTableInfo(ds.getDomain());
+        }
     }
 
     private void customizeProtocolTable(AbstractTableInfo table)

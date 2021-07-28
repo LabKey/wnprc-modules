@@ -2,6 +2,8 @@ interface jsonDataType {
   commands: Array<any>;
 }
 import {Query,ActionURL,Filter} from '@labkey/api';
+import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
+import { SaveRowsOptions } from '@labkey/api/dist/labkey/query/Rows';
 
 export const groupCommands = (values: Array<any>) => {
   return values.reduce((acc, item) => {
@@ -52,15 +54,13 @@ export const setupJsonData = (values: any[], schemaName: string, queryName: stri
 
 export const saveRowsDirect = (jsonData: jsonDataType) => {
 
-  console.log('in save rows')
   return new Promise((resolve, reject) => {
-    let options = {
+    let options: SaveRowsOptions = {
       commands: jsonData.commands,
       containerPath: ActionURL.getContainer(),
       success: (data) => {resolve(data)},
       failure: (data) => {reject(data)},
     };
-    console.log(JSON.stringify(options));
     Query.saveRows(options);
   });
 };
@@ -86,7 +86,7 @@ export const checkEditMode = () => {
 };
 
 export function labkeyActionSelectWithPromise(
-    options
+    options: SelectRowsOptions
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     options.success = (data) => {resolve(data)};
@@ -143,7 +143,7 @@ export const getAnimalIdsFromLocation = (location) => {
   })
 }
 
-export const lookupAnimalInfo = (id) => {
+export const lookupAnimalInfo = (id:string) => {
   return new Promise ((resolve, reject) => {
     let config = {
       schemaName: "study",
@@ -153,8 +153,6 @@ export const lookupAnimalInfo = (id) => {
     };
     labkeyActionSelectWithPromise(config)
       .then((data) => {
-        console.log(data);
-        //cache animal info
         if (data["rows"][0]) {
           resolve(data["rows"][0])
         } else {

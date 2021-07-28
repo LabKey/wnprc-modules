@@ -19,7 +19,7 @@ RUN apt-get update                 \
                            ssmtp   \
                            cron    \
                            gettext \
-                           postgresql-client-9.4 \
+                           postgresql-client-11 \
                            tzdata \
  && apt-get clean
 

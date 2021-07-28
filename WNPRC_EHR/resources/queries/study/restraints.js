@@ -27,7 +27,9 @@ function setDescription(row, helper){
     let description = [];
 
     description.push("Restraint Type: " + row.restraintType);
-    description.push("Remarks: " + row.remarks);
+    if (row.remarks) {
+        description.push("Remarks: " + row.remarks);
+    }
 
     return description;
 }

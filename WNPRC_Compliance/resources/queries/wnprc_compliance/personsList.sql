@@ -1,5 +1,5 @@
 SELECT
-persons.personid,
+DISTINCT(persons.personid),
 last_name,
 first_name,
 middle_name,
@@ -8,7 +8,8 @@ cardInfo.employee_number,
 notes,
 tbResults.lastClearance as lastTbClearance,
 measlesResults.lastClearance as measlesClearance,
-measlesResults.mrequired as measlesRequired,
+measles_required,
+hold,
 archived_for_access_purposes as isArchived
 
 FROM persons
@@ -36,7 +37,6 @@ LEFT JOIN (
 
   SELECT
   p_m_map.person_id,
-  m.required as mrequired,
   MAX(m.date) as lastClearance
 
   FROM measles_clearances m
@@ -46,7 +46,7 @@ LEFT JOIN (
     m.id = p_m_map.clearance_id
   )
 
-  GROUP BY p_m_map.person_id, m.required
+  GROUP BY p_m_map.person_id
 ) measlesResults
 
 ON measlesResults.person_id = persons.personid;

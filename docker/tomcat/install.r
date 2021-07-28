@@ -7,8 +7,8 @@ install.packages('kinship2', repos='http://cran.us.r-project.org')
 install.packages('getopt',   repos='http://cran.us.r-project.org')
 install.packages('rjson',    repos='http://cran.us.r-project.org')
 
-require('devtools')
+require('remotes')
 install_version('Rlabkey', version='2.1.136', repos='http://cran.us.r-project.org')
 
-require('devtools')
+require('remotes')
 install_github("luansheng/visPedigree")

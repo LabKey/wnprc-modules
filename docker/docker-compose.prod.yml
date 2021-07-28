@@ -7,6 +7,10 @@ services:
       - "labkey"
     volumes:
       - "${BACKUP_DIR}:/backups"
+      - "${PRIMATEFS_DIR}:/mnt/IT-Backups/"
+      - "${LKSERVERBACKUP_PERL}:/usr/local/labkey/pg_backup/lkServerBackup.pl"
+      - "${LKBACKUP_VARIABLE}:/usr/local/labkey/pg_backup/lkbackup.ini"
+      - "${PG_DUMP_DIR}:/usr/lib/postgresql/11/bin"
     networks:
       - network1
     environment:
@@ -14,4 +18,3 @@ services:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL:
       TZ: America/Chicago
-  

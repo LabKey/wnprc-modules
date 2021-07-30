@@ -6,13 +6,11 @@
         <column name="account"/>
         <column name="totalCost"/>
         <column name="requestStatus"/>
-        <column name="rejectReason"/>
         <column name="otherAccountAndInves"/>
         <column name="requester"/>
-        <column name="assignedTo"/>
         <column name="attachments"/>
     </columns>
     <filters>
-        <filter column="requestStatus/Label" operator="in" value="Review Pending; Request Approved" />
+        <filter column="requestStatus/Label" operator="eq" value="Request Approved" />
     </filters>
 </customView>

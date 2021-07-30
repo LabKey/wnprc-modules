@@ -271,8 +271,8 @@
         <%
             if (startDate != null && endDate != null) {
         %>
-        startDateOfSchedule = new Date("<%= startDate %>");
-        endDateOfSchedule = new Date("<%= endDate %>");
+        startDateOfSchedule = new Date(<%= q(startDate) %>);
+        endDateOfSchedule = new Date(<%= q(endDate) %>);
         <%
             }
         %>

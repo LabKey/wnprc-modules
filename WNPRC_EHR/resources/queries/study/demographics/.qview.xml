@@ -14,6 +14,7 @@
             </properties>
         </column>
         <column name="hold"/>
+        <column name="dam_old"/>
         <column name="dam"/>
         <column name="sire_old"/>
         <column name="sire"/>

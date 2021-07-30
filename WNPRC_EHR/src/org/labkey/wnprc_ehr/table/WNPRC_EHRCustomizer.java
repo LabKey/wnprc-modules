@@ -666,27 +666,113 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String sire_new = "sire";
             TableInfo arrival = getRealTableForDataset(table, "arrival");
             TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
 
-            // Here we want a union of the birth and arrival tables to get the ancestry of the animal
-            String arrivalAndBirthUnion = "( " +
-                    "with arrival_results as ( " +
-                    " (SELECT " +
-                        " a.participantid as sire" +
-                    " FROM " +
-                        " studydataset." +arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
-                    "  WHERE " +
-                        " a.vendor_id = b.sire and a.vendor_id != a.participantid and b.participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                    " LIMIT 1 ) " +
-                    " ) " +
-                    " select sire from arrival_results " +
-                    " union " +
-                    "  select c.sire from studydataset." + birth.getName() + " c" +
-                    " where (select count(*) from arrival_results)=0 and participantid=" + ExprColumn.STR_TABLE_ALIAS +".participantid)";
+            // Here we want a union of the birth and arrival tables to get the sire of the animal
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                    "CASE " +
+                    "WHEN " +
+                    "(SELECT a.participantid as sire " +
+                    "FROM " +
+                    "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                    " WHERE " +
+                    " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.sire AND a.vendor_id != a.participantid " +
+                    "ORDER BY b.date DESC LIMIT 1 " +
+                    ") " +
+                    "IS NOT NULL " +
+                    "THEN " +
+                    "(SELECT a.participantid as sire " +
+                    "FROM " +
+                    "studydataset." + arrival.getName() + " a, "+ "studydataset." + arrival.getName() + " b " +
+                    "WHERE " +
+                    "b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid and a.vendor_id = b.sire  and a.vendor_id != a.participantid " +
+                    " ORDER BY b.date DESC LIMIT 1" +
+                    ") " +
+                    "WHEN " +
+                    "(SELECT sire FROM studydataset." + arrival.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
+                    "THEN " +
+                    "(SELECT sire FROM studydataset." + arrival.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
+                    "WHEN " +
+                    "(SELECT sire FROM studydataset." + birth.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
+                    "THEN " +
+                    "(SELECT sire FROM studydataset." + birth.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
+                    "ELSE " +
+                    " (SELECT sire_old FROM studydataset." + demographics.getName() + " WHERE participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
+                    "END AS sire " +
+                    "LIMIT 1" +
 
-            SQLFragment sql = new SQLFragment(arrivalAndBirthUnion);
+                    ")";
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
             ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
             newCol.setLabel("Sire NEW");
             newCol.setDescription("Returns the animal's updated sire id");
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("dam") == null)
+        {
+            String dam_new = "dam";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
+
+            // Here we want a union of the birth and arrival tables to get the dam of the animal
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                    "CASE " +
+                    "WHEN " +
+                        "(SELECT a.participantid as dam " +
+                    "FROM " +
+                        "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                    " WHERE " +
+                        " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.dam AND a.vendor_id != a.participantid " +
+                    "ORDER BY b.date DESC LIMIT 1 " +
+                    ") " +
+                    "IS NOT NULL " +
+                    "THEN " +
+                        "(SELECT a.participantid as dam " +
+                    "FROM " +
+                        "studydataset." + arrival.getName() + " a, "+ "studydataset." + arrival.getName() + " b " +
+                    "WHERE " +
+                        "b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid and a.vendor_id = b.dam  and a.vendor_id != a.participantid " +
+                    " ORDER BY b.date DESC LIMIT 1" +
+                    ") " +
+                    "WHEN " +
+                    "(SELECT a.participantid as dam " +
+                    "FROM " +
+                    "studydataset." + arrival.getName() + " a, studydataset." + birth.getName() + " b " +
+                    " WHERE " +
+                    " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.dam AND a.vendor_id != a.participantid " +
+                    "ORDER BY b.date DESC LIMIT 1 " +
+                    ") " +
+                    "IS NOT NULL " +
+                    "THEN " +
+                    "(SELECT a.participantid as dam " +
+                    "FROM " +
+                    "studydataset." + arrival.getName() + " a, "+ "studydataset." + birth.getName() + " b " +
+                    "WHERE " +
+                    "b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid and a.vendor_id = b.dam  and a.vendor_id != a.participantid " +
+                    " ORDER BY b.date DESC LIMIT 1" +
+                    ") " +
+                    "WHEN " +
+                        "(SELECT dam FROM studydataset." + arrival.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
+                    "THEN " +
+                        "(SELECT dam FROM studydataset." + arrival.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
+                    "WHEN " +
+                        "(SELECT dam FROM studydataset." + birth.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
+                    "THEN " +
+                        "(SELECT dam FROM studydataset." + birth.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
+                    "ELSE " +
+                       " (SELECT dam_old FROM studydataset." + demographics.getName() + " WHERE participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
+                    "END AS dam " +
+                    "LIMIT 1" +
+
+            ")";
+
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+            ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Dam NEW");
+            newCol.setDescription("Returns the animal's updated dam id");
             table.addColumn(newCol);
         }
     }

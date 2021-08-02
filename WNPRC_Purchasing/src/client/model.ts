@@ -1,5 +1,6 @@
 import { immerable } from 'immer';
 import { Map } from 'immutable';
+import {PROGRAM_DEFAULT_VAL} from "./constants";
 
 export class VendorModel {
     /**
@@ -86,7 +87,8 @@ export class PurchaseAdminModel {
     readonly assignedTo: number;
     readonly paymentOption: number;
     readonly qcState: number;
-    readonly program: string = '4';
+    readonly program: string = PROGRAM_DEFAULT_VAL;
+    readonly rejectReason?: string;
     readonly confirmationNum?: string;
     readonly invoiceNum?: string;
     readonly orderDate?: Date;

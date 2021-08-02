@@ -21,10 +21,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.notification.NotificationService;
@@ -41,6 +44,7 @@ import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.MemberType;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RoleAssignment;
 import org.labkey.api.security.SecurityManager;
@@ -50,6 +54,7 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.MailHelper;
 import org.labkey.api.util.emailTemplate.EmailTemplateService;
@@ -69,6 +74,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -84,10 +90,36 @@ public class WNPRC_PurchasingController extends SpringActionController
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WNPRC_PurchasingController.class);
     public static final String NAME = "wnprc_purchasing";
     public static final Double ADDITIONAL_REVIEW_AMT = 5000.0; // additional review is required for requests >= $5000
+    private static final String FOLDER_ADMIN_ROLE = "Folder Administrator";
 
     public WNPRC_PurchasingController()
     {
         setActionResolver(_actionResolver);
+    }
+
+    @NotNull
+    private List<User> getFolderAdmins()
+    {
+        List<RoleAssignment> folderAdminGroups = getContainer().getPolicy().getAssignments().stream().filter(roleAssignment -> roleAssignment.getRole().getName().equals(FOLDER_ADMIN_ROLE)).collect(Collectors.toList());
+        List<User> folderAdmins = new ArrayList<>();
+        for (RoleAssignment folderAdmin : folderAdminGroups)
+        {
+            int userId = folderAdmin.getUserId();
+            //handle individual users assigned to folder admin role
+            if (null == SecurityManager.getGroup(userId))
+            {
+                folderAdmins.add(UserManager.getUser(userId));
+            }
+            //handle groups assigned to folder admin role
+            else
+            {
+                Set<User> activeUsers = SecurityManager.getAllGroupMembers(SecurityManager.getGroup(userId), MemberType.ACTIVE_USERS);
+                folderAdmins.addAll(activeUsers);
+            }
+
+        }
+
+        return folderAdmins;
     }
 
     @RequiresPermission(InsertPermission.class)
@@ -147,6 +179,30 @@ public class WNPRC_PurchasingController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
+    public class GetFolderAdminsAction extends ReadOnlyApiAction
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            Map<String, Object> resultProperties = new HashMap<>();
+            List<User> folderAdmins = getFolderAdmins(); //this doesn't include site admins
+            JSONArray results = new JSONArray();
+
+            for (User user : folderAdmins)
+            {
+                JSONObject json = new JSONObject();
+                json.put("userId", user.getUserId());
+                json.put("displayName", user.getDisplayName(getUser()));
+                results.put(json);
+            }
+
+            resultProperties.put("success", true);
+            resultProperties.put("results", results);
+            return new ApiSimpleResponse(resultProperties);
+        }
+    }
+
+    @RequiresPermission(InsertPermission.class)
     public class SubmitRequestAction extends MutatingApiAction<RequestForm>
     {
         @Override
@@ -183,17 +239,27 @@ public class WNPRC_PurchasingController extends SpringActionController
                 throw new BatchValidationException(validationExceptions, null);
             }
 
+            //email notification
             EmailTemplateForm emailTemplateForm = getValuesForEmailTemplate(requestForm);
 
-            //if its a new request
-            if (null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest())
+            try
             {
-                sendNewRequestEmailNotification(emailTemplateForm);
+                //if its a new request or a reorder
+                if ((null != requestForm.getIsNewRequest() && requestForm.getIsNewRequest()) ||
+                        (null != requestForm.getIsReorder() && requestForm.getIsReorder()))
+                {
+                    sendNewRequestEmailNotification(emailTemplateForm);
+                }
+                else
+                {
+                    sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
+                }
             }
-            else
+            catch (ConfigurationException | MessagingException | IOException | ValidationException e)
             {
-                sendRequestChangeEmailNotification(oldStatusVal, emailTemplateForm, requestForm, oldLineItems);
+                _log.error("Error sending purchasing email notification for request # " + requestForm.getRowId(), e);
             }
+
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
             response.put("requestId", requestForm.getRowId());
@@ -301,6 +367,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                         catch (javax.mail.internet.AddressException e)
                         {
                             _log.error("Error sending line item update message to " + endUser.getEmail() , e);
+                            throw new MessagingException(e.getMessage(), e);
                         }
                 }
             }
@@ -326,11 +393,12 @@ public class WNPRC_PurchasingController extends SpringActionController
             String emailSubject = requestEmailTemplate.renderSubject(getContainer());
             String emailBody = requestEmailTemplate.renderBody(getContainer());
 
+            List<User> folderAdmins = getFolderAdmins();
+
+            //send emails to all folder admins, which includes purchasing director for purchases >= $5000
             if (emailTemplateForm.getTotalCost().compareTo(BigDecimal.valueOf(ADDITIONAL_REVIEW_AMT)) >= 0)
             {
-                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
-
-                for (User user : adminUsers)
+                for (User user : folderAdmins)
                 {
                     NotificationService.get().sendMessageForRecipient(
                             getContainer(), UserManager.getUser(getUser().getUserId()), user,
@@ -339,16 +407,13 @@ public class WNPRC_PurchasingController extends SpringActionController
                             String.valueOf(emailTemplateForm.getRowId()), "New request over $5000");
                 }
             }
+            //send emails to all folder admins minus the purchasing director for purchases < $5000
             else
             {
                 //get purchasing dir userId
                 Map<Integer, String> purchasingDirUserIds = getPurchasingDirectorUserIds();
 
-                //get folder admin users
-                List<User> adminUsers = SecurityManager.getUsersWithPermissions(getContainer(), Collections.singleton(AdminPermission.class));
-
-                //send emails to ALL folder admins
-                for (User user : adminUsers)
+                for (User user : folderAdmins)
                 {
                     if (!purchasingDirUserIds.containsKey(user.getUserId()))
                     {
@@ -383,6 +448,7 @@ public class WNPRC_PurchasingController extends SpringActionController
             emailTemplateForm.setRequestDate((Date) map.get("requestdate"));
             emailTemplateForm.setTotalCost((BigDecimal)map.get("totalcost"));
             emailTemplateForm.setRequestStatus((String)map.get("requeststatus"));
+            emailTemplateForm.setRejectReason((String)map.get("rejectReason"));
             if (null != map.get("orderdate"))
             {
                 emailTemplateForm.setOrderDate((Date) map.get("orderdate"));
@@ -528,6 +594,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         Integer _rowId;
         String _vendor;
         String _requestStatus;
+        String _rejectReason;
         Date _requestDate;
         Date _orderDate;
         User _requester;
@@ -564,6 +631,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setRequestStatus(String requestStatus)
         {
             this._requestStatus = requestStatus;
+        }
+
+        public String getRejectReason()
+        {
+            return _rejectReason;
+        }
+
+        public void setRejectReason(String rejectReason)
+        {
+            _rejectReason = rejectReason;
         }
 
         public String getRequestDate()
@@ -630,6 +707,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         String _shippingAttentionTo;
         String _comments;
         Integer _qcState;
+        String _rejectReason;
         Integer _assignedTo;
         Integer _paymentOption;
         String _program;
@@ -652,6 +730,7 @@ public class WNPRC_PurchasingController extends SpringActionController
         BigDecimal _totalCost;
         String _qcStateLabel;
         Boolean _isNewRequest;
+        Boolean _isReorder;
 
         public List<JSONObject> getLineItems()
         {
@@ -761,6 +840,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setQcState(Integer qcState)
         {
             _qcState = qcState;
+        }
+
+        public String getRejectReason()
+        {
+            return _rejectReason;
+        }
+
+        public void setRejectReason(String rejectReason)
+        {
+            _rejectReason = rejectReason;
         }
 
         public Integer getAssignedTo()
@@ -981,6 +1070,16 @@ public class WNPRC_PurchasingController extends SpringActionController
         public void setIsNewRequest(Boolean newRequest)
         {
             _isNewRequest = newRequest;
+        }
+
+        public Boolean getIsReorder()
+        {
+            return _isReorder;
+        }
+
+        public void setIsReorder(Boolean reorder)
+        {
+            _isReorder = reorder;
         }
     }
 

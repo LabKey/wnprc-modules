@@ -10,4 +10,4 @@ SELECT
     pr.assignedTo,
     pr.attachments
 FROM ehr_purchasing.purchasingRequests pr
-WHERE ISMEMBEROF(pr.assignedTo)
+WHERE ISMEMBEROF(pr.assignedTo) AND (pr.qcState.label = 'Review Pending' OR pr.qcState.label = 'Request Approved')

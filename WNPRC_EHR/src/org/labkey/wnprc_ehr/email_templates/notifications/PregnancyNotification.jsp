@@ -55,14 +55,14 @@
     <tr>
         <td>Animal ID:</td>
         <td>
-            <a href="<%= hrefForAnimalAbstract %>">
+            <a href="<%= h(hrefForAnimalAbstract) %>">
                 <%= h(Id) %>
             </a>
         </td>
     </tr>
     <tr>
         <td>Sex:</td>
-        <td><%= gender %></td>
+        <td><%= h(gender) %></td>
     </tr>
 </table>
 

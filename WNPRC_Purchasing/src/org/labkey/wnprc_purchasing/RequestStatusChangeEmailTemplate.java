@@ -30,8 +30,12 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     @Override
     protected void addCustomReplacements(Replacements replacements)
     {
-        replacements.add("requestNum", Integer.class, "Request number", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRowId());
-        replacements.add("vendor", String.class, "Vendor name", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getVendor());
+        replacements.add("requestNum", Integer.class, "Request number", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getRowId());
+
+        replacements.add("vendor", String.class, "Vendor name", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getVendor());
+
         replacements.add("status", String.class, "Request status", ContentType.Plain, c -> {
             if (_notificationBean == null)
                 return null;
@@ -44,52 +48,38 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             return _notificationBean.getRequestStatus();
         });
 
-        _replacements.add(new ReplacementParam<String>("orderDate", String.class, "Order placed date")
-        {
-            @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getOrderDate();}
-        });
+        replacements.add("created", String.class, "Date of request submission", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getRequestDate());
 
-        _replacements.add(new ReplacementParam<String>("total", String.class, "Total cost")
-        {
-            @Override
-            public String getValue(Container c) {return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();}
-        });
+        replacements.add("orderDate", String.class, "Order placed date", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getOrderDate());
 
-        _replacements.add(new ReplacementParam<String>("role", String.class, "Purchasing dept or purchasing director")
-        {
-            @Override
-            public String getValue(Container c)
+        replacements.add("total", String.class, "Total cost", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getFormattedTotalCost());
+
+        replacements.add("role", String.class, "Purchasing dept or purchasing director", ContentType.Plain, c -> {
+            if (_notificationBean != null)
             {
-                if (_notificationBean != null)
+                if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.ADDITIONAL_REVIEW_AMT)) >= 0
+                        && (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
+                        || _notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected")))
                 {
-                    if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.ADDITIONAL_REVIEW_AMT)) >= 0
-                            && (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Approved")
-                            || _notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected")))
-                    {
-                        return "purchasing director";
-                    }
-                    return "purchasing department";
+                    return "purchasing director";
                 }
-                return null;
+                return "purchasing department";
             }
+            return null;
         });
 
-        _replacements.add(new ReplacementParam<String>("rejectReason", String.class, "Reason for Request Rejection")
-        {
-            @Override
-            public String getValue(Container c)
+        replacements.add("rejectReason", String.class, "Reason for Request Rejection", ContentType.Plain, c -> {
+            if (_notificationBean != null)
             {
-                if (_notificationBean != null)
+                if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))
                 {
-                    if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))
-                    {
-                        return "Reason for rejection:\n" + (StringUtils.isBlank(_notificationBean.getRejectReason()) ? "Reason not provided." : _notificationBean.getRejectReason());
-                    }
+                    return "Reason for rejection:\n" + (StringUtils.isBlank(_notificationBean.getRejectReason()) ? "Reason not provided." : _notificationBean.getRejectReason());
                 }
-                return null;
             }
-            return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost(); // TODO: This looks wrong -- should probably just return null here
+            return null;
         });
     }
 }

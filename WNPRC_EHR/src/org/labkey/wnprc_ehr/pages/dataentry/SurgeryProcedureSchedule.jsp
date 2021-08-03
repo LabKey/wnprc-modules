@@ -325,7 +325,7 @@
     }
 
     function getEventSubject(form) {
-        return form.animalid + ' - ' + form.procedurename;
+        return form.animalid + ' - ' + form.proceduredisplayname;
     }
 
     function createRequestObj(action, calendarIdSuffix) {
@@ -725,7 +725,7 @@
                 <%--<!-- ko if: requestid() != '' -->--%>
                 <dl class="dl-horizontal">
                     <dt>Task ID:            </dt> <dd>{{taskid}}</dd>
-                    <dt>Procedure Name:     </dt> <dd>{{procedurename}}</dd>
+                    <dt>Procedure Name:     </dt> <dd>{{proceduredisplayname}}</dd>
                     <dt>Unit:               </dt> <dd>{{procedureunitdisplay}}</dd>
                     <dt>Animal ID:          </dt> <dd><a href="{{animalLink}}">{{animalid}}</a></dd>
                     <dt>Start Table Time:   </dt> <dd>{{starttabletime}}</dd>
@@ -1143,7 +1143,7 @@
                 objectid:             ko.observable(),
                 requestid:            ko.observable(),
                 taskid:               ko.observable(''),
-                procedurename:        ko.observable(),
+                proceduredisplayname:        ko.observable(),
                 procedureunit:    ko.observable(),
                 procedureunitdisplay: ko.observable(),
                 age:                  ko.observable(),
@@ -1175,7 +1175,7 @@
                 priority:           '',
                 date:               '',
                 enddate:            '',
-                procedurename:      '',
+                proceduredisplayname:      '',
                 procedureunit:  '',
                 procedureunitdisplay: '',
                 comments:           '',
@@ -1303,7 +1303,7 @@
                 spacerDiv = createStaticDiv("", "spacer_" + rooms.length + 1, "");
                 colDiv.appendChild(spacerDiv);
 
-                let includedFields = ["Animal ID:animalid", "Procedure(s):procedurename", "Unit:procedureunitdisplay", "Project:project", "Protocol:protocol_fs_protocol",
+                let includedFields = ["Animal ID:animalid", "Procedure(s):proceduredisplayname", "Unit:procedureunitdisplay", "Project:project", "Protocol:protocol_fs_protocol",
                     "Account:account", "Surgeon:surgeon", "Consult Request:consultrequest", "Biopsy Needed:biopsyneeded",
                     "Surgery Tech Needed:surgerytechneeded", "SPI Needed:spineeded", "Vet Needed:vetneeded",
                     "Reason Vet is Needed:vetneededreason", "Special Equipment/Supplies Requested:equipment",

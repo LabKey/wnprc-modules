@@ -65,6 +65,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors, 'frequency', 'Frequency is required when entering regulated water orders.', 'ERROR');
     }
     if (!row.volume && row.waterSource == 'regulated'){
+        console.log ("water vol "+ row.volume);
         EHR.Server.Utils.addError(scriptErrors, 'volume', 'Volume is required when entering regulated water orders.', 'ERROR');
     }
 

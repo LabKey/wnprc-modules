@@ -509,6 +509,9 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             route: {
                 defaultValue : 'oral'
             },
+            provideFruit:{
+                allowBlank: false
+            },
             location:{
                 defaultValue: 'lab',
                 lookup:{

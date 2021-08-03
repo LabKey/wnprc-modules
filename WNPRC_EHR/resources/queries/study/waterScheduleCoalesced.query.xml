@@ -22,6 +22,9 @@
                     <column columnName="date">
                         <formatString>yyyy-MM-dd HH:mm</formatString>
                     </column>
+                    <column columnName="dateOrdered">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
                     <column columnName="animalId">
                         <fk>
                             <fkDbSchema>study</fkDbSchema>

@@ -112,9 +112,10 @@ import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
-import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
+import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
-import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
+        import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
+        import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
 import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
@@ -123,12 +124,9 @@ import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
 import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
-import org.labkey.api.ldk.notification.NotificationService;
-import org.labkey.wnprc_ehr.updates.ModuleUpdate;
+        import org.labkey.wnprc_ehr.updates.ModuleUpdate;
 import org.reflections.Reflections;
 
-        import java.io.File;
-        import java.nio.file.Paths;
         import java.util.ArrayList;
 import java.util.Arrays;
         import java.util.Collection;
@@ -408,7 +406,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new BehaviorNotification(this),
                 new DeathNotification(),
                 new ColonyAlertsNotification(this),
-                new WaterMonitoringNotification(this),
                 new TreatmentAlertsNotification(this),
                 new VvcNotification(this),
                 new FoodNotStartedNotification(this),
@@ -418,7 +415,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new AnimalRequestNotification(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
-                new ViralLoadQueueNotification(this)
+                new ViralLoadQueueNotification(this),
+                new WaterOrdersAlertNotification(this),
+                new WaterMonitoringAnimalWithOutEntriesNotification(this)
         );
 
         for (Notification notification : notifications)

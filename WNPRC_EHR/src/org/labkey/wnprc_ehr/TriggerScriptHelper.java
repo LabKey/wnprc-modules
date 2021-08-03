@@ -861,7 +861,7 @@ public class TriggerScriptHelper {
         Calendar waterClientDate = Calendar.getInstance();
         waterClientDate.setTime(clientDate);
 
-        if (date.toInstant().isAfter(treshholdTime.toInstant()) || waterClientDate.toInstant().isAfter(treshholdTime.toInstant())){
+        if (date.toInstant().isAfter(treshholdTime.toInstant())){
             if (assignedTo.equals("animalcare") && recordSource.equals("LabWaterForm")){
                 errorMessage = "Additional water for today assignedTo animalCare cannot be entered after 1:30 PM";
             }
@@ -2320,30 +2320,6 @@ public class TriggerScriptHelper {
             Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
             notification.sendManually(ehrContainer);
         }
-    }
-
-    // Returns a list of vendor ids if they do not match the current enteredVendorId
-    public List<String> checkOldVendorIds(String objectid, String animalId, String enteredVendorId) throws SQLException
-    {
-        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
-        SimplerFilter filter = new SimplerFilter("Id", CompareType.EQUAL, animalId);
-        filter.addCondition("objectid", CompareType.DOES_NOT_CONTAIN, objectid);
-
-        JSONArray arrivals = queryFactory.selectRows("study", "arrival", filter);
-        List<String> l = new ArrayList<>();
-        for (int i = 0; i < arrivals.length(); i++)
-        {
-            String vendorId = (String) arrivals.getJSONObject(i).get("vendor_id");
-            if (vendorId != null)
-            {
-                if (!enteredVendorId.equals(vendorId))
-                {
-                    l.add(vendorId);
-                    return l;
-                }
-            }
-        }
-        return l;
     }
 
 }

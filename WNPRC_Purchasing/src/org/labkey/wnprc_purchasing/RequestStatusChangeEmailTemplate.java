@@ -30,8 +30,12 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     @Override
     protected void addCustomReplacements(Replacements replacements)
     {
-        replacements.add("requestNum", Integer.class, "Request number", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getRowId());
-        replacements.add("vendor", String.class, "Vendor name", ContentType.Plain, c -> _notificationBean == null ? null : _notificationBean.getVendor());
+        replacements.add("requestNum", Integer.class, "Request number", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getRowId());
+
+        replacements.add("vendor", String.class, "Vendor name", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getVendor());
+
         replacements.add("status", String.class, "Request status", ContentType.Plain, c -> {
             if (_notificationBean == null)
                 return null;
@@ -44,14 +48,16 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             return _notificationBean.getRequestStatus();
         });
 
+        replacements.add("created", String.class, "Date of request submission", ContentType.Plain,
+                c -> _notificationBean == null ? null : _notificationBean.getRequestDate());
+
         replacements.add("orderDate", String.class, "Order placed date", ContentType.Plain,
                 c -> _notificationBean == null ? null : _notificationBean.getOrderDate());
 
         replacements.add("total", String.class, "Total cost", ContentType.Plain,
                 c -> _notificationBean == null ? null : _notificationBean.getFormattedTotalCost());
 
-        replacements.add("role", String.class, "Purchasing dept or purchasing director", ContentType.Plain, c ->
-        {
+        replacements.add("role", String.class, "Purchasing dept or purchasing director", ContentType.Plain, c -> {
             if (_notificationBean != null)
             {
                 if (_notificationBean.getTotalCost().compareTo(BigDecimal.valueOf(WNPRC_PurchasingController.ADDITIONAL_REVIEW_AMT)) >= 0
@@ -65,8 +71,7 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
             return null;
         });
 
-        replacements.add("rejectReason", String.class, "Reason for Request Rejection", ContentType.Plain, c ->
-        {
+        replacements.add("rejectReason", String.class, "Reason for Request Rejection", ContentType.Plain, c -> {
             if (_notificationBean != null)
             {
                 if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))

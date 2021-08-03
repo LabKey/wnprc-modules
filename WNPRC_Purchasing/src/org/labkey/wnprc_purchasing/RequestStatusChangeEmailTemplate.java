@@ -1,5 +1,6 @@
 package org.labkey.wnprc_purchasing;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.emailTemplate.EmailTemplate;
 
@@ -13,7 +14,8 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
     protected static final String DEFAULT_DESCRIPTION = "Request status change notification";
     protected static final String NAME = "WNPRC Purchasing - Request status change notification";
     protected static final String DEFAULT_BODY = "Purchase request # ^requestNum^ from vendor ^vendor^" +
-            " submitted on ^created^ for the total of ^total^ has been ^status^ by the ^role^.\n";
+            " submitted on ^created^ for the total of ^total^ has been ^status^ by the ^role^.\n" +
+            "\n^rejectReason^\n";
 
     private final List<ReplacementParam> _replacements = new ArrayList<>();
     private WNPRC_PurchasingController.EmailTemplateForm _notificationBean;
@@ -85,7 +87,23 @@ public class RequestStatusChangeEmailTemplate extends EmailTemplate
                     }
                     return "purchasing department";
                 }
-                return _notificationBean == null ? null : _notificationBean.getFormattedTotalCost();
+                return null;
+            }
+        });
+
+        _replacements.add(new ReplacementParam<String>("rejectReason", String.class, "Reason for Request Rejection")
+        {
+            @Override
+            public String getValue(Container c)
+            {
+                if (_notificationBean != null)
+                {
+                    if (_notificationBean.getRequestStatus().equalsIgnoreCase("Request Rejected"))
+                    {
+                        return "Reason for rejection:\n" + (StringUtils.isBlank(_notificationBean.getRejectReason()) ? "Reason not provided." : _notificationBean.getRejectReason());
+                    }
+                }
+                return null;
             }
         });
 

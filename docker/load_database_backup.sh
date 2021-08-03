@@ -46,6 +46,11 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --tablespace)     ## tablespace that the db should be set to (e.g., for an external drive)
+            tablespace="$2"
+            shift
+            shift
+            ;;
         --tmppath)
             tmppath="$2"
             shift
@@ -164,6 +169,20 @@ else
   ${pgpath}psql -U postgres -p "${pgport#*:}" -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
+
+#-------------------------------------------------------------------------------
+# Change the tablespace of the db if one is provided
+#-------------------------------------------------------------------------------
+if [[ $tablespace ]]; then
+  echo -n 'Setting tablespace to: '
+  echo $tablespace
+  if [[ -z $dock ]]; then
+    docker-compose exec postgres psql -U postgres -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
+  else
+    ${pgpath}psql -U postgres -p "${pgport#*:}" -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
+  fi
+fi
+  
 
 #-------------------------------------------------------------------------------
 # Actually restore the database, using a background proc so we can track progress

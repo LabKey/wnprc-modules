@@ -134,6 +134,12 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         return this;
     }
 
+    public CreateRequestPage reorderButton()
+    {
+        elementCache().reorder.click();
+        return this;
+    }
+
     public CreateRequestPage submitForReview()
     {
         clickAndWait(elementCache().submitForReview);
@@ -200,6 +206,12 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
     {
         SelectWrapper.Select(Locator.byClass("status-input form-control"))
                 .findWhenNeeded(getDriver()).selectByVisibleText(status);
+        return this;
+    }
+
+    public CreateRequestPage setRejectReason(String rejectReason)
+    {
+        elementCache().rejectReason.sendKeys(rejectReason);
         return this;
     }
 
@@ -293,6 +305,7 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         final WebElement attachment = Locator.id("fileUpload").findWhenNeeded(this).withTimeout(200);
 
         final WebElement submitForReview = Locator.button("Submit for Review").findWhenNeeded(this);
+        final WebElement reorder = Locator.button("Reorder").findWhenNeeded(this);
         final WebElement submit = Locator.button("Submit").findWhenNeeded(this);
         final WebElement cancel = Locator.button("Cancel").findWhenNeeded(this);
         final WebElement alertMessage = Locator.byClass("alert alert-danger").findWhenNeeded(this);
@@ -301,6 +314,8 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         final Select vendor = SelectWrapper.Select(Locator.byClass("vendor-input form-control "))
                 .findWhenNeeded(this);
         final Select shippingDest = SelectWrapper.Select(Locator.byClass("shipping-dest-input form-control "))
+                .findWhenNeeded(this);
+        final WebElement rejectReason = Locator.tagWithId("textarea", "reason-for-rejection-id")
                 .findWhenNeeded(this);
 
     }

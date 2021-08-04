@@ -53,6 +53,10 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
         return "0 0 13,15,17,19 * * ?";
     }
 
+    public String getCategory(){
+        return "Husbandry";
+    }
+
     public String getScheduleDescription()
     {
         return "daily at 1300, 1730";

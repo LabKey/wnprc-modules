@@ -15,30 +15,25 @@
  */
 package org.labkey.wnprc_ehr.notification;
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.Selector;
+import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.query.BatchValidationException;
 
-import java.sql.ResultSet;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,7 +53,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
         return "Water Monitoring";
     }
 
-    private static final Logger _log = Logger.getLogger(WaterMonitoringAnimalWithOutEntriesNotification.class);
+
 
     @Override
     public String getEmailSubject(Container c)
@@ -68,6 +63,10 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
 
     @Override
     public String getCronString() { return "0 0 13 * * ?"; }
+
+    public String getCategory(){
+        return "Husbandry";
+    }
 
     @Override
     public String getScheduleDescription()
@@ -102,17 +101,35 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
     protected void findAnimalsWithEnoughWater(final Container c, final User u, final StringBuilder msg)
     {
         Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());               //then we find all records with problems in the calculated_status field
+        cal.setTime(new Date());
 
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("mlsPerKg"), 20, CompareType.LT);
         filter.addCondition(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
 
-        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterPrePivot"),PageFlowUtil.set("animalId","date","mlsPerKg"), filter, null);
+        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterPrePivot"),PageFlowUtil.set("animalId","date","mlsPerKg","TotalWater"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)
         {
             msg.append("<b>WARNING: There are " + count + " animals that have remaining water for today.</b><br>\n");
+            Map<String,Object>[] totalWaterForDay = ts.getMapArray();
+            msg.append("<table border=1 style='border-collapse: collapse;'>");
+            msg.append("<tr><td style='padding: 5px; text-align: center;'><strong>Id</strong></td>" +
+                    "<td style='padding: 5px; text-align: center;'><strong>Date</strong></td>" +
+                    "<td style='padding: 5px; text-align: center;'><strong>mlsPerKg</strong></td>" +
+                    "<td style='padding: 5px; text-align: center;'><strong>Total Water Given</strong></td></tr>\n");
+
+            for(Map<String,Object> mapItem : totalWaterForDay){
+                LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("animalId"),String.class)
+                        + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
+                        + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class)
+                        + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("TotalWater"),String.class) +"</td></tr>" );
+
+            }
+            msg.append("</table>");
             msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "waterPrePivot", null) + "&query.date~dateeq=" + AbstractEHRNotification._dateFormat.format(cal.getTime()) +"&query.mlsPerKg~lt=20'>Click here to view them</a><br>\n\n");
             msg.append("<hr>\n\n");
 
@@ -121,23 +138,37 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
 
     protected  void findAnimalsWithWaterEntries(final Container c, final User u, final StringBuilder msg){
 
-        LocalDate today = LocalDate.now();
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        int datesInPast = 5;
 
+        for (int i = 0; i<datesInPast; i++){
 
-        Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
-        parameters.put("CheckDate", today);
+            Map<String, Object> parameters = new CaseInsensitiveHashMap<>();
+            parameters.put("CheckDate", date);
 
-        TableInfo ti = QueryService.get().getUserSchema(u,c,"study").getTable("waterScheduledAnimalWithOutEntries");
-        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id"),null,null);
-        ts.setNamedParameters(parameters);
+            TableInfo ti = QueryService.get().getUserSchema(u, c, "study").getTable("waterScheduledAnimalWithOutEntries");
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("id"), null, null);
+            ts.setNamedParameters(parameters);
 
-        long total = ts.getRowCount();
+            long total = ts.getRowCount();
 
-        if (total == 0 ){
-            msg.append("All regulated animals have at least one entries");
-        }else{
-            msg.append("There are "+ total + " animals in the system that have no records in water given dataset for today.");
+            if (total == 0)
+            {
+                msg.append("All regulated animals have at least one entries");
+            }
+            else
+            {
+                msg.append("There are " + total + " animals in the system that have no records in water given dataset for " + date.getDayOfWeek().toString() +" ("+ date.format(formatter) + ").<br>");
+                Map<String, Object>[] animalsWithOutEntries = ts.getMapArray();
+                for (Map<String, Object> mapItem : animalsWithOutEntries)
+                {
+                    msg.append(ConvertHelper.convert(mapItem.get("id"), String.class) + "<br>");
 
+                }
+                msg.append("<br>");
+            }
+            date = date.minusDays(1);
         }
 
 

@@ -2213,6 +2213,7 @@ public class TriggerScriptHelper {
         scheduledAnimalRecord.put("id",animalId);
         scheduledAnimalRecord.put("condition",waterSource);
         scheduledAnimalRecord.put("project", project);
+        scheduledAnimalRecord.put("mlsPerKg", "20");
 
         rowToAdd = SimpleQueryUpdater.makeRowsCaseInsensitive(scheduledAnimalRecord);
         //ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterScheduledAnimals");

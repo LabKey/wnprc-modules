@@ -577,7 +577,7 @@
                                     successCallback(
                                         events.map(function (row) {
                                         var volume;
-                                        if (row.volume) {
+                                        if (row.volume != null) {
                                             volume = row.volume + 'mL';
                                         }
                                         else {
@@ -588,7 +588,7 @@
                                             title: row.animalId + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
-                                             //vol: row.volume,
+                                            groupId : row.objectIdCoalesced,
                                             rawRowData: row,
                                             textColor: '#000000',
                                             //editable: true,
@@ -624,7 +624,7 @@
 
                                     successCallback(events.map(function (row) {
                                         var volume;
-                                        if (row.volume) {
+                                        if (row.volume != null) {
                                             volume = row.volume+ 'ml';
                                         }
                                         else {
@@ -637,7 +637,7 @@
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
-                                            // vol: row.volume,
+                                            groupId : row.objectIdCoalesced,
                                             rawRowData: row,
                                             //editable: true,
                                             description: 'Water for animal ' + row.animalId
@@ -655,11 +655,13 @@
                                 })
 
                             }
-                        }
+                        },
+                        id : 'WaterScheduleCoalesced' //setting source id for full calendar
                 },
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
                         if ($animalId == 'undefined' || $animalId == "null"){
+                            debugger;
                         WebUtils.API.selectRows("study", "waterPrePivot", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d')
@@ -671,7 +673,7 @@
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
                                             title: row.animalId + " Total: " + row.TotalWater,
-                                            start: new Date(row.Date),
+                                            start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
                                             rawRowData: row
@@ -704,7 +706,7 @@
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
                                             title: row.animalId + " Total: " + row.TotalWater,
-                                            start: new Date(row.Date),
+                                            start: new Date(row.date),
                                             textColor: '#000000',
                                             allDay: true,
                                             rawRowData: row
@@ -721,19 +723,9 @@
                                 }))
                                 })
                             }
-                        }
-                }/*,
-                {
-                    events:[
-                        {
-                            title: 'Test123 this is a really long string to see what happens!',
-                            start: '2021-05-21',
-                            end: '2021-05-21'
-                        }
-                    ],
-                    color: 'yellow',
-                    eventTextColor: 'red'
-                }*/
+                        },
+                    id : 'totalWater' //setting source id for full calendar
+                }
             ],
             loading: function (isLoading){
                 if (isLoading){
@@ -754,10 +746,11 @@
                     $('#water-calendar').unblock();
                 }
             },
+            //eventContent: function(arg) {
             eventClassNames: function(arg) {
                 if (arg.event.extendedProps.selected) {
                     return ["event-selected"];
-                } else {
+                } else{
                     return [];
                 }
             },
@@ -767,8 +760,11 @@
                 //This updates all the fields that can be change in this form
                 //We also have to reset the dirty flag to track any change after the event is loaded into
                 //the form to be able to change.
-
-                WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
+                if (info.event.source.id == "totalWater") {
+                    WebUtils.VM.taskDetails["volume"](info.event.extendedProps.rawRowData.TotalWater.toString());
+                }else{
+                    WebUtils.VM.form.volumeForm.value(info.event.extendedProps.rawRowData.volume.toString());
+                }
                 WebUtils.VM.form.volumeForm.dirtyFlag.reset();
 
                 WebUtils.VM.form.provideFruitForm.value(info.event.extendedProps.rawRowData.provideFruit);
@@ -835,6 +831,7 @@
                     if (event){
                         event.setExtendedProp("selected",false)
                     }
+
                 }
                 info.event.setExtendedProp("selected",true);
                 selectedEvent = info.event;

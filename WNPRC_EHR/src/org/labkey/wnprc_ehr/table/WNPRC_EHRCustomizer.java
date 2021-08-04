@@ -23,23 +23,26 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
@@ -49,10 +52,13 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.ehr.EHRSchema;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermission;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -94,6 +100,8 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeDemographicsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "tasks")) {
                 customizeTasksTable((AbstractTableInfo) table);
+            } else if (matches(table, "wnprc", "animal_requests")) {
+                customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
             else if (table.getName().equalsIgnoreCase("waterOrders"))
                 appendEnddateFuture((AbstractTableInfo) table, "enddate");
@@ -865,6 +873,291 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             }
         }
     }
+
+    public static class AnimalIdsToOfferColumn extends DataColumn {
+        public AnimalIdsToOfferColumn(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+
+    }
+
+    public static class AnimalIdsToOfferColumnQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public AnimalIdsToOfferColumnQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                out.write("");
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                super.renderGridCellContents(ctx, out);
+            }
+            else
+            {
+                out.write("");
+            }
+
+        }
+
+    }
+    public static class AnimalRequestsEditLinkConditional extends DataColumn
+    {
+        private User _currentUser;
+
+        public AnimalRequestsEditLinkConditional(ColumnInfo colInfo, User currentUser)
+        {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+            {
+                if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+                {
+                    String edit = new String("");
+                    edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                            ctx.getViewContext().getContextPath() +
+                            "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                            ctx.get("rowid").toString() +
+                            "&update=1&returnUrl=" +
+                            ctx.getViewContext().getContextPath() +
+                            "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                    return edit;
+                } else
+                {
+                    return "";
+                }
+            }
+    }
+    public static class AnimalRequestsEditLinkShow extends DataColumn {
+        private User _currentUser;
+        public AnimalRequestsEditLinkShow(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            String edit = "";
+            edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                    ctx.get("rowid").toString() +
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+            return edit;
+
+        }
+
+    }
+    public static class AnimalReportLink extends DataColumn {
+        public AnimalReportLink(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+    }
+
+    public static class AnimalReportLinkQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public AnimalReportLinkQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx)
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getDisplayValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        @Override
+        public String getFormattedValue(RenderContext ctx)
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getFormattedValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+    }
+
+    private void customizeAnimalRequestsTable(AbstractTableInfo table)
+    {
+
+        UserSchema us = getStudyUserSchema(table);
+        if (us == null)
+        {
+            return;
+        }
+        User currentUser = us.getUser();
+
+        //Nail down individual fields for editing, unless user has permission
+        List<String> readOnlyFields = new ArrayList<>();
+        readOnlyFields.add("QCState");
+        readOnlyFields.add("dateapprovedordenied");
+        readOnlyFields.add("animalsorigin");
+        readOnlyFields.add("dateordered");
+        readOnlyFields.add("datearrival");
+        for (String item : readOnlyFields)
+        {
+            if (table.getColumn(item) != null)
+            {
+                ColumnInfo col = table.getColumn(item);
+                if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                {
+                    col.setReadOnly(true);
+                }
+            }
+        }
+
+
+        if (table.getColumn("edit") == null){
+
+            String edit = "edit";
+
+            String theQuery  = "( " +
+                    "(SELECT 'edit')" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, edit, sql, JdbcType.VARCHAR);
+            table.addColumn(newCol);
+            newCol.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                    {
+                        return new AnimalRequestsEditLinkShow(colInfo, currentUser);
+                    }
+                    else
+                    {
+                        return new AnimalRequestsEditLinkConditional(colInfo, currentUser);
+                    }
+                }
+            });
+        }
+
+        //re-render animalidsoffer column
+        if (table.getColumn("animalidstooffer") != null)
+        {
+            ColumnInfo col = table.getColumn("animalidstooffer");
+            col.setLabel("Animal Ids");
+            col.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                    {
+                        return new AnimalIdsToOfferColumn(colInfo);
+                    }
+                    else
+                    {
+                        col.setHidden(true);
+                        return new AnimalIdsToOfferColumnQCStateConditional(colInfo, currentUser);
+                    }
+                }
+            });
+        }
+
+        //create animal history report link from a set of animal ids
+        if (table.getColumn("animal_history_link") == null)
+        {
+            String animal_history_link = "animal_history_link";
+
+                String theQuery  = "( " +
+                        "(SELECT " +
+                        " CASE WHEN a.animalidstooffer is not null " +
+                        "THEN 'Report Link' " +
+                        "ELSE '' " +
+                        " END AS animal_history_link " +
+                        " FROM wnprc.animal_requests a " +
+                        "WHERE a.rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid  LIMIT 1)  " +
+                        ")";
+
+                SQLFragment sql = new SQLFragment(theQuery);
+
+                ExprColumn newCol = new ExprColumn(table, animal_history_link, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Animal History Link");
+                newCol.setDescription("Provides a link to the animal history records given the animal ids that were selected.");
+                newCol.setURL(StringExpressionFactory.create("ehr-animalHistory.view?#subjects:${animalidstooffer}&inputType:multiSubject&showReport:0&activeReport:abstractReport"));
+                table.addColumn(newCol);
+                newCol.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    @Override
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                        if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                        {
+                            return new AnimalReportLink(colInfo);
+                        }
+                        else
+                        {
+                            return new AnimalReportLinkQCStateConditional(colInfo, currentUser);
+                        }
+                    }
+                });
+
+        }
+    }
+
 
     private ColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
     {

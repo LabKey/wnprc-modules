@@ -1,5 +1,7 @@
 package org.labkey.wnprc_ehr;
 
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -45,11 +47,13 @@ import org.labkey.ehr.EHRSchema;
 import org.labkey.ehr.demographics.EHRDemographicsServiceImpl;
 import org.labkey.webutils.api.json.JsonUtils;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
+import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.ResultSet;
@@ -779,6 +783,13 @@ public class TriggerScriptHelper {
         AnimalRequestNotification notification = new AnimalRequestNotification(ehr, rowid, user, hostName);
         notification.sendManually(container, user);
     }
+    public void sendAnimalRequestNotificationUpdate(Integer rowid, Map<String,Object> row, Map<String,Object> oldRow, String hostName){
+        _log.info("Using java helper to send email for animal request record: "+rowid);
+        Module ehr = ModuleLoader.getInstance().getModule("EHR");
+        AnimalRequestNotificationUpdate notification = new AnimalRequestNotificationUpdate(ehr, rowid, row, oldRow, user, hostName);
+        Maps.difference(row,oldRow);
+        notification.sendManually(container, user);
+    }
 
     public void sendProjectNotification(Integer key, String hostName){
         _log.info("Using java helper to send email for project request record: "+key);
@@ -945,7 +956,7 @@ public class TriggerScriptHelper {
                 }
 
 
-                    
+
                    // JSONArray waterAmounts = ConvertHelper.convert(map.get("waterObjects"), JSONArray.class);
                     //waterAmounts.length();
 
@@ -2345,6 +2356,43 @@ public class TriggerScriptHelper {
             }
         }
         return l;
+    }
+
+    // get the friendly label of a field given a table and field name
+    public static String getFieldLabel(TableInfo ti, String fieldName)
+    {
+        return (ti != null && fieldName != null) ? ti.getColumn(fieldName).getLabel() : null;
+    }
+
+    // builds up a difference map with field label -> [old value, new value]
+    public static Map<String, ArrayList<String>> buildDifferencesMap(TableInfo ti, Map<String, Object> oldRow, Map<String, Object> newRow)
+    {
+        Map<String, ArrayList<String>> theDifferences = new TreeMap<>();
+        Map<String, MapDifference.ValueDifference<Object>> getDiff = Maps.difference(oldRow,newRow).entriesDiffering();
+        for (Map.Entry<String, MapDifference.ValueDifference<Object>> in : getDiff.entrySet()){
+            if (ti.getColumn(in.getKey()).isUserEditable()){
+                ArrayList<String> oldValNewValArr = new ArrayList<>();
+                if (in.getValue().leftValue() !=  null)
+                {
+                    oldValNewValArr.add(in.getValue().leftValue().toString());
+                }
+                else
+                {
+                    oldValNewValArr.add("");
+                }
+                if (in.getValue().rightValue() !=  null)
+                {
+                    oldValNewValArr.add(in.getValue().rightValue().toString());
+                }
+                else
+                {
+                    oldValNewValArr.add("");
+                }
+                theDifferences.put(getFieldLabel(ti, in.getKey()), oldValNewValArr);
+            }
+
+        }
+        return theDifferences;
     }
 
 }

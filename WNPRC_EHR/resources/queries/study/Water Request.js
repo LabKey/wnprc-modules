@@ -17,9 +17,9 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
         console.log ("value of QCState "+ row.QCState)
     }
 
-    console.log ("value of date "+ row.code);
+    //console.log ("value of date "+ row.code);
     if (row.code != 'c-10120'){
-        console.log ("value of date "+ row.code);
+        //console.log ("value of date "+ row.code);
         EHR.Server.Utils.addError(scriptErrors, 'code', 'This field is required amount', 'WARN');
         EHR.Server.Validation.verifyDate(row, scriptErrors, helper);
 
@@ -38,7 +38,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     if (!helper.isETL()){
         console.log("value of qcstate "+ row.QCStateLabel+ "  QCState Using Secuirty "+ EHR.Server.Security.getQCState(row)['isPublicData']);
         if (row.QCStateLabel=='Completed'){
-            console.log ("one record completed "+ row.Id);
+            console.log ("water request.js - one record completed "+ row.Id);
             row.QCState = 1;
 
         }

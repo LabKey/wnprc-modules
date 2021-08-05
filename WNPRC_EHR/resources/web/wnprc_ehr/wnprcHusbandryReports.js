@@ -2,7 +2,7 @@ Ext4.namespace('EHR.reports');
 
 EHR.reports.waterGridCalendar = function (panel, tab) {
     var filterArray = panel.getFilterArray(tab);
-    debugger;
+    //debugger;
     var title = panel.getTitleSuffix();
 
     var target = tab.add({tag: 'span', style: 'padding-bottom: 20px'});

@@ -36,7 +36,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         var map = helper.getProperty('clientEncounterDate');
         var clientEncounterDate = [];
         if (map && map[row.Id]){
-            console.log(map[row.Id]);
+            //console.log(map[row.Id]);
             clientEncounterDate = map[row.Id];
 
         }
@@ -51,7 +51,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         var map = helper.getProperty('clientEncounterDate');
         var clientEncounterDate = [];
         if (map && map[row.Id]){
-            console.log(map[row.Id]);
+            //console.log(map[row.Id]);
             clientEncounterDate = map[row.Id];
 
         }
@@ -79,8 +79,8 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors, 'chairingEndTime', 'Chairing End time cannot be the same as Start time', 'ERROR');
     }
 
-    console.log ('chairing start time: '+ startChairing);
-    console.log ('chairing end time: '+ endChairing);
+    //console.log ('chairing start time: '+ startChairing);
+    //console.log ('chairing end time: '+ endChairing);
 
     if (endChairing < startChairing){
         EHR.Server.Utils.addError(scriptErrors,'chairingEndTime', 'End time cannot be before the Start time', 'ERROR');

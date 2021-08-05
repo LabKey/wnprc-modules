@@ -55,9 +55,9 @@ function onInit(event, helper){
 function onUpsert(helper, scriptErrors, row, oldRow) {
 
     if (row.date){
-        console.log ("row date "+row.date );
+        //console.log ("row date "+row.date );
         var map = helper.getProperty('clientEncounterDate');
-        console.log (map[row.Id]);
+        //console.log (map[row.Id]);
         var clientEncounterDate = [];
         if (map && map[row.Id]){
             clientEncounterDate = map[row.Id];
@@ -79,22 +79,23 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             EHR.Server.Utils.addError (scriptErrors,'date','Additional water in this form can only be requested for the same date', 'ERROR');
         }*/
         //row.date = rowDate;
-        console.log("value of qcstate waterAmount " + row.qcstate);
-        console.log("value of date " + row.date);
+        //console.log("value of qcstate waterAmount " + row.qcstate);
+        //console.log("value of date " + row.date);
         var fixdate = new Date(row.date);
         fixdate.setHours(14);
         fixdate.setMinutes(1);
         row.date = fixdate;
-        console.log("value of fixdate " + row.date);
+        //console.log("value of fixdate " + row.date);
         if (!row.skipWaterRegulationCheck){
+            //TODO: look up the qcstate given the label
             row.qcstate = 10;
             row.QCStateLabel = 'Scheduled'
-            console.log("value of qcstate waterAmount after setting 10 " + row.qcstate);
+           //console.log("value of qcstate waterAmount after setting 10 " + row.qcstate);
 
         }
 
 
-        console.log ("value of assignedTo "+ row.assignedTo)
+        //console.log ("value of assignedTo "+ row.assignedTo)
         if (row.assignedTo == "animalcare" && row.volume && !row.skipWaterRegulationCheck){
             let errorMessage = WNPRC.Utils.getJavaHelper().checkUploadTime(row.id,row.date,row.recordSource,row.assignedTo, 'waterAmount');
             if (errorMessage != null){
@@ -107,7 +108,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             if (map && map[row.Id]){
                 waterInForm = map[row.Id];
             }
-            console.log('value of clientWaterVol '+ row.extraContext);
+            //console.log('value of clientWaterVol '+ row.extraContext);
             let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterSchedule(row.id,row.date,row.objectid,row.volume,waterInForm);
             if (jsonArray != null){
                 for (var i = 0; i < jsonArray.length; i++ ){

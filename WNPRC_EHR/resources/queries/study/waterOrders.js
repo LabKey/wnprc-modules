@@ -25,7 +25,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         });
         var animalRestricted = {};
         animalRestricted = WNPRC.Utils.getJavaHelper().checkIfAnimalInCondition(row.Id, row.date);
-        console.log (animalRestricted);
+        //console.log (animalRestricted);
         if (!animalRestricted && !row.skipWaterRegulationCheck){
             EHR.Server.Utils.addError(scriptErrors,'Id', 'Animal not assigned to water restriction protocol or is already in ' + row.waterSource + ' condition.', 'ERROR');
         }
@@ -35,7 +35,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
 
     var today = new Date();
-    console.log("Value of date " + row.date);
+    //console.log("Value of date " + row.date);
     //console.log("Value of start date " + row.startdate);
     today.setHours(0,0,0,0);
 
@@ -43,9 +43,9 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     rowDate.setHours(0,0,0,0);
     EHR.Server.Utils.removeTimeFromDate(row,scriptErrors,"date");
 
-    console.log("Value of date " + rowDate + " "+ rowDate.getTime());
+    //console.log("Value of date " + rowDate + " "+ rowDate.getTime());
     //console.log("Value of start date " + row.startdate);
-    console.log("Value of today "+ today+ " "+ today.getTime());
+    //console.log("Value of today "+ today+ " "+ today.getTime());
 
 
     //TODO: allow updates of existing records.
@@ -65,7 +65,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         EHR.Server.Utils.addError(scriptErrors, 'frequency', 'Frequency is required when entering regulated water orders.', 'ERROR');
     }
     if (!row.volume && row.waterSource == 'regulated'){
-        console.log ("water vol "+ row.volume);
+        //console.log ("water vol "+ row.volume);
         EHR.Server.Utils.addError(scriptErrors, 'volume', 'Volume is required when entering regulated water orders.', 'ERROR');
     }
 
@@ -78,7 +78,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
 
     //console.log ("value of ObjectId "+oldRow.objectid + " Value of new objectId "+ row.objectid);
-   console.log ('skipWaterRegulation '+ row.skipWaterRegulationCheck);
+   //console.log ('skipWaterRegulation '+ row.skipWaterRegulationCheck);
    // if (oldRow && row.date && row.Id && row.frequency && (oldRow.objectid != row.objectid)) {
     if (row.project && row.objectid && row.Id && row.date && row.frequency && row.assignedTo && row.waterSource != 'lixit' && !row.skipWaterRegulationCheck) {
         console.log('value of row: frequency ' + row.frequency + ' value of waterSource ' + row.waterSource);
@@ -113,7 +113,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                     let dateOnly = new Date(date.getTime());
                     dateOnly = dateOnly.getFullYear()+ "-" +dateOnly.getMonth()+ "-" + dateOnly.getDate();
                     let infoMessage = "Water Order for "+ row.Id + " started on " + dateOnly + " with frequency of " + extraContextObject.frequency + " and volume of " + extraContextObject.volume + "ml will close.";
-                    console.log(infoMessage);
+                    //console.log(infoMessage);
                     EHR.Server.Utils.addError(scriptErrors,"waterSource",infoMessage,"INFO")
 
                 }

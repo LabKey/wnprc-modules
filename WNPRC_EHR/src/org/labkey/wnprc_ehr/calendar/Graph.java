@@ -15,7 +15,6 @@ import java.util.Properties;
 import com.microsoft.graph.logger.DefaultLogger;
 import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.extensions.Attendee;
-import com.microsoft.graph.models.extensions.Calendar;
 import com.microsoft.graph.models.extensions.DateTimeTimeZone;
 import com.microsoft.graph.models.extensions.EmailAddress;
 import com.microsoft.graph.models.extensions.Event;

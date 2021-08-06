@@ -55,9 +55,8 @@ function onInit(event, helper){
 function onUpsert(helper, scriptErrors, row, oldRow) {
 
     if (row.date){
-        console.log ("row date "+row.date );
         var map = helper.getProperty('clientEncounterDate');
-        console.log (map[row.Id]);
+
         var clientEncounterDate = [];
         if (map && map[row.Id]){
             clientEncounterDate = map[row.Id];
@@ -92,7 +91,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             if (map && map[row.Id]){
                 waterInForm = map[row.Id];
             }
-            console.log('value of clientWaterVol '+ row.extraContext);
+
             let jsonArray = WNPRC.Utils.getJavaHelper().checkWaterSchedule(row.id,row.date,row.objectid,row.volume,waterInForm);
             if (jsonArray != null){
                 for (var i = 0; i < jsonArray.length; i++ ){

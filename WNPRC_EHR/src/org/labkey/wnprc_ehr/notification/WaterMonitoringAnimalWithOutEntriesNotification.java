@@ -36,11 +36,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * User: bbimber
- * Date: 7/14/12
- * Time: 3:16 PM
- */
+
 public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHRNotification
 {
     public WaterMonitoringAnimalWithOutEntriesNotification(Module owner)

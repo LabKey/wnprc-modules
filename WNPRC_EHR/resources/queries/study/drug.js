@@ -11,6 +11,7 @@ function onInit(event,helper){
     helper.decodeExtraContextProperty('clientEncounterDate');
 
     helper.registerRowProcessor(function(helper,row) {
+        //TODO: pull this out and put into generic 'utils' function for reuse in other trigger scripts
         if (!row)
             return;
         if(!row.Id || !row.date){
@@ -41,7 +42,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         var map = helper.getProperty('clientEncounterDate');
         var clientEncounterDate = [];
         if (map && map[row.Id]){
-            console.log(map[row.Id]);
+            //console.log(map[row.Id]);
             clientEncounterDate = map[row.Id];
 
         }

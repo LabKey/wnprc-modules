@@ -71,30 +71,15 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
     }
 
     if (row.recordSource=="LabWaterForm"){
-        /*var today = new Date();
-        today.setHours(0,0,0,0);
-        var rowDate = new Date (row.date);
-        //rowDate.setHours(0,0,0,0);
-        if (rowDate.getTime() !== today.getTime()){
-            EHR.Server.Utils.addError (scriptErrors,'date','Additional water in this form can only be requested for the same date', 'ERROR');
-        }*/
-        //row.date = rowDate;
-        console.log("value of qcstate waterAmount " + row.qcstate);
-        console.log("value of date " + row.date);
         var fixdate = new Date(row.date);
         fixdate.setHours(14);
         fixdate.setMinutes(1);
         row.date = fixdate;
-        console.log("value of fixdate " + row.date);
         if (!row.skipWaterRegulationCheck){
-            row.qcstate = 10;
-            row.QCStateLabel = 'Scheduled'
-            console.log("value of qcstate waterAmount after setting 10 " + row.qcstate);
-
+            row.qcstate = EHR.Server.Security.getQCStateByLabel('Scheduled').rowid;
+            row.QCStateLabel = EHR.Server.Security.getQCStateByLabel('Scheduled').Label;
         }
 
-
-        console.log ("value of assignedTo "+ row.assignedTo)
         if (row.assignedTo == "animalcare" && row.volume && !row.skipWaterRegulationCheck){
             let errorMessage = WNPRC.Utils.getJavaHelper().checkUploadTime(row.id,row.date,row.recordSource,row.assignedTo, 'waterAmount');
             if (errorMessage != null){

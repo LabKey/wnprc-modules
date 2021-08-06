@@ -104,7 +104,7 @@
 
         husbandryAssignmentLookup.put(map.get("value"), waterInfo);
     }
-
+    //TODO:use labkey roles instead of hard coding the group names.
     Group vetGroup = GroupManager.getGroup(getContainer(), "veterinarians (LDAP)", GroupEnumType.SITE);
     Group complianceGroup = GroupManager.getGroup(getContainer(), "compliance (LDAP)", GroupEnumType.SITE);
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();

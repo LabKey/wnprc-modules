@@ -22,10 +22,11 @@ interface Props {
     isRequester: boolean;
     isReceiver: boolean;
     hasRequestId?: boolean;
+    isReorder?: boolean;
 }
 
 export const RequestOrderPanel: FC<Props> = memo(props => {
-    const { model, onInputChange, isAdmin, isRequester, isReceiver, hasRequestId } = props;
+    const { model, onInputChange, isAdmin, isRequester, isReceiver, hasRequestId, isReorder } = props;
 
     const [showOtherAcct, setShowOtherAcct] = useState<boolean>(false);
 
@@ -65,8 +66,8 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
 
     return (
         <>
-        {/* Read only - for the Requesters and Receivers */}
-        { (hasRequestId && (isReceiver || isRequester)) && (
+            {/* Read only - for the Requesters and Receivers */}
+            { (hasRequestId && (isReceiver || (!isReorder && isRequester))) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}
@@ -129,10 +130,10 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                     </Form>
                 </Panel>
             )
-        }
+            }
 
-        {/* For the Admins for new and old requests; and for the Requesters for new requests */}
-        { (isAdmin || (!hasRequestId && isRequester)) && (
+            {/* For the Admins for new and old requests; and for the Requesters for new requests */}
+            { (isAdmin || (!hasRequestId && isRequester) || (hasRequestId && isReorder && isRequester)) && (
                 <Panel
                     className="panel panel-default"
                     expanded={true}
@@ -201,7 +202,7 @@ export const RequestOrderPanel: FC<Props> = memo(props => {
                     {model.errorMsg && <div className="alert alert-danger">{model.errorMsg}</div>}
                 </Panel>
             )
-        }
+            }
         </>
     );
 });

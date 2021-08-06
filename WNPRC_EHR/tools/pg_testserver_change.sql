@@ -184,12 +184,5 @@ VALUES
 (32,	  'Incomplete Treatments',	   '29e3860b-02b5-102d-b524-493dbd27b599',	1005,	     '2011-09-27 13:11:20.188',	1005,	      '2011-09-27 13:11:20.188',	1975)
 ;
 
--- Switch to using non-ssl LDAP
-UPDATE    prop.Properties p
-SET       Value = 'ldap://ldap.primate.wisc.edu'
-WHERE     (SELECT s.Category FROM prop.PropertySets s WHERE s.Set = p.Set) = 'LDAPAuthentication'
-	      AND p.Name = 'Servers'
-;
-
 -- We've left a bit of a mess, so it's best to vacuum before guests arrive.  (Deleting doesn't reclaim the space on it's own, and we just deleted 40-50GB)
 --VACUUM FULL;

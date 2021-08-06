@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import DatePicker from 'react-datepicker';
 
-import { getData } from '../actions';
+import {getData, getFolderAdmins} from '../actions';
 
 import { createOptions } from './Utils';
 import { PurchasingFormInput } from './PurchasingFormInput';
@@ -17,12 +17,12 @@ export const AssignedToInput: FC<InputProps> = memo(props => {
     const [dropDownVals, setDropDownVals] = useState<any[]>();
 
     useEffect(() => {
-        getData('core', 'Users', 'UserId, DisplayName, Groups', 'DisplayName').then(vals => {
+        getFolderAdmins().then(vals => {
             setDropDownVals(vals);
         });
     }, []);
 
-    const options = useMemo(() => createOptions(dropDownVals, 'UserId', 'DisplayName'), [dropDownVals]);
+    const options = useMemo(() => createOptions(dropDownVals, 'userId', 'displayName'), [dropDownVals]);
 
     const onValueChange = useCallback(
         evt => {
@@ -118,6 +118,31 @@ export const StatusInput: FC<InputProps> = memo(props => {
                     </option>
                     {options}
                 </select>
+            </PurchasingFormInput>
+        </div>
+    );
+});
+
+export const RejectReasonInput: FC<InputProps> = memo(props => {
+    const { onChange, value } = props;
+
+    const onTextChange = useCallback(
+        evt => {
+            onChange('rejectReason', evt.target.value);
+        },
+        [onChange]
+    );
+
+    return (
+        <div>
+            <PurchasingFormInput label="Reason for rejection">
+                <textarea
+                    className={ 'reason-for-rejection-input form-control'}
+                    value={value}
+                    onChange={onTextChange}
+                    id="reason-for-rejection-id"
+                    placeholder="Please provide a reason for rejection"
+                />
             </PurchasingFormInput>
         </div>
     );

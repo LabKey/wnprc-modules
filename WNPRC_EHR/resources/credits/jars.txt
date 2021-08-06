@@ -1,5 +1,5 @@
 {table}
-Filename|Component|Version|Source|License|LabKey Dev|Purpose
+Filename|Component|Version|Source|License|WNPRC Dev|Purpose
 joda-time-2.8.1.jar|Joda-Time|2.8.1|{link:From GitHub|https://github.com/JodaOrg/joda-time}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Tools for dealing with dates/times in Java
 jsoup-1.13.1.jar|jsoup: Java HTML Parser|1.10.3|{link:From GitHub|https://github.com/jhy/jsoup}|{link:MIT License|https://opensource.org/licenses/MIT}|jricharson|Tools for parsing and manipulating HTML and CSS using the DOM
 reflections-0.9.10.jar|Reflections|0.9.10|{link:From GitHub|https://github.com/ronmamo/reflections}|{link:WTFPL|http://www.wtfpl.net/about/}|cstevens|Runtime analysis of Java classes and packages

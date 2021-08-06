@@ -668,44 +668,53 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo demographics = getRealTableForDataset(table, "demographics");
 
-            // Here we want a union of the birth and arrival tables to get the sire of the animal
+            // Here we want a union of the birth and arrival tables to get the sire of the animal,
+            // if none found, we fall back on the "old" data in the demographic table
             String arrivalAndBirthQuery = "( " +
                     "SELECT " +
-                    "CASE " +
-                    "WHEN " +
-                    "(SELECT a.participantid as sire " +
-                    "FROM " +
-                    "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
-                    " WHERE " +
-                    " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.sire AND a.vendor_id != a.participantid " +
-                    "ORDER BY b.date DESC LIMIT 1 " +
-                    ") " +
-                    "IS NOT NULL " +
-                    "THEN " +
-                    "(SELECT a.participantid as sire " +
-                    "FROM " +
-                    "studydataset." + arrival.getName() + " a, "+ "studydataset." + arrival.getName() + " b " +
-                    "WHERE " +
-                    "b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid and a.vendor_id = b.sire  and a.vendor_id != a.participantid " +
-                    " ORDER BY b.date DESC LIMIT 1" +
-                    ") " +
-                    "WHEN " +
-                    "(SELECT sire FROM studydataset." + arrival.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
-                    "THEN " +
-                    "(SELECT sire FROM studydataset." + arrival.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
-                    "WHEN " +
-                    "(SELECT sire FROM studydataset." + birth.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
-                    "THEN " +
-                    "(SELECT sire FROM studydataset." + birth.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
-                    "ELSE " +
-                    " (SELECT sire_old FROM studydataset." + demographics.getName() + " WHERE participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
-                    "END AS sire " +
-                    "LIMIT 1" +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.sire AND a.vendor_id != a.participantid " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
 
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS sire " +
                     ")";
             SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
             ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Sire NEW");
+            newCol.setLabel("Sire");
             newCol.setDescription("Returns the animal's updated sire id");
             table.addColumn(newCol);
         }
@@ -717,61 +726,53 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo demographics = getRealTableForDataset(table, "demographics");
 
             // Here we want a union of the birth and arrival tables to get the dam of the animal
+            // if none found, we fall back on the "old" data in the demographic table
             String arrivalAndBirthQuery = "( " +
                     "SELECT " +
-                    "CASE " +
-                    "WHEN " +
-                        "(SELECT a.participantid as dam " +
-                    "FROM " +
-                        "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
-                    " WHERE " +
-                        " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.dam AND a.vendor_id != a.participantid " +
-                    "ORDER BY b.date DESC LIMIT 1 " +
-                    ") " +
-                    "IS NOT NULL " +
-                    "THEN " +
-                        "(SELECT a.participantid as dam " +
-                    "FROM " +
-                        "studydataset." + arrival.getName() + " a, "+ "studydataset." + arrival.getName() + " b " +
-                    "WHERE " +
-                        "b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid and a.vendor_id = b.dam  and a.vendor_id != a.participantid " +
-                    " ORDER BY b.date DESC LIMIT 1" +
-                    ") " +
-                    "WHEN " +
-                    "(SELECT a.participantid as dam " +
-                    "FROM " +
-                    "studydataset." + arrival.getName() + " a, studydataset." + birth.getName() + " b " +
-                    " WHERE " +
-                    " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.dam AND a.vendor_id != a.participantid " +
-                    "ORDER BY b.date DESC LIMIT 1 " +
-                    ") " +
-                    "IS NOT NULL " +
-                    "THEN " +
-                    "(SELECT a.participantid as dam " +
-                    "FROM " +
-                    "studydataset." + arrival.getName() + " a, "+ "studydataset." + birth.getName() + " b " +
-                    "WHERE " +
-                    "b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid and a.vendor_id = b.dam  and a.vendor_id != a.participantid " +
-                    " ORDER BY b.date DESC LIMIT 1" +
-                    ") " +
-                    "WHEN " +
-                        "(SELECT dam FROM studydataset." + arrival.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
-                    "THEN " +
-                        "(SELECT dam FROM studydataset." + arrival.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
-                    "WHEN " +
-                        "(SELECT dam FROM studydataset." + birth.getName() + " WHERE participantid =" +  ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) is not null " +
-                    "THEN " +
-                        "(SELECT dam FROM studydataset." + birth.getName() +  " WHERE participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
-                    "ELSE " +
-                       " (SELECT dam_old FROM studydataset." + demographics.getName() + " WHERE participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid LIMIT 1) " +
-                    "END AS dam " +
-                    "LIMIT 1" +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.dam AND a.vendor_id != a.participantid " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
 
-            ")";
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS dam " +
+                    ")";
 
             SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
             ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Dam NEW");
+            newCol.setLabel("Dam");
             newCol.setDescription("Returns the animal's updated dam id");
             table.addColumn(newCol);
         }

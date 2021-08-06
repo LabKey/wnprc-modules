@@ -101,6 +101,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             } else if (matches(table, "wnprc", "animal_requests")) {
                 customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
+            else if (table.getName().equalsIgnoreCase("waterOrders"))
+                appendEnddateFuture((AbstractTableInfo) table, "enddate");
+
         }
     }
 
@@ -1183,6 +1186,34 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         return null;
+    }
+
+    private  void appendEnddateFuture(AbstractTableInfo ti, String sourceColName)
+    {
+        ColumnInfo sourceCol = ti.getColumn(sourceColName);
+        if (sourceCol == null)
+        {
+            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            return;
+        }
+
+        String name = sourceCol.getName();
+        if (ti.getColumn(name + "CoalescedFuture") == null)
+        {
+            SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn timestampadd(SQL_TSI_DAY, 365, {fn curdate()})}) as date)");
+            //SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn curdate()} + integer '365')  as date)");
+            ExprColumn col = new ExprColumn(ti, name + "CoalescedFuture", sql, JdbcType.DATE);
+            col.setCalculated(true);
+            col.setUserEditable(false);
+            col.setHidden(true);
+            col.setLabel(col.getLabel() + ", CoalescedFuture");
+
+            if (sourceCol.getFormat() != null)
+                col.setFormat(sourceCol.getFormat());
+
+            ti.addColumn(col);
+        }
+
     }
 
     //TODO: Look how to use another UI to allow for better support for virtual columns

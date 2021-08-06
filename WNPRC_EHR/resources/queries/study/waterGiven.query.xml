@@ -1,0 +1,96 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="waterGiven" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="dateOrdered">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="performedby">
+                        <columnTitle>Performed By</columnTitle>
+
+                    </column>
+                    <column columnName="volume">
+                        <columnTitle>Volume (mL)</columnTitle>
+                    </column>
+                    
+                    <column columnName="provideFruit">
+                        <columnTitle>Provide Fruit</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_fruit</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="remarks">
+
+                    </column>
+                    <column columnName="waterSource">
+                        <columnTitle>Water Source</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_source</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>
+                    </column>
+                    <column columnName="location">
+                        <columnTitle>Water Location</columnTitle>
+                        <displayWidth>250</displayWidth>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_location</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="route">
+                        <columnTitle>Route</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>routes</fkTable>
+                            <fkColumnName>route</fkColumnName>
+                        </fk>
+
+                    </column>
+                    <column columnName="assignedto">
+                        <columnTitle>Assigned To</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_assigned</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+
+                    </column>
+
+                    <column columnName="project">
+
+                    </column>
+                    <column columnName="room">
+                        <columnTitle>Room</columnTitle>
+                    </column>
+                    <column columnName="MostRecentWeight">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>demographicsMostRecentWeight</fkTable>
+                            <fkColumnName>MostRecentWeight</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="treatmentId">
+                        <isHidden>false</isHidden>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

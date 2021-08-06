@@ -76,6 +76,10 @@ public class WNPRC_Schema extends SimpleUserSchema {
         _container = container;
     }
 
+    public static DbSchema getWnprcDbSchema() {
+        return DbSchema.get(NAME, DbSchemaType.Module);
+    }
+
     @Override
     public TableInfo createTable(String name) {
         Map<String, TableInfo> enumTables = getEnumTables();

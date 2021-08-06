@@ -1,5 +1,6 @@
 Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
     extend: 'EHR.data.DataEntryClientStore',
+    loaded: true,
 
     constructor: function() {
         this.callParent(arguments);
@@ -73,5 +74,40 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
                 self.slaveFields.push(fieldName);
             }
         });
+    },
+    getExtraContext: function(){
+
+        var clientEncounterDate = {};
+        var mainEncounterDate = new Date();
+        var encounterRecords;
+
+        Ext4.data.StoreManager.each(function(store){
+            if(store.queryName == 'encounters'){
+                encounterRecords = store.data;
+            }
+        })
+
+        for (var idx = 0; idx < encounterRecords.getCount(); idx++){
+            var record = encounterRecords.getAt(idx).data;
+            if (record.date != null && record.date){
+                mainEncounterDate = record.date;
+
+                if (!clientEncounterDate[record.Id]){
+                    clientEncounterDate[record.Id] = [];
+                }
+
+                clientEncounterDate[record.Id].push({
+                    mainEncounterDate: mainEncounterDate
+                })
+            }
+        }
+        if (!LABKEY.Utils.isEmptyObj(clientEncounterDate)){
+            clientEncounterDate = Ext4.encode(clientEncounterDate);
+
+            return{
+                clientEncounterDate : clientEncounterDate
+            }
+        }
+        return null;
     }
 });

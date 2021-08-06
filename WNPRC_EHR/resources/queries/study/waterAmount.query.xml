@@ -1,0 +1,72 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="waterAmount" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <columnTitle>Date Ordered</columnTitle>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                    </column>
+                    <column columnName="project"></column>
+
+
+                    <column columnName="volume">
+                        <columnTitle>Volume (mL)</columnTitle>
+                    </column>
+                    <column columnName="provideFruit">
+                        <columnTitle>Provide Fruit</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_fruit</fkTable>
+                            <fkColumnName>Value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="assignedTo">
+                        <columnTitle>Assigned To</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_assigned</fkTable>
+                            <fkColumnName>Value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="frequency">
+                        <columnTitle>Frequency</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>husbandry_frequency</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="waterSource">
+                        <columnTitle>Water Source</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_source</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>
+                    </column>
+                    <column columnName="recordSource">
+                        <columnTitle>Record Source</columnTitle>
+                        <!--<fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_source</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>-->
+                    </column>
+                    <column columnName="qcstate"></column>
+
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

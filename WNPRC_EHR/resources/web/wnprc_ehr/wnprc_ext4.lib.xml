@@ -9,13 +9,17 @@
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/MasterSectionClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/NecropsyClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/ResearchUltrasoundsClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/SingleAnimal/WaterClientStore.js"/>
+        <script path="/wnprc_ehr/data/HusbandryServerStore.js"/>
         <script path="/wnprc_ehr/ext4/data/SingleAnimal/SlaveSectionClientStore.js"/>
+        <script path="/wnprc_ehr/ext4/data/SingleAnimal/WaterApprenticeSectionClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/TaskClientStore.js"/>
         <script path="/wnprc_ehr/ext4/data/TaskStoreCollection.js"/>
         <script path="/wnprc_ehr/ext4/panel/AnimalDetailsPanel.js"/>
         <script path="/wnprc_ehr/ext4/panel/TaskDataEntryPanel.js"/>
         <script path="/wnprc_ehr/ext4/utils/DataEntryButtons.js"/>
         <script path="/wnprc_ehr/ext4/components/fields/protocolStaffField.js"/>
+        <script path="/wnprc_ehr/data/HusbandryClientStore.js"/>
     </library>
     <dependencies>
         <dependency path="/wnprc_ehr/wnprc_ext4_core"/>

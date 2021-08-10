@@ -111,7 +111,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             }
 
         },
-        'study.encounters':{
+        'study.singleGeneralEncounter':{
             Id:{
                 parentConfig: null
             },
@@ -233,11 +233,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     id : 'location',
                     listeners: {
                         change: function (field, val) {
-                            var weightStartTime = Ext4.getCmp('encounterDateTime');
+                            var encounterStartTime = Ext4.getCmp('encounterDateTime');
                             var chairingStartTime = Ext4.getCmp('chairingStartTime');
                             var chairingEndTime = Ext4.getCmp('chairingEndTime');
                             var waterLocation = Ext4.getCmp('waterLocation');
-                            var startTime = new Date(weightStartTime.getValue());
+                            var startTime = new Date(encounterStartTime.getValue());
                             if (!chairingStartTime.getValue()){
                                  chairingStartTime.setValue(startTime);
                             }

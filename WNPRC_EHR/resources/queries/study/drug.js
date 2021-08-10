@@ -42,13 +42,14 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         var map = helper.getProperty('clientEncounterDate');
         var clientEncounterDate = [];
         if (map && map[row.Id]){
-            //console.log(map[row.Id]);
             clientEncounterDate = map[row.Id];
 
         }
-        let errorMessage = WNPRC.Utils.getJavaHelper().checkEncounterTime(row.Id,row.date,clientEncounterDate, 'drug');
-        if (errorMessage != null){
-            EHR.Server.Utils.addError(scriptErrors,'date',errorMessage,'ERROR');
+        if(clientEncounterDate != null || encounterRecords != undefined){
+            let errorMessage = WNPRC.Utils.getJavaHelper().checkEncounterTime(row.Id, row.date, clientEncounterDate, 'drug');
+            if (errorMessage != null) {
+                EHR.Server.Utils.addError(scriptErrors, 'date', errorMessage, 'ERROR');
+            }
         }
 
     }

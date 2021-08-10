@@ -7,7 +7,7 @@ public class SingleEncounterSection extends SimpleFormSection
 {
     public SingleEncounterSection() {
 
-        super("study", "encounters", "Single Animal Encounter");
+        super("study", "singleGeneralEncounter", "Single Animal Encounter");
         fieldNamesAtStartInOrder = Arrays.asList(
                 "Id",
                 "date",

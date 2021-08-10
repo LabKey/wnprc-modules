@@ -37,8 +37,6 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.WaterApprenticeSectionClientStore', {
         for(var idx = 0; idx < waterAmountRecords.getCount(); idx++){
             var record = waterAmountRecords.getAt(idx).data;
             if( record.volume != null && record.volume) {
-                console.log(record.volume);
-
                 if(!clientWaterMap[record.Id]){
                     clientWaterMap[record.Id] = [];
                 }

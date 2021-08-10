@@ -12,7 +12,6 @@ Ext4.define('WNPRC.ext.data.WaterStoreCollection', {
 
         var store = this.serverStores.get(storeConfig.storeId);
         if (store){
-            console.log('Store already defined: ' + store.storeId);
             return store;
         }
 

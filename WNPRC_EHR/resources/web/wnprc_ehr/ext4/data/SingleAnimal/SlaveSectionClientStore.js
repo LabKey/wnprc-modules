@@ -82,23 +82,25 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
         var encounterRecords;
 
         Ext4.data.StoreManager.each(function(store){
-            if(store.queryName == 'encounters'){
+            if(store.queryName == 'singleGeneralEncounter'){
                 encounterRecords = store.data;
             }
         })
 
-        for (var idx = 0; idx < encounterRecords.getCount(); idx++){
-            var record = encounterRecords.getAt(idx).data;
-            if (record.date != null && record.date){
-                mainEncounterDate = record.date;
+        if(encounterRecords != null || encounterRecords != undefined){
+            for (var idx = 0; idx < encounterRecords.getCount(); idx++) {
+                var record = encounterRecords.getAt(idx).data;
+                if (record.date != null && record.date) {
+                    mainEncounterDate = record.date;
 
-                if (!clientEncounterDate[record.Id]){
-                    clientEncounterDate[record.Id] = [];
+                    if (!clientEncounterDate[record.Id]) {
+                        clientEncounterDate[record.Id] = [];
+                    }
+
+                    clientEncounterDate[record.Id].push({
+                        mainEncounterDate: mainEncounterDate
+                    })
                 }
-
-                clientEncounterDate[record.Id].push({
-                    mainEncounterDate: mainEncounterDate
-                })
             }
         }
         if (!LABKEY.Utils.isEmptyObj(clientEncounterDate)){

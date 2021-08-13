@@ -709,13 +709,25 @@
 %>
 
 <div class="col-xs-12 col-xl-10">
-    <div class="col-xs-12 col-md-4">
+    <div class="col-xs-12 col-md-3">
         <div id="calendar-selection" class="panel panel-primary">
             <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#calendar-selection-collapsible" aria-controls="calendar-selection-collapsible" aria-expanded="true">Calendar Selection</a></div>
             <div class="panel-body collapse in" id="calendar-selection-collapsible" aria-expanded="true">
                 <div id="calendar-checklist"></div>
             </div>
         </div>
+    </div>
+
+    <div class="col-xs-12 col-md-6">
+        <div id="procedure-calendar" class="panel panel-primary">
+            <div class="panel-heading"><span>Calendar</span></div>
+            <div class="panel-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-12 col-md-3">
         <div id="surgeryDetailsDiv" class="panel panel-primary">
             <div class="panel-heading"><a class="btn btn-primary" data-toggle="collapse" href="#surgery-details-collapsible" aria-controls="surgery-details-collapsible" aria-expanded="true">Surgery Details</a></div>
             <div class="panel-body collapse in" id="surgery-details-collapsible" aria-expanded="true" data-bind="with: taskDetails">
@@ -753,6 +765,7 @@
                     <%--//this is if we want to disable the edit/cancel buttons--%>
                     <%--<a class="btn btn-default" href="#" onclick="WebUtils.VM.editEvent()" data-bind="css: { disabled: _.isBlank(animalid()) }">Edit</a>--%>
                     <%--<a class="btn btn-danger" href="#" onclick="WebUtils.VM.cancelEvent()" data-bind="css: { disabled: _.isBlank(animalid()) }">Cancel</a>--%>
+                    <a class="btn btn-info" href="#" onclick="WebUtils.VM.duplicateEvent()">Duplicate Event</a>
                     <a class="btn btn-default" href="#" onclick="WebUtils.VM.editEvent()">Edit</a>
                     <a class="btn btn-danger" href="#" onclick="WebUtils.VM.cancelEvent()">Cancel</a>
                 </div>
@@ -776,18 +789,10 @@
                     <%--//this is if we want to disable the edit/cancel buttons--%>
                     <%--<a class="btn btn-default" href="#" onclick="WebUtils.VM.editEvent()" data-bind="css: { disabled: _.isBlank(animalid()) }">Edit</a>--%>
                     <%--<a class="btn btn-danger" href="#" onclick="WebUtils.VM.cancelEvent()" data-bind="css: { disabled: _.isBlank(animalid()) }">Cancel</a>--%>
+                    <a class="btn btn-info" href="#" onclick="WebUtils.VM.duplicateEvent()">Duplicate Event</a>
                     <a class="btn btn-default" href="#" onclick="WebUtils.VM.editEvent()">Edit</a>
                     <a class="btn btn-danger" href="#" onclick="WebUtils.VM.cancelEvent()">Cancel</a>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xs-12 col-md-8">
-        <div id="procedure-calendar" class="panel panel-primary">
-            <div class="panel-heading"><span>Calendar</span></div>
-            <div class="panel-body">
-                <div id="calendar"></div>
             </div>
         </div>
     </div>
@@ -1392,6 +1397,9 @@
                 scheduleSurgeryProcedure('SurgeryProcedureChangeStatus', requestObj);
             },
             cancelEvent: function() {
+                if ($.isEmptyObject(selectedEvent)) {
+                    return;
+                }
                 let cancel = confirm("Are you sure you'd like to cancel this surgery? This will move it back into the pending requests.");
                 if (cancel === true && selectedEvent.id) {
                     let eventId = (selectedEvent.extendedProps.parentid) ? selectedEvent.extendedProps.parentid : selectedEvent.id;
@@ -1445,6 +1453,9 @@
                 }
             },
             editEvent: function() {
+                if ($.isEmptyObject(selectedEvent)) {
+                    return;
+                }
                 oldEventValues = {};
                 $("#eventModalTitle").html(selectedEvent.title);
 
@@ -1546,6 +1557,12 @@
                 }
 
                 $("#eventModal").modal();
+            },
+            duplicateEvent: function() {
+                if ($.isEmptyObject(selectedEvent)) {
+                    return;
+                }
+                alert('test');
             },
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>

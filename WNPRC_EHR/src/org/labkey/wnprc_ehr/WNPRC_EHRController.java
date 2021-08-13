@@ -1741,6 +1741,11 @@ public class WNPRC_EHRController extends SpringActionController
             Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
             boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), event.getRooms(), event.getSubject(), event.getRequestId(), response);
 
+            String qcStateLabel = "Scheduled";
+            if (event.getCalendarId().endsWith("on_hold")) {
+                qcStateLabel = "Request: On Hold";
+            }
+
             if (eventsScheduled)
             {
                 try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
@@ -1758,7 +1763,7 @@ public class WNPRC_EHRController extends SpringActionController
                             taskRecord.put("title", "SurgeryProcedure");
                             taskRecord.put("category", "task");
                             taskRecord.put("assignedto", event.getAssignedTo());
-                            taskRecord.put("QCStateLabel", "Scheduled");
+                            taskRecord.put("QCStateLabel", qcStateLabel);
                             taskRecord.put("duedate", "");
                             taskRecord.put("formtype", "SurgeryProcedure");
                             insertRecord(taskRecord, "ehr", "tasks");
@@ -1774,7 +1779,7 @@ public class WNPRC_EHRController extends SpringActionController
                         JSONObject surgeryRecord = new JSONObject();
                         surgeryRecord.put("objectid", spRow.get("objectid"));
                         //surgeryRecord.put("apptid", apptId);
-                        surgeryRecord.put("QCStateLabel", "Scheduled");
+                        surgeryRecord.put("QCStateLabel", qcStateLabel);
                         surgeryRecord.put("taskid", spRow.get("taskid"));
                         surgeryRecord.put("startTableTime", event.getStartTableTime());
                         surgeryRecord.put("date", event.getStart());
@@ -1802,7 +1807,7 @@ public class WNPRC_EHRController extends SpringActionController
 
                     JSONObject requestRecord = new JSONObject();
                     requestRecord.put("requestid", event.getRequestId());
-                    requestRecord.put("QCStateLabel", "Scheduled");
+                    requestRecord.put("QCStateLabel", qcStateLabel);
                     updateRecord(requestRecord, "ehr", "requests");
 
                     transaction.commit();

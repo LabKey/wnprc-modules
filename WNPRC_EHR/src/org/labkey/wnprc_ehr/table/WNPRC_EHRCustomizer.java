@@ -678,7 +678,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             "FROM " +
                                 "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
                             " WHERE " +
-                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.sire AND a.vendor_id != a.participantid " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.sire) AND lower(a.vendor_id) != lower(a.participantid) " +
                             "ORDER BY " +
                                 "b.modified DESC " +
                             "LIMIT 1), " +
@@ -735,7 +735,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                             "FROM " +
                                 "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
                             " WHERE " +
-                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND a.vendor_id = b.dam AND a.vendor_id != a.participantid " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.dam) AND lower(a.vendor_id) != lower(a.participantid) " +
                             "ORDER BY " +
                                 "b.modified DESC " +
                             "LIMIT 1), " +

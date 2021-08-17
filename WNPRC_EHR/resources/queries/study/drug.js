@@ -45,7 +45,8 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             clientEncounterDate = map[row.Id];
 
         }
-        if(clientEncounterDate){
+
+        if(clientEncounterDate.length > 0){
             let errorMessage = WNPRC.Utils.getJavaHelper().checkEncounterTime(row.Id, row.date, clientEncounterDate, 'drug');
             if (errorMessage != null) {
                 EHR.Server.Utils.addError(scriptErrors, 'date', errorMessage, 'ERROR');

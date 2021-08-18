@@ -14,10 +14,10 @@ public class WaterDrugAdministrationSection extends SlaveGridSection
         super ("study", "drug", "Implant Maintenance");
         //setClientStoreClass("EHR.data.DrugAdministrationRunsClientStore");
         //addClientDependency(ClientDependency.fromPath("ehr/data/DrugAdministrationRunsClientStore.js"));
-        addClientDependency(ClientDependency.fromPath("ehr/form/field/SnomedCombo.js"));
+        addClientDependency(ClientDependency.supplierFromPath("ehr/form/field/SnomedCombo.js"));
         //setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
        // setAllowBulkAdd(true);
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
     }
     public WaterDrugAdministrationSection(String title){
         super ("study", "drug", title);

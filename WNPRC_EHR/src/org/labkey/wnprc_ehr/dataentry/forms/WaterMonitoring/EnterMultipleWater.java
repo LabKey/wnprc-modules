@@ -26,9 +26,9 @@ public class EnterMultipleWater extends SimpleTaskForm
             new WaterMultipleFormSection()
         ));
         setStoreCollectionClass("WNPRC.ext.data.WaterStoreCollection");
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/model/sources/Encounter.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterServerStore.js"));
-        this.addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterStoreCollection.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/model/sources/Encounter.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterServerStore.js"));
+        this.addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/data/SingleAnimal/WaterStoreCollection.js"));
 
         for (FormSection section : this.getFormSections()){
         //    section.addConfigSource("Husbandry");

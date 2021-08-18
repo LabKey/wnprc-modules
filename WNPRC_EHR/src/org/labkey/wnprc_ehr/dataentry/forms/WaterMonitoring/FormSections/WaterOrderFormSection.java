@@ -20,15 +20,15 @@ public class WaterOrderFormSection extends SimpleGridSection
         ));*/
 
         this.setAllowBulkAdd(true);
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/HusbandryClientStore.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddWaterWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/data/HusbandryClientStore.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddWaterWindow.js"));
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
     }
     public WaterOrderFormSection(String sectionTitle){
         super ("study", "waterOrders", sectionTitle);
         this.setAllowBulkAdd(true);
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/data/HusbandryClientStore.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddWaterWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/data/HusbandryClientStore.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddWaterWindow.js"));
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
     }
     public List<String> getTbarButtons(){

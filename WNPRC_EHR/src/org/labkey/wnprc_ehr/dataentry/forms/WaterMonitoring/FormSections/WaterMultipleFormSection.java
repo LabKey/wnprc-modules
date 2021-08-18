@@ -14,8 +14,8 @@ public class WaterMultipleFormSection extends SimpleGridSection
         setClientStoreClass("WNPRC.ext.data.SingleAnimal.WaterClientStore");
         setAllowBulkAdd(true);
 
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/windows/AddScheduleWaterWindow.js"));
-        addClientDependency(ClientDependency.fromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/windows/AddScheduleWaterWindow.js"));
+        addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
         _showLocation = true;
         setAllowBulkAdd(false);
         setTemplateMode(TEMPLATE_MODE.NONE);

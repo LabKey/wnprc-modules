@@ -906,15 +906,16 @@ public class TriggerScriptHelper {
         }
         String errorMessage = null;
 
-        Calendar waterClientDate = Calendar.getInstance();
-        waterClientDate.setTime(clientDate);
+        Calendar apprenticeClientDate = Calendar.getInstance();
+        apprenticeClientDate.setTime(clientDate);
 
         Calendar encounterDateTime = Calendar.getInstance();
         encounterDateTime.setTime(internalDate);
 
         final long MILLI_TO_HOUR = 1000 * 60 * 60;
 
-        if (Math.abs(encounterDateTime.toInstant().minus(waterClientDate.getTimeInMillis(),ChronoUnit.MILLIS).toEpochMilli()/MILLI_TO_HOUR)>24){
+        if ( mainEncounterDates != null &&
+                Math.abs(encounterDateTime.toInstant().minus(apprenticeClientDate.getTimeInMillis(),ChronoUnit.MILLIS).toEpochMilli()/MILLI_TO_HOUR)>24){
             errorMessage = "Encounter time cannot be more than 24 hours before or after any of the other records in this form.";
         }
 

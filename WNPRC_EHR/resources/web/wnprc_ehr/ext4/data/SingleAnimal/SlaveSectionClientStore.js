@@ -87,7 +87,7 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore', {
             }
         })
 
-        if(encounterRecords != null || encounterRecords != undefined){
+        if(encounterRecords){
             for (var idx = 0; idx < encounterRecords.getCount(); idx++) {
                 var record = encounterRecords.getAt(idx).data;
                 if (record.date != null && record.date) {

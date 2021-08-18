@@ -28,8 +28,7 @@
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("clientapi/ext4");
-        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.css");
-        dependencies.add("/webutils/lib/fullcalendar-5.3.2/lib/main.min.js");
+        dependencies.add("fullcalendar");
         dependencies.add("/webutils/lib/webutils_core/api.js");
 
         dependencies.add("https://unpkg.com/popper.js/dist/umd/popper.min.js");

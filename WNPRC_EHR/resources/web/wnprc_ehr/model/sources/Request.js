@@ -37,6 +37,57 @@ EHR.model.DataModelManager.registerMetadata('WNPRC_Request', {
         }
     },
     byQuery: {
+        'study.waterAmount':{
+            project: {
+                xtype: 'ehr-projectentryfield',
+                editorConfig: {
+
+                },
+                shownInGrid: true,
+                useNull: true,
+                allowBlank: false,
+                lookup: {
+                    columns: 'project,name,displayName,protocol'
+                },
+                columnConfig: {
+                    width: 120
+                }
+            },
+            date: {
+                xtype: 'datefield',
+                format:'Y-m-d',
+                allowBlank: false,
+                editorConfig: {
+                    minValue: new Date()
+                },
+                columnConfig:{
+                    width: 110
+                },
+                helpPopup: 'Choose the date when the water amount should happen.',
+                onExpand: function() {
+                    var value = this.getValue();
+                    this.picker.setValue(Ext.isDate(value) ? value : new Date());
+                }
+
+
+            },
+            requestid:{
+                hidden: true,
+                shownInGrid: false
+
+            },
+            QCState: {
+                setInitialValue: function(v){
+                    var qc;
+                    if(!v && EHR.Security.getQCStateByLabel('Scheduled'))
+                        qc = EHR.Security.getQCStateByLabel('Scheduled').RowId;
+                    return v || qc;
+                },
+                shownInGrid: true,
+                hidden: false
+            }
+
+        },
         'study.foodDeprives':{
             project: {
                 xtype: 'ehr-projectentryfield',

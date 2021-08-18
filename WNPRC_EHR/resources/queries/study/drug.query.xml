@@ -1,0 +1,183 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="drug" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl>/ehr/drugDetails.view?lsid=${lsid}</tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id"/>
+                    <column columnName="date">
+                        <columnTitle>Begin Date</columnTitle>
+                    </column>
+                    <column columnName="HeaderDate">
+                        <columnTitle>Header Date</columnTitle>
+                        <formatString>DateTime</formatString>
+                    </column>
+                    <column columnName="enddate">
+                        <columnTitle>End Time</columnTitle>
+                        <isHidden>false</isHidden>
+                    </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="chargetype">
+                        <columnTitle>Charge Unit</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>medicationChargeType</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="code">
+                        <columnTitle>Code</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="qualifier">
+                        <columnTitle>Qualifier</columnTitle>
+                    </column>
+                    <column columnName="reason">
+                        <columnTitle>Reason</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>drugReason</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="route">
+                        <columnTitle>Route</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>routes</fkTable>
+                            <fkColumnName>route</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="concentration">
+                        <columnTitle>Drug Conc</columnTitle>
+                    </column>
+                    <column columnName="conc_units">
+                        <columnTitle>Conc Units</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>conc_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="dosage">
+                        <columnTitle>Dosage</columnTitle>
+                    </column>
+                    <column columnName="dosage_units">
+                        <columnTitle>Dosage Units</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>dosage_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="volume">
+                        <columnTitle>Volume</columnTitle>
+                    </column>
+                    <column columnName="vol_units">
+                        <columnTitle>Vol Units</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>volume_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="amount">
+                        <columnTitle>Amount</columnTitle>
+                    </column>
+                    <column columnName="amount_units">
+                        <columnTitle>Amount Units</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>amount_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true" />
+                        </fk>
+                    </column>
+                    <column columnName="restraint">
+                        <columnTitle>Restraint</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="restraintDuration">
+                        <columnTitle>Time Restrained</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_duration</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="outcome">
+                        <columnTitle>Outcome</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>drugOutcome</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                        <defaultValue>Normal</defaultValue>
+                    </column>
+                    <column columnName="lot">
+                        <columnTitle>Lot</columnTitle>
+                    </column>
+                    <column columnName="remark">
+                        <columnTitle>Remark</columnTitle>
+                    </column>
+                    <column columnName="category">
+                        <columnTitle>Category</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>drug_categories</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
+                        </fk>
+                    </column>
+                    <column columnName="begindate">
+                        <columnTitle>Begin Date</columnTitle>
+                    </column>
+                    <column columnName="treatmentid">
+                        <columnTitle>Treatment Id</columnTitle>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="timeordered">
+                        <columnTitle>Time Ordered</columnTitle>
+                        <description>For drugs that were ordered using the Treatment Orders table, this stores the original time this administration was scheduled to be administered.</description>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="parentid">
+
+                    </column>
+                    <column columnName="caseid">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="areaCleaned">
+                        <fkDbSchema>ehr_lookups</fkDbSchema>
+                        <fkTable>implant_area</fkTable>
+                        <fkColumnName>value</fkColumnName>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

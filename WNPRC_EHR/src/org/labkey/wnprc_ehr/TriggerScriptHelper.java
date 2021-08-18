@@ -1826,9 +1826,7 @@ public class TriggerScriptHelper {
 
     }
 
-
-
-    public static class WaterInfo implements Comparable<org.labkey.ehr.utils.TriggerScriptHelper.BloodInfo>
+    public static class WaterInfo
     {
         //private String _objectId;
         private Date _date;
@@ -1857,12 +1855,6 @@ public class TriggerScriptHelper {
             setDate(date);
             _quantity = quantity;
             setWeight(weight);
-        }
-
-        @Override
-        public int compareTo(@NotNull org.labkey.ehr.utils.TriggerScriptHelper.BloodInfo o)
-        {
-            return getDate().compareTo(o.getDate());
         }
 
         public Date getDate()
@@ -1894,8 +1886,6 @@ public class TriggerScriptHelper {
         {
             _weight = weight;
         }
-
-
     }
 
     public static class WaterDataBaseRecord {

@@ -230,7 +230,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public double getVersion()
     {
-        return 18.37;
+        return 18.38;
     }
 
     public boolean hasScripts()

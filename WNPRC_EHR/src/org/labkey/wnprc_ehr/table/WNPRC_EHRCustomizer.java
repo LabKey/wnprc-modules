@@ -715,7 +715,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
             ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
             newCol.setLabel("Sire");
-            newCol.setDescription("Returns the animal's updated sire id");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found, if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no sire is found there, it " +
+                    "then finally uses the historic demographic text field called 'sire_old' as the sire.");
             table.addColumn(newCol);
         }
         if (table.getColumn("dam") == null)
@@ -773,7 +776,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
             ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
             newCol.setLabel("Dam");
-            newCol.setDescription("Returns the animal's updated dam id");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found, if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no dam is found there, it " +
+                    "then finally uses the historic demographic text field called 'dam_old' as the dam.");
             table.addColumn(newCol);
         }
     }

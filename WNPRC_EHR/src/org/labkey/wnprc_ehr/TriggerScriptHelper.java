@@ -13,6 +13,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.ehr.EHRDemographicsService;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.security.EHRSecurityEscalator;
 import org.labkey.api.ldk.notification.NotificationService;
@@ -261,8 +262,8 @@ public class TriggerScriptHelper {
                         stopExecution = true;
                     }
                 }
-//                housingRow.put("sex", EHRDemographicsServiceImpl.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
-//                filteredHousingRows.add(housingRow);
+                housingRow.put("sex", EHRDemographicsService.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
+                filteredHousingRows.add(housingRow);
             }
         }
 

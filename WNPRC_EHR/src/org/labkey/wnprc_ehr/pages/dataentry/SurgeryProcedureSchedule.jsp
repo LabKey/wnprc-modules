@@ -624,6 +624,127 @@
             }
         });
     }
+
+    function generateEventModal(modalType) {
+        if (modalType !== "createEvent" && $.isEmptyObject(selectedEvent)) {
+            return;
+        }
+
+        if (modalType === "createEvent") {
+            $("#eventModalTitle").html("Create Event");
+            document.getElementById("updateEventButton").style.display = "none";
+            document.getElementById("createEventButton").style.display = "block";
+        } else if (modalType === "duplicateEvent") {
+            $("#eventModalTitle").html("Duplicate Event");
+            document.getElementById("updateEventButton").style.display = "none";
+            document.getElementById("createEventButton").style.display = "block";
+        } else if (modalType === "editEvent") {
+            $("#eventModalTitle").html("Edit Event");
+            document.getElementById("updateEventButton").style.display = "block";
+            document.getElementById("createEventButton").style.display = "none";
+        }
+
+        oldEventValues = {};
+
+        let mainEvent = selectedEvent;
+        let isEHRManaged = !mainEvent.extendedProps.isUnmanaged;
+
+        if (isEHRManaged) {
+            if (selectedEvent.extendedProps.parentid) {
+                mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
+            }
+        }
+
+        let roomIds = [];
+        if (isEHRManaged) {
+            if (mainEvent.extendedProps.childids) {
+                roomIds = mainEvent.extendedProps.childids;
+            }
+        }
+
+        let formDiv = document.getElementById("modalForm");
+
+        while (formDiv.firstChild) {
+            formDiv.removeChild(formDiv.lastChild);
+        }
+
+        let titleDiv = createInputDiv("Title", "text", "modalTitleField", mainEvent.title);
+        formDiv.appendChild(titleDiv);
+        formDiv.appendChild(document.createElement("hr"));
+
+        if (isEHRManaged) {
+            let roomEvents = [];
+            for (let i = 0; i < roomIds.length; i++) {
+                roomEvents.push(calendar.getEventById(roomIds[i]));
+            }
+            roomEvents.sort(compareRooms("start", "end"));
+
+            for (let i = 0; i < roomEvents.length; i++) {
+                let startValue = dateToDateTimeInputField(roomEvents[i].start);
+                let endValue = dateToDateTimeInputField(roomEvents[i].end);
+                let roomEmail = roomEvents[i].extendedProps.calendarId;
+
+                oldEventValues["modalRoomField_" + i] = roomEmail;
+                let roomDiv = createSelectDiv("Room", "modalRoomField_" + i, roomEmail);
+                oldEventValues["modalStartField_" + i] = startValue;
+                let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
+                oldEventValues["modalEndField_" + i] = endValue;
+                let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
+
+                if (i > 0) {
+                    formDiv.appendChild(document.createElement("hr"));
+                }
+                formDiv.appendChild(roomDiv);
+                formDiv.appendChild(startDiv);
+                formDiv.appendChild(endDiv);
+            }
+        } else {
+            let startValue = dateToDateTimeInputField(mainEvent.start);
+            let endValue = dateToDateTimeInputField(mainEvent.end);
+            let allDayValue = mainEvent.allDay;
+            let commentsValue = mainEvent.extendedProps.body;
+
+            let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField", startValue);
+            let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField", endValue);
+            let allDayDiv = createInputDiv("Add Day Event", "checkbox", "modalAllDayField", allDayValue);
+            let commentsDiv = createInputDiv("Comments", "textarea", "modalCommentsField", commentsValue.trim());
+
+            formDiv.appendChild(startDiv);
+            formDiv.appendChild(endDiv);
+            formDiv.appendChild(allDayDiv);
+            formDiv.appendChild(commentsDiv);
+
+            let allDayCheckbox = document.getElementById("modalAllDayField");
+
+            allDayCheckbox.addEventListener('change', function () {
+                let isChecked = document.getElementById("modalAllDayField").checked;
+                if (isChecked) {
+                    document.getElementById("modalStartField").type = "date";
+                    document.getElementById("modalStartField").value = dateToDateInputField(mainEvent.start);
+                    document.getElementById("modalStartFieldLabel").innerHTML = "Start Date";
+
+                    document.getElementById("modalEndField").type = "date";
+                    let allDayEndDate = mainEvent.end;
+                    allDayEndDate.setDate(allDayEndDate.getDate() - 1);
+                    document.getElementById("modalEndField").value = dateToDateInputField(allDayEndDate);
+                    document.getElementById("modalEndFieldLabel").innerHTML = "End Date";
+                } else {
+                    document.getElementById("modalStartField").type = "datetime-local";
+                    document.getElementById("modalStartFieldLabel").innerHTML = "Start Time";
+                    document.getElementById("modalStartField").value = startValue;
+
+                    document.getElementById("modalEndField").type = "datetime-local";
+                    document.getElementById("modalEndFieldLabel").innerHTML = "End Time";
+                    document.getElementById("modalEndField").value = endValue;
+                }
+            });
+            if (mainEvent.allDay && !allDayCheckbox.checked) {
+                allDayCheckbox.click();
+            }
+        }
+
+        $("#eventModal").modal();
+    }
 </script>
 
 
@@ -848,7 +969,8 @@
                 </div>
                 <div id="modalBody" class="modal-body">
                     <form id="modalForm" class="form-horizontal" /></form>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="updateEvent()">Update Event</button>
+                    <button id="updateEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="updateEvent()" style="display:none;">Update Event</button>
+                    <button id="createEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="createEvent()" style="display:none;">Create Event</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -1452,117 +1574,14 @@
                     });
                 }
             },
-            editEvent: function() {
-                if ($.isEmptyObject(selectedEvent)) {
-                    return;
-                }
-                oldEventValues = {};
-                $("#eventModalTitle").html(selectedEvent.title);
-
-                let mainEvent = selectedEvent;
-                let isEHRManaged = !mainEvent.extendedProps.isUnmanaged;
-
-                if (isEHRManaged) {
-                    if (selectedEvent.extendedProps.parentid) {
-                        mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
-                    }
-                }
-
-                let roomIds = [];
-                if (isEHRManaged) {
-                    if (mainEvent.extendedProps.childids) {
-                        roomIds = mainEvent.extendedProps.childids;
-                    }
-                }
-                
-                let formDiv = document.getElementById("modalForm");
-
-                while (formDiv.firstChild) {
-                    formDiv.removeChild(formDiv.lastChild);
-                }
-
-                let titleDiv = createInputDiv("Title", "text", "modalTitleField", mainEvent.title);
-                formDiv.appendChild(titleDiv);
-                formDiv.appendChild(document.createElement("hr"));
-
-                if (isEHRManaged) {
-                    let roomEvents = [];
-                    for (let i = 0; i < roomIds.length; i++) {
-                        roomEvents.push(calendar.getEventById(roomIds[i]));
-                    }
-                    roomEvents.sort(compareRooms("start", "end"));
-
-                    for (let i = 0; i < roomEvents.length; i++) {
-                        let startValue = dateToDateTimeInputField(roomEvents[i].start);
-                        let endValue = dateToDateTimeInputField(roomEvents[i].end);
-                        let roomEmail = roomEvents[i].extendedProps.calendarId;
-
-                        oldEventValues["modalRoomField_" + i] = roomEmail;
-                        let roomDiv = createSelectDiv("Room", "modalRoomField_" + i, roomEmail);
-                        oldEventValues["modalStartField_" + i] = startValue;
-                        let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
-                        oldEventValues["modalEndField_" + i] = endValue;
-                        let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
-
-                        if (i > 0) {
-                            formDiv.appendChild(document.createElement("hr"));
-                        }
-                        formDiv.appendChild(roomDiv);
-                        formDiv.appendChild(startDiv);
-                        formDiv.appendChild(endDiv);
-                    }
-                } else {
-                    let startValue = dateToDateTimeInputField(mainEvent.start);
-                    let endValue = dateToDateTimeInputField(mainEvent.end);
-                    let allDayValue = mainEvent.allDay;
-                    let commentsValue = mainEvent.extendedProps.body;
-
-                    let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField", startValue);
-                    let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField", endValue);
-                    let allDayDiv = createInputDiv("Add Day Event", "checkbox", "modalAllDayField", allDayValue);
-                    let commentsDiv = createInputDiv("Comments", "textarea", "modalCommentsField", commentsValue.trim());
-
-                    formDiv.appendChild(startDiv);
-                    formDiv.appendChild(endDiv);
-                    formDiv.appendChild(allDayDiv);
-                    formDiv.appendChild(commentsDiv);
-
-                    let allDayCheckbox = document.getElementById("modalAllDayField");
-
-                    allDayCheckbox.addEventListener('change', function () {
-                        let isChecked = document.getElementById("modalAllDayField").checked;
-                        if (isChecked) {
-                            document.getElementById("modalStartField").type = "date";
-                            document.getElementById("modalStartField").value = dateToDateInputField(mainEvent.start);
-                            document.getElementById("modalStartFieldLabel").innerHTML = "Start Date";
-
-                            document.getElementById("modalEndField").type = "date";
-                            let allDayEndDate = mainEvent.end;
-                            allDayEndDate.setDate(allDayEndDate.getDate() - 1);
-                            document.getElementById("modalEndField").value = dateToDateInputField(allDayEndDate);
-                            document.getElementById("modalEndFieldLabel").innerHTML = "End Date";
-                        } else {
-                            document.getElementById("modalStartField").type = "datetime-local";
-                            document.getElementById("modalStartFieldLabel").innerHTML = "Start Time";
-                            document.getElementById("modalStartField").value = startValue;
-
-                            document.getElementById("modalEndField").type = "datetime-local";
-                            document.getElementById("modalEndFieldLabel").innerHTML = "End Time";
-                            document.getElementById("modalEndField").value = endValue;
-                        }
-                    });
-                    if (mainEvent.allDay && !allDayCheckbox.checked) {
-                        allDayCheckbox.click();
-                    }
-                }
-
-                $("#eventModal").modal();
+            createEvent: function() {
+                generateEventModal("createEvent");
             },
             duplicateEvent: function() {
-                if ($.isEmptyObject(selectedEvent)) {
-                    return;
-                }
-                alert('test');
+                generateEventModal("duplicateEvent");
+            },
+            editEvent: function() {
+                generateEventModal("editEvent");
             },
             viewNecropsyReportURL: ko.pureComputed(function() {
                 <% ActionURL necropsyReportURL = new ActionURL(WNPRC_EHRController.NecropsyReportAction.class, getContainer()); %>

@@ -73,4 +73,5 @@ abstract public class WebUtilsService {
      */
     abstract public ModelAndView getJspPageFromView(JspView view);
     abstract public ModelAndView getJspReportPageFromView(JspView view);
+    abstract public JspView getKnockoutTemplate(String templateName);
 }

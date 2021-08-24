@@ -1,5 +1,5 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.webutils.view.JspPage" %>
+<%@ page import="org.labkey.webutils.api.JspPage" %>
 <%@ page import="org.springframework.web.servlet.ModelAndView" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.api.module.Module" %>

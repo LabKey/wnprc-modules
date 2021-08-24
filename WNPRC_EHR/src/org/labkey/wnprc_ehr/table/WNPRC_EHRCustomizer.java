@@ -1200,7 +1200,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         String name = sourceCol.getName();
         if (ti.getColumn(name + "CoalescedFuture") == null)
         {
-            SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn timestampadd(SQL_TSI_DAY, 365, {fn curdate()})}) as date)");
+            SQLFragment sql = new SQLFragment("CAST(COALESCE(").append(sourceCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append(",  {fn timestampadd(SQL_TSI_DAY, 365, {fn curdate()})}) as date)");
             //SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn curdate()} + integer '365')  as date)");
             ExprColumn col = new ExprColumn(ti, name + "CoalescedFuture", sql, JdbcType.DATE);
             col.setCalculated(true);

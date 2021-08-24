@@ -1,9 +1,8 @@
-package org.labkey.webutils.view;
+package org.labkey.webutils.api;
 
 import org.json.JSONArray;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.template.ClientDependency;
-import org.labkey.webutils.WebUtilsServiceImpl;
 import org.labkey.webutils.api.model.JspPageModel;
 
 import java.util.Arrays;
@@ -13,7 +12,7 @@ import java.util.List;
  * Created by jon on 1/13/16.
  */
 public class JspPage extends JspView<JspPageModel> {
-    static private String _packagePathDir = WebUtilsServiceImpl.getPackageDirFromClass(JspPage.class);
+    static private String _packagePathDir = WebUtilsService.getPackageDirFromClass(JspPage.class);
     private Integer publicNumberOfRenders =0 ;
     private JSONArray publicUnBindComponents = new JSONArray();
 
@@ -51,7 +50,7 @@ public class JspPage extends JspView<JspPageModel> {
                     "lk-input-textarea"
             );
             for( String name: templates ) {
-                this.getModelBean().addTemplate(new JspView<>(_packagePathDir + "knockout_components/" + name + ".jsp"));
+                this.getModelBean().addTemplate(WebUtilsService.get().getKnockoutTemplate(name));
             }
 
             // Set the frame to none, since we don't want WebPartView to add any wrapping HTML, such as a web part.

@@ -12,7 +12,7 @@ import java.util.List;
  * Created by jon on 1/13/16.
  */
 public class JspPage extends JspView<JspPageModel> {
-    static private String _packagePathDir = WebUtilsService.getPackageDirFromClass(JspPage.class);
+    //static private String _packagePathDir = WebUtilsService.getPackageDirFromClass(JspPage.class);
     private Integer publicNumberOfRenders =0 ;
     private JSONArray publicUnBindComponents = new JSONArray();
 
@@ -24,7 +24,7 @@ public class JspPage extends JspView<JspPageModel> {
     //numberofRenders check if it is not the first time the page renders
     //unBindComponents components in the page to rebind to ko.observables.
     public JspPage(JspView view, Integer numberOfRenders, JSONArray unBindComponents){
-        super(_packagePathDir + "JspPage.jsp", new JspPageModel());
+        super("/org/labkey/webutils/view/JspPage.jsp", new JspPageModel());
 
         publicNumberOfRenders = numberOfRenders;
         publicUnBindComponents = unBindComponents;
@@ -62,7 +62,7 @@ public class JspPage extends JspView<JspPageModel> {
     }
 
     public JspPage(JspView view, JspPageModel model) {
-        super(_packagePathDir + "JspPage.jsp", model);
+        super("/org/labkey/webutils/view/JspPage.jsp", model);
 
         // Set the body to the passed in view
         this.setBody(view);
@@ -83,7 +83,7 @@ public class JspPage extends JspView<JspPageModel> {
                 "lk-input-textarea"
         );
         for( String name: templates ) {
-            this.getModelBean().addTemplate(new JspView<>(_packagePathDir + "knockout_components/" + name + ".jsp"));
+            this.getModelBean().addTemplate(new JspView<>("/org/labkey/webutils/view/knockout_components/" + name + ".jsp"));
         }
 
         // Set the frame to none, since we don't want WebPartView to add any wrapping HTML, such as a web part.

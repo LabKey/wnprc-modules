@@ -48,12 +48,4 @@ public class dbutilsModule extends ExtendedSimpleModule {
         schemaNames.add("dbutils");
         return schemaNames;
     }
-
-    public Container getPrivateContainer() {
-        throw new UnsupportedOperationException();
-    }
-
-    public Container getPrivateFilesContainer() {
-        throw new UnsupportedOperationException();
-    }
 }

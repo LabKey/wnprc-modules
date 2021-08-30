@@ -10,6 +10,9 @@
                     <column columnName="edit" >
                         <columnTitle>Edit</columnTitle>
                     </column>
+                    <column columnName="rowid" >
+                        <columnTitle>#</columnTitle>
+                    </column>
 
                     <column columnName="date" >
                         <columnTitle>Date Requested</columnTitle>

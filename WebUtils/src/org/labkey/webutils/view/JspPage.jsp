@@ -22,7 +22,7 @@
 %>
 
 <style type="text/css">
-    #bootstrap-box<%=sufix%> {
+    #bootstrap-box<%=h(sufix)%> {
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -33,12 +33,12 @@
         /* background-color: #fff; */ /* panels will include this, so it's not necessary to set here, and this way, it matches the outer divs */
     }
 
-    #bootstrap-box<%=sufix%> input[type="button"] {
+    #bootstrap-box<%=h(sufix)%> input[type="button"] {
         -webkit-appearance: button;
         cursor: pointer;
     }
 
-    #bootstrap-box<%=sufix%> input[disabled] {
+    #bootstrap-box<%=h(sufix)%> input[disabled] {
         cursor: default;
     }
 
@@ -139,7 +139,7 @@
 
 <!-- Use a div to hide the content until Knockout bindings have been applied.-->
 <div class="hiddenDiv" style="display: none;">
-    <div id="bootstrap-box<%=sufix%>">
+    <div id="bootstrap-box<%=h(sufix)%>">
         <!-- Templates -->
         <%
             try {
@@ -162,9 +162,10 @@
 
 <script type="application/javascript">
     (function() {
+        debugger;
         var koSuccessfullyLoaded = true;
         //variables use for rendering the JSP a second time under a LabKey WebPart
-        let $numberOfRenders = "<%=numberOfRenders %>";
+        let $numberOfRenders = "<%=numberOfRenders%>";
         let unBindComponents  = <%=unBindComponents%>;
        // var applied = false;
 

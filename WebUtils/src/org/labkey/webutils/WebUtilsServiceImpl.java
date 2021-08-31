@@ -65,8 +65,8 @@ public class WebUtilsServiceImpl extends WebUtilsService {
     @Override
     public JspView getKnockoutTemplate(String templateName)
     {
-        String _packagePathDir = WebUtilsServiceImpl.getPackageDirFromClass(JspPage.class);
-        return new JspView<>(_packagePathDir + "knockout_components/" + templateName + ".jsp");
+        //String _packagePathDir = WebUtilsServiceImpl.getPackageDirFromClass(JspPage.class);
+        return new JspView<>("/org/labkey/webutils/view/knockout_components/" + templateName + ".jsp");
     }
 
     private ModelAndView getJspPage(JspView view) {

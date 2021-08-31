@@ -337,7 +337,7 @@
                                                     String value = frequency.getString("value");
                                                     String title = frequency.getString("title");
                                             %>
-                                            <option value="<%=value%>"><%=h(title)%></option>
+                                            <option value="<%=h(value)%>"><%=h(title)%></option>
                                             <%
                                                 }
                                             %>
@@ -362,7 +362,7 @@
                                                     String value = assignedTo.getString("value");
                                                     String title = assignedTo.getString("title");
                                             %>
-                                            <option value="<%=value%>"><%=h(title)%></option>
+                                            <option value="<%=h(value)%>"><%=h(title)%></option>
                                             <%
                                                 }
                                             %>
@@ -386,7 +386,7 @@
                                                      rowid= frequency.getString("rowid");
                                                      altmeaning = frequency.getString("altmeaning");
                                         %>
-                                           <option value="<%=rowid%>"><%=h(altmeaning)%></option>
+                                           <option value="<%=h(rowid)%>"><%=h(altmeaning)%></option>
                                         <%
                                                 }
                                             }
@@ -454,6 +454,8 @@
 
 
 <script>
+
+    debugger;
     let selectedEvent = {};
     let calendar = {};
     let calendarEvents = {};
@@ -511,12 +513,13 @@
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
         };
 
-        var husbandryAssignmentLookup = <%= husbandryAssignmentLookup.toString() %>;
+        var husbandryAssignmentLookup = <%= unsafe(husbandryAssignmentLookup.toString()) %>;
         WebUtils.VM.husbandryAssignmentLookup = husbandryAssignmentLookup;
-        var $animalId = "<%= animalIds %>";
-        var $numberOfRenders = "<%= numberOfRenders %>";
+        var $animalId = "<%= h(animalIds) %>";
 
-        var userId = "<%= userid.toString() %>";
+
+
+        var userId = "<%= h(userid.toString()) %>";
         //This variable allows for specific groups to see all water orders and amounts in the system
         let isSuperUser = false;
 
@@ -528,7 +531,7 @@
             isSuperUser = true;
         }
 
-        var waterAccessControlled = <%= userAccessWater.toString() %>;
+        var waterAccessControlled = <%= h(userAccessWater.toString()) %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
 
         let firstEntry = true;
@@ -729,7 +732,7 @@
             loading: function (isLoading){
                 if (isLoading){
                     $('#water-calendar').block({
-                        message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Updating Calendar...',
+                        message: '<img src="<%=getWebappURL("/webutils/icons/loading.svg")%>">Updating Calendar...',
                         css: {
                             border: 'none',
                             padding: '15px',
@@ -1007,7 +1010,7 @@
                 document.getElementById("modelServerResponse").innerHTML = "";
 
                 $('#waterInfoPanel').block({
-                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
+                    message: '<img src="<%=getWebappURL("/webutils/icons/loading.svg")%>">Closing Water Order...',
                     css: {
                         border: 'none',
                         padding: '15px',
@@ -1103,7 +1106,7 @@
                 document.getElementById("modelServerResponse").innerHTML = "";
 
                 $('#waterInfoPanel').block({
-                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Closing Water Order...',
+                    message: '<img src="<%=getWebappURL("/webutils/icons/loading.svg")%>">Closing Water Order...',
                     css: {
                         border: 'none',
                         padding: '15px',
@@ -1283,7 +1286,7 @@
             submitForm: function(){
 
                 $('#waterExceptionPanel').block({
-                    message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Updating Calendar...',
+                    message: '<img src="<%=getWebappURL("/webutils/icons/loading.svg")%>">Updating Calendar...',
                     css: {
                         border: 'none',
                         padding: '15px',

@@ -398,13 +398,21 @@ public class TriggerScriptHelper {
                     if (openEncounters.size() == 0) {
                         //There are no open breeding encounters, so create a new one
                         List<Map<String, Object>> insertRows = createNewBreedingEncounter(group, i);
-                        saveBreedingEncounter(insertRows, false);
+                        if (StringUtils.isEmpty((String) insertRows.get(0).get("sireid"))) {
+                            errorStrings.add(getError("Id", "Starting a breeding encounter requires a female and at least one male.", "ERROR"));
+                        } else {
+                            saveBreedingEncounter(insertRows, false);
+                        }
                     } else if (openEncounters.size() == 1){
                         //Close currently open breeding encounter and then start new one
                         List<Map<String, Object>> updateRows = closeOngoingBreedingEncounter(filteredHousingRows, openEncounters, group, i);
                         saveBreedingEncounter(updateRows, true);
                         List<Map<String, Object>> insertRows = createNewBreedingEncounter(group, i);
-                        saveBreedingEncounter(insertRows, false);
+                        if (StringUtils.isEmpty((String) insertRows.get(0).get("sireid"))) {
+                            errorStrings.add(getError("Id", "Starting a breeding encounter requires a female and at least one male.", "ERROR"));
+                        } else {
+                            saveBreedingEncounter(insertRows, false);
+                        }
                     } else {
                         //This should not happen
                         if (group.get(i).get("Id").equals(group.get(i).get("currentId"))) {
@@ -504,12 +512,12 @@ public class TriggerScriptHelper {
         JSONObject encounter = new JSONObject();
         encounter.put("objectid", UUID.randomUUID().toString());
         encounter.put("Id", animalsInEncounter.get(0).get("Id"));
-        encounter.put("sireid", sireid);
+        encounter.put("sireid", sireid.toString());
         encounter.put("date", animalsInEncounter.get(0).get("date"));
         encounter.put("project", animalsInEncounter.get(0).get("project"));
         encounter.put("QCState", EHRService.get().getQCStates(container).get(EHRService.QCSTATES.InProgress.getLabel()).getRowId());
         encounter.put("performedby", animalsInEncounter.get(0).get("performedby"));
-        encounter.put("remark", remark);
+        encounter.put("remark", remark.toString());
         encounter.put("outcome", false);
         List<Map<String, Object>> rows = new ArrayList<>();
         rows.add(encounter);

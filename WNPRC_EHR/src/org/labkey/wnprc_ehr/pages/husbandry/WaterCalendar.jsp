@@ -455,12 +455,12 @@
 
 <script>
 
-    debugger;
-    let selectedEvent = {};
-    let calendar = {};
-    let calendarEvents = {};
-    let hideEditPanel = true;
-    let allowProjects = "";
+    //TODO: change var to let for all the following variables for better scoop management
+    var selectedEvent = {};
+    var calendar = {};
+    var calendarEvents = {};
+    var hideEditPanel = true;
+    var allowProjects = "";
 
     var changeableItems = ko.observableArray();
 

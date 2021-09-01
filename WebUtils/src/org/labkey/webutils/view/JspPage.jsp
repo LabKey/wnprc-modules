@@ -162,7 +162,6 @@
 
 <script type="application/javascript">
     (function() {
-        debugger;
         var koSuccessfullyLoaded = true;
         //variables use for rendering the JSP a second time under a LabKey WebPart
         let $numberOfRenders = "<%=numberOfRenders%>";

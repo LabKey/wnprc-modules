@@ -5,3 +5,7 @@ password $LK_BACKGROUND_USER_PASSWORD
 machine ehr.primate.wisc.edu
 login $LK_BACKGROUND_USER
 password $LK_BACKGROUND_USER_PASSWORD
+
+machine labkey.primate.wisc.edu
+login $LK_BAKCGROUD_USER
+password $LK_BACKGROUND_USER_PASSWORD

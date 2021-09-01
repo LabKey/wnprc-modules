@@ -8,14 +8,21 @@
 <%@ page import="org.labkey.webutils.WebUtilsModule" %>
 <%@ page import="org.labkey.api.module.ModuleProperty" %>
 <%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
+<%@ page import="org.labkey.api.util.GUID" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspPage view = (JspPage) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
+    Integer numberOfRenders = view.getNumberOfRenders();
+    JSONArray unBindComponents = view.getUnbindComponents();
+
+
+    String sufix = GUID.makeGUID();
 %>
 
 <style type="text/css">
-    #bootstrap-box {
+    #bootstrap-box<%=sufix%> {
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -26,12 +33,12 @@
         /* background-color: #fff; */ /* panels will include this, so it's not necessary to set here, and this way, it matches the outer divs */
     }
 
-    #bootstrap-box input[type="button"] {
+    #bootstrap-box<%=sufix%> input[type="button"] {
         -webkit-appearance: button;
         cursor: pointer;
     }
 
-    #bootstrap-box input[disabled] {
+    #bootstrap-box<%=sufix%> input[disabled] {
         cursor: default;
     }
 
@@ -119,6 +126,7 @@
 
     boolean QUnitOn = (QUnitOnPropertyValue != null) && QUnitOnPropertyValue.toLowerCase().equals("true");
 
+
     if (QUnitOn) {
 %>
 <div id="qunit"></div>
@@ -131,7 +139,7 @@
 
 <!-- Use a div to hide the content until Knockout bindings have been applied.-->
 <div class="hiddenDiv" style="display: none;">
-    <div id="bootstrap-box">
+    <div id="bootstrap-box<%=sufix%>">
         <!-- Templates -->
         <%
             try {
@@ -155,10 +163,26 @@
 <script type="application/javascript">
     (function() {
         var koSuccessfullyLoaded = true;
+        //variables use for rendering the JSP a second time under a LabKey WebPart
+        let $numberOfRenders = "<%=numberOfRenders %>";
+        let unBindComponents  = <%=unBindComponents%>;
+       // var applied = false;
 
         // Use a try block to ensure that we always show the hidden div.
         try {
-            ko.applyBindings(WebUtils.VM);
+            if ($numberOfRenders == 0){
+                ko.applyBindings(WebUtils.VM);
+            }else{
+                if(typeof ko !== 'undefined'){
+                    for(var i =0; i<unBindComponents.length; i++){
+                        var nodeComponent = document.getElementById(unBindComponents[i]);
+                        ko.cleanNode(nodeComponent);
+                        ko.applyBindings(WebUtils.VM, nodeComponent);
+                    }
+
+                }
+
+            }
         }
         catch (e) {
             koSuccessfullyLoaded = false;

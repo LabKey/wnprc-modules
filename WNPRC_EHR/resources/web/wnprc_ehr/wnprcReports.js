@@ -1154,19 +1154,18 @@ EHR.reports['abstract'] = function(panel, tab){
             style: 'margin-bottom: 20px'
         };
         var elementHTML = '';
-        for (var i = 0; i < animalList.length; i ++){
-            elementHTML += '<div id="abstract-section' + animalList[i] + '"></div>'
-        }
+        // here we generate a random number to force the react component to refresh,
+        // since it became a problem when jumping between the same report in Clinical and General
+        // Animal History tabs with the same animal id
+        var randNum = Math.random().toString();
+        elementHTML += '<div id="abstract-section' + animalId + randNum +'"></div>'
         Ext4.apply(config, {
             html: elementHTML,
             listeners: {
                 afterrender: {
                     fn: function () {
                         LABKEY.requiresScript("/wnprc_ehr/gen/abstract.js",true, function() {
-                            for (var i = 0; i < animalList.length; i ++){
-                                Abstract.renderAnimalAbstract(animalList[i])
-                            }
-
+                            Abstract.renderAnimalAbstract(animalId, randNum)
                         });
                     }
                 }
@@ -1330,7 +1329,7 @@ EHR.reports['abstract'] = function(panel, tab){
         });
 
         LABKEY.Utils.requiresCSS("wnprc_ehr/HousingAndAssignmentHistory.css");
-        WNPRC_EHR.Utils.Lib.loadLibrary(['/webutils/lib/webutils'], function() {
+        LABKEY.requiresScript('/webutils/lib/webutils', function() { 
             LABKEY.requiresScript("wnprc_ehr/HousingAndAssignmentHistory.js", function() {
                 var config = {
                     xtype: 'ldk-webpartpanel',
@@ -1348,7 +1347,7 @@ EHR.reports['abstract'] = function(panel, tab){
                             afterrender: {
                                 fn: function() {
                                     var applyBindings = function() {
-                                        var $animalNodes = jQuery('#' + panelId).find('animal-housing');
+                                        var $animalNodes = $('#' + panelId).find('animal-housing');
 
                                         $animalNodes.each(function() {
                                             if (typeof ko !== 'undefined') {

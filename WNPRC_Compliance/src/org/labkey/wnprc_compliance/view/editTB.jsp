@@ -89,7 +89,6 @@
                                         <label>
                                             <input class="form-control" type="text" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}, value: date">
                                         </label><br>
-                                        <input type="checkbox" data-bind="checked: required, click: $root.customClick.updateMeasles"> Required<br><br>
                                     </div>
                                 </div>
                             <!-- /ko -->
@@ -127,7 +126,6 @@
                     var wrapdate = moment(event.date);
                     WebUtils.VM.results.MeaslesClearances()[event._row-1]['date'] = moment.utc(wrapdate).format();
                 }
-                WebUtils.VM.results.MeaslesClearances()[event._row-1]['required'] = event.required;
                 WebUtils.VM.results.MeaslesClearances()[event._row-1]['mutated'] = true;
                 disableButton("#measles-update-button",false);
                 return true;

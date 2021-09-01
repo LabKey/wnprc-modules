@@ -3,14 +3,21 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="animal_requests" tableDbType="TABLE" useColumnOrder="true">
                 <tableTitle>Animal Requests</tableTitle>
-                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
+                <javaCustomizer class="org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer"/>
+                <updateUrl />
+
                 <columns>
+                    <column columnName="edit" >
+                        <columnTitle>Edit</columnTitle>
+                    </column>
+
                     <column columnName="date" >
                         <columnTitle>Date Requested</columnTitle>
                         <formatString>yyyy-MM-dd hh:mm</formatString>
+                        <isUserEditable>false</isUserEditable>
                     </column>
                     <column columnName="createdBy">
-                        <columnTitle>Create By</columnTitle>
+                        <columnTitle>Created By</columnTitle>
                     </column>
                     <column columnName="principalinvestigator">
                     <columnTitle>Principal Investigator</columnTitle>
@@ -71,8 +78,7 @@
                         <columnTitle>Disposition</columnTitle>
                         <fk> <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>animal_requests_disposition</fkTable>
-                            <fkColumnName>meaning</fkColumnName>
-                            <fkDisplayColumnName>Origin</fkDisplayColumnName>
+                            <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
                     <column columnName="executivecommitteeapproval">
@@ -131,6 +137,9 @@
                     </column>
                     <column columnName="animalsorigin">
                         <columnTitle>Animal Origin</columnTitle>
+                    </column>
+                    <column columnName="animal_history_link">
+                        <columnTitle>Animal History</columnTitle>
                     </column>
 
                 </columns>

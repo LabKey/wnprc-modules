@@ -18,4 +18,3 @@ services:
       LK_BACKGROUND_USER_PASSWORD:
       LK_BASE_URL:
       TZ: America/Chicago
-  

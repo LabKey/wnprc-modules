@@ -24,3 +24,5 @@ docker/nginx/key.pem
 WNPRC_EHR/resources/web/wnprc_ehr/gen/
 
 .storybook-out/
+
+docker/ehrcron/scripts/pg_backup/lkbackup.ini

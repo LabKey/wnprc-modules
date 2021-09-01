@@ -121,6 +121,8 @@
                         </div>
 
 
+
+
                         <div class="col-xs-4">
                             <div class="panel panel-primary">
                                 <div class="panel-heading">Attributes</div>
@@ -133,9 +135,21 @@
                                                 This person is an employee
                                             </label>
                                         </div>
-                                        <div class="form-group col-sm-4">
-                                            <label class="col-sm-5 control-label">DOB </label>
-                                                <input type="text" class="form-control" data-bind="dateTimePicker: dateOfBirth, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
+                                        <div class="checkbox">
+                                            <label class="control-label">
+                                                <input type="checkbox" data-bind="checked: hold">
+                                                Hold
+                                            </label>
+                                        </div>
+                                        <div class="checkbox">
+                                            <label class="control-label">
+                                                <input type="checkbox" data-bind="checked: measles_required">
+                                                Measles required
+                                            </label>
+                                        </div>
+                                        <div class="row ">
+                                            <label class="control-label" style="padding-left:5px">DOB </label>
+                                            <input type="text" data-bind="dateTimePicker: dateOfBirth, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
                                             </label>
                                         </div>
                                     </form>
@@ -263,15 +277,6 @@
                         <div class="col-sm-6">
                         <form class="form-horizontal">
                             <div class="form-group">
-                                <div class="col-sm-offset-3 col-sm-8">
-                                    <div class="checkbox">
-                                        <label class="control-label">
-                                            <input type="checkbox" data-bind="checked: required"> Required
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
                                 <label class="col-sm-3 control-label">Clearance Date</label>
                                 <div class="col-sm-8">
                                     <input type="text" class="form-control" data-bind="dateTimePicker: date, dateTimePickerOptions: {format: 'MM/DD/YYYY'}">
@@ -371,6 +376,8 @@
             dateOfBirth: ko.observable(''),
             notes:      ko.observable(''),
             isEmployee: ko.observable(false),
+            hold: ko.observable(false),
+            measles_required: ko.observable(false),
             userMatches: ko.observableArray([]),
             cardMatches: ko.observableArray([]),
             selectedUsers: ko.observableArray([]),
@@ -439,8 +446,7 @@
             $element: $('#measles-form-body'),
             disabled: ko.observable(),
             notes: ko.observable(''),
-            date: ko.observable(''),
-            required: ko.observable(false)
+            date: ko.observable('')
         };
         VM.measlesForm = measlesForm;
 
@@ -472,6 +478,7 @@
             VM.newUserForm.dateOfBirth('');
             VM.newUserForm.notes('');
             VM.newUserForm.isEmployee(false);
+            VM.newUserForm.hold(false);
             VM.newUserForm.userMatches([]);
             VM.newUserForm.cardMatches([]);
             VM.newUserForm.selectedUsers([]);
@@ -498,6 +505,8 @@
                     lastName:    form.lastName,
                     dateOfBirth: form.dateOfBirth,
                     description: form.notes,
+                    hold: form.hold,
+                    measles_required: form.measles_required,
                     cardNumbers: _.map(form.selectedCards, function(card) { return card.id }),
                     userIds:     _.map(form.selectedUsers, function(user) { return user.id })
                 };
@@ -511,8 +520,7 @@
                     }
                     submission.data.measlesInfo = {
                         notes: measlesForm.notes(),
-                        dateCompleted: dateCompleted,
-                        required: measlesForm.required()
+                        dateCompleted: dateCompleted
                     };
                 }
 
@@ -528,7 +536,9 @@
                 submission.url = "<%= new ActionURL(WNPRC_ComplianceController.UpdatePersonClearanceAPI.class, getContainer()) %>";
 
                 submission.data = {
-                    personid: VM.selectedPerson()
+                    personid: VM.selectedPerson(),
+                    hold: form.hold,
+                    measles_required: form.measles_required
                 };
 
                 if (!measlesForm.disabled()) {
@@ -540,8 +550,7 @@
                     }
                     submission.data.measlesInfo = {
                         notes: measlesForm.notes(),
-                        dateCompleted: dateCompleted,
-                        required: measlesForm.required()
+                        dateCompleted: dateCompleted
                     };
                 }
 

@@ -15,6 +15,7 @@
  */
 package org.labkey.wnprc_ehr;
 
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.labkey.api.data.Container;
@@ -43,6 +44,7 @@ import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.security.User;
 import org.labkey.api.security.roles.RoleManager;
+import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
@@ -87,6 +89,10 @@ import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Treatments.TreatmentsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCForm;
 import org.labkey.wnprc_ehr.dataentry.forms.VVC.VVCRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.EnterMultipleWater;
+import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.EnterSingleDayWater;
+import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.EnterWater;
+import org.labkey.wnprc_ehr.dataentry.forms.WaterMonitoring.EnterWaterOrder;
 import org.labkey.wnprc_ehr.dataentry.forms.Weight.WeightForm;
 import org.labkey.wnprc_ehr.demographics.MedicalFieldDemographicsProvider;
 import org.labkey.wnprc_ehr.demographics.MostRecentObsDemographicsProvider;
@@ -94,6 +100,7 @@ import org.labkey.wnprc_ehr.history.DefaultAlopeciaDataSource;
 import org.labkey.wnprc_ehr.history.DefaultBodyConditionDataSource;
 import org.labkey.wnprc_ehr.history.DefaultTBDataSource;
 import org.labkey.wnprc_ehr.history.WNPRCUrinalysisLabworkType;
+import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.BehaviorNotification;
 import org.labkey.wnprc_ehr.notification.ColonyAlertsNotification;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
@@ -106,12 +113,15 @@ import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
 import org.labkey.wnprc_ehr.notification.TreatmentAlertsNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
-import org.labkey.wnprc_ehr.notification.WaterMonitoringNotification;
+import org.labkey.wnprc_ehr.notification.WaterMonitoringAnimalWithOutEntriesNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
+import org.labkey.wnprc_ehr.notification.WaterOrdersAlertNotification;
+import org.labkey.wnprc_ehr.pages.husbandry.WaterCalendarWebPartFactory;
 import org.labkey.wnprc_ehr.schemas.TissueSampleTable;
 import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.security.permissions.BehaviorAssignmentsPermission;
 import org.labkey.wnprc_ehr.security.roles.BehaviorServiceWorker;
+import org.labkey.wnprc_ehr.security.roles.WNPRCAnimalRequestsRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRFullSubmitterRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCEHRRequestorSchedulerRole;
 import org.labkey.wnprc_ehr.security.roles.WNPRCFullSubmitterWithReviewerRole;
@@ -119,7 +129,9 @@ import org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer;
 import org.labkey.wnprc_ehr.updates.ModuleUpdate;
 import org.reflections.Reflections;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -138,6 +150,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String CONTROLLER_NAME = "wnprc_ehr";
     public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
+        public static final WebPartFactory waterCalendarWebPart = new WaterCalendarWebPartFactory();
 
     public static String BC_GOOGLE_DRIVE_PROPERTY_NAME = "BCGoogleDriveAccount";
 
@@ -194,6 +207,22 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         return ehrContainer;
     }
 
+        /**
+         * Logger for logging the logs
+         */
+        private static final Logger LOG = Logger.getLogger(WNPRC_EHRModule.class);
+
+        /**
+         * Flag (from the JVM) to indicate we should force the module to re-run all updates
+         * regardless of the actual module version
+         */
+        private boolean forceUpdate = Boolean.getBoolean("labkey.module.forceupdate");
+
+        /**
+         * Flag indicating we should load the study metadata on module startup
+         */
+        private boolean loadOnStart = false;
+
     public String getName()
     {
         return NAME;
@@ -201,7 +230,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     public double getVersion()
     {
-        return 18.36;
+        return 18.38;
     }
 
     public boolean hasScripts()
@@ -216,9 +245,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         addController(TEST_CONTROLLER_NAME, WNPRC_EHRTestController.class);
     }
 
-    @Override
-    protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
-    {
+        @NotNull
+        protected Collection<WebPartFactory> createWebPartFactories()
+        {
+            return new ArrayList<>(Arrays.asList(waterCalendarWebPart));
+        }
+
+        @Override
+        protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
+        {
         ModuleUpdate.onStartup(moduleContext, this);
 
         EHRService.get().registerModule(this);
@@ -230,8 +265,10 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcCoreUtils.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcOverRides.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcReports.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/wnprcHusbandryReports.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/datasetButtons.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/animalPortal.js"), this);
+        EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/animalWaterCalendar.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/reports/PregnancyReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/reports/ResearchUltrasoundsReport.js"), this);
         EHRService.get().registerClientDependency(ClientDependency.fromPath("wnprc_ehr/Inroom.js"), this);
@@ -279,6 +316,9 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerMoreActionsButton(new CreateTaskButton(this, "Weight"), "study", "demographics");
         EHRService.get().registerMoreActionsButton(new ChangeBloodQCButton(this), "study", "blood");
 
+        //override pages
+        EHRService.get().registerActionOverride("dataEntry", this, "views/dataEntry.html");
+
         EHRService.get().registerOptionalClinicalHistoryResources(this);
         EHRService.get().registerHistoryDataSource(new DefaultAlopeciaDataSource(this));
         EHRService.get().registerHistoryDataSource(new DefaultBodyConditionDataSource(this));
@@ -310,6 +350,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
             }
 
         }
+        EHRService es = EHRService.get();
+       // if (loadOnStart) loadLatestDatasetMetadata(es);
     }
 
     private void registerPermissions()
@@ -365,7 +407,6 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new BehaviorNotification(this),
                 new DeathNotification(),
                 new ColonyAlertsNotification(this),
-                new WaterMonitoringNotification(this),
                 new TreatmentAlertsNotification(this),
                 new VvcNotification(this),
                 new FoodNotStartedNotification(this),
@@ -373,9 +414,12 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new FoodNotCompletedNotification(this),
                 new FoodCompletedProblemsNotification(this),
                 new AnimalRequestNotification(this),
+                new AnimalRequestNotificationUpdate(this),
                 new ProjectRequestNotification(this),
                 new IrregularObsBehaviorNotification(this),
-                new ViralLoadQueueNotification(this)
+                new ViralLoadQueueNotification(this),
+                new WaterOrdersAlertNotification(this),
+                new WaterMonitoringAnimalWithOutEntriesNotification(this)
         );
 
         for (Notification notification : notifications)
@@ -424,7 +468,13 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 ProtocolForm.class,
                 ResearchUltrasoundsForm.class,
                 ResearchUltrasoundsTaskForm.class,
-                ResearchUltrasoundsReviewForm.class
+                ResearchUltrasoundsReviewForm.class,
+                ProtocolForm.class,
+                EnterWater.class,
+                EnterMultipleWater.class,
+                EnterWaterOrder.class,
+                EnterSingleDayWater.class
+
         );
         for (Class<? extends DataEntryForm> form : forms)
         {
@@ -442,6 +492,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         RoleManager.registerRole(new BehaviorServiceWorker());
         RoleManager.registerRole(new WNPRCEHRRequestorSchedulerRole());
         RoleManager.registerRole(new WNPRCEHRFullSubmitterRole());
+        RoleManager.registerRole(new WNPRCAnimalRequestsRole());
     }
 
     public Set<Container> getWNPRCStudyContainers()
@@ -478,9 +529,12 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     @Override
     public void versionUpdate(ModuleContext moduleContext) throws Exception
     {
-        super.versionUpdate(moduleContext);
-        ModuleUpdate.doVersionUpdate(moduleContext);
-    }
+            LOG.debug("deferring import of study metadata until module startup (after Spring config)");
+            forceUpdate = false; // let the version report correctly from now on
+            loadOnStart = true;  // indicate that we should load the study metadata on startup
+            super.versionUpdate(moduleContext);
+            ModuleUpdate.doVersionUpdate(moduleContext);
+        }
 
     @Override
     @NotNull
@@ -499,4 +553,14 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 .filter(c -> c.getSimpleName().endsWith("UnitTest"))
                 .collect(Collectors.toSet());
     }
+
+       /* *//**
+         * Executes the import of the dataset metadata into every container that has the module enabled
+         *//*
+        private void loadLatestDatasetMetadata(EHRService es)
+        {
+            LOG.debug("importing study metadata from reference study to all study containers");
+            File file = new File(Paths.get(getExplodedPath().getAbsolutePath(), "referenceStudy", "study").toFile(), "study.xml");
+            getWNPRCStudyContainers().forEach(c -> DatasetImportHelper.safeImportDatasetMetadata(es.getEHRUser(c), c, file));
+        }*/
 }

@@ -46,6 +46,11 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --tablespace)     ## tablespace that the db should be set to (e.g., for an external drive)
+            tablespace="$2"
+            shift
+            shift
+            ;;
         --tmppath)
             tmppath="$2"
             shift
@@ -94,7 +99,7 @@ fi
 
 echo -n 'value of dock '$dock
 if [[ -z $dock ]]; then
-  docker-compose down -v
+  docker-compose -f docker-compose.prod.yml -f docker-compose.yml down -v
   if [[ ! -e .env ]]; then
       cp default.env .env
   fi
@@ -144,7 +149,7 @@ fi
 #-------------------------------------------------------------------------------
 if [[ -z $filepath ]]; then
     filename="labkey_$(date +'%Y%m%d')_0100.pg"
-    scp ${username}ehr.primate.wisc.edu:/backups/labkey/labkey_backup/database/daily/${filename} $tmpdir || exit 1
+    scp ${username}ehr.primate.wisc.edu:/space/backups/labkey_backup/database/daily/${filename} $tmpdir || exit 1
     filepath="$tmpdir/$filename"
 fi
 
@@ -164,6 +169,20 @@ else
   ${pgpath}psql -U postgres -p "${pgport#*:}" -c 'drop role if exists labkey; create role labkey superuser; drop role if exists doconnor; create role doconnor superuser; drop role if exists oconnor; create role oconnor superuser; drop role if exists oconnorlab; create role oconnorlab superuser; drop role if exists sconnor; create role sconnor superuser; drop role if exists soconnorlab; create role soconnorlab superuser; drop role if exists soconnor_lab; create role soconnor_lab superuser;' &>/dev/null
   echo -e '\033[0;32mdone\033[0m'
 fi
+
+#-------------------------------------------------------------------------------
+# Change the tablespace of the db if one is provided
+#-------------------------------------------------------------------------------
+if [[ $tablespace ]]; then
+  echo -n 'Setting tablespace to: '
+  echo $tablespace
+  if [[ -z $dock ]]; then
+    docker-compose exec postgres psql -U postgres -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
+  else
+    ${pgpath}psql -U postgres -p "${pgport#*:}" -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
+  fi
+fi
+  
 
 #-------------------------------------------------------------------------------
 # Actually restore the database, using a background proc so we can track progress
@@ -207,6 +226,8 @@ if [[ -z $prod ]]; then
         update prop.properties p set value = '/usr/bin/R' where (select s.category from prop.propertysets s where s.set = p.set) = 'ScriptEngineDefinition_R,r' and p.name = 'exePath';
         update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ehr.geneticcalculations' and p.name = 'enabled';
         update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'ldk.ldapConfig' and p.name = 'enabled';
+        update prop.properties p set value = 'false' where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ldk.notifications.config' and p.name = 'serviceEnabled';
+        delete from prop.properties p where (select s.category from prop.propertysets s where s.set = p.set) = 'org.labkey.ldk.notifications.status';
         update ehr.module_properties p set stringvalue = 'test-ehr-do-not-reply@primate.wisc.edu' where p.prop_name = 'site_email';
         update exp.propertydescriptor set scale = 64 where name in ('FirstName', 'LastName', 'Phone', 'Mobile', 'Pager', 'IM') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;
         update exp.propertydescriptor set scale = 255 where name in ('Description') and propertyuri like '%:ExtensibleTable-core-Users.Folder-%' and scale = 0;

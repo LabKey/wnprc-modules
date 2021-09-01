@@ -41,6 +41,7 @@ Utils.contains = function(v,arr) {
     return false;
 };
 
+//returns true or false if array is unique
 Utils.unique = function (chk) {
     var arr = [];
     var contain = false;
@@ -53,4 +54,15 @@ Utils.unique = function (chk) {
         }
     }
     return !contain;
+}
+
+//returns array of unique items
+Utils.uniqueArray = function(fullArr) {
+    var arr = [];
+    for (var i = 0; i < fullArr.length; i++) {
+        if (!Utils.contains(fullArr[i],arr)) {
+            arr.push(fullArr[i]);
+        }
+    }
+    return arr;
 }

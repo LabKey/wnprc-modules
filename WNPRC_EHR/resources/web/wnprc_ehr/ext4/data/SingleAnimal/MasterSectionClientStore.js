@@ -48,7 +48,8 @@ Ext4.define('WNPRC.ext.data.SingleAnimal.MasterSectionClientStore', {
 
     subscribeToClientStore: function(clientStore) {
         var self = this;
-        if (WNPRC.ExtUtils.isInstanceOf(clientStore, WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore)) {
+        if (WNPRC.ExtUtils.isInstanceOf(clientStore, WNPRC.ext.data.SingleAnimal.SlaveSectionClientStore) ||
+                WNPRC.ExtUtils.isInstanceOf(clientStore, WNPRC.ext.data.SingleAnimal.WaterApprenticeSectionClientStore)) {
             var key = self.storeCollection.getKey(clientStore);
             if (self.subscribedFields == null) {
                 self.subscribedFields = {};

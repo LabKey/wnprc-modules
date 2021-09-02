@@ -349,7 +349,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                 lineItemChangeEmailTemplate.setFullQuantityReceivedFlag(fullQuantityReceived);
                 lineItemChangeEmailTemplate.setNotificationBean(emailTemplateForm);
                 String emailSubject = lineItemChangeEmailTemplate.renderSubject(getContainer());
-                String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer());
+                String emailBody = lineItemChangeEmailTemplate.renderHtmlBody(getContainer()).toString();
 
                 //send email to lab end user who originated the request
                 if (endUser != null)

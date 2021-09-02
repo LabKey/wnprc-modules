@@ -509,7 +509,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToPurchaseAdminPage();
         checker().verifyTrue(REQUESTER_USER_1 + "user should not permission for admin page",
                 isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
-                        .withText("You do not have the permissions required to access this page.")));
+                        .withText("User does not have permission to perform this operation.")));
         goBack();
 
         log("Creating request as " + REQUESTER_USER_1);
@@ -660,7 +660,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToPurchaseAdminPage();
         checker().verifyTrue("Receiver should not have permission to access admin page",
                 isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
-                        .withText("You do not have the permissions required to access this page.")));
+                        .withText("User does not have permission to perform this operation.")));
         goToReceiverPage();
         waitAndClickAndWait(Locator.linkWithText(requestId2));
         requestPage = new CreateRequestPage(getDriver());

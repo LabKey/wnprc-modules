@@ -49,7 +49,7 @@ public abstract class SecurityEscalatedService {
 
         // Check to make sure our user has all the required permissions
         SecurityPolicy policy = SecurityPolicyManager.getPolicy(container);
-        if(requiredPermissions.length > 0 && !policy.hasPermissions(user, requiredPermissions)) {
+        if (requiredPermissions.length > 0 && !container.hasPermissions(user, new HashSet<>(Arrays.asList(requiredPermissions)))) {
             throw MissingPermissionsException.createNew(requiredPermissions);
         }
     }

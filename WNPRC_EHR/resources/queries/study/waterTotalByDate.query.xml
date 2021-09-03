@@ -24,16 +24,6 @@
                             <fkDisplayColumnName>Label</fkDisplayColumnName>
                         </fk>
                     </column>
-                    <column columnName="weight">
-                        <conditionalFormats>
-                            <conditionalFormat>
-                                <filters>
-                                    <filter operator="lte" value="0"/>
-                                </filters>
-                                <backgroundColor>FF0000</backgroundColor>
-                            </conditionalFormat>
-                        </conditionalFormats>
-                    </column>
                     <column columnName="mlsPerKg">
                         <columnTitle>ml Water Per Kg</columnTitle>
                         <conditionalFormats>

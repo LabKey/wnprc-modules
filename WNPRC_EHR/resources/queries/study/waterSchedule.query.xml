@@ -1,0 +1,184 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="waterSchedule" tableDbType="TABLE">
+                <tableUrl>/EHR/treatmentDetails.view?key=${lsid}</tableUrl>
+                <pkColumnName>primaryKey</pkColumnName>
+                <columns>
+                    <column columnName="lsid">
+                        <isHidden>false</isHidden>
+                    </column>
+                    <column columnName="objectid">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                    </column>
+                    <column columnName="Id">
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>animal</fkTable>
+                            <fkColumnName>Id</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="StartDate">
+                        <columnTitle>Treatment Start Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="code">
+                        <nullable>false</nullable>
+                        <columnTitle>SNOMED Code</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>snomed</fkTable>
+                            <fkColumnName>code</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="parentid">
+                        <!--<fk>-->
+                          <!--<fkDbSchema>study</fkDbSchema>-->
+                          <!--<fkTable>studyDataParent</fkTable>-->
+                          <!--<fkColumnName>objectid</fkColumnName>-->
+                        <!--</fk>-->
+                    </column>
+                    <column columnName="frequency">
+                        <isHidden>false</isHidden>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                           <fkTable>husbandry_frequency</fkTable>
+                          <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="remark">
+                        <displayWidth>250</displayWidth>
+                    </column>
+                    <column columnName="CurrentRoom">
+                        <displayWidth>40</displayWidth>
+                        <fk>
+                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkTable>rooms</fkTable>
+                          <fkColumnName>Room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="Cage">
+                        <displayWidth>40</displayWidth>
+                    </column>
+                    <column columnName="dataset">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="qcstate">
+                        <isHidden>true</isHidden>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>qcstate</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="projectStatus">
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="NOT ASSIGNED"/>
+                                </filters>
+                                <backgroundColor>E3170D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="conc2">
+                        <columnTitle>Concentration</columnTitle>
+                    </column>
+                    <column columnName="amount2">
+                        <columnTitle>Amount Given</columnTitle>
+                    </column>
+                    <column columnName="volume">
+                        <columnTitle>Volume</columnTitle>
+                    </column>
+                    <column columnName="volume2">
+                        <columnTitle>Volume</columnTitle>
+                    </column>
+                    <column columnName="waterStatus">
+                        <!--<url>/ehr/taskDetails.view?formtype=${taskid/formtype}&amp;taskid=${taskid}</url>-->
+                        <isHidden>false</isHidden>
+                        <shownInDetailsView>true</shownInDetailsView>
+                        <columnTitle>Status</columnTitle>
+                        <displayWidth>50</displayWidth>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>qcstate</fkTable>
+                            <fkColumnName>rowid</fkColumnName>
+                        </fk>
+                        <conditionalFormats>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="In Progress"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Review Required"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Scheduled"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Delete Requested"/>
+                                </filters>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Approved"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Sample Delivered"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Denied"/>
+                                </filters>
+                                <backgroundColor>FF0000</backgroundColor>
+                            </conditionalFormat>
+                            <conditionalFormat>
+                                <filters>
+                                    <filter operator="eq" value="Request: Pending"/>
+                                </filters>
+                                <backgroundColor>FBEC5D</backgroundColor>
+                            </conditionalFormat>
+                        </conditionalFormats>
+                    </column>
+                    <column columnName="taskid">
+                        <isHidden>false</isHidden>
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/taskDetails.view?formtype=${taskid/formtype}&amp;taskid=${taskid}</url>
+                    </column>
+                    <column columnName="assingto"></column>
+                </columns>
+
+            </table>
+        </tables>
+    </metadata>
+</query>

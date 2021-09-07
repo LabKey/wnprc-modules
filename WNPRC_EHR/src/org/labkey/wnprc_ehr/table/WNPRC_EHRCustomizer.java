@@ -108,6 +108,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             } else if (matches(table, "wnprc", "animal_requests")) {
                 customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
+            else if (table.getName().equalsIgnoreCase("waterOrders"))
+                appendEnddateFuture((AbstractTableInfo) table, "enddate");
+
         }
     }
 
@@ -711,6 +714,128 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             ExprColumn newCol = new ExprColumn(table, vendorIdColumn, sql, JdbcType.VARCHAR);
             newCol.setLabel("Vendor ID");
             newCol.setDescription("Returns the animal's original vendor id.");
+            table.addColumn(newCol);
+        }
+
+        if (table.getColumn("sire") == null)
+        {
+            String sire_new = "sire";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
+
+            // Here we want a union of the birth and arrival tables to get the sire of the animal,
+            // if none found, we fall back on the "old" data in the demographic table
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.sire) AND lower(a.vendor_id) != lower(a.participantid) " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS sire " +
+                    ")";
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+            ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Sire");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found, if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no sire is found there, it " +
+                    "then finally uses the historic demographic text field called 'sire_old' as the sire.");
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("dam") == null)
+        {
+            String dam_new = "dam";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
+
+            // Here we want a union of the birth and arrival tables to get the dam of the animal
+            // if none found, we fall back on the "old" data in the demographic table
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.dam) AND lower(a.vendor_id) != lower(a.participantid) " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS dam " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+            ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Dam");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found, if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no dam is found there, it " +
+                    "then finally uses the historic demographic text field called 'dam_old' as the dam.");
             table.addColumn(newCol);
         }
     }
@@ -1352,6 +1477,34 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         return null;
+    }
+
+    private  void appendEnddateFuture(AbstractTableInfo ti, String sourceColName)
+    {
+        ColumnInfo sourceCol = ti.getColumn(sourceColName);
+        if (sourceCol == null)
+        {
+            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            return;
+        }
+
+        String name = sourceCol.getName();
+        if (ti.getColumn(name + "CoalescedFuture") == null)
+        {
+            SQLFragment sql = new SQLFragment("CAST(COALESCE(").append(sourceCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append(",  {fn timestampadd(SQL_TSI_DAY, 365, {fn curdate()})}) as date)");
+            //SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn curdate()} + integer '365')  as date)");
+            ExprColumn col = new ExprColumn(ti, name + "CoalescedFuture", sql, JdbcType.DATE);
+            col.setCalculated(true);
+            col.setUserEditable(false);
+            col.setHidden(true);
+            col.setLabel(col.getLabel() + ", CoalescedFuture");
+
+            if (sourceCol.getFormat() != null)
+                col.setFormat(sourceCol.getFormat());
+
+            ti.addColumn(col);
+        }
+
     }
 
     //TODO: Look how to use another UI to allow for better support for virtual columns

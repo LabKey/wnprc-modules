@@ -111,6 +111,47 @@ EHR.DataEntryUtils.registerGridButton('ADDSTARTTIME', function (config){
     }, config);
 
 });
+EHR.DataEntryUtils.registerGridButton('CHANGETIME', function (config){
+    return Ext4.Object.merge({
+        text: 'Update time',
+        tooltip: 'Click to mark the selected rows to update the date and time',
+        handler: function(btn){
+            var grid = btn.up('gridpanel');
+            var selections = grid.getSelectionModel().getSelection();
+
+            if (!grid.store || !selections || !selections.length){
+                Ext4.Msg.alert('Error', 'No rows selected');
+                return;
+            }
+            var keyMap = {};
+            var startTime  = {date: new Date ()};
+            var toAdd = [];
+
+            Ext4.Array.each(selections, function(r){
+                LDK.Assert.assertNotEmpty('No caseid in rounds record', r.get('objectid'));
+                LDK.Assert.assertNotEmpty('Id not found in rounds record', r.get('Id'));
+                                
+                r.set(startTime);
+
+                if (!r.store){
+                    toAdd.push(r);
+                }
+
+            }, this);
+
+            if (toAdd.length){
+                if (!Ext4.isEmpty(this.insertIndex)){
+                    this.targetStore.insert(this.insertIndex, toAdd);
+                }
+                else{
+                    this.targetStore.add(toAdd);
+                }
+            }
+
+        }
+    }, config);
+
+});
 
 EHR.DataEntryUtils.registerDataEntryFormButton('FOOD_STARTED', {
     text: 'Start Food Deprive',

@@ -81,6 +81,12 @@
                         <!--</fk>-->
                         <url>/ehr/participantView.view?participantId=${dam}</url>
                     </column>
+                    <column columnName="dam_old">
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="sire_old">
+                        <isHidden>true</isHidden>
+                    </column>
                     <column columnName="sire">
                         <columnTitle>Sire</columnTitle>
                         <!--<fk>-->
@@ -92,6 +98,9 @@
                     </column>
                     <column columnName="origin/source">
                     </column>
+                    <column columnName="origin_old">
+                        <isHidden>true</isHidden>
+                    </column>
                     <column columnName="birth">
                         <formatString>yyyy-MM-dd</formatString>
                         <!--<shownInInsertView>false</shownInInsertView>-->
@@ -101,6 +110,9 @@
                             query.queryName=Birth&amp;
                             query.Id~eq=${Id}
                         </url>
+                    </column>
+                    <column columnName="birth_old">
+                        <isHidden>true</isHidden>
                     </column>
                     <column columnName="death">
                         <formatString>yyyy-MM-dd</formatString>
@@ -213,6 +225,9 @@
                         <!--</fk>-->
                     </column>
                     <column columnName="geographic_origin">
+                    </column>
+                    <column columnName="geographic_origin_old">
+                        <isHidden>true</isHidden>
                     </column>
                     <!--<column columnName="behavior">
                         <isHidden>true</isHidden>

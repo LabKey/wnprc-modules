@@ -53,7 +53,7 @@
                 this.animalRequestDeleteURL = '/query/deleteQueryRows.view?schemaName=wnprc&query.queryName=animal_requests';
             }
 
-            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'Blood Draws', schemaName: 'study'})){
+            if(EHR.Security.hasPermission('Request: Approved', 'admin', {queryName: 'surgery_procedure', schemaName: 'study'})){
                 this.surgeryProcedureUpdateURL = '/ehr/manageRecord.view?schemaName=study&queryName=surgery_procedure&keyField=lsid&key=${lsid}&update=1';
                 this.surgeryProcedureDeleteURL = '/query/deleteQueryRows.view?schemaName=study&query.queryName=surgery_procedure';
             }
@@ -185,7 +185,6 @@
                         }
                     }]
                 },
-
                 {
                     title: 'Blood Draw Requests',
                     ref: 'BloodDrawRequests',
@@ -275,8 +274,7 @@
                             schemaName: 'wnprc',
                             queryName: 'animal_requests',
                             viewName: 'Animal Requests',
-                            updateURL: this.animalRequestUpdateURL,
-                            deleteURL: this.animalRequestDeleteURL,
+                            updateURL: '',
                             scope: this,
                             success: this.onSuccessResize
                         }
@@ -478,6 +476,21 @@
                             url: makeExt4DataEntryURL("Research Ultrasounds"),
                             title: 'Enter Research Ultrasounds',
                             queries: ['research_ultrasounds']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Enter Water Orders"),
+                            title: 'Enter Water Orders',
+                            queries: ['waterOrders']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Enter Lab Water"),
+                            title: 'Enter Lab Water',
+                            queries: ['waterGiven']
+                        },
+                        {
+                            url: makeExt4DataEntryURL("Enter Treatments - Water"),
+                            title: 'Enter Treatments - Water',
+                            queries: ['waterGiven']
                         }
                     ]
                 },

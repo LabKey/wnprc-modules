@@ -1,0 +1,22 @@
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="animalId" />
+        <column name="date" />
+        <column name="dateOrdered"/>
+        <column name="volume" />
+        <column name="frequency" />
+        <column name="waterSource"/>
+        <column name="dataSource"/>
+        <column name="assignedTo"/>
+        <column name="provideFruit"/>
+        <column name="actionRequired"/>
+        <column name="qcstate" />
+        <column name="taskid" />
+    </columns>
+    <sorts>
+        <sort column="date" descending="false"/>
+    </sorts>
+    <!--<filters>-->
+    <!--<filter column="qcstate/publicdata" operator="eq" value="true"/>-->
+    <!--</filters>-->
+</customView>

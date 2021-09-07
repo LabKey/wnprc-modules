@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <div id="loading-bar" data-bind="visible: table.rows().length==0" ><img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...</div>
+        <div id="loading-bar" data-bind="visible: table.rows().length==0" ><img src="<%=getWebappURL("/webutils/icons/loading.svg")%>">Loading...</div>
 
         <table class="table table-striped table-bordered table-hover" data-bind="with: table, visible: table.rows().length!=0">
             <thead>
@@ -568,7 +568,7 @@
                         if (isLoading) {
                             //Block further ui
                             $el.block({
-                                message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Loading...',
+                                message: '<img src="<%=getWebappURL("/webutils/icons/loading.svg")%>">Loading...',
                                 css: {
                                     border: 'none',
                                     padding: '5px',

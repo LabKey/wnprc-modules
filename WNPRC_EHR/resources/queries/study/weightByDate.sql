@@ -16,7 +16,11 @@ JOIN
                   ) AS DATE)
               ,timestampadd('SQL_TSI_DAY',1,CAST(curdate() AS TIMESTAMP))) AS endDate
 
-      FROM study.weight i WHERE i.id IN (SELECT Id FROM study.waterScheduledAnimals)
+      FROM study.weight i WHERE i.id IN (
+          SELECT drwc.id
+          FROM study.demographicsMostRecentWaterCondition drwc
+          WHERE drwc.MostRecentWaterCondition = 'regulated'
+          )
                             --AND i.date > '2021-01-01'
                             AND i.date > timestampadd('SQL_TSI_DAY', -90, CAST(curdate() AS TIMESTAMP))
                             --order by i.date desc

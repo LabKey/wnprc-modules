@@ -1,12 +1,13 @@
 SELECT wbd.id,
        wbd.date,
        wbd.weight,
+       wbd.weightDate,
        TRUNCATE(ROUND(CAST(waterSummary.TotalWater/wbd.weight AS NUMERIC),2),2) AS mlsPerKg,
+       waterSummary.TotalWater,
        waterSummary.volumeGivenInLabSub,
        waterSummary.volumeGivenInCage,
        waterSummary.volumeGivenInImage,
        waterSummary.volumeGivenInProcedure,
-       waterSummary.TotalWater,
        waterSummary.performedConcat,
        waterSummary.qcstate
 

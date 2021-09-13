@@ -18,9 +18,9 @@ PIVOT Weight,total,volumeGivenInLab, volumeGivenInCage BY id*/
 
 SELECT wtdb.id,
        CAST(wtdb.date AS DATE) AS date,
-       wtdb.weight AS Weight,
-       wtdb.TotalWater AS TotalWater
+       MAX(wtdb.mlsPerKg) AS mlsPerKg,
+       MAX(wtdb.TotalWater) AS TotalWater
 
 FROM study.waterTotalByDate wtdb
 GROUP BY wtdb.id, wtdb.date--, wtdb.Weight, wtdb.TotalWater
-PIVOT wtdb.Weight,wtdb.TotalWater BY wtdb.id
+PIVOT mlsPerKg,TotalWater BY id

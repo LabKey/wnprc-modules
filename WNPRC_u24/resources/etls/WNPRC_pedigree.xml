@@ -20,7 +20,7 @@
                     <sourceFilter column="Species" value="Marmoset" operator="eq"/>
                 </sourceFilters>
             </source>
-            <destination schemaName="study" queryName="pedigree" targetOption="merge">
+            <destination schemaName="study" queryName="pedigree" targetOption="truncate">
                 <constants>
                     <column name="date" type="TIMESTAMP" value="09-13-2021"/>
                 </constants>

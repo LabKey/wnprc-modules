@@ -10,6 +10,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.announcements.api.Announcement;
+import org.labkey.api.announcements.api.AnnouncementService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -2390,6 +2392,24 @@ public class TriggerScriptHelper {
 
         }
         return theDifferences;
+    }
+
+    public Integer setUpMessageBoardThread(Integer rowId)
+    {
+        Container c = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Animal_Services/SPI/Private/");
+        String title = "Animal Request Thread #" + rowId.toString();
+        String body = "";
+        boolean sendEmail = false;
+        Announcement md = AnnouncementService.get().insertAnnouncement(c,user,title,body,sendEmail);
+        return md.getRowId();
+    }
+
+    public void updateExternalThreadId(Map<String, Object> animalRequest, Integer threadId) throws InvalidKeyException, QueryUpdateServiceException, SQLException, BatchValidationException
+    {
+        animalRequest.put("external_thread_row_id", threadId);
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "wnprc", "animal_requests");
+        queryUpdater.update(animalRequest);
+
     }
 
 }

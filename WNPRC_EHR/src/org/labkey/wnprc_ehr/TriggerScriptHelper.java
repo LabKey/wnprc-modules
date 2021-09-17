@@ -2406,7 +2406,7 @@ public class TriggerScriptHelper {
 
     public void updateExternalThreadId(Map<String, Object> animalRequest, Integer threadId) throws InvalidKeyException, QueryUpdateServiceException, SQLException, BatchValidationException
     {
-        animalRequest.put("external_thread_row_id", threadId);
+        animalRequest.put("externalthreadrowid", threadId);
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "wnprc", "animal_requests");
         queryUpdater.update(animalRequest);
 

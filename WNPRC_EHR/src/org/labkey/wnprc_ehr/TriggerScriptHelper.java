@@ -2394,9 +2394,9 @@ public class TriggerScriptHelper {
         return theDifferences;
     }
 
-    public Integer setUpMessageBoardThread(Integer rowId)
+    public Integer setUpMessageBoardThread(Integer rowId, String containerPath)
     {
-        Container c = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Animal_Services/SPI/Private/");
+        Container c = ContainerManager.getForPath(containerPath);
         String title = "Animal Request Thread #" + rowId.toString();
         String body = "";
         boolean sendEmail = false;
@@ -2404,10 +2404,11 @@ public class TriggerScriptHelper {
         return md.getRowId();
     }
 
-    public void updateExternalThreadId(Map<String, Object> animalRequest, Integer threadId) throws InvalidKeyException, QueryUpdateServiceException, SQLException, BatchValidationException
+    // Updates the value of a field given a row, meant to be called from a trigger script
+    public void updateRow(Map<String, Object> animalRequest, Object value, String schemaName, String tableName, String fieldName) throws InvalidKeyException, QueryUpdateServiceException, SQLException, BatchValidationException
     {
-        animalRequest.put("externalthreadrowid", threadId);
-        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "wnprc", "animal_requests");
+        animalRequest.put(fieldName, value);
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schemaName, tableName);
         queryUpdater.update(animalRequest);
 
     }

@@ -68,8 +68,10 @@ function onAfterInsert(helper,errors,row){
     var rowid = row.rowId;
     var hostName = 'https://' + LABKEY.serverName;
     console.log ("animal_requests.js: New request submitted, rowid: "+ rowid);
-    var threadId = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(rowid);
-    WNPRC.Utils.getJavaHelper().updateExternalThreadId(row, threadId);
+    var threadId = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(rowid, "/WNPRC/WNPRC_Units/Animal_Services/SPI/Private/");
+    WNPRC.Utils.getJavaHelper().updateRow(row, threadId, "wnprc", "animal_requests", "internalthreadrowid");
+    var threadIdExternal = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(rowid, "/WNPRC/WNPRC_Units/Animal_Services/SPI/Restricted/");
+    WNPRC.Utils.getJavaHelper().updateRow(row, threadIdExternal, "wnprc", "animal_requests", "externalthreadrowid");
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotification(rowid, hostName);
 }
 

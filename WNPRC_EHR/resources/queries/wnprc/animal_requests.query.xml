@@ -142,11 +142,11 @@
                         <columnTitle>Animal Origin</columnTitle>
                     </column>
                     <column columnName="externalthreadrowid">
-                        <columnTitle>Animal History</columnTitle>
+                        <columnTitle>External Disc</columnTitle>
                         <isHidden>true</isHidden>
                     </column>
                     <column columnName="internalthreadrowid">
-                        <columnTitle>Animal History</columnTitle>
+                        <columnTitle>Internal Disc</columnTitle>
                         <isHidden>true</isHidden>
                     </column>
                     <column columnName="animal_history_link">

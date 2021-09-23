@@ -1012,6 +1012,59 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
     }
 
+    public static class InternalThreadIdColumn extends DataColumn {
+        public InternalThreadIdColumn(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            String link;
+            link = "<a href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/announcements/WNPRC/WNPRC_Units/Animal_Services/SPI/Private/thread.view?rowId=" +
+                    ctx.get("internalthreadrowid").toString() +
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'>" +
+                    ctx.get("internalthreadrowid").toString() +
+                    "</a>";
+            return HtmlString.unsafe(link);
+        }
+
+    }
+    public static class ExternalThreadIdColumn extends DataColumn {
+        public ExternalThreadIdColumn(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            String link;
+            link = "<a href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/announcements/WNPRC/WNPRC_Units/Animal_Services/SPI/Restricted/thread.view?rowId=" +
+                    ctx.get("externalthreadrowid").toString() +
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'>" +
+                    ctx.get("externalthreadrowid").toString() +
+                    "</a>";
+            return HtmlString.unsafe(link);
+        }
+
+    }
+
     public static class AnimalIdsToOfferColumnQCStateConditional extends DataColumn {
         private User _currentUser;
         public AnimalIdsToOfferColumnQCStateConditional(ColumnInfo colInfo, User currentUser) {
@@ -1034,6 +1087,54 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             {
                 out.write("");
             }
+        }
+    }
+    public static class InternalThreadRowIdQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public InternalThreadRowIdQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            String link;
+            link = "<a href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/announcements/WNPRC/WNPRC_Units/Animal_Services/SPI/Private/thread.view?rowId=" +
+                    ctx.get("internalthreadrowid").toString() +
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'>" +
+                    ctx.get("internalthreadrowid").toString() +
+                    "</a>";
+            return HtmlString.unsafe(link);
+        }
+    }
+    public static class ExternalThreadRowIdQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public ExternalThreadRowIdQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            String link;
+            link = "<a href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/announcements/WNPRC/WNPRC_Units/Animal_Services/SPI/Restricted/thread.view?rowId=" +
+                    ctx.get("externalthreadrowid").toString() +
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'>" +
+                    ctx.get("externalthreadrowid").toString() +
+                    "</a>";
+            return HtmlString.unsafe(link);
         }
     }
 
@@ -1231,6 +1332,29 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             else{
                 col.setHidden(true);
                 col.setDisplayColumnFactory(colInfo -> new AnimalIdsToOfferColumnQCStateConditional(colInfo, currentUser));
+            }
+        }
+
+        //re-render internalthreadrowid column
+        if (table.getColumn("internalthreadrowid") != null)
+        {
+            BaseColumnInfo col = (BaseColumnInfo) table.getColumn("internalthreadrowid");
+            if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class)){
+                col.setDisplayColumnFactory(colInfo -> new InternalThreadIdColumn(colInfo));
+            }
+            else{
+                col.setDisplayColumnFactory(colInfo -> new InternalThreadRowIdQCStateConditional(colInfo, currentUser));
+            }
+        }
+        //re-render internalthreadrowid column
+        if (table.getColumn("externalthreadrowid") != null)
+        {
+            BaseColumnInfo col = (BaseColumnInfo) table.getColumn("externalthreadrowid");
+            if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class)){
+                col.setDisplayColumnFactory(colInfo -> new ExternalThreadIdColumn(colInfo));
+            }
+            else{
+                col.setDisplayColumnFactory(colInfo -> new ExternalThreadRowIdQCStateConditional(colInfo, currentUser));
             }
         }
 

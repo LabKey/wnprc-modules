@@ -386,6 +386,10 @@ EHR.ext.metaHelper = new function(){
             if(meta.getRenderer)
                 col.renderer = meta.getRenderer(col, meta, grid);
 
+            if (meta.css){
+                col.css = meta.css;
+            }
+
             col.renderer = EHR.ext.metaHelper.getDefaultRenderer(col, meta, col.renderer, grid);
 
             //HTML-encode the column header

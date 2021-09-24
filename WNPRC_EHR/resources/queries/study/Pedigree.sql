@@ -42,7 +42,8 @@ END
 AS status,
 d.calculated_status as status_code,
 'Demographics' as source,
-d.species as Species
+d.species as Species,
+d.created AS date
 
 --d.qcstate
 
@@ -79,7 +80,8 @@ CAST(p.departdate AS SQL_VARCHAR) as status_code,
 --'Rhesus' as Species
 --null as qcstate
 
-p.species AS species
+p.species AS species,
+COALESCE(p.created,p.modified) AS date
 
 FROM ehr.supplemental_pedigree p
 LEFT JOIN study.demographics d ON (d.id=p.id)

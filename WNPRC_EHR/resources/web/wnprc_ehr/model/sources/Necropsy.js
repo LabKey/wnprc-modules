@@ -206,10 +206,12 @@ EHR.model.DataModelManager.registerMetadata('Necropsy', {
             date: {
                 shownInGrid: false
             },
-
+            tissue_qualifier: {
+                shownInGrid: false
+            },
             process: {
                 xtype: 'wnprc-multiselectfield',
-                shownInGrid: false,
+                shownInGrid: true,
                 lookup : {
                     schemaName:    'ehr_lookups',
                     queryName:     'processSnomed',

@@ -41,7 +41,11 @@ SELECT
   d.dam,
   d.sire,
   d.modified as modified,
-  curdate() as date
+  curdate() as date,
+  CASE d.participantid.activeAssignments.projects
+    WHEN '20210102' THEN true
+    ELSE false
+  END AS U24_Animals
 FROM study.demographics d
 
 LEFT OUTER JOIN study.demographics as ih on d.id = ih.id and ih.origin.code in

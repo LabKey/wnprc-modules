@@ -1,0 +1,40 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="chairing" tableDbType="TABLE">
+                <tableUrl></tableUrl>
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <titleColumn>caseno</titleColumn>
+                <columns>
+
+                    <column columnName="chairingStartTime">
+                        <columnTitle>Chairing Start Time</columnTitle>
+                        <description>Chairing Start Time</description>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+
+                    </column>
+                    <column columnName="chairingEndTime">
+                        <columnTitle>Chairing End Time</columnTitle>
+                        <description>Chairing End Time</description>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+
+                    </column>
+                    <column columnName="location">
+                        <columnTitle>Chairing Location</columnTitle>
+                        <description>Chairing Location</description>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_location</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+
+                </columns>
+                <tableTitle>chairing</tableTitle>
+            </table>
+        </tables>
+    </metadata>
+</query>

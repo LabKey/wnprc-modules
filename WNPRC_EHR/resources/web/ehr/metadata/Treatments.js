@@ -18,16 +18,37 @@ EHR.Metadata.registerMetadata('Treatments', {
                 },
                 colModel: {
                     width: 120
-                }
+                },
+                css: 'border-left: solid 2px #000000;'
             },
             volume: {
+                header: 'Vol',
                 colModel: {
-                    width: 50
-                }
+                    width: 40
+                },
+                css : 'font-weight:bold;'
             },
             vol_units: {
+                header: 'VolUnits',
                 colModel: {
                     width: 50
+                },
+                css: 'font-weight:bold; border-right: solid 2px #000000;'
+            },
+            concentration:{
+                header: 'Conc',
+                shownInGrid: true,
+                compositeField: 'Drug Conc',
+                colModel: {
+                    width: 45
+                }
+            },
+            conc_units:{
+                header: 'ConcUnits',
+                shownInGrid: true,
+                compositeField: 'Drug Conc',
+                colModel: {
+                    width: 60
                 }
             },
             performedby: {
@@ -47,7 +68,10 @@ EHR.Metadata.registerMetadata('Treatments', {
                 }
             },
             route: {
-                shownInGrid: true
+                shownInGrid: true,
+                colModel: {
+                    width: 50
+                }
             }
         }
     }

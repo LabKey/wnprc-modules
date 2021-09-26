@@ -79,7 +79,7 @@ public class WNPRC_PurchasingManager
 
     public void addQCStatus(Container c, User user)
     {
-        addData(c, user, "core", "QCState", "QCStatus.tsv");
+        addData(c, user, "core", "DataStates", "QCStatus.tsv");
     }
 
     private void addData(Container c, User user, String schemaName, String tableName, String fileName)

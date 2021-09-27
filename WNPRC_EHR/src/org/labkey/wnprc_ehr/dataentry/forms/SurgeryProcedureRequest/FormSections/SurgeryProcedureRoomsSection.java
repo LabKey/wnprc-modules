@@ -16,7 +16,7 @@ public class SurgeryProcedureRoomsSection extends SimpleGridSection
     public List<String> getTbarButtons()
     {
         List<String> defaultButtons = super.getTbarButtons();
-        defaultButtons.add(1,"WNPRC_ADD_ROOM");
+        defaultButtons.add(1, "WNPRC_ADD_ROOM");
         defaultButtons.remove("ADDRECORD");
 
         return defaultButtons;

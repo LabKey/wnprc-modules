@@ -30,6 +30,7 @@ public class SurgeryProcedureFoodDepriveSection extends SlaveGridSection {
         fields.add("Id");
         fields.add("project");
         fields.add("account");
+        
         return fields;
     }
 

@@ -217,7 +217,7 @@
         WebUtils.VM.submitMarkExempt = function() {
             $exemptDialog.modal('hide');
             var cardData = ko.mapping.toJS(WebUtils.VM.form);
-            WebUtils.API.postJSON("<%=q(urlFor(MarkCardExemptAPI.class))%>", {
+            WebUtils.API.postJSON(<%=q(urlFor(MarkCardExemptAPI.class))%>, {
                         cardId: cardData.selectedCard[0],
                         reason: cardData.notes
             }).then(function(d) {
@@ -236,7 +236,7 @@
 
             //TODO validate here...
             //TODO not sure how this $parent selectedPerson really works here?
-            WebUtils.API.postJSON("<%=q(urlFor(WNPRC_ComplianceController.LinkCardAPI.class))%>", {
+            WebUtils.API.postJSON(<%=q(urlFor(WNPRC_ComplianceController.LinkCardAPI.class))%>, {
                 cardId: cardData.selectedCard[0],
                 personId: personData.selectedPerson
             }).then(function(d) {
@@ -285,7 +285,7 @@
                     } else {
                         // knockout wasn't playing nice here, using jQuery to force button to disabled
                         $(document).on('click', '#radio-person', function () {
-                            $('#link-card-button').removeProp('disabled');
+                            $('#link-card-button').prop('disabled', false);
                         });
                     }
                     WebUtils.VM.listPersons.userMatches((PERSONS in results) ? results[PERSONS] : []);

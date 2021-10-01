@@ -1,8 +1,12 @@
-SELECT wbd.id,
-       wbd.date,
-       wbd.weight,
-       wbd.weightDate,
-       TRUNCATE(ROUND(CAST(waterSummary.TotalWater/wbd.weight AS NUMERIC),2),2) AS mlsPerKg,
+/*Creates a date entry for every day for each animal in the water monitoring system.
+  It uses LabKeys ehr_lookup.calendar to create and ongoing date row from the
+  first date the animal gets added to the system. It adds all the water the animal receives
+  for every single day in the system. If no water is given to the animal is creates an
+  empty row.*/
+
+SELECT
+       Id,
+       cal.targetdate AS date,
        waterSummary.TotalWater,
        waterSummary.volumeGivenInLabSub,
        waterSummary.volumeGivenInCage,
@@ -38,4 +42,5 @@ LEFT OUTER JOIN(
     FROM study.waterGiven iwg WHERE qcstate.label = 'Completed'
     GROUP BY iwg.Id, CAST(iwg.date AS DATE)
     )waterSummary
-ON wbd.id = waterSummary.id AND CAST(wbd.date AS DATE) = waterSummary.date
+ON CAST(cal.targetdate AS DATE) = waterSummary.date AND waterSummary.innerId = Id
+WHERE cal.targetdate <= curdate() AND Id IS NOT NULL

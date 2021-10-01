@@ -71,7 +71,7 @@ Ext4.define('EHR.window.AddScheduledFoodDeprivesWindow', {
                 fieldLabel: 'Assigned To',
                 itemId: 'assignedto',
                 displayField: 'title',
-                valueField: 'title',
+                valueField: 'value',
                 defaultListConfig: {loadingHeight: 70, minHeight: 95, maxHeight: 600, shadow: 'sides'},
                 store: {
                     type: 'labkey-store',

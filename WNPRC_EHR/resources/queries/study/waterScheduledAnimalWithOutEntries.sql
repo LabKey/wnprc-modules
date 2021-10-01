@@ -1,4 +1,4 @@
-PARAMETERS(CheckDate TIMESTAMP);
+PARAMETERS(CheckDate TIMESTAMP)
 
 SELECT DISTINCT(id), CheckDate AS date FROM
     (SELECT a.id, a.MostRecentWaterCondition FROM study.demographicsMostRecentWaterCondition a

@@ -2394,11 +2394,14 @@ public class TriggerScriptHelper {
         return theDifferences;
     }
 
-    public Integer setUpMessageBoardThread(Integer rowId, String containerPath)
+    public Integer setUpMessageBoardThread(Map<String,Object> animalRequest, String containerPath)
     {
         Container c = ContainerManager.getForPath(containerPath);
-        String title = "Animal Request Thread #" + rowId.toString();
-        String body = "";
+        String title = animalRequest.get("rowid") + ": " +
+                animalRequest.get("principalinvestigator").toString() +
+                " (" + animalRequest.get("protocol").toString() + ")";
+        String body =
+                        "${labkey.webPart(partName='Wiki', title='The Request', name='Animal Request In Question')}\n";
         boolean sendEmail = false;
         Announcement md = AnnouncementService.get().insertAnnouncement(c,user,title,body,sendEmail);
         return md.getRowId();

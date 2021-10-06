@@ -7562,7 +7562,7 @@
       </column>
     </columns>
   </table>
-  <table tableName="waterOrders" tableDbtype="TABLE">
+  <table tableName="waterOrders" tableDbType="TABLE">
     <columns>
       <column columnName="objectid">
         <datatype>entityid</datatype>
@@ -7600,7 +7600,7 @@
       </column>
     </columns>
   </table>
-  <table tableName="waterAmount" tableDbtype="TABLE">
+  <table tableName="waterAmount" tableDbType="TABLE">
     <columns>
       <column columnName="objectid">
         <datatype>entityid</datatype>
@@ -7638,7 +7638,7 @@
       </column>
     </columns>
   </table>
-  <table tableName="waterGiven" tableDbtype="TABLE">
+  <table tableName="waterGiven" tableDbType="TABLE">
     <columns>
       <column columnName="objectid">
         <datatype>entityid</datatype>
@@ -7676,7 +7676,7 @@
       </column>
     </columns>
   </table>
-  <table tableName="waterScheduledAnimals" tableDbtype="TABLE">
+  <table tableName="waterScheduledAnimals" tableDbType="TABLE">
     <columns>
       <column columnName="objectid">
         <datatype>entityid</datatype>
@@ -7715,7 +7715,7 @@
 
     </columns>
   </table>
-  <table tableName="singleGeneralEncounter" tableDbtype="TABLE">
+  <table tableName="singleGeneralEncounter" tableDbType="TABLE">
     <columns>
       <column columnName="objectid">
         <datatype>entityid</datatype>
@@ -7753,7 +7753,7 @@
       </column>
     </columns>
   </table>
-  <table tableName="chairing" tableDbtype="TABLE">
+  <table tableName="chairing" tableDbType="TABLE">
     <columns>
       <column columnName="objectid">
         <datatype>entityid</datatype>

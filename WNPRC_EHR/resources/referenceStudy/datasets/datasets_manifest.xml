@@ -69,5 +69,12 @@
     <dataset name="research_ultrasounds" id="6005" category="ColonyManagement"/>
     <dataset name="NecropsyAbstract" id="6009" />
     <dataset name="breeding_encounters" id="6000" category="ColonyManagement"/>
+    <dataset name="waterOrders" id="6012" category="Husbandry"/>
+    <dataset name="waterAmount" id="6013" category="Husbandry"/>
+    <dataset name="waterGiven" id="6015" category="Husbandry"/>
+    <dataset name="waterScheduledAnimals" id="6010"/>
+    <dataset name="singleGeneralEncounter" id="6011"/>
+    <dataset name="chairing" id="6014"/>
+
   </datasets>
 </datasets>

@@ -3,6 +3,11 @@
         <tables xmlns="http://labkey.org/data/xml">
             <table tableName="jetInvoiceItems" tableDbType="NOT_IN_DB">
                 <tableTitle>CSV to JET Preview</tableTitle>
+                <columns>
+                    <column columnName="Amount">
+                        <formatString>0.00</formatString>
+                    </column>
+                </columns>
             </table>
         </tables>
     </metadata>

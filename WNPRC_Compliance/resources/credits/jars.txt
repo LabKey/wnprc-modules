@@ -1,5 +1,5 @@
 {table}
-Filename|Component|Version|Source|License|LabKey Dev|Purpose
+Filename|Component|Version|Source|License|WNPRC Dev|Purpose
 jooq-3.8.4.jar|jOOQ|3.8.4|{link:From GitHub|https://github.com/jOOQ/jOOQ}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Database-mapping for Java
 pdfbox-2.0.11.jar|Apache PDFBox|2.0.11|{link:From Apache|http://svn.apache.org/repos/asf/pdfbox/trunk/}|{link:Apache Software License 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jrichardson|Generates and manipulates PDFs
 {table}

@@ -11,10 +11,13 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -22,6 +25,8 @@ import java.util.regex.Pattern;
  * Created by jon on 5/26/16.
  */
 public class EmailMessageUtils {
+    public static final String VIROLOGY_DATE_FORMAT = "yyyy/MM/dd kk:mm:ss";
+
     static public JSONObject convertMessageToJSON(Message message, MessageHandler messageHandler) {
         // Define the header information for our message JSON object.
         JSONObject messageJSON = new JSONObject();
@@ -31,6 +36,7 @@ public class EmailMessageUtils {
         JSONArray errors = new JSONArray();
         messageJSON.put("errors", errors);
 
+        DateFormat sdf = new SimpleDateFormat(VIROLOGY_DATE_FORMAT, Locale.ENGLISH);
         Date sent = null;
         try {
             sent = message.getSentDate();
@@ -38,7 +44,7 @@ public class EmailMessageUtils {
         catch (MessagingException e) {
             errors.put("Failed to retrieve the sent time.");
         }
-        messageJSON.put("sent", sent);
+        messageJSON.put("sent", sdf.format(sent));
 
         Address[] from = null;
         try {

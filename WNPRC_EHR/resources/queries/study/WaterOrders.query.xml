@@ -12,11 +12,11 @@
 
                     </column>
                     <column columnName="date">
-                        <columntitle>Start Date</columntitle>
+                        <columnTitle>Start Date</columnTitle>
                         <formatString>yyyy-MM-dd hh:mm</formatString>
                     </column>
                     <column columnName="enddate">
-                        <columntitle>End Date</columntitle>
+                        <columnTitle>End Date</columnTitle>
                         <formatString>yyyy-MM-dd</formatString>
                     </column>
                     <column columnName="volume">
@@ -25,10 +25,10 @@
                     <column columnName="frequency">
                         <columnTitle>Frequency</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkDbSchema>wnprc</fkDbSchema>
                             <fkTable>husbandry_frequency</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumn>Meaning</fkDisplayColumn>
+                            <fkDisplayColumnName>Meaning</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="assignedTo">
@@ -45,7 +45,7 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="provideFruit">

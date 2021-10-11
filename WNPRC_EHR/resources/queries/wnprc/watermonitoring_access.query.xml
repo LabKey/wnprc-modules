@@ -1,0 +1,43 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="watermonitoring_access" tableDbType="TABLE">
+                <tableTitle>Water Monitoring Access</tableTitle>
+                <javaCustomizer class="org.labkey.ehr.table.DefaultEHRCustomizer"/>
+                <columns>
+                    <column columnName="date" >
+                        <columnTitle>Date</columnTitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="alloweduser">
+                        <columnTitle>Allowed User</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>PrincipalsWithoutAdmin</fkTable>
+                            <fkColumnName>UserId</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="project">
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>project</fkTable>
+                            <fkColumnName>project</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="createdBy">
+                        <columnTitle>Create By</columnTitle>
+                    </column>
+                    <column columnName="principalinvestigator">
+                        <columnTitle>Principal Investigator</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>uniqueProtocolInvestigator</fkTable>
+                            <fkColumnName>inves</fkColumnName>
+                            <fkDisplayColumnName>inves</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

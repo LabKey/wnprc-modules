@@ -62,7 +62,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
         });
     }
     row.animalidstooffer = subjectArray.join(";");
-
 }
 
 function onAfterInsert(helper,errors,row){
@@ -72,3 +71,9 @@ function onAfterInsert(helper,errors,row){
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotification(rowid, hostName);
 }
 
+function onAfterUpdate(helper,errors,row,oldRow){
+    var rowid = row.rowId;
+    var hostName = 'https://' + LABKEY.serverName;
+    console.log ("animal_requests.js: New request updated, rowid: "+ rowid);
+    WNPRC.Utils.getJavaHelper().sendAnimalRequestNotificationUpdate(rowid, row, oldRow, hostName);
+}

@@ -2,7 +2,6 @@ package org.labkey.webutils.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
 import org.labkey.api.view.JspView;
 import org.springframework.web.servlet.ModelAndView;
@@ -73,4 +72,5 @@ abstract public class WebUtilsService {
      */
     abstract public ModelAndView getJspPageFromView(JspView view);
     abstract public ModelAndView getJspReportPageFromView(JspView view);
+    abstract public JspView getKnockoutTemplate(String templateName);
 }

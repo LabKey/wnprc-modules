@@ -27,6 +27,5 @@
         <dependency path="/webutils/lib/webutils_core/utilities/qunit/qunit"/>
         <dependency path="/webutils/lib/webutils_core/utilities/rsvp/rsvp"/>
         <dependency path="/webutils/lib/webutils_core/utilities/underscore/underscore"/>
-        <dependency path="/internal/jQuery"/>
     </dependencies>
 </libraries>

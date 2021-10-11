@@ -165,6 +165,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 hidden: true
             },
             performedby:{
+                parentConfig: null,
                 hidden: false,
                 defaultValue: LABKEY.Security.currentUser.displayName
             },
@@ -251,21 +252,6 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             } ,
 
-            /*location: {
-                editorConfig : {
-                    id: 'chairingLocation',
-                    listeners: {
-                        select: function (field, val) {
-                            if (field) {
-                                var chairingStartTime = Ext4.getCmp('chairingStartTime');
-                                chairingStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                            }
-                        }
-                    }
-                }
-
-            },*/
-
             chairingStartTime: {
                 xtype: 'xdatetime',
                 extFormat: 'Y-m-d H:i',
@@ -311,14 +297,20 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
 
             },
-            remarks:{
+            remark:{
                 xtype:  'ehr-remarkfield',
+                hidden: false,
                 allowBlank: false,
                 editorConfig: {
                     width:  400,
                     height: 100,
                     //resizable: true
                 }
+            },
+            performedby: {
+                allowBlank: false,
+                hidden: false,
+                defaultValue: LABKEY.Security.currentUser.displayName
             }
 
         },
@@ -362,43 +354,12 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                             }
 
 
-                                /*if(field.value === 'Long Term Chairing') {
-                                    restraintStartTime.show();
-                                    restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                                    restraintEndTime.show();
-                                    restraintEndTime.setValue(new Date());
-                                    locationField.show();
-
-                                } else {
-                                    restraintStartTime.setValue('');
-                                    restraintEndTime.setValue('');
-                                    locationField.setValue('');
-                                    restraintStartTime.hide();
-                                    restraintEndTime.hide();
-                                    locationField.hide();
-                                }
-                                if(field.value === 'Short Term Chairing') {
-                                    var starTime = new Date();
-                                    var endTime = new Date (starTime);
-                                    endTime.setMinutes(starTime.getMinutes()+30);
-                                    restraintStartTime.show();
-                                    restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                                    restraintEndTime.show();
-                                    restraintEndTime.setValue(endTime);
-                                } else {
-                                    restraintStartTime.setValue('');
-                                    restraintEndTime.setValue('');
-                                    restraintStartTime.hide();
-                                    restraintEndTime.hide();
-
-                                }*/
-
-
                         }
                     }
                 }
             },
-            remarks:{
+            remark:{
+                hidden: false,
                 allowBlank: true,
                 //xtype:  'ehr-remarkfield',
                 editorConfig:{
@@ -419,6 +380,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                         return true;
                     }
                 }
+            },
+            performedby: {
+                allowBlank: false,
+                hidden: false,
+                defaultValue: LABKEY.Security.currentUser.displayName
             }
 
         },

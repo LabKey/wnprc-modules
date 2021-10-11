@@ -39,7 +39,7 @@ public class WaterWeightSection extends SlaveFormSection
 
     @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id","date","weight","remark");
+        return Arrays.asList("Id","date","weight","project","remark");
     }
 
     //@Override

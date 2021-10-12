@@ -72,7 +72,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
 
     public String getDescription()
     {
-        return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.";
+        return "The report is designed to report total amount of water animal had gotten and report if they have not gotten the required 20 mls per kilogram.";
     }
 
     @Override
@@ -87,7 +87,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
         //Check animals with less than 20 mls per kilogram of water for today
         findAnimalsWithEnoughWater(c,u,msg);
 
-        //Check animals that did not get any water for today
+        //Check animals that did not get any water for today and the last five days.
         findAnimalsWithWaterEntries(c,u,msg);
 
 

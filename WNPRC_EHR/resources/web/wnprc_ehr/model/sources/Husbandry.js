@@ -347,10 +347,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                                 if (field.value == "None" || field.value == ""){
                                     restraintRemarks.setValue('');
                                     restraintRemarks.hide();
-                                }/*else{
-                                    restraintRemarks.setValue('');
-                                    restraintRemarks.hide();
-                                }*/
+                                }
                             }
 
 

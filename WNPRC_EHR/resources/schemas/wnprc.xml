@@ -240,5 +240,14 @@
             <column columnName="modified"/>
         </columns>
     </table>
-
+    <table tableName="husbandry_frequency" tableDbType="TABLE">
+        <columns>
+            <column columnName="RowId"/>
+            <column columnName="meaning"/>
+            <column columnName="dayofweek"/>
+            <column columnName="sort_order"/>
+            <column columnName="active"/>
+            <column columnName="altmeaning"/>
+        </columns>
+    </table>
 </tables>

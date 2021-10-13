@@ -71,7 +71,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                 valueField: 'meaning',
                 store: {
                     type: 'labkey-store',
-                    schemaName: 'ehr_lookups',
+                    schemaName: 'wnprc',
                     queryName: 'husbandry_frequency',
                     keyColumn: 'rowid',
                     displayColumn: 'altmeaning',

@@ -51,7 +51,7 @@
                     <column columnName="frequency">
                         <isHidden>false</isHidden>
                         <fk>
-                          <fkDbSchema>ehr_lookups</fkDbSchema>
+                          <fkDbSchema>wnprc</fkDbSchema>
                            <fkTable>husbandry_frequency</fkTable>
                           <fkColumnName>rowid</fkColumnName>
                         </fk>

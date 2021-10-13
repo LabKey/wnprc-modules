@@ -171,6 +171,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         return BrowserType.CHROME;
     }
 
+    @Override
+    protected File getStudyPolicyXML()
+    {
+        return TestFileUtils.getSampleData("wnprc_ehr/wnprcEhrTestStudyPolicy.xml");
+    }
+
     @BeforeClass @LogMethod
     public static void doSetup() throws Exception
     {

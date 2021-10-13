@@ -1337,7 +1337,7 @@ public class TriggerScriptHelper {
 
     public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, String frequency, String waterSource, String objectId, Integer project, Map<String, Object> extraContext){
 
-        String meaningFrequency = getMeaningFromRowid( frequency, "husbandry_frequency" );
+        String meaningFrequency = getMeaningFromRowid( frequency, "husbandry_frequency", "wnprc" );
         JSONArray arrayOfErrors = new JSONArray();
         JSONArray extraContextArray = new JSONArray();
 
@@ -1421,7 +1421,7 @@ public class TriggerScriptHelper {
 
                         if (loopDate.compareTo(convertToLocalDateViaSqlDate(waterRecord.getDate()))==0){
 
-                            String serverMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency" );
+                            String serverMeaning = getMeaningFromRowid( waterRecord.getFrequency(), "husbandry_frequency", "wnprc" );
 
                             //Check frequency compatibility with water orders in the server
                             if (!checkFrequencyCompatibility(serverMeaning, meaningFrequency))
@@ -2059,8 +2059,11 @@ public class TriggerScriptHelper {
     //Generic function to get lookup table to get meaning from rowid
     //improvement to return a map with all the items in the table and only call the db once
     public String getMeaningFromRowid (String lookupColumn, String lookupTable){
+        return getMeaningFromRowid(lookupColumn, lookupTable, "ehr_lookups");
+    }
+    public String getMeaningFromRowid (String lookupColumn, String lookupTable, String lookupSchema){
 
-        TableInfo husbandryFrequency = getTableInfo("ehr_lookups",lookupTable);
+        TableInfo husbandryFrequency = getTableInfo(lookupSchema, lookupTable);
         int frequencyNumber = Integer.parseInt(lookupColumn);
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("rowid"), frequencyNumber, CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("active"), true);
@@ -2202,7 +2205,7 @@ public class TriggerScriptHelper {
 
                 extraContextObject.put("date", waterOrderMap.get("date"));
                 extraContextObject.put("volume", waterOrderMap.get("volume"));
-                String frequencyMeaning = getMeaningFromRowid(waterOrderMap.get("frequency").toString(), "husbandry_frequency");
+                String frequencyMeaning = getMeaningFromRowid(waterOrderMap.get("frequency").toString(), "husbandry_frequency", "wnprc");
                 extraContextObject.put("frequency", frequencyMeaning);
 
                 arrayOfErrors.put(returnErrors);

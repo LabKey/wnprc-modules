@@ -26,8 +26,6 @@ wnprc_billing/resources/credits/jars.txt
 
 .storybook-out/
 
-docker/ehrcron/scripts/pg_backup/lkbackup.ini
-
 # generated artifacts from @labkey/build
 */resources/web/*/gen/
 */resources/views/gen/

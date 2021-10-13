@@ -31,6 +31,7 @@ public class FoodDeprivesFormSections extends SimpleGridSection
         addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/UWBoxSelect.css"));
         addClientDependency(ClientDependency.supplierFromPath("wnprc_ehr/ext4/components/buttons/husbandryButtons.js"));
         _showLocation = true;
+        setTemplateMode(TEMPLATE_MODE.NONE);
         formName  = parentFormName;
     }
 

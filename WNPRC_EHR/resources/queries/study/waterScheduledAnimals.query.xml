@@ -1,0 +1,35 @@
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="waterScheduledAnimals" tableDbType="TABLE" useColumnOrder="true">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="Id">
+
+                    </column>
+                    <column columnName="date">
+                        <columntitle>Start Date</columntitle>
+                        <formatString>yyyy-MM-dd</formatString>
+                    </column>
+                    <column columnName="enddate">
+                        <columntitle>End Date</columntitle>
+                        <formatString>yyyy-MM-dd hh:mm</formatString>
+                    </column>
+                    <column columnName="condition">
+                        <columnTitle>Condition</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>water_source</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                            <fkDisplayColumn>title</fkDisplayColumn>
+                        </fk>
+                    </column>
+            </columns>
+        </table>
+    </tables>
+</metadata>
+        </query>

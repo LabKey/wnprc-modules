@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>Pedigree</name>
+    <description>WNPRC Marmoset Pedigree</description>
+    <transforms>
+        <transform type="RemoteQueryTransformStep" id="step1">
+            <description>Copy to target</description>
+            <source remoteSource="ProductionEHRServer" schemaName="study" queryName="pedigree">
+                <sourceColumns>
+                    <column>id</column>
+                    <column>id/demographics/vendor_id</column>
+                    <column>BirthDate</column>
+                    <column>dam</column>
+                    <column>sire</column>
+                    <column>gender_code</column>
+                    <column>source</column>
+                    <column>Species</column>
+                </sourceColumns>
+                <sourceFilters>
+                    <sourceFilter column="Species" value="Marmoset" operator="eq"/>
+                </sourceFilters>
+            </source>
+            <destination schemaName="study" queryName="pedigree" targetOption="truncate">
+                <constants>
+                    <column name="date" type="TIMESTAMP" value="09-13-2021"/>
+                </constants>
+            </destination>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 30 1 * * ?" />
+    </schedule>
+</etl>

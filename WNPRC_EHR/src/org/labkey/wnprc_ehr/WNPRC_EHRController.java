@@ -16,9 +16,8 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
-//import com.google.common.base.MoreObjects;
-import org.apache.commons.text.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
@@ -30,15 +29,13 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiUsageException;
 import org.labkey.api.action.ExportAction;
-import org.labkey.api.action.Marshal;
-import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
@@ -46,14 +43,18 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.ehr.EHRDemographicsService;
+import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.resource.FileResource;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.resource.DirectoryResource;
+import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.security.ActionNames;
 import org.labkey.api.security.CSRF;
@@ -64,16 +65,14 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
-import org.labkey.api.security.UserManager;
-import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.AdminPermission;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.dbutils.api.SimpleQuery;
-import org.labkey.dbutils.api.SimpleQueryFactory;
+import org.labkey.dbutils.api.SimpleQueryUpdater;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
@@ -96,13 +95,13 @@ import org.labkey.wnprc_ehr.dataentry.validators.AnimalVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.ProjectVerifier;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidAnimalIdException;
 import org.labkey.wnprc_ehr.dataentry.validators.exception.InvalidProjectException;
+import org.labkey.wnprc_ehr.email.EmailMessageUtils;
 import org.labkey.wnprc_ehr.email.EmailServer;
 import org.labkey.wnprc_ehr.email.EmailServerConfig;
 import org.labkey.wnprc_ehr.email.MessageIdentifier;
-import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
+import org.labkey.wnprc_ehr.schemas.WNPRC_Schema;
 import org.labkey.wnprc_ehr.service.dataentry.BehaviorDataEntryService;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -118,7 +117,6 @@ import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -126,6 +124,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -377,7 +376,7 @@ public class WNPRC_EHRController extends SpringActionController
 
         public Date getSentDate()
         {
-            DateFormat df = new SimpleDateFormat("yyyy/MM/dd kk:mm:ss", Locale.ENGLISH);
+            DateFormat df = new SimpleDateFormat(EmailMessageUtils.VIROLOGY_DATE_FORMAT, Locale.ENGLISH);
             Date result;
             try
             {
@@ -1466,7 +1465,7 @@ public class WNPRC_EHRController extends SpringActionController
             // (it _should_ be all lowercase, but we should check anyway)
             String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
             formType = formType != null ? formType.toLowerCase() : null;
-            
+
             switch (formType)
             {
 
@@ -1484,6 +1483,7 @@ public class WNPRC_EHRController extends SpringActionController
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
                 case "necropsy":
                 case "breeding encounter":
+                case "research ultrasounds":
                     newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
                             getContainer().getPath()));
                     // the ExtJS 4 data entry form expects "formType" with a capital 'T'
@@ -1559,5 +1559,641 @@ public class WNPRC_EHRController extends SpringActionController
             DatasetImportHelper.importDatasetMetadata(getUser(), getContainer(), file);
             return new ApiSimpleResponse("success", true);
         }
+    }
+
+    @ActionNames("WaterCalendar")
+    @RequiresLogin()
+    public class WaterCalendarAction extends WNPRCJspPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/husbandry/WaterCalendar.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Water Calendar";
+        }
+    }
+
+    @ActionNames("UpdateWaterAmount")
+    @RequiresLogin
+    public class UpdateWaterAmountAction extends MutatingApiAction<WaterOrderRecord>
+    {
+        @Override
+        public Object execute (WaterOrderRecord event, BindException errors) throws Exception{
+
+            List<Map<String, Object>> WaterAmountRows = getWaterAmountRecord(event.getObjectId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            TableInfo ti = null;
+            QueryUpdateService service = null;
+            List<Map<String, Object>> rowToUpdate = null;
+
+            if (event.getDataSource().equals("waterAmount"))
+            {
+                ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterAmount");
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+
+                    if (event.getAction().equals("update"))
+                    {
+                        for (Map<String, Object> woRow : WaterAmountRows)
+                        {
+                            JSONObject waterAmountRecord = new JSONObject();
+                            waterAmountRecord.put("taskid", woRow.get("taskid"));
+                            waterAmountRecord.put("objectid", event.getObjectId());
+                            waterAmountRecord.put("volume", event.getVolume());
+                            waterAmountRecord.put("provideFruit", event.getProvideFruit());
+                            waterAmountRecord.put("date", event.getDate());
+                            waterAmountRecord.put("assignedTo", event.getAssignedTo());
+                            waterAmountRecord.put("frequency", event.getFrequency());
+                            waterAmountRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
+                            rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterAmountRecord);
+
+
+                            service = ti.getUpdateService();
+
+                            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                            if (updatedRows.size() != rowToUpdate.size())
+                            {
+                                throw new QueryUpdateServiceException("Not all rows updated properly");
+                            }
+
+                        }
+                    }
+                    if ("delete".equals(event.getAction()))
+                    {
+                        _log.error("Deleting waterAmount with objectId "+ event.getObjectId());
+
+                        SimpleQueryUpdater waterAmountTable = new SimpleQueryUpdater(getUser(),getContainer(),"study", "waterAmount");
+                        JSONObject rowToDelete = new JSONObject();
+                        rowToDelete.put("objectId", event.getObjectId());
+                        waterAmountTable.delete(rowToDelete);
+
+                        
+
+                    }
+
+                    transaction.commit();
+                    response.put("success", true);
+
+                }
+                catch (Exception e)
+                {
+
+                    response.put("success", false);
+
+                }
+                finally
+                {
+
+                }
+            }
+
+            return response;
+
+        }
+
+    }
+
+
+
+    @ActionNames("CloseWaterOrder")
+    @RequiresLogin
+    public class CloseWaterOrderAction extends MutatingApiAction<WaterOrderRecord>
+    {
+        @Override
+        public Object execute (WaterOrderRecord event, BindException errors) throws Exception{
+
+            List<Map<String, Object>> WaterOrdersRows = getWaterOrderRecord(event.getObjectId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            TableInfo ti = null;
+            QueryUpdateService service = null;
+            List<Map<String, Object>> rowToUpdate = null;
+
+            if (event.getDataSource().equals("waterOrders"))
+            {
+                Map <String,Object> extraContext = new HashMap<>();
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+
+                    for (Map<String, Object> woRow : WaterOrdersRows)
+                    {
+                        JSONObject waterOrderRecord = new JSONObject();
+                        waterOrderRecord.put("taskid", woRow.get("taskid"));
+                        waterOrderRecord.put("objectid", event.getObjectId());
+                        waterOrderRecord.put("enddate", event.getEndDate());
+                        if (event.isSkipWaterRegulationCheck()){
+                            waterOrderRecord.put("skipWaterRegulationCheck", true);
+                        }
+                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord);
+
+                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
+                        service = ti.getUpdateService();
+
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, extraContext);
+                        if (updatedRows.size() != rowToUpdate.size())
+                        {
+                            throw new QueryUpdateServiceException("Not all rows updated properly");
+                        }
+
+                    }
+
+                    transaction.commit();
+                    response.put("success", true);
+
+                }
+                catch (BatchValidationException e){
+                    response.put("success", false);
+
+                    response.put("errors", createResponseWriter().getJSON(e).get("errors"));
+                    response.put("extraContext", extraContext);
+
+                }
+                catch (Exception e)
+                {
+
+                    response.put("success", false);
+
+
+                }
+
+                finally
+                {
+
+                }
+            }
+
+            return response;
+
+        }
+
+    }
+    //Starts a new water order one day after the end of the currently selected water order
+    // This method is used on the WaterCalendar to easily modify existing water orders.
+    @ActionNames("EnterNewWaterOrder")
+    @RequiresLogin
+    public class EnterNewWaterOrderAction extends MutatingApiAction<WaterOrderRecord>
+    {
+        @Override
+        public Object execute (WaterOrderRecord event, BindException errors) throws Exception{
+
+            List<Map<String, Object>> WaterOrdersRows = getWaterOrderRecord(event.getObjectId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            TableInfo ti = null;
+            QueryUpdateService service = null;
+            List<Map<String, Object>> rowToUpdate = null;
+
+            if (event.getDataSource().equals("waterOrders"))
+            {
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+
+                    for (Map<String, Object> woRow : WaterOrdersRows)
+                    {
+                        JSONObject waterOrderRecord = new JSONObject();
+                        waterOrderRecord.put("taskid", woRow.get("taskid"));
+                        waterOrderRecord.put("objectid", event.getObjectId());
+                        waterOrderRecord.put("enddate", event.getEndDate());
+                        waterOrderRecord.put("skipWaterRegulationCheck", true);
+                        rowToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRecord);
+
+                        ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
+                        service = ti.getUpdateService();
+
+                        List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowToUpdate, rowToUpdate, null, null);
+                        if (updatedRows.size() != rowToUpdate.size())
+                        {
+                            throw new QueryUpdateServiceException("Not all rows updated properly");
+                        }
+
+                    }
+
+                    //Start new water order
+                    List<Map<String, Object>> rowToInsert = null;
+                    List<Map<String, Object>> taskToInsert = null;
+                    JSONObject taskRecord = new JSONObject();
+                    JSONObject waterOrderRow = new JSONObject();
+
+                    String taskId = UUID.randomUUID().toString();
+                    taskRecord.put("taskid", taskId);
+                    taskRecord.put("title", "Enter Water Orders");
+                    taskRecord.put("category", "task");
+                    taskRecord.put("qcstate", EHRService.QCSTATES.Completed.getQCState(getContainer()).getRowId());
+                    taskRecord.put("formType","Enter Water Orders");
+                    taskRecord.put("assignedTo",getUser().getUserId());
+
+
+
+                    taskToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(taskRecord);
+
+                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "ehr").getTable("tasks");
+                    service = ti.getUpdateService();
+
+                    BatchValidationException validationTaskException = new BatchValidationException();
+                    List<Map<String, Object>> insertedTask = service.insertRows(getUser(), getContainer(), taskToInsert, validationTaskException, null, null);
+
+                    java.util.Calendar StartDate = java.util.Calendar.getInstance();
+                    StartDate.setTime(event.getEndDate());
+                    StartDate.add(java.util.Calendar.DATE, 1);
+
+                    waterOrderRow.put("taskid", taskId);
+                    waterOrderRow.put("date",StartDate.getTime());
+                    waterOrderRow.put("id",event.getAnimalId());
+                    waterOrderRow.put("project",event.getProject());
+                    waterOrderRow.put("frequency", event.getFrequency());
+                    waterOrderRow.put("volume", event.getVolume());
+                    waterOrderRow.put("assignedTo", event.getAssignedTo());
+                    waterOrderRow.put("waterSource","regulated");
+
+                    rowToInsert = SimpleQueryUpdater.makeRowsCaseInsensitive(waterOrderRow);
+
+                    ti = QueryService.get().getUserSchema(getUser(), getContainer(), "study").getTable("waterOrders");
+                    service = ti.getUpdateService();
+
+                    BatchValidationException validationException = new BatchValidationException();
+                    List<Map<String, Object>> insertedRows = service.insertRows(getUser(), getContainer(), rowToInsert, validationException, null, null);
+
+                    if (validationException.hasErrors())
+                    {
+                        throw validationException;
+                    }
+
+                    if (taskToInsert.size() != insertedTask.size() || rowToInsert.size() != insertedRows.size()){
+                        throw new QueryUpdateServiceException("Task record or water record not inserted");
+                    }
+
+
+
+
+
+                    transaction.commit();
+                    //TODO: return JSON string with taskid and success
+
+                    //JSONObject returnJSON = new JSONObject();
+                    response.put("success", true);
+                    response.put("taskId", taskId);
+
+
+                    //response.put(returnJSON);
+
+                }
+                catch (Exception e)
+                {
+
+                    response.put("success", false);
+
+                }
+                finally
+                {
+
+                }
+            }
+
+            return response;
+
+        }
+
+    }
+
+    // TODO: consolidate the water order and water amount class to have only a WaterInfo that can handle
+    // the two different scenarios
+
+    public static class WaterOrderRecord {
+
+
+        private String taskId;
+        private String objectId;
+        private String animalId;
+        private String project;
+        private Date date;
+        private Date endDate;
+        private long dateInMillis;
+        private Double volume;
+        private String provideFruit;
+        private String dataSource;
+        private String waterSource;
+        private String frequency;
+        private String assignedTo;
+        private String action;
+        private boolean skipWaterRegulationCheck;
+
+
+        public void setTaskId(String taskId)
+        {
+            this.taskId = taskId;
+        }
+
+        public void setObjectId(String objectId)
+        {
+            this.objectId = objectId;
+        }
+
+        public void setAnimalId(String animalId)
+        {
+            this.animalId = animalId;
+        }
+
+        public void setDate(Date date)
+        {
+            this.date = date;
+        }
+        public void setDate(String date)
+        {
+            //DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+            long miliseconds = Long.parseLong(date);
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            calendar.setTimeInMillis(miliseconds);
+            this.date = calendar.getTime();
+        }
+        public void setDateInMillis(long dateInMillis)
+        {
+            if (dateInMillis>0)
+            {
+                java.util.Calendar calendar = java.util.Calendar.getInstance();
+                calendar.setTimeInMillis(dateInMillis);
+                this.date = calendar.getTime();
+            }
+            this.dateInMillis = dateInMillis;
+        }
+
+        public long getDateInMillis()
+        {
+            return dateInMillis;
+        }
+
+        public void setProject(String project)
+        {
+            this.project = project;
+        }
+
+        public void setEndDate(Date endDate)
+        {
+            this.endDate = endDate;
+        }
+
+        public void setDataSource(String dataSource)
+        {
+            this.dataSource = dataSource;
+        }
+
+        public void setWaterSource(String waterSource)
+        {
+            this.waterSource = waterSource;
+        }
+
+        public void setFrequency(String frequency)
+        {
+            this.frequency = frequency;
+        }
+
+        public void setVolume(Double volume)
+        {
+            this.volume = volume;
+        }
+
+        public void setProvideFruit(String provideFruit)
+        {
+            this.provideFruit = provideFruit;
+        }
+
+        public void setAssignedTo(String assignedTo)
+        {
+            this.assignedTo = assignedTo;
+        }
+
+        public void setAction(String action)
+        {
+            this.action = action;
+        }
+
+        public String getTaskId()
+        {
+            return taskId;
+        }
+
+        public String getObjectId()
+        {
+            return objectId;
+        }
+
+        public String getAnimalId()
+        {
+            return animalId;
+        }
+
+        public Date getDate()
+        {
+            return date;
+        }
+
+        public Date getEndDate()
+        {
+            return endDate;
+        }
+
+        public String getDataSource()
+        {
+            return dataSource;
+        }
+
+        public String getWaterSource()
+        {
+            return waterSource;
+        }
+
+        public String getProject()
+        {
+            return project;
+        }
+
+        public String getFrequency()
+        {
+            return frequency;
+        }
+
+        public Double getVolume()
+        {
+            return volume;
+        }
+
+        public String getProvideFruit()
+        {
+            return provideFruit;
+        }
+
+        public String getAssignedTo()
+        {
+            return assignedTo;
+        }
+
+        public String getAction()
+        {
+            return action;
+        }
+
+        public boolean isSkipWaterRegulationCheck()
+        {
+            return skipWaterRegulationCheck;
+        }
+
+        public void setSkipWaterRegulationCheck(boolean skipWaterRegulationCheck)
+        {
+            this.skipWaterRegulationCheck = skipWaterRegulationCheck;
+        }
+
+
+    }
+
+    private List<Map<String, Object>> getWaterOrderRecord (String objectId) throws java.sql.SQLException{
+        List<FieldKey> columns = new ArrayList<>();
+
+        columns.add(FieldKey.fromString("id"));
+        columns.add(FieldKey.fromString("objectid"));
+        columns.add(FieldKey.fromString("taskid"));
+        columns.add(FieldKey.fromString("date"));
+        columns.add(FieldKey.fromString("enddate"));
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("objectid"), objectId);
+        QueryHelper waterOrderQuery = new QueryHelper(getContainer(), getUser(), "study","waterOrders");
+        List<Map<String, Object>> woRows = new ArrayList<>();
+        try (Results rs = waterOrderQuery.select(columns, filter))
+        {
+            while (rs.next())
+            {
+                woRows.add(rs.getRowMap());
+            }
+        }
+        return woRows;
+    }
+
+    /*public static class WaterAmountRecord {
+
+        private String taskId;
+        private String objectId;
+        private String animalId;
+        private Date date;
+        private Double volume;
+        private String dataSource;
+        private String frequency;
+        private String assignedTo;
+
+        public void setTaskId(String taskId)
+        {
+            this.taskId = taskId;
+        }
+
+        public void setObjectId(String objectId)
+        {
+            this.objectId = objectId;
+        }
+
+        public void setAnimalId(String animalId)
+        {
+            this.animalId = animalId;
+        }
+
+        public void setDate(Date endDate)
+        {
+            this.date = date;
+        }
+
+        public void setDataSource(String dataSource)
+        {
+            this.dataSource = dataSource;
+        }
+
+        public void setVolume(Double volume)
+        {
+            this.volume = volume;
+        }
+
+        public void setFrequency(String frequency)
+        {
+            this.frequency = frequency;
+        }
+
+        public void setAssignedTo(String assignedTo)
+        {
+            this.assignedTo = assignedTo;
+        }
+
+        public String getFrequency()
+        {
+            return frequency;
+        }
+
+        public String getAssignedTo()
+        {
+            return assignedTo;
+        }
+
+        public String getTaskId()
+        {
+            return taskId;
+        }
+
+        public String getObjectId()
+        {
+            return objectId;
+        }
+
+        public String getAnimalId()
+        {
+            return animalId;
+        }
+
+        public Date getDate()
+        {
+            return date;
+        }
+
+        public String getDataSource()
+        {
+            return dataSource;
+        }
+
+        public Double getVolume()
+        {
+            return volume;
+        }
+
+    }*/
+
+    private List<Map<String, Object>> getWaterAmountRecord (String objectId) throws java.sql.SQLException{
+        List<FieldKey> columns = new ArrayList<>();
+
+        columns.add(FieldKey.fromString("id"));
+        columns.add(FieldKey.fromString("objectid"));
+        columns.add(FieldKey.fromString("taskid"));
+        columns.add(FieldKey.fromString("date"));
+
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("objectid"), objectId);
+        QueryHelper waterOrderQuery = new QueryHelper(getContainer(), getUser(), "study","waterAmount");
+        Results rs = waterOrderQuery.select(columns, filter);
+
+        List<Map<String, Object>> woRows = new ArrayList<>();
+        while (rs.next())
+        {
+            woRows.add(rs.getRowMap());
+        }
+        rs.close();
+        return woRows;
+
     }
 }

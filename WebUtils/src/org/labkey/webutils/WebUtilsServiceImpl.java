@@ -5,7 +5,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.labkey.webutils.view.JspPage;
+import org.labkey.webutils.api.JspPage;
 import org.labkey.webutils.api.WebUtilsService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -60,6 +60,13 @@ public class WebUtilsServiceImpl extends WebUtilsService {
         reportView.setBody(view);
 
         return getJspPage(reportView);
+    }
+
+    @Override
+    public JspView getKnockoutTemplate(String templateName)
+    {
+        //String _packagePathDir = WebUtilsServiceImpl.getPackageDirFromClass(JspPage.class);
+        return new JspView<>("/org/labkey/webutils/view/knockout_components/" + templateName + ".jsp");
     }
 
     private ModelAndView getJspPage(JspView view) {

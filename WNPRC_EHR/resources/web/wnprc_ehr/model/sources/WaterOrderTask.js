@@ -90,7 +90,7 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
                 allowBlank: false,
                 defaultValue: 2,
                 lookup:{
-                    schemaName: 'ehr_lookups',
+                    schemaName: 'wnprc',
                     queryName: 'husbandry_frequency',
                     keyColumn: 'rowid',
                     displayColumn: 'meaning',
@@ -155,7 +155,7 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
                     displayColumn: 'altmeaning'
                 },
                 lookup:{
-                    schemaName: 'ehr_lookups',
+                    schemaName: 'wnprc',
                     queryName: 'husbandry_frequency',
                     keyColumn: 'rowid',
                     displayColumn: 'altmeaning',

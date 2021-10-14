@@ -104,6 +104,7 @@
     function createSelectDiv(label, id, selectedOption) {
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("form-group");
+        mainDiv.id = id + "Div";
         let labelEl = document.createElement("label");
         labelEl.htmlFor = id;
         labelEl.classList.add("col-xs-4");
@@ -162,6 +163,7 @@
             inputEl.type = inputType;
             if (inputType === "checkbox") {
                 inputEl.classList.add("form-check-input");
+                inputEl.checked = value;
             }
             else {
                 inputEl.classList.add("form-control");
@@ -400,25 +402,38 @@
         });
     }
 
-    function updateEvent() {
-        let mainEvent = selectedEvent;
-        let isEHRManaged = !mainEvent.extendedProps.isUnmanaged;
+    function isEHRManaged(event) {
+        return !event.extendedProps.isUnmanaged;
+    }
 
-        if (isEHRManaged) {
+    function getMainEvent(event) {
+        let mainEvent = event;
+
+        if (isEHRManaged(mainEvent)) {
             if (mainEvent.extendedProps.parentid) {
-                mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
+                mainEvent = calendar.getEventById(event.extendedProps.parentid)
             }
         }
 
-        clearSelectedEvent();
+        return mainEvent;
+    }
 
+    function getRoomIds(mainEvent) {
         let roomIds = [];
-        if (isEHRManaged) {
+
+        if (isEHRManaged(mainEvent)) {
             if (mainEvent.extendedProps.childids) {
                 roomIds = mainEvent.extendedProps.childids;
             }
         }
 
+        return roomIds;
+    }
+
+    function getModalEventDetails(mainEvent) {
+        let roomIds = getRoomIds(mainEvent);
+
+        let eventDetails = {};
         let roomNames = [];
         let roomEmails = [];
         let oldRoomEmails = [];
@@ -427,7 +442,7 @@
         let ends = [];
 
         let roomEvents = [];
-        if (isEHRManaged) {
+        if (isEHRManaged(mainEvent)) {
             for (let i = 0; i < roomIds.length; i++) {
                 roomEvents.push(calendar.getEventById(roomIds[i]));
 
@@ -444,32 +459,127 @@
             }
         }
 
+        eventDetails.roomEvents = roomEvents;
+        eventDetails.roomNames = roomNames;
+        eventDetails.roomEmails = roomEmails;
+        eventDetails.oldRoomEmails = oldRoomEmails;
+        eventDetails.objectIds = objectIds;
+        eventDetails.starts = starts;
+        eventDetails.ends = ends;
+
+        return eventDetails;
+    }
+
+    function getModalUnmanagedEventDetails(mainEvent) {
+        let unmanagedEventDetails = {};
+
+        unmanagedEventDetails.allDay = document.getElementById("modalAllDayField").checked;
+        if (unmanagedEventDetails.allDay) {
+            unmanagedEventDetails.start = new Date(document.getElementById("modalStartField").value + "T00:00:00");
+            unmanagedEventDetails.end = new Date(document.getElementById("modalEndField").value + "T00:00:00");
+        } else {
+            unmanagedEventDetails.start = new Date(document.getElementById("modalStartField").value);
+            unmanagedEventDetails.end = new Date(document.getElementById("modalEndField").value);
+        }
+        unmanagedEventDetails.eventId = mainEvent.extendedProps.eventId;
+        unmanagedEventDetails.body = document.getElementById("modalCommentsField").value;
+
+        return unmanagedEventDetails;
+    }
+
+    function duplicateEvent() {
+        let mainEvent = getMainEvent(selectedEvent);
+        clearSelectedEvent();
+
+        let eventDetails = getModalEventDetails(mainEvent);
+
         let requestObj = {};
         requestObj.calendarId = mainEvent.extendedProps.calendarId;
         requestObj.requestId = mainEvent.extendedProps.requestid;
         requestObj.subject = document.getElementById("modalTitleField").value;
-        requestObj.roomNames = roomNames;
-        requestObj.roomEmails = roomEmails;
-        requestObj.objectIds = objectIds;
-        if (isEHRManaged) {
-            requestObj.starts = starts;
-            requestObj.ends = ends;
+        requestObj.roomNames = eventDetails.roomNames;
+        requestObj.roomEmails = eventDetails.roomEmails;
+        requestObj.objectIds = eventDetails.objectIds;
+
+        if (isEHRManaged(mainEvent)) {
+            requestObj.starts = eventDetails.starts;
+            requestObj.ends = eventDetails.ends;
+            requestObj.ehrManaged = true;
         } else {
-            requestObj.allDay = document.getElementById("modalAllDayField").checked;
-            if (requestObj.allDay) {
-                requestObj.start = new Date(document.getElementById("modalStartField").value + "T00:00:00");
-                requestObj.end = new Date(document.getElementById("modalEndField").value + "T00:00:00");
-            } else {
-                requestObj.start = new Date(document.getElementById("modalStartField").value);
-                requestObj.end = new Date(document.getElementById("modalEndField").value);
-            }
-            requestObj.eventId = mainEvent.extendedProps.eventId;
-            requestObj.body = document.getElementById("modalCommentsField").value;
+            let unmanagedEventDetails = getModalUnmanagedEventDetails(mainEvent);
+            requestObj.allDay = unmanagedEventDetails.allDay
+            requestObj.start = unmanagedEventDetails.start;
+            requestObj.end = unmanagedEventDetails.end;
+            requestObj.eventId = unmanagedEventDetails.eventId;
+            requestObj.body = unmanagedEventDetails.body;
+            requestObj.ehrManaged = false;
+        }
+
+        LABKEY.Ajax.request({
+            url: LABKEY.ActionURL.buildURL("wnprc_ehr", "DuplicateSurgeryEvent", null, requestObj),
+            method: "POST",
+            success: LABKEY.Utils.getCallbackWrapper(function (response) {
+                if (response.success) {
+                    //First remove the 'old' events from the calendarEvents object as well as on fullcalendar
+                    mainEvent.remove();
+                    let roomIds = getRoomIds(mainEvent);
+                    for (let i = 0; i < roomIds.length; i++) {
+                        removeEventFromCalendar(eventDetails.oldRoomEmails[i], requestObj.requestId);
+                    }
+
+                    //Then add the updated events back to the calendarEvents object as well as on the fullcalendar
+                    for (let cal in response.events) {
+                        if (response.events.hasOwnProperty(cal)) {
+                            for (let i = 0; i < response.events[cal].events.length; i++) {
+                                addEventToCalendar(response.events[cal].events[i], cal);
+                            }
+                        }
+                    }
+                }
+                else {
+                    alert("There was a problem completing your request\n\n" +
+                    response.error ? "Error: " + response.error + "\n" : "" +
+                    response.exception ? "Exception: " + response.exception : "");
+                }
+                $('#calendar-selection').unblock();
+                $('#procedure-calendar').unblock();
+            }, this),
+            failure: LABKEY.Utils.getCallbackWrapper(function (response) {
+                alert("Something went wrong: " + JSON.stringify(response));
+                $('#calendar-selection').unblock();
+                $('#procedure-calendar').unblock();
+            }, this)
+        });
+    }
+
+    function updateEvent() {
+        let mainEvent = getMainEvent(selectedEvent);
+        clearSelectedEvent();
+
+        let eventDetails = getModalEventDetails(mainEvent);
+
+        let requestObj = {};
+        requestObj.calendarId = mainEvent.extendedProps.calendarId;
+        requestObj.requestId = mainEvent.extendedProps.requestid;
+        requestObj.subject = document.getElementById("modalTitleField").value;
+        requestObj.roomNames = eventDetails.roomNames;
+        requestObj.roomEmails = eventDetails.roomEmails;
+        requestObj.objectIds = eventDetails.objectIds;
+        if (isEHRManaged(mainEvent)) {
+            requestObj.starts = eventDetails.starts;
+            requestObj.ends = eventDetails.ends;
+        } else {
+            let unmanagedEventDetails = getModalUnmanagedEventDetails(mainEvent);
+            requestObj.allDay = unmanagedEventDetails.allDay
+            requestObj.start = unmanagedEventDetails.start;
+            requestObj.end = unmanagedEventDetails.end;
+            requestObj.eventId = unmanagedEventDetails.eventId;
+            requestObj.body = unmanagedEventDetails.body;
         }
 
         console.log(requestObj);
 
-        if (isEHRManaged) {
+        if (isEHRManaged(mainEvent)) {
             LABKEY.Ajax.request({
                 url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateSurgeryProcedure", null, requestObj),
                 method: "POST",
@@ -478,8 +588,9 @@
                         updateFoodDeprive(requestObj.requestId);
                         //First remove the 'old' events from the calendarEvents object as well as on fullcalendar
                         mainEvent.remove();
+                        let roomIds = getRoomIds(mainEvent);
                         for (let i = 0; i < roomIds.length; i++) {
-                            removeEventFromCalendar(oldRoomEmails[i], requestObj.requestId);
+                            removeEventFromCalendar(eventDetails.oldRoomEmails[i], requestObj.requestId);
                         }
 
                         //Then add the updated events back to the calendarEvents object as well as on the fullcalendar
@@ -626,16 +737,17 @@
     }
 
     function generateEventModal(modalType) {
-        if (modalType !== "createEvent" && $.isEmptyObject(selectedEvent)) {
+        if (modalType !== "newEvent" && $.isEmptyObject(selectedEvent)) {
             return;
         }
 
-        if (modalType === "createEvent") {
-            $("#eventModalTitle").html("Create Event");
+        if (modalType === "newEvent") {
+            $("#eventModalTitle").html("New Event");
             document.getElementById("updateEventButton").style.display = "none";
             document.getElementById("createEventButton").style.display = "block";
         } else if (modalType === "duplicateEvent") {
             $("#eventModalTitle").html("Duplicate Event");
+
             document.getElementById("updateEventButton").style.display = "none";
             document.getElementById("createEventButton").style.display = "block";
         } else if (modalType === "editEvent") {
@@ -647,20 +759,14 @@
         oldEventValues = {};
 
         let mainEvent = selectedEvent;
-        let isEHRManaged = !mainEvent.extendedProps.isUnmanaged;
 
-        if (isEHRManaged) {
+        if (isEHRManaged(mainEvent)) {
             if (selectedEvent.extendedProps.parentid) {
                 mainEvent = calendar.getEventById(selectedEvent.extendedProps.parentid)
             }
         }
 
-        let roomIds = [];
-        if (isEHRManaged) {
-            if (mainEvent.extendedProps.childids) {
-                roomIds = mainEvent.extendedProps.childids;
-            }
-        }
+        let roomIds = getRoomIds(mainEvent);
 
         let formDiv = document.getElementById("modalForm");
 
@@ -672,12 +778,17 @@
         formDiv.appendChild(titleDiv);
         formDiv.appendChild(document.createElement("hr"));
 
-        if (isEHRManaged) {
+        if (isEHRManaged(mainEvent)) {
             let roomEvents = [];
             for (let i = 0; i < roomIds.length; i++) {
                 roomEvents.push(calendar.getEventById(roomIds[i]));
             }
             roomEvents.sort(compareRooms("start", "end"));
+
+            if (modalType === "duplicateEvent") {
+                let sameRoomTimeDiv = createInputDiv("Same Room(s)/Time(s)", "checkbox", "modalSameRoomTimeField", true);
+                formDiv.appendChild(sameRoomTimeDiv);
+            }
 
             for (let i = 0; i < roomEvents.length; i++) {
                 let startValue = dateToDateTimeInputField(roomEvents[i].start);
@@ -691,12 +802,52 @@
                 oldEventValues["modalEndField_" + i] = endValue;
                 let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField_" + i, endValue);
 
+                if (modalType === "duplicateEvent") {
+                    roomDiv.hidden = true;
+                    startDiv.hidden = true;
+                    endDiv.hidden = true;
+                }
+
                 if (i > 0) {
                     formDiv.appendChild(document.createElement("hr"));
                 }
                 formDiv.appendChild(roomDiv);
                 formDiv.appendChild(startDiv);
                 formDiv.appendChild(endDiv);
+            }
+
+            if (modalType === "duplicateEvent") {
+                let dateDiv = createInputDiv("New Date", "date", "modalNewDateField", dateToDateInputField(mainEvent.start));
+                oldEventValues["modalNewDateField"] = dateToDateInputField(mainEvent.start);
+                formDiv.appendChild(dateDiv);
+
+                let sameRoomTimeCheckbox = document.getElementById("modalSameRoomTimeField");
+                sameRoomTimeCheckbox.addEventListener('change', function () {
+                    let isChecked = document.getElementById("modalSameRoomTimeField").checked;
+                    if (isChecked) {
+                        document.getElementById("modalNewDateFieldDiv").hidden = false;
+
+                        for (let i = 0; i < roomEvents.length; i++) {
+                            document.getElementById("modalRoomField_" + i + "Div").hidden = true;
+                            document.getElementById("modalStartField_" + i + "Div").hidden = true;
+                            document.getElementById("modalEndField_" + i + "Div").hidden = true;
+
+                            document.getElementById("modalRoomField_" + i).value = oldEventValues["modalRoomField_" + i];
+                            document.getElementById("modalStartField_" + i).value = oldEventValues["modalStartField_" + i];
+                            document.getElementById("modalEndField_" + i).value = oldEventValues["modalEndField_" + i];
+                        }
+                    }
+                    else {
+                        document.getElementById("modalNewDateFieldDiv").hidden = true;
+                        document.getElementById("modalNewDateField").value = oldEventValues["modalNewDateField"];
+
+                        for (let i = 0; i < roomEvents.length; i++) {
+                            document.getElementById("modalRoomField_" + i + "Div").hidden = false;
+                            document.getElementById("modalStartField_" + i + "Div").hidden = false;
+                            document.getElementById("modalEndField_" + i + "Div").hidden = false;
+                        }
+                    }
+                });
             }
         } else {
             let startValue = dateToDateTimeInputField(mainEvent.start);
@@ -706,7 +857,7 @@
 
             let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField", startValue);
             let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField", endValue);
-            let allDayDiv = createInputDiv("Add Day Event", "checkbox", "modalAllDayField", allDayValue);
+            let allDayDiv = createInputDiv("All Day Event", "checkbox", "modalAllDayField", allDayValue);
             let commentsDiv = createInputDiv("Comments", "textarea", "modalCommentsField", commentsValue.trim());
 
             formDiv.appendChild(startDiv);
@@ -738,9 +889,8 @@
                     document.getElementById("modalEndField").value = endValue;
                 }
             });
-            if (mainEvent.allDay && !allDayCheckbox.checked) {
-                allDayCheckbox.click();
-            }
+            allDayCheckbox.click();
+            allDayCheckbox.click();
         }
 
         $("#eventModal").modal();
@@ -970,7 +1120,7 @@
                 <div id="modalBody" class="modal-body">
                     <form id="modalForm" class="form-horizontal" /></form>
                     <button id="updateEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="updateEvent()" style="display:none;">Update Event</button>
-                    <button id="createEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="createEvent()" style="display:none;">Create Event</button>
+                    <button id="createEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="duplicateEvent()" style="display:none;">Create Event</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -1146,11 +1296,22 @@
                         calendar = new FullCalendar.Calendar(calendarEl, {
                             themeSystem: 'bootstrap',
                             initialView: 'dayGridMonth',
+                            customButtons: {
+                                customCreateButton: {
+                                    text: "Create Event",
+                                    click: function() {
+                                        alert("test button");
+                                    }
+                                }
+                            },
                             //rerenderDelay: 50,
                             headerToolbar: {
-                                left: 'prev,next today',
+                                left: 'prev,next today customCreateButton',
                                 center: 'title',
                                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                            },
+                            bootstrapFontAwesome: {
+                                customCreateButton: "plus-square"
                             },
                             eventClassNames: function (arg) {
                                 if (arg.event.id.startsWith("PLACEHOLDER")) {
@@ -1574,8 +1735,8 @@
                     });
                 }
             },
-            createEvent: function() {
-                generateEventModal("createEvent");
+            newEvent: function() {
+                generateEventModal("newEvent");
             },
             duplicateEvent: function() {
                 generateEventModal("duplicateEvent");

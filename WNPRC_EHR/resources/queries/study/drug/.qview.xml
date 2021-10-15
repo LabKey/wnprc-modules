@@ -10,6 +10,7 @@
                <property name="columnTitle" value="SNOMED Code"/>
            </properties>
        </column>
+       <column name="areaCleaned"/>
        <column name="qualifier"/>
        <column name="amount"/>
        <column name="amount_units"/>
@@ -23,6 +24,7 @@
        <column name="performedby"/>
        <!--<column name="HeaderDate"/>-->
        <column name="qcstate" />
+       <column name="parentid"/>
        <column name="taskid" />
    </columns>
    <sorts>

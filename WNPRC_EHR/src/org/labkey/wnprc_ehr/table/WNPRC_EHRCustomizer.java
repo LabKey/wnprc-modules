@@ -18,40 +18,47 @@ package org.labkey.wnprc_ehr.table;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.BaseColumnInfo;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.WrappedColumn;
 import org.labkey.api.ehr.EHRService;
 import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.ldk.table.AbstractTableCustomizer;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimplerFilter;
-//import org.labkey.ehr.EHRSchema;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsEditPermission;
+import org.labkey.wnprc_ehr.security.permissions.WNPRCAnimalRequestsViewPermission;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: bimber
@@ -93,7 +100,12 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 customizeDemographicsTable((AbstractTableInfo) table);
             } else if (matches(table, "ehr", "tasks")) {
                 customizeTasksTable((AbstractTableInfo) table);
+            } else if (matches(table, "wnprc", "animal_requests")) {
+                customizeAnimalRequestsTable((AbstractTableInfo) table);
             }
+            else if (table.getName().equalsIgnoreCase("waterOrders"))
+                appendEnddateFuture((AbstractTableInfo) table, "enddate");
+
         }
     }
 
@@ -251,11 +263,11 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         Container ehrContainer = EHRService.get().getEHRStudyContainer(ti.getUserSchema().getContainer());
         GUID ehrEntityId = ehrContainer.getEntityId();
         SQLFragment sql = new SQLFragment("(SELECT " +
-               " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+               " (CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*"+ conv + ") || ' flower')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='" + ehrEntityId.toString() + "')" +
                     "THEN (ROUND(amount*" + invconv + ") || ' log')" +
                 "ELSE " +
                     " 'bad data'" +
@@ -267,14 +279,14 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
         String chowLookup = "chowLookup";
         SQLFragment sql2 = new SQLFragment("(SELECT " +
-                " (CASE WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
-                "THEN (CAST (amount as text) || ' log')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
-                "THEN (CAST (amount as text) || ' log (gluten-free)')" +
-                "WHEN type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
-                "THEN (CAST (amount as text) || ' flower')" +
+                " (CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (CAST (amount as text) || ' log')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'log (gluten-free)' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (CAST (amount as text) || ' log (gluten-free)')" +
+                "WHEN " + ExprColumn.STR_TABLE_ALIAS + ".type = (SELECT Rowid from ehr_lookups.lookups where set_name = 'feeding_types' and value = 'flower' and container ='"+ ehrEntityId.toString() + "')" +
+                    "THEN (CAST (amount as text) || ' flower')" +
                 "ELSE " +
-                " 'bad data'" +
+                    " 'bad data'" +
                 "END) as ChowLookup)");
         ExprColumn newCol2 = new ExprColumn(ti, chowLookup, sql2, JdbcType.VARCHAR);
         newCol2.setLabel("Chow Lookup");
@@ -650,6 +662,140 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             newCol.setDescription("Returns the animal's original vendor id.");
             table.addColumn(newCol);
         }
+
+        if (table.getColumn("sire") == null)
+        {
+            String sire_new = "sire";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
+
+            // Here we want a union of the birth and arrival tables to get the sire of the animal
+            // For the given demographic animal id, it checks the arrival records to see if there is a matching sire
+            //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the sire as long as the species between the two are the same
+            //  if that is not the case, it will fall back on the arrival and birth records, and if still no sire found in arrival or births,
+            //  we fall back on the "old" data in the demographic table, called sire_old
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.sire) AND lower(a.vendor_id) != lower(a.participantid) " +
+                                " AND (SELECT x.species from studydataset." + demographics.getName() +" x WHERE x.participantid = a.participantid) =  " +
+                                " (SELECT y.species from studydataset." + demographics.getName() +" y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "sire_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS sire " +
+                    ")";
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+            ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Sire");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found and the species of the animals are matching, " +
+                    "if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no sire is found there, it " +
+                    "then finally uses the historic demographic text field called 'sire_old' as the sire.");
+            table.addColumn(newCol);
+        }
+        if (table.getColumn("dam") == null)
+        {
+            String dam_new = "dam";
+            TableInfo arrival = getRealTableForDataset(table, "arrival");
+            TableInfo birth = getRealTableForDataset(table, "birth");
+            TableInfo demographics = getRealTableForDataset(table, "demographics");
+
+            // Here we want a union of the birth and arrival tables to get the dam of the animal
+            // For the given demographic animal id, it checks the arrival records to see if there is a matching dam
+            //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the dam, as long as the species between the two are the same
+            //  if that is not the case, it will fall back on the arrival and birth records, and if still no dam found in arrival or births,
+            //  we fall back on the "old" data in the demographic table, called dam_old
+            String arrivalAndBirthQuery = "( " +
+                    "SELECT " +
+                        "COALESCE ( " +
+                            "(SELECT " +
+                                "a.participantid as dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                            " WHERE " +
+                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.dam) AND lower(a.vendor_id) != lower(a.participantid) " +
+                                " AND (SELECT x.species from studydataset." + demographics.getName() +" x WHERE x.participantid = a.participantid) =  " +
+                                " (SELECT y.species from studydataset." + demographics.getName() +" y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
+                            "ORDER BY " +
+                                "b.modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + arrival.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC " +
+                            "LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam " +
+                            "FROM " +
+                                "studydataset." + birth.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            "ORDER BY " +
+                                "modified DESC" +
+                            " LIMIT 1), " +
+
+                            "(SELECT " +
+                                "dam_old " +
+                            "FROM " +
+                                "studydataset." + demographics.getName() +
+                            " WHERE " +
+                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                            " LIMIT 1) " +
+                        ") AS dam " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+            ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
+            newCol.setLabel("Dam");
+            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                    "'real' animal id if a matching vendor id was found and the species of the animals are matching, " +
+                    "if not found it will use whatever is in the " +
+                    "arrival record, if not found, it then checks birth records, and if no dam is found there, it " +
+                    "then finally uses the historic demographic text field called 'dam_old' as the dam.");
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)
@@ -865,6 +1011,281 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
     }
 
+    public static class AnimalIdsToOfferColumn extends DataColumn {
+        public AnimalIdsToOfferColumn(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+
+    }
+
+    public static class AnimalIdsToOfferColumnQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public AnimalIdsToOfferColumnQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                out.write("");
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                super.renderGridCellContents(ctx, out);
+            }
+            else
+            {
+                out.write("");
+            }
+        }
+    }
+
+    public static class AnimalRequestsEditLinkConditional extends DataColumn
+    {
+        private User _currentUser;
+
+        public AnimalRequestsEditLinkConditional(ColumnInfo colInfo, User currentUser)
+        {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+            {
+                String edit;
+                if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+                {
+                    edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                            ctx.getViewContext().getContextPath() +
+                            "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                            ctx.get("rowid").toString() +
+                            "&update=1&returnUrl=" +
+                            ctx.getViewContext().getContextPath() +
+                            "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+                }
+                else {
+                    edit = "";
+                }
+                return HtmlString.unsafe(edit);
+            }
+
+
+    }
+
+    public static class AnimalRequestsEditLinkShow extends DataColumn {
+        public AnimalRequestsEditLinkShow(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            String edit;
+            edit = "<a class='fa fa-pencil lk-dr-action-icon' style='opacity: 1' href='" +
+                    ctx.getViewContext().getContextPath() +
+                    "/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Request&keyField=rowid&key=" +
+                    ctx.get("rowid").toString() +
+                    "&update=1&returnUrl=" +
+                    ctx.getViewContext().getContextPath() +
+                    "%2Fwnprc_ehr%2FWNPRC%2FEHR%2FdataEntry.view%3F'></a>";
+            return HtmlString.unsafe(edit);
+        }
+    }
+
+    public static class AnimalReportLink extends DataColumn {
+        public AnimalReportLink(ColumnInfo colInfo) {
+            super(colInfo);
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx) {
+            return super.getValue(ctx);
+        }
+    }
+
+    public static class AnimalReportLinkQCStateConditional extends DataColumn {
+        private User _currentUser;
+        public AnimalReportLinkQCStateConditional(ColumnInfo colInfo, User currentUser) {
+            super(colInfo);
+            _currentUser = currentUser;
+        }
+
+        @Override
+        public Object getValue(RenderContext ctx)
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        @Override
+        public Object getDisplayValue(RenderContext ctx)
+        {
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return "";
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getDisplayValue(ctx);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        @Override
+        public HtmlString getFormattedHtml(RenderContext ctx)
+        {
+            HtmlStringBuilder emptyString = HtmlStringBuilder.of();
+            if ("Request: Pending".equals(ctx.get("QCState$Label")))
+            {
+                return emptyString.getHtmlString();
+            }
+            else if (_currentUser.getUserId() == (Integer) ctx.get("createdBy"))
+            {
+                return super.getFormattedHtml(ctx);
+            }
+            else
+            {
+                return emptyString.getHtmlString();
+            }
+        }
+
+    }
+
+    private void customizeAnimalRequestsTable(AbstractTableInfo table)
+    {
+
+        UserSchema us = getStudyUserSchema(table);
+        if (us == null)
+        {
+            return;
+        }
+        User currentUser = us.getUser();
+
+        //Nail down individual fields for editing, unless user has permission
+        List<String> readOnlyFields = new ArrayList<>();
+        readOnlyFields.add("QCState");
+        readOnlyFields.add("dateapprovedordenied");
+        readOnlyFields.add("animalsorigin");
+        readOnlyFields.add("dateordered");
+        readOnlyFields.add("datearrival");
+        for (String item : readOnlyFields)
+        {
+            if (table.getColumn(item) != null)
+            {
+                BaseColumnInfo col = (BaseColumnInfo) table.getColumn(item);
+                if (!us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) && !us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                {
+                    col.setReadOnly(true);
+                }
+            }
+        }
+
+
+        if (table.getColumn("edit") == null){
+
+            String edit = "edit";
+
+            String theQuery  = "( " +
+                    "(SELECT 'edit')" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, edit, sql, JdbcType.VARCHAR);
+            table.addColumn(newCol);
+            newCol.setDisplayColumnFactory(new DisplayColumnFactory()
+            {
+
+                @Override
+                public DisplayColumn createRenderer(ColumnInfo colInfo)
+                {
+                    if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsEditPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                    {
+                        return new AnimalRequestsEditLinkShow(colInfo);
+                    }
+                    else
+                    {
+                        return new AnimalRequestsEditLinkConditional(colInfo, currentUser);
+                    }
+                }
+            });
+        }
+
+        //re-render animalidsoffer column
+        if (table.getColumn("animalidstooffer") != null)
+        {
+            BaseColumnInfo col = (BaseColumnInfo) table.getColumn("animalidstooffer");
+            col.setLabel("Animal Ids");
+            if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class)){
+                col.setDisplayColumnFactory(colInfo -> new AnimalIdsToOfferColumn(colInfo));
+            }
+            else{
+                col.setHidden(true);
+                col.setDisplayColumnFactory(colInfo -> new AnimalIdsToOfferColumnQCStateConditional(colInfo, currentUser));
+            }
+        }
+
+        //create animal history report link from a set of animal ids
+        if (table.getColumn("animal_history_link") == null)
+        {
+            String animal_history_link = "animal_history_link";
+
+                String theQuery  = "( " +
+                        "(SELECT " +
+                        " CASE WHEN a.animalidstooffer is not null " +
+                        "THEN 'Report Link' " +
+                        "ELSE '' " +
+                        " END AS animal_history_link " +
+                        " FROM wnprc.animal_requests a " +
+                        "WHERE a.rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid  LIMIT 1)  " +
+                        ")";
+
+                SQLFragment sql = new SQLFragment(theQuery);
+
+                ExprColumn newCol = new ExprColumn(table, animal_history_link, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Animal History Link");
+                newCol.setDescription("Provides a link to the animal history records given the animal ids that were selected.");
+                newCol.setURL(StringExpressionFactory.create("ehr-animalHistory.view?#subjects:${animalidstooffer}&inputType:multiSubject&showReport:0&activeReport:abstractReport"));
+                table.addColumn(newCol);
+                newCol.setDisplayColumnFactory(new DisplayColumnFactory()
+                {
+                    @Override
+                    public DisplayColumn createRenderer(ColumnInfo colInfo)
+                    {
+                        if (us.getContainer().hasPermission(currentUser, WNPRCAnimalRequestsViewPermission.class) || us.getContainer().hasPermission(currentUser, AdminPermission.class))
+                        {
+                            return new AnimalReportLink(colInfo);
+                        }
+                        else
+                        {
+                            return new AnimalReportLinkQCStateConditional(colInfo, currentUser);
+                        }
+                    }
+                });
+
+        }
+    }
+
     private BaseColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)
     {
         String ID_COL = "Id";
@@ -898,6 +1319,34 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         }
 
         return null;
+    }
+
+    private  void appendEnddateFuture(AbstractTableInfo ti, String sourceColName)
+    {
+        ColumnInfo sourceCol = ti.getColumn(sourceColName);
+        if (sourceCol == null)
+        {
+            _log.error("Unable to find column: " + sourceColName + " on table " + ti.getSelectName());
+            return;
+        }
+
+        String name = sourceCol.getName();
+        if (ti.getColumn(name + "CoalescedFuture") == null)
+        {
+            SQLFragment sql = new SQLFragment("CAST(COALESCE(").append(sourceCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append(",  {fn timestampadd(SQL_TSI_DAY, 365, {fn curdate()})}) as date)");
+            //SQLFragment sql = new SQLFragment("CAST(COALESCE(" + ExprColumn.STR_TABLE_ALIAS + "." + sourceCol.getSelectName() + ",  {fn curdate()} + integer '365')  as date)");
+            ExprColumn col = new ExprColumn(ti, name + "CoalescedFuture", sql, JdbcType.DATE);
+            col.setCalculated(true);
+            col.setUserEditable(false);
+            col.setHidden(true);
+            col.setLabel(col.getLabel() + ", CoalescedFuture");
+
+            if (sourceCol.getFormat() != null)
+                col.setFormat(sourceCol.getFormat());
+
+            ti.addColumn(col);
+        }
+
     }
 
     //TODO: Look how to use another UI to allow for better support for virtual columns

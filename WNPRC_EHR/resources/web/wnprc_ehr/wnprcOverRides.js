@@ -609,7 +609,9 @@ EHR.Metadata.registerMetadata('Request', {
 Ext4.override(EHR.form.field.ProjectEntryField, {
     getDisallowedProtocols: function(){
         return ['wprc00'];
-    }
+    },
+
+    invesLastNameCol: 'investigatorWithName'
 });
 
 (function(){

@@ -7562,4 +7562,239 @@
       </column>
     </columns>
   </table>
+  <table tableName="waterOrders" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <nullable>false</nullable>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <nullable>false</nullable>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <importAliases>
+          <importAlias>pno</importAlias>
+        </importAliases>
+        <formatString>00000000</formatString>
+      </column>
+      <column columnName="enddate">
+        <datatype>timestamp</datatype>
+        <columnTitle>Enddate</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+        <isHidden>true</isHidden>
+      </column>
+    </columns>
+  </table>
+  <table tableName="waterAmount" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <nullable>false</nullable>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <nullable>false</nullable>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <importAliases>
+          <importAlias>pno</importAlias>
+        </importAliases>
+        <formatString>00000000</formatString>
+      </column>
+    </columns>
+  </table>
+  <table tableName="waterGiven" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <nullable>false</nullable>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <nullable>false</nullable>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <importAliases>
+          <importAlias>pno</importAlias>
+        </importAliases>
+        <formatString>00000000</formatString>
+      </column>
+    </columns>
+  </table>
+  <table tableName="waterScheduledAnimals" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <nullable>false</nullable>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <nullable>false</nullable>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <importAliases>
+          <importAlias>pno</importAlias>
+        </importAliases>
+        <formatString>00000000</formatString>
+      </column>
+
+    </columns>
+  </table>
+  <table tableName="singleGeneralEncounter" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <nullable>false</nullable>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <nullable>false</nullable>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <importAliases>
+          <importAlias>pno</importAlias>
+        </importAliases>
+        <formatString>00000000</formatString>
+      </column>
+    </columns>
+  </table>
+  <table tableName="chairing" tableDbType="TABLE">
+    <columns>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <isHidden>true</isHidden>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <nullable>false</nullable>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <nullable>false</nullable>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <importAliases>
+          <importAlias>pno</importAlias>
+        </importAliases>
+        <formatString>00000000</formatString>
+      </column>
+    </columns>
+  </table>
 </tables>

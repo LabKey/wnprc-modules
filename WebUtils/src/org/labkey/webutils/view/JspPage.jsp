@@ -1,22 +1,21 @@
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.labkey.api.data.PropertyManager" %>
+<%@ page import="org.labkey.api.module.Module" %>
+<%@ page import="org.labkey.api.module.ModuleLoader" %>
+<%@ page import="org.labkey.api.module.ModuleProperty" %>
+<%@ page import="org.labkey.api.util.GUID" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.webutils.WebUtilsModule" %>
 <%@ page import="org.labkey.webutils.api.JspPage" %>
+<%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
 <%@ page import="org.springframework.web.servlet.ModelAndView" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.module.Module" %>
-<%@ page import="org.labkey.api.data.PropertyManager" %>
-<%@ page import="org.labkey.api.module.ModuleLoader" %>
-<%@ page import="org.labkey.webutils.WebUtilsModule" %>
-<%@ page import="org.labkey.api.module.ModuleProperty" %>
-<%@ page import="org.labkey.webutils.api.model.JspPageModel" %>
-<%@ page import="org.labkey.api.util.GUID" %>
-<%@ page import="org.json.JSONArray" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspPage view = (JspPage) HttpView.currentView();
     JspPageModel model = (JspPageModel) getModelBean();
     Integer numberOfRenders = view.getNumberOfRenders();
     JSONArray unBindComponents = view.getUnbindComponents();
-
 
     String sufix = GUID.makeGUID();
 %>

@@ -11,8 +11,8 @@ import java.util.List;
 /**
  * Created by jon on 1/13/16.
  */
-public class JspPage extends JspView<JspPageModel> {
-    //static private String _packagePathDir = WebUtilsService.getPackageDirFromClass(JspPage.class);
+public class JspPage extends JspView<JspPageModel>
+{
     private Integer publicNumberOfRenders =0 ;
     private JSONArray publicUnBindComponents = new JSONArray();
 
@@ -23,7 +23,8 @@ public class JspPage extends JspView<JspPageModel> {
     //Adding second constructor to allow rendering JSP under a LabKey webPart
     //numberofRenders check if it is not the first time the page renders
     //unBindComponents components in the page to rebind to ko.observables.
-    public JspPage(JspView view, Integer numberOfRenders, JSONArray unBindComponents){
+    public JspPage(JspView view, Integer numberOfRenders, JSONArray unBindComponents)
+    {
         super("/org/labkey/webutils/view/JspPage.jsp", new JspPageModel());
 
         publicNumberOfRenders = numberOfRenders;
@@ -40,7 +41,6 @@ public class JspPage extends JspView<JspPageModel> {
             this.addClientDependency(ClientDependency.fromPath(path));
         }
 
-
         if (numberOfRenders == 0){
 
             // Add some Knockout templates.
@@ -55,10 +55,7 @@ public class JspPage extends JspView<JspPageModel> {
 
             // Set the frame to none, since we don't want WebPartView to add any wrapping HTML, such as a web part.
             this.setFrame(FrameType.NONE);
-
         }
-
-
     }
 
     public JspPage(JspView view, JspPageModel model) {

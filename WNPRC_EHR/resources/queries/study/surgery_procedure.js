@@ -6,6 +6,7 @@ function onInit(event, helper){
     helper.setScriptOptions({
         allowAnyId: true,
         skipIdFormatCheck: true,
+        allowFutureDates: true
     });
 }
 

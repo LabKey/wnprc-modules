@@ -459,6 +459,9 @@
             }
         }
 
+        if (document.getElementById("modalSameRoomTimeField").value === 'true') {
+            eventDetails.newDate = new Date(document.getElementById("modalNewDateField").value + "T00:00:00");
+        }
         eventDetails.roomEvents = roomEvents;
         eventDetails.roomNames = roomNames;
         eventDetails.roomEmails = roomEmails;
@@ -500,6 +503,7 @@
         requestObj.roomNames = eventDetails.roomNames;
         requestObj.roomEmails = eventDetails.roomEmails;
         requestObj.objectIds = eventDetails.objectIds;
+        requestObj.newDate = eventDetails.newDate;
 
         if (isEHRManaged(mainEvent)) {
             requestObj.starts = eventDetails.starts;
@@ -520,14 +524,7 @@
             method: "POST",
             success: LABKEY.Utils.getCallbackWrapper(function (response) {
                 if (response.success) {
-                    //First remove the 'old' events from the calendarEvents object as well as on fullcalendar
-                    mainEvent.remove();
-                    let roomIds = getRoomIds(mainEvent);
-                    for (let i = 0; i < roomIds.length; i++) {
-                        removeEventFromCalendar(eventDetails.oldRoomEmails[i], requestObj.requestId);
-                    }
-
-                    //Then add the updated events back to the calendarEvents object as well as on the fullcalendar
+                    //Add the duplicated events to the calendarEvents object as well as on the fullcalendar
                     for (let cal in response.events) {
                         if (response.events.hasOwnProperty(cal)) {
                             for (let i = 0; i < response.events[cal].events.length; i++) {

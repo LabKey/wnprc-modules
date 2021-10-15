@@ -58,7 +58,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public class BeginAction extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/begin.jsp";
+            return "/org/labkey/wnprc_compliance/view/begin.jsp";
         }
 
         @Override
@@ -72,7 +72,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public class UnidentifiedCardsPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/unidentifiedCards.jsp";
+            return "/org/labkey/wnprc_compliance/view/unidentifiedCards.jsp";
         }
 
         @Override
@@ -86,7 +86,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public class PendingTBResultsPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/pendingTBResults.jsp";
+            return "/org/labkey/wnprc_compliance/view/pendingTBResults.jsp";
         }
 
         @Override
@@ -95,12 +95,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
         }
     }
 
+    // TODO: Remove this action? exemptCards.jsp is empty!
     @ActionNames("exemptCards")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class ExemptCardsPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/exemptCards.jsp";
+            return "/org/labkey/wnprc_compliance/view/exemptCards.jsp";
         }
 
         @Override
@@ -114,7 +115,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public class NewUserPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/enterTB.jsp";
+            return "/org/labkey/wnprc_compliance/view/enterTB.jsp";
         }
 
         @Override
@@ -128,7 +129,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public class EditTBPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/editTB.jsp";
+            return "/org/labkey/wnprc_compliance/view/editTB.jsp";
         }
 
         @Override
@@ -142,7 +143,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public class EditUserPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/userEdit.jsp";
+            return "/org/labkey/wnprc_compliance/view/userEdit.jsp";
         }
 
         @Override
@@ -323,7 +324,7 @@ public class WNPRC_ComplianceController extends SpringActionController {
     public class UploadAccessReportPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/uploadAccessReport.jsp";
+            return "/org/labkey/wnprc_compliance/view/uploadAccessReport.jsp";
         }
 
         @Override
@@ -333,12 +334,13 @@ public class WNPRC_ComplianceController extends SpringActionController {
     }
 
 
+    // TODO: Delete this action? personSearch.jsp does not exist!
     @ActionNames("personSearchPage")
     @RequiresPermission(ComplianceAdminPermission.class)
     public class PersonSearchPage extends HRJspPageAction {
         @Override
         public String getPathToJsp() {
-            return "view/personSearch.jsp";
+            return "/org/labkey/wnprc_compliance/view/personSearch.jsp";
         }
 
         @Override

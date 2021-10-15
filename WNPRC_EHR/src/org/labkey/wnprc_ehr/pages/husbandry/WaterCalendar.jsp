@@ -1,27 +1,14 @@
-<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
-<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
-<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
-<%@ page import="org.json.JSONObject" %>
-<%@ page import="java.util.List" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="java.util.UUID" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.text.SimpleDateFormat" %>
-<%@ page import="java.text.ParseException" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-
-<%@ page import="org.labkey.api.query.QueryAction"%>
-<%@ page import="org.labkey.api.query.QueryDefinition"%>
-<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-
-<%@ page import="org.labkey.wnprc_ehr.WNPRC_EHRController" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
 <%@ page import="org.labkey.api.security.Group" %>
 <%@ page import="org.labkey.api.security.GroupManager" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQuery" %>
+<%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
-<%@ page import="org.labkey.api.collections.CaseInsensitiveHashMap" %>
-<%@ page import="static java.lang.Integer.parseInt" %>
+<%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override

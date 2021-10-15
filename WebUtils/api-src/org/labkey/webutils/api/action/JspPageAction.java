@@ -1,18 +1,14 @@
 package org.labkey.webutils.api.action;
 
-import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.action.HasPageConfig;
-import org.labkey.api.action.HasViewContext;
-import org.labkey.api.action.PermissionCheckable;
 import org.labkey.api.action.PermissionCheckableAction;
 import org.labkey.api.module.Module;
 import org.labkey.api.view.JspView;
-import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.webutils.api.WebUtilsService;
+import org.labkey.webutils.api.JspPage;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,22 +23,34 @@ import javax.servlet.http.HttpServletResponse;
  * controller handles populating the pageConfig and viewContext before calling handleRequest, calls handleRequest
  * to get the ModelAndView, and then calls render on the ModelAndView after handleRequest returns.
  */
-public abstract class JspPageAction extends PermissionCheckableAction implements HasPageConfig {
+public abstract class JspPageAction extends PermissionCheckableAction implements HasPageConfig
+{
     @Override
-    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        ModelAndView _pageView = getModelAndView(request, response);
+    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
+    {
+        ModelAndView pageView = getModelAndView();
 
         // Set the title
         getPageConfig().setTitle(getTitle());
 
         // Call the before render hook.
-        this.beforeRender(request, response, _pageView);
+        this.beforeRender(request, response, pageView);
 
-        return _pageView;
+        return pageView;
     }
 
-    protected ModelAndView getModelAndView(HttpServletRequest request, HttpServletResponse response) {
-        return WebUtilsService.get().getJspPageFromView(getView());
+    private ModelAndView getModelAndView()
+    {
+        JspView view = getView();
+        JspView jspPage = new JspPage(view);
+
+        // Set the frame
+        jspPage.setFrame(WebPartView.FrameType.NONE);
+
+        // Set the body to our passed in view
+        jspPage.setBody(view);
+
+        return jspPage;
     }
 
     // The SpringActionController populates a pageConfig for actions that implement HasPageConfig
@@ -54,10 +62,6 @@ public abstract class JspPageAction extends PermissionCheckableAction implements
     ViewContext _viewContext;
     @Override public void setViewContext(ViewContext context) { _viewContext = context; }
     @Override public ViewContext getViewContext()             { return _viewContext; }
-
-    public java.lang.Class getBaseClass() {
-        return getModule().getClass();
-    }
 
     /**
      * An overridable hook before the page starts to render.

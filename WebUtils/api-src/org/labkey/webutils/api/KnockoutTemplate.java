@@ -2,7 +2,7 @@ package org.labkey.webutils.api;
 
 import org.labkey.api.view.JspView;
 
-public enum KnockoutTemplates
+public enum KnockoutTemplate
 {
     Table()
     {

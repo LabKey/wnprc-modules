@@ -45,13 +45,13 @@ public class JspPage extends JspView<JspPageModel>
         if (numberOfRenders == 0)
         {
             // Add some Knockout templates.
-            List<KnockoutTemplates> templates = Arrays.asList(
-                KnockoutTemplates.Table,
-                KnockoutTemplates.QueryTable,
-                KnockoutTemplates.InputTextArea
+            List<KnockoutTemplate> templates = Arrays.asList(
+                KnockoutTemplate.Table,
+                KnockoutTemplate.QueryTable,
+                KnockoutTemplate.InputTextArea
             );
 
-            for (KnockoutTemplates template : templates)
+            for (KnockoutTemplate template : templates)
             {
                 getModelBean().addTemplate(template.getJspView());
             }

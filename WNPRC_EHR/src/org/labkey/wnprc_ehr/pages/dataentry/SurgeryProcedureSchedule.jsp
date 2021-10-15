@@ -457,11 +457,11 @@
                 starts.push(new Date(document.getElementById("modalStartField_" + i).value));
                 ends.push(new Date(document.getElementById("modalEndField_" + i).value));
             }
+            if (document.getElementById("modalSameRoomTimeField").value === 'true') {
+                eventDetails.newDate = new Date(document.getElementById("modalNewDateField").value + "T00:00:00");
+            }
         }
 
-        if (document.getElementById("modalSameRoomTimeField").value === 'true') {
-            eventDetails.newDate = new Date(document.getElementById("modalNewDateField").value + "T00:00:00");
-        }
         eventDetails.roomEvents = roomEvents;
         eventDetails.roomNames = roomNames;
         eventDetails.roomEmails = roomEmails;
@@ -488,6 +488,62 @@
         unmanagedEventDetails.body = document.getElementById("modalCommentsField").value;
 
         return unmanagedEventDetails;
+    }
+
+    function createUnmanagedEvent() {
+        $("#eventModalTitle").html("New Event");
+        document.getElementById("updateEventButton").style.display = "none";
+        document.getElementById("createEventButton").style.display = "block";
+
+        let formDiv = document.getElementById("modalForm");
+
+        while (formDiv.firstChild) {
+            formDiv.removeChild(formDiv.lastChild);
+        }
+
+        let titleDiv = createInputDiv("Title", "text", "modalTitleField", "");
+        formDiv.appendChild(titleDiv);
+        formDiv.appendChild(document.createElement("hr"));
+
+        ///////////////////////
+
+        let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField", "");
+        let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField", "");
+        let allDayDiv = createInputDiv("All Day Event", "checkbox", "modalAllDayField", true);
+        let commentsDiv = createInputDiv("Comments", "textarea", "modalCommentsField", "");
+
+        formDiv.appendChild(startDiv);
+        formDiv.appendChild(endDiv);
+        formDiv.appendChild(allDayDiv);
+        formDiv.appendChild(commentsDiv);
+
+        let allDayCheckbox = document.getElementById("modalAllDayField");
+
+        // allDayCheckbox.addEventListener('change', function () {
+        //     let isChecked = document.getElementById("modalAllDayField").checked;
+        //     if (isChecked) {
+        //         document.getElementById("modalStartField").type = "date";
+        //         document.getElementById("modalStartField").value = dateToDateInputField(mainEvent.start);
+        //         document.getElementById("modalStartFieldLabel").innerHTML = "Start Date";
+        //
+        //         document.getElementById("modalEndField").type = "date";
+        //         let allDayEndDate = mainEvent.end;
+        //         allDayEndDate.setDate(allDayEndDate.getDate() - 1);
+        //         document.getElementById("modalEndField").value = dateToDateInputField(allDayEndDate);
+        //         document.getElementById("modalEndFieldLabel").innerHTML = "End Date";
+        //     } else {
+        //         document.getElementById("modalStartField").type = "datetime-local";
+        //         document.getElementById("modalStartFieldLabel").innerHTML = "Start Time";
+        //         document.getElementById("modalStartField").value = startValue;
+        //
+        //         document.getElementById("modalEndField").type = "datetime-local";
+        //         document.getElementById("modalEndFieldLabel").innerHTML = "End Time";
+        //         document.getElementById("modalEndField").value = endValue;
+        //     }
+        // });
+        // allDayCheckbox.click();
+        // allDayCheckbox.click();
+        $("#eventModal").modal();
     }
 
     function duplicateEvent() {
@@ -1297,7 +1353,7 @@
                                 customCreateButton: {
                                     text: "Create Event",
                                     click: function() {
-                                        alert("test button");
+                                        createUnmanagedEvent();
                                     }
                                 }
                             },
@@ -1307,9 +1363,9 @@
                                 center: 'title',
                                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
                             },
-                            bootstrapFontAwesome: {
-                                customCreateButton: "plus-square"
-                            },
+                            // bootstrapFontAwesome: {
+                            //     customCreateButton: "plus-square"
+                            // },
                             eventClassNames: function (arg) {
                                 if (arg.event.id.startsWith("PLACEHOLDER")) {
                                     return ["placeholder-event"];

@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS ehr_lookups.husbandry_frequency;
-CREATE TABLE ehr_lookups.husbandry_frequency
+
+CREATE TABLE wnprc.husbandry_frequency
 (
     RowId      serial                    NOT NULL,
     meaning    varchar(100) DEFAULT NULL NOT NULL,
@@ -11,7 +12,7 @@ CREATE TABLE ehr_lookups.husbandry_frequency
 )
     WITH (OIDS= FALSE);
 
-INSERT INTO ehr_lookups.husbandry_frequency
+INSERT INTO wnprc.husbandry_frequency
 (rowid, meaning,dayofweek, sort_order,active,altmeaning)
 VALUES
 (1, 'Daily - AM',       NULL,   1,'TRUE', 'AM'),

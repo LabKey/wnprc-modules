@@ -40,7 +40,7 @@
                     <column columnName="frequency">
                         <columnTitle>Frequency</columnTitle>
                         <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkDbSchema>wnprc</fkDbSchema>
                             <fkTable>husbandry_frequency</fkTable>
                             <fkColumnName>rowid</fkColumnName>
                         </fk>
@@ -51,7 +51,7 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>water_source</fkTable>
                             <fkColumnName>value</fkColumnName>
-                            <fkDisplayColumn>title</fkDisplayColumn>
+                            <fkDisplayColumnName>title</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="recordSource">

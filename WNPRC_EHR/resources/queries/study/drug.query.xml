@@ -64,18 +64,6 @@
                             <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
-                    <column columnName="concentration">
-                        <columnTitle>Drug Conc</columnTitle>
-                    </column>
-                    <column columnName="conc_units">
-                        <columnTitle>Conc Units</columnTitle>
-                        <fk>
-                            <fkDbSchema>ehr_lookups</fkDbSchema>
-                            <fkTable>conc_units</fkTable>
-                            <fkColumnName>unit</fkColumnName>
-                            <fkDisplayColumnName useRawValue="true"/>
-                        </fk>
-                    </column>
                     <column columnName="dosage">
                         <columnTitle>Dosage</columnTitle>
                     </column>
@@ -110,6 +98,18 @@
                             <fkTable>amount_units</fkTable>
                             <fkColumnName>unit</fkColumnName>
                             <fkDisplayColumnName useRawValue="true" />
+                        </fk>
+                    </column>
+                    <column columnName="concentration">
+                        <columnTitle>Drug Conc</columnTitle>
+                    </column>
+                    <column columnName="conc_units">
+                        <columnTitle>Conc Units</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>conc_units</fkTable>
+                            <fkColumnName>unit</fkColumnName>
+                            <fkDisplayColumnName useRawValue="true"/>
                         </fk>
                     </column>
                     <column columnName="restraint">

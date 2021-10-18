@@ -41,6 +41,11 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --dbtime)     ## time that the database backup was created in format HHMM (ex: 1543)
+            dbtime="$2"
+            shift
+            shift
+            ;;
         --port)       ## port that postgresql is running on
             pgport="$2"
             shift
@@ -148,7 +153,12 @@ fi
 # latest daily from the EHR production server's backup folder
 #-------------------------------------------------------------------------------
 if [[ -z $filepath ]]; then
-    filename="labkey_$(date +'%Y%m%d')_0100.pg"
+    if [[ -z $dbtime ]]
+    then
+        filename="labkey_$(date +'%Y%m%d')_0100.pg"
+    else
+        filename="labkey_$(date +'%Y%m%d')_$dbtime.pg"
+    fi
     scp ${username}ehr.primate.wisc.edu:/space/backups/labkey_backup/database/daily/${filename} $tmpdir || exit 1
     filepath="$tmpdir/$filename"
 fi
@@ -182,7 +192,7 @@ if [[ $tablespace ]]; then
     ${pgpath}psql -U postgres -p "${pgport#*:}" -c "alter database ${dbname} set tablespace ${tablespace};" &>/dev/null
   fi
 fi
-  
+
 
 #-------------------------------------------------------------------------------
 # Actually restore the database, using a background proc so we can track progress

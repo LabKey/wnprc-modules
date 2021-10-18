@@ -1,0 +1,74 @@
+<html>
+
+    <style>
+        .column-label {font-weight: bold}
+    </style>
+
+    <script type="text/javascript">
+
+        function getDisplayValue(item) {
+            let result = '';
+            let val = '';
+            if (item.displayValue) {
+                val = item.displayValue;
+            } else {
+                val = item.value;
+            }
+
+            if (item.url) {
+                result = '<a href="' + LABKEY.contextPath + item.url + '">' + val + '</a>';
+            } else {
+                result = val;
+            }
+            return result;
+        }
+
+
+        let threadId =LABKEY.ActionURL.getParameter("rowId") ;
+        if (!threadId) {
+            $('#render-area').html('<p>No thread id parameter found.</p>');
+        }
+        let animalRequestConfig = {
+            containerPath: '/WNPRC/EHR',
+            schemaName: 'wnprc',
+            requiredVersion: 21.3,
+            sql: 'SELECT * FROM "animal_requests" WHERE "internalthreadrowid" = ' + threadId + ' OR "externalthreadrowid" = ' + threadId,
+            success: function (data) {
+                if (!data.rows[0]){
+                    $('#render-area').html('<p>Request not found.</p>');
+                    return;
+                }
+                let row = data.rows[0].data;
+
+                $('#render-area').html(
+
+                    '<table>' +
+
+                    '<tr><td class="column-label">#</td>' + '<td>' + getDisplayValue(row.rowid) + '</td></tr>' +
+                    '<tr><td class="column-label">Date Requested</td>' + '<td>' + getDisplayValue(row.date) + '</td></tr>' +
+                    '<tr><td class="column-label">Created By</td>' + '<td>' + getDisplayValue(row.createdBy) + '</td></tr>' +
+                    '<tr><td class="column-label">Principal Investigator</td>' + '<td>' + getDisplayValue(row.principalinvestigator) + '</td></tr>' +
+                    '<tr><td class="column-label">Project    </td>' + '<td>' + getDisplayValue(row.project) + '</td></tr>' +
+                    '<tr><td class="column-label">Protocol   </td>' + '<td>' + getDisplayValue(row.protocol) + '</td></tr>' +
+                    '<tr><td class="column-label">Species Needed </td>' + '<td>' + getDisplayValue(row.speciesneeded) + '</td></tr>' +
+                    '<tr><td class="column-label">Origin </td>' + '<td>' + getDisplayValue(row.originneeded) + '</td></tr>' +
+                    '<tr><td class="column-label"># of Animals   </td>' + '<td>' + getDisplayValue(row.numberofanimals) + '</td></tr>' +
+                    '<tr><td class="column-label">Status </td>' + '<td>' + getDisplayValue(row.QCState) + '</td></tr>' +
+                    '<tr><td class="column-label">Internal Disc  </td>' + '<td>' + getDisplayValue(row.internalthreadrowid) + '</td></tr>' +
+                    '<tr><td class="column-label">External Disc  </td>' + '<td>' + getDisplayValue(row.externalthreadrowid) + '</td></tr>' +
+                    '<tr><td class="column-label">Animal History Link    </td>' + '<td>' + getDisplayValue(row.animal_history_link) + '</td></tr>' +
+                    '<tr><td class="column-label">Animal Ids </td>' + '<td>' + getDisplayValue(row.animalidstooffer) + '</td></tr>' +
+
+                    '</table> '
+
+                );
+            }
+        }
+
+        LABKEY.Query.executeSql(animalRequestConfig);
+
+    </script>
+
+    <div id="render-area"></div>
+
+</html>

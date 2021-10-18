@@ -2400,8 +2400,8 @@ public class TriggerScriptHelper {
         String title = animalRequest.get("rowid") + ": " +
                 animalRequest.get("principalinvestigator").toString() +
                 " (" + animalRequest.get("protocol").toString() + ")";
-        String body =
-                        "${labkey.webPart(partName='Wiki', title='The Request', name='Animal Request In Question')}\n";
+        String body =   "**Below is the animal request associated with this discussion:**\n" +
+                        "${labkey.webPart(partName='Animal Request', title='The Request', name='animalRequest', showFrame='false')}\n";
         boolean sendEmail = false;
         Announcement md = AnnouncementService.get().insertAnnouncement(c,user,title,body,sendEmail);
         return md.getRowId();

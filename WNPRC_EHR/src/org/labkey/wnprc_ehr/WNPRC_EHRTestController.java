@@ -66,7 +66,7 @@ public class WNPRC_EHRTestController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/testing/ext_component_tests.jsp";
+            return "/org/labkey/wnprc_ehr/pages/testing/ext_component_tests.jsp";
         }
 
         @Override
@@ -83,7 +83,7 @@ public class WNPRC_EHRTestController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/testing/trigger_tests.jsp";
+            return "/org/labkey/wnprc_ehr/pages/testing/trigger_tests.jsp";
         }
 
         @Override

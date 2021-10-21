@@ -1201,7 +1201,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/NecropsySchedule.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/NecropsySchedule.jsp";
         }
 
         @Override
@@ -1218,7 +1218,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/PathologyCaseList.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/PathologyCaseList.jsp";
         }
 
         @Override
@@ -1235,7 +1235,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/NecropsyReport.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/NecropsyReport.jsp";
         }
 
         @Override
@@ -1252,7 +1252,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/NecropsyCollectionList.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/NecropsyCollectionList.jsp";
         }
 
         @Override
@@ -1269,7 +1269,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/calendars/OnCallCalendar.jsp";
+            return "/org/labkey/wnprc_ehr/pages/calendars/OnCallCalendar.jsp";
         }
 
         @Override
@@ -1286,7 +1286,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/calendars/OnCallCalendar.jsp";
+            return "/org/labkey/wnprc_ehr/pages/calendars/OnCallCalendar.jsp";
         }
 
         @Override
@@ -1303,7 +1303,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/population_management/ColonyCensus.jsp";
+            return "/org/labkey/wnprc_ehr/pages/population_management/ColonyCensus.jsp";
         }
 
         @Override
@@ -1320,7 +1320,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/population_management/PerDiems.jsp";
+            return "/org/labkey/wnprc_ehr/pages/population_management/PerDiems.jsp";
         }
 
         @Override
@@ -1337,7 +1337,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/behavior/AssignBehaviorProjects.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/behavior/AssignBehaviorProjects.jsp";
         }
 
         @Override
@@ -1354,7 +1354,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/clinical/DiarrheaAnalysis.jsp";
+            return "/org/labkey/wnprc_ehr/pages/clinical/DiarrheaAnalysis.jsp";
         }
 
         @Override
@@ -1367,7 +1367,6 @@ public class WNPRC_EHRController extends SpringActionController
     @RequiresLogin
     public class AddBehaviorAssignmentAction extends MutatingApiAction<AddBehaviorAssignmentForm>
     {
-
         @Override
         public Object execute(AddBehaviorAssignmentForm form, BindException errors) throws Exception
         {
@@ -1568,7 +1567,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/husbandry/WaterCalendar.jsp";
+            return "/org/labkey/wnprc_ehr/pages/husbandry/WaterCalendar.jsp";
         }
 
         @Override

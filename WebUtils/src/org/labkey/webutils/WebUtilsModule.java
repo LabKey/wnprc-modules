@@ -22,7 +22,6 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.webutils.api.WebUtilsService;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +44,6 @@ public class WebUtilsModule extends DefaultModule {
     @Override
     protected void init() {
         addController(WebUtilsController.NAME, WebUtilsController.class);
-        WebUtilsService.setInstance(new WebUtilsServiceImpl());
     }
 
     @Override

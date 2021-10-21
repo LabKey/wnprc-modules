@@ -457,7 +457,7 @@
                 starts.push(new Date(document.getElementById("modalStartField_" + i).value));
                 ends.push(new Date(document.getElementById("modalEndField_" + i).value));
             }
-            if (document.getElementById("modalSameRoomTimeField").value === 'true') {
+            if (document.getElementById("modalSameRoomTimeField").checked) {
                 eventDetails.newDate = new Date(document.getElementById("modalNewDateField").value + "T00:00:00");
             }
         }
@@ -1361,7 +1361,7 @@
                             headerToolbar: {
                                 left: 'prev,next today customCreateButton',
                                 center: 'title',
-                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
                             },
                             // bootstrapFontAwesome: {
                             //     customCreateButton: "plus-square"

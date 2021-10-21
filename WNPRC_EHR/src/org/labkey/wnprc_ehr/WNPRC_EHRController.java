@@ -1666,7 +1666,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             try {
                 List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId(), true);
-                List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
+                //List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
                 Map<String, Object> taskRow = getTaskRecord((String) spRows.get(0).get("taskid"));
                 Map<String, Object> requestRow = getRequestRecord((String) spRows.get(0).get("requestid"));
 

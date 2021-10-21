@@ -6,6 +6,10 @@
 
     <script type="text/javascript">
 
+        function getURLParameter(url, name) {
+
+        }
+
         function getDisplayValue(item) {
             let result = '';
             let val = '';
@@ -13,6 +17,10 @@
                 val = item.displayValue;
             } else {
                 val = item.value;
+            }
+
+            if (val == null){
+                val = '';
             }
 
             if (item.url) {
@@ -24,9 +32,15 @@
         }
 
 
-        let threadId =LABKEY.ActionURL.getParameter("rowId") ;
-        if (!threadId) {
-            $('#render-area').html('<p>No thread id parameter found.</p>');
+
+        let threadId;
+        threadId = new URLSearchParams(window.location.search);
+        threadId = threadId.get("rowId");
+
+        if (!threadId){
+            //TODO: this is proof of concept fallback to get url param, needs work
+            threadId = window.location.search;
+            threadId = threadId.substring(threadId.indexOf("rowId")+8, threadId.indexOf("rowId")+11)
         }
         let animalRequestConfig = {
             containerPath: '/WNPRC/EHR',

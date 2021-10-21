@@ -41,8 +41,8 @@ public abstract class JspPageAction extends PermissionCheckableAction implements
 
     private ModelAndView getModelAndView()
     {
-        JspView view = getView();
-        JspView jspPage = new JspPage(view);
+        JspView<?> view = getView();
+        JspView<?> jspPage = new JspPage(view);
 
         // Set the frame
         jspPage.setFrame(WebPartView.FrameType.NONE);
@@ -84,7 +84,7 @@ public abstract class JspPageAction extends PermissionCheckableAction implements
      *
      * @return an AbstractJspView to render on the page.
      */
-    public abstract JspView getView();
+    public abstract JspView<?> getView();
 
     /**
      * Returns the page's title to display in the tab or window title bar.

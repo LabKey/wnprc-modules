@@ -1698,105 +1698,107 @@ public class WNPRC_EHRController extends SpringActionController
                     rooms.put(room);
                 }
 
-                Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
-                boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), rooms, event.getSubject(), requestId, response);
-
-                if (eventsScheduled)
+                String qcStateLabel = "Scheduled";
+                if (event.getCalendarId().endsWith("on_hold"))
                 {
-                    String qcStateLabel = "Scheduled";
-                    if (event.getCalendarId().endsWith("on_hold"))
+                    qcStateLabel = "Request: On Hold";
+                }
+
+                LocalDateTime newStartTime = Collections.min(newStartTimes);
+                LocalDateTime newEndTime = Collections.max(newEndTimes);
+
+                //CREATE TASK RECORD
+                JSONObject taskRecord = new JSONObject();
+                taskRecord.put("taskid", taskId);
+                taskRecord.put("title", "SurgeryProcedure");
+                taskRecord.put("category", "task");
+                taskRecord.put("assignedto", taskRow.get("assignedto"));
+                taskRecord.put("QCStateLabel", qcStateLabel);
+                taskRecord.put("duedate", "");
+                taskRecord.put("formtype", "SurgeryProcedure");
+
+                //CREATE REQUEST RECORD
+                JSONObject requestRecord = new JSONObject();
+                requestRecord.put("requestid", requestId);
+                requestRecord.put("title", requestRow.get("title"));
+                requestRecord.put("notify1", requestRow.get("notify1"));
+                requestRecord.put("notify2", requestRow.get("notify2"));
+                requestRecord.put("notify3", requestRow.get("notify3"));
+                requestRecord.put("sendemail", requestRow.get("sendemail"));
+                requestRecord.put("pi", requestRow.get("pi"));
+                requestRecord.put("priority", requestRow.get("priority"));
+                requestRecord.put("formtype", requestRow.get("formtype"));
+                requestRecord.put("description", "Duplicated by: " + getUser().getDisplayName(getUser()));
+                requestRecord.put("container", requestRow.get("container"));
+                requestRecord.put("QCStateLabel", qcStateLabel);
+
+                //CREATE SURGERY PROCEDURE RECORD(S)
+                List<Map<String, Object>> newSpRows = new ArrayList<>();
+                for (int i = 0; i < spRows.size(); i++)
+                {
+                    LocalDateTime newStartTableTime = changeDateByDifference((Date) spRows.get(i).get("date"), newStartTime, (Date) spRows.get(i).get("startTableTime"));
+
+                    Map<String, Object> newSpRow = new HashMap<>();
+                    newSpRow.put("objectid", objectId);
+                    newSpRow.put("Id", spRows.get(i).get("Id"));
+                    newSpRow.put("date", newStartTime);
+                    newSpRow.put("startTableTime", newStartTableTime);
+                    newSpRow.put("enddate", newEndTime);
+                    newSpRow.put("procedurename", spRows.get(i).get("procedurename"));
+                    newSpRow.put("procedureunit", spRows.get(i).get("procedureunit"));
+                    newSpRow.put("project", spRows.get(i).get("project"));
+                    newSpRow.put("account", spRows.get(i).get("account"));
+                    newSpRow.put("surgeon", spRows.get(i).get("surgeon"));
+                    newSpRow.put("consultRequest", spRows.get(i).get("consultRequest"));
+                    newSpRow.put("biopsyNeeded", spRows.get(i).get("biopsyNeeded"));
+                    newSpRow.put("surgerytechneeded", spRows.get(i).get("surgerytechneeded"));
+                    newSpRow.put("spineeded", spRows.get(i).get("spineeded"));
+                    newSpRow.put("vetneeded", spRows.get(i).get("vetneeded"));
+                    newSpRow.put("vetneededreason", spRows.get(i).get("vetneededreason"));
+                    newSpRow.put("equipment", spRows.get(i).get("equipment"));
+                    newSpRow.put("drugslab", spRows.get(i).get("drugslab"));
+                    newSpRow.put("drugssurgery", spRows.get(i).get("drugssurgery"));
+                    newSpRow.put("comments", spRows.get(i).get("comments"));
+                    newSpRow.put("requestid", requestId);
+                    newSpRow.put("taskid", taskId);
+
+                    newSpRows.add(newSpRow);
+                }
+
+                //CREATE PROCEDURE_SCHEDULED_ROOMS RECORD(S)
+                List<Map<String, Object>> newRoomRows = new ArrayList<>();
+                for (int i = 0; i < event.getRoomEmails().size(); i++)
+                {
+                    Map<String, Object> newRoomRow = new HashMap<>();
+                    newRoomRow.put("objectid", UUID.randomUUID().toString());
+                    newRoomRow.put("room", event.getRoomNames().get(i));
+                    newRoomRow.put("date", newStartTimes.get(i));
+                    newRoomRow.put("enddate", newEndTimes.get(i));
+                    newRoomRow.put("event_id", rooms.getJSONObject(i).get("event_id"));
+                    newRoomRow.put("requestid", requestId);
+
+                    newRoomRows.add(newRoomRow);
+                }
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+                    insertRecord(taskRecord, "ehr", "tasks");
+                    insertRecord(requestRecord, "ehr", "requests");
+                    insertRecords(newSpRows, "study", "surgery_procedure");
+                    insertRecords(newRoomRows, "wnprc", "procedure_scheduled_rooms");
+
+                    Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+                    boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), rooms, event.getSubject(), requestId, response);
+
+                    if (eventsScheduled)
                     {
-                        qcStateLabel = "Request: On Hold";
-                    }
-
-                    LocalDateTime newStartTime = Collections.min(newStartTimes);
-                    LocalDateTime newEndTime = Collections.max(newEndTimes);
-
-                    //CREATE TASK RECORD
-                    JSONObject taskRecord = new JSONObject();
-                    taskRecord.put("taskid", taskId);
-                    taskRecord.put("title", "SurgeryProcedure");
-                    taskRecord.put("category", "task");
-                    taskRecord.put("assignedto", taskRow.get("assignedto"));
-                    taskRecord.put("QCStateLabel", qcStateLabel);
-                    taskRecord.put("duedate", "");
-                    taskRecord.put("formtype", "SurgeryProcedure");
-
-                    //CREATE REQUEST RECORD
-                    JSONObject requestRecord = new JSONObject();
-                    requestRecord.put("requestid", requestId);
-                    requestRecord.put("title", requestRow.get("title"));
-                    requestRecord.put("notify1", requestRow.get("notify1"));
-                    requestRecord.put("notify2", requestRow.get("notify2"));
-                    requestRecord.put("notify3", requestRow.get("notify3"));
-                    requestRecord.put("sendemail", requestRow.get("sendemail"));
-                    requestRecord.put("pi", requestRow.get("pi"));
-                    requestRecord.put("priority", requestRow.get("priority"));
-                    requestRecord.put("formtype", requestRow.get("formtype"));
-                    requestRecord.put("description", "Duplicated by: " + getUser().getDisplayName(getUser()));
-                    requestRecord.put("container", requestRow.get("container"));
-                    requestRecord.put("QCStateLabel", qcStateLabel);
-
-                    //CREATE SURGERY PROCEDURE RECORD(S)
-                    List<Map<String, Object>> newSpRows = new ArrayList<>();
-                    for (int i = 0; i < spRows.size(); i++)
-                    {
-                        LocalDateTime newStartTableTime = changeDateByDifference((Date) spRows.get(i).get("date"), newStartTime, (Date) spRows.get(i).get("startTableTime"));
-
-                        Map<String, Object> newSpRow = new HashMap<>();
-                        newSpRow.put("objectid", objectId);
-                        newSpRow.put("Id", spRows.get(i).get("Id"));
-                        newSpRow.put("date", newStartTime);
-                        newSpRow.put("startTableTime", newStartTableTime);
-                        newSpRow.put("enddate", newEndTime);
-                        newSpRow.put("procedurename", spRows.get(i).get("procedurename"));
-                        newSpRow.put("procedureunit", spRows.get(i).get("procedureunit"));
-                        newSpRow.put("project", spRows.get(i).get("project"));
-                        newSpRow.put("account", spRows.get(i).get("account"));
-                        newSpRow.put("surgeon", spRows.get(i).get("surgeon"));
-                        newSpRow.put("consultRequest", spRows.get(i).get("consultRequest"));
-                        newSpRow.put("biopsyNeeded", spRows.get(i).get("biopsyNeeded"));
-                        newSpRow.put("surgerytechneeded", spRows.get(i).get("surgerytechneeded"));
-                        newSpRow.put("spineeded", spRows.get(i).get("spineeded"));
-                        newSpRow.put("vetneeded", spRows.get(i).get("vetneeded"));
-                        newSpRow.put("vetneededreason", spRows.get(i).get("vetneededreason"));
-                        newSpRow.put("equipment", spRows.get(i).get("equipment"));
-                        newSpRow.put("drugslab", spRows.get(i).get("drugslab"));
-                        newSpRow.put("drugssurgery", spRows.get(i).get("drugssurgery"));
-                        newSpRow.put("comments", spRows.get(i).get("comments"));
-                        newSpRow.put("requestid", requestId);
-                        newSpRow.put("taskid", taskId);
-
-                        newSpRows.add(newSpRow);
-                    }
-
-                    //CREATE PROCEDURE_SCHEDULED_ROOMS RECORD(S)
-                    List<Map<String, Object>> newRoomRows = new ArrayList<>();
-                    for (int i = 0; i < event.getRoomEmails().size(); i++)
-                    {
-                        Map<String, Object> newRoomRow = new HashMap<>();
-                        newRoomRow.put("objectid", UUID.randomUUID().toString());
-                        newRoomRow.put("room", event.getRoomNames().get(i));
-                        newRoomRow.put("date", newStartTimes.get(i));
-                        newRoomRow.put("enddate", newEndTimes.get(i));
-                        newRoomRow.put("event_id", rooms.getJSONObject(i).get("event_id"));
-                        newRoomRow.put("requestid", requestId);
-
-                        newRoomRows.add(newRoomRow);
-                    }
-
-                    try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
-                    {
-                        insertRecord(taskRecord, "ehr", "tasks");
-                        insertRecord(requestRecord, "ehr", "requests");
-                        insertRecords(newSpRows, "study", "surgery_procedure");
-                        insertRecords(newRoomRows, "wnprc", "procedure_scheduled_rooms");
-
                         response.put("success", true);
                         transaction.commit();
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 System.out.println(e);
             }
 

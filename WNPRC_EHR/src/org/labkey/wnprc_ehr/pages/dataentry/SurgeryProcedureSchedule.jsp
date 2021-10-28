@@ -109,7 +109,7 @@
         }
     };
 
-    function createSelectDiv(label, id, selectedOption) {
+    function createSelectDiv(label, id, selectedOption, nonBaseCalendars) {
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("form-group");
         mainDiv.id = id + "Div";
@@ -128,10 +128,10 @@
         selectEl.name = id;
 
         let keys = Object.keys(calendarEvents);
-        keys.sort();
+        keys.sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
         for (let i = 0; i < keys.length; i++) {
             if (calendarEvents.hasOwnProperty(keys[i])) {
-                if (calendarEvents[keys[i]].roomCalendar) {
+                if (calendarEvents[keys[i]].roomCalendar || (nonBaseCalendars && calendarEvents[keys[i]].baseCalendar === false)) {
                     let optionEl = document.createElement("option");
                     optionEl.value = calendarEvents[keys[i]].id;
                     optionEl.innerHTML = calendarEvents[keys[i]].displayName;
@@ -515,11 +515,14 @@
 
         ///////////////////////
 
+        let roomDiv = createSelectDiv("Room", "modalRoomField", null, true);
+
         let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField", "");
         let endDiv = createInputDiv("End Time", "datetime-local", "modalEndField", "");
         let allDayDiv = createInputDiv("All Day Event", "checkbox", "modalAllDayField", true);
         let commentsDiv = createInputDiv("Comments", "textarea", "modalCommentsField", "");
 
+        formDiv.appendChild(roomDiv);
         formDiv.appendChild(startDiv);
         formDiv.appendChild(endDiv);
         formDiv.appendChild(allDayDiv);

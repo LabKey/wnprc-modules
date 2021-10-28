@@ -1602,7 +1602,11 @@
                 }
                 rooms.sort(compareRooms("date", "enddate"));
 
-                let startTableTimeDiv = createInputDiv("Start Table Time", "datetime-local", "scheduleStartTableTimeField", dateToDateTimeInputField(new Date(request["starttabletime"])));
+                let startTableTime = "";
+                if (request["starttabletime"]) {
+                    startTableTime = dateToDateTimeInputField(new Date(request["starttabletime"]));
+                }
+                let startTableTimeDiv = createInputDiv("Start Table Time", "datetime-local", "scheduleStartTableTimeField", startTableTime);
                 colDiv.appendChild(startTableTimeDiv);
                 spacerDiv = createStaticDiv("", "spacer_1", "");
                 colDiv.appendChild(spacerDiv);

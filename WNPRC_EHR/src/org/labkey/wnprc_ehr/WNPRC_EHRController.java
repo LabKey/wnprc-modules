@@ -1693,7 +1693,7 @@ public class WNPRC_EHRController extends SpringActionController
                     room.put("date", newStartTimes.get(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     room.put("enddate", newEndTimes.get(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     room.put("email", event.getRoomEmails().get(i));
-                    room.put("objectid", objectId);
+                    room.put("objectid", UUID.randomUUID().toString());
 
                     rooms.put(room);
                 }
@@ -1736,7 +1736,10 @@ public class WNPRC_EHRController extends SpringActionController
                 List<Map<String, Object>> newSpRows = new ArrayList<>();
                 for (int i = 0; i < spRows.size(); i++)
                 {
-                    LocalDateTime newStartTableTime = changeDateByDifference((Date) spRows.get(i).get("date"), newStartTime, (Date) spRows.get(i).get("startTableTime"));
+                    LocalDateTime newStartTableTime = null;
+                    if (spRows.get(i).get("startTableTime") != null) {
+                        newStartTableTime = changeDateByDifference((Date) spRows.get(i).get("date"), newStartTime, (Date) spRows.get(i).get("startTableTime"));
+                    }
 
                     Map<String, Object> newSpRow = new HashMap<>();
                     newSpRow.put("objectid", objectId);
@@ -1770,7 +1773,7 @@ public class WNPRC_EHRController extends SpringActionController
                 for (int i = 0; i < event.getRoomEmails().size(); i++)
                 {
                     Map<String, Object> newRoomRow = new HashMap<>();
-                    newRoomRow.put("objectid", UUID.randomUUID().toString());
+                    newRoomRow.put("objectid", rooms.getJSONObject(i).get("objectid"));
                     newRoomRow.put("room", event.getRoomNames().get(i));
                     newRoomRow.put("date", newStartTimes.get(i));
                     newRoomRow.put("enddate", newEndTimes.get(i));
@@ -1792,6 +1795,17 @@ public class WNPRC_EHRController extends SpringActionController
 
                     if (eventsScheduled)
                     {
+                        List<Map<String, Object>> updatedRoomRows = new ArrayList<>();
+                        for (int i = 0; i < rooms.length(); i++) {
+                            JSONObject roomRow = rooms.getJSONObject(i);
+                            JSONObject roomRecord = new JSONObject();
+                            roomRecord.put("objectid", roomRow.get("objectid"));
+                            roomRecord.put("event_id", roomRow.get("event_id"));
+                            updatedRoomRows.add(roomRecord);
+                        }
+                        //update all rows at the same time so that the trigger script can update the surgery
+                        updateRecords(updatedRoomRows, "wnprc", "procedure_scheduled_rooms");
+
                         response.put("success", true);
                         transaction.commit();
                     }
@@ -2125,6 +2139,7 @@ public class WNPRC_EHRController extends SpringActionController
                     updateRecord(taskRecord, "ehr", "tasks");
                 }
 
+                response.put("success", true);
                 if ("Request: Pending".equals(event.getQCStateLabel()))
                 {
                     Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
@@ -2136,11 +2151,18 @@ public class WNPRC_EHRController extends SpringActionController
                             calendar.cancelEvent(eventId);
                             response.getJSONArray("roomList").put(roomRow);
                         }
+                        else
+                        {
+                            response.put("success", false);
+                            response.put("error", "There was an error updating the event in Office 365");
+                        }
                     }
                 }
 
-                transaction.commit();
-                response.put("success", true);
+                if ((boolean) response.get("success"))
+                {
+                    transaction.commit();
+                }
             } catch (Exception e) {
                 int x = 3;
                 //TODO nothing?

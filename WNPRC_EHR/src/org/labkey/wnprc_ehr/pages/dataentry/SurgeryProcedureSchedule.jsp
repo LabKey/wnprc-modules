@@ -52,6 +52,14 @@
         color: white !important;
     }
 
+    .event-selected-list {
+        background: #C3D9FF;
+    }
+
+    /*.fc-list-event:hover .event-selected-list:hover {*/
+    /*    background: #C3D9FF !important;*/
+    /*}*/
+
     .event-selected {
         border: 1px solid white;
         border-radius: 3px;
@@ -1373,7 +1381,11 @@
                                 if (arg.event.id.startsWith("PLACEHOLDER")) {
                                     return ["placeholder-event"];
                                 } else if (arg.event.extendedProps.selected) {
-                                    return ["event-selected"];
+                                    if (calendar.view.type.startsWith("list")) {
+                                        return ["event-selected-list"];
+                                    } else {
+                                        return ["event-selected"];
+                                    }
                                 } else {
                                     return [];
                                 }

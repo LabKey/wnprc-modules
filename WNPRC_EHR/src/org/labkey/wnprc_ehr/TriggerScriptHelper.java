@@ -2416,7 +2416,15 @@ public class TriggerScriptHelper {
         animalRequest.put(fieldName, value);
         SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, schemaName, tableName);
         queryUpdater.update(animalRequest);
+    }
 
+    public boolean checkAnimalRequestExists(Integer rowid)
+    {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("rowid", CompareType.EQUAL, rowid);
+
+        JSONArray requests = queryFactory.selectRows("wnprc", "animal_requests", filter);
+        return requests.length() > 0;
     }
 
 }

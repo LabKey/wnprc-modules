@@ -6,9 +6,6 @@
 
     <script type="text/javascript">
 
-        function getURLParameter(url, name) {
-
-        }
 
         function getDisplayValue(item) {
             let result = '';
@@ -31,16 +28,14 @@
             return result;
         }
 
-
-
+        let url = new URL(window.location)
         let threadId;
-        threadId = new URLSearchParams(window.location.search);
-        threadId = threadId.get("rowId");
-
-        if (!threadId){
-            //TODO: this is proof of concept fallback to get url param, needs work
-            threadId = window.location.search;
-            threadId = threadId.substring(threadId.indexOf("rowId")+8, threadId.indexOf("rowId")+11)
+        // covers the case where the rowId is actually in the returnUrl param (when user responds to thread)
+        if (url.searchParams.get("rowId")){
+            threadId = url.searchParams.get("rowId")
+        } else {
+            url = new URL(window.location.origin + "/" + LABKEY.ActionURL.getParameter("returnUrl"))
+            threadId = url.searchParams.get("rowId")
         }
         let animalRequestConfig = {
             containerPath: '/WNPRC/EHR',

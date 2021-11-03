@@ -333,7 +333,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
 
                             if (field) {
-                                var restraintRemarks = Ext4.getCmp('restraintRemarks');
+                                var restraintRemarks = Ext4.getCmp('restraintRemark');
 
                                 debugger; 
                                 if (field.value != null){
@@ -356,12 +356,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             },
             remark:{
-                hidden: false,
-                allowBlank: true,
-                //xtype:  'ehr-remarkfield',
+                xtype:  'textareafield',
+                width:400,
                 editorConfig:{
+                    id:     'restraintRemark',
                     autoRender: true,
-                    id:     'restraintRemarks',
                     listeners:{
                         //hide field on render because if it's never rendered
                         //to the dom it won't be able to be changed while hidden
@@ -370,6 +369,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                         }
                     }
                 },
+                allowBlank: true,
                 validator: function (value){
                     if (value == ''){
                         return 'Need to add a remark'
@@ -380,7 +380,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             },
             performedby: {
                 allowBlank: false,
-                hidden: false,
+                hidden: true,
                 defaultValue: LABKEY.Security.currentUser.displayName
             }
 

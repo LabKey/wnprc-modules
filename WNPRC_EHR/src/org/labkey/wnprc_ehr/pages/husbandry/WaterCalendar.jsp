@@ -662,11 +662,12 @@
                 },
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
-                        if ($animalId == 'undefined' || $animalId == "null"){
+                        if ($animalId == 'undefined' || $animalId == "null" || $animalId == ''){
                             debugger;
-                        WebUtils.API.selectRows("study", "waterPrePivot", {
+                        WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d')
+                            "date~lte": fetchInfo.end.format('Y-m-d'),
+                            "TotalWater~isnonblank":true
                         }).then(function (data) {
                             var events = data.rows;
 
@@ -674,7 +675,7 @@
                                     events.map(function (row) {
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            title: row.id + " Total: " + row.TotalWater,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
@@ -697,17 +698,17 @@
 
                         }else{
 
-                            WebUtils.API.selectRows("study", "waterPrePivot", {
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "animalId~in": $animalId
+                            "id~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
                                 successCallback(events.map(function (row) {
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            title: row.id + " Total: " + row.TotalWater,
                                             start: new Date(row.date),
                                             textColor: '#000000',
                                             allDay: true,
@@ -1007,6 +1008,7 @@
             },
 
             endWaterOrder: function (row){
+                debugger;
                 document.getElementById("modelServerResponse").innerHTML = "";
 
                 $('#waterInfoPanel').block({
@@ -1096,8 +1098,9 @@
                         }
 
 
-                    }, this)
+                    },this),
 
+                    method:"POST"
                 });
 
             },

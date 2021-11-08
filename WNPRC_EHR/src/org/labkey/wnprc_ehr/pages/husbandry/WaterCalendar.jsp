@@ -663,7 +663,6 @@
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
                         if ($animalId == 'undefined' || $animalId == "null" || $animalId == ''){
-                            debugger;
                         WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
@@ -1008,7 +1007,6 @@
             },
 
             endWaterOrder: function (row){
-                debugger;
                 document.getElementById("modelServerResponse").innerHTML = "";
 
                 $('#waterInfoPanel').block({
@@ -1169,7 +1167,8 @@
                         }
 
 
-                    }, this)
+                    }, this),
+                    method:"POST"
 
                 });
 
@@ -1304,7 +1303,6 @@
                 var form = ko.mapping.toJS(WebUtils.VM.form);
                 var taskid = LABKEY.Utils.generateUUID();
                 //var date = form.date.format("Y-m-d H:i:s");
-                debugger;
 
                 var insertDate = new Date(form.dateForm);
                 if (form.frequencyForm.value === "AM"){
@@ -1399,7 +1397,6 @@
                 }
 
                 // Refresh the calendar view.
-                debugger;
                 calendar.refetchEvents();
                 //Unblock calendar
                 $('#water-calendar').unblock();

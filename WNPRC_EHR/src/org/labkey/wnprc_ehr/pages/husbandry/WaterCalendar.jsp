@@ -1083,15 +1083,8 @@
                             document.getElementById("modelServerResponse").innerHTML = "<p>"+returnMessage+"</p>";
                             document.getElementById("proceedButton").classList.remove("hidden");
 
-                            //$('#myModal')
-                            //LABKEY.Utils.alert("Update failed", response.errors);
                         }
-                        /*if(!response.success){
-                            debugger;
-                            response.errors;
-                            $('#myModal');
-
-                        }*/ else {
+                        else {
                             alert('Water cannot be closed')
                         }
 
@@ -1124,6 +1117,7 @@
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
+                //DONE: Add allowDatesInDistantPast: true into the waterOrders.js file
 
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "EnterNewWaterOrder", null, {
@@ -1156,7 +1150,7 @@
                             window.open(newWaterOrder,'_blank');
 
                         }
-                        if (!response.success){
+                        else if (!response.success){
 
                             response.errors;
                             $('#myModal');
@@ -1434,7 +1428,7 @@
         let configObject = {
             "date~gte": fetchInfo.start.format('Y-m-d'),
             "date~lte": fetchInfo.end.format('Y-m-d'),
-            "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            "parameters": {NumDays: 120, StartDate: date.format(LABKEY.extDefaultDateFormat)},
             "qcstate/label~eq": "Scheduled"
         };
 

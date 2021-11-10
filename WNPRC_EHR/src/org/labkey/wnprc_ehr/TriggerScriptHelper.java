@@ -2414,4 +2414,14 @@ public class TriggerScriptHelper {
         return theDifferences;
     }
 
+    public boolean checkAnimalRequestExists(Integer rowid)
+    {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("rowid", CompareType.EQUAL, rowid);
+
+        JSONArray requests = queryFactory.selectRows("wnprc", "animal_requests", filter);
+        return requests.length() > 0;
+
+    }
+
 }

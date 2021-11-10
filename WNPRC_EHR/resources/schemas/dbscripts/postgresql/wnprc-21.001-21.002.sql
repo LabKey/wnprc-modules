@@ -6,6 +6,9 @@ CREATE TABLE wnprc.procedure_rooms
     type                VARCHAR(50),
     email               VARCHAR(50),
     show_by_default     BOOLEAN DEFAULT TRUE,
+    requestable         BOOLEAN DEFAULT TRUE,
+    ehr_managed         BOOLEAN DEFAULT TRUE,
+    folder_id           VARCHAR(200),
     default_bg_color    VARCHAR(20),
 
     -- Default fields for LabKey.

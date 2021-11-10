@@ -180,6 +180,12 @@ EHR.model.DataModelManager.registerMetadata('SurgeryProcedureRequest', {
             modified: {
                 hidden: true
             },
+            room: {
+                lookup: {
+                    sort: 'room',
+                    filterArray: [LABKEY.Filter.create('requestable', true, LABKEY.Filter.Types.EQUAL)],
+                }
+            },
             date: {
             },
             enddate: {

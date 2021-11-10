@@ -36,7 +36,10 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Results;
@@ -83,6 +86,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
+import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
@@ -1934,6 +1938,121 @@ public class WNPRC_EHRController extends SpringActionController
                         response.put("error", e.getMessage());
                     }
                 }
+
+            return response;
+        }
+    }
+
+    @ActionNames("CreateSurgeryProcedure")
+    @RequiresLogin()
+    public class CreateSurgeryProcedureAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365Unmanaged");
+            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("procedure_calendars");
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "folder_id"), filter, null);
+            Map<String, Object>[] calendars = ts.getMapArray();
+
+            String roomObjectId = UUID.randomUUID().toString();
+            String requestId = UUID.randomUUID().toString();
+            String taskId = UUID.randomUUID().toString();
+            String comment = event.getCalendarId() != null
+                    ? "Automatically generated from transition calendar event"
+                    : "Generated from event that was created directly from the schedule calendar";
+            String qcStateLabel = "Scheduled";
+            String parentCalendar = event.getCalendarId().toLowerCase().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+
+            LocalDateTime start = LocalDateTime.ofInstant(event.getStart().toInstant(), ZoneId.of("America/Chicago"));
+            LocalDateTime end = LocalDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.of("America/Chicago"));
+
+            JSONArray rooms = new JSONArray();
+            JSONObject room = new JSONObject();
+            room.put("date", start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            room.put("enddate", end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            room.put("email", event.getRoomEmails().get(0));
+            room.put("objectid", roomObjectId);
+            rooms.put(room);
+
+            JSONObject spRecord = new JSONObject();
+            spRecord.put("objectid", UUID.randomUUID().toString());
+            spRecord.put("Id", "ph9999");
+            spRecord.put("date", event.getStart());
+            spRecord.put("enddate", event.getEnd());
+            spRecord.put("procedurename", "other");
+            spRecord.put("procedureunit", event.getCalendarId().toLowerCase().contains("spi") ? "spi" : "vet");
+
+            spRecord.put("consultRequest", false);
+            spRecord.put("biopsyNeeded", false);
+            spRecord.put("surgerytechneeded", false);
+            spRecord.put("spineeded", false);
+            spRecord.put("vetneeded", false);
+
+            spRecord.put("comments", comment);
+            spRecord.put("QCStateLabel", qcStateLabel);
+            spRecord.put("requestid", requestId);
+            spRecord.put("taskid", taskId);
+
+            JSONObject roomRecord = new JSONObject();
+            roomRecord.put("objectid", roomObjectId);
+            roomRecord.put("room", event.getRoomNames().get(0));
+            roomRecord.put("date", event.getStart());
+            roomRecord.put("enddate", event.getEnd());
+            //roomRecord.put("event_id", null);
+            roomRecord.put("requestid", requestId);
+
+
+            JSONObject taskRecord = new JSONObject();
+            taskRecord.put("taskid", taskId);
+            taskRecord.put("title", "SurgeryProcedure");
+            taskRecord.put("category", "task");
+            //taskRecord.put("assignedto", null); //TODO assigned to who?
+            taskRecord.put("QCStateLabel", qcStateLabel);
+            taskRecord.put("duedate", "");
+            taskRecord.put("formtype", "SurgeryProcedure");
+
+            JSONObject requestRecord = new JSONObject();
+            requestRecord.put("requestid", requestId);
+            requestRecord.put("title", "Request Surgery or Procedure");
+            //requestRecord.put("notify1", null);
+            //requestRecord.put("notify2", null); //TODO notify who?
+            //requestRecord.put("notify3", null);
+            //requestRecord.put("sendemail", null);
+            //requestRecord.put("pi", null);
+            requestRecord.put("priority", "Routine");
+            requestRecord.put("formtype", "SurgeryProcedureRequest");
+            requestRecord.put("description", comment);
+            requestRecord.put("container", getContainer().toString());
+            requestRecord.put("QCStateLabel", qcStateLabel);
+
+            try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+            {
+                insertRecord(taskRecord, "ehr", "tasks");
+                insertRecord(requestRecord, "ehr", "requests");
+                insertRecord(spRecord, "study", "surgery_procedure");
+                insertRecord(roomRecord, "wnprc", "procedure_scheduled_rooms");
+
+                Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+                boolean eventsScheduled = calendar.addEvents(parentCalendar, rooms, event.getSubject(), requestId, response);
+
+                if (eventsScheduled)
+                {
+                    JSONObject roomRow = rooms.getJSONObject(0);
+                    JSONObject updateRecord = new JSONObject();
+                    updateRecord.put("objectid", roomRow.get("objectid"));
+                    updateRecord.put("event_id", roomRow.get("event_id"));
+                    updateRecord(updateRecord, "wnprc", "procedure_scheduled_rooms");
+
+                    response.put("success", true);
+                    transaction.commit();
+                }
+                calendar.cancelEvent(event.getEventId());
+            }
 
             return response;
         }

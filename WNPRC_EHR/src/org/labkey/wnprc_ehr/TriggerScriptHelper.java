@@ -50,6 +50,7 @@ import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
+import org.labkey.wnprc_ehr.notification.SurgeryScheduledNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
@@ -190,6 +191,18 @@ public class TriggerScriptHelper {
             idNotification.setParam(DeathNotification.idParamName, id);
             idNotification.sendManually(container, user);
         }
+    }
+
+    public void sendSurgeryScheduledNotification(final String requestid) {
+        Module ehrModule = ModuleLoader.getInstance().getModule("EHR");
+        SurgeryScheduledNotification surgeryNotification = new SurgeryScheduledNotification(ehrModule, requestid);
+        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(surgeryNotification, container)){
+            _log.info("Notification service is not enabled, will not send surgery scheduled notification");
+            return;
+        }
+
+        Container wnprcEhrContainer = ContainerManager.getForPath("/WNPRC/EHR");
+        surgeryNotification.sendManually(wnprcEhrContainer, user);
     }
 
     public void sendPregnancyNotification(final List<String> ids, final List<String> objectids) {

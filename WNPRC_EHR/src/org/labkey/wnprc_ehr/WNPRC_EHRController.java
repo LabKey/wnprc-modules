@@ -36,7 +36,10 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Results;
@@ -83,6 +86,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
+import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
@@ -131,11 +135,15 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1467,6 +1475,8 @@ public class WNPRC_EHRController extends SpringActionController
     {
         private String calendarId;
         private String requestId;
+        private String unit;
+        private boolean brandNew;
         private List<String> roomNames;
         private List<String> roomEmails;
         private List<String> objectIds;
@@ -1474,7 +1484,9 @@ public class WNPRC_EHRController extends SpringActionController
         private Date end;
         private List<Date> starts;
         private List<Date> ends;
+        private Date newDate;
         private boolean allDay;
+        private boolean ehrManaged;
         private String body;
         private String subject;
         private String eventId;
@@ -1487,6 +1499,16 @@ public class WNPRC_EHRController extends SpringActionController
         public String getRequestId()
         {
             return requestId;
+        }
+
+        public String getUnit()
+        {
+            return unit;
+        }
+
+        public boolean isBrandNew()
+        {
+            return brandNew;
         }
 
         public List<String> getRoomNames()
@@ -1524,7 +1546,17 @@ public class WNPRC_EHRController extends SpringActionController
             return ends;
         }
 
+        public Date getNewDate()
+        {
+            return newDate;
+        }
+
         public boolean getAllDay()
+        {
+            return allDay;
+        }
+
+        public boolean getEhrManaged()
         {
             return allDay;
         }
@@ -1552,6 +1584,16 @@ public class WNPRC_EHRController extends SpringActionController
         public void setRequestId(String requestid)
         {
             this.requestId = requestid;
+        }
+
+        public void setUnit(String unit)
+        {
+            this.unit = unit;
+        }
+
+        public void setBrandNew(boolean brandNew)
+        {
+            this.brandNew = brandNew;
         }
 
         public void setRoomNames(List<String> roomNames)
@@ -1589,9 +1631,19 @@ public class WNPRC_EHRController extends SpringActionController
             this.ends = ends;
         }
 
+        public void setNewDate(Date newDate)
+        {
+            this.newDate = newDate;
+        }
+
         public void setAllDay(boolean allDay)
         {
             this.allDay = allDay;
+        }
+
+        public void setEhrManaged(boolean ehrManaged)
+        {
+            this.ehrManaged = ehrManaged;
         }
 
         public void setBody(String body)
@@ -1607,6 +1659,190 @@ public class WNPRC_EHRController extends SpringActionController
         public void setEventId(String eventId)
         {
             this.eventId = eventId;
+        }
+    }
+
+    private LocalDateTime changeDate(Date startingDateAndTime, Date newDate)
+    {
+        LocalDateTime dateTime = LocalDateTime.ofInstant(startingDateAndTime.toInstant(), ZoneId.of("America/Chicago"));
+        LocalDateTime newDateTime = LocalDateTime.ofInstant(newDate.toInstant(), ZoneId.of("America/Chicago"));
+
+        long daysBetween = ChronoUnit.DAYS.between(dateTime.toLocalDate(), newDateTime.toLocalDate());
+        LocalDateTime updatedDateTime = dateTime.plusDays(daysBetween);
+
+        return updatedDateTime;
+    }
+
+    private LocalDateTime changeDateByDifference(Date originalStart, LocalDateTime newStart, Date originalEnd)
+    {
+        Duration timeBetween = Duration.between(originalStart.toInstant(), newStart.atZone(ZoneId.of("America/Chicago")).toInstant());
+        LocalDateTime newEnd = LocalDateTime.ofInstant(originalEnd.toInstant().plus(timeBetween), ZoneId.of("America/Chicago"));
+
+        return newEnd;
+    }
+
+    @ActionNames("DuplicateSurgeryEvent")
+    @RequiresLogin
+    public class DuplicateSurgeryEventAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try {
+                List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId(), true);
+                //List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
+                Map<String, Object> taskRow = getTaskRecord((String) spRows.get(0).get("taskid"));
+                Map<String, Object> requestRow = getRequestRecord((String) spRows.get(0).get("requestid"));
+
+                String requestId = UUID.randomUUID().toString();
+                String taskId = UUID.randomUUID().toString();
+                String objectId = UUID.randomUUID().toString();
+
+                List<LocalDateTime> newStartTimes = new ArrayList<>();
+                List<LocalDateTime> newEndTimes = new ArrayList<>();
+                for (int i = 0; i < event.getStarts().size(); i++) {
+                    LocalDateTime start = LocalDateTime.ofInstant(event.getStarts().get(i).toInstant(), ZoneId.of("America/Chicago"));
+                    LocalDateTime end = LocalDateTime.ofInstant(event.getEnds().get(i).toInstant(), ZoneId.of("America/Chicago"));
+                    if (event.getNewDate() != null) {
+                        start = changeDate(event.getStarts().get(i), event.getNewDate());
+                        end = changeDateByDifference(event.getStarts().get(i), start, event.getEnds().get(i));
+                    }
+                    newStartTimes.add(start);
+                    newEndTimes.add(end);
+                }
+
+                JSONArray rooms = new JSONArray();
+                for (int i = 0; i < event.getRoomNames().size(); i++) {
+                    JSONObject room = new JSONObject();
+                    room.put("date", newStartTimes.get(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    room.put("enddate", newEndTimes.get(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    room.put("email", event.getRoomEmails().get(i));
+                    room.put("objectid", UUID.randomUUID().toString());
+
+                    rooms.put(room);
+                }
+
+                String qcStateLabel = "Scheduled";
+                if (event.getCalendarId().endsWith("on_hold"))
+                {
+                    qcStateLabel = "Request: On Hold";
+                }
+
+                LocalDateTime newStartTime = Collections.min(newStartTimes);
+                LocalDateTime newEndTime = Collections.max(newEndTimes);
+
+                //CREATE TASK RECORD
+                JSONObject taskRecord = new JSONObject();
+                taskRecord.put("taskid", taskId);
+                taskRecord.put("title", "SurgeryProcedure");
+                taskRecord.put("category", "task");
+                taskRecord.put("assignedto", taskRow.get("assignedto"));
+                taskRecord.put("QCStateLabel", qcStateLabel);
+                taskRecord.put("duedate", "");
+                taskRecord.put("formtype", "SurgeryProcedure");
+
+                //CREATE REQUEST RECORD
+                JSONObject requestRecord = new JSONObject();
+                requestRecord.put("requestid", requestId);
+                requestRecord.put("title", requestRow.get("title"));
+                requestRecord.put("notify1", requestRow.get("notify1"));
+                requestRecord.put("notify2", requestRow.get("notify2"));
+                requestRecord.put("notify3", requestRow.get("notify3"));
+                requestRecord.put("sendemail", requestRow.get("sendemail"));
+                requestRecord.put("pi", requestRow.get("pi"));
+                requestRecord.put("priority", requestRow.get("priority"));
+                requestRecord.put("formtype", requestRow.get("formtype"));
+                requestRecord.put("description", "Duplicated by: " + getUser().getDisplayName(getUser()));
+                requestRecord.put("container", requestRow.get("container"));
+                requestRecord.put("QCStateLabel", qcStateLabel);
+
+                //CREATE SURGERY PROCEDURE RECORD(S)
+                List<Map<String, Object>> newSpRows = new ArrayList<>();
+                for (int i = 0; i < spRows.size(); i++)
+                {
+                    LocalDateTime newStartTableTime = null;
+                    if (spRows.get(i).get("startTableTime") != null) {
+                        newStartTableTime = changeDateByDifference((Date) spRows.get(i).get("date"), newStartTime, (Date) spRows.get(i).get("startTableTime"));
+                    }
+
+                    Map<String, Object> newSpRow = new HashMap<>();
+                    newSpRow.put("objectid", objectId);
+                    newSpRow.put("Id", spRows.get(i).get("Id"));
+                    newSpRow.put("date", newStartTime);
+                    newSpRow.put("startTableTime", newStartTableTime);
+                    newSpRow.put("enddate", newEndTime);
+                    newSpRow.put("procedurename", spRows.get(i).get("procedurename"));
+                    newSpRow.put("procedureunit", spRows.get(i).get("procedureunit"));
+                    newSpRow.put("project", spRows.get(i).get("project"));
+                    newSpRow.put("account", spRows.get(i).get("account"));
+                    newSpRow.put("surgeon", spRows.get(i).get("surgeon"));
+                    newSpRow.put("consultRequest", spRows.get(i).get("consultRequest"));
+                    newSpRow.put("biopsyNeeded", spRows.get(i).get("biopsyNeeded"));
+                    newSpRow.put("surgerytechneeded", spRows.get(i).get("surgerytechneeded"));
+                    newSpRow.put("spineeded", spRows.get(i).get("spineeded"));
+                    newSpRow.put("vetneeded", spRows.get(i).get("vetneeded"));
+                    newSpRow.put("vetneededreason", spRows.get(i).get("vetneededreason"));
+                    newSpRow.put("equipment", spRows.get(i).get("equipment"));
+                    newSpRow.put("drugslab", spRows.get(i).get("drugslab"));
+                    newSpRow.put("drugssurgery", spRows.get(i).get("drugssurgery"));
+                    newSpRow.put("comments", spRows.get(i).get("comments"));
+                    newSpRow.put("requestid", requestId);
+                    newSpRow.put("taskid", taskId);
+
+                    newSpRows.add(newSpRow);
+                }
+
+                //CREATE PROCEDURE_SCHEDULED_ROOMS RECORD(S)
+                List<Map<String, Object>> newRoomRows = new ArrayList<>();
+                for (int i = 0; i < event.getRoomEmails().size(); i++)
+                {
+                    Map<String, Object> newRoomRow = new HashMap<>();
+                    newRoomRow.put("objectid", rooms.getJSONObject(i).get("objectid"));
+                    newRoomRow.put("room", event.getRoomNames().get(i));
+                    newRoomRow.put("date", newStartTimes.get(i));
+                    newRoomRow.put("enddate", newEndTimes.get(i));
+                    newRoomRow.put("event_id", rooms.getJSONObject(i).get("event_id"));
+                    newRoomRow.put("requestid", requestId);
+
+                    newRoomRows.add(newRoomRow);
+                }
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+                    insertRecord(taskRecord, "ehr", "tasks");
+                    insertRecord(requestRecord, "ehr", "requests");
+                    insertRecords(newSpRows, "study", "surgery_procedure");
+                    insertRecords(newRoomRows, "wnprc", "procedure_scheduled_rooms");
+
+                    Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+                    boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), rooms, event.getSubject(), requestId, response);
+
+                    if (eventsScheduled)
+                    {
+                        List<Map<String, Object>> updatedRoomRows = new ArrayList<>();
+                        for (int i = 0; i < rooms.length(); i++) {
+                            JSONObject roomRow = rooms.getJSONObject(i);
+                            JSONObject roomRecord = new JSONObject();
+                            roomRecord.put("objectid", roomRow.get("objectid"));
+                            roomRecord.put("event_id", roomRow.get("event_id"));
+                            updatedRoomRows.add(roomRecord);
+                        }
+                        //update all rows at the same time so that the trigger script can update the surgery
+                        updateRecords(updatedRoomRows, "wnprc", "procedure_scheduled_rooms");
+
+                        response.put("success", true);
+                        transaction.commit();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+            }
+
+            return response;
         }
     }
 
@@ -1729,6 +1965,131 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
+    @ActionNames("CreateSurgeryProcedure")
+    @RequiresLogin()
+    public class CreateSurgeryProcedureAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365Unmanaged");
+            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
+            TableInfo ti = schema.getTable("procedure_calendars");
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "folder_id"), filter, null);
+            Map<String, Object>[] calendars = ts.getMapArray();
+
+            String roomObjectId = UUID.randomUUID().toString();
+            String requestId = UUID.randomUUID().toString();
+            String taskId = UUID.randomUUID().toString();
+            String comment = event.isBrandNew()
+                    ? "Generated from event that was created directly from the schedule calendar"
+                    : "Automatically generated from transition calendar event";
+            String qcStateLabel = "Scheduled";
+            String parentCalendar;
+            if (event.isBrandNew()) {
+                parentCalendar = event.getUnit().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+            } else {
+                parentCalendar = event.getCalendarId().toLowerCase().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+            }
+
+            LocalDateTime start = LocalDateTime.ofInstant(event.getStart().toInstant(), ZoneId.of("America/Chicago"));
+            LocalDateTime end = LocalDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.of("America/Chicago"));
+
+            JSONArray rooms = new JSONArray();
+            JSONObject room = new JSONObject();
+            room.put("date", start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            room.put("enddate", end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            room.put("email", event.getRoomEmails().get(0));
+            room.put("objectid", roomObjectId);
+            rooms.put(room);
+
+            JSONObject spRecord = new JSONObject();
+            spRecord.put("objectid", UUID.randomUUID().toString());
+            spRecord.put("Id", "ph9999");
+            spRecord.put("date", event.getStart());
+            spRecord.put("enddate", event.getEnd());
+            spRecord.put("procedurename", "other");
+            if (event.isBrandNew()) {
+                spRecord.put("procedureunit", event.getUnit());
+            } else {
+                spRecord.put("procedureunit", event.getCalendarId().toLowerCase().contains("spi") ? "spi" : "vet");
+            }
+            spRecord.put("consultRequest", false);
+            spRecord.put("biopsyNeeded", false);
+            spRecord.put("surgerytechneeded", false);
+            spRecord.put("spineeded", false);
+            spRecord.put("vetneeded", false);
+            spRecord.put("comments", comment);
+            spRecord.put("QCStateLabel", qcStateLabel);
+            spRecord.put("requestid", requestId);
+            spRecord.put("taskid", taskId);
+
+            JSONObject roomRecord = new JSONObject();
+            roomRecord.put("objectid", roomObjectId);
+            roomRecord.put("room", event.getRoomNames().get(0));
+            roomRecord.put("date", event.getStart());
+            roomRecord.put("enddate", event.getEnd());
+            //roomRecord.put("event_id", null);
+            roomRecord.put("requestid", requestId);
+
+
+            JSONObject taskRecord = new JSONObject();
+            taskRecord.put("taskid", taskId);
+            taskRecord.put("title", "SurgeryProcedure");
+            taskRecord.put("category", "task");
+            //taskRecord.put("assignedto", null); //TODO assigned to who?
+            taskRecord.put("QCStateLabel", qcStateLabel);
+            taskRecord.put("duedate", "");
+            taskRecord.put("formtype", "SurgeryProcedure");
+
+            JSONObject requestRecord = new JSONObject();
+            requestRecord.put("requestid", requestId);
+            requestRecord.put("title", "Request Surgery or Procedure");
+            //requestRecord.put("notify1", null);
+            //requestRecord.put("notify2", null); //TODO notify who?
+            //requestRecord.put("notify3", null);
+            //requestRecord.put("sendemail", null);
+            //requestRecord.put("pi", null);
+            requestRecord.put("priority", "Routine");
+            requestRecord.put("formtype", "SurgeryProcedureRequest");
+            requestRecord.put("description", comment);
+            requestRecord.put("container", getContainer().toString());
+            requestRecord.put("QCStateLabel", qcStateLabel);
+
+            try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+            {
+                insertRecord(taskRecord, "ehr", "tasks");
+                insertRecord(requestRecord, "ehr", "requests");
+                insertRecord(spRecord, "study", "surgery_procedure");
+                insertRecord(roomRecord, "wnprc", "procedure_scheduled_rooms");
+
+                Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+                boolean eventsScheduled = calendar.addEvents(parentCalendar, rooms, event.getSubject(), requestId, response);
+
+                if (eventsScheduled)
+                {
+                    JSONObject roomRow = rooms.getJSONObject(0);
+                    JSONObject updateRecord = new JSONObject();
+                    updateRecord.put("objectid", roomRow.get("objectid"));
+                    updateRecord.put("event_id", roomRow.get("event_id"));
+                    updateRecord(updateRecord, "wnprc", "procedure_scheduled_rooms");
+
+                    response.put("success", true);
+                    transaction.commit();
+                }
+                if (!event.isBrandNew())
+                {
+                    calendar.cancelEvent(event.getEventId());
+                }
+            }
+
+            return response;
+        }
+    }
+
     @ActionNames("ScheduleSurgeryProcedure")
     //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
     @RequiresLogin()
@@ -1737,7 +2098,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
         {
-            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
+            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId(), false);
             List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
 
             JSONObject response = new JSONObject();
@@ -1887,7 +2248,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public Object execute(SurgeryProcedureChangeStatusEvent event, BindException errors) throws Exception
         {
-            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId());
+            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId(), false);
             List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
             String taskId = spRows.size() > 0 ? (String) spRows.get(0).get("taskid") : null;
 
@@ -1929,6 +2290,7 @@ public class WNPRC_EHRController extends SpringActionController
                     updateRecord(taskRecord, "ehr", "tasks");
                 }
 
+                response.put("success", true);
                 if ("Request: Pending".equals(event.getQCStateLabel()))
                 {
                     Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
@@ -1940,11 +2302,18 @@ public class WNPRC_EHRController extends SpringActionController
                             calendar.cancelEvent(eventId);
                             response.getJSONArray("roomList").put(roomRow);
                         }
+                        else
+                        {
+                            response.put("success", false);
+                            response.put("error", "There was an error updating the event in Office 365");
+                        }
                     }
                 }
 
-                transaction.commit();
-                response.put("success", true);
+                if ((boolean) response.get("success"))
+                {
+                    transaction.commit();
+                }
             } catch (Exception e) {
                 int x = 3;
                 //TODO nothing?
@@ -1956,13 +2325,41 @@ public class WNPRC_EHRController extends SpringActionController
         }
     }
 
-    private List<Map<String, Object>> getSurgeryProcedureRecords(String requestId) throws java.sql.SQLException
+    private List<Map<String, Object>> getSurgeryProcedureRecords(String requestId, boolean allColumns) throws java.sql.SQLException
     {
         List<FieldKey> columns = new ArrayList<>();
-        columns.add(FieldKey.fromString("objectid"));
-        columns.add(FieldKey.fromString("taskid"));
-        columns.add(FieldKey.fromString("date"));
-        columns.add(FieldKey.fromString("enddate"));
+        if (allColumns)
+        {
+            columns.add(FieldKey.fromString("Id"));
+            columns.add(FieldKey.fromString("date"));
+            columns.add(FieldKey.fromString("startTableTime"));
+            columns.add(FieldKey.fromString("enddate"));
+            columns.add(FieldKey.fromString("procedurename"));
+            columns.add(FieldKey.fromString("procedureunit"));
+            columns.add(FieldKey.fromString("project"));
+            columns.add(FieldKey.fromString("account"));
+            columns.add(FieldKey.fromString("surgeon"));
+            columns.add(FieldKey.fromString("consultRequest"));
+            columns.add(FieldKey.fromString("biopsyNeeded"));
+            columns.add(FieldKey.fromString("surgerytechneeded"));
+            columns.add(FieldKey.fromString("spineeded"));
+            columns.add(FieldKey.fromString("vetneeded"));
+            columns.add(FieldKey.fromString("vetneededreason"));
+            columns.add(FieldKey.fromString("equipment"));
+            columns.add(FieldKey.fromString("drugslab"));
+            columns.add(FieldKey.fromString("drugssurgery"));
+            columns.add(FieldKey.fromString("comments"));
+            columns.add(FieldKey.fromString("requestid"));
+            columns.add(FieldKey.fromString("taskid"));
+        }
+        else 
+        {
+            columns.add(FieldKey.fromString("objectid"));
+            columns.add(FieldKey.fromString("taskid"));
+            columns.add(FieldKey.fromString("date"));
+            columns.add(FieldKey.fromString("enddate"));
+        }
+        
 
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
         QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
@@ -1977,7 +2374,7 @@ public class WNPRC_EHRController extends SpringActionController
         return spRows;
     }
 
-    private List<Map<String, Object>> getSurgeryProcedureRooms(String requestId) throws java.sql.SQLException
+    private List<Map<String, Object>> getSurgeryProcedureRooms(String requestId)
     {
         List<Map<String, Object>> roomRows = new ArrayList<>();
         SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
@@ -1991,9 +2388,43 @@ public class WNPRC_EHRController extends SpringActionController
         return roomRows;
     }
 
-    private void insertRecord(JSONObject record, String schema, String table) throws DuplicateKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    private Map<String, Object> getTaskRecord(String taskId)
     {
-        List<Map<String, Object>> rowsToInsert  = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
+        Map<String, Object> taskRow = new HashMap<>();
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("taskid"), taskId);
+        JSONArray jsonTask = queryFactory.selectRows("ehr", "tasks", filter);
+
+        if (jsonTask.length() > 0) {
+            taskRow = jsonTask.getJSONObject(0);
+        }
+
+        return taskRow;
+    }
+
+    private Map<String, Object> getRequestRecord(String requestId)
+    {
+        Map<String, Object> requestRow = new HashMap<>();
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
+        JSONArray jsonRequest = queryFactory.selectRows("ehr", "requests", filter);
+
+        if (jsonRequest.length() > 0) {
+            requestRow = jsonRequest.getJSONObject(0);
+        }
+
+        return requestRow;
+    }
+
+    private void insertRecord(JSONObject rowToInsert, String schema, String table) throws DuplicateKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        List<Map<String, Object>> rowsToInsert  = SimpleQueryUpdater.makeRowsCaseInsensitive(rowToInsert);
+        insertRecords(rowsToInsert, schema, table);
+    }
+
+    private void insertRecords(List<Map<String, Object>> rowsToInsert, String schema, String table) throws DuplicateKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        rowsToInsert = SimpleQueryUpdater.makeRowListCaseInsensitive(rowsToInsert);
 
         TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), schema).getTable(table);
         QueryUpdateService service = ti.getUpdateService();

@@ -6,14 +6,12 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.FieldKey;
@@ -139,8 +137,19 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             TableInfo ti = schema.getTable("procedure_calendars");
             TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "folder_id"), filter, null);
             Map<String, Object>[] calendars = ts.getMapArray();
+
+            filter = new SimplerFilter("ehr_managed", CompareType.EQUAL, false);
+            schema = DbSchema.get("wnprc", DbSchemaType.Module);
+            ti = schema.getTable("procedure_rooms");
+            ts = new TableSelector(ti, PageFlowUtil.set("email", "folder_id"), filter, null);
+            Map<String, Object>[] unmanagedRooms = ts.getMapArray();
+
             for (Map<String, Object> calendar : calendars) {
                 CALENDARS_BY_ID.put((String) calendar.get("folder_id"), (String) calendar.get("calendar_id"));
+            }
+
+            for (Map<String, Object> unmanagedRoom : unmanagedRooms) {
+                CALENDARS_BY_ID.put((String) unmanagedRoom.get("folder_id"), (String) unmanagedRoom.get("email"));
             }
         }
         return CALENDARS_BY_ID;
@@ -189,7 +198,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         List<Event> updatedEvents = new ArrayList<>();
         updatedEvents.add(updatedEvent);
 
-        JSONObject updatedEventsJson = getUnmanagedJsonEventList(updatedEvents);
+        JSONObject updatedEventsJson = getUnmanagedJsonEventList(updatedEvents, false);
         response.put("events", updatedEventsJson);
 
         return true;
@@ -286,6 +295,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             eventSource.put("id", calendar.getString("calendar_id"));
             eventSource.put("baseCalendar", "Office365".equalsIgnoreCase(calendar.getString("calendar_type")));
             eventSource.put("roomCalendar", "Office365Resource".equalsIgnoreCase(calendar.getString("calendar_type")));
+            eventSource.put("requestable", calendar.getBoolean("requestable"));
             eventSource.put("displayName", calendar.getString("display_name"));
             eventSource.put("room", calendar.getString("room"));
             allJsonData.put(calendar.getString("calendar_id"), eventSource);
@@ -396,6 +406,8 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                         extendedProps.put("objectid", isBaseCalendar ? surgeryInfo.get("objectid") : objectId);
                         extendedProps.put("date", start);
                         extendedProps.put("enddate", end);
+                        extendedProps.put("isUnmanaged", false);
+                        extendedProps.put("isTransitional", false);
                         extendedProps.put("selected", false);
                         jsonEvent.put("extendedProps", extendedProps);
                     }
@@ -423,9 +435,30 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return allJsonData;
     }
 
-    private JSONObject getUnmanagedJsonEventList(List<Event> events) {
-        //JSONObject allJsonData = new JSONObject();
+    private JSONObject getUnmanagedJsonEventList(List<Event> events, boolean isTransitional) {
+        JSONObject allJsonData = new JSONObject();
         JSONObject allJsonEvents = new JSONObject();
+
+        SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
+        SimpleQuery allCalendars = sqf.makeQuery("wnprc", "procedure_calendars_and_rooms");
+        List<JSONObject> calendarList = JsonUtils.getListFromJSONArray(allCalendars.getResults().getJSONArray("rows"));
+
+        for (JSONObject calendar : calendarList) {
+            JSONObject eventSource = new JSONObject();
+            String bgColor = getCalendarColors().get(calendar.getString("calendar_id"));
+            eventSource.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
+            eventSource.put("textColor", getTextColor(eventSource.getString("backgroundColor")));
+            eventSource.put("id", calendar.getString("calendar_id"));
+            eventSource.put("baseCalendar", "Office365".equalsIgnoreCase(calendar.getString("calendar_type")));
+            eventSource.put("roomCalendar", "Office365Resource".equalsIgnoreCase(calendar.getString("calendar_type")));
+            eventSource.put("requestable", calendar.getBoolean("requestable"));
+            eventSource.put("displayName", calendar.getString("display_name"));
+            eventSource.put("room", calendar.getString("room"));
+            allJsonData.put(calendar.getString("calendar_id"), eventSource);
+
+            allJsonEvents.computeIfAbsent(calendar.getString("calendar_id"), key -> new JSONArray());
+        }
+
         for (Event event : events) {
             String currentCalName = getCalendarsById().get(event.calendar.id);
             allJsonEvents.computeIfAbsent(currentCalName, key -> new JSONArray());
@@ -446,6 +479,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             jsonEvent.put("id", id);
 
             extendedProps.put("isUnmanaged", true);
+            extendedProps.put("isTransitional", isTransitional);
             extendedProps.put("eventId", event.id);
             extendedProps.put("body", event.body.content != null ? Jsoup.parse(event.body.content).text() : "");
             jsonEvent.put("extendedProps", extendedProps);
@@ -453,12 +487,17 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);
         }
 
-        return allJsonEvents;
+        for (Map.Entry<String, Object> entry : allJsonData.entrySet()) {
+            ((JSONObject) entry.getValue()).put("events", allJsonEvents.get(entry.getKey()));
+        }
+
+        return allJsonData;
     }
 
     private JSONObject getCalendarEvents(String start, String end) throws IOException {
         Map<String, String> authorizedBaseCalendars = new HashMap<>();
         Map<String, String> authorizedUnmanagedCalendars = new HashMap<>();
+        Map<String, String> transitionCalendars = new HashMap<>();
 
         SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.IN, List.of("Office365", "Office365Unmanaged"));
         DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
@@ -499,20 +538,50 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             }
         }
 
+        //Also get any individual room calendars that are not ehrManaged (ie: transitional calendars)
+        filter = new SimplerFilter("ehr_managed", CompareType.EQUAL, false);
+        schema = DbSchema.get("wnprc", DbSchemaType.Module);
+        ti = schema.getTable("procedure_rooms");
+        ts = new TableSelector(ti, PageFlowUtil.set("email", "folder_id"), filter, null);
+        queryResults = ts.getMapArray();
+
+        for (int i = 0; i < queryResults.length; i++) {
+            String calendarId = (String) queryResults[i].get("email");
+            String folderId = (String) queryResults[i].get("folder_id");
+
+            transitionCalendars.put(calendarId, folderId);
+        }
+
         long startTime = System.currentTimeMillis();
         List<Event> baseCalendarEventsList = getCalendarAppointments(start, end, authorizedBaseCalendars);
+        List<Event> transitionCalendarEventsList = getCalendarAppointments(start, end, transitionCalendars);
         List<Event> unmanagedEventsList = getCalendarAppointments(start, end, authorizedUnmanagedCalendars);
         long endTime = System.currentTimeMillis();
         _log.debug("Time to fetch events: " + (endTime - startTime));
 
         startTime = System.currentTimeMillis();
         JSONObject baseCalendarEvents = getJsonEventList(baseCalendarEventsList);
-        JSONObject unmanagedEvents = getUnmanagedJsonEventList(unmanagedEventsList);
+        JSONObject unmanagedEvents = getUnmanagedJsonEventList(unmanagedEventsList, false);
+        JSONObject transitionEvents = getUnmanagedJsonEventList(transitionCalendarEventsList, true);
         endTime = System.currentTimeMillis();
         _log.debug("Time to organize events: " + (endTime - startTime));
 
         for (Map.Entry entry : unmanagedEvents.entrySet()) {
-            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", entry.getValue());
+            JSONArray events = ((JSONObject) baseCalendarEvents.get(entry.getKey())).getJSONArray("events");
+            JSONArray newEvents = ((JSONObject) unmanagedEvents.get(entry.getKey())).getJSONArray("events");
+            for (int i = 0; i < newEvents.length(); i++) {
+                events.put(newEvents.get(i));
+            }
+            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", events);
+        }
+
+        for (Map.Entry entry : transitionEvents.entrySet()) {
+            JSONArray events = ((JSONObject) baseCalendarEvents.get(entry.getKey())).getJSONArray("events");
+            JSONArray newEvents = ((JSONObject) transitionEvents.get(entry.getKey())).getJSONArray("events");
+            for (int i = 0; i < newEvents.length(); i++) {
+                events.put(newEvents.get(i));
+            }
+            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", events);
         }
 
         return baseCalendarEvents;

@@ -1475,6 +1475,8 @@ public class WNPRC_EHRController extends SpringActionController
     {
         private String calendarId;
         private String requestId;
+        private String unit;
+        private boolean brandNew;
         private List<String> roomNames;
         private List<String> roomEmails;
         private List<String> objectIds;
@@ -1497,6 +1499,16 @@ public class WNPRC_EHRController extends SpringActionController
         public String getRequestId()
         {
             return requestId;
+        }
+
+        public String getUnit()
+        {
+            return unit;
+        }
+
+        public boolean isBrandNew()
+        {
+            return brandNew;
         }
 
         public List<String> getRoomNames()
@@ -1572,6 +1584,16 @@ public class WNPRC_EHRController extends SpringActionController
         public void setRequestId(String requestid)
         {
             this.requestId = requestid;
+        }
+
+        public void setUnit(String unit)
+        {
+            this.unit = unit;
+        }
+
+        public void setBrandNew(boolean brandNew)
+        {
+            this.brandNew = brandNew;
         }
 
         public void setRoomNames(List<String> roomNames)
@@ -1962,11 +1984,16 @@ public class WNPRC_EHRController extends SpringActionController
             String roomObjectId = UUID.randomUUID().toString();
             String requestId = UUID.randomUUID().toString();
             String taskId = UUID.randomUUID().toString();
-            String comment = event.getCalendarId() != null
-                    ? "Automatically generated from transition calendar event"
-                    : "Generated from event that was created directly from the schedule calendar";
+            String comment = event.isBrandNew()
+                    ? "Generated from event that was created directly from the schedule calendar"
+                    : "Automatically generated from transition calendar event";
             String qcStateLabel = "Scheduled";
-            String parentCalendar = event.getCalendarId().toLowerCase().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+            String parentCalendar;
+            if (event.isBrandNew()) {
+                parentCalendar = event.getUnit().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+            } else {
+                parentCalendar = event.getCalendarId().toLowerCase().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+            }
 
             LocalDateTime start = LocalDateTime.ofInstant(event.getStart().toInstant(), ZoneId.of("America/Chicago"));
             LocalDateTime end = LocalDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.of("America/Chicago"));
@@ -1985,14 +2012,16 @@ public class WNPRC_EHRController extends SpringActionController
             spRecord.put("date", event.getStart());
             spRecord.put("enddate", event.getEnd());
             spRecord.put("procedurename", "other");
-            spRecord.put("procedureunit", event.getCalendarId().toLowerCase().contains("spi") ? "spi" : "vet");
-
+            if (event.isBrandNew()) {
+                spRecord.put("procedureunit", event.getUnit());
+            } else {
+                spRecord.put("procedureunit", event.getCalendarId().toLowerCase().contains("spi") ? "spi" : "vet");
+            }
             spRecord.put("consultRequest", false);
             spRecord.put("biopsyNeeded", false);
             spRecord.put("surgerytechneeded", false);
             spRecord.put("spineeded", false);
             spRecord.put("vetneeded", false);
-
             spRecord.put("comments", comment);
             spRecord.put("QCStateLabel", qcStateLabel);
             spRecord.put("requestid", requestId);
@@ -2051,7 +2080,10 @@ public class WNPRC_EHRController extends SpringActionController
                     response.put("success", true);
                     transaction.commit();
                 }
-                calendar.cancelEvent(event.getEventId());
+                if (!event.isBrandNew())
+                {
+                    calendar.cancelEvent(event.getEventId());
+                }
             }
 
             return response;

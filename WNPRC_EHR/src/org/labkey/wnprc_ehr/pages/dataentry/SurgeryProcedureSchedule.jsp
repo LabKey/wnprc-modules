@@ -109,7 +109,52 @@
         }
     };
 
-    function createSelectDiv(label, id, selectedOption, nonBaseCalendars) {
+    function createUnitSelectDiv(label, id) {
+        let mainDiv = document.createElement("div");
+        mainDiv.classList.add("form-group");
+        mainDiv.id = id + "Div";
+        let labelEl = document.createElement("label");
+        labelEl.htmlFor = id;
+        labelEl.classList.add("col-xs-4");
+        labelEl.classList.add("control-label");
+        labelEl.innerHTML = label;
+        let middleDiv = document.createElement("div");
+        middleDiv.classList.add("col-xs-8");
+        let inputDiv = document.createElement("div");
+        inputDiv.classList.add("input-group");
+        let selectEl = document.createElement("select");
+        selectEl.classList.add("form-control");
+        selectEl.id = id;
+        selectEl.name = id;
+
+        LABKEY.Query.selectRows({
+            schemaName: 'wnprc',
+            queryName: 'procedure_units',
+            columns: 'unit_display_name,unit',
+            scope: this,
+            success: function (data) {
+                if (data.rows && data.rows.length > 0) {
+
+
+                    for (let i = 0; i < data.rows.length; i++) {
+                        let optionEl = document.createElement("option");
+                        optionEl.value = data.rows[i].unit;
+                        optionEl.innerHTML = data.rows[i].unit_display_name;
+                        selectEl.appendChild(optionEl);
+                    }
+                }
+            }
+        });
+
+        inputDiv.appendChild(selectEl);
+        middleDiv.appendChild(inputDiv);
+        mainDiv.appendChild(labelEl);
+        mainDiv.appendChild(middleDiv);
+
+        return mainDiv;
+    }
+
+    function createRoomSelectDiv(label, id, selectedOption, nonBaseCalendars) {
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("form-group");
         mainDiv.id = id + "Div";
@@ -486,6 +531,7 @@
             let roomEmail = document.getElementById("modalRoomField").value;
             roomEmails.push(roomEmail);
             roomNames.push(calendarEvents[roomEmail].room);
+            eventDetails.unit = document.getElementById("modalUnitField")?.value;
         }
 
         eventDetails.roomEvents = roomEvents;
@@ -580,13 +626,16 @@
         if (mainEvent) {
             requestObj.calendarId = mainEvent.extendedProps.calendarId;
             requestObj.requestId = mainEvent.extendedProps.requestid;
+            requestObj.brandNew = false;
         } else {
             requestObj.calendarId = document.getElementById("modalRoomField").value;
+            requestObj.brandNew = true;
         }
         requestObj.subject = document.getElementById("modalTitleField").value;
         requestObj.roomNames = eventDetails.roomNames;
         requestObj.roomEmails = eventDetails.roomEmails;
         requestObj.objectIds = eventDetails.objectIds;
+        requestObj.unit = eventDetails.unit;
         if (isEHRManaged(mainEvent)) {
             requestObj.starts = eventDetails.starts;
             requestObj.ends = eventDetails.ends;
@@ -888,7 +937,7 @@
                 let roomEmail = roomEvents[i].extendedProps.calendarId;
 
                 oldEventValues["modalRoomField_" + i] = roomEmail;
-                let roomDiv = createSelectDiv("Room", "modalRoomField_" + i, roomEmail);
+                let roomDiv = createRoomSelectDiv("Room", "modalRoomField_" + i, roomEmail);
                 oldEventValues["modalStartField_" + i] = startValue;
                 let startDiv = createInputDiv("Start Time", "datetime-local", "modalStartField_" + i, startValue);
                 oldEventValues["modalEndField_" + i] = endValue;
@@ -960,15 +1009,18 @@
                 allDayEndDate.setDate(allDayEndDate.getDate() - 1);
 
                 if (isTransitional(mainEvent)) {
-                    let roomDiv = createSelectDiv("Room", "modalRoomField", null, false);
+                    let roomDiv = createRoomSelectDiv("Room", "modalRoomField", null, false);
                     formDiv.appendChild(roomDiv);
                 }
             } else {
+                let unitDiv = createUnitSelectDiv("Unit", "modalUnitField");
                 startValue = dateToDateTimeInputField(today);
                 endValue = dateToDateTimeInputField(today);
                 allDayValue = false;
                 commentsValue = "";
-                let roomDiv = createSelectDiv("Room", "modalRoomField", null, true);
+                let roomDiv = createRoomSelectDiv("Room", "modalRoomField", null, true);
+
+                formDiv.appendChild(unitDiv);
                 formDiv.appendChild(roomDiv);
                 allDayStartDate = today;
                 allDayEndDate = today;
@@ -1681,7 +1733,7 @@
                     let endValue = rooms[i].enddate;
                     let calendarId = rooms[i].email;
 
-                    let roomDiv = createSelectDiv("Room", "scheduleRoomField_" + i, calendarId);
+                    let roomDiv = createRoomSelectDiv("Room", "scheduleRoomField_" + i, calendarId);
                     let startDiv = createInputDiv("Start Time", "datetime-local", "scheduleStartField_" + i, startValue);
                     let endDiv = createInputDiv("End Time", "datetime-local", "scheduleEndField_" + i, endValue);
 

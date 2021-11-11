@@ -436,8 +436,29 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     }
 
     private JSONObject getUnmanagedJsonEventList(List<Event> events, boolean isTransitional) {
-        //JSONObject allJsonData = new JSONObject();
+        JSONObject allJsonData = new JSONObject();
         JSONObject allJsonEvents = new JSONObject();
+
+        SimpleQueryFactory sqf = new SimpleQueryFactory(user, container);
+        SimpleQuery allCalendars = sqf.makeQuery("wnprc", "procedure_calendars_and_rooms");
+        List<JSONObject> calendarList = JsonUtils.getListFromJSONArray(allCalendars.getResults().getJSONArray("rows"));
+
+        for (JSONObject calendar : calendarList) {
+            JSONObject eventSource = new JSONObject();
+            String bgColor = getCalendarColors().get(calendar.getString("calendar_id"));
+            eventSource.put("backgroundColor", bgColor != null ? bgColor : DEFAULT_BG_COLOR);
+            eventSource.put("textColor", getTextColor(eventSource.getString("backgroundColor")));
+            eventSource.put("id", calendar.getString("calendar_id"));
+            eventSource.put("baseCalendar", "Office365".equalsIgnoreCase(calendar.getString("calendar_type")));
+            eventSource.put("roomCalendar", "Office365Resource".equalsIgnoreCase(calendar.getString("calendar_type")));
+            eventSource.put("requestable", calendar.getBoolean("requestable"));
+            eventSource.put("displayName", calendar.getString("display_name"));
+            eventSource.put("room", calendar.getString("room"));
+            allJsonData.put(calendar.getString("calendar_id"), eventSource);
+
+            allJsonEvents.computeIfAbsent(calendar.getString("calendar_id"), key -> new JSONArray());
+        }
+
         for (Event event : events) {
             String currentCalName = getCalendarsById().get(event.calendar.id);
             allJsonEvents.computeIfAbsent(currentCalName, key -> new JSONArray());
@@ -466,7 +487,11 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);
         }
 
-        return allJsonEvents;
+        for (Map.Entry<String, Object> entry : allJsonData.entrySet()) {
+            ((JSONObject) entry.getValue()).put("events", allJsonEvents.get(entry.getKey()));
+        }
+
+        return allJsonData;
     }
 
     private JSONObject getCalendarEvents(String start, String end) throws IOException {
@@ -542,11 +567,21 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         _log.debug("Time to organize events: " + (endTime - startTime));
 
         for (Map.Entry entry : unmanagedEvents.entrySet()) {
-            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", entry.getValue());
+            JSONArray events = ((JSONObject) baseCalendarEvents.get(entry.getKey())).getJSONArray("events");
+            JSONArray newEvents = ((JSONObject) unmanagedEvents.get(entry.getKey())).getJSONArray("events");
+            for (int i = 0; i < newEvents.length(); i++) {
+                events.put(newEvents.get(i));
+            }
+            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", events);
         }
 
         for (Map.Entry entry : transitionEvents.entrySet()) {
-            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", entry.getValue());
+            JSONArray events = ((JSONObject) baseCalendarEvents.get(entry.getKey())).getJSONArray("events");
+            JSONArray newEvents = ((JSONObject) transitionEvents.get(entry.getKey())).getJSONArray("events");
+            for (int i = 0; i < newEvents.length(); i++) {
+                events.put(newEvents.get(i));
+            }
+            ((JSONObject) baseCalendarEvents.get(entry.getKey())).put("events", events);
         }
 
         return baseCalendarEvents;

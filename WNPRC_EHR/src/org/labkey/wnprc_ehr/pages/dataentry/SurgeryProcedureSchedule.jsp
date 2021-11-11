@@ -482,7 +482,7 @@
             if (document.getElementById("modalSameRoomTimeField")?.checked) {
                 eventDetails.newDate = new Date(document.getElementById("modalNewDateField").value + "T00:00:00");
             }
-        } else if (isTransitional(mainEvent)) {
+        } else if (isTransitional(mainEvent) || !mainEvent) {
             let roomEmail = document.getElementById("modalRoomField").value;
             roomEmails.push(roomEmail);
             roomNames.push(calendarEvents[roomEmail].room);
@@ -510,7 +510,7 @@
             unmanagedEventDetails.start = new Date(document.getElementById("modalStartField").value);
             unmanagedEventDetails.end = new Date(document.getElementById("modalEndField").value);
         }
-        unmanagedEventDetails.eventId = mainEvent.extendedProps.eventId;
+        unmanagedEventDetails.eventId = mainEvent?.extendedProps?.eventId;
         unmanagedEventDetails.body = document.getElementById("modalCommentsField").value;
 
         return unmanagedEventDetails;
@@ -577,8 +577,12 @@
 
     function getRequestObj(mainEvent, eventDetails) {
         let requestObj = {};
-        requestObj.calendarId = mainEvent.extendedProps.calendarId;
-        requestObj.requestId = mainEvent.extendedProps.requestid;
+        if (mainEvent) {
+            requestObj.calendarId = mainEvent.extendedProps.calendarId;
+            requestObj.requestId = mainEvent.extendedProps.requestid;
+        } else {
+            requestObj.calendarId = document.getElementById("modalRoomField").value;
+        }
         requestObj.subject = document.getElementById("modalTitleField").value;
         requestObj.roomNames = eventDetails.roomNames;
         requestObj.roomEmails = eventDetails.roomEmails;
@@ -597,8 +601,11 @@
         return requestObj;
     }
 
-    function createNewEvent() {
-        let mainEvent = getMainEvent(selectedEvent);
+    function createNewEvent(isBrandNew) {
+        let mainEvent;
+        if (!isBrandNew) {
+            mainEvent = getMainEvent(selectedEvent);
+        }
         clearSelectedEvent();
 
         let eventDetails = getModalEventDetails(mainEvent);
@@ -610,7 +617,7 @@
             success: LABKEY.Utils.getCallbackWrapper(function (response) {
                 if (response.success) {
                     //First remove the 'old' event from the calendarEvents object as well as on fullcalendar
-                    mainEvent.remove();
+                    mainEvent?.remove();
 
                     //Then add the updated event back to the calendarEvents object as well as on the fullcalendar
                     for (let cal in response.events) {
@@ -698,8 +705,8 @@
                             //Then add the updated event back to the calendarEvents object as well as on the fullcalendar
                             for (let cal in response.events) {
                                 if (response.events.hasOwnProperty(cal)) {
-                                    for (let i = 0; i < response.events[cal].length; i++) {
-                                        addEventToCalendar(response.events[cal][i], cal);
+                                    for (let i = 0; i < response.events[cal].events.length; i++) {
+                                        addEventToCalendar(response.events[cal].events[i], cal);
                                     }
                                 }
                             }
@@ -1230,7 +1237,7 @@
                     <form id="modalForm" class="form-horizontal" /></form>
                     <button id="updateEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="updateEvent()" style="display:none;">Update Event</button>
                     <button id="duplicateEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="duplicateEvent()" style="display:none;">Duplicate Event</button>
-                    <button id="createEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="createNewEvent()" style="display:none;">Create Event</button>
+                    <button id="createEventButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="createNewEvent(true)" style="display:none;">Create Event</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

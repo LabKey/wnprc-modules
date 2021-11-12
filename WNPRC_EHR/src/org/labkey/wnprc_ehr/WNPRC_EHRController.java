@@ -1975,12 +1975,6 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
 
-            SimplerFilter filter = new SimplerFilter("calendar_type", CompareType.EQUAL, "Office365Unmanaged");
-            DbSchema schema = DbSchema.get("wnprc", DbSchemaType.Module);
-            TableInfo ti = schema.getTable("procedure_calendars");
-            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "folder_id"), filter, null);
-            Map<String, Object>[] calendars = ts.getMapArray();
-
             String roomObjectId = UUID.randomUUID().toString();
             String requestId = UUID.randomUUID().toString();
             String taskId = UUID.randomUUID().toString();

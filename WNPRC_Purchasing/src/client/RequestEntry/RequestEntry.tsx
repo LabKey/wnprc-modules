@@ -52,12 +52,19 @@ export const App: FC = memo(() => {
     const [rejectQCStateId, setRejectQCStateId] = useState<number>();
     const [isReorder, setIsReorder] = useState<boolean>(ActionURL.getParameter('isReorder') || false);
     const { isAdmin: hasPurchasingAdminPermission, canUpdate: hasPurchasingUpdatePermission, canInsert: hasPurchasingInsertPermission } = getServerContext().user;
+    const [isRequester, setIsRequester] = useState<boolean>();
+    const [isReceiver, setIsReceiver] = useState<boolean>();
+    const [isPurchaseAdmin, setIsPurchaseAdmin] = useState<boolean>();
 
     // equivalent to componentDidMount and componentDidUpdate (if with dependencies, then equivalent to componentDidUpdate)
     useEffect(() => {
         // is fired on component mount
         const reqRowId = ActionURL.getParameter('requestRowId');
         setRequestId(reqRowId);
+
+        setIsRequester(hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission);
+        setIsReceiver(hasPurchasingUpdatePermission && !hasPurchasingAdminPermission);
+        setIsPurchaseAdmin(hasPurchasingAdminPermission);
 
         (async () => {
             //get QCStates
@@ -454,9 +461,9 @@ export const App: FC = memo(() => {
                     onInputChange={requestOrderModelChange}
                     model={requestOrderModel}
                     hasRequestId={!!requestId}
-                    isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
-                    isAdmin={hasPurchasingAdminPermission}
-                    isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                    isRequester={isRequester}
+                    isAdmin={isPurchaseAdmin}
+                    isReceiver={isReceiver}
                     isReorder={isReorder}
                 />
                 {
@@ -478,9 +485,9 @@ export const App: FC = memo(() => {
                     lineItems={lineItems}
                     errorMsg={lineItemErrorMsg}
                     hasRequestId={!!requestId}
-                    isRequester={hasPurchasingInsertPermission && !hasPurchasingAdminPermission && !hasPurchasingUpdatePermission}
-                    isAdmin={hasPurchasingAdminPermission}
-                    isReceiver={hasPurchasingUpdatePermission && !hasPurchasingAdminPermission}
+                    isRequester={isRequester}
+                    isAdmin={isPurchaseAdmin}
+                    isReceiver={isReceiver}
                     isReorder={isReorder}
                 />
                 <button
@@ -505,7 +512,7 @@ export const App: FC = memo(() => {
                                     {requestId && !isReorder ? 'Submit' : 'Submit for Review'}
                                 </button>
                                 {
-                                    (requestId && !isReorder) && (
+                                    (requestId && !isReorder && !isReceiver) && (
                                     <button
                                         className="btn btn-primary pull-right"
                                         style={{marginRight:'10px'}}

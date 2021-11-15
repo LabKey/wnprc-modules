@@ -78,7 +78,7 @@ JOIN (
         LEFT JOIN ehr_lookups.treatment_frequency_times ft ON (ft.frequency = t1.frequency.meaning)
 
         INNER JOIN
-            ehr_lookups.husbandry_frequency hf
+            wnprc.husbandry_frequency hf
             -- Frequencies that are not daily, we used the dayofweek tp populate schedule
             -- If daily it shows every day.
             ON (

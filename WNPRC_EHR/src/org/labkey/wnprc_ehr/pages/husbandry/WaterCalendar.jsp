@@ -46,7 +46,7 @@
     SimpleQuery assignedToOptions = queryFactory.makeQuery("ehr_lookups", "husbandry_assigned");
     List<JSONObject> assignedToList= JsonUtils.getSortedListFromJSONArray(assignedToOptions.getResults().getJSONArray("rows"),"title");
 
-    SimpleQuery husbandryFrequency = queryFactory.makeQuery("ehr_lookups", "husbandry_frequency");
+    SimpleQuery husbandryFrequency = queryFactory.makeQuery("wnprc", "husbandry_frequency");
     List<JSONObject> husbandryFrequencyList= JsonUtils.getSortedListFromJSONArray(husbandryFrequency.getResults().getJSONArray("rows"),"altmeaning");
 
     SimpleQuery husbandryFruit = queryFactory.makeQuery("ehr_lookups", "husbandry_fruit");
@@ -109,7 +109,7 @@
     boolean isVet = getUser().isInGroup(vetGroup.getUserId()) || getUser().isInSiteAdminGroup();
     boolean isCompliance = getUser().isInGroup(complianceGroup.getUserId()) || getUser().isInSiteAdminGroup();
 
-    //List<JSONObject> husbandryFrequency = JsonUtils.getListFromJSONArray(queryFactory.selectRows("ehr_lookups", "husbandry_frequency"));
+    //List<JSONObject> husbandryFrequency = JsonUtils.getListFromJSONArray(queryFactory.selectRows("wnprc", "husbandry_frequency"));
 
 %>
 

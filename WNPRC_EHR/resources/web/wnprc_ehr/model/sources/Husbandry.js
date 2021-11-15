@@ -571,7 +571,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                     displayColumn: 'altmeaning'
                 },
                 lookup:{
-                    schemaName: 'ehr_lookups',
+                    schemaName: 'wnprc',
                     queryName: 'husbandry_frequency',
                     keyColumn: 'rowid',
                     displayColumn: 'altmeaning',
@@ -692,7 +692,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 //allowBlank: false,
                 defaultValue: 2,
                 lookup:{
-                    schemaName: 'ehr_lookups',
+                    schemaName: 'wnprc',
                     queryName: 'husbandry_frequency',
                     keyColumn: 'rowid',
                     displayColumn: 'meaning',

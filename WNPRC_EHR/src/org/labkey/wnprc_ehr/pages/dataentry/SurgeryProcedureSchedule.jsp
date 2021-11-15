@@ -96,6 +96,18 @@
 
 <script type="text/javascript">
 
+    if (!String.prototype.includes) {
+        String.prototype.includes = function(search, start) {
+            'use strict';
+
+            if (search instanceof RegExp) {
+                throw TypeError('first argument must not be a RegExp');
+            }
+            if (start === undefined) { start = 0; }
+            return this.indexOf(search, start) !== -1;
+        };
+    }
+
     let blockObj = {
         message: '<img src="<%=getContextPath()%>/webutils/icons/loading.svg">Processing...',
         css: {
@@ -108,6 +120,51 @@
             color: '#fff'
         }
     };
+
+    function clearSearchTerm(search) {
+        document.getElementById("calendarSearchField").value = "";
+        searchTerm = "";
+        if (search) {
+            searchCalendarEvents();
+        }
+    }
+
+    function setSearchTerm(search) {
+        searchTerm = document.getElementById("calendarSearchField").value || "";
+        searchTerm = searchTerm.toLowerCase();
+        if (search) {
+            searchCalendarEvents();
+        }
+    }
+
+    function searchCalendarEvents() {
+        let allEvents = [];
+
+        //group all events into a single array for easy iteration
+        let keys = Object.keys(calendarEvents);
+        keys.sort((a, b) => a.localeCompare(b, "en", {sensitivity: "base"}));
+        for (let i = 0; i < keys.length; i++) {
+            if (calendarEvents.hasOwnProperty(keys[i])) {
+                allEvents = allEvents.concat(calendarEvents[keys[i]].events)
+            }
+        }
+
+        //render all of the matching events at the same time as a batch
+        calendar.batchRendering(() => {
+            for (let i = 0; i < allEvents.length; i++) {
+                let event = calendar.getEventById(allEvents[i].id);
+
+                //check if the search term is in the title or body of the event
+                if (((event.title && event.title.toLowerCase().includes(searchTerm))
+                        || (event.extendedProps.body && event.extendedProps.body.toLowerCase().includes(searchTerm)))
+                        && (document.getElementById(event.extendedProps.calendarId + "_checkbox").checked)) {
+                    event.setProp("display", "auto");
+                } else {
+                    event.setProp("display", "none");
+                }
+            }
+        });
+    }
 
     function createUnitSelectDiv(label, id) {
         let mainDiv = document.createElement("div");
@@ -1159,8 +1216,15 @@
 
     <div class="col-xs-12 col-md-6">
         <div id="procedure-calendar" class="panel panel-primary">
-            <div class="panel-heading"><span>Calendar</span></div>
-            <div class="panel-body">
+            <div class="panel-heading">
+                <a class="btn btn-primary" data-toggle="collapse" href="#calendar-collapsible" aria-controls="calendar-collapsible" aria-expanded="true">Calendar</a>
+                <span style="float: right">Search
+                    <input style="color: black;border-radius: 5px;" type="search" id="calendarSearchField" name="calendarSearchField">
+                    <button onclick="clearSearchTerm(true)" class="btn btn-primary" style="background-color: inherit" type="button"><i class="fa fa-times-circle"></i></button>
+<%--                    <button onclick="setSearchTerm(true)" class="btn btn-primary" style="background-color: inherit" type="button"><i class="fa fa-search"></i></button>--%>
+                </span>
+            </div>
+            <div class="panel-body collapse in" id="calendar-collapsible" aria-expanded="true">
                 <div id="calendar"></div>
             </div>
         </div>
@@ -1307,8 +1371,15 @@
     let calendarEvents = {};
     let pendingRequestsIndex = {};
     let pendingRoomsIndex = {};
+    let searchTerm = "";
 
     (function() {
+        document.getElementById('calendarSearchField').onkeydown = function(event) {
+            if (event.key === "Enter") {
+                setSearchTerm(true);
+            }
+        }
+
         let calendarEl = document.getElementById('calendar');
 
         calendarEl.addEventListener("click", function(clickEvent) {
@@ -1373,7 +1444,7 @@
                                 if (calendarEvents) {
                                     for (let cal in calendarEvents) {
                                         if (calendarEvents.hasOwnProperty(cal)) {
-                                            let calCheckbox = document.getElementById(cal);
+                                            let calCheckbox = document.getElementById(cal + "_checkbox");
                                             if (calCheckbox.checked != isChecked) {
                                                 calCheckbox.click();
                                             }
@@ -1403,10 +1474,10 @@
                                 let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                                 let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 
-                                div.id = data.rows[i].calendar_id + '_checkbox';
+                                div.id = data.rows[i].calendar_id + "_checkboxDiv";
 
                                 checkbox.type = 'checkbox';
-                                checkbox.id = data.rows[i].calendar_id;
+                                checkbox.id = data.rows[i].calendar_id + "_checkbox";
                                 if (data.rows[i].show_by_default) {
                                     checkbox.checked = true;
                                 } else {
@@ -1415,12 +1486,19 @@
                                 checkbox.value = '';
                                 checkbox.addEventListener('change', function() {
                                     if (calendar) {
-                                        let calId = this.id;
+                                        let calId = this.id.slice(this.id, this.id.indexOf("_checkbox"));
                                         let events = calendarEvents[calId].events;
-                                        let displayProp = this.checked ? "auto" : "none";
+                                        let isChecked = this.checked ? true : false;
                                         calendar.batchRendering(() => {
                                             for (let i = 0; i < events.length; i++) {
-                                                calendar.getEventById(events[i].id).setProp("display", displayProp);
+                                                let event = calendar.getEventById(events[i].id);
+                                                if (((event.title && event.title.toLowerCase().includes(searchTerm))
+                                                        || (event.extendedProps.body && event.extendedProps.body.toLowerCase().includes(searchTerm)))
+                                                        && (isChecked)) {
+                                                    event.setProp("display", "auto");
+                                                } else {
+                                                    event.setProp("display", "none");
+                                                }
                                             }
                                             if (placeholderEvents[calId]) {
                                                 for (let i = 0; i < placeholderEvents[calId].length; i++) {

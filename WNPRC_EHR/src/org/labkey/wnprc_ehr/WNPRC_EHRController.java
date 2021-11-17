@@ -1817,7 +1817,7 @@ public class WNPRC_EHRController extends SpringActionController
                     insertRecords(newRoomRows, "wnprc", "procedure_scheduled_rooms");
 
                     Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
-                    boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), rooms, event.getSubject(), requestId, response);
+                    boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), rooms, event.getSubject(), null, requestId, response);
 
                     if (eventsScheduled)
                     {
@@ -2061,7 +2061,7 @@ public class WNPRC_EHRController extends SpringActionController
                 insertRecord(roomRecord, "wnprc", "procedure_scheduled_rooms");
 
                 Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
-                boolean eventsScheduled = calendar.addEvents(parentCalendar, rooms, event.getSubject(), requestId, response);
+                boolean eventsScheduled = calendar.addEvents(parentCalendar, rooms, event.getSubject(), event.getBody(), requestId, response);
 
                 if (eventsScheduled)
                 {
@@ -2098,7 +2098,7 @@ public class WNPRC_EHRController extends SpringActionController
             JSONObject response = new JSONObject();
             response.put("success", false);
             Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
-            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), event.getRooms(), event.getSubject(), event.getRequestId(), response);
+            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), event.getRooms(), event.getSubject(), null, event.getRequestId(), response);
 
             String qcStateLabel = "Scheduled";
             if (event.getCalendarId().endsWith("on_hold")) {

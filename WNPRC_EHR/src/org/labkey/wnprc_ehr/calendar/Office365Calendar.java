@@ -204,7 +204,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
         return true;
     }
 
-    public boolean addEvents(String calendarId, JSONArray roomRequests, String subject, String requestId, JSONObject response) throws IOException {
+    public boolean addEvents(String calendarId, JSONArray roomRequests, String subject, String body, String requestId, JSONObject response) throws IOException {
         if (response == null) {
             response = new JSONObject();
         }
@@ -241,6 +241,9 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 Properties props = new Properties();
                 props.setProperty("requestid", requestId);
                 props.setProperty("objectid", (String) roomRequest.get("objectid"));
+                if (body != null && body.trim().length() > 0) {
+                    props.setProperty("body", body);
+                }
 
                 Event newEvent = Graph.buildEvent(startTime, endTime, subject, props, null, attendees, false);
                 Event createdEvent = Graph.createEvent(getAccessToken(getAccountNames().get(calendarId)), getBaseCalendars().get(calendarId), newEvent);
@@ -339,6 +342,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             eventProps.load(new StringReader(event.body.content));
             String requestId = Jsoup.parse(eventProps.getProperty("requestid")).text();
             String objectId = Jsoup.parse(eventProps.getProperty("objectid")).text();
+            String body = eventProps.getProperty("body") != null ? Jsoup.parse(eventProps.getProperty("body")).text() : "";
 
             JSONObject surgeryInfo = surgeryRequestResults.get(requestId);
             //Skip the event if there's not a corresponding record in the study.surgery_procedure dataset
@@ -409,6 +413,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                         extendedProps.put("isUnmanaged", false);
                         extendedProps.put("isTransitional", false);
                         extendedProps.put("selected", false);
+                        extendedProps.put("body", body);
                         jsonEvent.put("extendedProps", extendedProps);
                     }
                     ((JSONArray) allJsonEvents.get(currentCalName)).put(jsonEvent);

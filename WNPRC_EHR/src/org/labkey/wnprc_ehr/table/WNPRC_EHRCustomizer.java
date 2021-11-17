@@ -423,21 +423,23 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         {
             String mostRecentAlopeciaScore = "mostRecentAlopeciaScore";
             TableInfo alopecia = getRealTableForDataset(table, "alopecia");
-
-            String theQuery  = "( " +
-                    "(SELECT " +
+            if (null != alopecia)
+            {
+                String theQuery = "( " +
+                        "(SELECT " +
                         "a.score as score " +
-                    "FROM studydataset." +alopecia.getName() + " a " +
-                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
-                    ")";
+                        "FROM studydataset." + alopecia.getName() + " a " +
+                        "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                        ")";
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Alopecia Score");
-            newCol.setDescription("Calculates the most recent alopecia score for each animal");
-            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Alopecia Score");
+                newCol.setDescription("Calculates the most recent alopecia score for each animal");
+                newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
+                table.addColumn(newCol);
+            }
         }
 
         if (table.getColumn("mostRecentBodyConditionScore") == null)

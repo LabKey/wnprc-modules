@@ -423,42 +423,46 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         {
             String mostRecentAlopeciaScore = "mostRecentAlopeciaScore";
             TableInfo alopecia = getRealTableForDataset(table, "alopecia");
-
-            String theQuery  = "( " +
-                    "(SELECT " +
+            if (null != alopecia)
+            {
+                String theQuery = "( " +
+                        "(SELECT " +
                         "a.score as score " +
-                    "FROM studydataset." +alopecia.getName() + " a " +
-                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
-                    ")";
+                        "FROM studydataset." + alopecia.getName() + " a " +
+                        "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                        ")";
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Alopecia Score");
-            newCol.setDescription("Calculates the most recent alopecia score for each animal");
-            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Alopecia Score");
+                newCol.setDescription("Calculates the most recent alopecia score for each animal");
+                newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
+                table.addColumn(newCol);
+            }
         }
 
         if (table.getColumn("mostRecentBodyConditionScore") == null)
         {
             String mostRecentBodyConditionScore = "mostRecentBodyConditionScore";
             TableInfo bcs = getRealTableForDataset(table, "bcs");
+            if (null != bcs)
+            {
+                String theQuery = "( " +
+                        "(SELECT " +
+                        "a.score as score " +
+                        "FROM studydataset." + bcs.getName() + " a " +
+                        "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                        ")";
 
-            String theQuery  = "( " +
-                    "(SELECT " +
-                    "a.score as score " +
-                    "FROM studydataset." +bcs.getName() + " a " +
-                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
-                    ")";
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            SQLFragment sql = new SQLFragment(theQuery);
-
-            ExprColumn newCol = new ExprColumn(table, mostRecentBodyConditionScore, sql, JdbcType.VARCHAR);
-            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=body_condition_scores"));
-            newCol.setLabel("Most Recent BCS");
-            newCol.setDescription("Returns the participant's most recent body condition score");
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, mostRecentBodyConditionScore, sql, JdbcType.VARCHAR);
+                newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=body_condition_scores"));
+                newCol.setLabel("Most Recent BCS");
+                newCol.setDescription("Returns the participant's most recent body condition score");
+                table.addColumn(newCol);
+            }
         }
         if (table.getColumn("necropsyAbstractNotes") == null)
         {
@@ -472,46 +476,49 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String origin = "origin";
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo arrival = getRealTableForDataset(table, "arrival");
-
-            // Here we want a union of the birth and arrival tables to get the origin of the animal
-            String arrivalAndBirthUnion = "( " +
-                    "SELECT " +
+            if (null != birth && null != arrival)
+            {
+                // Here we want a union of the birth and arrival tables to get the origin of the animal
+                String arrivalAndBirthUnion = "( " +
+                        "SELECT " +
                         "a.source as source, " +
                         "a.date as date," +
                         "a.participantid as participantid " +
-                    "FROM studydataset." +arrival.getName() + " a " +
+                        "FROM studydataset." + arrival.getName() + " a " +
 
-                    "WHERE a.source is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "WHERE a.source is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
 
-                    "UNION ALL " +
+                        "UNION ALL " +
 
-                    "SELECT " +
+                        "SELECT " +
                         "b.origin as source," +
                         "b.date as date," +
                         "b.participantid as participantid " +
-                    "FROM studydataset." + birth.getName() + " b " +
+                        "FROM studydataset." + birth.getName() + " b " +
 
-                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                    ")";
+                        "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        ")";
 
-            String theQuery = "(" +
-                    "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date DESC LIMIT 1" +
-                    ")";
+                String theQuery = "(" +
+                        "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date DESC LIMIT 1" +
+                        ")";
 
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, origin, sql, JdbcType.VARCHAR);
-            //String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}";
+                ExprColumn newCol = new ExprColumn(table, origin, sql, JdbcType.VARCHAR);
+                //String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}";
 
-            //newCol.setURL(StringExpressionFactory.createURL(url));
-            newCol.setLabel("Source/Vendor");
-            newCol.setDescription("Returns the animal's original source from an arrival or birth record.");
-            UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
-            newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "source", "code", "meaning"));
-            newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}"));
-            table.addColumn(newCol);
+                //newCol.setURL(StringExpressionFactory.createURL(url));
+                newCol.setLabel("Source/Vendor");
+                newCol.setDescription("Returns the animal's original source from an arrival or birth record.");
+                UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
+                newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "source", "code", "meaning"));
+                newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}"));
+                table.addColumn(newCol);
+            }
         }
+
         // Here we want a custom query since the getWrappedIdCol model did not work for us for the following requirements:
         // 1. Show the geographic origin if the query is able to calculate it.
         // 2. Show blank (and not the broken lookup with the id inside of <angle brackets>) if we don't have the info.

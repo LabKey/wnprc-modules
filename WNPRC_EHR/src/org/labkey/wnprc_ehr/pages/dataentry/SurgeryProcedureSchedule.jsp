@@ -154,13 +154,16 @@
             for (let i = 0; i < allEvents.length; i++) {
                 let event = calendar.getEventById(allEvents[i].id);
 
-                //check if the search term is in the title or body of the event
-                if (((event.title && event.title.toLowerCase().includes(searchTerm))
-                        || (event.extendedProps.body && event.extendedProps.body.toLowerCase().includes(searchTerm)))
-                        && (document.getElementById(event.extendedProps.calendarId + "_checkbox").checked)) {
-                    event.setProp("display", "auto");
-                } else {
-                    event.setProp("display", "none");
+                if (event) {
+                    //check if the search term is in the title or body of the event
+                    if (((event.title && event.title.toLowerCase().includes(searchTerm))
+                            || (event.extendedProps.body && event.extendedProps.body.toLowerCase().includes(searchTerm)))
+                            && (document.getElementById(event.extendedProps.calendarId + "_checkbox").checked)) {
+                        event.setProp("display", "auto");
+                    }
+                    else {
+                        event.setProp("display", "none");
+                    }
                 }
             }
         });
@@ -722,8 +725,18 @@
             method: "POST",
             success: LABKEY.Utils.getCallbackWrapper(function (response) {
                 if (response.success) {
-                    //First remove the 'old' event from the calendarEvents object as well as on fullcalendar
-                    mainEvent?.remove();
+                    let mainEventId = mainEvent?.extendedProps?.eventId;
+                    ////Remove the 'old' transitional event from the calendarEvents object as well as on fullcalendar (if applicable)
+                    if (mainEventId) {
+                        let cal = mainEvent.extendedProps.calendarId;
+                        for (let j = calendarEvents[cal].events.length - 1; j >= 0; j--) {
+                            let eventId = calendarEvents[cal].events[j].extendedProps.eventId;
+                            if (eventId && eventId === mainEventId) {
+                                calendarEvents[cal].events.splice(j, 1);
+                            }
+                        }
+                        mainEvent?.remove();
+                    }
 
                     //Then add the updated event back to the calendarEvents object as well as on the fullcalendar
                     for (let cal in response.events) {

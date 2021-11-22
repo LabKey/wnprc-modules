@@ -423,42 +423,46 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         {
             String mostRecentAlopeciaScore = "mostRecentAlopeciaScore";
             TableInfo alopecia = getRealTableForDataset(table, "alopecia");
-
-            String theQuery  = "( " +
-                    "(SELECT " +
+            if (null != alopecia)
+            {
+                String theQuery = "( " +
+                        "(SELECT " +
                         "a.score as score " +
-                    "FROM studydataset." +alopecia.getName() + " a " +
-                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
-                    ")";
+                        "FROM studydataset." + alopecia.getName() + " a " +
+                        "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                        ")";
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Alopecia Score");
-            newCol.setDescription("Calculates the most recent alopecia score for each animal");
-            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, mostRecentAlopeciaScore, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Alopecia Score");
+                newCol.setDescription("Calculates the most recent alopecia score for each animal");
+                newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
+                table.addColumn(newCol);
+            }
         }
 
         if (table.getColumn("mostRecentBodyConditionScore") == null)
         {
             String mostRecentBodyConditionScore = "mostRecentBodyConditionScore";
             TableInfo bcs = getRealTableForDataset(table, "bcs");
+            if (null != bcs)
+            {
+                String theQuery = "( " +
+                        "(SELECT " +
+                        "a.score as score " +
+                        "FROM studydataset." + bcs.getName() + " a " +
+                        "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
+                        ")";
 
-            String theQuery  = "( " +
-                    "(SELECT " +
-                    "a.score as score " +
-                    "FROM studydataset." +bcs.getName() + " a " +
-                    "WHERE a.score is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid  ORDER by a.date DESC LIMIT 1)  " +
-                    ")";
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            SQLFragment sql = new SQLFragment(theQuery);
-
-            ExprColumn newCol = new ExprColumn(table, mostRecentBodyConditionScore, sql, JdbcType.VARCHAR);
-            newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=body_condition_scores"));
-            newCol.setLabel("Most Recent BCS");
-            newCol.setDescription("Returns the participant's most recent body condition score");
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, mostRecentBodyConditionScore, sql, JdbcType.VARCHAR);
+                newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=body_condition_scores"));
+                newCol.setLabel("Most Recent BCS");
+                newCol.setDescription("Returns the participant's most recent body condition score");
+                table.addColumn(newCol);
+            }
         }
         if (table.getColumn("necropsyAbstractNotes") == null)
         {
@@ -472,46 +476,49 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             String origin = "origin";
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo arrival = getRealTableForDataset(table, "arrival");
-
-            // Here we want a union of the birth and arrival tables to get the origin of the animal
-            String arrivalAndBirthUnion = "( " +
-                    "SELECT " +
+            if (null != birth && null != arrival)
+            {
+                // Here we want a union of the birth and arrival tables to get the origin of the animal
+                String arrivalAndBirthUnion = "( " +
+                        "SELECT " +
                         "a.source as source, " +
                         "a.date as date," +
                         "a.participantid as participantid " +
-                    "FROM studydataset." +arrival.getName() + " a " +
+                        "FROM studydataset." + arrival.getName() + " a " +
 
-                    "WHERE a.source is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "WHERE a.source is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
 
-                    "UNION ALL " +
+                        "UNION ALL " +
 
-                    "SELECT " +
+                        "SELECT " +
                         "b.origin as source," +
                         "b.date as date," +
                         "b.participantid as participantid " +
-                    "FROM studydataset." + birth.getName() + " b " +
+                        "FROM studydataset." + birth.getName() + " b " +
 
-                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                    ")";
+                        "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        ")";
 
-            String theQuery = "(" +
-                    "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date DESC LIMIT 1" +
-                    ")";
+                String theQuery = "(" +
+                        "SELECT source FROM " + arrivalAndBirthUnion + " w ORDER BY w.date DESC LIMIT 1" +
+                        ")";
 
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, origin, sql, JdbcType.VARCHAR);
-            //String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}";
+                ExprColumn newCol = new ExprColumn(table, origin, sql, JdbcType.VARCHAR);
+                //String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}";
 
-            //newCol.setURL(StringExpressionFactory.createURL(url));
-            newCol.setLabel("Source/Vendor");
-            newCol.setDescription("Returns the animal's original source from an arrival or birth record.");
-            UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
-            newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "source", "code", "meaning"));
-            newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}"));
-            table.addColumn(newCol);
+                //newCol.setURL(StringExpressionFactory.createURL(url));
+                newCol.setLabel("Source/Vendor");
+                newCol.setDescription("Returns the animal's original source from an arrival or birth record.");
+                UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
+                newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "source", "code", "meaning"));
+                newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${origin}"));
+                table.addColumn(newCol);
+            }
         }
+
         // Here we want a custom query since the getWrappedIdCol model did not work for us for the following requirements:
         // 1. Show the geographic origin if the query is able to calculate it.
         // 2. Show blank (and not the broken lookup with the id inside of <angle brackets>) if we don't have the info.
@@ -523,45 +530,48 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo arrival = getRealTableForDataset(table, "arrival");
 
-            // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
-            String arrivalAndBirthUnion = "( " +
-                    "SELECT " +
+            if (null != birth && null != arrival)
+            {
+                // Here we want a union of the birth and arrival tables to get the geographic origin of the animal
+                String arrivalAndBirthUnion = "( " +
+                        "SELECT " +
                         "a.geographic_origin as origin, " +
                         "a.date as date," +
                         "a.participantid as participantid " +
-                    "FROM studydataset." +arrival.getName() + " a " +
+                        "FROM studydataset." + arrival.getName() + " a " +
 
-                    "WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "WHERE a.geographic_origin is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
 
-                    "UNION ALL " +
+                        "UNION ALL " +
 
-                    "SELECT " +
+                        "SELECT " +
                         "b.origin as origin," +
                         "b.date as date," +
                         "b.participantid as participantid " +
-                    "FROM studydataset." + birth.getName() + " b " +
+                        "FROM studydataset." + birth.getName() + " b " +
 
-                    "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                    ")";
+                        "WHERE b.origin is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        ")";
 
-            String theQuery = "(" +
-                    "SELECT " +
+                String theQuery = "(" +
+                        "SELECT " +
                         "CASE WHEN origin = 'cen'" +
                         "THEN 'domestic' " +
                         "ELSE origin " +
                         "END AS geographic_origin " +
-                    "FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
-                    ")";
+                        "FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
+                        ")";
 
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, geographicOrigin, sql, JdbcType.VARCHAR);
-            String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=geographic_origins&meaning=${geographic_origin}";
-            newCol.setURL(StringExpressionFactory.createURL(url));
-            newCol.setLabel("Geographic Origin");
-            newCol.setDescription("This column is the geographic origin");
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, geographicOrigin, sql, JdbcType.VARCHAR);
+                String url = "query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=geographic_origins&meaning=${geographic_origin}";
+                newCol.setURL(StringExpressionFactory.createURL(url));
+                newCol.setLabel("Geographic Origin");
+                newCol.setDescription("This column is the geographic origin");
+                table.addColumn(newCol);
+            }
         }
         if (table.getColumn("ancestry") == null)
         {
@@ -570,40 +580,43 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo arrival = getRealTableForDataset(table, "arrival");
 
             // Here we want a union of the birth and arrival tables to get the ancestry of the animal
-            String arrivalAndBirthUnion = "( " +
-                    "SELECT " +
+            if (null != birth && null != arrival)
+            {
+                String arrivalAndBirthUnion = "( " +
+                        "SELECT " +
                         "a.ancestry as ancestry, " +
                         "a.date as date," +
                         "a.participantid as participantid " +
-                    "FROM studydataset." + arrival.getName() + " a " +
+                        "FROM studydataset." + arrival.getName() + " a " +
 
-                    "WHERE a.ancestry is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "WHERE a.ancestry is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
 
-                    "UNION ALL " +
+                        "UNION ALL " +
 
-                    "SELECT " +
+                        "SELECT " +
                         "b.ancestry as ancestry," +
                         "b.date as date," +
                         "b.participantid as participantid " +
-                    "FROM studydataset." + birth.getName() + " b " +
+                        "FROM studydataset." + birth.getName() + " b " +
 
-                    "WHERE b.ancestry is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                    ")";
+                        "WHERE b.ancestry is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        ")";
 
-            String theQuery = "(" +
-                    "SELECT ancestry FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
-                    ")";
+                String theQuery = "(" +
+                        "SELECT ancestry FROM " + arrivalAndBirthUnion + " w ORDER BY w.date ASC LIMIT 1" +
+                        ")";
 
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, ancestry, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Ancestry");
-            newCol.setDescription("Returns the animal's ancestry.");
-            UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
-            newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "ancestry", "rowid", "value"));
-            newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${ancestry}"));
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, ancestry, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Ancestry");
+                newCol.setDescription("Returns the animal's ancestry.");
+                UserSchema ehrLookupsSchema = getUserSchema(table, "ehr_lookups");
+                newCol.setFk(new QueryForeignKey(ehrLookupsSchema, null, "ancestry", "rowid", "value"));
+                newCol.setURL(StringExpressionFactory.create("query-detailsQueryRow.view?schemaName=ehr_lookups&query.queryName=source&code=${ancestry}"));
+                table.addColumn(newCol);
+            }
         }
         if (table.getColumn("birth") == null)
         {
@@ -611,56 +624,62 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo arrival = getRealTableForDataset(table, "arrival");
 
-            // Here we want a union of the birth and arrival tables to get the ancestry of the animal
-            String arrivalAndBirthUnion = "( " +
-                    "SELECT " +
+            if (null != birth && null != arrival)
+            {
+                // Here we want a union of the birth and arrival tables to get the ancestry of the animal
+                String arrivalAndBirthUnion = "( " +
+                        "SELECT " +
                         "a.birth as birth, " +
                         "a.participantid as participantid, " +
                         "a.modified as modified " +
-                    "FROM studydataset." + arrival.getName() + " a " +
+                        "FROM studydataset." + arrival.getName() + " a " +
 
-                    "WHERE a.birth is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "WHERE a.birth is not null and a.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
 
-                    "UNION ALL " +
+                        "UNION ALL " +
 
-                    "SELECT " +
+                        "SELECT " +
                         "b.date as birth," +
                         "b.participantid as participantid, " +
                         "b.modified as modified " +
-                    "FROM studydataset." + birth.getName() + " b " +
+                        "FROM studydataset." + birth.getName() + " b " +
 
-                    "WHERE b.date is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                    ")";
+                        "WHERE b.date is not null and b.participantid=" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        ")";
 
-            String theQuery = "(" +
-                    "SELECT birth FROM " + arrivalAndBirthUnion + " w ORDER BY w.modified DESC LIMIT 1" +
-                    ")";
+                String theQuery = "(" +
+                        "SELECT birth FROM " + arrivalAndBirthUnion + " w ORDER BY w.modified DESC LIMIT 1" +
+                        ")";
 
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, birthColumn, sql, JdbcType.DATE);
-            newCol.setLabel("Birth");
-            newCol.setDescription("Returns the animal's birth date.");
-            //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=study&query.queryName=Birth&query.Id~eq={id}"));
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, birthColumn, sql, JdbcType.DATE);
+                newCol.setLabel("Birth");
+                newCol.setDescription("Returns the animal's birth date.");
+                //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=study&query.queryName=Birth&query.Id~eq={id}"));
+                table.addColumn(newCol);
+            }
         }
         if (table.getColumn("vendor_id") == null)
         {
             String vendorIdColumn = "vendor_id";
             TableInfo arrival = getRealTableForDataset(table, "arrival");
 
-            String theQuery = "(" +
-                    "SELECT vendor_id FROM studydataset." + arrival.getName() + " w where w.participantid="
-                      + ExprColumn.STR_TABLE_ALIAS + ".participantid and w.vendor_id is not null LIMIT 1" +
-                    ")";
+            if (null != arrival)
+            {
+                String theQuery = "(" +
+                        "SELECT vendor_id FROM studydataset." + arrival.getName() + " w where w.participantid="
+                        + ExprColumn.STR_TABLE_ALIAS + ".participantid and w.vendor_id is not null LIMIT 1" +
+                        ")";
 
-            SQLFragment sql = new SQLFragment(theQuery);
+                SQLFragment sql = new SQLFragment(theQuery);
 
-            ExprColumn newCol = new ExprColumn(table, vendorIdColumn, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Vendor ID");
-            newCol.setDescription("Returns the animal's original vendor id.");
-            table.addColumn(newCol);
+                ExprColumn newCol = new ExprColumn(table, vendorIdColumn, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Vendor ID");
+                newCol.setDescription("Returns the animal's original vendor id.");
+                table.addColumn(newCol);
+            }
         }
 
         if (table.getColumn("sire") == null)
@@ -670,64 +689,66 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo demographics = getRealTableForDataset(table, "demographics");
 
-            // Here we want a union of the birth and arrival tables to get the sire of the animal
-            // For the given demographic animal id, it checks the arrival records to see if there is a matching sire
-            //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the sire as long as the species between the two are the same
-            //  if that is not the case, it will fall back on the arrival and birth records, and if still no sire found in arrival or births,
-            //  we fall back on the "old" data in the demographic table, called sire_old
-            String arrivalAndBirthQuery = "( " +
-                    "SELECT " +
+            if (null != arrival && null != birth && null != demographics)
+            {
+                // For the given demographic animal id, it checks the arrival records to see if there is a matching sire
+                //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the sire as long as the species between the two are the same
+                //  if that is not the case, it will fall back on the arrival and birth records, and if still no sire found in arrival or births,
+                //  we fall back on the "old" data in the demographic table, called sire_old
+                String arrivalAndBirthQuery = "( " +
+                        "SELECT " +
                         "COALESCE ( " +
-                            "(SELECT " +
-                                "a.participantid as sire " +
-                            "FROM " +
-                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
-                            " WHERE " +
-                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.sire) AND lower(a.vendor_id) != lower(a.participantid) " +
-                                " AND (SELECT x.species from studydataset." + demographics.getName() +" x WHERE x.participantid = a.participantid) =  " +
-                                " (SELECT y.species from studydataset." + demographics.getName() +" y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
-                            "ORDER BY " +
-                                "b.modified DESC " +
-                            "LIMIT 1), " +
+                        "(SELECT " +
+                        "a.participantid as sire " +
+                        "FROM " +
+                        "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                        " WHERE " +
+                        " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.sire) AND lower(a.vendor_id) != lower(a.participantid) " +
+                        " AND (SELECT x.species from studydataset." + demographics.getName() + " x WHERE x.participantid = a.participantid) =  " +
+                        " (SELECT y.species from studydataset." + demographics.getName() + " y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
+                        "ORDER BY " +
+                        "b.modified DESC " +
+                        "LIMIT 1), " +
 
-                            "(SELECT " +
-                                "sire " +
-                            "FROM " +
-                                "studydataset." + arrival.getName() +
-                            " WHERE " +
-                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                            "ORDER BY " +
-                                "modified DESC " +
-                            "LIMIT 1), " +
+                        "(SELECT " +
+                        "sire " +
+                        "FROM " +
+                        "studydataset." + arrival.getName() +
+                        " WHERE " +
+                        "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "ORDER BY " +
+                        "modified DESC " +
+                        "LIMIT 1), " +
 
-                            "(SELECT " +
-                                "sire " +
-                            "FROM " +
-                                "studydataset." + birth.getName() +
-                            " WHERE " +
-                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                            "ORDER BY " +
-                                "modified DESC" +
-                            " LIMIT 1), " +
+                        "(SELECT " +
+                        "sire " +
+                        "FROM " +
+                        "studydataset." + birth.getName() +
+                        " WHERE " +
+                        "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "ORDER BY " +
+                        "modified DESC" +
+                        " LIMIT 1), " +
 
-                            "(SELECT " +
-                                "sire_old " +
-                            "FROM " +
-                                "studydataset." + demographics.getName() +
-                            " WHERE " +
-                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                            " LIMIT 1) " +
+                        "(SELECT " +
+                        "sire_old " +
+                        "FROM " +
+                        "studydataset." + demographics.getName() +
+                        " WHERE " +
+                        "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        " LIMIT 1) " +
                         ") AS sire " +
-                    ")";
-            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
-            ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Sire");
-            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
-                    "'real' animal id if a matching vendor id was found and the species of the animals are matching, " +
-                    "if not found it will use whatever is in the " +
-                    "arrival record, if not found, it then checks birth records, and if no sire is found there, it " +
-                    "then finally uses the historic demographic text field called 'sire_old' as the sire.");
-            table.addColumn(newCol);
+                        ")";
+                SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+                ExprColumn newCol = new ExprColumn(table, sire_new, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Sire");
+                newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                        "'real' animal id if a matching vendor id was found and the species of the animals are matching, " +
+                        "if not found it will use whatever is in the " +
+                        "arrival record, if not found, it then checks birth records, and if no sire is found there, it " +
+                        "then finally uses the historic demographic text field called 'sire_old' as the sire.");
+                table.addColumn(newCol);
+            }
         }
         if (table.getColumn("dam") == null)
         {
@@ -736,65 +757,68 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             TableInfo birth = getRealTableForDataset(table, "birth");
             TableInfo demographics = getRealTableForDataset(table, "demographics");
 
-            // Here we want a union of the birth and arrival tables to get the dam of the animal
-            // For the given demographic animal id, it checks the arrival records to see if there is a matching dam
-            //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the dam, as long as the species between the two are the same
-            //  if that is not the case, it will fall back on the arrival and birth records, and if still no dam found in arrival or births,
-            //  we fall back on the "old" data in the demographic table, called dam_old
-            String arrivalAndBirthQuery = "( " +
-                    "SELECT " +
+            if (null != arrival && null != birth && null != demographics)
+            {
+                // Here we want a union of the birth and arrival tables to get the dam of the animal
+                // For the given demographic animal id, it checks the arrival records to see if there is a matching dam
+                //  which is the actual vendor ID of an animal that arrived at the center, and it uses that animal's id as the dam, as long as the species between the two are the same
+                //  if that is not the case, it will fall back on the arrival and birth records, and if still no dam found in arrival or births,
+                //  we fall back on the "old" data in the demographic table, called dam_old
+                String arrivalAndBirthQuery = "( " +
+                        "SELECT " +
                         "COALESCE ( " +
-                            "(SELECT " +
-                                "a.participantid as dam " +
-                            "FROM " +
-                                "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
-                            " WHERE " +
-                                " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.dam) AND lower(a.vendor_id) != lower(a.participantid) " +
-                                " AND (SELECT x.species from studydataset." + demographics.getName() +" x WHERE x.participantid = a.participantid) =  " +
-                                " (SELECT y.species from studydataset." + demographics.getName() +" y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
-                            "ORDER BY " +
-                                "b.modified DESC " +
-                            "LIMIT 1), " +
+                        "(SELECT " +
+                        "a.participantid as dam " +
+                        "FROM " +
+                        "studydataset." + arrival.getName() + " a, studydataset." + arrival.getName() + " b " +
+                        " WHERE " +
+                        " b.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid AND lower(a.vendor_id) = lower(b.dam) AND lower(a.vendor_id) != lower(a.participantid) " +
+                        " AND (SELECT x.species from studydataset." + demographics.getName() + " x WHERE x.participantid = a.participantid) =  " +
+                        " (SELECT y.species from studydataset." + demographics.getName() + " y WHERE y.participantid = " + ExprColumn.STR_TABLE_ALIAS + ".participantid) " +
+                        "ORDER BY " +
+                        "b.modified DESC " +
+                        "LIMIT 1), " +
 
-                            "(SELECT " +
-                                "dam " +
-                            "FROM " +
-                                "studydataset." + arrival.getName() +
-                            " WHERE " +
-                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                            "ORDER BY " +
-                                "modified DESC " +
-                            "LIMIT 1), " +
+                        "(SELECT " +
+                        "dam " +
+                        "FROM " +
+                        "studydataset." + arrival.getName() +
+                        " WHERE " +
+                        "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "ORDER BY " +
+                        "modified DESC " +
+                        "LIMIT 1), " +
 
-                            "(SELECT " +
-                                "dam " +
-                            "FROM " +
-                                "studydataset." + birth.getName() +
-                            " WHERE " +
-                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                            "ORDER BY " +
-                                "modified DESC" +
-                            " LIMIT 1), " +
+                        "(SELECT " +
+                        "dam " +
+                        "FROM " +
+                        "studydataset." + birth.getName() +
+                        " WHERE " +
+                        "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        "ORDER BY " +
+                        "modified DESC" +
+                        " LIMIT 1), " +
 
-                            "(SELECT " +
-                                "dam_old " +
-                            "FROM " +
-                                "studydataset." + demographics.getName() +
-                            " WHERE " +
-                                "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
-                            " LIMIT 1) " +
+                        "(SELECT " +
+                        "dam_old " +
+                        "FROM " +
+                        "studydataset." + demographics.getName() +
+                        " WHERE " +
+                        "participantid =" + ExprColumn.STR_TABLE_ALIAS + ".participantid " +
+                        " LIMIT 1) " +
                         ") AS dam " +
-                    ")";
+                        ")";
 
-            SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
-            ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
-            newCol.setLabel("Dam");
-            newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
-                    "'real' animal id if a matching vendor id was found and the species of the animals are matching, " +
-                    "if not found it will use whatever is in the " +
-                    "arrival record, if not found, it then checks birth records, and if no dam is found there, it " +
-                    "then finally uses the historic demographic text field called 'dam_old' as the dam.");
-            table.addColumn(newCol);
+                SQLFragment sql = new SQLFragment(arrivalAndBirthQuery);
+                ExprColumn newCol = new ExprColumn(table, dam_new, sql, JdbcType.VARCHAR);
+                newCol.setLabel("Dam");
+                newCol.setDescription("This is a calculated column that first checks arrival records and swaps out for the " +
+                        "'real' animal id if a matching vendor id was found and the species of the animals are matching, " +
+                        "if not found it will use whatever is in the " +
+                        "arrival record, if not found, it then checks birth records, and if no dam is found there, it " +
+                        "then finally uses the historic demographic text field called 'dam_old' as the dam.");
+                table.addColumn(newCol);
+            }
         }
     }
 

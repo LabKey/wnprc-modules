@@ -12,27 +12,27 @@
                 <property name="columnTitle" value="Weight Date"/>
             </properties>
         </column>
+        <column name="Id/activeAssignments/Availability">
+            <properties>
+                <property name="columnTitle" value="Avail"/>
+            </properties>
+        </column>
+        <column name="hold"/>
         <column name="Id/curLocation/room">
             <properties>
                 <property name="columnTitle" value="Room"/>
             </properties>
         </column>
-        <column name="hold"/>
+        <column name="medical"/>
         <column name="Id/curLocation/cage">
             <properties>
                 <property name="columnTitle" value="Cage"/>
             </properties>
         </column>
-        <column name="medical"/>
+        <column name="Id/CurrentBehavior/currentBehaviors"/>
         <column name="Id/curLocation/cond">
             <properties>
                 <property name="columnTitle" value="Condition"/>
-            </properties>
-        </column>
-        <column name="Id/CurrentBehavior/currentBehaviors"/>
-        <column name="Id/numRoommates/AnimalsInCage">
-            <properties>
-                <property name="columnTitle" value="# Animals In Cage"/>
             </properties>
         </column>
         <column name="mostRecentAlopeciaScore">
@@ -40,9 +40,9 @@
                 <property name="columnTitle" value="Most Recent Alopecia Score"/>
             </properties>
         </column>
-        <column name="calculated_status">
+        <column name="Id/numRoommates/AnimalsInCage">
             <properties>
-                <property name="columnTitle" value="Status"/>
+                <property name="columnTitle" value="# Animals In Cage"/>
             </properties>
         </column>
         <column name="mostRecentBodyConditionScore">
@@ -50,9 +50,9 @@
                 <property name="columnTitle" value="Most Recent BCS"/>
             </properties>
         </column>
-        <column name="Id/activeAssignments/Availability">
+        <column name="calculated_status">
             <properties>
-                <property name="columnTitle" value="Avail"/>
+                <property name="columnTitle" value="Status"/>
             </properties>
         </column>
         <column name="origin">

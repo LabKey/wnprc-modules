@@ -1308,6 +1308,29 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 });
 
         }
+
+        //column to report how many animals in this request were assigned to a project
+        if (table.getColumn("num_animals_assigned") == null) {
+            String num_animals_assigned = "num_animals_assigned";
+            TableInfo assignmentTable = getRealTableForDataset(table, "assignment");
+
+            String theQuery  = "( " +
+                    "(SELECT " +
+                    "(CASE WHEN COUNT(*) = 0 " +
+                    " THEN null " +
+                    " ELSE COUNT(*) " +
+                    " END) as num_animals_assigned " +
+                    " FROM studydataset." + assignmentTable.getName() + " a " +
+                    "WHERE a.animal_request_rowid=" + ExprColumn.STR_TABLE_ALIAS + ".rowid )  " +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, num_animals_assigned, sql, JdbcType.VARCHAR);
+            newCol.setDescription("Shows the number of animals assigned to a project related to this animal request.");
+            table.addColumn(newCol);
+
+        }
     }
 
     private BaseColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)

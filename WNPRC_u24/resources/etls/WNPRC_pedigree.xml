@@ -21,9 +21,9 @@
                 </sourceFilters>
             </source>
             <destination schemaName="study" queryName="pedigree" targetOption="truncate">
-                <constants>
-                    <column name="date" type="TIMESTAMP" value="09-13-2021"/>
-                </constants>
+                <columnTransforms>
+                    <column source="id/demographics/vendor_id" target="vendor_id"/>
+                </columnTransforms>
             </destination>
         </transform>
     </transforms>

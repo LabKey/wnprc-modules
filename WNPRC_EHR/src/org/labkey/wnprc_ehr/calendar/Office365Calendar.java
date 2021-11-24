@@ -55,6 +55,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
     private Map<String, String> BASE_CALENDARS = null;
     private Map<String, String> CALENDARS_BY_ID = null;
     private Map<String, String> CALENDAR_COLORS = null;
+    private Map<String, String> CALENDAR_NAMES = null;
     private static final String PROCEDURE_ACCOUNT_NAME = "ProcedureCalendar";
     public static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     public static final String DEFAULT_BG_COLOR = "#3788D8";
@@ -167,6 +168,19 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
             }
         }
         return CALENDAR_COLORS;
+    }
+
+    private synchronized Map<String, String> getCalendarNames() {
+        if (CALENDAR_NAMES == null) {
+            CALENDAR_NAMES = new HashMap<>();
+            TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("procedure_rooms");
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("room", "email"), null, null);
+            Map<String, Object>[] calendars = ts.getMapArray();
+            for (Map<String, Object> calendar : calendars) {
+                CALENDAR_NAMES.put((String) calendar.get("email"), (String) calendar.get("room"));
+            }
+        }
+        return CALENDAR_NAMES;
     }
 
     public Map<String, Boolean> isRoomAvailable(List<String> rooms, ZonedDateTime startTime, ZonedDateTime endTime) {
@@ -425,6 +439,7 @@ public class Office365Calendar implements org.labkey.wnprc_ehr.calendar.Calendar
                 JSONObject roomEvent = roomEvents.getJSONObject(roomEvents.length() - 1);
                 JSONObject extendedProps = roomEvent.getJSONObject("extendedProps");
                 extendedProps.put("parentid", parentIds.get(requestId));
+                extendedProps.put("room", getCalendarNames().get(room));
             }
             //Populate the childIds for the baseCalendar (the ids of the events on the room calendars)
             JSONArray calendarEvents = allJsonEvents.getJSONArray(baseCalendar);

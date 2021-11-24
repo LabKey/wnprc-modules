@@ -25,6 +25,8 @@
 %>
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+<script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+<script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
 
 <style type="text/css">
     /* Full Calendar heading */
@@ -1575,6 +1577,41 @@
                             // bootstrapFontAwesome: {
                             //     customCreateButton: "plus-square"
                             // },
+                            eventDidMount: function(info) {
+                                let contentString = "Title: " + info.event.title;
+                                let roomString;
+                                let bodyString;
+                                if (info.event.extendedProps.childids) {
+                                    let roomName = info.event.extendedProps.rooms;
+                                    roomString = "Rooms: " + roomName;
+                                } else if (info.event.extendedProps.parentid) {
+                                    let roomName = info.event.extendedProps.room;
+                                    roomString = "Room: " + roomName;
+                                } else if (info.event.extendedProps.rooms) {
+                                    let roomName = info.event.extendedProps.rooms;
+                                    roomString = "Room(s): " + roomName;
+                                } else {
+                                    let roomName = info.event.source.id;
+                                    roomString = "Calendar: " + roomName;
+                                }
+                                let timeString = "Time: " +
+                                        info.event.start.toLocaleTimeString("en-us", { hour12: false, hour: '2-digit', minute: '2-digit' }) +
+                                        " - " +
+                                        info.event.end.toLocaleTimeString("en-us", { hour12: false, hour: '2-digit', minute: '2-digit' });
+                                if (roomString) {
+                                    contentString += "<br>" + roomString + "<br>" + timeString;
+                                }
+                                if (info.event.extendedProps.requestor) {
+                                    contentString += "<br>Requestor: " + info.event.extendedProps.requestor;
+                                }
+                                if (info.event.extendedProps.body) {
+                                    contentString += "<br>Comments: " + info.event.extendedProps.body;
+                                }
+                                tippy(info.el, {
+                                    content: contentString,
+                                    allowHTML: true
+                                });
+                            },
                             eventClassNames: function (arg) {
                                 if (arg.event.id.startsWith("PLACEHOLDER")) {
                                     return ["placeholder-event"];

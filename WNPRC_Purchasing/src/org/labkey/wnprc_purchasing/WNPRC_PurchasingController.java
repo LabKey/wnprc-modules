@@ -68,6 +68,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -364,7 +365,7 @@ public class WNPRC_PurchasingController extends SpringActionController
                             message.setRecipient(Message.RecipientType.TO, new InternetAddress(endUser.getEmail()));
                             MailHelper.send(message, getUser(), getContainer());
                         }
-                        catch (javax.mail.internet.AddressException e)
+                        catch (AddressException e)
                         {
                             _log.error("Error sending line item update message to " + endUser.getEmail() , e);
                             throw new MessagingException(e.getMessage(), e);

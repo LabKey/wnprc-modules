@@ -1150,18 +1150,19 @@
                             window.open(newWaterOrder,'_blank');
 
                         }
-                        else if (!response.success){
-
+                        else{
                             response.errors;
-                            $('#myModal');
-
-                        }else {
-                            alert('Water cannot be closed')
-                            $('#waterInfoPanel').unblock();
+                            $('#myModal').modal('hide');;
                         }
 
 
                     }, this),
+                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        alert('Water cannot be closed')
+                        $('#waterInfoPanel').unblock();
+
+                    },this),
                     method:"POST"
 
                 });

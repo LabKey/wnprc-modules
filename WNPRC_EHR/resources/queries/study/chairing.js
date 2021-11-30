@@ -95,7 +95,6 @@ function setDescription(row,helper){
         description.push(EHR.Server.Utils.nullToString(row.description));
     }
     if (row.location){
-        console.log(JSON.stringify(row.location));
         description.push('Chairing location: ' + EHR.Server.Utils.nullToString(row.location));
     }
     if(row.chairingStartTime){

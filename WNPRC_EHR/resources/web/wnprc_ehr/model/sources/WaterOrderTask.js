@@ -88,7 +88,10 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
             },
             frequency:{
                 allowBlank: false,
-                defaultValue: 2,
+                defaultValue: 3,
+                editorConfig:{
+                    displayColumn: 'meaning'
+                },
                 lookup:{
                     schemaName: 'wnprc',
                     queryName: 'husbandry_frequency',

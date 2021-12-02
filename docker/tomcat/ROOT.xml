@@ -37,6 +37,10 @@
               mail.smtp.host="mailserver"
               mail.smtp.user=""
               mail.smtp.port="1025"
+              mail.smtp.from="test-ehr-do-not-reply@primate.wisc.edu"
+              mail.smtp.starttls.enable="true"
+              mail.smtp.socketFactory.class="javax.net.ssl.SSLSocketFactory"
+              mail.smtp.auth="false"
     />
 
     <!-- ActiveMQ configuration. Previously (and perhaps in the future) used for pipeline jobs.

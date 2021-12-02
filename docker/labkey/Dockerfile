@@ -28,13 +28,13 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
             LABKEY_DISTRIBUTION="wisc_community" ; \
             LABKEY_FILE_NAME="UWisc-Community-bin.tar.gz" ; \
         fi \
-    elif [ "$LABKEY_VERSION" = 18.3 ] ; then \
-        LABKEY_TEAMCITY_CONFIG="LabKey_183wnprc_2_Premium_Installers" ; \
-        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
-        LABKEY_DISTRIBUTION="wisc" ; \
-        LABKEY_FILE_NAME="UWisc-bin.tar.gz" ; \
     elif [ "$LABKEY_VERSION" = 21.3 ] ; then \
         LABKEY_TEAMCITY_CONFIG="LabKey_213Release_External_Wnprc_Installers" ; \
+        LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
+        LABKEY_DISTRIBUTION="wisc" ; \
+        LABKEY_FILE_NAME="UWisc.tar.gz" ; \
+    elif [ "$LABKEY_VERSION" = 21.7 ] ; then \
+        LABKEY_TEAMCITY_CONFIG="LabKey_217Release_External_Wnprc_Installers" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \

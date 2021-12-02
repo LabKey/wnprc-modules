@@ -8,4 +8,5 @@
 !public-yum-ol7.repo
 !ROOT.xml
 !server8_5_32.xml
+!server9_0_54.xml
 !wait-for-postgres.sh

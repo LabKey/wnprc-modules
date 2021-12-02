@@ -662,11 +662,11 @@
                 },
                 {
                     events:function (fetchInfo, successCallback, failureCallback) {
-                        if ($animalId == 'undefined' || $animalId == "null"){
-                            debugger;
-                        WebUtils.API.selectRows("study", "waterPrePivot", {
+                        if ($animalId == 'undefined' || $animalId == "null" || $animalId == ''){
+                        WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
-                            "date~lte": fetchInfo.end.format('Y-m-d')
+                            "date~lte": fetchInfo.end.format('Y-m-d'),
+                            "TotalWater~isnonblank":true
                         }).then(function (data) {
                             var events = data.rows;
 
@@ -674,7 +674,7 @@
                                     events.map(function (row) {
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            title: row.id + " Total: " + row.TotalWater,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
@@ -697,17 +697,17 @@
 
                         }else{
 
-                            WebUtils.API.selectRows("study", "waterPrePivot", {
+                            WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "animalId~in": $animalId
+                            "id~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
                                 successCallback(events.map(function (row) {
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            title: row.id + " Total: " + row.TotalWater,
                                             start: new Date(row.date),
                                             textColor: '#000000',
                                             allDay: true,
@@ -1083,21 +1083,15 @@
                             document.getElementById("modelServerResponse").innerHTML = "<p>"+returnMessage+"</p>";
                             document.getElementById("proceedButton").classList.remove("hidden");
 
-                            //$('#myModal')
-                            //LABKEY.Utils.alert("Update failed", response.errors);
                         }
-                        /*if(!response.success){
-                            debugger;
-                            response.errors;
-                            $('#myModal');
-
-                        }*/ else {
+                        else {
                             alert('Water cannot be closed')
                         }
 
 
-                    }, this)
+                    },this),
 
+                    method:"POST"
                 });
 
             },
@@ -1123,6 +1117,7 @@
 
                 //TODO: escalate permission to close waterorder  older than 60 days or all ongoing water order
                 //TODO: should have the QC Status of Started and not complete
+                //DONE: Add allowDatesInDistantPast: true into the waterOrders.js file
 
                 LABKEY.Ajax.request({
                     url: LABKEY.ActionURL.buildURL("wnprc_ehr", "EnterNewWaterOrder", null, {
@@ -1155,18 +1150,20 @@
                             window.open(newWaterOrder,'_blank');
 
                         }
-                        if (!response.success){
-
+                        else{
                             response.errors;
-                            $('#myModal');
-
-                        }else {
-                            alert('Water cannot be closed')
-                            $('#waterInfoPanel').unblock();
+                            $('#myModal').modal('hide');;
                         }
 
 
-                    }, this)
+                    }, this),
+                    failure: LABKEY.Utils.getCallbackWrapper(function (response)
+                    {
+                        alert('Water cannot be closed')
+                        $('#waterInfoPanel').unblock();
+
+                    },this),
+                    method:"POST"
 
                 });
 
@@ -1301,7 +1298,6 @@
                 var form = ko.mapping.toJS(WebUtils.VM.form);
                 var taskid = LABKEY.Utils.generateUUID();
                 //var date = form.date.format("Y-m-d H:i:s");
-                debugger;
 
                 var insertDate = new Date(form.dateForm);
                 if (form.frequencyForm.value === "AM"){
@@ -1396,7 +1392,6 @@
                 }
 
                 // Refresh the calendar view.
-                debugger;
                 calendar.refetchEvents();
                 //Unblock calendar
                 $('#water-calendar').unblock();
@@ -1434,7 +1429,7 @@
         let configObject = {
             "date~gte": fetchInfo.start.format('Y-m-d'),
             "date~lte": fetchInfo.end.format('Y-m-d'),
-            "parameters": {NumDays: 60, StartDate: date.format(LABKEY.extDefaultDateFormat)},
+            "parameters": {NumDays: 120, StartDate: date.format(LABKEY.extDefaultDateFormat)},
             "qcstate/label~eq": "Scheduled"
         };
 

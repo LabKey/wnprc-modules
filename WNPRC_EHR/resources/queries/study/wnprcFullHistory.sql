@@ -1,6 +1,6 @@
 SELECT Id,
        date,
-       CAST (project AS VARCHAR) AS project,
+       project  AS project,
        DataSet.Label AS dataset,
        DataSet.Name AS DataSetName,
        remark,
@@ -13,9 +13,9 @@ FROM study.studyData
 
 UNION ALL
 SELECT
-    animalId AS Id,
+    Id AS Id,
     date,
-     projectConcat AS project,
+     project AS project,
      'Water Given (Total)' AS dataset,
      'watertotal' AS DataSetName,
      'Sum of all water given for the day.' AS remark,
@@ -25,4 +25,5 @@ SELECT
      null AS  taskid,
      null AS requestid
 
-FROM study.waterPrePivot
+FROM study.waterTotalByDate
+WHERE TotalWater IS NOT NULL

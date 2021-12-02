@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS ehr_lookups.husbandry_frequency;
-DROP TABLE IF EXISTS wnprc.husbandry_frequency;
+
 CREATE TABLE wnprc.husbandry_frequency
 (
-    rowid      serial                    NOT NULL,
+    RowId      serial                    NOT NULL,
     meaning    varchar(100) DEFAULT NULL NOT NULL,
     dayofweek  integer,
     sort_order integer,

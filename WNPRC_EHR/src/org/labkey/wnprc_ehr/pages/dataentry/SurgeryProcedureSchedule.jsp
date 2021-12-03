@@ -94,6 +94,11 @@
         bottom: -2px;
         pointer-events: none;
     }
+
+    .tippy-box[data-theme~='custom-theme'] {
+        background-color: dimgrey;
+        color: lightblue;
+    }
 </style>
 
 <script type="text/javascript">
@@ -1578,38 +1583,51 @@
                             //     customCreateButton: "plus-square"
                             // },
                             eventDidMount: function(info) {
-                                let contentString = "Title: " + info.event.title;
+                                let contentString = "<strong>Title:</strong> " + info.event.title;
                                 let roomString;
-                                let bodyString;
                                 if (info.event.extendedProps.childids) {
                                     let roomName = info.event.extendedProps.rooms;
-                                    roomString = "Rooms: " + roomName;
+                                    roomString = "<strong>Rooms:</strong> " + roomName;
                                 } else if (info.event.extendedProps.parentid) {
                                     let roomName = info.event.extendedProps.room;
-                                    roomString = "Room: " + roomName;
+                                    roomString = "<strong>Room:</strong> " + roomName;
                                 } else if (info.event.extendedProps.rooms) {
                                     let roomName = info.event.extendedProps.rooms;
-                                    roomString = "Room(s): " + roomName;
+                                    roomString = "<strong>Room(s):</strong> " + roomName;
                                 } else {
                                     let roomName = info.event.source.id;
-                                    roomString = "Calendar: " + roomName;
+                                    roomString = "<strong>Calendar:</strong> " + roomName;
                                 }
-                                let timeString = "Time: " +
-                                        info.event.start.toLocaleTimeString("en-us", { hour12: false, hour: '2-digit', minute: '2-digit' }) +
-                                        " - " +
-                                        info.event.end.toLocaleTimeString("en-us", { hour12: false, hour: '2-digit', minute: '2-digit' });
+                                let timeString = "<strong>Time:</strong> All Day";
+                                if (!info.event.allDay) {
+                                    timeString = "<strong>Time:</strong> " +
+                                            info.event.start.toLocaleTimeString("en-us", {
+                                                hour12: false,
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) +
+                                            " - " +
+                                            info.event.end.toLocaleTimeString("en-us", {
+                                                hour12: false,
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            });
+                                }
                                 if (roomString) {
-                                    contentString += "<br>" + roomString + "<br>" + timeString;
+                                    contentString += "<br><br>" + roomString;
                                 }
+                                contentString += "<br><br>" + timeString;
                                 if (info.event.extendedProps.requestor) {
-                                    contentString += "<br>Requestor: " + info.event.extendedProps.requestor;
+                                    contentString += "<br><br><strong>Requestor:</strong> " + info.event.extendedProps.requestor;
                                 }
                                 if (info.event.extendedProps.body) {
-                                    contentString += "<br>Comments: " + info.event.extendedProps.body;
+                                    contentString += "<br><br><strong>Comments:</strong> " + info.event.extendedProps.body;
                                 }
                                 tippy(info.el, {
                                     content: contentString,
-                                    allowHTML: true
+                                    allowHTML: true,
+                                    placement: 'left',
+                                    theme: 'custom-theme'
                                 });
                             },
                             eventClassNames: function (arg) {

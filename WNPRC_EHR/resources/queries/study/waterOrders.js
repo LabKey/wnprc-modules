@@ -3,7 +3,8 @@ var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 
 function onInit(event, helper){
     helper.setScriptOptions({
-        allowFutureDates: true
+        allowFutureDates: true,
+        allowDatesInDistantPast: true
     });
 }
 

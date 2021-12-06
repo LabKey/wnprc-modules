@@ -5,7 +5,7 @@ CREATE TABLE wnprc.watermonitoring_access
     alloweduser             userid,
     project                 integer,
     createdBy               userid,
-    principalinvestigator   userid,
+    principalinvestigator   varchar,
     CONSTRAINT PK_watermonitoring_access PRIMARY KEY (rowid)
 );
 

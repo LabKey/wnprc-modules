@@ -1,4 +1,4 @@
-CREATE TABLE wnprc.watermonitoring_access;
+CREATE TABLE wnprc.watermonitoring_access
 (
     rowid                   serial                    NOT NULL,
     date                    TIMESTAMP,

@@ -39,6 +39,8 @@ services:
     image: wnprcehr/postfix:latest
     depends_on:
       - "mailcatcher"
+    volumes:
+      - "${POSTFIX_CERT_FOLDER}:/etc/postfix/certs"
     environment:
       MAIL_SERVER:
       TZ: America/Chicago

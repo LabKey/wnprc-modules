@@ -4,8 +4,11 @@ CREATE TABLE wnprc.watermonitoring_access
     date                    TIMESTAMP,
     alloweduser             userid,
     project                 integer,
-    createdBy               userid,
     principalinvestigator   varchar,
+    createdby               userid,
+    created                 TIMESTAMP,
+    modifiedby              userid,
+    modified                TIMESTAMP,
     CONSTRAINT PK_watermonitoring_access PRIMARY KEY (rowid)
 );
 

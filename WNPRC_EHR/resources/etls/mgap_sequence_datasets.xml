@@ -24,6 +24,7 @@
                     <column source="totalReads" target="total_reads"/>
                     <column source="sraAccession" target="sra_accession"/>
                     <column source="originalId" target="original_id"/>
+                    <column source="originalId" target="parsed_id" transformClass="org.labkey.wnprc_ehr.etl.MgapParseIdTransform"/>
                 </columnTransforms>
             </destination>
         </transform>

@@ -7,9 +7,15 @@ public class MgapParseIdTransform extends ColumnTransform
     @Override
     protected Object doTransform(Object inputValue)
     {
-        //Object prefix = getInputValue("id");
-        return "this is a test";
-        //String prefixStr = null == prefix ? "" : prefix.toString();
-        //return prefixStr + "_" + inputValue + "_" + getConstant("myConstant");
+        String parsedId = null;
+        String originalId = (String) getInputValue();
+        if (originalId != null && originalId.trim().length() > 0)
+        {
+            parsedId = originalId.replace("WNPRC-", "");
+
+
+        }
+
+        return parsedId;
     }
 }

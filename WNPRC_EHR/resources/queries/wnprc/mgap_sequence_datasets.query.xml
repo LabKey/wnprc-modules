@@ -13,6 +13,7 @@
                     <column columnName="total_reads">
                         <columnTitle>Total Reads</columnTitle>
                         <datatype>integer</datatype>
+                        <formatString>#,###</formatString>
                     </column>
                     <column columnName="sra_accession">
                         <columnTitle>SRA Accession</columnTitle>

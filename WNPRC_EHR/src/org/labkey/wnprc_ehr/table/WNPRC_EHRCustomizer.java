@@ -797,6 +797,29 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     "then finally uses the historic demographic text field called 'dam_old' as the dam.");
             table.addColumn(newCol);
         }
+
+        if (table.getColumn("mgapUrl") == null)
+        {
+            String mgapUrl = "mgapUrl";
+
+            //SEE THIS FOR QUERY EXAMPLE customizeReasonForMoveColumn
+            String theQuery  = "(" +
+                    "(SELECT " +
+                    "'https://mgap.ohsu.edu/query/mGAP/executeQuery.view?schemaName=laboratory&query.queryName=subjects&query.subjectname~in=' || " +
+                    "STRING_AGG(m.mgap_id, ',') " +
+                    "FROM wnprc.mgap_sequence_datasets m " +
+                    "WHERE m.parsed_id IS NOT NULL " +
+                    "AND m.parsed_id=" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
+                    ")";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mgapUrl, sql, JdbcType.VARCHAR);
+            newCol.setLabel("mGAP URL");
+            newCol.setDescription("Calculates the mGAP URL for an animal (if available)");
+            //newCol.setURL(StringExpressionFactory.create("query-executeQuery.view?schemaName=ehr_lookups&query.queryName=alopecia_scores"));
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)

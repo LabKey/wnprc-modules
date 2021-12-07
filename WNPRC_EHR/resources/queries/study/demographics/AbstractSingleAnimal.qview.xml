@@ -92,6 +92,6 @@
                 <property name="columnTitle" value="Pathology Notes"/>
             </properties>
         </column>
-
+        <column name="mgapIds"/>
     </columns>
 </customView>

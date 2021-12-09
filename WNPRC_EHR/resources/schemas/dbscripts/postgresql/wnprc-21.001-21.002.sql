@@ -18,10 +18,10 @@ VALUES
 (2, 'Daily - PM',       NULL,   2,'TRUE','PM'),
 (3, 'Daily - AM/PM',    NULL,   3,'TRUE',''),
 (4, 'Daily - Any Time', NULL,   4,'TRUE','Any Time'),
-(5, 'Sunday',           '1',    5,'TRUE',''),
-(6, 'Monday',           '2',    6,'TRUE',''),
-(7, 'Tuesday',          '3',    7,'TRUE',''),
-(8, 'Wednesday',        '4',    8,'TRUE',''),
-(9, 'Thursday',         '5',    9,'TRUE',''),
-(10, 'Friday',          '6',    10,'TRUE',''),
-(11, 'Saturday',        '7',    11,'TRUE','');
+(5, 'Sunday - PM',           '1',    5,'TRUE',''),
+(6, 'Monday - PM',           '2',    6,'TRUE',''),
+(7, 'Tuesday - PM',          '3',    7,'TRUE',''),
+(8, 'Wednesday - PM',        '4',    8,'TRUE',''),
+(9, 'Thursday - PM',         '5',    9,'TRUE',''),
+(10, 'Friday - PM',          '6',    10,'TRUE',''),
+(11, 'Saturday - PM',        '7',    11,'TRUE','');

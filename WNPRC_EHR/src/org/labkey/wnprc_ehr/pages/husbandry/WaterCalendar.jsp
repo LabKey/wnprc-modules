@@ -531,7 +531,7 @@
             isSuperUser = true;
         }
 
-        var waterAccessControlled = <%= h(userAccessWater.toString()) %>;
+        var waterAccessControlled = <%= unsafe(userAccessWater.toString()) %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
 
         let firstEntry = true;

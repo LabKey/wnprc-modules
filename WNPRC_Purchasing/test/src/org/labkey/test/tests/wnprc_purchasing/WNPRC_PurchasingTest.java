@@ -458,6 +458,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid value for Unit cost ", "10", requestPage.getUnitCost());
         checker().verifyEquals("Invalid value for Quantity ", "25", requestPage.getQuantity());
 
+        checker().screenShotIfNewError("RequestPagePopulated");
+
         log("Upload another attachment");
         requestPage.addAttachment(pdfFile);
 

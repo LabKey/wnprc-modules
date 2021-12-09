@@ -8,6 +8,7 @@ services:
 
   postgres:
     image: postgres:11
+    shm_size: 4g
     restart: always
     volumes:
       - "${PG_CONF_FILE}:/conf/postgresql.conf"

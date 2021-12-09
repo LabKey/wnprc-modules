@@ -802,14 +802,12 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
         {
             String mgapIds = "mgapIds";
 
-            String theQuery  = "(" +
-                    "(SELECT " +
-                    //"'https://mgap.ohsu.edu/query/mGAP/executeQuery.view?schemaName=laboratory&query.queryName=subjects&query.subjectname~in=' || " +
+            String theQuery  = "((" +
+                    "SELECT " +
                     "STRING_AGG(m.mgap_id, ',') as mgapIds " +
                     "FROM wnprc.mgap_sequence_datasets m " +
-                    "WHERE m.parsed_id IS NOT NULL " +
-                    "AND m.parsed_id=" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
-                    ")";
+                    "WHERE m.parsed_id=" + ExprColumn.STR_TABLE_ALIAS + ".participantid" +
+                    "))";
 
             SQLFragment sql = new SQLFragment(theQuery);
 
@@ -817,35 +815,10 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             newCol.setLabel("mGAP Id(s)");
             newCol.setDescription("Shows an animal's mGAP Id(s) and links to the animal in mGAP (if available)");
             newCol.setURL(StringExpressionFactory.create("https://mgap.ohsu.edu/query/mGAP/executeQuery.view?schemaName=laboratory&query.queryName=subjects&query.subjectname~in=${mgapIds}"));
+            //TODO enable new URL once it's working on the mGAP end
+            //newCol.setURL(StringExpressionFactory.create("https://mgap.ohsu.edu/mgap/mGAP/genomeBrowser.view?sampleFilters=mgap:${mgapIds}"));
 
             table.addColumn(newCol);
-
-//            newCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo){
-//
-//                @Override
-//                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-//                {
-//                    String mgapIds = (String)ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "mgapIds"));
-//                    if (mgapIds != null)
-//                    {
-//                        StringBuilder urlString = new StringBuilder();
-//                        urlString.append("<a href=\"");
-//                        urlString.append(PageFlowUtil.filter("https://mgap.ohsu.edu/query/mGAP/executeQuery.view?schemaName=laboratory&query.queryName=subjects&query.subjectname~in="));
-//                        urlString.append(mgapIds);
-//                        urlString.append("\">");
-//                        urlString.append(mgapIds);
-//                        urlString.append("</a>");
-//
-//                        out.write(urlString.toString());
-//                    }
-//                }
-//
-//                @Override
-//                public Object getDisplayValue(RenderContext ctx)
-//                {
-//                    return ctx.get(new FieldKey(getBoundColumn().getFieldKey().getParent(), "mgapIds"));
-//                }
-//            });
         }
     }
 

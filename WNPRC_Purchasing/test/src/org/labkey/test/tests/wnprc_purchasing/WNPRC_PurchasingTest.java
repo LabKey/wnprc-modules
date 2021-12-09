@@ -443,6 +443,9 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickAndWait(Locator.linkWithText(requestID));
 
         requestPage = new CreateRequestPage(getDriver());
+        // Wait for the page to populate the drop-downs
+        waitForText("acct100 - Assay Services");
+
         checker().verifyEquals("Invalid value for Accounts to charge ", "acct100 - Assay Services", requestPage.getAccountsToCharge());
         checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage.getVendor());
         checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage.getBusinessPurpose());

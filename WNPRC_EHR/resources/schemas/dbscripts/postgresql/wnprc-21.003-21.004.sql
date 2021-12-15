@@ -15,5 +15,5 @@ CREATE TABLE wnprc.mgap_sequence_datasets
     modifiedby      userid,
     modified        TIMESTAMP,
 
-    CONSTRAINT PK_mgap_sequence_datasets PRIMARY KEY (mgap_id, sequence_type)
+    CONSTRAINT PK_mgap_sequence_datasets PRIMARY KEY (mgap_id, sequence_type, sra_accession)
 );

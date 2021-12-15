@@ -59,7 +59,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
 
     public String getScheduleDescription()
     {
-        return "daily at 1300, 1730";
+        return "daily at 1300, 1500, 1700, 1900";
     }
 
     @Override

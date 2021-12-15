@@ -391,6 +391,20 @@ EHR.ext.ChemExcelWin = Ext.extend(Ext.Panel, {
             return;
         }
 
+        // check if filesize is greater than 1000, this is a limitation by pageSize in the ext editor grid.
+        var fileSizeCalc = fileContent.match(/\n|\r|\r\n/g);
+        if (!!fileSizeCalc){
+            var fileSize = fileSizeCalc.length;
+            if (fileSize > 1000) {
+                var msg = 'Warning! This file size (' +
+                        fileSize  +
+                        ') is greater than 1000 rows will cause issue with submission. ' +
+                        'Either reduce file size or flip through all the pages in the grid to load records into the client. ' +
+                        'Contact an admin if you are still having issues.'
+                alert(msg);
+            }
+        }
+
         this.ownerCt.hide();
         Ext.Msg.wait('Loading...');
 

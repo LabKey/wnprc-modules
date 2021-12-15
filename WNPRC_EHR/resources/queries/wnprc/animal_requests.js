@@ -49,7 +49,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             callback: function (data) {
                 if (data) {
                     if (data['calculated_status'] && data.calculated_status !== 'Alive') {
-                        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') is not alive', 'ERROR');
+                        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') is not alive', 'WARN');
                     }
                     if (data['calculated_status'] == null) {
                         EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') does not exist', 'ERROR');

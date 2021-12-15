@@ -16,12 +16,13 @@ public class chairingFormSection extends SlaveFormSection
         Set<String> fields = new HashSet<>();
         fields.add("Id");
         fields.add("project");
+        fields.add("performedby");
 
         return fields;
     }
 
     @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id","date","location","chairingStartTime","chairingEndTime","remarks", "project");
+        return Arrays.asList("Id","date","location","chairingStartTime","chairingEndTime","remark", "project","performedby");
     }
 }

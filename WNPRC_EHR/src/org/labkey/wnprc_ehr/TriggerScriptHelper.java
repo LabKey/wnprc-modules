@@ -1335,7 +1335,7 @@ public class TriggerScriptHelper {
 
     }
 
-    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, String frequency, String waterSource, String objectId, Integer project, Map<String, Object> extraContext){
+    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, int frequency, String waterSource, String objectId, Integer project, Map<String, Object> extraContext){
 
         String meaningFrequency = getMeaningFromRowid( frequency, "husbandry_frequency", "wnprc" );
         JSONArray arrayOfErrors = new JSONArray();
@@ -1908,7 +1908,7 @@ public class TriggerScriptHelper {
         private Date endDateCoalescedFuture;
         private String dataSource;
         private String project;
-        private String frequency;
+        private int frequency;
         private String assignedTo;
         private Double volume;
 
@@ -1954,7 +1954,7 @@ public class TriggerScriptHelper {
             this.project = project;
         }
 
-        public void setFrequency(String frequency)
+        public void setFrequency(int frequency)
         {
             this.frequency = frequency;
         }
@@ -2016,7 +2016,7 @@ public class TriggerScriptHelper {
             return project;
         }
 
-        public String getFrequency()
+        public int getFrequency()
         {
             return frequency;
         }
@@ -2048,7 +2048,7 @@ public class TriggerScriptHelper {
                 else if (prop.getKey().equalsIgnoreCase("dataSource") && prop.getValue() instanceof String)
                     setDataSource((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("frequency") && prop.getValue() instanceof String)
-                    setFrequency((String)prop.getValue());
+                    setFrequency((int)prop.getValue());
 
             }
 
@@ -2058,13 +2058,13 @@ public class TriggerScriptHelper {
 
     //Generic function to get lookup table to get meaning from rowid
     //improvement to return a map with all the items in the table and only call the db once
-    public String getMeaningFromRowid (String lookupColumn, String lookupTable){
+    public String getMeaningFromRowid (int lookupColumn, String lookupTable){
         return getMeaningFromRowid(lookupColumn, lookupTable, "ehr_lookups");
     }
-    public String getMeaningFromRowid (String lookupColumn, String lookupTable, String lookupSchema){
+    public String getMeaningFromRowid (int lookupColumn, String lookupTable, String lookupSchema){
 
         TableInfo husbandryFrequency = getTableInfo(lookupSchema, lookupTable);
-        int frequencyNumber = Integer.parseInt(lookupColumn);
+        int frequencyNumber = lookupColumn;
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("rowid"), frequencyNumber, CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("active"), true);
         //filter.addCondition(FieldKey.fromString("active"), true, CompareType.EQUAL);
@@ -2205,7 +2205,7 @@ public class TriggerScriptHelper {
 
                 extraContextObject.put("date", waterOrderMap.get("date"));
                 extraContextObject.put("volume", waterOrderMap.get("volume"));
-                String frequencyMeaning = getMeaningFromRowid(waterOrderMap.get("frequency").toString(), "husbandry_frequency", "wnprc");
+                String frequencyMeaning = getMeaningFromRowid(ConvertHelper.convert(waterOrderMap.get("frequency"),Integer.class), "husbandry_frequency", "wnprc");
                 extraContextObject.put("frequency", frequencyMeaning);
 
                 arrayOfErrors.put(returnErrors);

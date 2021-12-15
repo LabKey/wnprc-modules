@@ -93,5 +93,6 @@
             </properties>
         </column>
         <column name="mgapIds"/>
+        <column name="mgapSequenceTypes"/>
     </columns>
 </customView>

@@ -818,6 +818,26 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
             table.addColumn(newCol);
         }
+
+        if (table.getColumn("mgapSequenceTypes") == null)
+        {
+            String mgapSequenceTypes = "mgapSequenceTypes";
+
+            String theQuery  = "((" +
+                    "SELECT " +
+                    "STRING_AGG(DISTINCT m.sequence_type, ', ') AS mgapSequenceTypes " +
+                    "FROM wnprc.mgap_sequence_datasets m " +
+                    "WHERE LOWER(m.parsed_id) = LOWER(" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
+                    "))";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mgapSequenceTypes, sql, JdbcType.VARCHAR);
+            newCol.setLabel("mGAP Sequence Type(s)");
+            newCol.setDescription("Shows the available Sequence Type(s) for this animal in mGAP");
+
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)

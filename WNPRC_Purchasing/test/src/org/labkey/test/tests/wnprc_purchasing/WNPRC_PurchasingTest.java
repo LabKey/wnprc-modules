@@ -443,7 +443,11 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickAndWait(Locator.linkWithText(requestID));
 
         requestPage = new CreateRequestPage(getDriver());
-        checker().verifyEquals("Invalid value for Accounts to charge ", "acct100 - Assay Services", requestPage.getAccountsToCharge());
+
+        // Wait for the page to populate the drop-downs
+        CreateRequestPage checkerRequestPath = requestPage;
+        waitFor(() -> "acct100 - Assay Services".equalsIgnoreCase(checkerRequestPath.getAccountsToCharge()), () -> "Invalid value for Accounts to charge: " + checkerRequestPath.getAccountsToCharge(), WAIT_FOR_JAVASCRIPT);
+
         checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage.getVendor());
         checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage.getBusinessPurpose());
         checker().verifyEquals("Invalid value for Special Instructions ", "Ho Ho Ho", requestPage.getSpecialInstructions());
@@ -453,6 +457,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid value for Unit Input ", "CS", requestPage.getUnitInput());
         checker().verifyEquals("Invalid value for Unit cost ", "10", requestPage.getUnitCost());
         checker().verifyEquals("Invalid value for Quantity ", "25", requestPage.getQuantity());
+
+        checker().screenShotIfNewError("RequestPagePopulated");
 
         log("Upload another attachment");
         requestPage.addAttachment(pdfFile);

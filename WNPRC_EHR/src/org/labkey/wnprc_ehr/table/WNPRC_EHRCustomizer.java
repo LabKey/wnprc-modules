@@ -804,9 +804,9 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
 
             String theQuery  = "((" +
                     "SELECT " +
-                    "STRING_AGG(m.mgap_id, ',') as mgapIds " +
+                    "STRING_AGG(DISTINCT m.mgap_id, ',') AS mgapIds " +
                     "FROM wnprc.mgap_sequence_datasets m " +
-                    "WHERE m.parsed_id=" + ExprColumn.STR_TABLE_ALIAS + ".participantid" +
+                    "WHERE LOWER(m.parsed_id) = LOWER(" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
                     "))";
 
             SQLFragment sql = new SQLFragment(theQuery);
@@ -814,9 +814,7 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
             ExprColumn newCol = new ExprColumn(table, mgapIds, sql, JdbcType.VARCHAR);
             newCol.setLabel("mGAP Id(s)");
             newCol.setDescription("Shows an animal's mGAP Id(s) and links to the animal in mGAP (if available)");
-            newCol.setURL(StringExpressionFactory.create("https://mgap.ohsu.edu/query/mGAP/executeQuery.view?schemaName=laboratory&query.queryName=subjects&query.subjectname~in=${mgapIds}"));
-            //TODO enable new URL once it's working on the mGAP end
-            //newCol.setURL(StringExpressionFactory.create("https://mgap.ohsu.edu/mgap/mGAP/genomeBrowser.view?sampleFilters=mgap:${mgapIds}"));
+            newCol.setURL(StringExpressionFactory.create("https://mgap.ohsu.edu/mgap/mGAP/genomeBrowser.view?sampleFilters=mgap:${mgapIds}"));
 
             table.addColumn(newCol);
         }

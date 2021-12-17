@@ -728,7 +728,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToModule("Dumbster");
         mailTable = new EmailRecordTable(this);
         subject = "Purchase request # " + requestId + " status update";
-        checker().verifyEquals("Incorrect To for the emails sent after approval", Arrays.asList(getCurrentUser()), mailTable.getColumnDataAsText("To"));
+        checker().verifyEquals("Incorrect To for the emails sent after approval", Arrays.asList(getCurrentUser(), ADMIN_USER), mailTable.getColumnDataAsText("To"));
         mailTable.clickSubjectAtIndex(subject, 0);
         log("Email body " + mailTable.getMessage(subject).getBody());
         checker().verifyTrue("Incorrect email body",
@@ -773,7 +773,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToModule("Dumbster");
         EmailRecordTable mailTable = new EmailRecordTable(this);
         String subject = "Purchase request # " + requestId + " status update";
-        checker().verifyEquals("Incorrect To for the emails sent after rejection", Arrays.asList(getCurrentUser()),
+        checker().verifyEquals("Incorrect To for the emails sent after rejection", Arrays.asList(getCurrentUser(), ADMIN_USER),
                 mailTable.getColumnDataAsText("To"));
         mailTable.clickSubjectAtIndex(subject, 0);
         log("Email body " + mailTable.getMessage(subject).getBody());

@@ -71,6 +71,9 @@ EHR.model.DataModelManager.registerMetadata('Breeding.Config', {
                     plugins: ['wnprc-pregnancyduedatecalculation'],
                 }
             },
+            date: {
+                hidden: true
+            },
             date_due: {
                 xtype: 'wnprc-calculatedpregnancyduedatefield',
                 editorConfig: {

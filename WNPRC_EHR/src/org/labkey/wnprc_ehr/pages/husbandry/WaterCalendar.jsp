@@ -1000,7 +1000,8 @@
                         }
 
 
-                    }, this)
+                    }, this),
+                    method: "POST"
 
                 });
 
@@ -1380,7 +1381,8 @@
                             }
 
 
-                        }, this)
+                        }, this),
+                        method:"POST"
 
                     });
 
@@ -1475,7 +1477,8 @@
                 }
 
 
-            }, this)
+            }, this),
+            method: "POST"
 
         });
 

@@ -1,6 +1,7 @@
 package org.labkey.wnprc_ehr.updates;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
@@ -20,7 +21,7 @@ public class ModuleUpdate
     /**
      * Logger for logging the logs
      */
-    private static final Logger LOG = Logger.getLogger(ModuleUpdate.class);
+    private static final Logger LOG = LogManager.getLogger(ModuleUpdate.class);
 
     /**
      * Cached set of {@link Updater} instances reflected from the package

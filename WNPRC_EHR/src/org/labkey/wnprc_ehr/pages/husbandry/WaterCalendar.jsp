@@ -411,6 +411,7 @@
                                 <%--<button class="btn btn-default" data-bind="click: $root.clearForm">Cancel</button>--%>
                                 <!-- ko if: dataSourceForm() == 'waterAmount' -->
                                 <button class="btn btn-primary" data-bind="click: $root.submitForm, enable: WebUtils.VM.form.isDirty">Update Single Day Water</button>
+                                <button class="btn btn-primary" data-bind="click: deleteWaterAmount">Delete Single Day Water</button>
                                 <!-- /ko -->
                                 <!-- ko if: dataSourceForm() == 'waterOrders' -->
                                 <button id ="submitNewWater" class="btn btn-primary" data-bind="click: $root.submitForm, enable: WebUtils.VM.form.isDirty">Insert Single Day Water</button>
@@ -590,7 +591,7 @@
                                             title: row.animalId + ' ' + volume,
                                             start: new Date(row.date),
                                             allDay: true,
-                                            groupId : row.objectIdCoalesced,
+                                            groupId : groupId(row),
                                             rawRowData: row,
                                             textColor: '#000000',
                                             //editable: true,
@@ -639,7 +640,7 @@
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
-                                            groupId : row.objectIdCoalesced,
+                                            groupId : groupId(row),
                                             rawRowData: row,
                                             //editable: true,
                                             description: 'Water for animal ' + row.animalId
@@ -900,6 +901,7 @@
             taskDetails: {
                 lsid:                       ko.observable(),
                 objectIdCoalesced:          ko.observable(),
+                waterOrderObjectId:         ko.observable(),
                 taskid:                     ko.observable(),
                 projectCoalesced:           ko.observable(),
                 animalId:                   ko.observable(),
@@ -924,8 +926,7 @@
                 animalIdForm:               ko.pureComputed(function (){return ''}),
                 dateForm:                   ko.observable(),
                 projectForm:                ko.observable(),
-                dataSourceForm:             ko.observable(),
-                objectIdForm:               ko.observable(),
+                waterOrderObjectId:         ko.observable(),
                 frequencyForm:              new Item("Time of Day:","PM"),
                 volumeForm:                 new Item("Volume:", ""),
                 provideFruitForm:           new Item("Provide Fruit:","none"),
@@ -1074,9 +1075,9 @@
                                     let clientObjectId = Ext4.util.Format.htmlEncode(errorObject.objectId);
                                     let volume = Ext4.util.Format.htmlEncode(errorObject.volume);
                                     let date = Ext4.util.Format.htmlEncode(errorObject.date);
-                                    returnMessage += "There is another waterAmount on "+date+" for the volume of "+volume+" " +
+                                    returnMessage += "<div id='waterException" + i +"'>There is another waterAmount on "+date+" for the volume of "+volume+" " +
                                             " <button onclick=\"updateWaterAmount('"+clientObjectId+"')\">Update</button> " +
-                                            "<button onclick=\"deleteWaterAmount('"+clientObjectId+"')\">Delete</button><br>";
+                                            "<button onclick=\"deleteWaterAmount(null, null,'"+clientObjectId+"','waterException" + i +"')\">Delete</button><br></div>";
 
                                 }
 
@@ -1170,6 +1171,7 @@
 
             },
             closeModalWindow: function (row){
+
                 $('#waterInfoPanel').unblock();
             }
         });
@@ -1220,6 +1222,14 @@
 
         WebUtils.VM.form.objectIdForm = ko.pureComputed(function(){
             return WebUtils.VM.taskDetails.objectIdCoalesced();
+        });
+
+        WebUtils.VM.form.waterOrderObjectId = ko.pureComputed(function(){
+            //if (WebUtils.VM.form.dataSourceForm === "waterOrders") {
+                return WebUtils.VM.taskDetails.objectIdCoalesced();
+            /*} else {
+                return  WebUtils.VM.taskDetails.waterOrderObjectId();
+            }*/
         });
 
         WebUtils.VM.form.taskidForm = ko.pureComputed(function(){
@@ -1316,17 +1326,18 @@
 
                 if (form.dataSourceForm === "waterOrders"){
                     WebUtils.API.insertRows('study', 'waterAmount', [{
-                        taskid:         taskid,
-                        Id:             form.animalIdForm,
-                        date:           insertDate.getTime(),
-                        project:        form.projectForm,
-                        volume:         form.volumeForm.value,
-                        provideFruit:   form.provideFruitForm.value,
-                        assignedTo:     form.assignedToForm.value,
-                        frequency:      form.frequencyForm.value,
-                        recordSource:   "WaterCalendar",
-                        waterSource:    "regulated",
-                        qcstate:        10 //Schedule
+                        taskid:                 taskid,
+                        Id:                     form.animalIdForm,
+                        date:                   insertDate.getTime(),
+                        project:                form.projectForm,
+                        volume:                 form.volumeForm.value,
+                        provideFruit:           form.provideFruitForm.value,
+                        assignedTo:             form.assignedToForm.value,
+                        frequency:              form.frequencyForm.value,
+                        waterOrderObjectId:     form.waterOrderObjectId,
+                        recordSource:           "WaterCalendar",
+                        waterSource:            "regulated",
+                        qcstate:                10 //Schedule
                     }]);
                     WebUtils.API.insertRows('ehr', 'tasks', [{
                         taskid:     taskid,
@@ -1374,7 +1385,7 @@
                                 WebUtils.VM.form.assignedToForm.dirtyFlag.reset();
                                 WebUtils.VM.form.frequencyForm.dirtyFlag.reset();
 
-                                //$('#waterInfoPanel').unblock();
+                                $('#waterExceptionPanel').unblock();
 
                             } else {
                                 alert('Water cannot be closed')
@@ -1406,9 +1417,6 @@
                     hideEditPanel = true;
                 }
                 console.log("get Spam");
-
-
-
             },
 
         });
@@ -1450,11 +1458,15 @@
         return configObject;
     }
 
-    function deleteWaterAmount(objectId){
+    function deleteWaterAmount(currentModel,event,clientObjectId,divId){
+        debugger;
+        if (!clientObjectId){
+            clientObjectId = selectedEvent.extendedProps.rawRowData.objectIdCoalesced;
+        }
 
         LABKEY.Ajax.request({
             url: LABKEY.ActionURL.buildURL("wnprc_ehr", "UpdateWaterAmount", null, {
-                objectId:           objectId,
+                objectId:           clientObjectId,
                 dataSource:         "waterAmount",
                 action:             "delete"
 
@@ -1468,7 +1480,7 @@
                     calendar.refetchEvents();
 
                     //Clearing error message
-                    document.getElementById("modelServerResponse").innerHTML = "";
+                    document.getElementById(divId).innerHTML = "";
 
                     //$('#waterInfoPanel').unblock();
 
@@ -1487,7 +1499,7 @@
 
         var updateWaterOrder =  LABKEY.ActionURL.buildURL('ehr', 'manageRecord', null, {
             schemaName:         'study',
-            queryName:          "Water Amount",
+            queryName:          "waterAmount",
             keyField:           "objectId",
             key:                objectId
         });
@@ -1534,6 +1546,19 @@
     function sleep(delay) {
         var start = new Date().getTime();
         while (new Date().getTime() < start + delay);
+    }
+    function groupId(row){
+
+        if (row.dataSource === "waterAmount") {
+            if(row.waterOrderObjectId === null){
+                return LABKEY.Utils.generateUUID();
+            }else {
+                return row.waterOrderObjectId
+            }
+
+        }else{
+            return row.objectIdCoalesced
+        }
     }
 
 

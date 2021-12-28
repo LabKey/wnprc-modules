@@ -259,7 +259,7 @@
                                     <div>Select an option from this window:</div>
                                     <div>End Date for Water Order: <b>{{date}}</b></div>
                                     <hr>
-                                    <div class="server-return-message" id = "returnTitle">Return Errors from Server:</div>
+                                    <div class="server-return-message hidden" id = "returnTitle">Return Errors from Server:</div>
                                     <div class="server-return-message" id = "modelServerResponse"></div>
 
                                 </div>
@@ -977,6 +977,7 @@
 
                             $('#waterInfoPanel').unblock();
                             $('#myModal').modal('hide');
+                            document.getElementById("modelServerResponse").innerHTML = "";
 
 
                         }else if (response.errors){
@@ -1054,6 +1055,7 @@
                         }else if (response.errors){
 
                             document.getElementById("returnTitle").style.display = "block";
+                            document.getElementById("returnTitle").classList.remove("hidden");
                             document.getElementById("modelServerResponse").style.display = "block";
 
                             //let jsonArray = response.errors[0].errors;
@@ -1173,6 +1175,10 @@
             closeModalWindow: function (row){
 
                 $('#waterInfoPanel').unblock();
+                document.getElementById("modelServerResponse").innerHTML = "";
+                document.getElementById("proceedButton").classList.add("hidden");
+                document.getElementById("returnTitle").classList.add("hidden");
+
             }
         });
 
@@ -1508,6 +1514,7 @@
         window.open(updateWaterOrder,'_blank');
 
         //TODO: add a wait for user to update water
+
 
         // Refresh the calendar view.
         calendar.refetchEvents();

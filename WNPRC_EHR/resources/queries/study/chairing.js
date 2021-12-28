@@ -30,7 +30,7 @@ function onInit(event, helper){
         helper.setProperty('clientEncounterDate', clientEncounterDate);
     });
 }
-function onUpsert(helper, scriptErrors, row, oldRow){
+function onInsert(helper, scriptErrors, row, oldRow){
 
     if (row.chairingStartTime){
         var map = helper.getProperty('clientEncounterDate');

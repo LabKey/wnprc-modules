@@ -9,6 +9,7 @@
                 <sourceColumns>
                     <column>id</column>
                     <column>id/demographics/vendor_id</column>
+                    <column>date</column>
                     <column>BirthDate</column>
                     <column>dam</column>
                     <column>sire</column>

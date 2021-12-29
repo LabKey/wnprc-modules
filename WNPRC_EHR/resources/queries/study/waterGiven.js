@@ -66,14 +66,15 @@ function onInit(event, helper){
 
         if (shouldAdd){
             waterInTransaction[row.Id].push({
-                objectid: row.objectid,
-                date: row.date,
-                datasource: row.datasource,
-                qcstate: row.qcstate,
-                assignedto: row.assignedto,
-                parentid: row.parentid,
-                volume: row.volume,
-                lsid: row.lsid
+                objectid:       row.objectid,
+                date:           row.date,
+                datasource:     row.datasource,
+                qcstate:        row.qcstate,
+                assignedto:     row.assignedto,
+                parentid:       row.parentid,
+                volume:         row.volume,
+                lsid:           row.lsid,
+                treatmentId:    row.treatmentId
 
             });
         }
@@ -151,7 +152,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                 //EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, errorQC);
             }*/
 
-            if (row.volume)
+            /*if (row.volume)
                 {
                     var msg = WNPRC.Utils.getJavaHelper().waterLastThreeDays(row.Id, row.date, waters);
                     if (msg != null){
@@ -159,7 +160,7 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
                         //EHR.Server.Utils.addError(scriptErrors, 'quantity', msg, errorQC);
                     }
 
-                }
+                }*/
             console.log ("value of treatmentId "+ row.treatmentId + (row.treatmentId == null));
 
             //This validation should only be called when using the Lab Water from, when entering
@@ -211,7 +212,10 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
             console.log('error Message ' + errorMessage);
             if (!errorMessage){
                 console.log('before adding description '+ row);
-                addWaterGivenDescription(row, waters);
+                if (waters[0].waterObjects){
+                    addWaterGivenDescription(row, waters);
+                }
+
             }
             //row.remarks=
 
@@ -224,37 +228,24 @@ function onUpsert(helper, scriptErrors, row, oldRow) {
 }
 function addWaterGivenDescription(row, waters){
     let clientDescription = '';
-    console.log ('description  '+clientDescription+ ' waters length '+ waters.length);
     let waterRecords = [];
     waterRecords = waters[0].waterObjects;
-    console.log('waterRecords '+waterRecords.length + ' inside waters '+ waters[0].waterObjects);
     for (var i=0;i<waterRecords.length; i++ ){
-        console.log ('value of map '+ waterRecords[i]);
         let waterRecord = waterRecords[i];
-        console.log (waterRecord.assignedTo + ',' + waterRecord.volume);
-        clientDescription += 'Volume of ' + + waterRecord.volume + ' assigned to ' +waterRecord.assignedTo + '\n'  ;
+        clientDescription += 'Volume of ' + + waterRecord.volume + ' assigned to ' +waterRecord.assignedTo;
 
-
+        if ( i < waterRecords.length-1){
+            clientDescription += '\n';
+        }
     }
-    /*LABKEY.ExtAdapter.each(waters, function (waterRecord){
-        console.log (waterRecord.get('assignedto') + ',' + waterRecord.get('volume'));
-        clientDescription += 'Volume of' + + waterRecord.get('volume') + 'assigned to' +waterRecord.get('assignedto') + ',' ;
-
-
-    },this)*/
-
-    console.log ('description after   '+clientDescription);
-
-    row.description = clientDescription;
-
-    
+    row.clientDescription = clientDescription;
 }
 
 function setDescription(row, helper){
     var description = new Array();
 
-    if (row.description)
-        description.push(EHR.Server.Utils.nullToString(row.description));
+    if (row.clientDescription)
+        description.push(EHR.Server.Utils.nullToString(row.clientDescription));
     if (row.volume)
         description.push('Total Volume: ' +EHR.Server.Utils.nullToString(row.volume));
     if (row.provideFruit)

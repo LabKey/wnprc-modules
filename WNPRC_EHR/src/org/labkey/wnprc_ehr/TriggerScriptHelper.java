@@ -939,19 +939,28 @@ public class TriggerScriptHelper {
                 {
                     String[] treatmentArray = allTreatmentId.split(";");
                     // String clientVolume = ((Map)((List)recordsInTransaction.get(0).get("waterObjects")).get(0)).get("volume").toString();
-                    List<Map<String, Object>> waterFromExtraContext = ((List) recordsInTransaction.get(0).get("waterObjects"));
+                    List<Map<String, Object>> waterFromExtraContext = new ArrayList<>();
+
+                    //When updating the client does not send waterObjects so it cannot use, we just use the treatmentId from the
+                    //client provided by waterGiven triggerScript
+                    if (recordsInTransaction.size() > 0 &&((List) recordsInTransaction.get(0).get("waterObjects")) == null){
+                        waterFromExtraContext.add(recordsInTransaction.get(0));
+                    }else if(recordsInTransaction.size() > 0){
+                        waterFromExtraContext = ((List) recordsInTransaction.get(0).get("waterObjects"));
+                    }
+
 
 
                     String clientVolume = null;
-                    for (String objectId : treatmentArray)
+                    for (String waterAmountObjectId : treatmentArray)
                     {
                         for (Map extraContextRows : waterFromExtraContext)
                         {
 
-                            if (objectId.equals(extraContextRows.get("treatmentId")) && "waterAmount".equals(extraContextRows.get("dataSource")))
+                            if (waterAmountObjectId.equals(extraContextRows.get("treatmentId")) )
                             {
                                 Map<String, Object> updateWaterAmount = new CaseInsensitiveHashMap<>();
-                                updateWaterAmount.put("lsid", extraContextRows.get("lsid"));
+                                updateWaterAmount.put("objectid", waterAmountObjectId);
                                 updateWaterAmount.put("volume", extraContextRows.get("volume"));
                                 //updateWaterAmount.put("");
                                 watersRecordsToUpdate.add(updateWaterAmount);
@@ -971,7 +980,7 @@ public class TriggerScriptHelper {
                 }
 
 
-            success = changeRowQCStatus("waterAmount", "lsid",  "volume",watersRecordsToUpdate);
+            success = changeRowQCStatus("waterAmount", "objectid",  "volume",watersRecordsToUpdate);
             if (!success.isBlank()){
                 errorMessage.append(success);
             }

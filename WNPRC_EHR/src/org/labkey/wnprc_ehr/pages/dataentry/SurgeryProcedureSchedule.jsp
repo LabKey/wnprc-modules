@@ -99,6 +99,57 @@
         background-color: dimgrey;
         color: lightblue;
     }
+
+    .acc-input {
+        display: none;
+    }
+
+    .acc-label {
+        display: block;
+        padding: 8px 22px;
+        margin: 0 0 1px 0;
+        cursor: pointer;
+        background: steelblue;
+        border-radius: 3px;
+        color: #FFF;
+        transition: ease .5s;
+        position: relative; /* ADDING THIS IS REQUIRED */
+    }
+
+    .acc-label:hover {
+        background: cornflowerblue;
+    }
+
+    .acc-label::after {
+        content: '+';
+        font-size: 22px;
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        top: 2px;
+    }
+
+    .acc-input:checked + .acc-label::after {
+        content: '-';
+        right: 14px;
+        top: 3px;
+    }
+
+    .acc-content {
+        background: #E2E5F6;
+        padding: 10px 25px;
+        border: 1px solid #A7A7A7;
+        margin: 0 0 1px 0;
+        border-radius: 3px;
+    }
+
+    .acc-input + .acc-label + .acc-content {
+        display: none;
+    }
+
+    .acc-input:checked + .acc-label + .acc-content {
+        display: block;
+    }
 </style>
 
 <script type="text/javascript">
@@ -178,15 +229,31 @@
 
     function createCalendarHeader(calendarChecklist, headerName) {
         let div = document.createElement("div");
+
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = headerName + "_calendar_group_checkbox";
+        checkbox.classList.add("acc-input");
+
         let label = document.createElement("label");
-        let description = document.createTextNode(headerName);
+        label.htmlFor = checkbox.id;
         label.style.marginTop = '3px';
+        label.classList.add("acc-label");
+
+        let description = document.createTextNode(headerName);
+
+        let calendarGroupDiv = document.createElement("div");
+        calendarGroupDiv.id = headerName + "_calendar_group_div";
+        calendarGroupDiv.classList.add("acc-content");
+
         label.appendChild(description);
+        div.appendChild(checkbox);
         div.appendChild(label);
+        div.appendChild(calendarGroupDiv);
         calendarChecklist.appendChild(div);
     }
 
-    function createCalendarListItem(calendarChecklist, allChecked, calData) {
+    function createCalendarListItem(parentDiv, allChecked, calData) {
         let div = document.createElement('div');
         let checkbox = document.createElement('input');
         let label = document.createElement('label');
@@ -232,7 +299,7 @@
         checkbox.style.display = 'inline-block';
         checkbox.style.cssFloat = 'left';
 
-        label.for = checkbox.id;
+        label.htmlFor = checkbox.id;
         label.style.marginTop = '3px';
         label.appendChild(description);
 
@@ -249,7 +316,7 @@
         div.appendChild(legend);
         div.appendChild(label);
 
-        calendarChecklist.appendChild(div);
+        parentDiv.appendChild(div);
         return allChecked;
     }
 
@@ -1552,7 +1619,7 @@
 
                             checkbox.style.display = 'inline-block';
                             checkbox.style.cssFloat = 'left';
-                            label.for = checkbox.id;
+                            label.htmlFor = checkbox.id;
                             label.style.marginTop = '3px';
                             label.appendChild(description);
 
@@ -1571,16 +1638,18 @@
                                 calendarList[data.rows[i].calendar_group].push(data.rows[i]);
                             }
 
-                            let topLevelCaledars = ["SPI", "Vet Staff"];
+                            let topLevelCalendars = ["SPI", "Vet Staff"];
 
-                            for (let i = 0; i < topLevelCaledars.length; i++) {
-                                if (calendarList[topLevelCaledars[i]]) {
-                                    createCalendarHeader(calendarChecklist, topLevelCaledars[i]);
+                            for (let i = 0; i < topLevelCalendars.length; i++) {
+                                if (calendarList[topLevelCalendars[i]]) {
+                                    createCalendarHeader(calendarChecklist, topLevelCalendars[i]);
 
-                                    for (let j = 0; j < calendarList[topLevelCaledars[i]].length; j++) {
-                                        createCalendarListItem(calendarChecklist, allChecked, calendarList[topLevelCaledars[i]][j]);
+                                    for (let j = 0; j < calendarList[topLevelCalendars[i]].length; j++) {
+                                        let calendarGroupDiv = document.getElementById(topLevelCalendars[i] + "_calendar_group_div");
+                                        createCalendarListItem(calendarGroupDiv, allChecked, calendarList[topLevelCalendars[i]][j]);
                                     }
-                                    delete calendarList[topLevelCaledars[i]];
+                                    document.getElementById(topLevelCalendars[i] + "_calendar_group_checkbox").click();
+                                    delete calendarList[topLevelCalendars[i]];
                                 }
                             }
 
@@ -1588,8 +1657,10 @@
                                 if (calendarList.hasOwnProperty(calendarGroup)) {
                                     createCalendarHeader(calendarChecklist, calendarGroup);
                                     for (let i = 0; i < calendarList[calendarGroup].length; i++) {
-                                        createCalendarListItem(calendarChecklist, allChecked, calendarList[calendarGroup][i]);
+                                        let calendarGroupDiv = document.getElementById(calendarGroup + "_calendar_group_div");
+                                        createCalendarListItem(calendarGroupDiv, allChecked, calendarList[calendarGroup][i]);
                                     }
+                                    document.getElementById(calendarGroup + "_calendar_group_checkbox").click();
                                 }
                             }
                             checkbox.checked = allChecked;

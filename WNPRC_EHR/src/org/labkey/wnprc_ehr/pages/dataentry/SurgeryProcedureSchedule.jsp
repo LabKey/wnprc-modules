@@ -176,6 +176,83 @@
         });
     }
 
+    function createCalendarHeader(calendarChecklist, headerName) {
+        let div = document.createElement("div");
+        let label = document.createElement("label");
+        let description = document.createTextNode(headerName);
+        label.style.marginTop = '3px';
+        label.appendChild(description);
+        div.appendChild(label);
+        calendarChecklist.appendChild(div);
+    }
+
+    function createCalendarListItem(calendarChecklist, allChecked, calData) {
+        let div = document.createElement('div');
+        let checkbox = document.createElement('input');
+        let label = document.createElement('label');
+        let description = document.createTextNode(calData.display_name);
+        let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+
+        div.id = calData.calendar_id + "_checkboxDiv";
+
+        checkbox.type = 'checkbox';
+        checkbox.id = calData.calendar_id + "_checkbox";
+        if (calData.show_by_default) {
+            checkbox.checked = true;
+        } else {
+            allChecked = false;
+        }
+        checkbox.value = '';
+        checkbox.addEventListener('change', function() {
+            if (calendar) {
+                let calId = this.id.slice(this.id, this.id.indexOf("_checkbox"));
+                let events = calendarEvents[calId].events;
+                let isChecked = !!this.checked;
+                calendar.batchRendering(() => {
+                    for (let i = 0; i < events.length; i++) {
+                        let event = calendar.getEventById(events[i].id);
+                        if (((event.title && event.title.toLowerCase().includes(searchTerm))
+                                || (event.extendedProps.body && event.extendedProps.body.toLowerCase().includes(searchTerm)))
+                                && (isChecked)) {
+                            event.setProp("display", "auto");
+                        } else {
+                            event.setProp("display", "none");
+                        }
+                    }
+                    if (placeholderEvents[calId]) {
+                        for (let i = 0; i < placeholderEvents[calId].length; i++) {
+                            calendar.getEventById(placeholderEvents[calId][i].id).setProp("display", displayProp);
+                        }
+                    }
+                });
+            }
+        });
+
+        checkbox.style.display = 'inline-block';
+        checkbox.style.cssFloat = 'left';
+
+        label.for = checkbox.id;
+        label.style.marginTop = '3px';
+        label.appendChild(description);
+
+        legend.setAttribute('width', '25px');
+        legend.setAttribute('height', '15px');
+        legend.style.marginLeft = '5px';
+        legend.style.marginRight = '5px';
+        rect.style.fill = calData.default_bg_color;
+        rect.setAttribute('width', '25px');
+        rect.setAttribute('height', '15px');
+        legend.appendChild(rect);
+
+        div.appendChild(checkbox);
+        div.appendChild(legend);
+        div.appendChild(label);
+
+        calendarChecklist.appendChild(div);
+        return allChecked;
+    }
+
     function createUnitSelectDiv(label, id) {
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("form-group");
@@ -1485,71 +1562,35 @@
                             calendarChecklist.appendChild(div);
 
                             let allChecked = true;
+
+                            let calendarList = {};
                             for (let i = 0; i < data.rows.length; i++) {
-
-                                let div = document.createElement('div');
-                                let checkbox = document.createElement('input');
-                                let label = document.createElement('label');
-                                let description = document.createTextNode(data.rows[i].display_name);
-                                let legend = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                                let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-
-                                div.id = data.rows[i].calendar_id + "_checkboxDiv";
-
-                                checkbox.type = 'checkbox';
-                                checkbox.id = data.rows[i].calendar_id + "_checkbox";
-                                if (data.rows[i].show_by_default) {
-                                    checkbox.checked = true;
-                                } else {
-                                    allChecked = false;
+                                if (!calendarList[data.rows[i].calendar_group]) {
+                                    calendarList[data.rows[i].calendar_group] = [];
                                 }
-                                checkbox.value = '';
-                                checkbox.addEventListener('change', function() {
-                                    if (calendar) {
-                                        let calId = this.id.slice(this.id, this.id.indexOf("_checkbox"));
-                                        let events = calendarEvents[calId].events;
-                                        let isChecked = this.checked ? true : false;
-                                        calendar.batchRendering(() => {
-                                            for (let i = 0; i < events.length; i++) {
-                                                let event = calendar.getEventById(events[i].id);
-                                                if (((event.title && event.title.toLowerCase().includes(searchTerm))
-                                                        || (event.extendedProps.body && event.extendedProps.body.toLowerCase().includes(searchTerm)))
-                                                        && (isChecked)) {
-                                                    event.setProp("display", "auto");
-                                                } else {
-                                                    event.setProp("display", "none");
-                                                }
-                                            }
-                                            if (placeholderEvents[calId]) {
-                                                for (let i = 0; i < placeholderEvents[calId].length; i++) {
-                                                    calendar.getEventById(placeholderEvents[calId][i].id).setProp("display", displayProp);
-                                                }
-                                            }
-                                        });
+                                calendarList[data.rows[i].calendar_group].push(data.rows[i]);
+                            }
+
+                            let topLevelCaledars = ["SPI", "Vet Staff"];
+
+                            for (let i = 0; i < topLevelCaledars.length; i++) {
+                                if (calendarList[topLevelCaledars[i]]) {
+                                    createCalendarHeader(calendarChecklist, topLevelCaledars[i]);
+
+                                    for (let j = 0; j < calendarList[topLevelCaledars[i]].length; j++) {
+                                        createCalendarListItem(calendarChecklist, allChecked, calendarList[topLevelCaledars[i]][j]);
                                     }
-                                });
+                                    delete calendarList[topLevelCaledars[i]];
+                                }
+                            }
 
-                                checkbox.style.display = 'inline-block';
-                                checkbox.style.cssFloat = 'left';
-
-                                label.for = checkbox.id;
-                                label.style.marginTop = '3px';
-                                label.appendChild(description);
-
-                                legend.setAttribute('width', '25px');
-                                legend.setAttribute('height', '15px');
-                                legend.style.marginLeft = '5px';
-                                legend.style.marginRight = '5px';
-                                rect.style.fill = data.rows[i].default_bg_color;
-                                rect.setAttribute('width', '25px');
-                                rect.setAttribute('height', '15px');
-                                legend.appendChild(rect);
-
-                                div.appendChild(checkbox);
-                                div.appendChild(legend);
-                                div.appendChild(label);
-
-                                calendarChecklist.appendChild(div);
+                            for (let calendarGroup in calendarList) {
+                                if (calendarList.hasOwnProperty(calendarGroup)) {
+                                    createCalendarHeader(calendarChecklist, calendarGroup);
+                                    for (let i = 0; i < calendarList[calendarGroup].length; i++) {
+                                        createCalendarListItem(calendarChecklist, allChecked, calendarList[calendarGroup][i]);
+                                    }
+                                }
                             }
                             checkbox.checked = allChecked;
                         }

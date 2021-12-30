@@ -1,9 +1,9 @@
-DROP TABLE IF EXISTS wnprc.procedure_rooms CASCADE;
 CREATE TABLE wnprc.procedure_rooms
 (
     room                VARCHAR(50),
     displayname         VARCHAR(100),
     type                VARCHAR(50),
+    calendar_group      VARCHAR(100),
     email               VARCHAR(50),
     show_by_default     BOOLEAN DEFAULT TRUE,
     requestable         BOOLEAN DEFAULT TRUE,
@@ -21,7 +21,6 @@ CREATE TABLE wnprc.procedure_rooms
     CONSTRAINT pk_procedure_room PRIMARY KEY (room)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_categories CASCADE;
 CREATE TABLE wnprc.procedure_categories
 (
     displayname VARCHAR(50),
@@ -36,7 +35,6 @@ CREATE TABLE wnprc.procedure_categories
     CONSTRAINT pk_procedure_category PRIMARY KEY (category)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_names;
 CREATE TABLE wnprc.procedure_names
 (
     displayname VARCHAR(50),
@@ -53,7 +51,6 @@ CREATE TABLE wnprc.procedure_names
     CONSTRAINT fk_procedure_categories_category FOREIGN KEY (category) REFERENCES wnprc.procedure_categories (category)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_scheduled_rooms;
 CREATE TABLE wnprc.procedure_scheduled_rooms
 (
     objectid        entityid NOT NULL,
@@ -76,7 +73,6 @@ CREATE TABLE wnprc.procedure_scheduled_rooms
     CONSTRAINT fk_procedure_scheduled_rooms_requestid FOREIGN KEY (requestid) REFERENCES ehr.requests (requestid)
 );
 
-DROP TABLE IF EXISTS wnprc.azure_accounts CASCADE;
 CREATE TABLE wnprc.azure_accounts
 (
     display_name        VARCHAR(100),
@@ -98,11 +94,11 @@ CREATE TABLE wnprc.azure_accounts
     CONSTRAINT pk_azure_accounts_name PRIMARY KEY (name)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_calendars;
 CREATE TABLE wnprc.procedure_calendars
 (
     calendar_id             VARCHAR(100),
     calendar_type           VARCHAR(100),
+    calendar_group          VARCHAR(100),
     display_name            VARCHAR(500),
     account_name            VARCHAR(100),
     api_action              VARCHAR(200),
@@ -123,7 +119,6 @@ CREATE TABLE wnprc.procedure_calendars
     CONSTRAINT fk_azure_accounts_name FOREIGN KEY (account_name) REFERENCES wnprc.azure_accounts (name)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_surgeons;
 CREATE TABLE wnprc.procedure_surgeons
 (
     userid            userid NOT NULL,
@@ -138,7 +133,6 @@ CREATE TABLE wnprc.procedure_surgeons
     CONSTRAINT pk_procedure_surgeons_id PRIMARY KEY (userid)
 );
 
-DROP TABLE IF EXISTS wnprc.procedure_units;
 CREATE TABLE wnprc.procedure_units
 (
     unit_display_name   VARCHAR(100),

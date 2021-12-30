@@ -2462,7 +2462,7 @@ public class WNPRC_EHRController extends SpringActionController
 
             try {
                 TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "wnprc").getTable("procedure_calendars_and_rooms");
-                TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "display_name", "show_by_default", "default_bg_color", "requires_authorization", "authorized_groups"), null, null);
+                TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "display_name", "calendar_group", "show_by_default", "default_bg_color", "requires_authorization", "authorized_groups"), null, new Sort("calendar_group"));
                 Map<String, Object>[] queryResults = ts.getMapArray();
 
                 if (queryResults != null && queryResults.length > 0) {

@@ -1,4 +1,4 @@
-CREATE TABLE wnprc.procedure_rooms
+CREATE TABLE IF NOT EXISTS wnprc.procedure_rooms
 (
     room                VARCHAR(50),
     displayname         VARCHAR(100),
@@ -21,7 +21,7 @@ CREATE TABLE wnprc.procedure_rooms
     CONSTRAINT pk_procedure_room PRIMARY KEY (room)
 );
 
-CREATE TABLE wnprc.procedure_categories
+CREATE TABLE IF NOT EXISTS wnprc.procedure_categories
 (
     displayname VARCHAR(50),
     category    VARCHAR(50),
@@ -35,7 +35,7 @@ CREATE TABLE wnprc.procedure_categories
     CONSTRAINT pk_procedure_category PRIMARY KEY (category)
 );
 
-CREATE TABLE wnprc.procedure_names
+CREATE TABLE IF NOT EXISTS wnprc.procedure_names
 (
     displayname VARCHAR(50),
     name        VARCHAR(50),
@@ -51,7 +51,7 @@ CREATE TABLE wnprc.procedure_names
     CONSTRAINT fk_procedure_categories_category FOREIGN KEY (category) REFERENCES wnprc.procedure_categories (category)
 );
 
-CREATE TABLE wnprc.procedure_scheduled_rooms
+CREATE TABLE IF NOT EXISTS wnprc.procedure_scheduled_rooms
 (
     objectid        entityid NOT NULL,
     room            VARCHAR(100),
@@ -73,7 +73,7 @@ CREATE TABLE wnprc.procedure_scheduled_rooms
     CONSTRAINT fk_procedure_scheduled_rooms_requestid FOREIGN KEY (requestid) REFERENCES ehr.requests (requestid)
 );
 
-CREATE TABLE wnprc.azure_accounts
+CREATE TABLE IF NOT EXISTS wnprc.azure_accounts
 (
     display_name        VARCHAR(100),
     account             VARCHAR(100),
@@ -94,7 +94,7 @@ CREATE TABLE wnprc.azure_accounts
     CONSTRAINT pk_azure_accounts_name PRIMARY KEY (name)
 );
 
-CREATE TABLE wnprc.procedure_calendars
+CREATE TABLE IF NOT EXISTS wnprc.procedure_calendars
 (
     calendar_id             VARCHAR(100),
     calendar_type           VARCHAR(100),
@@ -119,7 +119,7 @@ CREATE TABLE wnprc.procedure_calendars
     CONSTRAINT fk_azure_accounts_name FOREIGN KEY (account_name) REFERENCES wnprc.azure_accounts (name)
 );
 
-CREATE TABLE wnprc.procedure_surgeons
+CREATE TABLE IF NOT EXISTS wnprc.procedure_surgeons
 (
     userid            userid NOT NULL,
 
@@ -133,7 +133,7 @@ CREATE TABLE wnprc.procedure_surgeons
     CONSTRAINT pk_procedure_surgeons_id PRIMARY KEY (userid)
 );
 
-CREATE TABLE wnprc.procedure_units
+CREATE TABLE IF NOT EXISTS wnprc.procedure_units
 (
     unit_display_name   VARCHAR(100),
     unit                VARCHAR(100),

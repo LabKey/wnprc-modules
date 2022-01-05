@@ -139,6 +139,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             project: {
                 xtype: 'wnprc-projectentryfield',
                 editable : true,
+                allowBlank: false,
                 hidden: false,
                 disable: false,
                 shownInGrid: true,
@@ -426,7 +427,14 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 defaultValue: 'Implant Maintenance'
             },
             areaCleaned:{
-                allowBlank: false
+                allowBlank: false,
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'implant_area',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+                    sort: 'sort_order'
+                }
             },
             remark:{
                 shownInGrid: true

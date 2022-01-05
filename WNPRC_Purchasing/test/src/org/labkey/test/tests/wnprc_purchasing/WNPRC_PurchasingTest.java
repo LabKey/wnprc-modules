@@ -443,7 +443,11 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         clickAndWait(Locator.linkWithText(requestID));
 
         requestPage = new CreateRequestPage(getDriver());
-        checker().verifyEquals("Invalid value for Accounts to charge ", "acct100 - Assay Services", requestPage.getAccountsToCharge());
+
+        // Wait for the page to populate the drop-downs
+        CreateRequestPage checkerRequestPath = requestPage;
+        waitFor(() -> "acct100 - Assay Services".equalsIgnoreCase(checkerRequestPath.getAccountsToCharge()), () -> "Invalid value for Accounts to charge: " + checkerRequestPath.getAccountsToCharge(), WAIT_FOR_JAVASCRIPT);
+
         checker().verifyEquals("Invalid value for Vendor ", "Real Santa Claus", requestPage.getVendor());
         checker().verifyEquals("Invalid value for BusinessPurpose ", "Holiday Party", requestPage.getBusinessPurpose());
         checker().verifyEquals("Invalid value for Special Instructions ", "Ho Ho Ho", requestPage.getSpecialInstructions());
@@ -453,6 +457,8 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyEquals("Invalid value for Unit Input ", "CS", requestPage.getUnitInput());
         checker().verifyEquals("Invalid value for Unit cost ", "10", requestPage.getUnitCost());
         checker().verifyEquals("Invalid value for Quantity ", "25", requestPage.getQuantity());
+
+        checker().screenShotIfNewError("RequestPagePopulated");
 
         log("Upload another attachment");
         requestPage.addAttachment(pdfFile);
@@ -509,7 +515,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToPurchaseAdminPage();
         checker().verifyTrue(REQUESTER_USER_1 + "user should not permission for admin page",
                 isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
-                        .withText("You do not have the permissions required to access this page.")));
+                        .withText("User does not have permission to perform this operation.")));
         goBack();
 
         log("Creating request as " + REQUESTER_USER_1);
@@ -660,7 +666,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         goToPurchaseAdminPage();
         checker().verifyTrue("Receiver should not have permission to access admin page",
                 isElementPresent(Locator.tagWithClass("div", "labkey-error-subheading")
-                        .withText("You do not have the permissions required to access this page.")));
+                        .withText("User does not have permission to perform this operation.")));
         goToReceiverPage();
         waitAndClickAndWait(Locator.linkWithText(requestId2));
         requestPage = new CreateRequestPage(getDriver());

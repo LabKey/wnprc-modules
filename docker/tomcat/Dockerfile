@@ -1,5 +1,4 @@
 FROM adoptopenjdk/openjdk15:x86_64-centos-jdk-15.0.2_7
-#FROM openjdk:15.0.2-jdk-oraclelinux7
 
 ENV LANG en_US.utf8
 
@@ -35,7 +34,7 @@ RUN yum -y -q install \
 ENV CATALINA_HOME /usr/local/tomcat
 WORKDIR $CATALINA_HOME
 
-ENV TOMCAT_VERSION 8.5.32
+ENV TOMCAT_VERSION 9.0.54
 RUN wget -qO- http://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_VERSION%%\.[[:digit:]]*}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
   | tar -xz --strip-components=1 \
  && chmod -R 755 .
@@ -45,7 +44,7 @@ RUN mkdir -p conf/Catalina/localhost
 COPY ROOT.xml conf/Catalina/localhost/ROOT.xml
 
 # adding Tomcat custom login pattern
-COPY server8_5_32.xml conf/server.xml
+COPY server9_0_54.xml conf/server.xml
 
 RUN mkdir -p /usr/local/labkey/config/config-server
 COPY pipelineConfig.xml /usr/local/labkey/config/config-server/pipelineConfig.xml

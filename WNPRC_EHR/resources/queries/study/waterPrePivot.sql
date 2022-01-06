@@ -14,6 +14,8 @@ voGi.TotalWater AS TotalWater,
 voGi.TotalWater AS volume,
 voGi.RecentWeight,
 voGi.InnerWeight,
+voGi.RecentWeightNew,
+voGi.InnerWeightNew,
 
 
 TRUNCATE(ROUND(CAST(voGi.TotalWater /voGi.InnerWeight AS NUMERIC),2),2) AS mlsPerKg,
@@ -37,7 +39,23 @@ FROM (
         COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'imaging'),0) AS volumeGivenInImage,
         COALESCE ((SELECT SUM(CAST(iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) = 0 AND iwg.location LIKE 'procedureRoom'),0) AS volumeGivenInProcedure,
         COALESCE ((SELECT SUM (CAST (iwg.volume AS NUMERIC)) FROM study.waterGiven iwg WHERE iwg.id=wa.id AND (dayofyear(iwg.date)-dayofyear(wa.date)) =0),0) AS TotalWater,
+
+       (SELECT latestWeight.weight
+           FROM study.weight latestWeight) AS latestWeight,
         (SELECT we.weight
+         FROM study.weight we
+         WHERE we.id = wa.id AND we.date = (
+             SELECT MAX(wen.date)
+             FROM study.weight wen
+             WHERE (wen.id=wa.id AND wen.weight IS NOT NULL AND cast (wen.date as date) <= cast(wa.date as date))
+         )
+        ) AS InnerWeightNew,
+        (SELECT MAX(wen.date)
+         FROM study.weight wen
+         WHERE (wen.id=wa.id AND timestampdiff('SQL_TSI_DAY',wa.date,wen.date)>=0 AND wen.weight IS NOT NULL AND wa.date >= wen.date)
+        ) AS RecentWeightNew,
+
+       (SELECT we.weight
             FROM study.weight we
             WHERE we.id = wa.id AND we.date = (
                 SELECT MAX(wen.date)
@@ -72,4 +90,5 @@ FROM (
 WHERE voGi.InnerWeight IS NOT NULL
 --GROUP BY voGi.id,voGi.date,voGi.projectConcat,voGi.performedConcat,voGi.qcstateConcat,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight,voGi.RecentMlsPerKg,voGi.InnerMlsPerKg
 GROUP BY voGi.id,voGi.date,voGi.performedConcat,voGi.qcstateConcat,voGi.volumeGivenInLabSub,voGi.volumeGivenInCage,voGi.volumeGivenInImage,voGi.volumeGivenInProcedure,voGi.TotalWater,voGi.RecentWeight,voGi.InnerWeight,voGi.RecentMlsPerKg,voGi.InnerMlsPerKg
+,voGi.RecentWeightNew,voGi.InnerWeightNew
 --voGi.Weight

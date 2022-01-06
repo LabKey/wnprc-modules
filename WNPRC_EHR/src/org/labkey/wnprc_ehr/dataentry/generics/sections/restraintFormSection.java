@@ -19,6 +19,7 @@ public class restraintFormSection extends SlaveFormSection
     public Set<String> getSlaveFields(){
         Set<String> fields = new HashSet<>();
         fields.add("Id");
+        fields.add("date");
         fields.add("project");
 
         return fields;
@@ -26,6 +27,6 @@ public class restraintFormSection extends SlaveFormSection
 
     @Override
     public List<String> getFieldNames(){
-        return Arrays.asList("Id", "date", "project","restraintType","remarks");
+        return Arrays.asList("Id", "date", "project","restraintType","remark","performedby");
     }
 }

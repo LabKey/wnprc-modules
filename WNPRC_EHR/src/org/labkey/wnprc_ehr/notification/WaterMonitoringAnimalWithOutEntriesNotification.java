@@ -72,7 +72,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
 
     public String getDescription()
     {
-        return "The report is designed to identify potential problems with the colony, primarily related to weights, housing and assignments.";
+        return "The report is designed to report total amount of water animal had gotten and report if they have not gotten the required 20 mls per kilogram.";
     }
 
     @Override
@@ -87,7 +87,7 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
         //Check animals with less than 20 mls per kilogram of water for today
         findAnimalsWithEnoughWater(c,u,msg);
 
-        //Check animals that did not get any water for today
+        //Check animals that did not get any water for today and the last five days.
         findAnimalsWithWaterEntries(c,u,msg);
 
 
@@ -100,10 +100,13 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
         cal.setTime(new Date());
 
 
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("mlsPerKg"), 20, CompareType.LT);
-        filter.addCondition(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
+        SimpleFilter.OrClause orClause = new SimpleFilter.OrClause();
+        orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"), 20, CompareType.LT).getClauses().get(0));
+        orClause.addClause(new SimpleFilter(FieldKey.fromString("mlsPerKg"),null, CompareType.ISBLANK).getClauses().get(0));
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("date"), cal.getTime(), CompareType.DATE_EQUAL);
+        filter.addClause(orClause);
 
-        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterPrePivot"),PageFlowUtil.set("animalId","date","mlsPerKg","TotalWater"), filter, null);
+        TableSelector ts = new TableSelector(getStudySchema(c, u).getTable("waterTotalByDateWithWeight"),PageFlowUtil.set("id","date","mlsPerKg","TotalWater"), filter, null);
         long count = ts.getRowCount();
         if (count > 0)
         {
@@ -119,14 +122,14 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends AbstractEHR
                 LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-                msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("animalId"),String.class)
+                msg.append("<tr><td style='padding: 5px;'>" + ConvertHelper.convert(mapItem.get("id"),String.class)
                         + "</td><td style='padding: 5px; text-align: center;'> " + objectDateTime.format(formatter)
                         + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class)
                         + "</td><td style='padding: 5px; text-align: center;'> " + ConvertHelper.convert(mapItem.get("TotalWater"),String.class) +"</td></tr>" );
 
             }
             msg.append("</table>");
-            msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "waterPrePivot", null) + "&query.date~dateeq=" + AbstractEHRNotification._dateFormat.format(cal.getTime()) +"&query.mlsPerKg~lt=20'>Click here to view them</a><br>\n\n");
+            msg.append("<p><a href='" + getExecuteQueryUrl(c, "study", "waterTotalByDateWithWeight", null) + "&query.date~dateeq=" + AbstractEHRNotification._dateFormat.format(cal.getTime()) +"&query.mlsPerKg~lt=20'>Click here to view them</a><br>\n\n");
             msg.append("<hr>\n\n");
 
         }

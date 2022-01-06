@@ -28,7 +28,7 @@
                             <fkDbSchema>wnprc</fkDbSchema>
                             <fkTable>husbandry_frequency</fkTable>
                             <fkColumnName>rowid</fkColumnName>
-                            <fkDisplayColumnName>Meaning</fkDisplayColumnName>
+                            <fkDisplayColumnName>meaning</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="assignedTo">

@@ -49,7 +49,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
             callback: function (data) {
                 if (data) {
                     if (data['calculated_status'] && data.calculated_status !== 'Alive') {
-                        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') is not alive', 'ERROR');
+                        EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') is not alive', 'WARN');
                     }
                     if (data['calculated_status'] == null) {
                         EHR.Server.Utils.addError(scriptErrors, 'animalidstooffer', 'This animal (' + id + ') does not exist', 'ERROR');
@@ -73,11 +73,6 @@ function onAfterInsert(helper,errors,row){
     var threadIdExternal = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(row, "/WNPRC/WNPRC_Units/Animal_Services/Assigns/Restricted/");
     WNPRC.Utils.getJavaHelper().updateRow(row, threadIdExternal, "wnprc", "animal_requests", "externalthreadrowid");
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotification(rowid, hostName);
-    WNPRC.Utils.getJavaHelper().populateFolderPermissionsTable();
-
-    LABKEY.Security.getContainers()
-
-
 }
 
 function onAfterUpdate(helper,errors,row,oldRow){

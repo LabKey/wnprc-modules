@@ -242,7 +242,7 @@
     </table>
     <table tableName="husbandry_frequency" tableDbType="TABLE">
         <columns>
-            <column columnName="RowId"/>
+            <column columnName="rowid"/>
             <column columnName="meaning"/>
             <column columnName="dayofweek"/>
             <column columnName="sort_order"/>

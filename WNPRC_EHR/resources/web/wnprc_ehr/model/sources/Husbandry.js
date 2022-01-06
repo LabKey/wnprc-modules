@@ -165,6 +165,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 hidden: true
             },
             performedby:{
+                parentConfig: null,
                 hidden: false,
                 defaultValue: LABKEY.Security.currentUser.displayName
             },
@@ -251,21 +252,6 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 }
             } ,
 
-            /*location: {
-                editorConfig : {
-                    id: 'chairingLocation',
-                    listeners: {
-                        select: function (field, val) {
-                            if (field) {
-                                var chairingStartTime = Ext4.getCmp('chairingStartTime');
-                                chairingStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                            }
-                        }
-                    }
-                }
-
-            },*/
-
             chairingStartTime: {
                 xtype: 'xdatetime',
                 extFormat: 'Y-m-d H:i',
@@ -311,14 +297,20 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
 
             },
-            remarks:{
+            remark:{
                 xtype:  'ehr-remarkfield',
+                hidden: false,
                 allowBlank: false,
                 editorConfig: {
                     width:  400,
                     height: 100,
                     //resizable: true
                 }
+            },
+            performedby: {
+                allowBlank: false,
+                hidden: false,
+                defaultValue: LABKEY.Security.currentUser.displayName
             }
 
         },
@@ -341,7 +333,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
 
 
                             if (field) {
-                                var restraintRemarks = Ext4.getCmp('restraintRemarks');
+                                var restraintRemarks = Ext4.getCmp('restraintRemark');
 
                                 debugger; 
                                 if (field.value != null){
@@ -355,55 +347,20 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                                 if (field.value == "None" || field.value == ""){
                                     restraintRemarks.setValue('');
                                     restraintRemarks.hide();
-                                }/*else{
-                                    restraintRemarks.setValue('');
-                                    restraintRemarks.hide();
-                                }*/
-                            }
-
-
-                                /*if(field.value === 'Long Term Chairing') {
-                                    restraintStartTime.show();
-                                    restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                                    restraintEndTime.show();
-                                    restraintEndTime.setValue(new Date());
-                                    locationField.show();
-
-                                } else {
-                                    restraintStartTime.setValue('');
-                                    restraintEndTime.setValue('');
-                                    locationField.setValue('');
-                                    restraintStartTime.hide();
-                                    restraintEndTime.hide();
-                                    locationField.hide();
                                 }
-                                if(field.value === 'Short Term Chairing') {
-                                    var starTime = new Date();
-                                    var endTime = new Date (starTime);
-                                    endTime.setMinutes(starTime.getMinutes()+30);
-                                    restraintStartTime.show();
-                                    restraintStartTime.setValue((new Date()).format('Y-m-d H:i'));
-                                    restraintEndTime.show();
-                                    restraintEndTime.setValue(endTime);
-                                } else {
-                                    restraintStartTime.setValue('');
-                                    restraintEndTime.setValue('');
-                                    restraintStartTime.hide();
-                                    restraintEndTime.hide();
-
-                                }*/
+                            }
 
 
                         }
                     }
                 }
             },
-            remarks:{
-                allowBlank: true,
-                //xtype:  'ehr-remarkfield',
+            remark:{
+                xtype:  'textareafield',
+                width:400,
                 editorConfig:{
+                    id:     'restraintRemark',
                     autoRender: true,
-                    id:     'restraintRemarks',
                     listeners:{
                         //hide field on render because if it's never rendered
                         //to the dom it won't be able to be changed while hidden
@@ -412,6 +369,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                         }
                     }
                 },
+                allowBlank: true,
                 validator: function (value){
                     if (value == ''){
                         return 'Need to add a remark'
@@ -419,6 +377,11 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                         return true;
                     }
                 }
+            },
+            performedby: {
+                allowBlank: false,
+                hidden: true,
+                defaultValue: LABKEY.Security.currentUser.displayName
             }
 
         },
@@ -463,7 +426,14 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
                 defaultValue: 'Implant Maintenance'
             },
             areaCleaned:{
-                allowBlank: false
+                allowBlank: false,
+                lookup:{
+                    schemaName: 'ehr_lookups',
+                    queryName: 'implant_area',
+                    keyColumn: 'value',
+                    displayColumn: 'title',
+                    sort: 'sort_order'
+                }
             },
             remark:{
                 shownInGrid: true

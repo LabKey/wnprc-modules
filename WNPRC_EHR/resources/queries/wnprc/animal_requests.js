@@ -73,6 +73,11 @@ function onAfterInsert(helper,errors,row){
     var threadIdExternal = WNPRC.Utils.getJavaHelper().setUpMessageBoardThread(row, "/WNPRC/WNPRC_Units/Animal_Services/Assigns/Restricted/");
     WNPRC.Utils.getJavaHelper().updateRow(row, threadIdExternal, "wnprc", "animal_requests", "externalthreadrowid");
     WNPRC.Utils.getJavaHelper().sendAnimalRequestNotification(rowid, hostName);
+    WNPRC.Utils.getJavaHelper().populateFolderPermissionsTable();
+
+    LABKEY.Security.getContainers()
+
+
 }
 
 function onAfterUpdate(helper,errors,row,oldRow){

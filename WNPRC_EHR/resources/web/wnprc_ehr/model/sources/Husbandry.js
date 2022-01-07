@@ -139,6 +139,7 @@ EHR.model.DataModelManager.registerMetadata('Husbandry', {
             project: {
                 xtype: 'wnprc-projectentryfield',
                 editable : true,
+                allowBlank: false,
                 hidden: false,
                 disable: false,
                 shownInGrid: true,

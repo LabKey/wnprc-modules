@@ -7,7 +7,6 @@ import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.security.SecurityManager;
 import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.dbutils.api.exception.MissingPermissionsException;
 import org.labkey.dbutils.api.schema.DecoratedTableInfo;
@@ -50,8 +49,7 @@ public abstract class SecurityEscalatedService {
 
         // Check to make sure our user has all the required permissions
         SecurityPolicy policy = SecurityPolicyManager.getPolicy(container);
-        boolean hasPermission = SecurityManager.hasAllPermissions(null, policy,user,Set.of(requiredPermissions),Set.of());
-        if(requiredPermissions.length > 0 && !hasPermission) {
+        if(requiredPermissions.length > 0 && !policy.hasPermissions(user, requiredPermissions)) {
             throw MissingPermissionsException.createNew(requiredPermissions);
         }
     }

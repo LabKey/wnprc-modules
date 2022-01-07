@@ -1,1 +1,4 @@
-#* text=auto
+* text=auto
+
+WNPRC_EHR/resources/queries/study/Demographics.query.xml -text
+WNPRC_EHR/resources/queries/study/wnprcFullHistory/Full History.qview.xml -text

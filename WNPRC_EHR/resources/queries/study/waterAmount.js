@@ -52,7 +52,7 @@ function onInit(event, helper){
 
 }
 
-function onUpsert(helper, scriptErrors, row, oldRow) {
+function onInsert(helper, scriptErrors, row, oldRow) {
 
     if (row.date && row.recordSource != "WaterCalendar"){
         var map = helper.getProperty('clientEncounterDate');

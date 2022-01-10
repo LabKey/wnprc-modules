@@ -268,8 +268,13 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
             modelDate.setHours(dateCurrentTime.getHours());
             modelDate.setMinutes(dateCurrentTime.getMinutes());
 
-            let waterObject = {treatmentId: row.getValue('objectid'), volume: row.getValue('volume'), assignedTo: row.getValue('assignedTo'),
-                                dataSource: row.getValue('dataSource'), lsid:row.getValue('lsid')};
+            let waterObject = {
+                                treatmentId:    row.getValue('objectid'),
+                                volume:         row.getValue('volume'),
+                                assignedTo:     row.getValue('assignedTo'),
+                                dataSource:     row.getValue('dataSource'),
+                                lsid:           row.getValue('lsid')
+            };
 
             let previousVolume = 0;
             let previousTreatmentId = '';

@@ -7,8 +7,8 @@
             <description>Copy to target</description>
             <source remoteSource="ProductionEHRServer" schemaName="study" queryName="pedigree">
                 <sourceColumns>
-                    <column>id</column>
-                    <column>id/demographics/vendor_id</column>
+                    <column>Id</column>
+                    <column>Id/demographics/vendor_id</column>
                     <column>date</column>
                     <column>BirthDate</column>
                     <column>dam</column>

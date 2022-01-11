@@ -30,7 +30,7 @@ function onInit(event, helper){
         helper.setProperty('clientEncounterDate', clientEncounterDate);
     });
 }
-function onUpsert(helper, scriptErrors, row, oldRow){
+function onInsert(helper, scriptErrors, row, oldRow){
 
     if (row.chairingStartTime){
         var map = helper.getProperty('clientEncounterDate');
@@ -87,4 +87,49 @@ function onUpsert(helper, scriptErrors, row, oldRow){
     }
 
 
+}
+function setDescription(row,helper){
+    var description = new Array();
+
+    if (row.description){
+        description.push(EHR.Server.Utils.nullToString(row.description));
+    }
+    if (row.location){
+        description.push('Chairing location: ' + EHR.Server.Utils.nullToString(row.location));
+    }
+    if(row.chairingStartTime){
+        var m = new Date(row.chairingStartTime.time);
+        var dateString =
+                m.getUTCFullYear() + "-" +
+                ("0" + (m.getMonth()+1)).slice(-2) + "-" +
+                ("0" + m.getDate()).slice(-2) + " " +
+                ("0" + m.getHours()).slice(-2) + ":" +
+                ("0" + m.getMinutes()).slice(-2);
+        description.push('StartTime: ' + EHR.Server.Utils.nullToString(dateString));
+    }
+    if (row.chairingEndTime){
+        var m = new Date(row.chairingEndTime.time);
+        var dateString =
+                m.getUTCFullYear() + "-" +
+                ("0" + (m.getMonth()+1)).slice(-2) + "-" +
+                ("0" + m.getDate()).slice(-2) + " " +
+                ("0" + m.getHours()).slice(-2) + ":" +
+                ("0" + m.getMinutes()).slice(-2);
+        description.push('EndTime: ' + EHR.Server.Utils.nullToString(dateString));
+    }
+    if (row.chairingStartTime && row.chairingEndTime){
+        var startTime = row.chairingStartTime.time;
+        var endTime = row.chairingEndTime.time;
+        var difference = Math.floor((endTime - startTime) / (60 * 1000));
+        var hours = Math.floor(difference / 60);
+        var minutes = difference % 60;
+
+        var textDifference = "";
+        if (hours > 0) {
+            textDifference += hours + " hour" + (hours > 1 ? "s" : "") + " and "
+        }
+        textDifference += minutes + " minute" + (minutes != 1 ? "s" : "");
+        description.push('Duration: ' + textDifference);
+    }
+    return description;
 }

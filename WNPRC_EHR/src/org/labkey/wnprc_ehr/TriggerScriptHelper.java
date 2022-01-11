@@ -939,19 +939,28 @@ public class TriggerScriptHelper {
                 {
                     String[] treatmentArray = allTreatmentId.split(";");
                     // String clientVolume = ((Map)((List)recordsInTransaction.get(0).get("waterObjects")).get(0)).get("volume").toString();
-                    List<Map<String, Object>> waterFromExtraContext = ((List) recordsInTransaction.get(0).get("waterObjects"));
+                    List<Map<String, Object>> waterFromExtraContext = new ArrayList<>();
+
+                    //When updating the client does not send waterObjects so it cannot use, we just use the treatmentId from the
+                    //client provided by waterGiven triggerScript
+                    if (recordsInTransaction.size() > 0 &&((List) recordsInTransaction.get(0).get("waterObjects")) == null){
+                        waterFromExtraContext.add(recordsInTransaction.get(0));
+                    }else if(recordsInTransaction.size() > 0){
+                        waterFromExtraContext = ((List) recordsInTransaction.get(0).get("waterObjects"));
+                    }
+
 
 
                     String clientVolume = null;
-                    for (String objectId : treatmentArray)
+                    for (String waterAmountObjectId : treatmentArray)
                     {
                         for (Map extraContextRows : waterFromExtraContext)
                         {
 
-                            if (objectId.equals(extraContextRows.get("treatmentId")) && "waterAmount".equals(extraContextRows.get("dataSource")))
+                            if (waterAmountObjectId.equals(extraContextRows.get("treatmentId")) )
                             {
                                 Map<String, Object> updateWaterAmount = new CaseInsensitiveHashMap<>();
-                                updateWaterAmount.put("lsid", extraContextRows.get("lsid"));
+                                updateWaterAmount.put("objectid", waterAmountObjectId);
                                 updateWaterAmount.put("volume", extraContextRows.get("volume"));
                                 //updateWaterAmount.put("");
                                 watersRecordsToUpdate.add(updateWaterAmount);
@@ -971,7 +980,7 @@ public class TriggerScriptHelper {
                 }
 
 
-            success = changeRowQCStatus("waterAmount", "lsid",  "volume",watersRecordsToUpdate);
+            success = changeRowQCStatus("waterAmount", "objectid",  "volume",watersRecordsToUpdate);
             if (!success.isBlank()){
                 errorMessage.append(success);
             }
@@ -1327,7 +1336,7 @@ public class TriggerScriptHelper {
 
     }
 
-    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, String frequency, String waterSource, String objectId, Integer project, Map<String, Object> extraContext){
+    public JSONArray checkWaterRegulation(String animalId, Date clientStartDate, Date clientEndDate, int frequency, String waterSource, String objectId, Integer project, Map<String, Object> extraContext){
 
         String meaningFrequency = getMeaningFromRowid( frequency, "husbandry_frequency", "wnprc" );
         JSONArray arrayOfErrors = new JSONArray();
@@ -1376,7 +1385,7 @@ public class TriggerScriptHelper {
             //filter.addCondition(FieldKey.fromString("frequency"), frequency);
 
             //Adding all the water records from database to a list of waterRecord objects that can be compared
-            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume"), filter, null);
+            TableSelector waterOrdersFromDatabase = new TableSelector(waterSchedule, PageFlowUtil.set( "taskId","objectid","lsid","animalId", "date", "startDateCoalesced","endDateCoalescedFuture","dataSource","project","frequency", "assignedTo","volume","waterOrderObjectId"), filter, null);
             waterOrdersFromDatabase.setNamedParameters(parameters);
             waterRecords.addAll(waterOrdersFromDatabase.getArrayList(WaterDataBaseRecord.class));
 
@@ -1500,7 +1509,8 @@ public class TriggerScriptHelper {
 
                         //check if waterAmounts are outside the new order interval add warnings to users
                         //In waterAmount StartDate and EndDate are the same
-                        if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime()){
+                        if (waterRecord.getStartDateCoalesced().getTime() > Date.from(endOfLoop.atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime() &&
+                              objectId.equals(waterRecord.getWaterOrderObjectId())){
 
                             // Building link for allow user to edit waterAmounts in future
                             ActionURL editAmountURL = new ActionURL("EHR", "manageRecord", container);
@@ -1893,6 +1903,7 @@ public class TriggerScriptHelper {
 
         private String taskId;
         private String objectId;
+        private String waterOrderObjectId;
         private String lsid;
         private String animalId;
         private Date date;
@@ -1900,7 +1911,7 @@ public class TriggerScriptHelper {
         private Date endDateCoalescedFuture;
         private String dataSource;
         private String project;
-        private String frequency;
+        private int frequency;
         private String assignedTo;
         private Double volume;
 
@@ -1912,6 +1923,11 @@ public class TriggerScriptHelper {
         public void setObjectId(String objectId)
         {
             this.objectId = objectId;
+        }
+
+        public void setWaterOrderObjectId(String waterOrderObjectId)
+        {
+            this.waterOrderObjectId = waterOrderObjectId;
         }
 
         public void setLsid(String lsid)
@@ -1934,7 +1950,7 @@ public class TriggerScriptHelper {
             this.startDateCoalesced = startDateCoalesced;
         }
 
-        public void setEnddateCoalescedFuture(Date enddateCoalescedFuture){ this.endDateCoalescedFuture = enddateCoalescedFuture; }
+        public void setEndDateCoalescedFuture(Date endDateCoalescedFuture){ this.endDateCoalescedFuture = endDateCoalescedFuture; }
 
         public void setDataSource(String dataSource)
         {
@@ -1946,7 +1962,7 @@ public class TriggerScriptHelper {
             this.project = project;
         }
 
-        public void setFrequency(String frequency)
+        public void setFrequency(int frequency)
         {
             this.frequency = frequency;
         }
@@ -1971,6 +1987,11 @@ public class TriggerScriptHelper {
         public String getObjectId()
         {
             return objectId;
+        }
+
+        public String getWaterOrderObjectId()
+        {
+            return waterOrderObjectId;
         }
 
         public String getLsid()
@@ -2008,7 +2029,7 @@ public class TriggerScriptHelper {
             return project;
         }
 
-        public String getFrequency()
+        public int getFrequency()
         {
             return frequency;
         }
@@ -2036,11 +2057,11 @@ public class TriggerScriptHelper {
                 else if (prop.getKey().equalsIgnoreCase("startDate") && prop.getValue() instanceof Date)
                     setStartDateCoalesced((Date)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("endDate") && prop.getValue() instanceof Date)
-                    setEnddateCoalescedFuture((Date)prop.getValue());
+                    setEndDateCoalescedFuture((Date)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("dataSource") && prop.getValue() instanceof String)
                     setDataSource((String)prop.getValue());
                 else if (prop.getKey().equalsIgnoreCase("frequency") && prop.getValue() instanceof String)
-                    setFrequency((String)prop.getValue());
+                    setFrequency((int)prop.getValue());
 
             }
 
@@ -2050,13 +2071,13 @@ public class TriggerScriptHelper {
 
     //Generic function to get lookup table to get meaning from rowid
     //improvement to return a map with all the items in the table and only call the db once
-    public String getMeaningFromRowid (String lookupColumn, String lookupTable){
+    public String getMeaningFromRowid (int lookupColumn, String lookupTable){
         return getMeaningFromRowid(lookupColumn, lookupTable, "ehr_lookups");
     }
-    public String getMeaningFromRowid (String lookupColumn, String lookupTable, String lookupSchema){
+    public String getMeaningFromRowid (int lookupColumn, String lookupTable, String lookupSchema){
 
         TableInfo husbandryFrequency = getTableInfo(lookupSchema, lookupTable);
-        int frequencyNumber = Integer.parseInt(lookupColumn);
+        int frequencyNumber = lookupColumn;
         SimpleFilter filter = new SimpleFilter(FieldKey.fromString("rowid"), frequencyNumber, CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("active"), true);
         //filter.addCondition(FieldKey.fromString("active"), true, CompareType.EQUAL);
@@ -2073,37 +2094,6 @@ public class TriggerScriptHelper {
 
             }
         }
-
-
-       /* //Look for any orders that overlap in the waterScheduleCoalesced table
-        TableInfo waterSchedule = getTableInfo("study","waterScheduleCoalesced");
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("animalId"), animalId);
-        //filter.addCondition(FieldKey.fromString("date"), startDate.getTime(),CompareType.DATE_GTE);
-        //filter.addCondition(FieldKey.fromString("frequency"), frequency);
-
-        if (waterSchedule != null){
-            try (Results rs  = QueryService.get().select(waterSchedule, waterSchedule.getColumns(), filter, null, parameters, false))
-            {
-                Map<String, Object> rowMap = new CaseInsensitiveHashMap<>();
-                if (rs.next())
-                {
-                    for (String colName : waterSchedule.getColumnNameSet())
-                    {
-                        Object value = rs.getObject(FieldKey.fromParts(colName));
-                        if (value != null)
-                            rowMap.put(colName, value);
-                    }
-                }
-                WaterDataBaseRecord addRecord = new WaterDataBaseRecord();
-                addRecord.setFromMap(rowMap);
-                waterRecords.add(addRecord);
-
-            }
-            catch (SQLException e){
-                throw new RuntimeException(e);
-
-            }
-        }*/
 
         return returnMeaning;
     }
@@ -2197,7 +2187,7 @@ public class TriggerScriptHelper {
 
                 extraContextObject.put("date", waterOrderMap.get("date"));
                 extraContextObject.put("volume", waterOrderMap.get("volume"));
-                String frequencyMeaning = getMeaningFromRowid(waterOrderMap.get("frequency").toString(), "husbandry_frequency", "wnprc");
+                String frequencyMeaning = getMeaningFromRowid(ConvertHelper.convert(waterOrderMap.get("frequency"),Integer.class), "husbandry_frequency", "wnprc");
                 extraContextObject.put("frequency", frequencyMeaning);
 
                 arrayOfErrors.put(returnErrors);

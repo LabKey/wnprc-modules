@@ -797,6 +797,47 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                     "then finally uses the historic demographic text field called 'dam_old' as the dam.");
             table.addColumn(newCol);
         }
+
+        if (table.getColumn("mgapIds") == null)
+        {
+            String mgapIds = "mgapIds";
+
+            String theQuery  = "((" +
+                    "SELECT " +
+                    "STRING_AGG(DISTINCT m.mgap_id, ',') AS mgapIds " +
+                    "FROM wnprc.mgap_sequence_datasets m " +
+                    "WHERE LOWER(m.parsed_id) = LOWER(" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
+                    "))";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mgapIds, sql, JdbcType.VARCHAR);
+            newCol.setLabel("mGAP Id(s)");
+            newCol.setDescription("Shows an animal's mGAP Id(s) and links to the animal in mGAP (if available)");
+            newCol.setURL(StringExpressionFactory.create("https://mgap.ohsu.edu/mgap/mGAP/genomeBrowser.view?sampleFilters=mgap:${mgapIds}"));
+
+            table.addColumn(newCol);
+        }
+
+        if (table.getColumn("mgapSequenceTypes") == null)
+        {
+            String mgapSequenceTypes = "mgapSequenceTypes";
+
+            String theQuery  = "((" +
+                    "SELECT " +
+                    "STRING_AGG(DISTINCT m.sequence_type, ', ') AS mgapSequenceTypes " +
+                    "FROM wnprc.mgap_sequence_datasets m " +
+                    "WHERE LOWER(m.parsed_id) = LOWER(" + ExprColumn.STR_TABLE_ALIAS + ".participantid)" +
+                    "))";
+
+            SQLFragment sql = new SQLFragment(theQuery);
+
+            ExprColumn newCol = new ExprColumn(table, mgapSequenceTypes, sql, JdbcType.VARCHAR);
+            newCol.setLabel("mGAP Sequence Type(s)");
+            newCol.setDescription("Shows the available Sequence Type(s) for this animal in mGAP");
+
+            table.addColumn(newCol);
+        }
     }
 
     private TableInfo getRealTableForDataset(AbstractTableInfo ti, String name)

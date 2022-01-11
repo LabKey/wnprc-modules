@@ -3,7 +3,7 @@
        <column name="Id"/>
        <column name="date"/>
        <column name="project"/>
-       <column name="DataSet/Label">
+       <column name="dataset">
             <properties>
                 <property name="columnTitle" value="Dataset"/>
             </properties>

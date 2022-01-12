@@ -1,4 +1,4 @@
-<view xmlns="http://labkey.org/data/xml/view" frame="none" title="Animal Request">
+<view xmlns="http://labkey.org/data/xml/view" frame="none" title="Animal Request Form">
     <permissions>
         <permission name="login"/>
     </permissions>

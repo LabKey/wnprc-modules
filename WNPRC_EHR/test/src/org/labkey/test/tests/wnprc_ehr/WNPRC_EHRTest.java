@@ -380,15 +380,15 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     }
 
     @Override
-    public void importStudy()
-    {
-        importStudyFromPath(1);
-    }
-
-    @Override
     public String getModulePath()
     {
         return "/server/modules/wnprc-modules/" + getModuleDirectory();
+    }
+
+    @Override
+    public void importStudy()
+    {
+        importFolderFromPath(1);
     }
 
     // this mocks the behavior of enterweights sql update script

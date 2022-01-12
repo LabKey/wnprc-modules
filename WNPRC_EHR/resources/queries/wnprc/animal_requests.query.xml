@@ -12,7 +12,7 @@
                     </column>
                     <column columnName="rowid" >
                         <columnTitle>#</columnTitle>
-                        <url>/ehr/WNPRC/EHR/manageRecord.view?schemaName=wnprc&amp;queryName=animal_requests&amp;title=Animal%20Request&amp;keyField=rowid&amp;key=${rowid}</url>
+                        <url></url>
                     </column>
 
                     <column columnName="date" >

@@ -1,0 +1,9 @@
+<view xmlns="http://labkey.org/data/xml/view" title="Azure Authentication Settings">
+    <permissions>
+        <permission name="admin"/>
+    </permissions>
+    <dependencies>
+        <dependency path="ldk.context"/>
+        <dependency path="wnprc_ehr/ext4/panel/AzureAuthenticationSettingsPanel.js"/>
+    </dependencies>
+</view>

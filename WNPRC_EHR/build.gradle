@@ -15,12 +15,16 @@ dependencies {
     external "com.google.api-client:google-api-client:${googleApiClientVersion}"
     external "com.google.apis:google-api-services-calendar:${googleApiServicesCalendarVersion}"
     external "com.google.http-client:google-http-client-gson:${googleHttpClientVersion}"
-    external "com.microsoft.ews-java-api:ews-java-api:2.0"
     external ("com.google.auth:google-auth-library-oauth2-http:0.19.0") {
         // Avoid conflict with version pulled in by :platform:api and :platform:internal
         exclude group: "com.google.code.findbugs", module: "jsr305"
     }
     external "org.apache.commons:commons-text:1.9"
+    
+    //ms graph api libraries
+    external 'com.microsoft.azure:msal4j:1.11.0'
+    external 'com.microsoft.graph:microsoft-graph:2.10.0'
+    external 'org.slf4j:slf4j-nop:1.8.0-beta4'
 
     jspImplementation project(path: "${project.parent.path}:DBUtils",  configuration: "apiJarFile")
     jspImplementation project(path: "${project.parent.path}:WebUtils", configuration: "apiJarFile")

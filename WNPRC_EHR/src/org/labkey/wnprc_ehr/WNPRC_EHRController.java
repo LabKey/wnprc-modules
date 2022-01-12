@@ -16,6 +16,8 @@
 package org.labkey.wnprc_ehr;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import com.microsoft.graph.models.extensions.Event;
+import org.apache.commons.text.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.log4j.Logger;
@@ -34,8 +36,12 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
@@ -48,11 +54,14 @@ import org.labkey.api.ehr.demographics.AnimalRecord;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
+import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.QueryHelper;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.query.QueryUpdateServiceException;
+import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.DirectoryResource;
 import org.labkey.api.resource.FileResource;
 import org.labkey.api.resource.Resource;
@@ -65,14 +74,19 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminOperationsPermission;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
+import org.labkey.dbutils.api.SimplerFilter;
 import org.labkey.googledrive.api.DriveSharePermission;
 import org.labkey.googledrive.api.DriveWrapper;
 import org.labkey.googledrive.api.FolderWrapper;
@@ -81,11 +95,17 @@ import org.labkey.security.xml.GroupEnumType;
 import org.labkey.webutils.api.action.SimpleJspPageAction;
 import org.labkey.webutils.api.action.SimpleJspReportAction;
 import org.labkey.webutils.api.json.EnhancedJsonResponse;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshRunner;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
 import org.labkey.wnprc_ehr.bc.BCReportManager;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.bc.BusinessContinuityReport;
+import org.labkey.wnprc_ehr.calendar.AzureActiveDirectoryAuthenticator.AzureTokenStatus;
 import org.labkey.wnprc_ehr.calendar.Calendar;
+import org.labkey.wnprc_ehr.calendar.Graph;
+import org.labkey.wnprc_ehr.calendar.Office365Calendar;
 import org.labkey.wnprc_ehr.calendar.OnCallCalendar;
+import org.labkey.wnprc_ehr.calendar.SurgeryCalendarGoogle;
 import org.labkey.wnprc_ehr.data.ColonyCensus.AssignmentPerDiems;
 import org.labkey.wnprc_ehr.data.ColonyCensus.ColonyCensus;
 import org.labkey.wnprc_ehr.data.ColonyCensus.PopulationChangeEvent;
@@ -111,12 +131,19 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -989,6 +1016,144 @@ public class WNPRC_EHRController extends SpringActionController
             return new ApiSimpleResponse(json);
         }
     }
+    
+    public static class AzureAccessTokenEvent
+    {
+        private String name;
+        private int refresh_interval;
+        private boolean enabled;
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+        public int getRefresh_interval()
+        {
+            return refresh_interval;
+        }
+
+        public void setRefresh_interval(int refresh_interval)
+        {
+            this.refresh_interval = refresh_interval;
+        }
+
+        public boolean getEnabled()
+        {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled)
+        {
+            this.enabled = enabled;
+        }
+    }
+
+    @ActionNames("getAzureAuthenticationSettings")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class GetAzureAuthenticationSettingsAction extends ReadOnlyApiAction<Object>
+    {
+        public ApiResponse execute(Object form, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
+            response.put("accounts", settings.getAllSettings());
+            response.put("success", true);
+
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    @ActionNames("getAzureAuthenticationDeviceCodeValues")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class GetAzureAuthenticationDeviceCodeValuesAction extends ReadOnlyApiAction<AzureAccessTokenEvent>
+    {
+        public ApiResponse execute(AzureAccessTokenEvent event, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            String name = event.getName();
+            if (name != null)
+            {
+                PropertyManager.PropertyMap properties = PropertyManager.getEncryptedStore().getProperties(name + ".Credentials");
+                String userCode = properties.get("DeviceCodeUserCode");
+                String uri = properties.get("DeviceCodeURI");
+
+                if (userCode != null && uri != null)
+                {
+                    response.put("success", true);
+                    response.put("userCode", userCode);
+                    response.put("uri", uri);
+                }
+            }
+
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    @ActionNames("saveAzureAuthenticationSettings")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class SaveAzureAuthenticationSettingsAction extends MutatingApiAction<AzureAccessTokenEvent>
+    {
+        public ApiResponse execute(AzureAccessTokenEvent event, BindException errors) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", true);
+
+            JSONObject record = new JSONObject();
+            record.put("name", event.getName());
+            record.put("refresh_interval", event.getRefresh_interval());
+            record.put("enabled", event.getEnabled());
+
+            try {
+                List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
+
+                AzureAccessTokenRefreshSettings settings = AzureAccessTokenRefreshSettings.get();
+                if (!settings.updateSettings(rowsToUpdate, getUser())) {
+                    response.put("success", false);
+                }
+            } catch (Exception e) {
+                response.put("success", false);
+                throw e;
+            }
+
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    @ActionNames("refreshAzureAccessToken")
+    @RequiresPermission(AdminOperationsPermission.class)
+    public class RefreshAzureAccessTokenAction extends MutatingApiAction<AzureAccessTokenEvent>
+    {
+        public ApiResponse execute(AzureAccessTokenEvent event, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            AzureAccessTokenRefreshRunner azureAccessTokenRefreshRunner = new AzureAccessTokenRefreshRunner();
+            AzureTokenStatus status = azureAccessTokenRefreshRunner.doTokenRefresh(event.getName());
+
+            if (AzureTokenStatus.SUCCESS.equals(status)) {
+	            response.put("success", true);
+            } else if (AzureTokenStatus.AUTH_REQUIRED.equals(status)) {
+                response.put("success", false);
+                response.put("auth_required", true);
+            } else {
+                response.put("success", false);
+                response.put("auth_required", false);
+            }
+
+            return new ApiSimpleResponse(response);
+        }
+    }
 
     public static class DateRangeEvent
     {
@@ -1054,13 +1219,19 @@ public class WNPRC_EHRController extends SpringActionController
                     onCallSchedule[i + 1][1] = new JSONObject().put("html", WordUtils.capitalizeFully(startDate.plusDays(i).getDayOfWeek().toString()));
                 }
 
+                Calendar onCallCalendar = new OnCallCalendar(getUser(), getContainer());
+                java.time.LocalDate start = event.getStartDate().toInstant().atZone(ZoneId.of("America/Chicago")).toLocalDate();
+                java.time.LocalDate end = event.getEndDate().toInstant().atZone(ZoneId.of("America/Chicago")).toLocalDate();
+                JSONObject allEvents = onCallCalendar.getEventsAsJson(start, end);
+
                 //Fetch and then populate the events into the on call schedule html table in an easy way for the client side to read for each calendar
                 for (int i = 0; i < onCallCalendars.length; i++) {
                     JSONArray events = new JSONArray();
                     boolean calendarReadSuccessful = true;
                     try {
                         Map<String, Object> row = onCallCalendars[i];
-                        events = fetchCalendarEvents(new OnCallCalendar(), (String) row.get("calendar_id"), (String) row.get("calendar_type"), (String) row.get("default_bg_color"), event.getStartDate(), event.getEndDate());
+                        JSONObject calendarData = (JSONObject) allEvents.get(row.get("calendar_id"));
+                        events = calendarData.getJSONArray("events");
                     } catch (Exception e) {
                         _log.error("Error retrieving events from on-call calendar with calendarId: " + onCallCalendars[i].get("calendar_id"));
                         onCallSchedule[0][i + 2] = new JSONObject().put("html", onCallCalendars[i].get("display_name") + "<br><span class='error-text'>Error: Failed to load</span>");
@@ -1160,22 +1331,6 @@ public class WNPRC_EHRController extends SpringActionController
         return authorizedCalendars.toArray(onCallCalendars);
     }
 
-    private JSONArray fetchCalendarEvents(Calendar calendar, String calendarId, String calendarType, String backgroundColor, Date startDate, Date endDate) throws Exception
-    {
-        calendar.setUser(getUser());
-        calendar.setContainer(getContainer());
-        JSONArray events = null;
-        if (calendarType.equalsIgnoreCase("Office365Resource"))
-        {
-            events = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.ROOM, startDate, endDate);
-        }
-        else
-        {
-            events = calendar.getEventsAsJson(calendarId, backgroundColor, Calendar.EventType.CALENDAR, startDate, endDate);
-        }
-        return events;
-    }
-
     public abstract class WNPRCJspPageAction extends SimpleJspPageAction
     {
         @Override
@@ -1209,6 +1364,1220 @@ public class WNPRC_EHRController extends SpringActionController
         {
             return "Necropsy Schedule";
         }
+    }
+    
+    @ActionNames("SurgeryProcedureSchedule")
+    @RequiresLogin()
+    public class SurgeryProcedureScheduleAction extends WNPRCJspPageAction
+    {
+        @Override
+        public String getPathToJsp()
+        {
+            return "pages/dataentry/SurgeryProcedureSchedule.jsp";
+        }
+
+        @Override
+        public String getTitle()
+        {
+            return "Surgery and Procedure Schedule";
+        }
+    }
+
+    public static class SurgeryProcedureEvent
+    {
+        private String requestId;
+        private Date startTableTime;
+        private Date start;
+        private Date end;
+        private String subject;
+        private String assignedTo;
+        private String calendarId;
+        private JSONArray rooms;
+
+        public String getRequestId()
+        {
+            return requestId;
+        }
+
+        public Date getStartTableTime()
+        {
+            return startTableTime;
+        }
+
+        public Date getStart()
+        {
+            return start;
+        }
+
+        public Date getEnd()
+        {
+            return end;
+        }
+
+        public String getSubject()
+        {
+            return subject;
+        }
+
+        public String getAssignedTo()
+        {
+            return assignedTo;
+        }
+
+        public String getCalendarId() {
+            return calendarId;
+        }
+
+        public JSONArray getRooms() {
+            return rooms;
+        }
+
+        public void setRequestId(String requestId)
+        {
+            this.requestId = requestId;
+        }
+
+        public void setStartTableTime(Date startTableTime)
+        {
+            this.startTableTime = startTableTime;
+        }
+
+        public void setStart(Date start)
+        {
+            this.start = start;
+        }
+
+        public void setEnd(Date end)
+        {
+            this.end = end;
+        }
+
+        public void setSubject(String title)
+        {
+            this.subject = title;
+        }
+
+        public void setAssignedTo(String assignedTo)
+        {
+            this.assignedTo = assignedTo;
+        }
+
+        public void setCalendarId(String calendarId) {
+            this.calendarId = calendarId;
+        }
+
+        public void setRooms(JSONArray rooms) {
+            this.rooms = rooms;
+        }
+    }
+
+    public static class SurgeryProcedureUpdateEvent
+    {
+        private String calendarId;
+        private String requestId;
+        private String unit;
+        private boolean brandNew;
+        private List<String> roomNames;
+        private List<String> roomEmails;
+        private List<String> objectIds;
+        private Date start;
+        private Date end;
+        private List<Date> starts;
+        private List<Date> ends;
+        private Date newDate;
+        private boolean allDay;
+        private boolean ehrManaged;
+        private String body;
+        private String subject;
+        private String eventId;
+
+        public String getCalendarId()
+        {
+            return calendarId;
+        }
+
+        public String getRequestId()
+        {
+            return requestId;
+        }
+
+        public String getUnit()
+        {
+            return unit;
+        }
+
+        public boolean isBrandNew()
+        {
+            return brandNew;
+        }
+
+        public List<String> getRoomNames()
+        {
+            return roomNames;
+        }
+
+        public List<String> getRoomEmails()
+        {
+            return roomEmails;
+        }
+
+        public List<String> getObjectIds()
+        {
+            return objectIds;
+        }
+
+        public Date getStart()
+        {
+            return start;
+        }
+
+        public Date getEnd()
+        {
+            return end;
+        }
+
+        public List<Date> getStarts()
+        {
+            return starts;
+        }
+
+        public List<Date> getEnds()
+        {
+            return ends;
+        }
+
+        public Date getNewDate()
+        {
+            return newDate;
+        }
+
+        public boolean getAllDay()
+        {
+            return allDay;
+        }
+
+        public boolean getEhrManaged()
+        {
+            return allDay;
+        }
+
+        public String getBody()
+        {
+            return body;
+        }
+
+        public String getSubject()
+        {
+            return subject;
+        }
+
+        public String getEventId()
+        {
+            return eventId;
+        }
+
+        public void setCalendarId(String calendarId)
+        {
+            this.calendarId = calendarId;
+        }
+
+        public void setRequestId(String requestid)
+        {
+            this.requestId = requestid;
+        }
+
+        public void setUnit(String unit)
+        {
+            this.unit = unit;
+        }
+
+        public void setBrandNew(boolean brandNew)
+        {
+            this.brandNew = brandNew;
+        }
+
+        public void setRoomNames(List<String> roomNames)
+        {
+            this.roomNames = roomNames;
+        }
+
+        public void setRoomEmails(List<String> roomEmails)
+        {
+            this.roomEmails = roomEmails;
+        }
+
+        public void setObjectIds(List<String> objectIds)
+        {
+            this.objectIds = objectIds;
+        }
+
+        public void setStart(Date start)
+        {
+            this.start = start;
+        }
+
+        public void setEnd(Date end)
+        {
+            this.end = end;
+        }
+
+        public void setStarts(List<Date> starts)
+        {
+            this.starts = starts;
+        }
+
+        public void setEnds(List<Date> ends)
+        {
+            this.ends = ends;
+        }
+
+        public void setNewDate(Date newDate)
+        {
+            this.newDate = newDate;
+        }
+
+        public void setAllDay(boolean allDay)
+        {
+            this.allDay = allDay;
+        }
+
+        public void setEhrManaged(boolean ehrManaged)
+        {
+            this.ehrManaged = ehrManaged;
+        }
+
+        public void setBody(String body)
+        {
+            this.body = body;
+        }
+
+        public void setSubject(String title)
+        {
+            this.subject = title;
+        }
+
+        public void setEventId(String eventId)
+        {
+            this.eventId = eventId;
+        }
+    }
+
+    private LocalDateTime changeDate(Date startingDateAndTime, Date newDate)
+    {
+        LocalDateTime dateTime = LocalDateTime.ofInstant(startingDateAndTime.toInstant(), ZoneId.of("America/Chicago"));
+        LocalDateTime newDateTime = LocalDateTime.ofInstant(newDate.toInstant(), ZoneId.of("America/Chicago"));
+
+        long daysBetween = ChronoUnit.DAYS.between(dateTime.toLocalDate(), newDateTime.toLocalDate());
+        LocalDateTime updatedDateTime = dateTime.plusDays(daysBetween);
+
+        return updatedDateTime;
+    }
+
+    private LocalDateTime changeDateByDifference(Date originalStart, LocalDateTime newStart, Date originalEnd)
+    {
+        Duration timeBetween = Duration.between(originalStart.toInstant(), newStart.atZone(ZoneId.of("America/Chicago")).toInstant());
+        LocalDateTime newEnd = LocalDateTime.ofInstant(originalEnd.toInstant().plus(timeBetween), ZoneId.of("America/Chicago"));
+
+        return newEnd;
+    }
+
+    @ActionNames("DuplicateSurgeryEvent")
+    @RequiresLogin
+    public class DuplicateSurgeryEventAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try {
+                List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId(), true);
+                //List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
+                Map<String, Object> taskRow = getTaskRecord((String) spRows.get(0).get("taskid"));
+                Map<String, Object> requestRow = getRequestRecord((String) spRows.get(0).get("requestid"));
+
+                String requestId = UUID.randomUUID().toString();
+                String taskId = UUID.randomUUID().toString();
+                String objectId = UUID.randomUUID().toString();
+
+                List<LocalDateTime> newStartTimes = new ArrayList<>();
+                List<LocalDateTime> newEndTimes = new ArrayList<>();
+                for (int i = 0; i < event.getStarts().size(); i++) {
+                    LocalDateTime start = LocalDateTime.ofInstant(event.getStarts().get(i).toInstant(), ZoneId.of("America/Chicago"));
+                    LocalDateTime end = LocalDateTime.ofInstant(event.getEnds().get(i).toInstant(), ZoneId.of("America/Chicago"));
+                    if (event.getNewDate() != null) {
+                        start = changeDate(event.getStarts().get(i), event.getNewDate());
+                        end = changeDateByDifference(event.getStarts().get(i), start, event.getEnds().get(i));
+                    }
+                    newStartTimes.add(start);
+                    newEndTimes.add(end);
+                }
+
+                JSONArray rooms = new JSONArray();
+                for (int i = 0; i < event.getRoomNames().size(); i++) {
+                    JSONObject room = new JSONObject();
+                    room.put("date", newStartTimes.get(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    room.put("enddate", newEndTimes.get(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    room.put("email", event.getRoomEmails().get(i));
+                    room.put("objectid", UUID.randomUUID().toString());
+
+                    rooms.put(room);
+                }
+
+                String qcStateLabel = "Scheduled";
+                if (event.getCalendarId().endsWith("on_hold"))
+                {
+                    qcStateLabel = "Request: On Hold";
+                }
+
+                LocalDateTime newStartTime = Collections.min(newStartTimes);
+                LocalDateTime newEndTime = Collections.max(newEndTimes);
+
+                //CREATE TASK RECORD
+                JSONObject taskRecord = new JSONObject();
+                taskRecord.put("taskid", taskId);
+                taskRecord.put("title", "SurgeryProcedure");
+                taskRecord.put("category", "task");
+                taskRecord.put("assignedto", taskRow.get("assignedto"));
+                taskRecord.put("QCStateLabel", qcStateLabel);
+                taskRecord.put("duedate", "");
+                taskRecord.put("formtype", "SurgeryProcedure");
+
+                //CREATE REQUEST RECORD
+                JSONObject requestRecord = new JSONObject();
+                requestRecord.put("requestid", requestId);
+                requestRecord.put("title", requestRow.get("title"));
+                requestRecord.put("notify1", requestRow.get("notify1"));
+                requestRecord.put("notify2", requestRow.get("notify2"));
+                requestRecord.put("notify3", requestRow.get("notify3"));
+                requestRecord.put("sendemail", requestRow.get("sendemail"));
+                requestRecord.put("pi", requestRow.get("pi"));
+                requestRecord.put("priority", requestRow.get("priority"));
+                requestRecord.put("formtype", requestRow.get("formtype"));
+                requestRecord.put("description", "Duplicated by: " + getUser().getDisplayName(getUser()));
+                requestRecord.put("container", requestRow.get("container"));
+                requestRecord.put("QCStateLabel", qcStateLabel);
+
+                //CREATE SURGERY PROCEDURE RECORD(S)
+                List<Map<String, Object>> newSpRows = new ArrayList<>();
+                for (int i = 0; i < spRows.size(); i++)
+                {
+                    LocalDateTime newStartTableTime = null;
+                    if (spRows.get(i).get("startTableTime") != null) {
+                        newStartTableTime = changeDateByDifference((Date) spRows.get(i).get("date"), newStartTime, (Date) spRows.get(i).get("startTableTime"));
+                    }
+
+                    Map<String, Object> newSpRow = new HashMap<>();
+                    newSpRow.put("objectid", objectId);
+                    newSpRow.put("Id", spRows.get(i).get("Id"));
+                    newSpRow.put("date", newStartTime);
+                    newSpRow.put("startTableTime", newStartTableTime);
+                    newSpRow.put("enddate", newEndTime);
+                    newSpRow.put("procedurename", spRows.get(i).get("procedurename"));
+                    newSpRow.put("procedureunit", spRows.get(i).get("procedureunit"));
+                    newSpRow.put("project", spRows.get(i).get("project"));
+                    newSpRow.put("account", spRows.get(i).get("account"));
+                    newSpRow.put("surgeon", spRows.get(i).get("surgeon"));
+                    newSpRow.put("consultRequest", spRows.get(i).get("consultRequest"));
+                    newSpRow.put("biopsyNeeded", spRows.get(i).get("biopsyNeeded"));
+                    newSpRow.put("surgerytechneeded", spRows.get(i).get("surgerytechneeded"));
+                    newSpRow.put("spineeded", spRows.get(i).get("spineeded"));
+                    newSpRow.put("vetneeded", spRows.get(i).get("vetneeded"));
+                    newSpRow.put("vetneededreason", spRows.get(i).get("vetneededreason"));
+                    newSpRow.put("equipment", spRows.get(i).get("equipment"));
+                    newSpRow.put("drugslab", spRows.get(i).get("drugslab"));
+                    newSpRow.put("drugssurgery", spRows.get(i).get("drugssurgery"));
+                    newSpRow.put("comments", spRows.get(i).get("comments"));
+                    newSpRow.put("requestid", requestId);
+                    newSpRow.put("taskid", taskId);
+
+                    newSpRows.add(newSpRow);
+                }
+
+                //CREATE PROCEDURE_SCHEDULED_ROOMS RECORD(S)
+                List<Map<String, Object>> newRoomRows = new ArrayList<>();
+                for (int i = 0; i < event.getRoomEmails().size(); i++)
+                {
+                    Map<String, Object> newRoomRow = new HashMap<>();
+                    newRoomRow.put("objectid", rooms.getJSONObject(i).get("objectid"));
+                    newRoomRow.put("room", event.getRoomNames().get(i));
+                    newRoomRow.put("date", newStartTimes.get(i));
+                    newRoomRow.put("enddate", newEndTimes.get(i));
+                    newRoomRow.put("event_id", rooms.getJSONObject(i).get("event_id"));
+                    newRoomRow.put("requestid", requestId);
+
+                    newRoomRows.add(newRoomRow);
+                }
+
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+                {
+                    insertRecord(taskRecord, "ehr", "tasks");
+                    insertRecord(requestRecord, "ehr", "requests");
+                    insertRecords(newSpRows, "study", "surgery_procedure");
+                    insertRecords(newRoomRows, "wnprc", "procedure_scheduled_rooms");
+
+                    Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+                    boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), rooms, event.getSubject(), null, requestId, response);
+
+                    if (eventsScheduled)
+                    {
+                        List<Map<String, Object>> updatedRoomRows = new ArrayList<>();
+                        for (int i = 0; i < rooms.length(); i++) {
+                            JSONObject roomRow = rooms.getJSONObject(i);
+                            JSONObject roomRecord = new JSONObject();
+                            roomRecord.put("objectid", roomRow.get("objectid"));
+                            roomRecord.put("event_id", roomRow.get("event_id"));
+                            updatedRoomRows.add(roomRecord);
+                        }
+                        //update all rows at the same time so that the trigger script can update the surgery
+                        updateRecords(updatedRoomRows, "wnprc", "procedure_scheduled_rooms");
+
+                        response.put("success", true);
+                        transaction.commit();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+            }
+
+            return response;
+        }
+    }
+
+    @ActionNames("UpdateUnmanagedEvent")
+    @RequiresLogin
+    public class UpdateUnmanagedEventAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try {
+
+                Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+
+                ZonedDateTime start = ZonedDateTime.ofInstant(event.getStart().toInstant(), ZoneId.of("America/Chicago"));
+                ZonedDateTime end = ZonedDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.of("America/Chicago"));
+                Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, event.getBody(), null, event.getAllDay());
+                updatedEvent.id = event.getEventId();
+
+                calendar.updateUnmanagedEvent(event.getCalendarId(), updatedEvent, response);
+                response.put("success", true);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+            return response;
+        }
+    }
+
+    @ActionNames("UpdateSurgeryProcedure")
+    @RequiresLogin()
+    public class UpdateSurgeryProcedureAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
+
+            List<Map<String, Object>> updatedRooms = new ArrayList<>();
+            List<Event> updatedEvents = new ArrayList<>();
+            for (Map<String, Object> roomRow : roomRows) {
+                String objectId = (String) roomRow.get("objectid");
+
+                for (int i = 0; i < event.getObjectIds().size(); i++) {
+                    if (objectId.equalsIgnoreCase(event.getObjectIds().get(i))) {
+                        Instant newStart = event.getStarts().get(i).toInstant();
+                        Instant newEnd = event.getEnds().get(i).toInstant();
+                        String newRoomName = event.getRoomNames().get(i);
+
+                        Instant oldStart = ((Timestamp) roomRow.get("date")).toInstant();
+                        Instant oldEnd = ((Timestamp) roomRow.get("enddate")).toInstant();
+                        String oldRoomName = (String) roomRow.get("room");
+
+                        Map<String, Object> updatedRoom = new HashMap<>();
+                        updatedRoom.put("objectid", objectId);
+
+                        if (newStart != null && !newStart.equals(oldStart)) {
+                            updatedRoom.put("date", event.getStarts().get(i));
+                        }
+                        if (newEnd != null && !newEnd.equals(oldEnd)) {
+                            updatedRoom.put("enddate", event.getEnds().get(i));
+                        }
+                        if (newRoomName != null && !newRoomName.equals(oldRoomName)) {
+                            updatedRoom.put("room", newRoomName);
+                        }
+
+                        ZonedDateTime start = newStart.atZone(ZoneId.of("America/Chicago"));
+                        ZonedDateTime end = newEnd.atZone(ZoneId.of("America/Chicago"));
+
+                        Event updatedEvent = Graph.buildEvent(start, end, event.getSubject(), null, null, Graph.buildAttendeeList(event.getRoomEmails().get(i)), false);
+                        updatedEvent.id = (String) roomRow.get("event_id");
+                        updatedEvents.add(updatedEvent);
+
+                        updatedRooms.add(updatedRoom);
+                    }
+                }
+            }
+
+            Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+            try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
+                updateRecords(updatedRooms, "wnprc", "procedure_scheduled_rooms");
+                if (updatedEvents.size() > 0) {
+
+                    boolean eventsUpdated = calendar.updateProcedureEvents(event.getCalendarId(), updatedEvents, response, true);
+
+                    transaction.commit();
+                    response.put("success", true);
+                }
+            } catch (Exception e)
+                {
+                    try
+                    {
+                        List<Event> resetEvents = new ArrayList<>();
+                        for (Map<String, Object> roomRow : roomRows)
+                        {
+                            ZonedDateTime start = ((Timestamp) roomRow.get("date")).toInstant().atZone(ZoneId.of("America/Chicago"));
+                            ZonedDateTime end = ((Timestamp) roomRow.get("enddate")).toInstant().atZone(ZoneId.of("America/Chicago"));
+
+                            Event resetEvent = Graph.buildEvent(start, end, null, null, null, Graph.buildAttendeeList((String) roomRow.get("room_fs_email")), false);
+                            resetEvent.id = (String) roomRow.get("event_id");
+
+                            resetEvents.add(resetEvent);
+                        }
+                        calendar.updateProcedureEvents(event.getCalendarId(), resetEvents, null, false);
+                    } catch (Exception ex) {
+                        response.put("error", "There was an error. It's possible that only some of the events were updated in outlook. " +
+                                "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");
+                    }
+                    if (response.getString("error") == null) {
+                        response.put("error", e.getMessage());
+                    }
+                }
+
+            return response;
+        }
+    }
+
+    @ActionNames("CreateSurgeryProcedure")
+    @RequiresLogin()
+    public class CreateSurgeryProcedureAction extends MutatingApiAction<SurgeryProcedureUpdateEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureUpdateEvent event, BindException errors) throws Exception
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            String roomObjectId = UUID.randomUUID().toString();
+            String requestId = UUID.randomUUID().toString();
+            String taskId = UUID.randomUUID().toString();
+            String comment = event.isBrandNew()
+                    ? "Generated from event that was created directly from the schedule calendar"
+                    : "Automatically generated from transition calendar event";
+            String qcStateLabel = "Scheduled";
+            String parentCalendar;
+            if (event.isBrandNew()) {
+                parentCalendar = event.getUnit().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+            } else {
+                parentCalendar = event.getCalendarId().toLowerCase().contains("spi") ? "procedures_scheduled" : "surgeries_scheduled";
+            }
+
+            LocalDateTime start = LocalDateTime.ofInstant(event.getStart().toInstant(), ZoneId.of("America/Chicago"));
+            LocalDateTime end = LocalDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.of("America/Chicago"));
+
+            JSONArray rooms = new JSONArray();
+            JSONObject room = new JSONObject();
+            room.put("date", start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            room.put("enddate", end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            room.put("email", event.getRoomEmails().get(0));
+            room.put("objectid", roomObjectId);
+            rooms.put(room);
+
+            JSONObject spRecord = new JSONObject();
+            spRecord.put("objectid", UUID.randomUUID().toString());
+            spRecord.put("Id", "ph9999");
+            spRecord.put("date", event.getStart());
+            spRecord.put("enddate", event.getEnd());
+            spRecord.put("procedurename", "other");
+            if (event.isBrandNew()) {
+                spRecord.put("procedureunit", event.getUnit());
+            } else {
+                spRecord.put("procedureunit", event.getCalendarId().toLowerCase().contains("spi") ? "spi" : "vet");
+            }
+            spRecord.put("consultRequest", false);
+            spRecord.put("biopsyNeeded", false);
+            spRecord.put("surgerytechneeded", false);
+            spRecord.put("spineeded", false);
+            spRecord.put("vetneeded", false);
+            spRecord.put("comments", comment);
+            spRecord.put("QCStateLabel", qcStateLabel);
+            spRecord.put("requestid", requestId);
+            spRecord.put("taskid", taskId);
+
+            JSONObject roomRecord = new JSONObject();
+            roomRecord.put("objectid", roomObjectId);
+            roomRecord.put("room", event.getRoomNames().get(0));
+            roomRecord.put("date", event.getStart());
+            roomRecord.put("enddate", event.getEnd());
+            //roomRecord.put("event_id", null);
+            roomRecord.put("requestid", requestId);
+
+
+            JSONObject taskRecord = new JSONObject();
+            taskRecord.put("taskid", taskId);
+            taskRecord.put("title", "SurgeryProcedure");
+            taskRecord.put("category", "task");
+            //taskRecord.put("assignedto", null); //TODO assigned to who?
+            taskRecord.put("QCStateLabel", qcStateLabel);
+            taskRecord.put("duedate", "");
+            taskRecord.put("formtype", "SurgeryProcedure");
+
+            JSONObject requestRecord = new JSONObject();
+            requestRecord.put("requestid", requestId);
+            requestRecord.put("title", "Request Surgery or Procedure");
+            //requestRecord.put("notify1", null);
+            //requestRecord.put("notify2", null); //TODO notify who?
+            //requestRecord.put("notify3", null);
+            //requestRecord.put("sendemail", null);
+            //requestRecord.put("pi", null);
+            requestRecord.put("priority", "Routine");
+            requestRecord.put("formtype", "SurgeryProcedureRequest");
+            requestRecord.put("description", comment);
+            requestRecord.put("container", getContainer().toString());
+            requestRecord.put("QCStateLabel", qcStateLabel);
+
+            try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction())
+            {
+                insertRecord(taskRecord, "ehr", "tasks");
+                insertRecord(requestRecord, "ehr", "requests");
+                insertRecord(spRecord, "study", "surgery_procedure");
+                insertRecord(roomRecord, "wnprc", "procedure_scheduled_rooms");
+
+                Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+                boolean eventsScheduled = calendar.addEvents(parentCalendar, rooms, event.getSubject(), event.getBody(), requestId, response);
+
+                if (eventsScheduled)
+                {
+                    JSONObject roomRow = rooms.getJSONObject(0);
+                    JSONObject updateRecord = new JSONObject();
+                    updateRecord.put("objectid", roomRow.get("objectid"));
+                    updateRecord.put("event_id", roomRow.get("event_id"));
+                    updateRecord(updateRecord, "wnprc", "procedure_scheduled_rooms");
+
+                    response.put("success", true);
+                    transaction.commit();
+                }
+                if (!event.isBrandNew())
+                {
+                    calendar.cancelEvent(event.getEventId());
+                }
+            }
+
+            return response;
+        }
+    }
+
+    @ActionNames("ScheduleSurgeryProcedure")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class ScheduleSurgeryProcedureAction extends MutatingApiAction<SurgeryProcedureEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureEvent event, BindException errors) throws Exception
+        {
+            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId(), false);
+            List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+            Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+            boolean eventsScheduled = calendar.addEvents(event.getCalendarId(), event.getRooms(), event.getSubject(), null, event.getRequestId(), response);
+
+            String qcStateLabel = "Scheduled";
+            if (event.getCalendarId().endsWith("on_hold")) {
+                qcStateLabel = "Request: On Hold";
+            }
+
+            if (eventsScheduled)
+            {
+                try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
+                    /**
+                     * Insert the necessary records into the ehr.tasks table
+                     */
+                    //TODO get other info from jsp
+                    for(Map<String, Object> spRow : spRows)
+                    {
+                        String taskId = spRow.get("taskid") != null ? (String) spRow.get("taskid") : UUID.randomUUID().toString();
+                        if (spRow.get("taskid") == null) {
+                            spRow.put("taskid", taskId);
+                            JSONObject taskRecord = new JSONObject();
+                            taskRecord.put("taskid", taskId);
+                            taskRecord.put("title", "SurgeryProcedure");
+                            taskRecord.put("category", "task");
+                            taskRecord.put("assignedto", event.getAssignedTo());
+                            taskRecord.put("QCStateLabel", qcStateLabel);
+                            taskRecord.put("duedate", "");
+                            taskRecord.put("formtype", "SurgeryProcedure");
+                            insertRecord(taskRecord, "ehr", "tasks");
+                        }
+                    }
+
+                    /**
+                     * Update the surgery record(s) to contain the newly created taskid(s)
+                     */
+                    for(Map<String, Object> spRow : spRows)
+                    {
+                        //Initialize data to be updated and convert it to the necessary format
+                        JSONObject surgeryRecord = new JSONObject();
+                        surgeryRecord.put("objectid", spRow.get("objectid"));
+                        //surgeryRecord.put("apptid", apptId);
+                        surgeryRecord.put("QCStateLabel", qcStateLabel);
+                        surgeryRecord.put("taskid", spRow.get("taskid"));
+                        surgeryRecord.put("startTableTime", event.getStartTableTime());
+                        surgeryRecord.put("date", event.getStart());
+                        surgeryRecord.put("enddate", event.getEnd());
+                        updateRecord(surgeryRecord, "study", "surgery_procedure");
+                    }
+
+                    List<Map<String, Object>> updatedRoomRows = new ArrayList<>();
+                    for (int i = 0; i < event.getRooms().length(); i++) {
+                        JSONObject roomRow = event.getRooms().getJSONObject(i);
+                        JSONObject roomRecord = new JSONObject();
+                        roomRecord.put("objectid", roomRow.get("objectid"));
+                        roomRecord.put("event_id", roomRow.get("event_id"));
+                        roomRecord.put("room", roomRow.get("room"));
+                        roomRecord.put("date", roomRow.get("date"));
+                        roomRecord.put("enddate", roomRow.get("enddate"));
+                        updatedRoomRows.add(roomRecord);
+                    }
+                    //update all rows at the same time so that the trigger script can update the surgery
+                    updateRecords(updatedRoomRows, "wnprc", "procedure_scheduled_rooms");
+
+                    //TODO look into permissions stuff... ti.hasPermission(getUser(), DeletePermission.class);
+
+                    //TODO add some logic to make sure rows were updated correctly
+
+                    JSONObject requestRecord = new JSONObject();
+                    requestRecord.put("requestid", event.getRequestId());
+                    requestRecord.put("QCStateLabel", qcStateLabel);
+                    updateRecord(requestRecord, "ehr", "requests");
+
+                    transaction.commit();
+                    response.put("success", true);
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        for (Map<String, Object> roomRow : roomRows)
+                        {
+                            String eventId = (String) roomRow.get("event_id");
+                            if (eventId != null && eventId.length() > 0)
+                            {
+                                calendar.cancelEvent(eventId);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        response.put("error", "There was an error, but some of the events may have still been created in outlook. " +
+                                "This will cause an inconsistent record state. Please contact a member of the IDS team to fix this record.");
+                    }
+                    if (response.getString("error") == null) {
+                        response.put("error", e.getMessage());
+                    }
+                }
+            }
+            return response;
+        }
+    }
+
+    public static class SurgeryProcedureChangeStatusEvent
+    {
+        private String requestid;
+        private String qcstatelabel;
+        private String statuschangereason;
+
+        public String getRequestId()
+        {
+            return requestid;
+        }
+
+        public String getQCStateLabel()
+        {
+            return qcstatelabel;
+        }
+
+        public String getStatusChangeReason()
+        {
+            return statuschangereason;
+        }
+
+        public void setRequestId(String requestid)
+        {
+            this.requestid = requestid;
+        }
+
+        public void setQCStateLabel(String qcstatelabel)
+        {
+            this.qcstatelabel = qcstatelabel;
+        }
+
+        public void setStatusChangeReason(String statuschangereason)
+        {
+            this.statuschangereason = statuschangereason;
+        }
+    }
+
+    @ActionNames("SurgeryProcedureChangeStatus")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class SurgeryProcedureChangeStatusAction extends MutatingApiAction<SurgeryProcedureChangeStatusEvent>
+    {
+        @Override
+        public Object execute(SurgeryProcedureChangeStatusEvent event, BindException errors) throws Exception
+        {
+            List<Map<String, Object>> spRows = getSurgeryProcedureRecords(event.getRequestId(), false);
+            List<Map<String, Object>> roomRows = getSurgeryProcedureRooms(event.getRequestId());
+            String taskId = spRows.size() > 0 ? (String) spRows.get(0).get("taskid") : null;
+
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+            response.put("roomList", new JSONArray());
+
+            try (DbScope.Transaction transaction = WNPRC_Schema.getWnprcDbSchema().getScope().ensureTransaction()) {
+                /**
+                 * Update surgery records
+                 */
+                for(Map<String, Object> spRow : spRows)
+                {
+                    //Initialize data to be updated and convert it to the necessary format
+                    JSONObject surgeryRecord = new JSONObject();
+                    surgeryRecord.put("objectid", spRow.get("objectid"));
+                    surgeryRecord.put("QCStateLabel", event.getQCStateLabel());
+                    surgeryRecord.put("statuschangereason", event.getStatusChangeReason());
+                    updateRecord(surgeryRecord, "study", "surgery_procedure");
+                }
+
+                /**
+                 * Update request record
+                 */
+                JSONObject requestRecord = new JSONObject();
+                requestRecord.put("requestid", event.getRequestId());
+                requestRecord.put("QCStateLabel", event.getQCStateLabel());
+                requestRecord.put("remark", event.getStatusChangeReason());
+                updateRecord(requestRecord, "ehr", "requests");
+
+                /**
+                 * Update task record
+                 */
+                if (taskId != null)
+                {
+                    JSONObject taskRecord = new JSONObject();
+                    taskRecord.put("taskid", taskId);
+                    taskRecord.put("QCStateLabel", event.getQCStateLabel());
+                    updateRecord(taskRecord, "ehr", "tasks");
+                }
+
+                response.put("success", true);
+                if ("Request: Pending".equals(event.getQCStateLabel()))
+                {
+                    Office365Calendar calendar = new Office365Calendar(getUser(), getContainer());
+                    for (Map<String, Object> roomRow : roomRows)
+                    {
+                        String eventId = (String) roomRow.get("event_id");
+                        if (eventId != null && eventId.length() > 0)
+                        {
+                            calendar.cancelEvent(eventId);
+                            response.getJSONArray("roomList").put(roomRow);
+                        }
+                        else
+                        {
+                            response.put("success", false);
+                            response.put("error", "There was an error updating the event in Office 365");
+                        }
+                    }
+                }
+
+                if ((boolean) response.get("success"))
+                {
+                    transaction.commit();
+                }
+            } catch (Exception e) {
+                int x = 3;
+                //TODO nothing?
+            } finally {
+
+            }
+
+            return response;
+        }
+    }
+
+    private List<Map<String, Object>> getSurgeryProcedureRecords(String requestId, boolean allColumns) throws java.sql.SQLException
+    {
+        List<FieldKey> columns = new ArrayList<>();
+        if (allColumns)
+        {
+            columns.add(FieldKey.fromString("Id"));
+            columns.add(FieldKey.fromString("date"));
+            columns.add(FieldKey.fromString("startTableTime"));
+            columns.add(FieldKey.fromString("enddate"));
+            columns.add(FieldKey.fromString("procedurename"));
+            columns.add(FieldKey.fromString("procedureunit"));
+            columns.add(FieldKey.fromString("project"));
+            columns.add(FieldKey.fromString("account"));
+            columns.add(FieldKey.fromString("surgeon"));
+            columns.add(FieldKey.fromString("consultRequest"));
+            columns.add(FieldKey.fromString("biopsyNeeded"));
+            columns.add(FieldKey.fromString("surgerytechneeded"));
+            columns.add(FieldKey.fromString("spineeded"));
+            columns.add(FieldKey.fromString("vetneeded"));
+            columns.add(FieldKey.fromString("vetneededreason"));
+            columns.add(FieldKey.fromString("equipment"));
+            columns.add(FieldKey.fromString("drugslab"));
+            columns.add(FieldKey.fromString("drugssurgery"));
+            columns.add(FieldKey.fromString("comments"));
+            columns.add(FieldKey.fromString("requestid"));
+            columns.add(FieldKey.fromString("taskid"));
+        }
+        else 
+        {
+            columns.add(FieldKey.fromString("objectid"));
+            columns.add(FieldKey.fromString("taskid"));
+            columns.add(FieldKey.fromString("date"));
+            columns.add(FieldKey.fromString("enddate"));
+        }
+        
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
+        QueryHelper spQuery = new QueryHelper(getContainer(), getUser(), "study", "surgery_procedure");
+        List<Map<String, Object>> spRows = new ArrayList<>();
+        try (Results rs = spQuery.select(columns, filter))
+        {
+            while (rs.next())
+            {
+                spRows.add(rs.getRowMap());
+            }
+        }
+        return spRows;
+    }
+
+    private List<Map<String, Object>> getSurgeryProcedureRooms(String requestId)
+    {
+        List<Map<String, Object>> roomRows = new ArrayList<>();
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
+        JSONArray jsonRooms = queryFactory.selectRows("wnprc", "SurgeryProcedureRoomSchedule", filter);
+
+        for (int i = 0; i < jsonRooms.length(); i++) {
+            roomRows.add(jsonRooms.getJSONObject(i));
+        }
+
+        return roomRows;
+    }
+
+    private Map<String, Object> getTaskRecord(String taskId)
+    {
+        Map<String, Object> taskRow = new HashMap<>();
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("taskid"), taskId);
+        JSONArray jsonTask = queryFactory.selectRows("ehr", "tasks", filter);
+
+        if (jsonTask.length() > 0) {
+            taskRow = jsonTask.getJSONObject(0);
+        }
+
+        return taskRow;
+    }
+
+    private Map<String, Object> getRequestRecord(String requestId)
+    {
+        Map<String, Object> requestRow = new HashMap<>();
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("requestid"), requestId);
+        JSONArray jsonRequest = queryFactory.selectRows("ehr", "requests", filter);
+
+        if (jsonRequest.length() > 0) {
+            requestRow = jsonRequest.getJSONObject(0);
+        }
+
+        return requestRow;
+    }
+
+    private void insertRecord(JSONObject rowToInsert, String schema, String table) throws DuplicateKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        List<Map<String, Object>> rowsToInsert  = SimpleQueryUpdater.makeRowsCaseInsensitive(rowToInsert);
+        insertRecords(rowsToInsert, schema, table);
+    }
+
+    private void insertRecords(List<Map<String, Object>> rowsToInsert, String schema, String table) throws DuplicateKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        rowsToInsert = SimpleQueryUpdater.makeRowListCaseInsensitive(rowsToInsert);
+
+        TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), schema).getTable(table);
+        QueryUpdateService service = ti.getUpdateService();
+
+        BatchValidationException validationException = new BatchValidationException();
+        List<Map<String, Object>> insertedRows = service.insertRows(getUser(), getContainer(), rowsToInsert, validationException, null, null);
+        if (validationException.hasErrors())
+        {
+            throw validationException;
+        }
+    }
+
+    private void updateRecords(List<Map<String, Object>> rowsToUpdate, String schema, String table) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException {
+        if (rowsToUpdate != null && rowsToUpdate.size() > 0) {
+            //Get the service object based on schema/table
+            TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), schema).getTable(table);
+            QueryUpdateService service = ti.getUpdateService();
+
+            List<Map<String, Object>> updatedRows = service.updateRows(getUser(), getContainer(), rowsToUpdate, rowsToUpdate, null, null);
+            if (updatedRows.size() != rowsToUpdate.size()) {
+                throw new QueryUpdateServiceException("Not all " + schema + "." + table + " rows updated properly");
+            }
+        }
+    }
+
+    private void updateRecord(JSONObject record, String schema, String table) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+    {
+        List<Map<String, Object>> rowsToUpdate = SimpleQueryUpdater.makeRowsCaseInsensitive(record);
+        updateRecords(rowsToUpdate, schema, table);
+    }
+
+    @ActionNames("FetchSurgeryProcedureCalendarsAndRooms")
+    @RequiresLogin()
+    public class FetchSurgeryProcedureCalendarsAndRoomsAction extends ReadOnlyApiAction<Object>
+    {
+        @Override
+        public Object execute(Object form, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try {
+                TableInfo ti = QueryService.get().getUserSchema(getUser(), getContainer(), "wnprc").getTable("procedure_calendars_and_rooms");
+                TableSelector ts = new TableSelector(ti, PageFlowUtil.set("calendar_id", "display_name", "calendar_group", "show_by_default", "default_bg_color", "requires_authorization", "authorized_groups"), null, new Sort("calendar_group"));
+                Map<String, Object>[] queryResults = ts.getMapArray();
+
+                if (queryResults != null && queryResults.length > 0) {
+                    JSONObject data = new JSONObject();
+                    JSONArray rows = new JSONArray();
+
+                    for (int i = 0; i < queryResults.length; i++) {
+                        if (queryResults[i].get("requires_authorization") != null && (Boolean) queryResults[i].get("requires_authorization")) {
+                            String authorizedGroupsString = (String) queryResults[i].get("authorized_groups");
+
+                            if (authorizedGroupsString != null) {
+                                String[] authorizedGroups = authorizedGroupsString.trim().split("\\s*,\\s*");
+                                for (int j = 0; j < authorizedGroups.length; j++) {
+                                    Group authorizedGroup = GroupManager.getGroup(getContainer(), authorizedGroups[j], GroupEnumType.SITE);
+                                    if (getUser().isInGroup(authorizedGroup.getUserId()) || getUser().isInSiteAdminGroup()) {
+                                        rows.put(queryResults[i]);
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            rows.put(queryResults[i]);
+                        }
+                    }
+                    data.put("rows", rows);
+                    response.put("data", data);
+                    response.put("success", true);
+                }
+
+            } catch (Exception e) {
+                int x = 3;
+                //TODO add exception handling (is it necessary here?)
+            }
+
+            return response;
+        }
+    }
+
+    public static class FetchCalendarEvent
+    {
+        private String calendarId;
+        private String calendarType;
+
+        public String getCalendarId()
+        {
+            return calendarId;
+        }
+
+        public void setCalendarId(String calendarId)
+        {
+            this.calendarId = calendarId;
+        }
+
+        public String getCalendarType()
+        {
+            return calendarType;
+        }
+
+        public void setCalendarType(String calendarType)
+        {
+            this.calendarType = calendarType;
+        }
+    }
+
+    @ActionNames("FetchSurgeryProcedureEvents")
+    //TODO @RequiresPermission("SomeGroupPermissionSettingHere")
+    @RequiresLogin()
+    public class FetchSurgeryProcedureEventsAction extends ReadOnlyApiAction<FetchCalendarEvent>
+    {
+        @Override
+        public Object execute(FetchCalendarEvent event, BindException errors)
+        {
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+
+            try
+            {
+                Calendar surgeryCalendar = new Office365Calendar(getUser(), getContainer());
+                JSONObject office365Events = surgeryCalendar.getEventsAsJson(null, null);
+
+                surgeryCalendar = new SurgeryCalendarGoogle(getUser(), getContainer());
+                JSONObject googleEvents = surgeryCalendar.getEventsAsJson(null, null);
+
+                JSONObject allEvents = new JSONObject();
+
+                for (Map.Entry entry : office365Events.entrySet()) {
+                    allEvents.put((String) entry.getKey(), entry.getValue());
+                }
+
+                for (Map.Entry entry : googleEvents.entrySet()) {
+                    allEvents.put((String) entry.getKey(), entry.getValue());
+                }
+
+                response = generateSurgeryProcedureEventsResponse(response, allEvents);
+            }
+            catch (Exception e)
+            {
+                //TODO add logging
+                response.put("success", false);
+                response.put("error", e.toString());
+                e.printStackTrace();
+            }
+
+            return response;
+        }
+    }
+
+    private JSONObject generateSurgeryProcedureEventsResponse(JSONObject response, JSONObject events)
+    {
+        response.put("events", events);
+        if (events != null)
+        {
+            response.put("success", true);
+        }
+        return response;
     }
 
     @ActionNames("PathologyCaseList")

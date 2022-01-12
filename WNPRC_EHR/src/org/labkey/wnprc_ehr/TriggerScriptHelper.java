@@ -50,6 +50,7 @@ import org.labkey.wnprc_ehr.notification.AnimalRequestNotification;
 import org.labkey.wnprc_ehr.notification.AnimalRequestNotificationUpdate;
 import org.labkey.wnprc_ehr.notification.DeathNotification;
 import org.labkey.wnprc_ehr.notification.ProjectRequestNotification;
+import org.labkey.wnprc_ehr.notification.SurgeryScheduledNotification;
 import org.labkey.wnprc_ehr.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_ehr.notification.VvcNotification;
 
@@ -192,6 +193,18 @@ public class TriggerScriptHelper {
         }
     }
 
+    public void sendSurgeryScheduledNotification(final String requestid) {
+        Module ehrModule = ModuleLoader.getInstance().getModule("EHR");
+        SurgeryScheduledNotification surgeryNotification = new SurgeryScheduledNotification(ehrModule, requestid);
+        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(surgeryNotification, container)){
+            _log.info("Notification service is not enabled, will not send surgery scheduled notification");
+            return;
+        }
+
+        Container wnprcEhrContainer = ContainerManager.getForPath("/WNPRC/EHR");
+        surgeryNotification.sendManually(wnprcEhrContainer, user);
+    }
+
     public void sendPregnancyNotification(final List<String> ids, final List<String> objectids) {
 //        if (!NotificationService.get().isServiceEnabled() && NotificationService.get().isActive(new PregnancyNotification(), container)){
 //            _log.info("Notification service is not enabled, will not send pregnancy notification");
@@ -207,6 +220,30 @@ public class TriggerScriptHelper {
 //            pregnancyNotification.setParam(PregnancyNotification.objectidsParamName, objectids.get(i));
 //            pregnancyNotification.sendManually(container, user);
 //        }
+    }
+
+    public void setSurgeryProcedureStartEndTimes(String requestId, List<Date> startTimes, List<Date> endTimes) {
+        SimpleQueryFactory queryFactory = new SimpleQueryFactory(user, container);
+        SimplerFilter filter = new SimplerFilter("requestid", CompareType.EQUAL, requestId);
+        JSONArray procedureArray = queryFactory.selectRows("study", "surgery_procedure", filter);
+        List<JSONObject> procedures = JsonUtils.getListFromJSONArray(procedureArray);
+
+        Date date = Collections.min(startTimes);
+        Date endDate = Collections.max(endTimes);
+
+        List<Map<String, Object>> updateRows = new ArrayList<>();
+        for (JSONObject row : procedures) {
+            row.put("date", date);
+            row.put("enddate", endDate);
+            updateRows.add(row);
+        }
+
+        SimpleQueryUpdater queryUpdater = new SimpleQueryUpdater(user, container, "study", "surgery_procedure");
+        try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that surgery_procedure date/enddate fields can be updated to correct dates/times")) {
+            queryUpdater.update(updateRows);
+        } catch (Exception e) {
+            _log.error(e);
+        }
     }
 
     // Will insert the given rows into the given schema and table
@@ -269,11 +306,6 @@ public class TriggerScriptHelper {
             if (rowsToInsert.size() > 0) {
                 queryUpdater.insert(rowsToInsert);
             }
-//            try (SecurityEscalator escalator = EHRSecurityEscalator.beginEscalation(user, container, "Escalating so that ultrasound followup_required field can be changed to false")) {
-//                queryUpdater.update(rowsToUpdate);
-//            } catch (Exception e) {
-//                _log.error(e);
-//            }
         }
     }
 

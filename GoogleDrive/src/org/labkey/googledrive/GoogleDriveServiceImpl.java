@@ -14,6 +14,10 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
@@ -65,6 +69,11 @@ public class GoogleDriveServiceImpl extends GoogleDriveService {
     private JSONObject getCredentialJSON(String id, User user) throws NotFoundException {
         SimplerFilter filter = new SimplerFilter("id", CompareType.EQUAL, id);
         JSONObject[] rows = (new SimpleQueryFactory(user, ContainerManager.getHomeContainer())).selectRows("googledrive", "service_accounts", filter).toJSONObjectArray();
+
+        DbSchema schema = DbSchema.get("googledrive", DbSchemaType.Module);
+        TableInfo ti = schema.getTable("service_accounts");
+        TableSelector ts = new TableSelector(ti, filter, null);
+        Map<String, Object> serviceAccountMap = ts.getMap();
 
         if (rows.length == 0) {
             throw new NotFoundException();

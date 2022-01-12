@@ -8,5 +8,7 @@ WebUtils.Models.TableRow = Classify.newClass({
         this.isHidden   = ko.observable(false);
         this.warn = _.isDefined(config.warn) ? config.warn : false;
         this.err  = _.isDefined(config.err)  ? config.err  : false;
+        this.info = _.isDefined(config.info) ? config.info : false;
+        this.success = _.isDefined(config.success) ? config.success : false;
     }
 });

@@ -45,9 +45,13 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.resource.Resource;
+import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.roles.RoleManager;
+import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshSettings;
+import org.labkey.wnprc_ehr.AzureAuthentication.AzureAccessTokenRefreshRunnable;
 import org.labkey.wnprc_ehr.bc.BCReportRunner;
 import org.labkey.wnprc_ehr.buttons.ChangeBloodQCButton;
 import org.labkey.wnprc_ehr.buttons.CreateTaskButton;
@@ -86,6 +90,8 @@ import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasou
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsReviewForm;
 import org.labkey.wnprc_ehr.dataentry.forms.ResearchUltrasounds.ResearchUltrasoundsTaskForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Surgery.SurgeryForm;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.MultipleSurgeryProcedureRequestForm;
+import org.labkey.wnprc_ehr.dataentry.forms.SurgeryProcedureRequest.SurgeryProcedureRequestForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TBTests.TBTestsForm;
 import org.labkey.wnprc_ehr.dataentry.forms.TreatmentOrders.TreatmentOrdersForm;
 import org.labkey.wnprc_ehr.dataentry.forms.Treatments.TreatmentsForm;
@@ -154,7 +160,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
     public static final String CONTROLLER_NAME = "wnprc_ehr";
     public static final String TEST_CONTROLLER_NAME = "wnprc_test";
     public static final String WNPRC_Category_Name = NAME;
-        public static final WebPartFactory waterCalendarWebPart = new WaterCalendarWebPartFactory();
+    public static final WebPartFactory waterCalendarWebPart = new WaterCalendarWebPartFactory();
 
     /**
      * Logger for logging the logs
@@ -179,7 +185,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
 
     @Override
     public @Nullable Double getSchemaVersion() {
-        return forceUpdate ? Double.POSITIVE_INFINITY : 21.003;
+        return forceUpdate ? Double.POSITIVE_INFINITY : 21.004;
     }
 
     @Override
@@ -285,6 +291,15 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
         EHRService.get().registerLabworkType(new WNPRCUrinalysisLabworkType(this));
 
         BCReportRunner.schedule();
+        
+        AdminConsole.addLink(AdminConsole.SettingsLinkType.Management, "azure auth settings", DetailsURL.fromString("/WNPRC_EHR/azureAuthenticationSettings.view").getActionURL(), AdminOperationsPermission.class);
+
+        //Schedule jobs to refresh the access tokens for all Microsoft Azure accounts
+        for (String name : AzureAccessTokenRefreshSettings.get().getNames()) {
+            Thread refreshThread = new Thread(new AzureAccessTokenRefreshRunnable(name));
+            refreshThread.setDaemon(true);
+            refreshThread.start();
+        }
 
         EHRService es = EHRService.get();
         if (loadOnStart) loadLatestDatasetMetadata(es);
@@ -394,6 +409,8 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 NecropsyAbstractForm.class,
                 NecropsyForm.class,
                 NecropsyRequestForm.class,
+                SurgeryProcedureRequestForm.class,
+                MultipleSurgeryProcedureRequestForm.class,
                 PhysicalExamNWMForm.class,
                 PhysicalExamOWMForm.class,
                 ProblemListForm.class,

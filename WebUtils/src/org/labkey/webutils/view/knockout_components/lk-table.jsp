@@ -68,7 +68,7 @@
             </tr>
 
             <!-- ko foreach2: {data: $parent.table.rows } -->
-            <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err}, visible: !isHidden(), style: {background-color: isSelected() ? $component.rowBackgroundColorClicked : '', 'cursor' : $component.cursor} ">
+            <tr data-bind="css: { 'clickable': $component.rowsAreClickable, 'warning': warn, 'danger': err, 'info': info, 'success': success }, visible: !isHidden(), style: {background-color: isSelected() ? $component.rowBackgroundColorClicked : '', 'cursor' : $component.cursor} ">
                 <!-- ko if: $component.rowsAreSelectable -->
                 <td onclick="event.stopPropagation();"> <%-- prevent click from propagating to the row. --%>
                     <input type="checkbox" data-bind="checked: isSelected" >

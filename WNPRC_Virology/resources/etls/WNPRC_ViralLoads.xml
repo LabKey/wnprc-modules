@@ -1,0 +1,14 @@
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>EHR viral loads Truncate</name>
+    <description>This ETL truncates the Viral Loads table and uploads a clean copy of the data</description>
+    <transforms>
+        <transform id="vl-rsehr" type="RemoteQueryTransformStep">
+            <source queryName="rsehr_viral_loads" remoteSource="ProductionEHRServerVirology" schemaName="lists"/>
+            <destination queryName="viral_loads" schemaName="study" targetOption="truncate"/>
+        </transform>
+    </transforms>
+    <!-- run at 10:10pm CST every day -->
+    <schedule>
+        <cron expression="0 10 22 ? * *"/>
+    </schedule>
+</etl>

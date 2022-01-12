@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tables xsi:schemaLocation="http://labkey.org/data/xml ..\..\..\..\..\schemas\tableInfo.xsd" xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <table tableName="folder_paths_with_readers" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="folder_container_id"/>
+            <column columnName="folder_path"/>
+            <column columnName="emails"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+    <table tableName="folder_to_experiment_mappings" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="animal_id"/>
+            <column columnName="client_name"/>
+            <column columnName="folder_container_id"/>
+            <column columnName="folder_path"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
+</tables>

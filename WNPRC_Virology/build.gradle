@@ -1,0 +1,16 @@
+apply plugin: 'java'
+apply plugin: 'org.labkey.module'
+import org.labkey.gradle.util.BuildUtils
+
+
+compileJava {
+    options.compilerArgs << "-Xlint:unchecked"
+
+}
+
+dependencies {
+    implementation project(":server:modules:wnprc-modules:WNPRC_EHR")
+    implementation project(path: ":server:modules:wnprc-modules:DBUtils", configuration: "apiJarFile")
+    implementation project(path: ":server:modules:ehrModules:ehr", configuration: "apiJarFile")
+    //implementation project(path: "${project.parent.path}:DBUtils", configuration: "apiJarFile")
+}

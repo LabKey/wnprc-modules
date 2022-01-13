@@ -1,4 +1,4 @@
-package org.labkey.wnprc_ehr.security.permissions;
+package org.labkey.wnprc_virology.security.permissions;
 
 import org.labkey.api.security.permissions.AbstractPermission;
 

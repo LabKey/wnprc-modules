@@ -19,18 +19,14 @@ package org.labkey.wnprc_virology;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbSchemaType;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.wnprc_ehr.security.roles.WNPRCViralLoadReaderRole;
+import org.labkey.wnprc_virology.security.roles.WNPRCViralLoadReaderRole;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -69,6 +65,7 @@ public class WNPRC_VirologyModule extends SpringModule
     protected void init()
     {
         addController(WNPRC_VirologyController.NAME, WNPRC_VirologyController.class);
+        registerRoles();
     }
 
     @Override

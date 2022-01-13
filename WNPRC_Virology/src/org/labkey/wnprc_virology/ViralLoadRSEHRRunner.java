@@ -16,7 +16,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.dbutils.api.SimpleQueryFactory;
 import org.labkey.dbutils.api.SimpleQueryUpdater;
-import org.labkey.wnprc_ehr.security.permissions.WNPRCViralLoadReadPermission;
+import org.labkey.wnprc_virology.security.permissions.WNPRCViralLoadReadPermission;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;

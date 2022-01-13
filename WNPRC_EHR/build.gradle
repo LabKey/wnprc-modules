@@ -33,6 +33,7 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:LabDevKitModules:LDK", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ehrModules:ehr", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:ehrModules:Viral_Load_Assay", depProjectConfig: 'published', depExtension: 'module')
+    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: ":server:modules:dataintegration", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:DBUtils", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:WebUtils", depProjectConfig: 'published', depExtension: 'module')
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: "${project.parent.path}:GoogleDrive", depProjectConfig: 'published', depExtension: 'module')
@@ -40,6 +41,7 @@ dependencies {
 
     BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: "apiJarFile")
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "study"), depProjectConfig: "published", depExtension: "module")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: ":server:modules:dataintegration", depProjectConfig: "apiJarFile")
 }
 configurations.all {
     Configuration config ->

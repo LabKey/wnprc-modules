@@ -4,6 +4,7 @@ module.exports = function wp(env) {
         externals: {
             console: 'console',
         },
+        mode: process.env.NODE_ENV,
         module: {
             rules: [
                 {loader: 'ts-loader', test: /\.tsx?$/},

@@ -11,8 +11,8 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "build": "better-npm-run build",
-    "build-prod": "webpack --config webpack.config.js",
-    "clean": "rm -rf node_modules; rm -rf resources/web/gen/"
+    "build-prod": "better-npm-run build-prod",
+    "clean": "rm -rf resources/web/gen; rm -rf resources/views/gen"
   },
   "keywords": [],
   "author": "",
@@ -44,6 +44,12 @@
       "command": "webpack --config webpack.config.js",
       "env": {
         "NODE_ENV": "development"
+      }
+    },
+    "build-prod": {
+      "command": "webpack --config webpack.config.js",
+      "env": {
+        "NODE_ENV": "production"
       }
     }
   }

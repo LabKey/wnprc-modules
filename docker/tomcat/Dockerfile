@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk15:x86_64-centos-jdk-15.0.2_7
+FROM eclipse-temurin:17.0.1_12-jdk-centos7
 
 ENV LANG en_US.utf8
 

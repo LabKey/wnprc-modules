@@ -63,6 +63,7 @@ import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 import static org.labkey.test.WebTestHelper.getRemoteApiConnection;
 
 @Category({EHR.class, WNPRC_EHR.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 5)
 public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     //folders
@@ -709,7 +710,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         emailApprovalRequest.put("Unit", "Term");
         emailApprovalRequest.put("Unit Cost", "500");
         emailApprovalRequest.put("Quantity", "10");
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         String requestId = createRequest(emailApprovalRequest, null);
         stopImpersonating();
 
@@ -725,6 +726,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         checker().verifyTrue("Incorrect email body",
                 mailTable.getMessage(subject).getBody().contains("A new purchasing request # " + requestId + " by " + requester2Name + " was submitted on " + _dateTimeFormatter.format(today) + " for the total of $5,000.00."));
         checker().screenShotIfNewError("request_submitted_email");
+
         log("Delete emails from dumbster");
         enableEmailRecorder();
 
@@ -764,7 +766,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         emailApprovalRequest.put("Unit", "Term");
         emailApprovalRequest.put("Unit Cost", "500");
         emailApprovalRequest.put("Quantity", "20");
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         String requestId = createRequest(emailApprovalRequest, null);
         stopImpersonating();
 
@@ -818,7 +820,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         emailApprovalRequest.put("Unit", "Term");
         emailApprovalRequest.put("Unit Cost", "500");
         emailApprovalRequest.put("Quantity", "20");
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         String requestId = createRequest(emailApprovalRequest, null);
         stopImpersonating();
 

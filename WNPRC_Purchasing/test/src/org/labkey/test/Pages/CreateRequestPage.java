@@ -18,6 +18,13 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
         super(driver);
     }
 
+    @Override
+    protected void waitForPage()
+    {
+        Locator.waitForAnyElement(shortWait(), Locator.tagWithClass("div", "panel-title").withText("Request Info"),
+                Locator.tagWithClass("div", "panel-title").withText("Requested Items"));
+    }
+
     public String getAccountsToCharge()
     {
         return shortWait().ignoring(NoSuchElementException.class).until(wd ->

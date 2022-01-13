@@ -47,7 +47,7 @@ public class PrimateIdTest extends AbstractEHRTest
     @Override
     protected void importStudy()
     {
-        importStudyFromPath(1);
+        importFolderFromPath(1);
     }
 
     //endregion

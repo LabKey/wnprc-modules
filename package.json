@@ -85,13 +85,13 @@
   },
   "betterScripts": {
     "build": {
-      "command": "webpack --config primateid/webpack.config.ts",
+      "command": "webpack --config primateid/webpack.config.js",
       "env": {
         "NODE_ENV": "development"
       }
     },
     "build-prod": {
-      "command": "webpack --config primateid/webpack.config.ts",
+      "command": "webpack --config primateid/webpack.config.js",
       "env": {
         "NODE_ENV": "production"
       }

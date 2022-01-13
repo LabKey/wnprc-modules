@@ -1,9 +1,6 @@
-// noinspection TsLint: webpack is in the dev dependencies
-import * as Webpack from 'webpack';
-
 const path = require('path');
 
-let breedingConfig = function wp(env: { BUILD_DIR: string }){
+let breedingConfig = function wp(env) {
 
     return {
         devtool: 'source-map',
@@ -31,7 +28,7 @@ let breedingConfig = function wp(env: { BUILD_DIR: string }){
     };
 };
 
-let testConfig = function wp(env: { BUILD_DIR: string }) {
+let testConfig = function wp(env) {
 
     return {
         devtool: 'source-map',
@@ -65,7 +62,7 @@ let testConfig = function wp(env: { BUILD_DIR: string }) {
     };
 };
 
-let feedingConfig = function wp(env: { BUILD_DIR: string }) {
+let feedingConfig = function wp(env) {
 
     return {
         mode: process.env.NODE_ENV,
@@ -98,7 +95,7 @@ let feedingConfig = function wp(env: { BUILD_DIR: string }) {
         },
     };
 };
-var abstractConfig = function wp(env: { BUILD_DIR: string }) {
+var abstractConfig = function wp(env) {
 
     return {
         mode: process.env.NODE_ENV,
@@ -132,7 +129,7 @@ var abstractConfig = function wp(env: { BUILD_DIR: string }) {
     };
 };
 
-let researchUltrasoundsConfig = function wp(env: { BUILD_DIR: string }) {
+let researchUltrasoundsConfig = function wp(env) {
 
     return {
         devtool: 'source-map',
@@ -160,7 +157,7 @@ let researchUltrasoundsConfig = function wp(env: { BUILD_DIR: string }) {
     };
 };
 
-var weightConfig = function wp(env: { BUILD_DIR: string }) {
+var weightConfig = function wp(env) {
 
     return {
         mode: process.env.NODE_ENV,
@@ -196,7 +193,6 @@ var weightConfig = function wp(env: { BUILD_DIR: string }) {
     };
 };
 
-declare const module: any;
 module.exports = [
     breedingConfig, testConfig, feedingConfig, researchUltrasoundsConfig, abstractConfig, weightConfig
 ];

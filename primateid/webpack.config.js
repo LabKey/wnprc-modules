@@ -1,11 +1,9 @@
-const path = require('path');
 module.exports = function wp(env) {
     const base = {
         entry: './src/ts/primateid.ts',
         externals: {
             console: 'console',
         },
-        mode: process.env.NODE_ENV,
         module: {
             rules: [
                 {loader: 'ts-loader', test: /\.tsx?$/},
@@ -25,7 +23,7 @@ module.exports = function wp(env) {
             output: {
                 ...base.output,
                 libraryTarget: 'commonjs',
-                path: path.resolve(__dirname, `resources/scripts/primateid/gen`)
+                path: `${env.PROJECT_DIR}/resources/scripts/primateid`
             }
         },
         {   // create a configuration for the client side (in 'web')
@@ -33,7 +31,7 @@ module.exports = function wp(env) {
             output: {
                 ...base.output,
                 libraryTarget: 'var',
-                path: path.resolve(__dirname, `resources/web/primateid/gen`)
+                path: `${env.PROJECT_DIR}/resources/web/primateid`
             }
         },
     ];

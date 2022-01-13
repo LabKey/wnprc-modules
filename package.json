@@ -1,0 +1,100 @@
+{
+  "name": "@wnprc/labkey-modules",
+  "version": "1.0.0",
+  "description": "This repository includes all the custom LabKey modules developed by the WNPRC for use in the EHR system. Each subfolder contains a separate module.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "better-npm-run build",
+    "build-prod": "better-npm-run build-prod",
+    "storybook": "start-storybook",
+    "build-storybook": "build-storybook -c .storybook -o .storybook-out"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WNPRC-EHR-Services/wnprc-modules.git"
+  },
+  "author": "Clay Stevens <cstevens@primate.wisc.edu>",
+  "contributors": [
+    "F. Daniel Nicolalde <fdnicolalde@primate.wisc.edu>",
+    "Gabriel Gottfredsen <ggottfredsen@primate.wisc.edu>"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/WNPRC-EHR-Services/wnprc-modules/issues"
+  },
+  "homepage": "https://github.com/WNPRC-EHR-Services/wnprc-modules#readme",
+  "devDependencies": {
+    "@storybook/react": "^5.3.19",
+    "@types/extjs": "^4.2.32",
+    "@types/knockout": "^3.4.54",
+    "@types/knockout.mapping": "^2.0.33",
+    "@types/knockout.punches": "~0.5.0",
+    "@types/lodash": "^4.14.108",
+    "@types/node": "^7.0.64",
+    "@types/qunit": "^2.5.0",
+    "@types/rsvp": "~3.3.0",
+    "@types/toastr": "^2.0.0",
+    "@types/underscore": "^1.8.8",
+    "@types/underscore.string": "*",
+    "@types/urijs": "^1.15.38",
+    "@types/uuid": "^3.0.0",
+    "@types/webpack": "4.41.10",
+    "awesome-typescript-loader": "^3.5.0",
+    "babel-loader": "^8.1.0",
+    "better-npm-run": "0.0.15",
+    "css-loader": "^3.5.2",
+    "expose-loader": "^0.7.5",
+    "less": "^3.0.4",
+    "scss-loader": "^0.0.1",
+    "style-loader": "^1.1.4",
+    "ts-loader": "^6.2.2",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.10.0",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.8.3",
+    "webpack": "4.42.1",
+    "webpack-cli": "3.3.11"
+  },
+  "dependencies": {
+    "@labkey/api": "1.0.0",
+    "@wnprc/primate-id": "^1.1.7",
+    "blockui": "^1.0.0",
+    "bootstrap": "^3.0.0",
+    "dayjs": "^1.8.24",
+    "fullcalendar": "^3.0.0",
+    "jquery": "^3.5.0",
+    "knockout": "3.5.0",
+    "knockout.mapping": "~2.4.0",
+    "knockout.punches": "~0.5.0",
+    "lodash": "^4.17.13",
+    "markdown": "^0.5.0",
+    "moment": "^2.0.0",
+    "qunit": "^2.6.1",
+    "rsvp": "~3.3.0",
+    "simplefilter": "^1.0.0",
+    "toastr": "^2.0.0",
+    "underscore": "^1.0.0",
+    "underscore.string": "^3.3.5",
+    "urijs": "^1.0.0",
+    "uuid": "^3.0.0",
+    "whatwg-fetch": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "^1.2.4"
+  },
+  "betterScripts": {
+    "build": {
+      "command": "webpack --config primateid/webpack.config.js",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "build-prod": {
+      "command": "webpack --config primateid/webpack.config.js",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

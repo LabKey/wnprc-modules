@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<etl xmlns="http://labkey.org/etl/xml">
+    <name>mGAP Sequence Data</name>
+    <description>Syncs List of mGAP Sequence Data From PRIMe-Seq to WNPRC EHR</description>
+    <transforms>
+        <transform id="step1" type="RemoteQueryTransformStep">
+            <description>Copy to local table</description>
+            <source schemaName="mGAP" queryName="sequenceDatasetsSource" remoteSource="PRIMe-Seq">
+                <sourceColumns>
+                    <column>mgapId</column>
+                    <column>sequenceType</column>
+                    <column>totalReads</column>
+                    <column>sraAccession</column>
+                    <column>originalId</column>
+                </sourceColumns>
+                <sourceFilters>
+                    <sourceFilter column="center" operator="eq" value="WNPRC"/>
+                </sourceFilters>
+            </source>
+            <destination schemaName="wnprc" queryName="mgap_sequence_datasets" bulkLoad="true" targetOption="truncate">
+                <columnTransforms>
+                    <column source="mgapId" target="mgap_id"/>
+                    <column source="sequenceType" target="sequence_type"/>
+                    <column source="totalReads" target="total_reads"/>
+                    <column source="sraAccession" target="sra_accession"/>
+                    <column source="originalId" target="original_id"/>
+                    <column source="originalId" target="parsed_id" transformClass="org.labkey.wnprc_ehr.etl.MgapParseIdTransform"/>
+                </columnTransforms>
+            </destination>
+        </transform>
+    </transforms>
+    <schedule>
+        <cron expression="0 30 1 * * ?"/>
+    </schedule>
+</etl>

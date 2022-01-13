@@ -1373,7 +1373,7 @@ public class WNPRC_EHRController extends SpringActionController
         @Override
         public String getPathToJsp()
         {
-            return "pages/dataentry/SurgeryProcedureSchedule.jsp";
+            return "/org/labkey/wnprc_ehr/pages/dataentry/SurgeryProcedureSchedule.jsp";
         }
 
         @Override

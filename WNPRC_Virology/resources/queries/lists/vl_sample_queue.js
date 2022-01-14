@@ -1,4 +1,3 @@
-var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
 var LABKEY = require("labkey");
 
 var rowids = [];
@@ -6,14 +5,15 @@ var hostName =  'https://' + LABKEY.serverName;
 var completedStatus = 8;
 var emailParams = {};
 var insertedOnce = false;
+var helper = org.labkey.wnprc_virology.utils.TriggerScriptHelper.create(LABKEY.Security.currentUser.id, LABKEY.Security.currentContainer.id);
 
 function beforeUpdate(row){
-   if ((typeof row.experimentNumber == 'undefined' ||
-        typeof row.positive_control == 'undefined' ||
-        typeof row.vl_positive_control == 'undefined' ||
-        typeof row.avg_vl_positive_control == 'undefined' ||
-        typeof row.efficiency == 'undefined')
-        && row.Status == completedStatus) {
+    if ((typeof row.experimentNumber == 'undefined' ||
+                    typeof row.positive_control == 'undefined' ||
+                    typeof row.vl_positive_control == 'undefined' ||
+                    typeof row.avg_vl_positive_control == 'undefined' ||
+                    typeof row.efficiency == 'undefined')
+            && row.Status == completedStatus) {
         throw 'Cannot complete a record without an experiment number, positive control or efficiency value';
     }
 }
@@ -39,5 +39,5 @@ function afterUpdate(row, oldRow, errors){
 }
 
 function complete() {
-    WNPRC.Utils.getJavaHelper().sendViralLoadQueueNotification(rowids, emailParams);
+    helper.sendViralLoadQueueNotification(rowids, emailParams);
 }

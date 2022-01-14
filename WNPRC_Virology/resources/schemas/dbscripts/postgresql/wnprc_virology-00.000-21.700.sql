@@ -6,6 +6,7 @@ CREATE TABLE wnprc_virology.folder_paths_with_readers
     rowid               serial NOT NULL,
     folder_container_id text NOT NULL,
     folder_path         text NOT NULL,
+    folder_name         text NOT NULL,
     emails              text NOT NULL,
 
     -- Default fields for LabKey.

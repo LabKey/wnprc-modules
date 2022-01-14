@@ -51,7 +51,7 @@ public class ViralLoadRSEHRRunner implements Job {
     public static String VIROLOGY_RSEHR_PATH = "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/Private/";
 
 
-    public Map<String,Object> getEmailList(Container container)
+    public Map<String,Object> getEmailListAndFolderInfo(Container container)
     {
         List<User> adminUsers = SecurityManager.getUsersWithPermissions(container, Collections.singleton(AdminPermission.class));
         List<User> containerVLReaders = SecurityManager.getUsersWithPermissions(container, Collections.singleton(WNPRCViralLoadReadPermission.class));
@@ -66,6 +66,7 @@ public class ViralLoadRSEHRRunner implements Job {
         mpVL.put("emails", StringUtils.join(emailsVLReaders,";"));
         mpVL.put("folder_path", container.getPath());
         mpVL.put("folder_container_id", container.getEntityId());
+        mpVL.put("folder_name", container.getName());
         return mpVL;
     }
 
@@ -109,7 +110,7 @@ public class ViralLoadRSEHRRunner implements Job {
         Container container = ContainerManager.getForPath(VIROLOGY_RSEHR_PATH);
         for (Container child : container.getChildren())
         {
-            Map<String, Object> mp = getEmailList(child);
+            Map<String, Object> mp = getEmailListAndFolderInfo(child);
             rowsToInsert.add(mp);
         }
         User user = EHRService.get().getEHRUser(container);

@@ -23,7 +23,7 @@ RUN if [ "$WNPRC_BRANCH" = "master" ] ; then B="" ; else B=",branch:"${WNPRC_BRA
                 LABKEY_DISTRIBUTION="wisc" ; \
                 LABKEY_FILE_NAME="UWisc.tar.gz" ; \
     elif [ "$LABKEY_VERSION" = 21.11 ] ; then \
-        LABKEY_TEAMCITY_CONFIG="LabKey_2111Release_External_Wnprc_Installers" ; \
+        LABKEY_TEAMCITY_CONFIG="LabKey_2111Release_External_Wnprc_Installers2" ; \
         LABKEY_SNAPSHOT="-SNAPSHOT-" ; \
         LABKEY_DISTRIBUTION="wisc" ; \
         LABKEY_FILE_NAME="UWisc.tar.gz" ; \

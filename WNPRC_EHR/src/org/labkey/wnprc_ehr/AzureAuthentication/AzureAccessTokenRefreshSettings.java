@@ -58,13 +58,15 @@ public class AzureAccessTokenRefreshSettings {
         columns.add(FieldKey.fromString("name"));
         columns.add(FieldKey.fromString("scopes"));
 
-        final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
+        if (ti != null) {
+            final Map<FieldKey, ColumnInfo> colMap = QueryService.get().getColumns(ti, columns);
 
-        TableSelector ts = new TableSelector(ti, colMap.values(), null, null);
-        Map<String, Object>[] azureAccounts = ts.getMapArray();
+            TableSelector ts = new TableSelector(ti, colMap.values(), null, null);
+            Map<String, Object>[] azureAccounts = ts.getMapArray();
 
-        for (Map<String, Object> account : azureAccounts) {
-            _settings.put((String) account.get("name"), account);
+            for (Map<String, Object> account : azureAccounts) {
+                _settings.put((String) account.get("name"), account);
+            }
         }
     }
 

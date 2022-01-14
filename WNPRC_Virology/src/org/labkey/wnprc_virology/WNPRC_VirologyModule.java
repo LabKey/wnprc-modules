@@ -19,6 +19,8 @@ package org.labkey.wnprc_virology;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.ldk.notification.Notification;
+import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
@@ -26,10 +28,13 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_virology.security.roles.WNPRCViralLoadReaderRole;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class WNPRC_VirologyModule extends SpringModule
@@ -66,6 +71,7 @@ public class WNPRC_VirologyModule extends SpringModule
     {
         addController(WNPRC_VirologyController.NAME, WNPRC_VirologyController.class);
         registerRoles();
+        registerNotifications();
     }
 
     @Override
@@ -102,6 +108,17 @@ public class WNPRC_VirologyModule extends SpringModule
 
     public void registerRoles() {
         RoleManager.registerRole(new WNPRCViralLoadReaderRole());
+    }
+
+    public void registerNotifications() {
+        List<Notification> notifications = Arrays.asList(
+                new ViralLoadQueueNotification(this)
+        );
+
+        for (Notification notification : notifications)
+        {
+            NotificationService.get().registerNotification(notification);
+        }
     }
 
 }

@@ -1,9 +1,10 @@
-package org.labkey.wnprc_ehr.notification;
+package org.labkey.wnprc_virology.notification;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.ehr.notification.AbstractEHRNotification;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
@@ -14,11 +15,12 @@ import org.labkey.api.security.UserManager;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.util.MailHelper;
-import org.labkey.wnprc_ehr.WNPRC_EHRModule;
+import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
 import javax.mail.Address;
 import javax.mail.Message;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +50,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String vlPositiveControl;
     public String avgVLPositiveControl;
     public Double efficiency;
+    protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
 
     public ViralLoadQueueNotification(Module owner)
     {
@@ -69,6 +72,20 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         this.setUp();
     }
 
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailProps, String serverUrl) throws SQLException
+    {
+        super(owner);
+        rowIds = rowids;
+        currentUser = currentuser;
+        container = c;
+        hostName = (String) emailProps.get("hostName");
+        experimentNumber = (Integer) emailProps.get("experimentNumber");
+        positiveControl = (Integer) emailProps.get("positive_control");
+        vlPositiveControl = (String) emailProps.get("vl_positive_control");
+        avgVLPositiveControl = (String) emailProps.get("avg_vl_positive_control");
+        efficiency = (Double) emailProps.get("efficiency");
+        this.setUp();
+    }
     public void addEmail(String email)
     {
         if (emailsAndCount.containsKey(email))
@@ -117,6 +134,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         return recipientName;
     }
 
+    //override setuUp method?
     public void setUp() throws SQLException
     {
 
@@ -202,7 +220,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     @Override
     public String getCategory()
     {
-        return ModuleLoader.getInstance().getModule(WNPRC_EHRModule.class).getName();
+        return ModuleLoader.getInstance().getModule(WNPRC_VirologyModule.class).getName();
     }
 
     public String getName()
@@ -302,6 +320,14 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         return NotificationService.get().getRecipients(this, container);
     }
 
+    public void setRecipients(String emails)
+    {
+        this.notifyEmails = emails;
+    }
+
+
+
+    //override this dumb sendMessage method?
     public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, String recipient,Container container)
     {
         _log.info("ViralLoadNotification.java: sending viral sample queue update email...");

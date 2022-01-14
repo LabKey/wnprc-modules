@@ -250,4 +250,19 @@
             <column columnName="altmeaning"/>
         </columns>
     </table>
+    <table tableName="mgap_sequence_datasets" tableDbType="TABLE">
+        <columns>
+            <column columnName="mgap_id"/>
+            <column columnName="sequence_type"/>
+            <column columnName="total_reads"/>
+            <column columnName="sra_accession"/>
+            <column columnName="original_id"/>
+            <column columnName="parsed_id"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
 </tables>

@@ -1,13 +1,10 @@
-// noinspection TsLint: webpack is in the dev dependencies
-import * as Webpack from 'webpack';
-
-declare const module: any;
-module.exports = function wp(env: { BUILD_DIR: string, PROJECT_DIR: string }) {
+module.exports = function wp(env) {
     const base = {
         entry: './src/ts/primateid.ts',
         externals: {
             console: 'console',
         },
+        mode: process.env.NODE_ENV,
         module: {
             rules: [
                 {loader: 'ts-loader', test: /\.tsx?$/},

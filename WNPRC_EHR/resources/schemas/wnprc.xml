@@ -250,4 +250,17 @@
             <column columnName="altmeaning"/>
         </columns>
     </table>
+    <table tableName="watermonitoring_access" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="date"/>
+            <column columnName="alloweduser"/>
+            <column columnName="project"/>
+            <column columnName="principalinvestigator"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modifiedby"/>
+            <column columnName="modified"/>
+        </columns>
+    </table>
 </tables>

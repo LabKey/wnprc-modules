@@ -297,7 +297,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         goToRequesterPage();
         impersonate(REQUESTER_USER_1);
-        clickButton("Create Request");
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         CreateRequestPage requestPage = new CreateRequestPage(getDriver());
 
         log("Verifying the validation for mandatory fields");
@@ -521,7 +521,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
 
         log("Creating request as " + REQUESTER_USER_1);
         goToRequesterPage();
-        clickAndWait(Locator.linkWithText("Create Request"));
+        waitAndClickAndWait(Locator.linkWithText("Create Request"));
         Map<String, String> requesterRequest = new HashMap<>();
         requesterRequest.put("Account to charge", "acct100 - Assay Services");
         requesterRequest.put("Shipping destination", "456 Thompson lane (Math bldg)");

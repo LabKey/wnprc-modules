@@ -13,6 +13,7 @@ import org.labkey.api.query.QueryHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.logging.LogHelper;
+import org.labkey.wnprc_virology.VirologyModuleSettings;
 import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
 
 import java.sql.SQLException;
@@ -38,6 +39,8 @@ public class TriggerScriptHelper
     @NotNull
     private static final Map<String, String> _centerCustomProps = new HashMap<>();
 
+    private static VirologyModuleSettings _settings = new VirologyModuleSettings();
+
     private static final Logger _log = LogHelper.getLogger(TriggerScriptHelper.class, "Server-side validation of WNPRC_Virology data insert/update/deletes");
 
     private TriggerScriptHelper(int userId, String containerId)
@@ -51,6 +54,8 @@ public class TriggerScriptHelper
         if (container == null)
             throw new RuntimeException("Container does not exist: " + containerId);
         _container = container;
+        //load up the settings again incase they changed
+        _settings = new VirologyModuleSettings();
     }
 
     @NotNull
@@ -64,6 +69,7 @@ public class TriggerScriptHelper
     {
         return _container;
     }
+
 
     public static TriggerScriptHelper create(int userId, String containerId)
     {
@@ -97,14 +103,34 @@ public class TriggerScriptHelper
 
     public void sendViralLoadQueueNotification(String[] keys, Map<String,Object> emailProps) throws SQLException
     {
+        if (emailProps.get("status") == null)
+            return;
+
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        Container viralLoadContainer = ContainerManager.getForPath("/WNPRC/WNPRC_Units/Research_Services/Virology_Services/viral_load_sample_tracker/");
+        Container viralLoadContainer = ContainerManager.getForPath(_settings.getVirologyEHRVLSampleQueueFolderPath());
         String recordStatus = getVLStatus(_user, viralLoadContainer, (Integer) emailProps.get("status"));
-        if ("08-complete-email-Zika_portal".equals(recordStatus)){
-            //_log.info("Using java helper to send email for viral load queue record: "+key);
-            ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailProps);
-            Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-            notification.sendManually(ehrContainer);
+
+        if (_settings.getZikaPortalQCStatusString() != null)
+        {
+            if (_settings.getZikaPortalQCStatusString().equals(recordStatus))
+            {
+                //_log.info("Using java helper to send email for viral load queue record: "+key);
+                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailProps);
+                Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+                notification.sendManually(ehrContainer);
+            }
+        }
+
+        if (_settings.getRSEHRQCStatusString() != null)
+        {
+            if (_settings.getRSEHRQCStatusString().equals(recordStatus))
+            {
+                //_log.info("Using java helper to send email for viral load queue record: "+key);
+                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailProps);
+                Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
+                notification.sendManually(ehrContainer);
+            }
+
         }
     }
 }

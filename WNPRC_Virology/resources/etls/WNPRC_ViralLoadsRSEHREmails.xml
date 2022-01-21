@@ -1,1 +1,1 @@
-<!--- etl to get folder info / emails onto main EHR... query the folder_to_experiment_mappings_sql table.-->
+<!--- etl to get folder info / emails onto main EHR... query the folder_to_experiment_mappings_sql table. use folder_to_experiment_mappings.sql-->

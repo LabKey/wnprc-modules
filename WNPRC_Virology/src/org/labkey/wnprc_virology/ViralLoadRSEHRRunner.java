@@ -43,12 +43,10 @@ import static org.quartz.TriggerKey.triggerKey;
 public class ViralLoadRSEHRRunner implements Job {
     private static Logger _log = LogManager.getLogger(ViralLoadRSEHRRunner.class);
 
-    public static String GROUP_ID = "wnprc";
+    public static String GROUP_ID = "wnprc_virology";
     public static String JOB_ID = "vl_rsehr_job";
-    public static String TRIGGER_ID = "bc_report_trigger";
-    //Parent path for where the VL Data is being ETL'd into from main EHR
-    //TODO store this into a property
-    public static String VIROLOGY_RSEHR_PATH = "/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/Private/";
+
+    public static VirologyModuleSettings _settings = new VirologyModuleSettings();
 
 
     public Map<String,Object> getEmailListAndFolderInfo(Container container)
@@ -77,6 +75,8 @@ public class ViralLoadRSEHRRunner implements Job {
 
         try
         {
+            //update the settings map in case settings have changed since startup.
+            _settings = new VirologyModuleSettings();
             populateFolderPermissionsTable();
         }
         catch (QueryUpdateServiceException e)
@@ -107,7 +107,7 @@ public class ViralLoadRSEHRRunner implements Job {
     public void populateFolderPermissionsTable() throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException, InvalidKeyException
     {
         List<Map<String, Object>> rowsToInsert = new ArrayList<>();
-        Container container = ContainerManager.getForPath(VIROLOGY_RSEHR_PATH);
+        Container container = ContainerManager.getForPath(_settings.getVirologyRSEHRParentFolderPath());
         for (Container child : container.getChildren())
         {
             Map<String, Object> mp = getEmailListAndFolderInfo(child);
@@ -145,7 +145,7 @@ public class ViralLoadRSEHRRunner implements Job {
                 .startNow()
                 .withSchedule(
                         simpleSchedule()
-                                .withIntervalInMinutes(5)
+                                .withIntervalInMinutes(Integer.parseInt(_settings.getVirologyRSEHRJobInterval()))
                                 .repeatForever()
                 )
                 .build();

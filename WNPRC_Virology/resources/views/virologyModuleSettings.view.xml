@@ -1,0 +1,11 @@
+<view xmlns="http://labkey.org/data/xml/view" title="WNPRC Virology Module Settings">
+    <permissions>
+        <permission name="admin"/>
+    </permissions>
+    <dependencies>
+        <dependency path="clientapi"/>
+        <dependency path="clientapi_core"/>
+        <dependency path="Ext4ClientApi"/>
+        <dependency path="wnprc_virology/panel/VirologyModuleSettingsPanel.js"/>
+    </dependencies>
+</view>

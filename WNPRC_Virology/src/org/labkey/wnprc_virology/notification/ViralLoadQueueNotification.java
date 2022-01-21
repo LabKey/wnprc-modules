@@ -15,6 +15,7 @@ import org.labkey.api.security.UserManager;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.util.MailHelper;
+import org.labkey.wnprc_virology.VirologyModuleSettings;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
 import javax.mail.Address;
@@ -43,13 +44,13 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public Container container;
     public String modifiedByFullName = "";
     public String modifiedByEmail = "";
-    public final String openResearchPortal = "https://openresearch.labkey.com/study/ZEST/Private/dataset.view?datasetId=5080";
     public Map<String, Integer> emailsAndCount = new HashMap<>();
     public Integer experimentNumber;
     public Integer positiveControl;
     public String vlPositiveControl;
     public String avgVLPositiveControl;
     public Double efficiency;
+    public VirologyModuleSettings settings;
     protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
 
     public ViralLoadQueueNotification(Module owner)
@@ -69,6 +70,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         vlPositiveControl = (String) emailProps.get("vl_positive_control");
         avgVLPositiveControl = (String) emailProps.get("avg_vl_positive_control");
         efficiency = (Double) emailProps.get("efficiency");
+        settings = new VirologyModuleSettings();
         this.setUp();
     }
 
@@ -256,7 +258,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 " sample(s) you either submitted or were added to as part of a notify list. " +
                 "The results can be found in the Zika portal, and using the following " +
                 "<a href=\"" +
-                openResearchPortal +
+                settings.getZikaPortalUrl() +
                 "&Dataset.experiment_number~eq=" +
                 experimentNumber.toString() +
                 "\">link</a>.</p>");

@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   perlscripts:
-    image: wnprcehr/ehrcron:latest
+    image: wnprcehr/ehrcron:21.7
     depends_on:
       - "labkey"
     volumes:

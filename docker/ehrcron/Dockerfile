@@ -1,4 +1,4 @@
-FROM perl:5.24
+FROM perl:5.34-threaded-bullseye
 
 RUN cpanm LabKey::Query         \
           MIME::Lite            \
@@ -9,7 +9,7 @@ RUN cpanm LabKey::Query         \
           Log::Rolling
 
 # Add the apt repo for PostgreSQL so we can install the client package
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
  && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 # The gettext package contains the envsubst command needed for the run command of this image.
@@ -19,7 +19,7 @@ RUN apt-get update                 \
                            ssmtp   \
                            cron    \
                            gettext \
-                           postgresql-client-11 \
+                           postgresql-client-12 \
                            tzdata \
  && apt-get clean
 

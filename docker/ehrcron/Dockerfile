@@ -32,4 +32,7 @@ RUN chmod u+x /usr/local/labkey/*/* \
  && cat /usr/local/labkey/*/*.cron >> /etc/crontab \
  && touch ~/.netrc
 
+#This fixes a problem with imklog 
+ RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
+
 CMD /bin/bash -c "echo $TZ > /etc/timezone && rm /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && touch /etc/crontab /etc/cron.*/* && /usr/sbin/rsyslogd && cron && touch /var/log/cron.log && tail -f /var/log/syslog"

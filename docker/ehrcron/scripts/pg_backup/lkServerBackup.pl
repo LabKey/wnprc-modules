@@ -113,6 +113,7 @@ my $settings = new Config::Abstract::Ini(File::Spec->catfile($fileparse[1], 'lkb
 my %config = $settings->get_entry('general');
 my %lk_config = $settings->get_entry('lk_config');
 my %rotation = $settings->get_entry('file_rotation');
+my $dbname = $ENV{'PG_NAME'};
 
 # Variables
 my ($path, $status);
@@ -138,8 +139,8 @@ $log->commit;
 my $errors = [];
 
 #add postgres to path
-if ($config{pg_path}) {
-    $ENV{'PATH'} = $ENV{'PATH'} . ':' . $config{pg_path};
+if ($ENV{'PG_DUMP_DIR'}) {
+    $ENV{'PATH'} = $ENV{'PATH'} . ':' . $ENV{'PG_DUMP_DIR'};
 }
 
 if (!-e $config{backup_dest}) {
@@ -158,7 +159,9 @@ foreach (@required) {
 
 #the postgres backup
 checkFolder(File::Spec->catfile($config{backup_dest}, "database"));
-my @dbs = split(/\s/, $config{pg_dbname});
+#my @dbs = split(/\s/, $config{pg_dbname});
+my @dbs = split(/\s/, $dbname);
+
 foreach (@dbs) {
     runPgBackup($_);
 }

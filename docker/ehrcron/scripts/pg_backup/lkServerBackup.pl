@@ -113,7 +113,7 @@ my $settings = new Config::Abstract::Ini(File::Spec->catfile($fileparse[1], 'lkb
 my %config = $settings->get_entry('general');
 my %lk_config = $settings->get_entry('lk_config');
 my %rotation = $settings->get_entry('file_rotation');
-my $dbname = $ENV{'PG_NAME'};
+my $dbname = $ENV{'BACKUP_PG_NAME'};
 
 # Variables
 my ($path, $status);

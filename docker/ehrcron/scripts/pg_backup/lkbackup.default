@@ -3,7 +3,6 @@ backup_dest = /primary_backup/location
 primatefs_dest = /longterm/backup/location/
 compress = 1
 pg_host = servicename
-pg_user = pguser
 pgdump_format = c
 
 [lk_config]

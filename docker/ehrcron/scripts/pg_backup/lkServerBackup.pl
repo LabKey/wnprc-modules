@@ -114,6 +114,7 @@ my %config = $settings->get_entry('general');
 my %lk_config = $settings->get_entry('lk_config');
 my %rotation = $settings->get_entry('file_rotation');
 my $dbname = $ENV{'BACKUP_PG_NAME'};
+my $pguser = $ENV{'BACKUP_PG_USER'};
 
 # Variables
 my ($path, $status);
@@ -309,7 +310,7 @@ sub _pg_dump {
 
     # Postgres Backup
     my $cmd = "pg_dump -F " . ($config{pgdump_format} ? $config{pgdump_format} : 't') . " " . $pg_dbname . " -f " . $bkpostgresfile;
-    $cmd .= " -U " . $config{pg_user} if $config{pg_user};
+    $cmd .= " -U " . $pguser if $pguser;
     $cmd .= " -h " . $config{pg_host} if $config{pg_host};
 
     my $pgout = system($cmd);
@@ -338,7 +339,7 @@ sub _pg_dumpall {
 
     # Postgres Backup
     my $cmd = "pg_dumpall -g" . " -f " . $bkpostgresfile;
-    $cmd .= " -U " . $config{pg_user} if $config{pg_user};
+    $cmd .= " -U " . $pguser if $pguser;
     $cmd .= " -h " . $config{pg_host} if $config{pg_host};
     my $pgout = system($cmd);
     $log->entry($cmd);

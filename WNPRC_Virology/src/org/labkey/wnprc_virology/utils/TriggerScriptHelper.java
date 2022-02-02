@@ -106,16 +106,21 @@ public class TriggerScriptHelper
         if (emailProps.get("status") == null)
             return;
 
+        //cannot mutate the Map, make a copy
+        Map<String, Object> emailPropsCopy = new HashMap(emailProps);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         Container viralLoadContainer = ContainerManager.getForPath(_settings.getVirologyEHRVLSampleQueueFolderPath());
-        String recordStatus = getVLStatus(_user, viralLoadContainer, (Integer) emailProps.get("status"));
+        String recordStatus = getVLStatus(_user, viralLoadContainer, (Integer) emailPropsCopy.get("status"));
 
         if (_settings.getZikaPortalQCStatusString() != null)
         {
             if (_settings.getZikaPortalQCStatusString().equals(recordStatus))
             {
                 //_log.info("Using java helper to send email for viral load queue record: "+key);
-                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailProps);
+                String conjureURL = _settings.getZikaPortalUrl();
+                conjureURL = conjureURL + "&Dataset.experiment_number~eq=" + emailPropsCopy.get("experimentNumber");
+                emailPropsCopy.put("portalURL", conjureURL);
+                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
                 Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
                 notification.sendManually(ehrContainer);
             }
@@ -126,7 +131,10 @@ public class TriggerScriptHelper
             if (_settings.getRSEHRQCStatusString().equals(recordStatus))
             {
                 //_log.info("Using java helper to send email for viral load queue record: "+key);
-                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailProps);
+                emailPropsCopy.put("portalURL", _settings.getRSEHRPortalUrl());
+                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
+                //TODO add ability to query special table with info from RSEHR on who to notify
+                //ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, _settings.getRSEHREmailMode());
                 Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
                 notification.sendManually(ehrContainer);
             }

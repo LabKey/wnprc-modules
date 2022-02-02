@@ -85,6 +85,12 @@ Ext4.define('wnprc_virology.panel.VirologyModuleSettingsPanel', {
                     value: this.virologyModuleSettings.zikaPortalURL
                 },{
                     xtype: 'textfield',
+                    fieldLabel: 'RSEHR Portal URL',
+                    itemId: 'rsehrPortalURL',
+                    name: 'rsehrPortalURL',
+                    value: this.virologyModuleSettings.rsehrPortalURL
+                },{
+                    xtype: 'textfield',
                     fieldLabel: 'RSEHR Viral Load Location',
                     itemId: 'virologyRSEHRParentFolderPath',
                     name: 'virologyRSEHRParentFolderPath',

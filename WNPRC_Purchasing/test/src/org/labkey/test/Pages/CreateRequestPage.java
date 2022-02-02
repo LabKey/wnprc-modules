@@ -34,7 +34,7 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
 
     public CreateRequestPage setAccountsToCharge(String option)
     {
-        Locator.tag("option").withText(option).waitForElement((SearchContext) elementCache().accountToCharge, 5_000);
+        Locator.tag("option").withText(option).waitForElement(elementCache().accountToCharge.getWrappedElement(), 5_000);
         elementCache().accountToCharge.selectByVisibleText(option);
         return this;
     }

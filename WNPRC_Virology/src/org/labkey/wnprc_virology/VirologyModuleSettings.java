@@ -17,6 +17,9 @@ public class VirologyModuleSettings
     public static final String VIROLOGY_EHR_VL_SAMPLE_QUEUE_PATH_PROP = "virologyEHRVLSampleQueueFolderPath";
     public static final String VIROLOGY_RSEHR_JOB_INTERVAL_PROP = "virologyRSEHRJobInterval"; // in minutes
     public static final String ZIKA_PORTAL_URL_PROP = "zikaPortalURL";
+    public static final String RSEHR_PORTAL_URL_PROP = "rsehrPortalURL";
+    //TODO: assemble notify list from ETL from RSEHR
+    public static final String USE_RSEHR_FOLDER_PERMS_FOR_EMAIL = "virologyRSHEREmailMethod";
 
     private Map<String, Object> _settings;
 
@@ -95,6 +98,11 @@ public class VirologyModuleSettings
     public String getZikaPortalUrl()
     {
         return (String)_settings.get(ZIKA_PORTAL_URL_PROP);
+
+    }
+    public String getRSEHRPortalUrl()
+    {
+        return (String)_settings.get(RSEHR_PORTAL_URL_PROP);
 
     }
 }

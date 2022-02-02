@@ -51,6 +51,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String avgVLPositiveControl;
     public Double efficiency;
     public VirologyModuleSettings settings;
+    public Map<String, Object> emailProps;
     protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
 
     public ViralLoadQueueNotification(Module owner)
@@ -58,34 +59,35 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailProps) throws SQLException
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailprops) throws SQLException
     {
         super(owner);
         rowIds = rowids;
         currentUser = currentuser;
         container = c;
-        hostName = (String) emailProps.get("hostName");
-        experimentNumber = (Integer) emailProps.get("experimentNumber");
-        positiveControl = (Integer) emailProps.get("positive_control");
-        vlPositiveControl = (String) emailProps.get("vl_positive_control");
-        avgVLPositiveControl = (String) emailProps.get("avg_vl_positive_control");
-        efficiency = (Double) emailProps.get("efficiency");
+        emailProps = emailprops;
+        hostName = (String) emailprops.get("hostName");
+        experimentNumber = (Integer) emailprops.get("experimentNumber");
+        positiveControl = (Integer) emailprops.get("positive_control");
+        vlPositiveControl = (String) emailprops.get("vl_positive_control");
+        avgVLPositiveControl = (String) emailprops.get("avg_vl_positive_control");
+        efficiency = (Double) emailprops.get("efficiency");
         settings = new VirologyModuleSettings();
         this.setUp();
     }
 
-    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailProps, String serverUrl) throws SQLException
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailprops, String serverUrl) throws SQLException
     {
         super(owner);
         rowIds = rowids;
         currentUser = currentuser;
         container = c;
-        hostName = (String) emailProps.get("hostName");
-        experimentNumber = (Integer) emailProps.get("experimentNumber");
-        positiveControl = (Integer) emailProps.get("positive_control");
-        vlPositiveControl = (String) emailProps.get("vl_positive_control");
-        avgVLPositiveControl = (String) emailProps.get("avg_vl_positive_control");
-        efficiency = (Double) emailProps.get("efficiency");
+        hostName = (String) emailprops.get("hostName");
+        experimentNumber = (Integer) emailprops.get("experimentNumber");
+        positiveControl = (Integer) emailprops.get("positive_control");
+        vlPositiveControl = (String) emailprops.get("vl_positive_control");
+        avgVLPositiveControl = (String) emailprops.get("avg_vl_positive_control");
+        efficiency = (Double) emailprops.get("efficiency");
         this.setUp();
     }
     public void addEmail(String email)
@@ -137,6 +139,9 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     }
 
     //override setuUp method?
+
+    //this setup method does most of the work to get the notify list
+    //if we want to change the location of where the notify list comes from we'll need to change this method
     public void setUp() throws SQLException
     {
 
@@ -256,11 +261,9 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         msg.append("<p>Good news - Virology Services has completed viral load testing on " +
                 count +
                 " sample(s) you either submitted or were added to as part of a notify list. " +
-                "The results can be found in the Zika portal, and using the following " +
+                "The results can be found online, by using the following " +
                 "<a href=\"" +
-                settings.getZikaPortalUrl() +
-                "&Dataset.experiment_number~eq=" +
-                experimentNumber.toString() +
+                emailProps.get("portalURL") +
                 "\">link</a>.</p>");
         msg.append("<p>Below is a summary of the experiment:</p>");
 

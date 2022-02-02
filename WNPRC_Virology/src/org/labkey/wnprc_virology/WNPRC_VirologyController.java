@@ -55,6 +55,18 @@ public class WNPRC_VirologyController extends SpringActionController
         private String _virologyRSEHRParentFolderPath;
         private String _zikaPortalQCStatus;
         private String _zikaPortalURL;
+        private String _rsehrPortalURL;
+
+        public String getRsehrPortalURL()
+        {
+            return _rsehrPortalURL;
+        }
+
+        public void setRsehrPortalURL(String rsehrPortalURL)
+        {
+            _rsehrPortalURL = rsehrPortalURL;
+        }
+
 
         public String getZikaPortalURL()
         {
@@ -153,6 +165,8 @@ public class WNPRC_VirologyController extends SpringActionController
                 props.put(VirologyModuleSettings.ZIKA_PORTAL_QC_STATUS_STRING_PROP, form.getZikaPortalQCStatus());
             if (form.getZikaPortalURL() != null)
                 props.put(VirologyModuleSettings.ZIKA_PORTAL_URL_PROP, form.getZikaPortalURL());
+            if (form.getRsehrPortalURL() != null)
+                props.put(VirologyModuleSettings.RSEHR_PORTAL_URL_PROP, form.getRsehrPortalURL());
 
             VirologyModuleSettings.setVirologyModuleSettings(props);
 

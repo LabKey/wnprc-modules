@@ -63,7 +63,6 @@ public class WNPRC_VirologyModule extends SpringModule
     {
         // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new WNPRC_VirologyContainerListener());
-
         DefaultSchema.registerProvider(WNPRC_VirologySchema.NAME, new DefaultSchema.SchemaProvider(this)
         {
             @Override

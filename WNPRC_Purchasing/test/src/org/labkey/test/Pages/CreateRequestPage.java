@@ -33,7 +33,19 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
 
     public CreateRequestPage setAccountsToCharge(String option)
     {
-        elementCache().accountToCharge.selectByVisibleText(option);
+        //Retrying for ajax to load the options.
+        int attempts = 0;
+        while (attempts < 3)
+        {
+            try
+            {
+                elementCache().accountToCharge.selectByVisibleText(option);
+            }
+            catch (NoSuchElementException e)
+            {
+                attempts++;
+            }
+        }
         return this;
     }
 

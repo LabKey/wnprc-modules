@@ -5,6 +5,7 @@ import org.labkey.test.components.html.Input;
 import org.labkey.test.components.html.SelectWrapper;
 import org.labkey.test.pages.LabKeyPage;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -33,19 +34,8 @@ public class CreateRequestPage extends LabKeyPage<CreateRequestPage.ElementCache
 
     public CreateRequestPage setAccountsToCharge(String option)
     {
-        //Retrying for ajax to load the options.
-        int attempts = 0;
-        while (attempts < 3)
-        {
-            try
-            {
-                elementCache().accountToCharge.selectByVisibleText(option);
-            }
-            catch (NoSuchElementException e)
-            {
-                attempts++;
-            }
-        }
+        Locator.tag("option").withText(option).waitForElement((SearchContext) elementCache().accountToCharge, 5_000);
+        elementCache().accountToCharge.selectByVisibleText(option);
         return this;
     }
 

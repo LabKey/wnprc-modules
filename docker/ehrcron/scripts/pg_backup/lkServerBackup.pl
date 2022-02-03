@@ -160,7 +160,6 @@ foreach (@required) {
 
 #the postgres backup
 checkFolder(File::Spec->catfile($config{backup_dest}, "database"));
-#my @dbs = split(/\s/, $config{pg_dbname});
 my @dbs = split(/\s/, $dbname);
 
 foreach (@dbs) {

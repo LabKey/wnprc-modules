@@ -15,7 +15,6 @@ import org.labkey.api.security.UserManager;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.ValidEmail;
 import org.labkey.api.util.MailHelper;
-import org.labkey.wnprc_virology.VirologyModuleSettings;
 import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 
 import javax.mail.Address;
@@ -50,7 +49,6 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public String vlPositiveControl;
     public String avgVLPositiveControl;
     public Double efficiency;
-    public VirologyModuleSettings settings;
     public Map<String, Object> emailProps;
     protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
 
@@ -72,7 +70,6 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         vlPositiveControl = (String) emailprops.get("vl_positive_control");
         avgVLPositiveControl = (String) emailprops.get("avg_vl_positive_control");
         efficiency = (Double) emailprops.get("efficiency");
-        settings = new VirologyModuleSettings();
         this.setUp();
     }
 

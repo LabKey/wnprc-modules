@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.ehr.EHRService;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.InvalidKeyException;
@@ -46,7 +48,7 @@ public class ViralLoadRSEHRRunner implements Job {
     public static String GROUP_ID = "wnprc_virology";
     public static String JOB_ID = "vl_rsehr_job";
 
-    public static VirologyModuleSettings _settings = new VirologyModuleSettings();
+    public static Module virologyModule = ModuleLoader.getInstance().getModule(WNPRC_VirologyModule.NAME);
 
 
     public Map<String,Object> getEmailListAndFolderInfo(Container container)
@@ -76,7 +78,7 @@ public class ViralLoadRSEHRRunner implements Job {
         try
         {
             //update the settings map in case settings have changed since startup.
-            _settings = new VirologyModuleSettings();
+            virologyModule = ModuleLoader.getInstance().getModule(WNPRC_VirologyModule.NAME);
             populateFolderPermissionsTable();
         }
         catch (QueryUpdateServiceException e)
@@ -107,15 +109,23 @@ public class ViralLoadRSEHRRunner implements Job {
     public void populateFolderPermissionsTable() throws QueryUpdateServiceException, SQLException, BatchValidationException, DuplicateKeyException, InvalidKeyException
     {
         List<Map<String, Object>> rowsToInsert = new ArrayList<>();
-        Container container = ContainerManager.getForPath(_settings.getVirologyRSEHRParentFolderPath());
-        for (Container child : container.getChildren())
+        String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
+        if (containerPath == null)
+            containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getDefaultValue();
+        if (containerPath == null)
+        {
+            _log.info("No container path found for RSEHR Viral Load Parent Folder. Configure it in the module settings.");
+            return;
+        }
+        Container viralLoadContainer = ContainerManager.getForPath(containerPath);
+        for (Container child : viralLoadContainer.getChildren())
         {
             Map<String, Object> mp = getEmailListAndFolderInfo(child);
             rowsToInsert.add(mp);
         }
-        User user = EHRService.get().getEHRUser(container);
-        SimpleQueryUpdater qu = new SimpleQueryUpdater(user, container, "wnprc_virology", "folder_paths_with_readers");
-        SimpleQueryFactory sf = new SimpleQueryFactory(user,container);
+        User user = EHRService.get().getEHRUser(viralLoadContainer);
+        SimpleQueryUpdater qu = new SimpleQueryUpdater(user, viralLoadContainer, "wnprc_virology", "folder_paths_with_readers");
+        SimpleQueryFactory sf = new SimpleQueryFactory(user,viralLoadContainer);
         JSONArray rowsToDelete = sf.selectRows("wnprc_virology", "folder_paths_with_readers");
         if (rowsToDelete.length() > 0)
             qu.delete(rowsToDelete.toMapList());
@@ -140,12 +150,21 @@ public class ViralLoadRSEHRRunner implements Job {
     }
 
     public static Trigger getTrigger() {
+        String containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getEffectiveValue(ContainerManager.getRoot());
+        if (containerPath == null)
+            containerPath = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PARENT_FOLDER_STRING_PROP).getDefaultValue();
+        if (containerPath == null)
+        {
+            _log.info("No container path found for RSEHR Viral Load Parent Folder. Configure it in the module properties.");
+            return null;
+        }
+        Container viralLoadContainer = ContainerManager.getForPath(containerPath);
         Trigger trigger = newTrigger()
                 .withIdentity(getTriggerKey())
                 .startNow()
                 .withSchedule(
                         simpleSchedule()
-                                .withIntervalInMinutes(Integer.parseInt(_settings.getVirologyRSEHRJobInterval()))
+                                .withIntervalInMinutes(Integer.parseInt(virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_JOB_INTERVAL_PROP).getEffectiveValue(viralLoadContainer)))
                                 .repeatForever()
                 )
                 .build();

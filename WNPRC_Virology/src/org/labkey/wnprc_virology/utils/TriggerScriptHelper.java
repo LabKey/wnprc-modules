@@ -13,7 +13,7 @@ import org.labkey.api.query.QueryHelper;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.util.logging.LogHelper;
-import org.labkey.wnprc_virology.VirologyModuleSettings;
+import org.labkey.wnprc_virology.WNPRC_VirologyModule;
 import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
 
 import java.sql.SQLException;
@@ -39,8 +39,6 @@ public class TriggerScriptHelper
     @NotNull
     private static final Map<String, String> _centerCustomProps = new HashMap<>();
 
-    private static VirologyModuleSettings _settings = new VirologyModuleSettings();
-
     private static final Logger _log = LogHelper.getLogger(TriggerScriptHelper.class, "Server-side validation of WNPRC_Virology data insert/update/deletes");
 
     private TriggerScriptHelper(int userId, String containerId)
@@ -54,8 +52,6 @@ public class TriggerScriptHelper
         if (container == null)
             throw new RuntimeException("Container does not exist: " + containerId);
         _container = container;
-        //load up the settings again incase they changed
-        _settings = new VirologyModuleSettings();
     }
 
     @NotNull
@@ -109,15 +105,19 @@ public class TriggerScriptHelper
         //cannot mutate the Map, make a copy
         Map<String, Object> emailPropsCopy = new HashMap(emailProps);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
-        Container viralLoadContainer = ContainerManager.getForPath(_settings.getVirologyEHRVLSampleQueueFolderPath());
+        Module WNPRCVirology = ModuleLoader.getInstance().getModule(WNPRC_VirologyModule.NAME);
+        Container viralLoadContainer = ContainerManager.getForPath(WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.VIROLOGY_EHR_VL_SAMPLE_QUEUE_PATH_PROP).getEffectiveValue(ContainerManager.getRoot()));
         String recordStatus = getVLStatus(_user, viralLoadContainer, (Integer) emailPropsCopy.get("status"));
 
-        if (_settings.getZikaPortalQCStatusString() != null)
+        String WNPRCVirologyZikaQCStatusVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_QC_STATUS_STRING_PROP).getEffectiveValue(viralLoadContainer);
+        String WNPRCVirologyRSEHRQCStatusVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_QC_STATUS_STRING_PROP).getEffectiveValue(viralLoadContainer);
+
+        if (WNPRCVirologyZikaQCStatusVal != null)
         {
-            if (_settings.getZikaPortalQCStatusString().equals(recordStatus))
+            if (WNPRCVirologyZikaQCStatusVal.equals(recordStatus))
             {
                 //_log.info("Using java helper to send email for viral load queue record: "+key);
-                String conjureURL = _settings.getZikaPortalUrl();
+                String conjureURL = String.valueOf(WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
                 conjureURL = conjureURL + "&Dataset.experiment_number~eq=" + emailPropsCopy.get("experimentNumber");
                 emailPropsCopy.put("portalURL", conjureURL);
                 ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
@@ -126,12 +126,12 @@ public class TriggerScriptHelper
             }
         }
 
-        if (_settings.getRSEHRQCStatusString() != null)
+        if (WNPRCVirologyRSEHRQCStatusVal != null)
         {
-            if (_settings.getRSEHRQCStatusString().equals(recordStatus))
+            if (WNPRCVirologyRSEHRQCStatusVal.equals(recordStatus))
             {
                 //_log.info("Using java helper to send email for viral load queue record: "+key);
-                emailPropsCopy.put("portalURL", _settings.getRSEHRPortalUrl());
+                emailPropsCopy.put("portalURL", WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
                 ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
                 //TODO add ability to query special table with info from RSEHR on who to notify
                 //ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, _settings.getRSEHREmailMode());

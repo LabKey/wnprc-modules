@@ -1,0 +1,65 @@
+<module xmlns="http://labkey.org/moduleProperties/xml/">
+    <clientDependencies>
+        <dependency path="webutils/lib/webutils"/>
+        <dependency path="webutils/models/models"/>
+        <dependency path="ehr/ehr_api"/>
+        <dependency path="ehr/ehr_ext3_api"/>
+    </clientDependencies>
+    <properties>
+        <propertyDescriptor name="virologyEHRVLSampleQueueFolderPath">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>Relative folder path to the viral load sample queue on main EHR. Used in trigger script to send notification</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="RSEHRQCStatus">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>QC Status string used to send RSEHR notification emails</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="RSEHRPortalPath">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>URL where the data lives on the rsehr portal. Used in the notification email to link users to RSEHR server (might change).</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="RSEHRViralLoadDataFolder">
+            <canSetPerContainer>true</canSetPerContainer>
+            <defaultValue>/WNPRC/WNPRC_Units/Research_Services/Virology_Services/VL_DB/Private/</defaultValue>
+            <description>Relative folder path to the parent viral load data folder on RSEHR. Used to set up mapping table to find readers in each child folder, from this parent folder. TODO item.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+        <propertyDescriptor name="RSEHRJobInterval">
+            <canSetPerContainer>true</canSetPerContainer>
+            <defaultValue>10</defaultValue>
+            <description>Time interval in minutes on how often to re-populate RSEHR mapping table. Requires a server restart (or cache reload?)</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+
+
+        <propertyDescriptor name="ZikaPortalQCStatus">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>QC Status string used to send Zika notification emails</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+
+        <propertyDescriptor name="ZikaPortalPath">
+            <canSetPerContainer>true</canSetPerContainer>
+            <description>URL where the data lives on the zika portal. Used in the email notification to link users to the correct dataset on the open research portal.</description>
+            <editPermissions>
+                <permission>ADMIN</permission>
+            </editPermissions>
+        </propertyDescriptor>
+
+    </properties>
+</module>

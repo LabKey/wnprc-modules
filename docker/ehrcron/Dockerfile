@@ -1,5 +1,7 @@
 FROM perl:5.34-threaded-bullseye
 
+ARG PROD_VERSION=false
+
 RUN cpanm LabKey::Query         \
           MIME::Lite            \
           File::Touch           \
@@ -29,8 +31,15 @@ COPY scripts/ /usr/local/labkey/
 
 RUN chmod u+x /usr/local/labkey/*/* \
  && echo "\n\nMAILTO=ehrservices@g-groups.wisc.edu\n\n" >> /etc/crontab \
- && cat /usr/local/labkey/*/*.cron >> /etc/crontab \
  && touch ~/.netrc
+
+#Adding an ARG to determine if the image will be used by production server
+#Default value false, we would only change to true for production
+#If true, the ehrcron image will send emails and ran deleteStudyRecords
+RUN if [ "$PROD_VERSION" = "true" ] ; \
+      then cat /usr/local/labkey/*/*.cron >> /etc/crontab ; \
+      else cat /usr/local/labkey/pg_backup/pg_backup.cron >> /etc/crontab ; \
+    fi
 
 #This fixes a problem with imklog (Source: https://stackoverflow.com/questions/56609182/openthread-environment-docker-rsyslogd-imklog-cannot-open-kernel-log-proc-km)
  RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf

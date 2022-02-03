@@ -13,6 +13,7 @@ services:
       - network1
     environment:
       BACKUP_PG_NAME: $BACKUP_PG_NAME
+      BACKUP_PG_USER: $BACKUP_PG_USER
       PG_DUMP_DIR: $PG_DUMP_DIR
       LK_BACKGROUND_USER:
       LK_BACKGROUND_USER_PASSWORD:

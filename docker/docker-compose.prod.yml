@@ -2,13 +2,12 @@ version: "3.5"
 
 services:
   perlscripts:
-    image: wnprcehr/ehrcron:21.7
+    image: wnprcehr/ehrcron$PERL_PROD:$LABKEY_VERSION
     depends_on:
       - "labkey"
     volumes:
       - "${BACKUP_DIR}:/backups"
       - "${PRIMATEFS_DIR}:/mnt/IT-Backups/"
-      - "${PG_DUMP_DIR}:/usr/lib/postgresql/11/bin"
     networks:
       - network1
     environment:

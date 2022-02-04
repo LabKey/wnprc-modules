@@ -8,6 +8,7 @@ services:
 
   postgres:
     image: postgres:12.3
+    container_name: postgres
     shm_size: 4g
     restart: always
     volumes:
@@ -49,7 +50,8 @@ services:
       - network1
 
   labkey:
-    image: wnprcehr/labkeysnapshot:21.7
+    image: wnprcehr/labkeysnapshot:$LABKEY_VERSION
+    container_name: labkey
     depends_on:
       - "mailserver"
       - "postgres"
@@ -100,7 +102,7 @@ services:
       TZ: America/Chicago
 
   cadvisor:
-    image: google/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:latest
     depends_on:
       - "postgres"
     volumes:

@@ -861,7 +861,7 @@ public class WNPRC_PurchasingTest extends BaseWebDriverTest implements PostgresO
         log("Verify quantity received email notif");
         goToReceiverPage();
         impersonate(RECEIVER_USER);
-        clickAndWait(Locator.linkWithText(requestId));
+        waitAndClickAndWait(Locator.linkWithText(requestId));
         requestPage = new CreateRequestPage(getDriver());
         requestPage.setQuantityReceived("15").submit();
         stopImpersonating();

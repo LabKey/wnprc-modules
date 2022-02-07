@@ -118,6 +118,12 @@ public class ViralLoadRSEHRRunner implements Job {
             return;
         }
         Container viralLoadContainer = ContainerManager.getForPath(containerPath);
+        if (viralLoadContainer == null)
+        {
+            _log.info("No container found for RSEHR Viral Load Parent Folder. Set up the container to run this job.");
+            return;
+        }
+
         for (Container child : viralLoadContainer.getChildren())
         {
             Map<String, Object> mp = getEmailListAndFolderInfo(child);

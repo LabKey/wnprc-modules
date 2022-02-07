@@ -99,6 +99,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         }
     }
 
+    //TODO if we are gathering the email list from data from RSEHR, we'll need to change/adapt how we build up the notifyEmails here.
     public void countEmailsAndPut(String emails, String createdyByEmail)
     {
         if (emails != null){
@@ -329,7 +330,6 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
 
 
 
-    //override this dumb sendMessage method?
     public void sendMessage(String subject, String bodyHtml, Collection<UserPrincipal> recipients, String recipient,Container container)
     {
         _log.info("ViralLoadNotification.java: sending viral sample queue update email...");

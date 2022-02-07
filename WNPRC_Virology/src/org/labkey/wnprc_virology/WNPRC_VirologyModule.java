@@ -3,6 +3,7 @@ package org.labkey.wnprc_virology;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.ehr.EHRService;
 import org.labkey.api.ldk.notification.Notification;
 import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
@@ -12,6 +13,7 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.template.ClientDependency;
 import org.labkey.wnprc_virology.notification.ViralLoadQueueNotification;
 import org.labkey.wnprc_virology.security.roles.WNPRCViralLoadReaderRole;
 
@@ -82,6 +84,7 @@ public class WNPRC_VirologyModule extends SpringModule
             }
         });
 
+        EHRService.get().registerClientDependency(ClientDependency.supplierFromPath("wnprc_virology/datasetButtons.js"), this);
         ViralLoadRSEHRRunner.schedule();;
     }
 

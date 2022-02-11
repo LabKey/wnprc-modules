@@ -151,7 +151,9 @@ WNPRC_Virology.DatasetButtons = new function() {
                                             dataRegion.refresh();
                                             Ext4.Msg.hide();
                                         },
-                                        failure: EHR.Utils.onError
+                                        failure: function (e) {
+                                            alert (e.exception);
+                                        }
                                     });
 
                                 }

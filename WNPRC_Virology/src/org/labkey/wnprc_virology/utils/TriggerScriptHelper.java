@@ -106,39 +106,65 @@ public class TriggerScriptHelper
         Map<String, Object> emailPropsCopy = new HashMap(emailProps);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         Module WNPRCVirology = ModuleLoader.getInstance().getModule(WNPRC_VirologyModule.NAME);
+        if (WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.VIROLOGY_EHR_VL_SAMPLE_QUEUE_PATH_PROP).getEffectiveValue(ContainerManager.getRoot()) == null){
+            _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.VIROLOGY_EHR_VL_SAMPLE_QUEUE_PATH_PROP + " module prop is not set, not sending email notification.");
+            return;
+        }
         Container viralLoadContainer = ContainerManager.getForPath(WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.VIROLOGY_EHR_VL_SAMPLE_QUEUE_PATH_PROP).getEffectiveValue(ContainerManager.getRoot()));
+
         String recordStatus = getVLStatus(_user, viralLoadContainer, (Integer) emailPropsCopy.get("status"));
 
         String WNPRCVirologyZikaQCStatusVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_QC_STATUS_STRING_PROP).getEffectiveValue(viralLoadContainer);
-        String WNPRCVirologyRSEHRQCStatusVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_QC_STATUS_STRING_PROP).getEffectiveValue(viralLoadContainer);
-
         if (WNPRCVirologyZikaQCStatusVal != null)
         {
             if (WNPRCVirologyZikaQCStatusVal.equals(recordStatus))
             {
-                //_log.info("Using java helper to send email for viral load queue record: "+key);
-                String conjureURL = String.valueOf(WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
-                conjureURL = conjureURL + "&Dataset.experiment_number~eq=" + emailPropsCopy.get("experimentNumber");
-                emailPropsCopy.put("portalURL", conjureURL);
-                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
-                Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-                notification.sendManually(ehrContainer);
+
+                String WNPRCVirologyZikaPortalUrl = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer);
+                if (WNPRCVirologyZikaPortalUrl != null)
+                {
+                    String conjureURL = String.valueOf(WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
+                    conjureURL = conjureURL + "&Dataset.experiment_number~eq=" + emailPropsCopy.get("experimentNumber");
+                    emailPropsCopy.put("portalURL", conjureURL);
+                    ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
+                    notification.sendManually(viralLoadContainer);
+                }
+                else
+                {
+                    _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP + " module prop is not set, not sending email notification.");
+                }
             }
+        } else
+        {
+            _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.ZIKA_PORTAL_QC_STATUS_STRING_PROP + " module prop is not set, not sending email notification.");
         }
 
+
+        String WNPRCVirologyRSEHRQCStatusVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_QC_STATUS_STRING_PROP).getEffectiveValue(viralLoadContainer);
         if (WNPRCVirologyRSEHRQCStatusVal != null)
         {
             if (WNPRCVirologyRSEHRQCStatusVal.equals(recordStatus))
             {
                 //_log.info("Using java helper to send email for viral load queue record: "+key);
-                emailPropsCopy.put("portalURL", WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
-                ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
-                //TODO add ability to query special table with info from RSEHR on who to notify
-                //ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, _settings.getRSEHREmailMode());
-                Container ehrContainer =  ContainerManager.getForPath("/WNPRC/EHR");
-                notification.sendManually(ehrContainer);
+
+                String WNPRCVirologyRSEHRPortalUrlVal = WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer);
+                if (WNPRCVirologyRSEHRPortalUrlVal != null)
+                {
+                    emailPropsCopy.put("portalURL", WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
+                    ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
+                    //TODO add ability to query special table with info from RSEHR on who to notify
+                    //ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, _settings.getRSEHREmailMode());
+                    notification.sendManually(viralLoadContainer);
+                }
+                else
+                {
+                    _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP + " module prop is not set, not sending email notification.");
+                }
             }
 
+        } else
+        {
+            _log.info("WNPRC_Virology / TriggerScriptHelper: " + WNPRC_VirologyModule.RSEHR_QC_STATUS_STRING_PROP + " module prop is not set, not sending email notification.");
         }
     }
 }

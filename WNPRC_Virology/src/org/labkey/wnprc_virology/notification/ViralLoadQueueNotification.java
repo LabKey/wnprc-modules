@@ -2,6 +2,7 @@ package org.labkey.wnprc_virology.notification;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.ehr.notification.AbstractEHRNotification;
@@ -336,7 +337,12 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         try
         {
             MailHelper.MultipartMessage msg = MailHelper.createMultipartMessage();
-            msg.setFrom(NotificationService.get().getReturnEmail(container));
+            Address returnEmail = NotificationService.get().getReturnEmail(container);
+            if (returnEmail == null)
+            {
+                returnEmail = NotificationService.get().getReturnEmail(ContainerManager.getRoot());
+            }
+            msg.setFrom(returnEmail);
             msg.setSubject(subject);
 
             List<String> emails = new ArrayList<>();

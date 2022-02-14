@@ -142,16 +142,53 @@ export class AnimalRequestForm extends React.Component<any,State> {
     }
 
     observer = createDecorator(
-      {
-          field: 'optionalproject', // when the value of this field changes...
-          updates: {
-              account: (val, allValues) => {
-                  return this.findAccountByProject(val);
+        {
+              field: 'optionalproject', // when the value of this field changes...
+              updates: {
+                  account: (val, allValues) => {
+                      return this.findAccountByProject(val);
+                  }
               }
-
-          }
-      }
-    )
+              },
+          {
+            field: 'speciesneeded', // when the value of this field changes...
+            updates: {
+                originneeded: (val, allValues, prevValues) => {
+                    if (val === "Marmoset") {
+                        return "Any";
+                    } else {
+                        if (prevValues["speciesneeded"] == "Marmoset") {
+                            return "";
+                        } else {
+                            return prevValues["originneeded"];
+                        }
+                    }
+                },
+                mhctype: (val, allValues, prevValues) => {
+                    if (val === "Marmoset") {
+                        return "Any";
+                    } else {
+                        if (prevValues["speciesneeded"] == "Marmoset") {
+                            return "";
+                        } else {
+                            return prevValues["mhctype"];
+                        }
+                    }
+                },
+                viralstatus: (val, allValues, prevValues) => {
+                    if (val === "Marmoset") {
+                        return "Any";
+                    } else {
+                        if (prevValues["speciesneeded"] == "Marmoset") {
+                            return "";
+                        } else {
+                            return prevValues["viralstatus"];
+                        }
+                    }
+                }
+            }
+        }
+)
 
     getSeveralEHRData(dataArr) {
         //fetch and save the data for the dropdown options to our component state
@@ -199,7 +236,14 @@ export class AnimalRequestForm extends React.Component<any,State> {
             )
         };
 
-        //component to conditionally render a text input
+        //component to conditionally render an input when "isnot" prop is NOT equal to "when" prop's input val
+        //TODO generalize this into the Condition component below
+        const ConditionIsNot = ({ when, isnot, children }) => (
+            <Field name={when} subscription={{ value: true }}>
+                {({ input: { value } }) => (value !== isnot ? children : null)}
+            </Field>
+        );
+        //component to conditionally render an input when "is" prop is equal to "when" prop's input val
         const Condition = ({ when, is, children }) => (
             <Field name={when} subscription={{ value: true }}>
                 {({ input: { value } }) => (value === is ? children : null)}
@@ -287,6 +331,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     }
                                                 >
                                                 </Field>
+                                                <ConditionIsNot when="speciesneeded" isnot="Marmoset">
                                                 <Field
                                                     name="originneeded"
                                                     label="Origin"
@@ -301,6 +346,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     }
                                                 >
                                                 </Field>
+                                                </ConditionIsNot>
                                                 <Field
                                                     name="sex"
                                                     label="Sex"
@@ -335,6 +381,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     tooltip="Please provide an approximate weight range for the animals requested."
                                                 >
                                                 </Field>
+                                                <ConditionIsNot when="speciesneeded" isnot="Marmoset">
                                                 <Field
                                                     name="mhctype"
                                                     component={renderField}
@@ -344,6 +391,8 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     required={true}
                                                 >
                                                 </Field>
+                                                </ConditionIsNot>
+                                                <ConditionIsNot when="speciesneeded" isnot="Marmoset">
                                                 <Field
                                                     name="viralstatus"
                                                     label="Viral Status"
@@ -358,6 +407,8 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                     }
                                                 >
                                                 </Field>
+                                                </ConditionIsNot>
+
                                                 <Field
                                                     name="infectiousdisease"
                                                     label="Infectious Disease"
@@ -414,15 +465,6 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                       </>
                                                   }
                                                 >
-                                                </Field>
-                                                <Field
-                                                    name="dateneeded"
-                                                    label="Date Needed"
-                                                    component={renderDateTimePicker}
-                                                    type="text"
-                                                    validate={required}
-                                                >
-
                                                 </Field>
                                                 <Field
                                                     name="optionalproject"
@@ -492,6 +534,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 <div className="btn-wrap">
                                                     <button
                                                         className={`btn custom-submit labkey-button ${submitted}`}
+                                                        id="submit-final"
                                                         disabled={this.state.submitted}
                                                         type="submit"
                                                         >

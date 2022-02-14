@@ -42,6 +42,10 @@ RUN if [ "$PROD_VERSION" = "true" ] ; \
     fi
 
 #This fixes a problem with imklog (Source: https://stackoverflow.com/questions/56609182/openthread-environment-docker-rsyslogd-imklog-cannot-open-kernel-log-proc-km)
- RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
+RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
 
-CMD /bin/bash -c "echo $TZ > /etc/timezone && rm /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && touch /etc/crontab /etc/cron.*/* && /usr/sbin/rsyslogd && cron && touch /var/log/cron.log && tail -f /var/log/syslog"
+#Enabling the use of /etc/environment inside cron jobs, perls scripts have access to the enviromental variables
+#Print enviromental variables to /etc/environment because enviromental variables only exist in memory inside the docker container
+RUN sed -i 's/pam_env.so*$/pam_env.so readenv=1/g' /etc/pam.d/cron
+
+CMD /bin/bash -c "printenv > /etc/environment && echo $TZ > /etc/timezone && rm /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && touch /etc/crontab /etc/cron.*/* && /usr/sbin/rsyslogd && cron && touch /var/log/cron.log && tail -f /var/log/syslog"

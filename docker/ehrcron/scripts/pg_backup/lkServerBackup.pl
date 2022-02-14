@@ -135,6 +135,7 @@ my $log = Log::Rolling->new(
 
 $log->entry("Backup is starting");
 $log->entry("Current Working Dir: " . getcwd());
+$log->entry("Backup DB names ".$dbname);
 $log->commit;
 
 my $errors = [];
@@ -161,7 +162,6 @@ foreach (@required) {
 #the postgres backup
 checkFolder(File::Spec->catfile($config{backup_dest}, "database"));
 my @dbs = split(/\s/, $dbname);
-
 foreach (@dbs) {
     runPgBackup($_);
 }

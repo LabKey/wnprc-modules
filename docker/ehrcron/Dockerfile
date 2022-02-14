@@ -48,4 +48,7 @@ RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
 #Print enviromental variables to /etc/environment because enviromental variables only exist in memory inside the docker container
 RUN sed -i 's/pam_env.so*$/pam_env.so readenv=1/g' /etc/pam.d/cron
 
-CMD /bin/bash -c "printenv > /etc/environment && echo $TZ > /etc/timezone && rm /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && touch /etc/crontab /etc/cron.*/* && /usr/sbin/rsyslogd && cron && touch /var/log/cron.log && tail -f /var/log/syslog"
+#Adding postgres location to the images
+RUN echo "PG_DUMP_DIR=/usr/local/postgresql/bin" > /etc/environment
+
+CMD /bin/bash -c "printenv >> /etc/environment && echo $TZ > /etc/timezone && rm /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata && envsubst < /root/netrc.template > /root/.netrc && chmod 600 /root/.netrc && touch /etc/crontab /etc/cron.*/* && /usr/sbin/rsyslogd && cron && touch /var/log/cron.log && tail -f /var/log/syslog"

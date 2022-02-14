@@ -72,7 +72,7 @@ services:
                   -Dlog4j2.formatMsgNoLookups=true"
       LK_BACKGROUND_USER:
       LK_BACKGROUND_USER_PASSWORD:
-      LK_BASE_URL:
+      LK_BASE_URL: ${LK_BASE_URL}
       PG_NAME:
       PG_PASS:
       PG_USER:

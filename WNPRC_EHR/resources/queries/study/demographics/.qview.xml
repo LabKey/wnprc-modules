@@ -72,6 +72,7 @@
         <column name="Id/CurrentBehavior/currentBehaviors"/>
         <column name="Feeding/TypeOfChow"/>
         <column name="Feeding/chowConversion"/>
+        <column name="mgapIds"/>
     </columns>
     <sorts>
         <sort column="Id" descending="false"/>

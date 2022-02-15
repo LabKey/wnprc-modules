@@ -11,4 +11,3 @@ CREATE TABLE wnprc.watermonitoring_access
     modified                TIMESTAMP,
     CONSTRAINT PK_watermonitoring_access PRIMARY KEY (rowid)
 );
-

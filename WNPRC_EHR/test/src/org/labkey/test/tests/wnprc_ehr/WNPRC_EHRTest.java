@@ -183,8 +183,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         WNPRC_EHRTest initTest = (WNPRC_EHRTest)getCurrentTest();
 
         initTest.initProject("EHR");
-        initTest.createTestSubjects();
         initTest.clickFolder("EHR");
+        initTest._containerHelper.enableModule("WNPRC_EHR");
+        sleep(5000);
+        /*initTest.createTestSubjects();
         initTest._containerHelper.enableModules(Arrays.asList("EHR_Billing", "WNPRC_Billing", "WNPRC_BillingPublic"));
         initTest.setModuleProperties(Arrays.asList(new ModulePropertyValue("EHR_Billing", "/" +
                 initTest.getProjectName(), "BillingContainer", PRIVATE_FOLDER_PATH)));
@@ -218,7 +220,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         initTest.clickFolder("PI Portal");
         initTest.addBillingPublicWebParts();
 
-        initTest.uploadBillingDataAndVerify();
+        initTest.uploadBillingDataAndVerify();*/
     }
 
     private void uploadBillingDataAndVerify() throws Exception
@@ -443,6 +445,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
     public void navigateToWeights()
     {
         beginAt(buildURL("wnprc_ehr", getContainerPath(), "weight"));
+    }
+
+    public void navigateToAnimalRequestForm()
+    {
+        beginAt(buildURL("animalrequests", getContainerPath(), "app"));
     }
 
     public WebElement fillAnInput(String inputId, String value)
@@ -2558,6 +2565,132 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         clickNewButton("save-draft-btn");
         sleep(2000);
         assertTextNotPresent("Error during operation");
+    }
+
+
+    public void populateLookupSet(String setNamr) throws IOException, CommandException
+    {
+        //insert into ehr_lookups.lookup_sets (setname,container)  select 'animal_requests_sex' as setname, container from ehr_lookups.lookup_sets where setname='viral_status';
+
+        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+
+        log("setting up lookupset");
+
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr_lookups", "lookup_sets");
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("setname", setNamr);
+        rowMap.put("keyField", "value");
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+    }
+
+    public void populateLookupVals(String setName, String valName, String val) throws IOException, CommandException
+    {
+        //insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'M' as value from ehr_lookups.lookup_sets where setname='animal_requests_sex';
+
+        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+
+        log("populating lookupset");
+
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr_lookups", "lookups");
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put("set_name", setName);
+        rowMap.put(valName,val);
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+    }
+
+    public void populateLookupValsDirect(String setName, String valName, String val) throws IOException, CommandException
+    {
+        //insert into ehr_lookups.lookups (set_name,container,value) select setname, container, 'M' as value from ehr_lookups.lookup_sets where setname='animal_requests_sex';
+
+        Connection cn = new Connection(WebTestHelper.getBaseURL(), PasswordUtil.getUsername(), PasswordUtil.getPassword());
+
+        log("populating lookupset");
+
+        InsertRowsCommand insertCmd = new InsertRowsCommand("ehr_lookups", setName);
+        Map<String,Object> rowMap = new HashMap<>();
+        rowMap.put(valName,val);
+        insertCmd.addRow(rowMap);
+
+        insertCmd.execute(cn, EHR_FOLDER_PATH);
+
+    }
+
+    public void populateAnimalRequestTableLookups() throws IOException, CommandException
+    {
+
+        populateLookupSet("animal_requests_sex");
+        populateLookupVals("animal_requests_sex", "value", "M");
+
+        populateLookupSet("animal_requests_disposition");
+        populateLookupVals("animal_requests_disposition", "value", "Terminal");
+
+        populateLookupSet("animal_requests_infectiousdisease");
+        populateLookupVals("animal_requests_infectiousdisease", "value","Yes");
+
+        populateLookupSet("animal_requests_yes_no");
+        populateLookupVals("animal_requests_yes_no", "value","Yes");
+
+        populateLookupValsDirect("viral_status", "value","SPF4");
+        populateLookupValsDirect("geographic_origins", "meaning", "india");
+        populateLookupValsDirect("geographic_origins", "meaning", "china");
+        populateLookupValsDirect("geographic_origins", "meaning", "mauritius");
+        populateLookupValsDirect("geographic_origins", "meaning", "indonesia");
+        populateLookupValsDirect("geographic_origins", "meaning", "laos");
+        populateLookupValsDirect("geographic_origins", "meaning", "vietnam");
+        populateLookupValsDirect("geographic_origins", "meaning", "any");
+
+    }
+
+    public WebElement fillAnInputByName(String name, String value)
+    {
+        WebElement el = Locator.name(name).findElement(getDriver());
+        el.click();
+        el.sendKeys(value);
+        return el;
+    }
+
+    @Test
+    public void testAnimalRequestFormSubmit() throws IOException, CommandException
+    {
+        navigateToFolder(PROJECT_NAME,FOLDER_NAME);
+        populateAnimalRequestTableLookups();
+        navigateToAnimalRequestForm();
+        sleep(5000);
+        //it's a timing issue. we have to wait until the form is loaded for it to be clickable.
+
+        fillAnInputByName("principalinvestigator", "Other");
+        fillAnInputByName("externalprincipalinvestigator", "Automated Test");
+        fillAnInputByName("numberofanimals", "23");
+        fillAnInputByName("speciesneeded", "Cyno");
+        fillAnInputByName("originneeded", "any");
+        fillAnInputByName("sex", "M");
+        fillAnInputByName("age", "10");
+        fillAnInputByName("weight", "2");
+        fillAnInputByName("mhctype", "2");
+        fillAnInputByName("viralstatus", "SPF4");
+        fillAnInputByName("infectiousdisease", "Yes");
+        fillAnInputByName("pregnantanimalsrequired", "Yes");
+        fillAnInputByName("disposition", "Terminal");
+        fillAnInputByName("executivecommitteeapproval", "Yes");
+        fillAnInputByName("optionalproject", "TBD");
+        fillAnInputByName("account", "80085");
+        fillAnInputByName("protocol", "TBD");
+        WebElement el = Locator.id("anticipatedstartdate").findElement(getDriver()).findElement(By.tagName("input"));
+        el.sendKeys("2022-02-11");
+        el.sendKeys(Keys.TAB);
+        el = Locator.id("anticipatedenddate").findElement(getDriver()).findElement(By.tagName("input"));
+        el.sendKeys("2022-02-11");
+        el.sendKeys(Keys.TAB);
+        fillAnInputByName("comments", "test");
+
+        clickAndWait(Locator.tagWithId("button","submit-final"));
+        assertTextPresent("Data Entry");
     }
 
 

@@ -47,7 +47,7 @@ const renderDateTimePicker = props => (
       <label className="col-xs-5 form-control-label">{props.label}:</label>
       {/*We have to render the datepicker like this because it won't cooperate
            And we also have to do some not-so-sexy css adjustments */}
-      <div className="col-xs-5" id="datepicker">
+      <div className="col-xs-5 datepicker-wrapper " id={props.id}>
           <DatePicker
             onChange={props.input.onChange}
             dateFormat="yyyy-MM-dd"
@@ -506,6 +506,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 </Field>
                                                 <Field
                                                   name="anticipatedstartdate"
+                                                  id="anticipatedstartdate"
                                                   label="Anticipated Start Date"
                                                   component={renderDateTimePicker}
                                                   type="text"
@@ -515,6 +516,7 @@ export class AnimalRequestForm extends React.Component<any,State> {
                                                 </Field>
                                                 <Field
                                                   name="anticipatedenddate"
+                                                  id="anticipatedenddate"
                                                   label="Anticipated End Date"
                                                   component={renderDateTimePicker}
                                                   type="text"

@@ -4,7 +4,6 @@ export const saveRowsDirect = (jsonData) => {
         LABKEY.Query.saveRows({
             commands: jsonData.commands,
             method: 'POST',
-            containerPath: '/WNPRC/EHR',
             success: (data) => {
                 resolve(data);
             },
@@ -24,7 +23,6 @@ export const getEHRData = (schemaName,queryName,sort='rowid',columns='',filterAr
             queryName: queryName,
             columns: columns,
             sort: sort,
-            containerPath:'/WNPRC/EHR',
             filterArray: filterArray,
             success: (data) => {
                 resolve(data)

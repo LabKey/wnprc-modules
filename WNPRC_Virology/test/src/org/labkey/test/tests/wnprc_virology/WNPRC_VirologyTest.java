@@ -14,8 +14,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.ModulePropertyValue;
 import org.labkey.test.TestFileUtils;
-import org.labkey.test.categories.CustomModules;
-import org.labkey.test.categories.WNPRC_Virology;
+import org.labkey.test.categories.WNPRC_EHR;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PasswordUtil;
@@ -26,7 +25,7 @@ import org.labkey.test.util.Ext4Helper;
 
 import static org.labkey.test.WebTestHelper.buildRelativeUrl;
 
-@Category({CustomModules.class, WNPRC_Virology.class})
+@Category({WNPRC_EHR.class})
 public class WNPRC_VirologyTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
 

@@ -954,10 +954,13 @@ public class TriggerScriptHelper {
                     String clientVolume = null;
                     for (String waterAmountObjectId : treatmentArray)
                     {
+                        waterAmountObjectId = waterAmountObjectId.trim();
                         for (Map extraContextRows : waterFromExtraContext)
                         {
+                            Object objectTreatmentId = extraContextRows.get("treatmentId");
 
-                            if (waterAmountObjectId.equals(extraContextRows.get("treatmentId")) )
+                            if (objectTreatmentId != null
+                                    && waterAmountObjectId.equals(objectTreatmentId.toString().trim()) )
                             {
                                 Map<String, Object> updateWaterAmount = new CaseInsensitiveHashMap<>();
                                 updateWaterAmount.put("objectid", waterAmountObjectId);

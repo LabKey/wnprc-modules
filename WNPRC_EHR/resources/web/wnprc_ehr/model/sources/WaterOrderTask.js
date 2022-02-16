@@ -81,7 +81,6 @@ EHR.model.DataModelManager.registerMetadata('WaterOrderTask', {
             },
             assignedTo:{
                 allowBlank: false,
-                defaultValue: 'researchstaff',
                 columnConfig: {
                     width:120
                 }

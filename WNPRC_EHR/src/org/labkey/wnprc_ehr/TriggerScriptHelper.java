@@ -795,7 +795,6 @@ public class TriggerScriptHelper {
         _log.info("Using java helper to send email for animal request record: "+rowid);
         Module ehr = ModuleLoader.getInstance().getModule("EHR");
         AnimalRequestNotificationUpdate notification = new AnimalRequestNotificationUpdate(ehr, rowid, row, oldRow, user, hostName);
-        Maps.difference(row,oldRow);
         notification.sendManually(container, user);
     }
 

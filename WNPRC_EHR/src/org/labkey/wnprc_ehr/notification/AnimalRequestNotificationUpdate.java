@@ -32,6 +32,7 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
     public String _hostName;
     public Map<String,Object> _row;
     public Map<String,Object> _oldrow;
+    Map<String, ArrayList<String>> _theDifferences;
 
 
     public AnimalRequestNotificationUpdate(Module owner)
@@ -94,8 +95,6 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
     public String getMessageBodyHTML(Container c, User u)
     {
         final StringBuilder msg = new StringBuilder();
-        TableInfo ti = QueryService.get().getUserSchema(u, c, "wnprc").getTable("animal_requests");
-        Map<String, ArrayList<String>> theDifferences = TriggerScriptHelper.buildDifferencesMap(ti, _oldrow, _row);
         Date now = new Date();
         msg.append("<p>");
         msg.append(getUserName(_currentUser));
@@ -107,7 +106,7 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
         msg.append("<p>The following changes were made: <br><br>");
         msg.append("<table style='border: 1px solid black;'><thead style='font-weight: bold;'><tr style='border: 1px solid black; padding: 5px' ><td style='border: 1px solid black; padding: 5px'>Field changed</td><td style='border: 1px solid black; padding: 5px'>Old value</td><td style='border: 1px solid black; padding: 5px'>New value</td></tr></thead>");
 
-        for (Map.Entry<String, ArrayList<String>> change : theDifferences.entrySet())
+        for (Map.Entry<String, ArrayList<String>> change : _theDifferences.entrySet())
         {
             msg.append("<tr style='border: 1px solid black; padding: 4px'>");
             msg.append("<td style='border: 1px solid black; padding: 4px'>");
@@ -146,7 +145,13 @@ public class AnimalRequestNotificationUpdate extends AbstractEHRNotification
         Collection<UserPrincipal> recipients = getRecipients(container);
         if (!container.hasPermission(_currentUser, WNPRCAnimalRequestsEditPermission.class) && !container.hasPermission(_currentUser, AdminPermission.class))
         {
-            sendMessage(getEmailSubject(container),getMessageBodyHTML(container,user),recipients,user, container);
+            TableInfo ti = QueryService.get().getUserSchema(user, container, "wnprc").getTable("animal_requests");
+            _theDifferences = TriggerScriptHelper.buildDifferencesMap(ti, _oldrow, _row);
+            if (_theDifferences.size() > 0)
+            {
+                sendMessage(getEmailSubject(container),getMessageBodyHTML(container,user),recipients,user, container);
+
+            }
         }
 
     }

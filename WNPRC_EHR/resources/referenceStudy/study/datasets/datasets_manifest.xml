@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <datasets metaDataFile="datasets_metadata.xml" xmlns="http://labkey.org/study/xml">
-  <categories>
-    <category>Clinical</category>
-    <category>ColonyManagement</category>
-    <category>ClinPath</category>
-    <category>Pathology</category>
-  </categories>
   <datasets>
     <dataset name="alopecia" id="1061" category="Clinical"/>
     <dataset name="ActiveHousing" id="5010" showByDefault="false" category="ColonyManagement" demographicData="true"/>

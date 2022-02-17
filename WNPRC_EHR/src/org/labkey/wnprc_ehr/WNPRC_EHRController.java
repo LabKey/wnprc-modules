@@ -1486,6 +1486,7 @@ public class WNPRC_EHRController extends SpringActionController
                 case "enter water orders":
                 case "enter lab water":
                 case "enter treatments - water":
+                case "enter water daily amount":
                 case "research ultrasounds":
                     newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
                             getContainer().getPath()));

@@ -675,7 +675,7 @@
                                     events.map(function (row) {
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.id + " Total: " + row.TotalWater,
+                                            title: row.animalId + " Total: " + row.TotalWater,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
@@ -683,7 +683,7 @@
                                         };
 
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#000CFF';
+                                            eventObj.color = '#0080FF';
                                         }else{
                                             eventObj.color = '#EE2020'
                                         }
@@ -715,7 +715,7 @@
                                             rawRowData: row
                                         };
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#000CFF';
+                                            eventObj.color = '#0080FF';
                                         }else{
                                             eventObj.color = '#EE2020'
                                         }
@@ -1191,7 +1191,8 @@
         });
 
         WebUtils.VM.taskDetails.displayDate = ko.pureComputed(function(){
-            var dateString = WebUtils.VM.taskDetails.date();
+            return WebUtils.VM.taskDetails.date();
+            /*var dateString = WebUtils.VM.taskDetails.date();
 
             if (dateString){
                 return (moment(dateString, "MM/DD/YYYY").calendar(null, {
@@ -1200,7 +1201,7 @@
 
             }else {
                 return " ";
-            }
+            }*/
         });
 
         //Updating all the records of the form with data coming from the taskDeatils panel

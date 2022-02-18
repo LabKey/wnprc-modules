@@ -709,7 +709,6 @@ public class WNPRC_EHRController extends SpringActionController
                     props.put(filename, fileInfo);
                 }
             }
-
             return new ApiSimpleResponse(props);
         }
     }

@@ -1286,7 +1286,6 @@
     }
 </script>
 
-<%--TODO Refector to not use Java code anymore--%>
 <%
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 

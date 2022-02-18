@@ -1,10 +1,10 @@
 #!/bin/bash
 
-FB_PREFIX="21.11w_fb_"
+FB_IDENTIFIER="w_fb_"
 
-if [[ $SOURCE_BRANCH == $FB_PREFIX* ]];
+if [[ $SOURCE_BRANCH == *$FB_IDENTIFIER* ]];
 then
-        SHORT_BRANCH_NAME=${SOURCE_BRANCH#"$FB_PREFIX"}
+        SHORT_BRANCH_NAME=${SOURCE_BRANCH#*$FB_IDENTIFIER}
 else
         SHORT_BRANCH_NAME="master"
 fi

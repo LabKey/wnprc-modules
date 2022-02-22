@@ -1,2 +1,12 @@
 #!/bin/bash
-docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$branch --rm=true -t $IMAGE_NAME .
+
+FB_IDENTIFIER="w_fb_"
+
+if [[ $SOURCE_BRANCH == *$FB_IDENTIFIER* ]];
+then
+        SHORT_BRANCH_NAME=${SOURCE_BRANCH#*$FB_IDENTIFIER}
+else
+        SHORT_BRANCH_NAME="master"
+fi
+
+docker build --build-arg LABKEY_TEAMCITY_USERNAME=$teamcityUser --build-arg LABKEY_TEAMCITY_PASSWORD=$teamCityPWD --build-arg WNPRC_BRANCH=$SHORT_BRANCH_NAME --rm=true -t $IMAGE_NAME .

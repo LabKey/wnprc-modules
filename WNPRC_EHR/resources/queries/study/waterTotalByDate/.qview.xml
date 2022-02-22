@@ -3,6 +3,7 @@
         <column name="Id" />
         <column name="date" />
         <column name="TotalWater" />
+        <column name="provideFruit"/>
         <column name="volumeGivenInLabSub" />
         <column name="volumeGivenInCage"/>
         <column name="volumeGivenInLabSub" />

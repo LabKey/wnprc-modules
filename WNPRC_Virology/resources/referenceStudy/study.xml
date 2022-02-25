@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--Exported from  at https://openresearch.labkey.com/project/ZEST/Private/begin.view by csebranek on Thu Oct 14 10:56:28 PDT 2021-->
-<study archiveVersion="21.001" label="Viral Load from EHR" timepointType="DATE" subjectNounSingular="Participant" subjectNounPlural="Participants" subjectColumnName="ParticipantId" investigator="" grant="" species="" alternateIdPrefix="" alternateIdDigits="6" defaultTimepointDuration="1" securityType="BASIC_WRITE" xmlns="http://labkey.org/study/xml">
+<study archiveVersion="21.001" label="Viral Load from EHR" timepointType="DATE" subjectNounSingular="Participant" subjectNounPlural="Participants" subjectColumnName="Id" investigator="" grant="" species="" alternateIdPrefix="" alternateIdDigits="6" defaultTimepointDuration="1" securityType="BASIC_WRITE" xmlns="http://labkey.org/study/xml">
   <datasets dir="datasets" file="datasets_manifest.xml">
     <definition file="wnprc_virology.dataset"/>
   </datasets>

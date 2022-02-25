@@ -13,6 +13,7 @@
                             <fkDbSchema>ehr_purchasing</fkDbSchema>
                             <fkTable>purchasingRequests</fkTable>
                         </fk>
+                        <url>/wnprc_purchasing/purchasingRequest.view?requestRowId=${requestRowId}</url>
                     </column>
                     <column columnName="lineItemNumber">
                         <required>true</required>

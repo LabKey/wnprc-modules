@@ -3,9 +3,9 @@
   <table tableName="viral_loads" tableDbType="TABLE">
     <description>Loaded via ETL from or_viral_loads query on EHR</description>
     <columns>
-      <column columnName="ParticipantId">
+      <column columnName="Id">
         <datatype>varchar</datatype>
-        <columnTitle>Participant ID</columnTitle>
+        <columnTitle>Id</columnTitle>
         <description>Subject identifier</description>
         <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
         <nullable>false</nullable>

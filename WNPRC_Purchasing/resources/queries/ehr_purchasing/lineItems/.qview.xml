@@ -6,6 +6,7 @@
                 <property name="columnTitle" value="Request Status"/>
             </properties>
         </column>
+        <column name="lineItemNumber"/>
         <column name="item"/>
         <column name="itemUnitId"/>
         <column name="controlledSubstance"/>
@@ -23,4 +24,7 @@
             </properties>
         </column>
     </columns>
+    <sorts>
+        <sort column="requestRowId, lineItemNumber"/>
+    </sorts>
 </customView>

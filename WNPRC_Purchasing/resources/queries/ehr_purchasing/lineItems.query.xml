@@ -14,6 +14,9 @@
                             <fkTable>purchasingRequests</fkTable>
                         </fk>
                     </column>
+                    <column columnName="lineItemNumber">
+                        <required>true</required>
+                    </column>
                     <column columnName="item">
                         <required>true</required>
                     </column>

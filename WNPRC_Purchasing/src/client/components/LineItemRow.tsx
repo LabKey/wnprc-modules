@@ -9,6 +9,7 @@ import { LineItemModel } from '../model';
 import {
     ControlledSubstance,
     DescriptionInput,
+    LineItemNumber,
     SubtotalInput,
     UnitInput,
     UnitCostInput,
@@ -55,10 +56,25 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
         onDelete(rowIndex);
     }, [onDelete, rowIndex]);
 
+    let columnCount = 8;
+    if (canViewPricingInfo) {
+        columnCount++;
+    }
+    if (hasRequestId && !isReorder) {
+        columnCount++;
+    }
+    if (canViewPricingInfo) {
+        columnCount++;
+    }
+    const deleteColWidth = 12 - columnCount;
+
     return (
         <>
             {
                 <Row className="line-item-row" key={'line-item-row-' + rowIndex}>
+                    <Col xs={1}>
+                        <LineItemNumber value={model.lineItemNumber} />
+                    </Col>
                     <Col xs={4}>
                         <DescriptionInput
                             value={model.item}
@@ -116,13 +132,8 @@ export const LineItemRow: FC<LineItemProps> = memo(props => {
                         </Col>
                     }
 
-                    <Col xs={2}/>
-                    <Col xs={1}/>
-                    { (!hasRequestId || isReorder) &&
-                        <Col xs={2}/>
-                    }
                     { canDelete &&
-                        <Col xs={1}>
+                        <Col xs={deleteColWidth}>
                                 <span
                                         id={'delete-line-item-row-' + rowIndex}
                                         title="Delete item"

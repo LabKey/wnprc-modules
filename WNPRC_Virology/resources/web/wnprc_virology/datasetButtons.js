@@ -174,6 +174,101 @@ WNPRC_Virology.DatasetButtons = new function() {
             });
 
         },
+        downloadRecordsToCSV: function (dataRegionName) {
+            let dataRegion = LABKEY.DataRegions[dataRegionName];
+            let checked = dataRegion.getChecked();
+            let checkedJoin = checked.join(";");
+            let filt = [];
+            filt.push(LABKEY.Filter.create('key', checkedJoin, LABKEY.Filter.Types.IN));
+
+            function replaceSampleTypeCasing(sampleType) {
+                switch(sampleType) {
+                    case 'plasma':
+                        return 'Plasma';
+                    case 'urine':
+                        return 'Urine';
+                    case 'other_fluid':
+                        return 'Other-fluid';
+                    case 'tissue':
+                        return 'Tissue'
+                    default:
+                        return sampleType;
+                }
+            }
+
+            LABKEY.Query.selectRows({
+                schemaName: 'lists',
+                queryName: 'vl_sample_queue',
+                viewName: 'Samples_for_isolation',
+                filterArray: filt,
+                requiredVersion: 21.11,
+                success: function (response) {
+                    let csvRows = [];
+
+                    //header
+                    csvRows.push(["RNA isolation"]);
+                    csvRows.push(["Name: _____________________________________________________"]);
+                    csvRows.push(["Date: _____________________________________________________"]);
+                    csvRows.push(["Expt #: ___________________________________________________"]);
+                    csvRows.push(["Maxwell kit lot #: ________________________________________"]);
+                    csvRows.push(["Instrument: _______________________________________________"]);
+                    csvRows.push([""]);
+                    csvRows.push(["#", "ID", "Date", "Type", "Comments", "Plasma Freezer", "RNA Freezer"]);
+
+                    // sample data
+                    response.rows.forEach(function (row, index){
+                       let rowData = row.data;
+                       let csvRowItem = [
+                           (index+1).toString(), rowData.Id.value,
+                           new Date(rowData.Sample_date.formattedValue).toISOString().split('T')[0], //only get yyyy-mm-dd part
+                           replaceSampleTypeCasing(rowData.Sample_type.value),
+                           rowData.Submitter_comments.value,
+                           "________      ",
+                           "________"
+                       ];
+                       csvRows.push(csvRowItem);
+                    });
+                    csvRows.push([(response.rows.length+1).toString(), "PosControl", "", "Plasma", "", "________      ", "________"]);
+                    csvRows.push([(response.rows.length+2).toString(), "NegControl", "", "Water", "", "________      ", "________"]);
+
+                    // footer
+                    csvRows.push([""]);
+                    csvRows.push(["qPCR expt #"]);
+                    csvRows.push(["Reagents: "]);
+                    csvRows.push(["Assay: __________________________________________________"]);
+                    csvRows.push(["Primer/hexamer mix: _____________________________________"]);
+                    csvRows.push(["Probe: __________________________________________________"]);
+                    csvRows.push(["RNase out: ______________________________________________"]);
+                    csvRows.push(["DEPC water: _____________________________________________"]);
+                    csvRows.push(["Transcript: _____________________________________________"]);
+                    csvRows.push(["Taqman fast mix: ________________________________________"]);
+                    csvRows.push(["Instrument: _____________________________________________"]);
+                    csvRows.push(["QC info entered: ________________________________________"]);
+                    csvRows.push(["Charges entered: ________________________________________"]);
+                    csvRows.push(["VL sample tracker: ______________________________________"]);
+
+                    let csvContent = csvRows.map(e => e.join(",")).join("\n");
+                    let encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
+                    // create a link to download the file
+                    let link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    let currentDate = new Date();
+                    // we need to get the UTC offset since toISOString() always uses zero UTC offset, and could
+                    // put us in the wrong day if we do not calculate the current timezone offset when getting the current date
+                    const offset = currentDate.getTimezoneOffset()
+                    let theDate = new Date(currentDate.getTime() - (offset*60*1000)).toISOString().split('T')[0]
+                    link.setAttribute("download", "vl_sample_queue_" + theDate + ".csv");
+                    document.body.appendChild(link);
+
+                    //this will download the file
+                    link.click();
+                },
+                failure: function (e) {
+                    alert('Unable to download file, '+ e.exception);
+                }
+            });
+
+        },
 
     }
 }

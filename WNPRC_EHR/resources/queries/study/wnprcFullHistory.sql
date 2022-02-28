@@ -17,15 +17,20 @@ SELECT
     date,
      project AS project,
      'Water Given (Total)' AS dataset,
-     'watertotal' AS DataSetName,
-     'Sum of all water given for the day.' AS remark,
-       CASE
-        WHEN (provideFruit IS NOT NULL AND provideFruit != '') THEN
+     CASE
+         WHEN (remark IS NOT NULL AND remark !='') THEN
+             ('Sum of all water given for the day.' || CHR(10)
+                 || remark)
+             ELSE
+            'Sum of all water given for the day.'
+     END AS remark,
+     CASE
+         WHEN (provideFruit IS NOT NULL AND provideFruit != '') THEN
             ('Total Water for the day equals: ' || TotalWater || 'ml' || CHR(10)
             || 'Food provided: ' || provideFruit)
-        ELSE
+         ELSE
             ('Total Water for the day equals: ' || TotalWater || 'ml')
-       END AS description,
+     END AS description,
      performedConcat AS performedBy,
      qcstate AS qcstate,
      null AS  taskid,

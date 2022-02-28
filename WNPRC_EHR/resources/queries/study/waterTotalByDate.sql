@@ -9,6 +9,7 @@ SELECT
        cal.targetdate AS date,
        waterSummary.TotalWater,
        waterSummary.provideFruit,
+       waterSummary.remark,
        waterSummary.volumeGivenInLabSub,
        waterSummary.volumeGivenInCage,
        waterSummary.volumeGivenInImage,
@@ -38,6 +39,7 @@ LEFT OUTER JOIN(
     COALESCE (SUM(CASE WHEN iwg.location = 'procedureRoom' THEN iwg.volume ELSE 0 END), 0) AS volumeGivenInProcedure,
     COALESCE(SUM(iwg.volume), 0) AS TotalWater,
     COALESCE(GROUP_CONCAT(iwg.provideFruit.title,'; '),'') AS provideFruit,
+    COALESCE(GROUP_CONCAT(iwg.remarks,'; '),'') AS remark,
     COALESCE(GROUP_CONCAT(iwg.performedby, ';'),'') AS performedConcat,
     MAX(iwg.project) AS project,
     COALESCE(MAX(iwg.qcstate),1) AS qcstate

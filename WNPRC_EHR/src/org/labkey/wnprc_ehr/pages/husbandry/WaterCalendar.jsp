@@ -683,7 +683,7 @@
                                         };
 
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#0080FF';
+                                            eventObj.color = '#FFFFFF';
                                         }else{
                                             eventObj.color = '#EE2020'
                                         }
@@ -715,7 +715,7 @@
                                             rawRowData: row
                                         };
                                         if (row.mlsPerKg >= row.InnerMlsPerKg){
-                                            eventObj.color = '#0080FF';
+                                            eventObj.color = '#FFFFFF';
                                         }else{
                                             eventObj.color = '#EE2020'
                                         }

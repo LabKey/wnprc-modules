@@ -18,4 +18,4 @@ LEFT JOIN (
        SELECT  lists.mappings_for_clients.account,
                lists.mappings_for_clients.client_name
        FROM lists.mappings_for_clients) mp
-ON mp.account = vl.account
+ON mp.account in vl.account

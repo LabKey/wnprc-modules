@@ -6,10 +6,23 @@ function onInit(event, helper){
         allowFutureDates: true,
         allowDatesInDistantPast: true
     });
+
+}
+
+function onBeforeUpdate(row, oldRow, scriptErrors){
+    let waterAdmin = false;
+
+    if (row && row.project){
+        let currentUser = LABKEY.Security.currentUser.id;
+        waterAdmin = WNPRC.Utils.getJavaHelper().checkIfUserIsWaterAdmin(currentUser, row.project, row.user);
+    }
+
+
 }
 
 function onUpsert(helper, scriptErrors, row, oldRow){
-    console.log("print oldRow "+ oldRow);
+
+
 
     if (row.Id){
         EHR.Server.Utils.findDemographics({
@@ -20,6 +33,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 if(data){
                     if(!row.project){
                         EHR.Server.Utils.addError(scriptErrors, 'project', 'Must enter a project for all center animals.', 'WARN');
+
                     }
                 }
             }
@@ -34,6 +48,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
 
 
     }
+
 
     var today = new Date();
     //console.log("Value of date " + row.date);

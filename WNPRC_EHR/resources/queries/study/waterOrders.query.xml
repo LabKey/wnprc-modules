@@ -56,7 +56,15 @@
                             <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
-
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/dataEntryFormDetails.view?formtype=Enter%20Water%20Orders&amp;taskid=${taskid}</url>
+                    </column>
             </columns>
         </table>
     </tables>

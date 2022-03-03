@@ -89,6 +89,16 @@
                     <column columnName="treatmentId">
                         <isHidden>false</isHidden>
                     </column>
+
+                    <column columnName="taskid">
+                        <columnTitle>Task Id</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr</fkDbSchema>
+                            <fkTable>tasks</fkTable>
+                            <fkColumnName>taskid</fkColumnName>
+                        </fk>
+                        <url>/ehr/dataEntryFormDetails.view?taskid=${taskid}</url>
+                    </column>
                 </columns>
             </table>
         </tables>

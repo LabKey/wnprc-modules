@@ -12,6 +12,7 @@
         <column name="currentWaterCondition"/>
         <column name="conditionAtTime"/>
         <column name="performedConcat"/>
+        <column name="InnerMlsPerKg"/>
         <column name="qcstate"/>
 
     </columns>

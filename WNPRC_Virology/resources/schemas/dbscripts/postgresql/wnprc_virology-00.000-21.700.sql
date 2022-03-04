@@ -7,7 +7,7 @@ CREATE TABLE wnprc_virology.folder_paths_with_readers
     folder_container_id text NOT NULL,
     folder_path         text NOT NULL,
     folder_name         text NOT NULL,
-    emails              text NOT NULL,
+    emails              text,
 
     -- Default fields for LabKey.
     container         entityid NOT NULL,
@@ -19,12 +19,13 @@ CREATE TABLE wnprc_virology.folder_paths_with_readers
     CONSTRAINT pk_folder_paths_with_readers_rowid PRIMARY KEY (rowid)
 );
 
-DROP TABLE IF EXISTS wnprc_virology.folder_to_experiment_mappings;
-CREATE TABLE wnprc_virology.folder_to_experiment_mappings
+DROP TABLE IF EXISTS wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails;
+CREATE TABLE wnprc_virology.rsehr_folders_accounts_and_vl_reader_emails
 (
     rowid               serial NOT NULL,
-    animal_id           text NOT NULL,
-    client_name         text NOT NULL,
+    account             text NOT NULL,
+    emails              text,
+    folder_name         text NOT NULL,
     folder_container_id text NOT NULL,
     folder_path         text NOT NULL,
 
@@ -35,6 +36,6 @@ CREATE TABLE wnprc_virology.folder_to_experiment_mappings
     modifiedby        userid,
     modified          TIMESTAMP,
 
-    CONSTRAINT pk_folder_to_experiment_mappings_rowid PRIMARY KEY (rowid)
+    CONSTRAINT pk_rsehr_folders_accounts_and_vl_reader_emails_rowid PRIMARY KEY (rowid)
 );
 

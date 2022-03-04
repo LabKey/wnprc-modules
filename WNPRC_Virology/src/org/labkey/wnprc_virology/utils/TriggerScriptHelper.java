@@ -126,7 +126,7 @@ public class TriggerScriptHelper
                     String conjureURL = String.valueOf(WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.ZIKA_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
                     conjureURL = conjureURL + "&Dataset.experiment_number~eq=" + emailPropsCopy.get("experimentNumber");
                     emailPropsCopy.put("portalURL", conjureURL);
-                    ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
+                    ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, false);
                     notification.sendManually(viralLoadContainer);
                 }
                 else
@@ -151,7 +151,7 @@ public class TriggerScriptHelper
                 if (WNPRCVirologyRSEHRPortalUrlVal != null)
                 {
                     emailPropsCopy.put("portalURL", WNPRCVirology.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(viralLoadContainer));
-                    ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy);
+                    ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, true);
                     //TODO add ability to query special table with info from RSEHR on who to notify
                     //ViralLoadQueueNotification notification = new ViralLoadQueueNotification(ehr, keys, _user, viralLoadContainer, emailPropsCopy, _settings.getRSEHREmailMode());
                     notification.sendManually(viralLoadContainer);

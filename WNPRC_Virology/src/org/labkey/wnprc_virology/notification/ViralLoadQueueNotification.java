@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.labkey.api.search.SearchService._log;
+import static org.labkey.wnprc_virology.ViralLoadRSEHRRunner.virologyModule;
 
 public class ViralLoadQueueNotification extends AbstractEHRNotification
 {
@@ -52,13 +53,15 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
     public Double efficiency;
     public Map<String, Object> emailProps;
     protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
+    public List<HashMap<String,Object>> VLSampleListResults = new ArrayList<>();
+    public boolean useRSEHREmailMethod = false;
 
     public ViralLoadQueueNotification(Module owner)
     {
         super(owner);
     }
 
-    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailprops) throws SQLException
+    public ViralLoadQueueNotification(Module owner, String [] rowids, User currentuser, Container c, Map<String, Object> emailprops, boolean usersehremailmethod) throws SQLException
     {
         super(owner);
         rowIds = rowids;
@@ -71,6 +74,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         vlPositiveControl = (String) emailprops.get("vl_positive_control");
         avgVLPositiveControl = (String) emailprops.get("avg_vl_positive_control");
         efficiency = (Double) emailprops.get("efficiency");
+        useRSEHREmailMethod = usersehremailmethod;
         this.setUp();
     }
 
@@ -100,7 +104,6 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         }
     }
 
-    //TODO if we are gathering the email list from data from RSEHR, we'll need to change/adapt how we build up the notifyEmails here.
     public void countEmailsAndPut(String emails, String createdyByEmail)
     {
         if (emails != null){
@@ -163,6 +166,7 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         columns.add(FieldKey.fromString("Id"));
         columns.add(FieldKey.fromString("emails"));
         columns.add(FieldKey.fromString("ModifiedBy"));
+        columns.add(FieldKey.fromString("funding_string")); //account
 
         Integer createdByUserId = null;
         String notifyEmails = null;
@@ -175,6 +179,13 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
             String createdByUserEmail = null;
             User mod = null;
             while (rs.next()){
+                HashMap<String,Object> mp = new HashMap<>();
+                mp.put("Key", rs.getInt(FieldKey.fromString("Key")));
+                mp.put("emails", rs.getString(FieldKey.fromString("emails")));
+                mp.put("funding_string", rs.getString(FieldKey.fromString("funding_string")));
+
+                VLSampleListResults.add(mp);
+
                 createdByUserId = rs.getInt(FieldKey.fromString("CreatedBy"));
                 notifyEmails = rs.getString(FieldKey.fromString("emails"));
                 modifiedBy = rs.getInt(FieldKey.fromString("ModifiedBy"));
@@ -218,6 +229,65 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
                 addEmail(createdByUserEmail);
                 addEmail(modifiedByEmail);
                 countEmailsAndPut(notifyEmails, createdByUserEmail);
+            }
+        }
+
+    }
+
+    public void getRowsAndSendMessage() throws SQLException
+    {
+        //pull out accounts
+        Set<String> accounts = new HashSet<>();
+        Map<String, Integer> accountsAndCount = new HashMap<>();
+        String arr[] = new String[VLSampleListResults.size()];
+        for (int i = 0; i < VLSampleListResults.size(); i++)
+        {
+            //need to record # of samples per account
+            String accountNum = VLSampleListResults.get(i).get("funding_string").toString();
+            if (accountsAndCount.containsKey(accountNum))
+            {
+                Integer val = accountsAndCount.get(accountNum);
+                val++;
+                accountsAndCount.replace(accountNum,val);
+            }
+            else
+            {
+                accountsAndCount.put(accountNum,1);
+            }
+
+            //this will go into a unique set
+            arr[i] = accountNum;
+        }
+        Collections.addAll(accounts, arr);
+        SimpleFilter filter = new SimpleFilter();
+        filter.addInClause(FieldKey.fromString("account"), accounts);
+
+        QueryHelper viralLoadQuery = new QueryHelper(container, currentUser, "wnprc_virology", "rsehr_folders_accounts_and_vl_reader_emails");
+
+        // Define columns to get
+        List<FieldKey> columns = new ArrayList<>();
+        columns.add(FieldKey.fromString("Rowid"));
+        columns.add(FieldKey.fromString("account"));
+        columns.add(FieldKey.fromString("emails"));
+        columns.add(FieldKey.fromString("folder_path"));
+
+        // Execute the query
+        Collection<UserPrincipal> subscribedRecipients = getRecipients(container);
+        try (Results rs = viralLoadQuery.select(columns, filter))
+        {
+            while (rs.next())
+            {
+                String firstPart = virologyModule.getModuleProperties().get(WNPRC_VirologyModule.RSEHR_PORTAL_URL_PROP).getEffectiveValue(ContainerManager.getRoot());
+                emailProps.put("portalURL", firstPart + rs.getString(FieldKey.fromString("folder_path")));
+
+                String[] emails = rs.getString(FieldKey.fromString("emails")).split(";");
+                for (int k = 0; k < emails.length-1; k++)
+                {
+                    Integer count = accountsAndCount.get(rs.getString(FieldKey.fromString("account")));
+                    String recipientEmail = emails[k];
+                    String recipientName = getUserFullName(recipientEmail);
+                    sendMessage(getEmailSubject(container), getMessageBodyHTML(recipientEmail, count), subscribedRecipients, recipientEmail, container);
+                }
             }
         }
 
@@ -302,21 +372,27 @@ public class ViralLoadQueueNotification extends AbstractEHRNotification
         return getMessageBodyHTML("overrideabove", 1);
     }
 
-    public void sendManually (Container container)
+    public void sendManually (Container container) throws SQLException
     {
-        Collection<UserPrincipal> subscribedRecipients = getRecipients(container);
-        Iterator it =emailsAndCount.entrySet().iterator();
-        //send a message for all subscribed users and for each "unique" user in a notify column / submitter column
-        while (it.hasNext()){
-            Map.Entry pair = (Map.Entry)it.next();
-            String recipientEmail = (String) pair.getKey();
-            Integer count = (Integer) pair.getValue();
-
-            String recipientName = getUserFullName(recipientEmail);
-
-            sendMessage(getEmailSubject(container),getMessageBodyHTML(recipientName, count), subscribedRecipients, recipientEmail,container);
+        if (useRSEHREmailMethod)
+        {
+            getRowsAndSendMessage();
         }
+        else
+        {
+            Collection<UserPrincipal> subscribedRecipients = getRecipients(container);
+            Iterator it =emailsAndCount.entrySet().iterator();
+            //send a message for all subscribed users and for each "unique" user in a notify column / submitter column
+            while (it.hasNext()){
+                Map.Entry pair = (Map.Entry)it.next();
+                String recipientEmail = (String) pair.getKey();
+                Integer count = (Integer) pair.getValue();
 
+                String recipientName = getUserFullName(recipientEmail);
+
+                sendMessage(getEmailSubject(container),getMessageBodyHTML(recipientName, count), subscribedRecipients, recipientEmail,container);
+            }
+        }
     }
 
     public Collection<UserPrincipal> getRecipients(Container container)

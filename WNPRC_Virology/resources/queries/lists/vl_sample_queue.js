@@ -13,7 +13,7 @@ function beforeUpdate(row){
                     typeof row.vl_positive_control == 'undefined' ||
                     typeof row.avg_vl_positive_control == 'undefined' ||
                     typeof row.efficiency == 'undefined')
-            //TODO sanity check for status?
+            && row.Status == completedStatus
             ) {
         throw 'Cannot complete a record without an experiment number, positive control or efficiency value';
     }

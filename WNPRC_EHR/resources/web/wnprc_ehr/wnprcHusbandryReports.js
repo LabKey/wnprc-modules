@@ -1,10 +1,7 @@
 Ext4.namespace('EHR.reports');
 
 EHR.reports.waterGridCalendar = function (panel, tab) {
-    //LABKEY.Filter.create('pregnancyid', this._pregnancyId, LABKEY.Filter.Types.CONTAINS)
     var filterArray = panel.getFilterArray(tab);
-    //filterArray.add()
-    //debugger;
     var title = panel.getTitleSuffix();
 
     var target = tab.add({tag: 'span', style: 'padding-bottom: 20px'});

@@ -1483,6 +1483,10 @@ public class WNPRC_EHRController extends SpringActionController
                 // module (the ExtJS 4 version, which is built from the other data entry Java classes)
                 case "necropsy":
                 case "breeding encounter":
+                case "enter water orders":
+                case "enter lab water":
+                case "enter treatments - water":
+                case "enter water daily amount":
                 case "research ultrasounds":
                     newUrl = new ActionURL(String.format("/ehr%s/dataEntryForm.view",
                             getContainer().getPath()));

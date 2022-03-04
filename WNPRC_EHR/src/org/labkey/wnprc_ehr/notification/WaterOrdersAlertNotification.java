@@ -50,7 +50,7 @@ public class WaterOrdersAlertNotification extends AbstractEHRNotification
     @Override
     public String getCronString()
     {
-        return "0 0 13,15,17,19 * * ?";
+        return "0 0 10,13,15,17,19 * * ?";
     }
 
     public String getCategory(){

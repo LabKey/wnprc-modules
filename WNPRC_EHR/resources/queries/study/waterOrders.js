@@ -1,21 +1,29 @@
 require("ehr/triggers").initScript(this);
 var WNPRC = require("wnprc_ehr/WNPRC").WNPRC;
+let allowUsersMap = null;
 
 function onInit(event, helper){
     helper.setScriptOptions({
         allowFutureDates: true,
         allowDatesInDistantPast: true
     });
+    //TODO: query the allow user table
+    //columns: allowuserid and project
+    //define mapping and populate
 
 }
 
 function onBeforeUpdate(row, oldRow, scriptErrors){
+    //TODO: query allowUserMap
+
     let waterAdmin = false;
 
     if (row && row.project){
         let currentUser = LABKEY.Security.currentUser.id;
-        waterAdmin = WNPRC.Utils.getJavaHelper().checkIfUserIsWaterAdmin(currentUser, row.project, row.user);
+
     }
+    // if user not found
+    scriptErrors = " not have permissions";
 
 
 }

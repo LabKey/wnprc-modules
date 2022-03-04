@@ -1466,6 +1466,8 @@ public class WNPRC_EHRController extends SpringActionController
             String formType = (oldUrl.getParameter(LOWERCASE_FORMTYPE) == null) ? oldUrl.getParameter(CAMELCASE_FORMTYPE): oldUrl.getParameter(LOWERCASE_FORMTYPE);
             formType = formType != null ? formType.toLowerCase() : null;
 
+            //TODO: change the switch statement to use form_framework_types instread of hard coding the names of the new forms
+
             switch (formType)
             {
 

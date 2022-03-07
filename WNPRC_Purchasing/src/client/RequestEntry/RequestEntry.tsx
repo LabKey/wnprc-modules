@@ -164,7 +164,7 @@ export const App: FC = memo(() => {
                             controlledSubstance: val.controlledSubstance,
                             itemUnit: val.itemUnitId,
                             quantity: val.quantity,
-                            quantityReceived: val.quantityReceived,
+                            quantityReceived: isReorder ? 0 : val.quantityReceived,
                             unitCost: val.unitCost,
                             status: val.itemStatusId,
                         });

@@ -127,7 +127,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                 EHR.Server.Utils.addError(scriptErrors,errorObject.field, errorObject.message, errorObject.severity);
 
             }
-            console.log(" Printing Extra Context" + jsonExtraContext);
             if (jsonExtraContext != null){
                 for (var i = 0; i < jsonExtraContext.length; i++){
                     let extraContextObject = jsonExtraContext[i];
@@ -135,7 +134,6 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                     let dateOnly = new Date(date.getTime());
                     dateOnly = dateOnly.getFullYear()+ "-" +dateOnly.getMonth()+ "-" + dateOnly.getDate();
                     let infoMessage = "Water Order for "+ row.Id + " started on " + dateOnly + " with frequency of " + extraContextObject.frequency + " and volume of " + extraContextObject.volume + "ml will close.";
-                    //console.log(infoMessage);
                     EHR.Server.Utils.addError(scriptErrors,"waterSource",infoMessage,"INFO")
 
                 }
@@ -159,9 +157,10 @@ function onUpdate(helper, scriptErrors, row, oldRow){
                 waterOrdersAdmin = true;
             }
         })
-        console.log(waterOrdersAdmin);
         if (!waterOrdersAdmin){
-            EHR.Server.Utils.addError(scriptErrors,'project','User does not have permission to edit water order','ERROR')
+            EHR.Server.Utils.addError(scriptErrors,'project','User does not have permission to edit water order','ERROR');
+            console.error("Water System error, user: "+ currentUser + "trying to modify water order for project: "+ row.project +" and they do not have permissions");
+
         }
     }
 }

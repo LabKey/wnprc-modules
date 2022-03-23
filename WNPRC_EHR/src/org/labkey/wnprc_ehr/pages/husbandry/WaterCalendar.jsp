@@ -673,9 +673,13 @@
 
                             successCallback(
                                     events.map(function (row) {
+                                        let parsedTotalWater = 0;
+                                        if(row.TotalWater !== null){
+                                            parsedTotalWater = row.TotalWater;
+                                        }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.animalId + " Total: " + row.TotalWater,
+                                            title: row.animalId + " Total: " + parsedTotalWater,
                                             start: new Date(row.date),
                                             allDay: true,
                                             textColor: '#000000',
@@ -701,14 +705,18 @@
                             WebUtils.API.selectRows("study", "waterTotalByDateWithWeight", {
                             "date~gte": fetchInfo.start.format('Y-m-d'),
                             "date~lte": fetchInfo.end.format('Y-m-d'),
-                            "id~in": $animalId
+                            "animalId~in": $animalId
                             }).then(function (data) {
                                 var events = data.rows;
 
                                 successCallback(events.map(function (row) {
+                                    let parsedTotalWater = 0;
+                                    if(row.TotalWater !== null){
+                                        parsedTotalWater = row.TotalWater;
+                                    }
                                         var eventObj = {
                                             id : LABKEY.Utils.generateUUID(),
-                                            title: row.id + " Total: " + row.TotalWater,
+                                            title: row.animalId + " Total: " + parsedTotalWater,
                                             start: new Date(row.date),
                                             textColor: '#000000',
                                             allDay: true,
@@ -722,7 +730,7 @@
                                             return eventObj;
                                     }));
                                 failureCallback((function (data){
-                                    console.log("error from waterPrePivot");
+                                    console.log("error from waterTotalByDateWithWeight");
                                 }))
                                 })
                             }
